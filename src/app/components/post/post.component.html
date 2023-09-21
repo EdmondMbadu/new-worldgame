@@ -1,0 +1,123 @@
+    <!-- posts -->
+    <div class="flex flex-col mx-auto items-center my-10">
+        <div class=" w-fit bg-white p-4 rounded-lg shadow-lg">
+            <div class="flex  pb-10">
+                <img src="../../../assets/img/{{authorPic}}.jpeg" class="w-16 flex-nowrap rounded-full" alt="">
+                <h1 class=" px-2  font-bold">{{author}} <br> <span class="text-gray-500 font-light text-sm"> Big Picture Small World Director . 1h</span></h1>  
+                
+            </div>
+            <div class="pb-4">
+                <h1 class="text-center text-xl font-bold">{{title}}</h1>
+            </div>
+        
+            <div class="max-w-xl">
+
+                <p class="p-2" *ngIf="!full">
+                   {{excerpt}}
+                    <a routerLink="/home" (click)="showLessOrMore()" ><span class="text-blue-800" >(more)...</span></a> </p> 
+
+                    <p class="p-2 font-Nunito" *ngIf="full">
+
+                        {{fullAritcle}}
+                      <a (click)="showLessOrMore()" routerLink="/home"><span class="text-blue-800" > show less...</span> </a>   </p>
+
+                    
+            </div>
+
+            <!-- Comments tableau -->
+            <div class="flex flex-nowrap items-center">
+               
+                <div class="flex flex-nowrap py-2 items-center" (click)="displayComments()">
+                    <img src="../../../assets/img/comment.png" class="w-6 flex-nowrap items-center" alt=""> 
+                    <h1 class="px-1 items-center ">102</h1>
+                </div>
+                <div class="flex flex-nowrap items-center">
+                    <img src="../../../assets/img/bar-1.png" class=" ml-8 w-6  items-center" alt=""> 
+                    <h1 class="px-1 items-center">1K</h1>
+                </div>
+                <div class="flex flex-nowrap py-2 items-center">
+                    <img src="../../../assets/img/share.png" class="w-6 ml-6 flex-nowrap items-center" alt=""> 
+                    <h1 class="px-1 items-center ">10</h1>
+                </div>
+                <div class="flex flex-nowrap py-2 items-center">
+                    <img src="../../../assets/img/rating.png" class="w-6 ml-6 flex-nowrap items-center" alt=""> 
+                    <h1 class="px-1 items-center ">30</h1>
+                </div>
+
+
+
+                
+
+            </div>
+
+            <!-- Add a comment -->
+            <div class=" flex flex-nowrap mx-auto items-center py-2">
+
+                <div class="">
+                    <img src="../../../assets/img/user-1.png" class="w-8 pt-1 bg-gray-100" alt="">
+                </div>
+               
+                <div class=" px-2 ">
+                    <div class=" w:[16rem]  md:w-[26rem] flex-col mx-auto items-center">   
+            
+                        <div class=" relative ">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true"  fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </div>
+                            <input type="search" id="default-search" class="block w-full p-1.5 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50" placeholder="Add a comment ..." required>
+                            <!-- <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button> -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class=" bg-teal-700 px-2 md:px-3 py-1 rounded-full">
+                    <a routerLink="/home"  class="text-white md:text-sm  text-xs">Add Comment</a>
+
+                </div>
+                
+            </div>
+
+            <!-- Lists of comments -->
+            <div class="flex  mx-auto items-center my-6 bg-gray-100 p-2 " *ngIf="showComments">
+                <div class="flex flex-col pb-10  max-w-lg">
+                    <div class="flex flex-nowrap">
+                        
+                        <img src="../../../assets/img/jim.jpeg" class="w-14 h-12 rounded-full" alt="">
+                        <h1 class="  px-2 py-2">Jimmy Walker . 1h</h1>
+                             
+                    </div>
+                 
+                    <div class="flex flex-row pl-16">
+                        <h1 class="">I Love  these resolutions. This is great. </h1>
+                    </div>
+                    <!-- likes and dislike -->
+                    <div class="flex flex-nowrap items-center my-2 space-y-2">
+
+                        <div class="flex flex-nowrap my-1">
+                            <img src="../../../assets/img/like.png" class=" ml-16 w-6  items-center" alt=""> 
+                            <h1 class="px-1 items-center ">29</h1>
+                        </div>
+
+                        <div class="flex flex-nowrap ">
+                            <img src="../../../assets/img/dislike.png" class=" ml-8  w-6  items-center" alt=""> 
+                            <h1 class="px-1 items-center ">1K</h1>
+                        </div>
+                        
+                    </div>
+                </div>
+               
+
+              
+                
+
+            </div>
+
+    
+
+
+        </div>
+
+    </div>

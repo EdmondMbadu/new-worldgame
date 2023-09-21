@@ -1,21 +1,21 @@
-<nav class=" relative container mx-auto p-6">
+<nav class="  container mx-auto p-4 fixed top-0 left-0 right-0 bg-white"*ngIf="!loggedOn">
 
     <div class="flex items-center justify-between">
-            <div class=" pt-2  " routerLink="/">
-                <img  class="h-20"  src="../../../assets/img/new-world-game.svg" alt="">
+            <div class=" pt-2  " routerLink="/{{path}}"  >
+                <img  class="w-20 rounded-lg"  src="../../../assets/img/new-worldgame.png" alt="">
             </div>
         
-            <div class="hidden md:flex space-x-6">
-                <a routerLink="#main"> Explore</a>
-                <a href="">Join Now</a>
+            <div class="hidden md:flex space-x-6" >
+                <a pagescroll href="#design-science"> Explore</a>
+                <a  routerLink="/signup">Join Now</a>
                 <a routerLink="/login"> Sign in</a>
 
             </div>
 
-            <a routerLink="/signup" class="hidden md:block p-3 px-6 pt-2 text-white bg-teal-500 rounded-full hover:bg-teal-700"> Get Started</a>
+            <a routerLink="/signup" class="hidden md:block p-3 px-6 pt-2 text-white bg-teal-700 rounded-full hover:bg-teal-800"> Get Started</a>
 
             <div class="md:hidden flex items-center">
-                  <a  class="w-10" href="">
+                  <a  class="w-6" href="">
                     <img src="../../../assets/img/hamburger.png" alt="">
                   </a>
               
@@ -24,7 +24,53 @@
             
     </div>
 
-  
+</nav>
 
+<nav class=" container mx-auto p-4 fixed top-0 left-0 right-0 bg-white"*ngIf="loggedOn">
+
+    <div class="flex items-center justify-between">
+            <div class="flex-col mx-auto items-center" routerLink="/{{path}}">
+                <img   class="w-20 rounded-lg  "  src="../../../assets/img/new-worldgame.png" alt="">
+            </div>
+
+            <!-- homes and friends -->
+            <div class="flex flex-row mx-auto items-center lg:space-x-12 space-x-6">
+                    <img src="../../../assets/img/home.png" routerLink="/home" class="w-10 ">
+                    <img src="../../../assets/img/letter.png"  class="w-10">
+                    
+
+            </div>
+
+
+            <form class="hidden md:flex md:flex-col mx-auto items-center">   
+                
+                <div class=" relative lg:w-[30rem] md:w-[24rem]">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 " aria-hidden="true"  fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                        </svg>
+                    </div>
+                    <input type="search" id="default-search" class="block w-full p-3 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50" placeholder="Search a problem ..." required>
+                    <!-- <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button> -->
+                </div>
+            </form>
+
+            <div class="hidden md:flex md:flex-col mx-auto items-center"  routerLink="/"  >
+
+                <img class="w-10 hover:bg-gray-200 rounded-full" src="../../../assets/img/user-1.png" alt="">
+
+
+            </div>
+            <div class="md:hidden flex items-center">
+                <a  class="w-6" href="">
+                  <img src="../../../assets/img/hamburger.png" alt="">
+                </a>
+            
+            </div>
+
+        
+            
+            
+    </div>
 
 </nav>
