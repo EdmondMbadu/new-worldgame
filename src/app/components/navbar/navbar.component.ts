@@ -10,6 +10,8 @@ import { PageScrollService } from 'ngx-page-scroll-core';
 export class NavbarComponent {
   @Input() loggedOn: boolean = false;
 
+  @Input() current: string = 'pb-1  border-b-4';
+
   @Input() path: string = '';
 
   constructor(

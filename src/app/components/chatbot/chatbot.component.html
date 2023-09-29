@@ -1,0 +1,10 @@
+<div class="">
+    <div class="hidden lg:block fixed bottom-0 right-4 {{botHeight}} w-72 bg-white shadow-lg  rounded-lg border-2 border-gray-300 py-1" >
+        <div class="flex flex-row text-center px-2 py-1 bg-gray-50" (click)="displayBot()">
+            <h1 class="">Chat with Bucky</h1>
+            <img src="../../../assets/img/chat.png" class=" pl-2 w-8 h-6" alt="">
+            <img *ngIf="!showBot" src="../../../assets/img/up.png"alt="" class="w-4 h-4 ml-14 mt-2"  >
+            <img *ngIf="showBot" src="../../../assets/img/down.png"alt="" class="w-4 h-4 ml-14 mt-2">
+        </div>
+    </div>
+  </div> 

@@ -1,0 +1,13 @@
+<app-navbar [loggedOn]="true" [path]="'home'" current=""></app-navbar>
+<div class="" *ngFor="let item of AllQuestions; let i = index">
+<app-playground-step 
+[title]="title" 
+[step]="steps[i]" 
+[questions]="AllQuestions[i]"
+[stepNumber]="currentIndexDisplay"
+[buttonText]="buttontexts[i]"
+(buttonInfoEvent)="updatePlayground($event)"
+*ngIf="display[i]">
+</app-playground-step>
+
+</div>

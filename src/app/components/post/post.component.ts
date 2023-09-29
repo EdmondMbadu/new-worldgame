@@ -9,6 +9,7 @@ export class PostComponent {
   @Input() title: string = 'Electrifying Africa';
   @Input() author: string = 'Medard Gabel';
   @Input() authorPic: string = 'medard';
+  @Input() description: string = 'Big Picture Small World Director . 1h';
   showComments: boolean = false;
   full: boolean = false;
   excerpt: string =

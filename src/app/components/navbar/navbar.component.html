@@ -35,8 +35,17 @@
 
             <!-- homes and friends -->
             <div class="flex flex-row mx-auto items-center lg:space-x-12 space-x-6">
-                    <img src="../../../assets/img/home.png" routerLink="/home" class="w-10 ">
-                    <img src="../../../assets/img/letter.png"  class="w-10">
+                <div class="flex flex-col" routerLink="/home">
+                    <img src="../../../assets/img/home.png"  class="w-10  px-1"> 
+                   <h1 class=" text-xs text-center pt-1 border-teal-700 {{current}}">Home </h1>
+                </div>
+
+                <div class=" flex flex-col">
+                    <img src="../../../assets/img/letter.png"  class="w-10 px-1">
+                    <h1 class=" text-xs text-center pt-1 ">Answers </h1>
+                    
+                </div>
+                   
                     
 
             </div>

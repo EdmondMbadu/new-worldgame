@@ -11,6 +11,11 @@ import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { PostComponent } from './components/post/post.component';
+import { ChatbotComponent } from './components/chatbot/chatbot.component';
+import { CreatePlaygroundComponent } from './components/create-playground/create-playground.component';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import { PlaygroundStepsComponent } from './components/playground-steps/playground-steps.component';
+import { PlaygroundStepComponent } from './components/playground-step/playground-step.component';
 
 @NgModule({
   declarations: [
@@ -22,8 +27,17 @@ import { PostComponent } from './components/post/post.component';
     HomeComponent,
     ProfileComponent,
     PostComponent,
+    ChatbotComponent,
+    CreatePlaygroundComponent,
+    PlaygroundStepsComponent,
+    PlaygroundStepComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, NgxPageScrollCoreModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    NgxPageScrollCoreModule,
+    CKEditorModule,
+  ],
   providers: [],
   bootstrap: [AppComponent],
 })
