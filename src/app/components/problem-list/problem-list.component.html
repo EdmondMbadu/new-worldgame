@@ -1,0 +1,30 @@
+<div class="w-full {{margin}} md:p-8  bg-white border border-gray-200 rounded-lg shadow p-2">
+    <div class="flex items-center justify-between mb-4">
+        <h5 class="text-md font-semibold leading-none text-gray-900">Problems</h5>
+        <a routerLink="{{path}}" class="text-sm font-medium text-blue-600 hover:underline ">
+            View all
+        </a>
+    </div>
+    <div class="flow-root">
+            <ul role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngFor="let email of emails; let i=index">
+                <li class="py-3 sm:py-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img class="w-8 h-8 rounded-full" src="{{imagesPath[i]}}" alt="">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-md font-bold text-worldsecond truncate">
+                               {{problems[i]}}
+                            </p>
+                            <p class="text-sm text-gray-400 truncate">
+                               {{email}}
+                            </p>
+                        </div>
+                        <!-- <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                            $320
+                        </div> -->
+                    </div>
+                </li>
+            </ul>
+        </div>
+</div>

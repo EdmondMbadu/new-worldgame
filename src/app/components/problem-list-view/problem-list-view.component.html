@@ -1,0 +1,11 @@
+<app-navbar [loggedOn]="true" [path]="'home'" current="''"></app-navbar>
+
+<div class="flex flex-col mx-auto justify-center mt-28">
+    <div class=" flex flex-col mx-auto justify-center mb-6">
+        <h1 class="text-center text-xl font-bold font-Nunito">{{title}}</h1>
+    </div> 
+        <div class="flex flex-col justify-center mx-auto ">
+            <app-problem-list [margin]="'md:mx-16 p-4'" routerLink="/playground-steps"></app-problem-list>
+        </div>
+ 
+</div>

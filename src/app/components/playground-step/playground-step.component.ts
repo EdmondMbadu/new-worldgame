@@ -65,7 +65,7 @@ export class PlaygroundStepComponent {
       // console.log('current number', current);
       this.buttonInfoEvent.emit(current);
     } else {
-      let conf = confirm('Are you sure you want to delete this?');
+      let conf = confirm('Are you you want to Submit?');
       if (conf) {
         window.removeEventListener('scroll', this.scrollHandler!);
         this.router.navigate(['/home']);

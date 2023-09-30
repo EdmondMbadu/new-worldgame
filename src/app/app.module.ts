@@ -16,6 +16,9 @@ import { CreatePlaygroundComponent } from './components/create-playground/create
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
 import { PlaygroundStepsComponent } from './components/playground-steps/playground-steps.component';
 import { PlaygroundStepComponent } from './components/playground-step/playground-step.component';
+import { ProblemListComponent } from './components/problem-list/problem-list.component';
+import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
+import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +34,9 @@ import { PlaygroundStepComponent } from './components/playground-step/playground
     CreatePlaygroundComponent,
     PlaygroundStepsComponent,
     PlaygroundStepComponent,
+    ProblemListComponent,
+    ProblemListViewComponent,
+    ProblemListFeedbackComponent,
   ],
   imports: [
     BrowserModule,

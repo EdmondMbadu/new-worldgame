@@ -1,8 +1,8 @@
 <app-navbar [loggedOn]="true" [path]="'home'"></app-navbar>
 
-<div class="container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-24 ">
+<div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-24 ">
  <!-- profile -->
-    <div class="flex flex-col mx-auto items-center my-10 ">
+    <div class=" flex flex-col mx-auto items-center my-10 ">
         <div class=" w-[16rem]  bg-white p-4 rounded-lg shadow-lg " routerLink="/profile">
             <div class="">
             <img src="../../../assets/img/bucky.jpeg" class="w-24 mx-auto rounded-full" alt="">
@@ -15,7 +15,13 @@
 
 
         </div>
-
+        <div class="  w-[20rem]  bg-white p-4 rounded-lg shadow-lg mt-6">
+            <div class=" py-2">
+            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Playground Invitation (3)</h1>
+            </div>    
+         
+            <app-problem-list></app-problem-list>
+        </div>
 
     </div>
     <!-- start a playground -->
@@ -25,11 +31,13 @@
             <div class=" py-2">
             <img src="../../../assets/img/rubik.png" class="w-12 mx-auto " alt="">
             </div>
-        <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-            <a routerLink="/create-playground" class="text-white"> Start a Playground</a>
-        </div>
+            <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
+                <a routerLink="/create-playground" class="text-white"> Start a Playground</a>
+            </div>
 
         </div>
+ 
+
 
 
     </div>
@@ -45,22 +53,27 @@
     
         <!-- start a playground -->
 
-        <div class="hidden lg:block flex-col mx-auto items-center my-10">
+        <div class="hidden lg:flex flex-col mx-auto items-center my-10">
             <div class="  w-[16rem]  bg-white p-4 rounded-lg shadow-lg">
                 <div class=" py-2">
                 <img src="../../../assets/img/rubik.png" class="w-12 mx-auto " alt="">
                 </div>
-            <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                <a routerLink="/create-playground" class=" text-white"> Start a Playground</a>
-            </div>
+                <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
+                    <a routerLink="/create-playground" class=" text-white"> Start a Playground</a>
+                </div>
 
             </div>
 
+            <div class="  w-[20rem]   bg-white p-4 rounded-lg shadow-lg mt-6">
+                <div class=" py-2">
+                <h1 class="text-center hover:underline" routerLink="/problem-list-feedback">Awaiting Feedback (4)</h1>
+                </div>    
+                
+                <app-problem-list [path]="'/problem-list-feedback'" [problems]="problems"></app-problem-list>
+            </div>
 
         </div>
-    
-
-
+                    
 </div>
 
 
