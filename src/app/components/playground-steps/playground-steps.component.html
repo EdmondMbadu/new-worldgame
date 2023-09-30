@@ -1,13 +1,30 @@
 <app-navbar [loggedOn]="true" [path]="'home'" current=""></app-navbar>
-<div class="" *ngFor="let item of AllQuestions; let i = index">
-<app-playground-step 
-[title]="title" 
-[step]="steps[i]" 
-[questions]="AllQuestions[i]"
-[stepNumber]="currentIndexDisplay"
-[buttonText]="buttontexts[i]"
-(buttonInfoEvent)="updatePlayground($event)"
-*ngIf="display[i]">
-</app-playground-step>
 
+<div class=" container flex flex-col-reverse lg:flex-row mx-auto md:justify-between justify-center">
+    <div class="flex flex-col mx-auto" *ngFor="let item of AllQuestions; let i = index">
+        <app-playground-step 
+        [title]="title" 
+        [step]="steps[i]" 
+        [questions]="AllQuestions[i]"
+        [stepNumber]="currentIndexDisplay"
+        [buttonText]="buttontexts[i]"
+        (buttonInfoEvent)="updatePlayground($event)"
+        *ngIf="display[i]">
+        </app-playground-step>
+
+    </div>
+
+        <div class=" flex flex-col mx-auto mt-24 ">
+
+        <a href="#" class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100   p-4">
+            <img class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-l-lg" src="../../../assets/img/world-hunger.jpg" alt="">
+            <div class="flex flex-col justify-between p-4 leading-normal">
+                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 ">Problem Description</h5>
+                <p class="mb-3 font-normal text-gray-700 ">World hunger is a global term for when people experience severe food insecurity. It refers to periods of time when people spend entire days without eating due to a lack of money, access to food, or other resources. 
+                    Food insecurity is when people have limited or unreliable access to foods that are safe and nutritionally adequate. Environmental factors, job insecurity, or global economic events can also limit food access. 
+                    </p>
+            </div>
+        </a>
+
+        </div>
 </div>

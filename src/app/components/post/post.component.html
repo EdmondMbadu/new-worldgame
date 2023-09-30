@@ -14,12 +14,12 @@
 
                 <p class="p-2" *ngIf="!full">
                    {{excerpt}}
-                    <a routerLink="/home" (click)="showLessOrMore()" ><span class="text-blue-800" >(more)...</span></a> </p> 
+                    <a  (click)="showLessOrMore()" ><span class="text-blue-800" >(more)...</span></a> </p> 
 
                     <p class="p-2 font-Nunito" *ngIf="full">
 
                         {{fullAritcle}}
-                      <a (click)="showLessOrMore()" routerLink="/home"><span class="text-blue-800" > show less...</span> </a>   </p>
+                      <a (click)="showLessOrMore()" ><span class="text-blue-800" > show less...</span> </a>   </p>
 
                     
             </div>

@@ -19,6 +19,8 @@ import { PlaygroundStepComponent } from './components/playground-step/playground
 import { ProblemListComponent } from './components/problem-list/problem-list.component';
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
+import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
+import { MatSliderModule } from '@angular/material/slider';
 
 @NgModule({
   declarations: [
@@ -37,12 +39,14 @@ import { ProblemListFeedbackComponent } from './components/problem-list-feedback
     ProblemListComponent,
     ProblemListViewComponent,
     ProblemListFeedbackComponent,
+    ProblemFeedbackComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgxPageScrollCoreModule,
     CKEditorModule,
+    MatSliderModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

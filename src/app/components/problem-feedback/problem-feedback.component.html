@@ -1,0 +1,25 @@
+<app-navbar [loggedOn]="true" [path]="'home'" current=""></app-navbar>
+<div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-28">
+    <div class="flex flex-col mx-auto">
+        <app-post [title]="'Ending Poverty'"></app-post>
+
+    </div>
+
+   
+    <div class=" flex flex-col mx-auto mt-24 ">
+
+      <div>
+        <mat-slider
+            thumbLabel
+            [displayWith]="formatLabel"
+            tickInterval="1000"
+            min="1"
+            max="100000">
+        </mat-slider>
+      </div>
+
+    </div>
+</div>
+
+
+<app-chatbot></app-chatbot>

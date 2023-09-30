@@ -9,6 +9,7 @@ import { CreatePlaygroundComponent } from './components/create-playground/create
 import { PlaygroundStepsComponent } from './components/playground-steps/playground-steps.component';
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
+import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'playground-steps', component: PlaygroundStepsComponent },
   { path: 'problem-list-view', component: ProblemListViewComponent },
   { path: 'problem-list-feedback', component: ProblemListFeedbackComponent },
+  { path: 'problem-feedback', component: ProblemFeedbackComponent },
 ];
 
 @NgModule({

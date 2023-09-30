@@ -6,7 +6,7 @@
         </a>
     </div>
     <div class="flow-root">
-            <ul role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngFor="let email of emails; let i=index">
+            <ul role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngFor="let email of emails; let i=index" routerLink="{{path}}">
                 <li class="py-3 sm:py-4">
                     <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
