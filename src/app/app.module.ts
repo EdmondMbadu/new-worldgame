@@ -20,6 +20,8 @@ import { ProblemListComponent } from './components/problem-list/problem-list.com
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
+import { FormsModule } from '@angular/forms';
+import { SliderComponent } from './components/slider/slider.component';
 
 @NgModule({
   declarations: [
@@ -39,12 +41,14 @@ import { ProblemFeedbackComponent } from './components/problem-feedback/problem-
     ProblemListViewComponent,
     ProblemListFeedbackComponent,
     ProblemFeedbackComponent,
+    SliderComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     NgxPageScrollCoreModule,
     CKEditorModule,
+    FormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

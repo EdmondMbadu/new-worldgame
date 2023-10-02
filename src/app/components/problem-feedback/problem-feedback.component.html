@@ -1,22 +1,62 @@
 <app-navbar [loggedOn]="true" [path]="'home'" current=""></app-navbar>
-<div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-28">
-    <div class="flex flex-col mx-auto">
+<div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-24">
+    <div class="flex flex-col md:mx-20">
         <app-post [title]="'Ending Poverty'"></app-post>
 
     </div>
 
    
-    <div class=" flex flex-col mx-auto mt-24 ">
+   
 
-      <div>
-        <!-- <mat-slider
-            thumbLabel
-            [displayWith]="formatLabel"
-            tickInterval="1000"
-            min="1"
-            max="100000">
-        </mat-slider> -->
-      </div>
+      <div class="lg:fixed lg:top-24 lg:right-0 md:mx-10 flex flex-col ">
+
+          <div class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row   p-4">
+              <img class="object-cover  rounded-t-lg w-20 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg" src="../../../assets/img/evaluate.png" alt="">
+              <div class="flex flex-col  p-4 leading-normal">
+                  <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900 ">Evaluation</h5>
+                  <div class="flex flex-col justify-center">
+                        <div class="flex flex-row space-x-10  ">
+                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Comprehensive</h1>
+                            <div class="justify-center">
+                                <app-slider></app-slider>
+                            </div>
+                        </div>
+                        <div class="flex flex-row space-x-10  ">
+                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Restorative</h1>
+                            <div class="">
+                                <app-slider></app-slider>
+                            </div>
+                        </div>
+                        <div class="flex flex-row space-x-10  ">
+                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Inclusive</h1>
+                            <div class="">
+                                <app-slider></app-slider>
+                            </div>
+                        </div>
+                        <div class="flex flex-row space-x-10  ">
+                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Verifiable</h1>
+                            <div class="">
+                                <app-slider></app-slider>
+                            </div>
+                        </div>
+                        <div class="flex flex-row space-x-10  ">
+                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Achievable</h1>
+                            <div class="">
+                                <app-slider></app-slider>
+                            </div>
+                        </div>
+                    
+                       
+                        
+
+                        
+
+                  </div>
+                 
+                  
+                  
+              </div>
+            </div>
 
     </div>
 </div>
