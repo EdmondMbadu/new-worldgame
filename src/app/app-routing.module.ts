@@ -10,18 +10,21 @@ import { PlaygroundStepsComponent } from './components/playground-steps/playgrou
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
+import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
+import { AuthGuard } from './services/auth.guard';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'login', component: LoginComponent },
   { path: 'signup', component: SignupComponent },
-  { path: 'home', component: HomeComponent },
-  { path: 'profile', component: ProfileComponent },
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'create-playground', component: CreatePlaygroundComponent },
   { path: 'playground-steps', component: PlaygroundStepsComponent },
   { path: 'problem-list-view', component: ProblemListViewComponent },
   { path: 'problem-list-feedback', component: ProblemListFeedbackComponent },
   { path: 'problem-feedback', component: ProblemFeedbackComponent },
+  { path: 'verify-email', component: VerifyEmailComponent },
 ];
 
 @NgModule({

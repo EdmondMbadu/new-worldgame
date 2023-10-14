@@ -1,4 +1,4 @@
-<app-navbar [loggedOn]="true" [path]="'home'" current=""></app-navbar>
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'" current="''"></app-navbar>
 
 <div class=" container flex flex-col-reverse lg:flex-row mx-auto md:justify-between justify-center">
     <div class="flex flex-col mx-auto" *ngFor="let item of AllQuestions; let i = index">

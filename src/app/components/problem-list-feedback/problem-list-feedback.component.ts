@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-problem-list-feedback',
@@ -6,6 +7,7 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./problem-list-feedback.component.css'],
 })
 export class ProblemListFeedbackComponent {
+  constructor(public auth: AuthService) {}
   @Input() title: string = 'Awaiting Feedback(3)';
   problems: string[] = [
     'Ending Poverty',

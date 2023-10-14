@@ -2,6 +2,10 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
@@ -20,8 +24,12 @@ import { ProblemListComponent } from './components/problem-list/problem-list.com
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SliderComponent } from './components/slider/slider.component';
+import { environment } from 'environments/environments';
+import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
+import { CommonModule } from '@angular/common';
+import { TextPopupComponent } from './components/text-popup/text-popup.component';
 
 @NgModule({
   declarations: [
@@ -42,6 +50,8 @@ import { SliderComponent } from './components/slider/slider.component';
     ProblemListFeedbackComponent,
     ProblemFeedbackComponent,
     SliderComponent,
+    VerifyEmailComponent,
+    TextPopupComponent,
   ],
   imports: [
     BrowserModule,
@@ -49,6 +59,11 @@ import { SliderComponent } from './components/slider/slider.component';
     NgxPageScrollCoreModule,
     CKEditorModule,
     FormsModule,
+    CommonModule,
+    ReactiveFormsModule,
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule,
+    AngularFireAuthModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

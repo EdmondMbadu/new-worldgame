@@ -1,23 +1,28 @@
-<app-navbar [loggedOn]="true" [path]="'home'"></app-navbar>
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'"></app-navbar>
 
 <div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-24 ">
  <!-- profile -->
     <div class=" flex flex-col mx-auto items-center my-10 ">
         <div class=" w-[16rem]  bg-white p-4 rounded-lg shadow-lg " routerLink="/profile">
             <div class="">
-            <img src="../../../assets/img/bucky.jpeg" class="w-24 mx-auto rounded-full" alt="">
+                <img *ngIf="user.profilePicPath ==''" src="../../../assets/img/user.png" class="w-24 mx-auto rounded-full" alt="">
+                <img *ngIf="user.profilePicPath !==''" src="{{user.profilePicPath}}" class="w-24 mx-auto rounded-full" alt="">
             </div>
-            <h1 class="my-4 text-xl font-bold text-center">Buckminster Fuller</h1>
-            <h2 class="text-center text-gray-500">Designer. Author . Inventor</h2>
-            <h4  class=" py-2 text-gray-700 font-light text-center text-sm "> 10M Folowers . 10 Following </h4>
-            <h4  class="  text-gray-700 font-light text-center text-sm "> 210 Problems solved </h4>
-            <h4  class=" text-gray-700 font-light text-center text-sm "> 21 Problems participated </h4>
+            <h1 class="text-xl font-bold text-center">{{user.firstName}} {{user.lastName}}</h1>
+            <h2 class="text-center text-gray-400 my-2">{{user.email}}</h2>
+            
+            <h2 class="text-center text-gray-500">{{user.profileCredential}}</h2>
+          
+
+            <h4  class=" py-2 text-gray-700 font-light text-center text-sm "> {{user.followers}} followers . {{user.following}} following </h4>
+            <h4  class="  text-gray-700 font-light text-center text-sm "> {{user.numberOfPosts}} problems solved </h4>
+            <h4  class=" text-gray-700 font-light text-center text-sm "> {{user.numberOfContributions}} problems participated </h4>
 
 
         </div>
         <div class="  w-[20rem]  bg-white p-4 rounded-lg shadow-lg mt-6">
             <div class=" py-2">
-            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Playground Invitation (3)</h1>
+            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Laboratory Invitation (3)</h1>
             </div>    
          
             <app-problem-list></app-problem-list>
@@ -32,7 +37,7 @@
             <img src="../../../assets/img/rubik.png" class="w-12 mx-auto " alt="">
             </div>
             <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                <a routerLink="/create-playground" class="text-white"> Start a Playground</a>
+                <a routerLink="/create-playground" class="text-white"> Start a Laboratory</a>
             </div>
 
         </div>
@@ -59,7 +64,7 @@
                 <img src="../../../assets/img/rubik.png" class="w-12 mx-auto " alt="">
                 </div>
                 <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                    <a routerLink="/create-playground" class=" text-white"> Start a Playground</a>
+                    <a routerLink="/create-playground" class=" text-white"> Start a Laboratory</a>
                 </div>
 
             </div>

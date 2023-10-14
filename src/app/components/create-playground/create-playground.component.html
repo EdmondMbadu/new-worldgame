@@ -1,4 +1,5 @@
-<app-navbar [loggedOn]="true" [path]="'home'" current=""></app-navbar>
+
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" current="''"></app-navbar>
 
 
 

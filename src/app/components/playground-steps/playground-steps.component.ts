@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-playground-steps',
@@ -9,6 +10,7 @@ import { Element } from '@angular/compiler';
   styleUrls: ['./playground-steps.component.css'],
 })
 export class PlaygroundStepsComponent implements OnInit {
+  constructor(public auth: AuthService) {}
   ngOnInit(): void {
     this.display[this.currentIndexDisplay] = true;
     this.buttontexts[this.steps.length - 1] = 'Submit';

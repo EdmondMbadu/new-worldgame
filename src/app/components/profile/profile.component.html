@@ -1,4 +1,4 @@
-<app-navbar [loggedOn]="true" [path]="'home'" current="''"></app-navbar>
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
 
 <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-24">
 
@@ -6,13 +6,37 @@
 
             <div class="flex flex-row">
                 <div class="flex flex-col mx-auto">
-                    <img src="../../../assets/img/bucky.jpeg" class="rounded-full w-32" alt="">
+                    <img *ngIf="user.profilePicPath!==''" src="../../../assets/img/bucky.jpeg" class="rounded-full w-32" alt="">
+                    <!-- <div *ngIf="user.profilePicPath==''" class="relative   w-20 h-20 overflow-hidden bg-gray-100 rounded-full">
+                        <svg class=" w-28 h-28 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 28 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                    </div> -->
+                    <img *ngIf="user.profilePicPath==''" src="../../../assets/img/user.png"  class="rounded-full w-32" alt="">
                 </div>
                 
                 <div class="flex flex-col px-6 space-y-2">
-                    <h1 class=" text-2xl font-bold text-center md:text-left">Buckminster Fuller</h1>
-                    <h2 class=" text-lg  font-Nunito font-semibold text-center md:text-left"> Designer. Author . Inventor</h2>
-                    <h2 class=" text-gray-500 text-center md:text-left"> 10M followers . 10 following</h2>
+                    <h1 class=" text-2xl font-bold text-center md:text-left">{{user.firstName}} {{user.lastName}} </h1>
+                    <h2 class=" text-lg  font-Nunito font-semibold text-center md:text-left hover:underline" (click)="toggle()"> {{user.profileCredential}}</h2>
+                    <h2 *ngIf="user.profileCredential==''" class="   text-center md:text-left hover:underline" (click)="toggle()">Add profile credential</h2>
+                   
+                   
+
+                   
+                    <app-text-popup
+                    [updateProfileCredential]="true"
+                    ></app-text-popup>
+                   
+                   
+                   
+                    <!-- <div class="flex flex-col  border-2 border-gray-400 p-4 w-80 h-70 rounded-lg">
+                        <h1 class="font-bold">{{wordsLeft}} words limits </h1>
+                        <textarea [(ngModel)]="content" class="my-4 w-50 h-14 border-2 rounded-lg border-gray-400 p-2" name="" (keypress)="countWords()" id="" ></textarea>
+                        <div class="flex flex-row space-x-2 justify-center items-center">
+                            <a  class="bg-teal-800 hover:bg-teal-950 text-white w-fit px-4 py-1 rounded-full text-center mx-auto md:mx-0">Update</a>
+                            <a  class="hover:underline">Cancel</a>
+                        </div>
+
+                    </div> -->
+                    <h2 class=" text-gray-500 text-center md:text-left"> {{user.followers}} followers . {{user.following}} following</h2>
                     <a  class="bg-teal-800 hover:bg-teal-950 text-white w-fit px-4 py-2 rounded-full text-center mx-auto md:mx-0">Follow</a>
             
                 </div>
@@ -20,9 +44,17 @@
             </div>
 
             <div class="flex flex-col mt-4">
-            <p class="px-6">
-                God, to me, it seems, is a verb, not a noun, proper or improper.
+            <p class="px-6"  (click)="toggle()">
+               
+                {{user.profileDescription}}
             </p>
+            <p *ngIf="user.profileDescription===''" class="px-6 hover:underline" (click)="toggle()">
+               Write a description about yourself
+            </p>
+            <!-- <app-text-popup
+            [updateDescription]="true"
+            [title]="'Profile Description'"
+            ></app-text-popup> -->
 
             </div>
 
@@ -44,23 +76,26 @@
 
             <div class=" flex flex-row max-w-sm">
                 <img src="../../../assets/img/job.png" alt="" class="w-6 h-6">
-                <h2 class="px-4">Created Dymaxion House and Geodesic Dome</h2>
+                <h2 *ngIf="user.employement!==''" class="px-2">{{user.employement}}</h2>
+                <h2 *ngIf="user.employement===''"class=" px-2 hover:underline text-blue-500">Add employement credential</h2>
             </div>
             <div class=" flex flex-row max-w-sm">
                 <img src="../../../assets/img/school.png" alt="" class="w-6 h-6">
-                <h2 class="px-4">Harvard University (expelled)</h2>
+                <h2 *ngIf="user.education!==''" class="px-2">Harvard University (expelled)</h2>
+                <h2 *ngIf="user.education===''"class=" px-2 hover:underline text-blue-500">Add education credential</h2>
             </div>
             <div class=" flex flex-row max-w-sm">
                 <img src="../../../assets/img/location.png" alt="" class="w-6 h-6">
-                <h2 class="px-4">Milton, Massachusetts, U.S. </h2>
+                <h2 *ngIf="user.location!==''" class="px-2">Milton, Massachusetts, U.S. </h2>
+                <h2 *ngIf="user.location===''"class=" px-2 hover:underline text-blue-500">Add location credential</h2>
             </div>
             <div class=" flex flex-row max-w-sm">
                 <img src="../../../assets/img/view.png" alt="" class="w-6 h-6">
-                <h2 class="px-4">1B content views 100M this month. </h2>
+                <h2 class="px-2">{{user.contentViews}} content views so far </h2>
             </div>
             <div class=" flex flex-row max-w-sm">
                 <img src="../../../assets/img/team.png" alt="" class="w-6 h-6">
-                <h2 class="px-4">Joined in November 2023 </h2>
+                <h2 class="px-2">Joined in {{dateJoined}} </h2>
             </div>
 
 

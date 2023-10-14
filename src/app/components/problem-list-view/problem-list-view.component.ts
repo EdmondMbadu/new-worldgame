@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-problem-list-view',
@@ -6,5 +7,6 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./problem-list-view.component.css'],
 })
 export class ProblemListViewComponent {
+  constructor(public auth: AuthService) {}
   @Input() title: string = 'Playground Invitation (3)';
 }
