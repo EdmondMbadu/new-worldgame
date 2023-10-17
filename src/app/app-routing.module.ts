@@ -12,10 +12,12 @@ import { ProblemListFeedbackComponent } from './components/problem-list-feedback
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { AuthGuard } from './services/auth.guard';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },

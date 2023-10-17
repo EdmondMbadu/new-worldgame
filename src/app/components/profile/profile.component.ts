@@ -1,6 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import {
+  BoxEducationCredential,
+  BoxEmploymentCredential,
+  BoxLocationCredential,
+  BoxProfileCredential,
+  BoxProfileDescription,
+} from 'src/app/services/box.service';
 import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
 
@@ -11,21 +18,38 @@ import { TimeService } from 'src/app/services/time.service';
 })
 export class ProfileComponent implements OnInit {
   user: User;
-  displayaProfileCredential: boolean = false;
+
   dateJoined: string = '';
   constructor(
     public auth: AuthService,
     private time: TimeService,
-    public data: DataService
+    public boxProfile: BoxProfileCredential,
+    public boxDescription: BoxProfileDescription,
+    public boxEmployment: BoxEmploymentCredential,
+    public boxEducation: BoxEducationCredential,
+    public boxLocation: BoxLocationCredential
   ) {
     this.user = this.auth.currentUser;
   }
   ngOnInit(): void {
-    console.log('currend date', this.time.getCurrentDate());
     this.dateJoined = this.time.getMonthYear(this.user.dateJoined!);
   }
 
-  toggle() {
-    this.data.toggle();
+  toggleProfileCredential() {
+    this.boxProfile.toggle();
+  }
+
+  toggleProfileDescription() {
+    this.boxDescription.toggle();
+  }
+
+  toggleEmployementCredential() {
+    this.boxEmployment.toggle();
+  }
+  toggleEducationCredential() {
+    this.boxEducation.toggle();
+  }
+  toggleLocationCredential() {
+    this.boxLocation.toggle();
   }
 }

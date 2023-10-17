@@ -8,12 +8,13 @@ import { Component, Input } from '@angular/core';
 export class PostComponent {
   @Input() title: string = 'Electrifying Africa';
   @Input() author: string = 'Medard Gabel';
-  @Input() authorPic: string = 'medard';
+  @Input() authorPic: string = 'user.png';
   @Input() description: string = 'Big Picture Small World Director . 1h';
   showComments: boolean = false;
   full: boolean = false;
   excerpt: string =
     'Washington, Nov. 9, 2022—The World Bank Group announced today an innovative initiative to accelerate the pace of electrification in Africa to achieve universal access by 2030. The World Bank, the Multilateral Investment Guarantee Agency (MIGA), the International Finance Corporation (IFC), and other development agencies will promote private investment in distributed renewable energy (DRE) systems to electrify targeted areas quickly and efficiently. The Distributed Access through Renewable Energy Scale-Up Platform (DARES) calls for joint action by government, private investors, and development agencies to solve Africa’s immediate needs while developing DRE solutions that can be applied globally';
+
   fullAritcle: string = `
   Washington, Nov. 9, 2022—The World Bank Group announced today an innovative initiative to accelerate the pace of electrification in Africa to achieve universal access by 2030. The World Bank, the Multilateral Investment Guarantee Agency (MIGA), the International Finance Corporation (IFC), and other development agencies will promote private investment in distributed renewable energy (DRE) systems to electrify targeted areas quickly and efficiently. The Distributed Access through Renewable Energy Scale-Up Platform (DARES) calls for joint action by government, private investors, and development agencies to solve Africa’s immediate needs while developing DRE solutions that can be applied globally.
   

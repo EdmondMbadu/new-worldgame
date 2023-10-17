@@ -155,4 +155,22 @@ export class AuthService {
         // ...
       });
   }
+
+  forgotPassword(email: string) {
+    this.fireauth
+      .sendPasswordResetEmail(email)
+      .then(
+        () => {
+          this.router.navigate(['verify-email']);
+        },
+        (err) => {
+          alert('Something went wrong');
+        }
+      )
+      .catch((error) => {
+        alert('Something went wrong');
+        this.router.navigate(['/']);
+        // ...
+      });
+  }
 }

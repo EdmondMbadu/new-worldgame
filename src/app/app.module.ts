@@ -30,6 +30,7 @@ import { environment } from 'environments/environments';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { CommonModule } from '@angular/common';
 import { TextPopupComponent } from './components/text-popup/text-popup.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import { TextPopupComponent } from './components/text-popup/text-popup.component
     SliderComponent,
     VerifyEmailComponent,
     TextPopupComponent,
+    ForgotPasswordComponent,
   ],
   imports: [
     BrowserModule,
