@@ -44,6 +44,9 @@ export class AuthService {
     });
   }
 
+  getObservableUser() {
+    return this.user$;
+  }
   register(
     firstName: string,
     lastName: string,
@@ -88,6 +91,9 @@ export class AuthService {
         // ...
       });
   }
+  getAUser(uid: string) {
+    return this.afs.doc<User>(`users/${uid}`).valueChanges();
+  }
 
   addNewUser(firstName: string, lastName: string, user: any) {
     const userRef: AngularFirestoreDocument<any> = this.afs.doc(
@@ -105,6 +111,7 @@ export class AuthService {
       profileDescription: '',
       education: '',
       location: '',
+      profilePicture: {},
       dateJoined: this.time.getCurrentDate(),
       contentViews: '0',
       profilePicPath: '',

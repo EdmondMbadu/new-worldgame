@@ -3,6 +3,9 @@ import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
 import { AuthService } from 'src/app/services/auth.service';
+import { ActivatedRoute } from '@angular/router';
+import { Solution } from 'src/app/models/solution';
+import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
   selector: 'app-playground-steps',
@@ -10,22 +13,39 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./playground-steps.component.css'],
 })
 export class PlaygroundStepsComponent implements OnInit {
-  constructor(public auth: AuthService) {}
+  id: any = '';
+  currentSolution: Solution = {};
+  constructor(
+    public auth: AuthService,
+    private activatedRoute: ActivatedRoute,
+    private solution: SolutionService
+  ) {
+    this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.solution.getSolution(this.id).subscribe((data: any) => {
+      this.currentSolution = data;
+    });
+  }
   ngOnInit(): void {
     this.display[this.currentIndexDisplay] = true;
     this.buttontexts[this.steps.length - 1] = 'Submit';
   }
   currentIndexDisplay: number = 0;
 
-  title: string = 'World Hunger';
+  @Input() title?: string = 'World Hunger';
   steps: string[] = [
-    'Step I: Problem State',
-    'Step II: Preferred State',
-    'Step III: Plan',
+    'Step I:  Define the Problem State',
+    'Step II: Envision the Preferred State',
+    'Step III: Develop Your Plan',
     'Step IV: Strategy Review',
   ];
   display = new Array(this.steps.length).fill(false);
   buttontexts = new Array(this.steps.length).fill('Next');
+  questionsTitles: Array<Array<string>> = [
+    ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
+    ['S2-A', 'S2-B'],
+    ['S3-A', 'S3-B', 'S3-C', 'S3-D'],
+    ['S4'],
+  ];
   AllQuestions: Array<Array<string>> = [
     [
       'What is the problem you have chosen and why ?',

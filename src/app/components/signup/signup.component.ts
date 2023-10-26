@@ -13,6 +13,9 @@ export class SignupComponent {
   firstName: string = '';
   lastName: string = '';
   rePassword: string = '';
+  createAccountSuccess: boolean = false;
+  createAccountPopUp: boolean = false;
+  createAccountError: boolean = false;
 
   constructor(private auth: AuthService, private router: Router) {}
   createAccount() {
@@ -44,5 +47,12 @@ export class SignupComponent {
     this.rePassword = '';
     this.firstName = '';
     this.lastName = '';
+  }
+
+  closeAccountCreatedSuccess() {
+    this.createAccountSuccess = false;
+  }
+  closeAccountCreatedError() {
+    this.createAccountError = false;
   }
 }

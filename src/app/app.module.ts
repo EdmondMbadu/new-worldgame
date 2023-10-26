@@ -2,9 +2,17 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatNativeDateModule } from '@angular/material/core';
+
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -14,7 +22,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import { ProfileComponent } from './components/profile/profile.component';
-import { PostComponent } from './components/post/post.component';
+import { PostComponent } from './components/solution/solution.component';
 import { ChatbotComponent } from './components/chatbot/chatbot.component';
 import { CreatePlaygroundComponent } from './components/create-playground/create-playground.component';
 import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
@@ -31,6 +39,10 @@ import { VerifyEmailComponent } from './components/verify-email/verify-email.com
 import { CommonModule } from '@angular/common';
 import { TextPopupComponent } from './components/text-popup/text-popup.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { DropZoneDirective } from './components/drop-zone.directive';
 
 @NgModule({
   declarations: [
@@ -54,6 +66,8 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
     VerifyEmailComponent,
     TextPopupComponent,
     ForgotPasswordComponent,
+    UserProfileComponent,
+    DropZoneDirective,
   ],
   imports: [
     BrowserModule,
@@ -66,7 +80,16 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
     AngularFireAuthModule,
+    AngularFireStorageModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    BrowserAnimationsModule,
+    MatIconModule,
+    MatChipsModule,
   ],
+
   providers: [],
   bootstrap: [AppComponent],
 })

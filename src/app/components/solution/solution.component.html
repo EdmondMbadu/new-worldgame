@@ -1,25 +1,32 @@
     <!-- posts -->
-    <div class="flex flex-col mx-auto items-center my-10">
+    <div class="my-2">
         <div class=" w-fit bg-white p-4 rounded-lg shadow-lg">
-            <div class="flex  pb-10">
-                <img src="../../../assets/img/{{authorPic}}" class="w-16 flex-nowrap rounded-full" alt="">
-                <h1 class=" px-2  font-bold">{{author}} <br> <span class="text-gray-500 font-light text-sm"> {{description}}</span></h1>  
+            <div class="flex  pb-10" [routerLink]="['/user-profile',solution.authorAccountId]">
+                <div *ngIf="user">
+                    <img *ngIf="!user.profilePicture ||user.profilePicture.downloadURL ===''" [src]="avatarNoPicturePath" class="w-16 flex-nowrap rounded-full"  alt="">
+                    <img *ngIf="user.profilePicture && user.profilePicture.downloadURL!==''" [src]="user.profilePicture.downloadURL" class="w-16 flex-nowrap rounded-full" alt="" >
+                </div>
+                <h1 *ngIf="user" class=" px-2  font-bold ">{{user.firstName}} {{user.lastName}}  <br> <span class="text-gray-500 font-light text-sm"> {{user.profileCredential}} . {{timeElapsed}}</span></h1>  
                 
             </div>
             <div class="pb-4">
-                <h1 class="text-center text-xl font-bold">{{title}}</h1>
+                <h1 class="text-center text-xl font-bold">{{solution.title}}</h1>
             </div>
         
             <div class="max-w-xl">
 
-                <p class="p-2" *ngIf="!full">
-                   {{excerpt}}
-                    <a  (click)="showLessOrMore()" ><span class="text-blue-800" >(more)...</span></a> </p> 
+                <div>
+                   
+                <p class="p-2" *ngIf="!full" [innerHTML]="excerpt">...</p> 
+                    <a   *ngIf="!full" (click)="showLessOrMore()" ><span class="text-blue-800 hover:underline" >(more)</span></a> 
+                </div>
+                  
+                    
 
-                    <p class="p-2 font-Nunito" *ngIf="full">
+                    <p class="p-2 font-Nunito" *ngIf="full" [innerHTML]="fullAritcle"></p>
 
-                        {{fullAritcle}}
-                      <a (click)="showLessOrMore()" ><span class="text-blue-800" > show less...</span> </a>   </p>
+                       
+                      <a *ngIf="full"  (click)="showLessOrMore()" ><span class="text-blue-800" > show less...</span> </a>   
 
                     
             </div>

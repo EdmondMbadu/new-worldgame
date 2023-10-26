@@ -12,6 +12,59 @@ export class TimeService {
     const year: string = String(today.getFullYear()); // get year as 4 digits
     return `${month}-${day}-${year}`;
   }
+
+  timeAgo(dateString: string) {
+    if (!dateString) return '';
+    const [month, day, year, hours, minutes, seconds] = dateString
+      .split('-')
+      .map(Number);
+    const givenDate = new Date(year, month - 1, day, hours, minutes, seconds);
+    const now = new Date();
+
+    const secondsDiff = Math.floor(
+      (now.getTime() - givenDate.getTime()) / 1000
+    );
+    if (secondsDiff < 60) {
+      return `${secondsDiff} second${secondsDiff > 1 ? 's' : ''} ago`;
+    }
+
+    const minutesDiff = Math.floor(secondsDiff / 60);
+    if (minutesDiff < 60) {
+      return `${minutesDiff} minute${minutesDiff > 1 ? 's' : ''} ago`;
+    }
+
+    const hoursDiff = Math.floor(minutesDiff / 60);
+    if (hoursDiff < 24) {
+      return `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ago`;
+    }
+
+    const daysDiff = Math.floor(hoursDiff / 24);
+    if (daysDiff < 30) {
+      return `${daysDiff} day${daysDiff > 1 ? 's' : ''} ago`;
+    }
+
+    // Rough estimate for months, not accounting for varying days in months
+    const monthsDiff = Math.floor(daysDiff / 30);
+    if (monthsDiff < 12) {
+      return `${monthsDiff} month${monthsDiff > 1 ? 's' : ''} ago`;
+    }
+
+    const yearsDiff = Math.floor(monthsDiff / 12);
+    return `${yearsDiff} year${yearsDiff > 1 ? 's' : ''} ago`;
+  }
+
+  todaysDate(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    let date = `${month}-${day}-${year}-${hours}-${minutes}-${seconds}`;
+
+    return date;
+  }
   getMonthYear(dateString: string): string {
     // Split the date string into its components
     const [month, , year] = dateString
@@ -38,5 +91,27 @@ export class TimeService {
     const monthName: string = monthNames[month - 1];
 
     return `${monthName} ${year}`;
+  }
+
+  formatDateString(input: string) {
+    // Extract individual date components directly from the string
+    const parts = input.toString().split(' ');
+    const month = new Date(Date.parse(`${parts[1]} 1, 1970`)).getMonth() + 1; // Convert month name to month number
+    const day = parseInt(parts[2], 10);
+    const year = parseInt(parts[3], 10);
+
+    const timeParts = parts[4].split(':');
+    const hour = parseInt(timeParts[0], 10);
+    const minute = parseInt(timeParts[1], 10);
+    const second = parseInt(timeParts[2], 10);
+
+    // Extract the three-letter timezone abbreviation using a regex
+    const timezoneRegex = /\b([A-Z]{3})-\d{4}\b/;
+    const match = input.toString().match(timezoneRegex);
+    const timezone = match ? match[1] : 'Unknown';
+
+    // Create the desired output format
+    const formatted = `${month}-${day}-${year}-${hour}-${minute}-${second}-${timezone}`;
+    return formatted;
   }
 }

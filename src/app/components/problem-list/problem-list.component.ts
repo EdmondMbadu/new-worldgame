@@ -1,4 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { Solution } from 'src/app/models/solution';
+import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
+import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
   selector: 'app-problem-list',
@@ -6,6 +10,12 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./problem-list.component.css'],
 })
 export class ProblemListComponent {
+  @Input() solutions?: Solution[];
+  currentUser: User;
+  constructor(private solution: SolutionService, public auth: AuthService) {
+    this.currentUser = this.auth.currentUser;
+  }
+  @Input() users: User[] = [];
   @Input() margin = '';
   @Input() path = '/problem-list-view';
   @Input() problems: string[] = [
@@ -19,9 +29,5 @@ export class ProblemListComponent {
     'bucky@gmail.com',
   ];
 
-  @Input() imagesPath: string[] = [
-    '../../../assets/img/edmond.png',
-    '../../../assets/img/bucky.jpeg',
-    '../../../assets/img/medard.jpeg',
-  ];
+  imagesPath: string = '../../../assets/img/user.png';
 }

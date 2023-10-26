@@ -3,6 +3,9 @@ import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
+import { SolutionService } from 'src/app/services/solution.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Solution } from 'src/app/models/solution';
 
 @Component({
   selector: 'app-playground-step',
@@ -10,17 +13,32 @@ import { Router } from '@angular/router';
   styleUrls: ['./playground-step.component.css'],
 })
 export class PlaygroundStepComponent {
-  @Input() title: string = '';
+  currentSolution: Solution = {};
+  staticContentArray: string[] = [];
+  saveSuccess: boolean = false;
+  saveError: boolean = false;
+  submiResponse: boolean = false;
+  submitDisplay: boolean = false;
+  @Input() title?: string = '';
   @Input() buttonText: string = '';
   @Input() step: string = '';
+  @Input() solutionId: string = '';
   @Input() questions: string[] = [];
+  @Input() questionsTitles: string[] = [];
   @Input() stepNumber: number = 0;
   @Output() buttonInfoEvent = new EventEmitter<number>();
+  contentsArray: string[] = [];
+  questionsAndAnswersTracker?: { [key: string]: string } = {};
   scrollHandler: (() => void) | undefined;
   elements: any = [];
-  constructor(private router: Router) {}
+  constructor(private router: Router, private solution: SolutionService) {}
   data: string = '';
   ngOnInit() {
+    this.initializeContents();
+    this.solution.getSolution(this.solutionId).subscribe((data: any) => {
+      this.currentSolution = data;
+      this.initializeContents();
+    });
     this.scrollHandler = () => {
       // Get the current scroll position
       this.elements = [];
@@ -29,44 +47,75 @@ export class PlaygroundStepComponent {
       for (let i = 0; i < this.questions.length; i++) {
         this.elements.push(document.getElementById(`box-${i}`));
       }
-      // console.log('current element ', this.elements.length);
 
       for (let i = 0; i < this.elements.length; i++) {
         const element = document.getElementById(`box-${i}`);
         let elementY = this.elements[i]?.getBoundingClientRect().top;
-        if (elementY! <= 65) {
-          element!.style.zIndex = '-30';
+        if (elementY! <= 110) {
+          element!.style.zIndex = '-1';
         } else {
           element!.style.zIndex = '0';
         }
       }
-
-      // If the scroll position is greater than or equal to the element's position,
-      // then change the element's z-index
     };
 
     // Add a scroll event listener to the window
     window.addEventListener('scroll', this.scrollHandler);
+
+    this.solution.getSolution(this.solutionId).subscribe((data: any) => {
+      this.currentSolution = data;
+      // this.initializeContents();
+    });
+  }
+
+  initializeContents() {
+    this.contentsArray = [];
+    this.staticContentArray = [];
+    for (let q of this.questions) {
+      this.contentsArray.push('');
+      this.staticContentArray.push('');
+    }
+    if (
+      this.questionsTitles.length === 1 &&
+      this.currentSolution.status !== undefined
+    ) {
+      this.initializeStrategy();
+    } else if (
+      this.currentSolution.status !== undefined &&
+      this.currentSolution.status![this.questionsTitles[0]]
+    ) {
+      this.contentsArray = [];
+      this.staticContentArray = [];
+      for (let i = 0; i < this.questionsTitles.length; i++) {
+        this.contentsArray.push(
+          this.currentSolution.status![this.questionsTitles[i]]
+        );
+        this.staticContentArray.push(
+          this.currentSolution.status![this.questionsTitles[i]]
+        );
+      }
+    }
   }
 
   public Editor = ClassicEditor;
   public onReady(editor: any) {
     // console.log('CKEditor5 Angular Component is ready to use!', editor);
   }
-  public onChange({ editor }: any) {
-    const currentData = editor.getData();
-    // console.log(data);
-    this.data = currentData;
-  }
 
   updatePlayground(current: number) {
+    // only save data if both are different.
+
+    this.saveSolutionStatus();
+
+    // console.log('The data', this.questionsAndAnswersTracker);
     if (this.buttonText === 'Next') {
       current++;
-      // console.log('current number', current);
       this.buttonInfoEvent.emit(current);
     } else {
-      let conf = confirm('Are you you want to Submit?');
-      if (conf) {
+      this.submitDisplay = true;
+      // let conf = confirm('Are you sure you want to Submit?');
+      if (this.submiResponse) {
+        this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
         window.removeEventListener('scroll', this.scrollHandler!);
         this.router.navigate(['/home']);
       } else {
@@ -74,9 +123,92 @@ export class PlaygroundStepComponent {
       }
     }
 
-    // this.elements.length = 0;
+    this.elements.length = 0;
+  }
+  accept() {
+    this.submiResponse = true;
+    this.updatePlayground(this.stepNumber);
+  }
+
+  isNotEmpty(content: string) {
+    if (content === '') {
+      return true;
+    }
+    return false;
+  }
+  isInputInValid() {
+    for (let content of this.contentsArray) {
+      if (content === '') {
+        return true;
+      }
+    }
+    return false;
   }
   ngOnDestroy() {
     window.removeEventListener('scroll', this.scrollHandler!);
+  }
+
+  saveSolutionStatus() {
+    if (
+      JSON.stringify(this.contentsArray) !==
+      JSON.stringify(this.staticContentArray)
+    ) {
+      for (let i = 0; i < this.contentsArray.length; i++) {
+        this.questionsAndAnswersTracker![`${this.questionsTitles[i]}`] =
+          this.contentsArray[i];
+      }
+      // save solution
+      this.solution
+        .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
+        .then(() => {
+          this.saveSuccess = true;
+          setTimeout(() => {
+            this.saveSuccess = false;
+
+            // do something after 1000 milliseconds
+          }, 4000);
+        })
+        .catch((error) => {
+          this.saveError = true;
+          // alert('Error launching solution ');
+        });
+    }
+  }
+
+  closeSaveSuccess() {
+    this.saveSuccess = false;
+  }
+  closeSaveError() {
+    this.saveError = false;
+  }
+  closeSubmission() {
+    this.submitDisplay = false;
+  }
+
+  initializeStrategy() {
+    let array: string[] = [];
+    this.contentsArray = [''];
+    this.staticContentArray = [''];
+    if (this.currentSolution.status) {
+      Object.keys(this.currentSolution.status).forEach((key) => {
+        array.push(key);
+      });
+    }
+    array.sort((a, b) => {
+      // Compare the prefix (e.g., "S1", "S2", etc.)
+      const prefixComparison = a.split('-')[0].localeCompare(b.split('-')[0]);
+
+      // If the prefix is the same, compare the suffix (e.g., "A", "B", etc.)
+      if (prefixComparison === 0) {
+        return a.split('-')[1].localeCompare(b.split('-')[1]);
+      }
+
+      return prefixComparison;
+    });
+    for (let a of array) {
+      // console.log('currently ', this.currentSolution.status![a]);
+      this.contentsArray[0] += `\n${this.currentSolution.status![a]}`;
+      this.staticContentArray[0] += `\n${this.currentSolution.status![a]}`;
+    }
   }
 }

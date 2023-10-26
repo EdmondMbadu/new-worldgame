@@ -1,17 +1,17 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'"></app-navbar>
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  ></app-navbar>
 
-<div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-24 ">
+<div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-32">
  <!-- profile -->
     <div class=" flex flex-col mx-auto items-center my-10 ">
         <div class=" w-[16rem]  bg-white p-4 rounded-lg shadow-lg " routerLink="/profile">
             <div class="">
-                <img *ngIf="user.profilePicPath ==''" src="../../../assets/img/user.png" class="w-24 mx-auto rounded-full" alt="">
-                <img *ngIf="user.profilePicPath !==''" src="{{user.profilePicPath}}" class="w-24 mx-auto rounded-full" alt="">
+                <img *ngIf="profilePicturePath ==''" src="../../../assets/img/user.png" class="w-24 mx-auto rounded-full" alt="">
+                <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-24 mx-auto rounded-full"  alt="">
             </div>
             <h1 class="text-xl font-bold text-center">{{user.firstName}} {{user.lastName}}</h1>
-            <h2 class="text-center text-gray-400 my-2">{{user.email}}</h2>
+            <h2 class="text-center max-w-xs   text-gray-400 my-2 ">{{user.email}}</h2>
             
-            <h2 class="text-center text-gray-500">{{user.profileCredential}}</h2>
+            <h2 class="text-center text-gray-500">{{user.profileCredential}} </h2>
           
 
             <h4  class=" py-2 text-gray-700 font-light text-center text-sm "> {{user.followers}} followers . {{user.following}} following </h4>
@@ -22,10 +22,10 @@
         </div>
         <div class="  w-[20rem]  bg-white p-4 rounded-lg shadow-lg mt-6">
             <div class=" py-2">
-            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Laboratory Invitation (3)</h1>
+            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Pending Work ({{pending}})</h1>
             </div>    
          
-            <app-problem-list></app-problem-list>
+            <app-problem-list [users]="pendingSolutionsUsers" [solutions]="pendingSolutions"></app-problem-list>
         </div>
 
     </div>
@@ -34,10 +34,10 @@
     <div class=" lg:hidden w-[16rem] flex-col mx-auto items-center my-2">
         <div class=" w-[16rem] bg-white p-4 rounded-lg shadow-lg">
             <div class=" py-2">
-            <img src="../../../assets/img/rubik.png" class="w-12 mx-auto " alt="">
+            <img src="../../../assets/img/global-network.png" class="w-12 mx-auto " alt="">
             </div>
             <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                <a routerLink="/create-playground" class="text-white"> Start a Laboratory</a>
+                <a routerLink="/create-playground" class="text-white"> Start a Solution Lab</a>
             </div>
 
         </div>
@@ -49,11 +49,10 @@
 
  
 
-    <div class="flex flex-col mx-auto items-center">
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
-        <app-post></app-post>
+    <div class="flex flex-col" >
+        <app-solution *ngFor="let solution of completedSolutions; let i=index" [user]="completedSolutionsUsers[i]"   [solution]="solution"></app-solution>
+           
+        
     </div>
     
         <!-- start a playground -->
@@ -61,17 +60,17 @@
         <div class="hidden lg:flex flex-col mx-auto items-center my-10">
             <div class="  w-[16rem]  bg-white p-4 rounded-lg shadow-lg">
                 <div class=" py-2">
-                <img src="../../../assets/img/rubik.png" class="w-12 mx-auto " alt="">
+                <img src="../../../assets/img/global-network.png" class="w-12 mx-auto " alt="">
                 </div>
                 <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                    <a routerLink="/create-playground" class=" text-white"> Start a Laboratory</a>
+                    <a routerLink="/create-playground" class=" text-white"> Start a Solution Lab <Label></Label> <Label></Label></a>
                 </div>
 
             </div>
 
             <div class="  w-[20rem]   bg-white p-4 rounded-lg shadow-lg mt-6">
                 <div class=" py-2">
-                <h1 class="text-center hover:underline" routerLink="/problem-list-feedback">Awaiting Feedback (4)</h1>
+                <h1 class="text-center hover:underline" routerLink="/problem-list-feedback">Awaiting Feedback</h1>
                 </div>    
                 
                 <app-problem-list [path]="'/problem-list-feedback'" [problems]="problems"></app-problem-list>

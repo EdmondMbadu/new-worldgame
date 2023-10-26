@@ -13,6 +13,7 @@ import { ProblemFeedbackComponent } from './components/problem-feedback/problem-
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { AuthGuard } from './services/auth.guard';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { UserProfileComponent } from './components/user-profile/user-profile.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -22,9 +23,27 @@ const routes: Routes = [
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'create-playground', component: CreatePlaygroundComponent },
-  { path: 'playground-steps', component: PlaygroundStepsComponent },
-  { path: 'problem-list-view', component: ProblemListViewComponent },
-  { path: 'problem-list-feedback', component: ProblemListFeedbackComponent },
+  {
+    path: 'playground-steps/:id',
+    component: PlaygroundStepsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'user-profile/:id',
+    component: UserProfileComponent,
+    // canActivate: [AuthGuard],
+  },
+
+  {
+    path: 'problem-list-view',
+    component: ProblemListViewComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'problem-list-feedback',
+    component: ProblemListFeedbackComponent,
+    canActivate: [AuthGuard],
+  },
   { path: 'problem-feedback', component: ProblemFeedbackComponent },
   { path: 'verify-email', component: VerifyEmailComponent },
 ];

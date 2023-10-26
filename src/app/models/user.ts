@@ -3,7 +3,7 @@ export class User {
   email?: string;
   firstName?: string;
   lastName?: string;
-  profilePicPath?: string;
+  profilePicture?: Avatar;
   profileCredential?: string;
   profileDescription?: string;
   employement?: string;
@@ -15,4 +15,10 @@ export class User {
   numberOfPosts?: string;
   numberOfContributions?: string;
   contentViews?: string;
+}
+
+export class Avatar {
+  path?: string;
+  size?: string;
+  downloadURL?: string;
 }
