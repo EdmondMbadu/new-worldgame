@@ -63,6 +63,17 @@ export class SolutionService {
       .valueChanges();
   }
 
+  getSolutionForNonAuthenticatedUser(solutionId: string) {
+    return this.afs
+      .collectionGroup(`solutions`, (ref) =>
+        ref.where('solutionId', '==', solutionId)
+      )
+      .valueChanges();
+
+    // return this.afs.collectionGroup<Solution>(`solutions`).
+    // .valueChanges();
+  }
+
   getAuthenticatedUserAllSolutions() {
     return this.afs
       .collection<Solution>(`users/${this.auth.currentUser.uid}/solutions/`)
@@ -72,10 +83,6 @@ export class SolutionService {
     return this.afs
       .collection<Solution>(`users/${uid}/solutions/`)
       .valueChanges();
-  }
-
-  getAllUsers() {
-    return this.afs.collection<User>(`users`).valueChanges();
   }
 
   getAllSolutionsFromAllAccounts() {

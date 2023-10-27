@@ -25,4 +25,7 @@ export class DataService implements OnInit {
     };
     return userRef.set(data, { merge: true });
   }
+  getAllUsers() {
+    return this.afs.collection<User>(`users`).valueChanges();
+  }
 }

@@ -14,6 +14,7 @@ import { VerifyEmailComponent } from './components/verify-email/verify-email.com
 import { AuthGuard } from './services/auth.guard';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
+import { SolutionViewComponent } from './components/solution-view/solution-view.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -31,6 +32,11 @@ const routes: Routes = [
   {
     path: 'user-profile/:id',
     component: UserProfileComponent,
+    // canActivate: [AuthGuard],
+  },
+  {
+    path: 'solution-view/:id',
+    component: SolutionViewComponent,
     // canActivate: [AuthGuard],
   },
 

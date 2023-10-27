@@ -43,6 +43,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { DropZoneDirective } from './components/drop-zone.directive';
+import { SolutionViewComponent } from './components/solution-view/solution-view.component';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import { DropZoneDirective } from './components/drop-zone.directive';
     ForgotPasswordComponent,
     UserProfileComponent,
     DropZoneDirective,
+    SolutionViewComponent,
   ],
   imports: [
     BrowserModule,

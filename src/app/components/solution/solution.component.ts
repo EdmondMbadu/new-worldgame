@@ -17,26 +17,13 @@ export class PostComponent implements OnInit {
   dummyUser: User = { firstName: '', lastName: '', profilePicture: {} };
   excerpt: string = '';
   profilePicture?: string = '';
-  constructor(private time: TimeService) {
-    // if (this.user!.profilePicture && this.user.profilePicture.path) {
-    //   this.profilePicture = this.user.profilePicture.downloadURL;
-    // }
-  }
+  constructor(private time: TimeService) {}
 
   showComments: boolean = false;
   full: boolean = false;
   fullAritcle: string = '';
   timeElapsed: string = '';
-  ngOnInit(): void {
-    this.excerpt = this.solution!.content!.slice(0, 250);
-    this.excerpt += '...';
-    this.fullAritcle = this.solution!.content!;
-    this.timeElapsed = this.time.timeAgo(this.solution!.submissionDate!);
-    // console.log(' the user ', this.user!.profilePicture);
-    // if (this.user!.profilePicture && this.user.profilePicture.path) {
-    //   this.profilePicture = this.user.profilePicture.downloadURL;
-    // }
-  }
+  ngOnInit(): void {}
 
   showLessOrMore() {
     if (this.full) {

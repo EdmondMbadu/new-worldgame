@@ -59,10 +59,33 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                         </svg>
                     </div>
-                    <input type="search" id="default-search" class="block w-full p-3 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50" placeholder="Search a problem ..." required>
+                    <input type="search" id="default-search" class="block w-full p-3 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50"  [formControl]="searchControl" placeholder="Search a problem ..." required>
                     <!-- <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button> -->
                 </div>
+                 <!-- Result cart  -->
+            <div *ngIf="filteredItems.length!==0" class="absolute top-20 lg:w-[30rem] md:w-[26rem]  bg-white p-4 rounded-xl shadow-lg border-2 border-gray-200 mx-20">
+              <ul role="list" class="divide-y divide-gray-300">
+                  <li class="py-3 sm:py-4 hover:bg-gray-100" *ngFor="let s of filteredItems.slice(0,5); let i= index">
+                      <div class="flex items-center space-x-4" [routerLink]="['/solution-view',s.solutionId]">
+                          <div class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full ">
+                              <span class="font-medium text-gray-600 ">{{s.authorName?.substring(0,2)}}</span>
+                          </div>
+                          <div class="flex-1 min-w-0">
+                              <p class="text-sm font-medium text-gray-900 ">
+                              {{s.title}}
+                              </p>
+                              <p class="text-sm text-gray-500 truncate ">
+                              <!-- ({{s.phoneNumber| slice:0:3}}) - {{s.phoneNumber| slice:3:6}} - {{s.phoneNumber| slice:6:10}}  -->
+                              </p>
+                          </div>
+                          
+                      </div>
+                  </li>
+              </ul>
+            </div>
             </form>
+
+           
 
             <div class="hidden md:flex md:flex-col mx-auto items-center" (click)="toggleDropDown()"  >
 
