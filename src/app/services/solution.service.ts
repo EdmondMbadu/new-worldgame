@@ -69,9 +69,16 @@ export class SolutionService {
         ref.where('solutionId', '==', solutionId)
       )
       .valueChanges();
+  }
 
-    // return this.afs.collectionGroup<Solution>(`solutions`).
-    // .valueChanges();
+  addCommentToSolution(solution: Solution, comments: any) {
+    const data = {
+      comments: comments,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `users/${solution.authorAccountId}/solutions/${solution.solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
   }
 
   getAuthenticatedUserAllSolutions() {

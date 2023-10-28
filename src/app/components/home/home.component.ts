@@ -28,6 +28,7 @@ export class HomeComponent implements OnInit {
       this.allSolutions = data;
 
       this.findPendingSolutions();
+      this.findCompletedSolutions();
     });
 
     if (this.user!.profilePicture && this.user.profilePicture.path) {
@@ -40,28 +41,53 @@ export class HomeComponent implements OnInit {
     'Mental Health',
   ];
 
-  findPendingSolutions() {
-    this.completedSolutions = [];
+  async findPendingSolutions() {
     this.pendingSolutions = [];
-    this.pending = 0;
+    this.pendingSolutionsUsers = [];
 
-    for (let s of this.allSolutions!) {
-      if (s.finished !== undefined) {
-        this.completedSolutions.push(s);
-        this.auth.getAUser(s.authorAccountId!).subscribe((data) => {
-          this.completedSolutionsUsers.push(data!);
-        });
-      } else if (
+    const userPromises = this.allSolutions!.filter(
+      (s) =>
+        s.finished === undefined &&
         this.auth.currentUser &&
         s.authorName ===
           `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`
-      ) {
-        this.auth.getAUser(s.authorAccountId!).subscribe((data) => {
-          this.pendingSolutionsUsers.push(data!);
-        });
-        this.pendingSolutions.push(s);
-        this.pending++;
-      }
-    }
+    ).map(async (s) => {
+      this.pendingSolutions.push(s); // Push solution to the array
+
+      // Create a promise for each user fetch
+      return new Promise<any>((resolve, reject) => {
+        this.auth.getAUser(s.authorAccountId!).subscribe(
+          (data) => resolve(data),
+          (error) => reject(error)
+        );
+      });
+    });
+
+    // Wait for all user-fetching promises to resolve
+    const users = await Promise.all(userPromises);
+    this.pendingSolutionsUsers.push(...users);
+    this.pending = users.length;
+  }
+  async findCompletedSolutions() {
+    this.completedSolutions = [];
+    this.completedSolutionsUsers = [];
+
+    const userPromises = this.allSolutions!.filter(
+      (s) => s.finished !== undefined
+    ).map(async (s) => {
+      this.completedSolutions.push(s); // Push solution to the array
+
+      // Create a promise for each user fetch
+      return new Promise<any>((resolve, reject) => {
+        this.auth.getAUser(s.authorAccountId!).subscribe(
+          (data) => resolve(data),
+          (error) => reject(error)
+        );
+      });
+    });
+
+    // Wait for all user-fetching promises to resolve
+    const users = await Promise.all(userPromises);
+    this.completedSolutionsUsers.push(...users);
   }
 }

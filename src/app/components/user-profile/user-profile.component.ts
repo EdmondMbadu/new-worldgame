@@ -12,7 +12,6 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class UserProfileComponent implements OnInit {
   id: any = '';
-  currentUser: User;
   user: any = {};
   dateJoined: string = '';
   time: any;
@@ -26,9 +25,10 @@ export class UserProfileComponent implements OnInit {
     private solution: SolutionService
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.currentUser = this.auth.currentUser;
+
     auth.getAUser(this.id).subscribe((data) => {
       this.user = data;
+      console.log(' the user', this.user);
       if (this.user?.profilePicture && this.user.profilePicture.path) {
         this.profilePicturePath = this.user.profilePicture.downloadURL;
         // console.log('here  iam', this.profilePicturePath);

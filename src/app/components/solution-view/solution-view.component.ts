@@ -26,7 +26,6 @@ export class SolutionViewComponent implements OnInit {
       .getSolutionForNonAuthenticatedUser(this.solutionId)
       .subscribe((data: any) => {
         this.currentSolution = data[0];
-        console.log('solution view', this.currentSolution);
         this.auth
           .getAUser(this.currentSolution.authorAccountId!)
           .subscribe((user: any) => {

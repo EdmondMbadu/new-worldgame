@@ -36,7 +36,7 @@
                
                 <div class="flex flex-nowrap py-2 items-center" (click)="displayComments()">
                     <img src="../../../assets/img/comment.png" class="w-6 flex-nowrap items-center" alt=""> 
-                    <h1 class="px-1 items-center ">102</h1>
+                    <h1  class="px-1 items-center ">{{numberOfcomments}}</h1>
                 </div>
                 <div class="flex flex-nowrap items-center">
                     <img src="../../../assets/img/bar-1.png" class=" ml-8 w-6  items-center" alt=""> 
@@ -61,7 +61,8 @@
             <div class=" flex flex-nowrap mx-auto items-center py-2">
 
                 <div class="">
-                    <img src="../../../assets/img/user.png" class="w-8 pt-1 bg-gray-100" alt="">
+                    <img *ngIf="profilePicture===''" [src]="avatarNoPicturePath" class="w-8 pt-1 bg-gray-100 " alt="">
+                    <img *ngIf="profilePicture!==''" [src]="profilePicture" class="w-8 pt-1 rounded-full" alt="">
                     <!-- <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full">
                         <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                     </div> -->
@@ -71,8 +72,8 @@
                 <div class=" px-2 ">
                     <div class=" w:[16rem]  md:w-[26rem] flex-col mx-auto items-center">   
             
-                        <div class="">
-                            <input type="search" id="default-search" class="block w-full p-1.5 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50" placeholder="Add a comment ..." required>
+                        <div class="" >
+                            <input [(ngModel)]="comment" type="search" id="default-search" class="block w-full p-1.5 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50" placeholder="Add a comment ..." required>
                            
                         </div>
                     </div>
@@ -80,36 +81,37 @@
                 </div>
 
                 <div class=" bg-teal-700 px-2 md:px-3 py-1 rounded-full">
-                    <a routerLink="/home"  class="text-white md:text-sm  text-xs">Add Comment</a>
+                    <button type="submit" (click)="addComment()" class="text-white md:text-sm  text-xs">Add Comment</button>
 
                 </div>
                 
             </div>
 
             <!-- Lists of comments -->
-            <div class="flex  mx-auto items-center my-6 bg-gray-100 p-2 " *ngIf="showComments">
-                <div class="flex flex-col pb-10  max-w-lg">
+            <div class="flex  mx-auto items-center my-6 bg-gray-100 p-2 " *ngIf="showComments && solution.comments">
+                <div class="flex flex-col pb-10  max-w-lg" *ngFor="let comment of solution.comments | keyvalue; let i =index">
                     <div class="flex flex-nowrap">
                         
-                        <img src="../../../assets/img/jim.jpeg" class="w-14 h-12 rounded-full" alt="">
-                        <h1 class="  px-2 py-2">Jimmy Walker . 1h</h1>
+                        <img *ngIf="!commentUserProfilePicturePath[i]" [src]="avatarNoPicturePath" class="w-8 pt-1 rounded-full" alt="">
+                        <img *ngIf="commentUserProfilePicturePath[i]" [src]="commentUserProfilePicturePath[i]" class="w-8 pt-1 rounded-full" alt="">
+                        <h1 class="  px-2 py-2">{{commentUserNames[i]}} . {{commentTimeElapsed[i]}}</h1>
                              
                     </div>
                  
                     <div class="flex flex-row pl-16">
-                        <h1 class="">I Love  these resolutions. This is great. </h1>
+                        <h1 class="">{{comment.value}}. </h1>
                     </div>
                     <!-- likes and dislike -->
                     <div class="flex flex-nowrap items-center my-2 space-y-2">
 
                         <div class="flex flex-nowrap my-1">
                             <img src="../../../assets/img/like.png" class=" ml-16 w-6  items-center" alt=""> 
-                            <h1 class="px-1 items-center ">29</h1>
+                            <h1 class="px-1 items-center ">0</h1>
                         </div>
 
                         <div class="flex flex-nowrap ">
                             <img src="../../../assets/img/dislike.png" class=" ml-8  w-6  items-center" alt=""> 
-                            <h1 class="px-1 items-center ">1K</h1>
+                            <h1 class="px-1 items-center ">0</h1>
                         </div>
                         
                     </div>
@@ -127,3 +129,28 @@
         </div>
 
     </div>
+
+  
+ <!-- Modal for submitting a solution  -->
+<div id="popup-modal"  class=" p-4" *ngIf="displayAddCommentPermission" >
+    <div class="  w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
+        <div class="border-gray-200 border-2 relative bg-white rounded-lg shadow">
+            <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" (click)="closeDisplayCommentPermission()" >
+                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500 ">You should login to add a comment</h3>
+                <button  routerLink="/login" type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2" >
+                    Yes, Sign in
+                </button>
+                <button (click)="closeDisplayCommentPermission()"  type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 ">No, cancel</button>
+            </div>
+        </div>
+    </div>
+  </div>
