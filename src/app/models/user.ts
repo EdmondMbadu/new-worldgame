@@ -10,8 +10,8 @@ export class User {
   education?: string;
   location?: string;
   dateJoined?: string;
-  followers?: string;
-  following?: string;
+  followers?: string[];
+  following?: string[];
   numberOfPosts?: string;
   numberOfContributions?: string;
   contentViews?: string;

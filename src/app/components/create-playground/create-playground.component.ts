@@ -16,9 +16,12 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SolutionService } from 'src/app/services/solution.service';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { User } from 'src/app/models/user';
 
 export interface Email {
   name: string;
+  ready?: string;
+  evaluated?: string;
 }
 @Component({
   selector: 'app-create-playground',
@@ -64,9 +67,7 @@ export class CreatePlaygroundComponent {
   }
 
   public Editor = ClassicEditor;
-  public onReady(editor: any) {
-    // console.log('CKEditor5 Angular Component is ready to use!', editor);
-  }
+  public onReady(editor: any) {}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
 
@@ -106,13 +107,6 @@ export class CreatePlaygroundComponent {
   }
 
   launchPlayground() {
-    console.log(
-      'displaying results : ',
-      this.myForm.value.title,
-      this.myForm.value.description,
-      this.currentEmails,
-      this.myForm.value.date
-    );
     this.loading = true;
     let solutionId = '';
     this.solution
@@ -124,15 +118,20 @@ export class CreatePlaygroundComponent {
       )
       .then(() => {
         this.createdSolutionSuccess = true;
+        this.createSolutionForParticipants();
 
-        setTimeout(() => {
-          this.createdSolutionSuccess = false;
+        // setTimeout(() => {
+        //   this.createdSolutionSuccess = false;
 
-          solutionId = this.solution.solutionId;
+        //   solutionId = this.solution.solutionId;
 
-          this.router.navigate(['/playground-steps/' + solutionId]);
-          // do something after 1000 milliseconds
-        }, 2000);
+        //   this.createSolutionForParticipants();
+        //   // this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
+        //   // do something after 1000 milliseconds
+        // }, 2000);
+      })
+      .then(() => {
+        this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
       })
       .catch((error) => {
         this.solutionError = of(error);
@@ -140,6 +139,41 @@ export class CreatePlaygroundComponent {
         console.log('error now');
         // alert('Error launching solution ');
       });
+  }
+
+  createSolutionForParticipants() {
+    let initiatorEmail = this.auth.currentUser.email;
+
+    let myuser: User = {};
+    for (let email of this.currentEmails) {
+      this.auth.getUserFromEmail(email.name).subscribe((data) => {
+        myuser = data[0];
+
+        this.solution.createNewSolutionForParticipant(
+          this.myForm.value.title,
+          this.myForm.value.description,
+          this.findEmailsToSend(initiatorEmail, myuser.email!),
+          this.myForm.value.date,
+          this.auth.currentUser.uid,
+          this.solution.solutionId,
+          myuser.uid!
+        );
+      });
+    }
+  }
+
+  findEmailsToSend(initiatorEmail: string, authorEmail: string) {
+    let emailsToSend: Email[] = [];
+
+    for (let email of this.currentEmails) {
+      if (email.name !== authorEmail) {
+        emailsToSend.push(email);
+      }
+    }
+
+    emailsToSend.push({ name: initiatorEmail });
+
+    return emailsToSend;
   }
   closePopUpSucess() {
     this.createdSolutionSuccess = false;

@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
   selector: 'app-slider',
@@ -6,5 +7,16 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./slider.component.css'],
 })
 export class SliderComponent {
-  @Input() value: number = 1;
+  @Input() attribute: string = '';
+  constructor(solution: SolutionService) {
+    if (this.attribute === 'achievable') {
+    }
+  }
+  disabled = false;
+  max = 10;
+  min = 0;
+  showTicks = true;
+  step = 1;
+  thumbLabel = false;
+  value = 0;
 }

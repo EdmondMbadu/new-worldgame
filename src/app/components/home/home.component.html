@@ -22,10 +22,10 @@
         </div>
         <div class="  w-[20rem]  bg-white p-4 rounded-lg shadow-lg mt-6">
             <div class=" py-2">
-            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Pending Work ({{pending}})</h1>
+            <h1 class="text-center hover:underline" routerLink="/problem-list-view">Pending Solutions ({{pending}})</h1>
             </div>    
          
-            <app-problem-list [users]="pendingSolutionsUsers" [solutions]="pendingSolutions"></app-problem-list>
+            <app-problem-list [path]="'/playground-steps'" [users]="pendingSolutionsUsers" [solutions]="pendingSolutions"></app-problem-list>
         </div>
 
     </div>
@@ -70,10 +70,10 @@
 
             <div class="  w-[20rem]   bg-white p-4 rounded-lg shadow-lg mt-6">
                 <div class=" py-2">
-                <h1 class="text-center hover:underline" routerLink="/problem-list-feedback">Awaiting Feedback</h1>
+                <h1 class="text-center hover:underline" routerLink="/problem-list-feedback">Strategy Evaluation ({{evaluation}})</h1>
                 </div>    
                 
-                <app-problem-list [path]="'/problem-list-feedback'" [problems]="problems"></app-problem-list>
+                <app-problem-list [path]="'/problem-feedback'" [viewAllPath]="'/problem-list-feedback'" [users]="evaluationSolutionsUsers" [solutions]="evaluationSolutions"></app-problem-list>
             </div>
 
         </div>

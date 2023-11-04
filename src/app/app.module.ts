@@ -5,6 +5,9 @@ import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -87,6 +90,9 @@ import { SolutionViewComponent } from './components/solution-view/solution-view.
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatCardModule,
+    MatCheckboxModule,
+    MatSliderModule,
     BrowserAnimationsModule,
     MatIconModule,
     MatChipsModule,

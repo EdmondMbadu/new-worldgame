@@ -1,4 +1,28 @@
-<div class="slidecontainer ">
+<!-- <div class="slidecontainer ">
     <input type="range" min="1" max="10"[(ngModel)]="value" class="slider" id="myRange">
     <p class="text-center font-Nunito font-extralight">{{value}} <span id="demo"></span></p>
+  </div> -->
+
+
+  <!-- <mat-card class="example-result-card"> -->
+    <div class="my-2">
+    <mat-card-content>
+   
+  
+      <!-- <div class="example-label-container"> -->
+        <!-- <label id="example-name-label" class="example-name-label">Value</label> -->
+        <label class="example-value-label mx-4">{{slider.value}}</label>
+      <!-- </div> -->
+      <mat-slider
+          class="example-margin"
+          [disabled]="disabled"
+          [max]="max"
+          [min]="min"
+          [step]="step"
+          [discrete]="thumbLabel"
+          [showTickMarks]="showTicks">
+        <input matSliderThumb [(ngModel)]="value" #slider>
+      </mat-slider>
+    </mat-card-content>
   </div>
+  <!-- </mat-card> -->

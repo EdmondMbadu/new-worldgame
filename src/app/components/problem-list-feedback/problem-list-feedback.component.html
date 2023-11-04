@@ -1,15 +1,11 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'"></app-navbar>
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" current="''"></app-navbar>
 
 <div class="flex flex-col mx-auto justify-center mt-32">
     <div class=" flex flex-col mx-auto justify-center mb-6">
-        <h1 class="text-center text-xl font-bold font-Nunito">{{title}}</h1>
+        <h1 class="text-center text-xl font-bold font-Nunito">{{title}} ({{evaluation}})</h1>
     </div> 
         <div class="flex flex-col justify-center mx-auto ">
-            <app-problem-list 
-            [problems]="problems" 
-            [path]="'/problem-feedback'"
-            [margin]="'md:mx-16 p-4'">
-            </app-problem-list>
+            <app-problem-list [viewAllPath]="'problem-list-feedback'" [users]="evaluationSolutionsUsers" [solutions]="evaluationSolutions" [margin]="'md:mx-16 p-4'"></app-problem-list>
         </div>
  
 </div>

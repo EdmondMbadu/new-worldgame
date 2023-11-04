@@ -51,13 +51,30 @@ export class PostComponent implements OnInit {
     }
     this.initializeComments();
   }
-  initializeComments() {
-    this.numberOfcomments = Object.keys(this.solution.comments!).length;
-    Object.entries(this.solution.comments!).forEach(([key, value]) => {
-      const element = key.split('#');
-      this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
-      this.auth.getAUser(element[0]).subscribe((data: any) => {
+
+  async initializeComments() {
+    if (this.solution.comments) {
+      this.numberOfcomments = Object.keys(this.solution.comments!).length;
+
+      // An array to store promises for user data fetching
+      const userPromises = Object.entries(this.solution.comments!).map(
+        ([key]) => {
+          const element = key.split('#');
+          this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
+
+          return new Promise<any>((resolve, reject) => {
+            this.auth.getAUser(element[0]).subscribe(
+              (data: any) => resolve(data),
+              (error) => reject(error)
+            );
+          });
+        }
+      );
+
+      const users = await Promise.all(userPromises);
+      users.forEach((data) => {
         this.commentUserNames.push(data.firstName + ' ' + data.lastName);
+
         if (data.profilePicture.downloadURL) {
           this.commentUserProfilePicturePath.push(
             data.profilePicture.downloadURL
@@ -68,7 +85,7 @@ export class PostComponent implements OnInit {
           );
         }
       });
-    });
+    }
   }
 
   findLength(comments: any) {

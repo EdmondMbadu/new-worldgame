@@ -15,6 +15,7 @@ export class UserProfileComponent implements OnInit {
   user: any = {};
   dateJoined: string = '';
   time: any;
+
   profilePicturePath?: string = '';
   completedSolutions: Solution[] = [];
 
@@ -28,7 +29,6 @@ export class UserProfileComponent implements OnInit {
 
     auth.getAUser(this.id).subscribe((data) => {
       this.user = data;
-      console.log(' the user', this.user);
       if (this.user?.profilePicture && this.user.profilePicture.path) {
         this.profilePicturePath = this.user.profilePicture.downloadURL;
         // console.log('here  iam', this.profilePicturePath);

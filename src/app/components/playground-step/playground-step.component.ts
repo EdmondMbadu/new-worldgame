@@ -6,7 +6,13 @@ import { Router } from '@angular/router';
 import { SolutionService } from 'src/app/services/solution.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Solution } from 'src/app/models/solution';
+import { AuthService } from 'src/app/services/auth.service';
+import { User } from 'src/app/models/user';
 
+export interface FeedbackRequest {
+  authorId?: string;
+  evaluated?: string;
+}
 @Component({
   selector: 'app-playground-step',
   templateUrl: './playground-step.component.html',
@@ -31,7 +37,11 @@ export class PlaygroundStepComponent {
   questionsAndAnswersTracker?: { [key: string]: string } = {};
   scrollHandler: (() => void) | undefined;
   elements: any = [];
-  constructor(private router: Router, private solution: SolutionService) {}
+  constructor(
+    private router: Router,
+    private solution: SolutionService,
+    private auth: AuthService
+  ) {}
   data: string = '';
   ngOnInit() {
     this.initializeContents();
@@ -61,11 +71,6 @@ export class PlaygroundStepComponent {
 
     // Add a scroll event listener to the window
     window.addEventListener('scroll', this.scrollHandler);
-
-    this.solution.getSolution(this.solutionId).subscribe((data: any) => {
-      this.currentSolution = data;
-      // this.initializeContents();
-    });
   }
 
   initializeContents() {
@@ -116,6 +121,9 @@ export class PlaygroundStepComponent {
       // let conf = confirm('Are you sure you want to Submit?');
       if (this.submiResponse) {
         this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
+
+        this.sendRequestForEvaluation();
+
         window.removeEventListener('scroll', this.scrollHandler!);
         this.router.navigate(['/home']);
       } else {
@@ -124,6 +132,29 @@ export class PlaygroundStepComponent {
     }
 
     this.elements.length = 0;
+  }
+
+  sendRequestForEvaluation() {
+    let emails: any = this.currentSolution.participants;
+    console.log('all emails', emails);
+    let myuser: User = {};
+    let feedback: FeedbackRequest[] = [];
+    for (let email of emails) {
+      this.auth.getUserFromEmail(email.name).subscribe((data) => {
+        myuser = data[0];
+
+        this.solution.sendSolutionRequestForEvaluation(
+          myuser.uid!,
+          this.currentSolution.solutionId!,
+          [
+            {
+              authorId: this.auth.currentUser.uid,
+              evaluated: 'false',
+            },
+          ]
+        );
+      });
+    }
   }
   accept() {
     this.submiResponse = true;

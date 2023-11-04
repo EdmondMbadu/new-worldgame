@@ -17,7 +17,8 @@ export class ProblemListComponent {
   }
   @Input() users: User[] = [];
   @Input() margin = '';
-  @Input() path = '/problem-list-view';
+  @Input() path: string = '/problem-feedback';
+  @Input() viewAllPath: string = '/problem-list-view';
   @Input() problems: string[] = [
     'World Hunger',
     'Electrifying Africa',

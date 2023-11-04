@@ -2,6 +2,7 @@ export class Solution {
   solutionId?: string;
   authorEmail?: string;
   authorAccountId?: string;
+  initiatorId?: string;
   authorProfileCredential?: string;
   authorName?: string;
   content?: string;
@@ -13,10 +14,18 @@ export class Solution {
   likes?: string;
   views?: string;
   share?: string;
-  feedback?: string;
+  feedbackRequest?: FeedbackRequest[] = [];
+  evaluation?: { [key: string]: string } = {};
   endDate?: string;
   endDateFormatted?: string;
   finished?: string;
+  evaluationAverage?: string;
   creationDate?: string;
   submissionDate?: string;
+  numberofTimesEvaluated?: string;
+}
+
+export interface FeedbackRequest {
+  authorId?: string;
+  evaluated?: string;
 }

@@ -1,7 +1,7 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'"></app-navbar>
+<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [current]="''"></app-navbar>
 <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-24">
     <div class="flex flex-col md:mx-20">
-        <app-solution [title]="'Ending Poverty'"></app-solution>
+        <app-solution [solution]="userSolution"[user]="user"></app-solution>
 
     </div>
 
@@ -11,43 +11,38 @@
       <div class="lg:fixed lg:top-24 lg:right-0 md:mx-10 flex flex-col ">
 
           <div class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row   p-4">
-              <img class="object-cover  rounded-t-lg w-20 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg" src="../../../assets/img/evaluate.png" alt="">
-              <div class="flex flex-col  p-4 leading-normal">
-                  <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900 ">Evaluation</h5>
-                  <div class="flex flex-col justify-center">
-                        <div class="flex flex-row space-x-10  ">
-                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Comprehensive</h1>
-                            <div class="justify-center">
-                                <app-slider></app-slider>
-                            </div>
+              <img class="object-cover  rounded-t-lg w-20 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg " src="../../../assets/img/evaluation.png" alt="">
+              <div class="flex flex-col p-4  leading-normal">
+                  <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900  text-center">Evaluation</h5>
+                  <div class="flex flex-col justify-center items-center">
+                        <div class="flex flex-row space-x-10  " *ngFor="let ev of evaluationArray; let i=index">
+                   
+                            <h1 class="text-gray-900 font-Nunito font-extralight w-44 py-4" >{{ev}}</h1>
+
+                                <div class="my-2">
+                                    <mat-card-content> 
+
+                                        <label class="example-value-label mx-4">{{slider.value}}</label>
+
+                                    <mat-slider
+                                        class="example-margin"
+                                        [disabled]="disabled"
+                                        [max]="max"
+                                        [min]="min"
+                                        [step]="step"
+                                        [discrete]="thumbLabel"
+                                        [showTickMarks]="showTicks">
+                                        <input matSliderThumb [(ngModel)]="values[i]" #slider>
+                                    </mat-slider>
+                                    </mat-card-content>
+                                </div>
+                        
                         </div>
-                        <div class="flex flex-row space-x-10  ">
-                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Restorative</h1>
-                            <div class="">
-                                <app-slider></app-slider>
-                            </div>
-                        </div>
-                        <div class="flex flex-row space-x-10  ">
-                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Inclusive</h1>
-                            <div class="">
-                                <app-slider></app-slider>
-                            </div>
-                        </div>
-                        <div class="flex flex-row space-x-10  ">
-                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Verifiable</h1>
-                            <div class="">
-                                <app-slider></app-slider>
-                            </div>
-                        </div>
-                        <div class="flex flex-row space-x-10  ">
-                            <h1 class="text-gray-900 font-Nunito font-extralight w-36" >Achievable</h1>
-                            <div class="">
-                                <app-slider></app-slider>
-                            </div>
-                        </div>
+                        
                     
-                        <div class=" mt-2 border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                            <a routerLink="/home" class="text-white"> Submit Feedback</a>
+                    
+                        <div class=" mt-4 border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
+                            <a  class="text-white" (click)="submitFeedback()"> Submit Feedback</a>
                         </div>
             
                        

@@ -88,34 +88,37 @@
             </div>
 
             <!-- Lists of comments -->
-            <div class="flex  mx-auto items-center my-6 bg-gray-100 p-2 " *ngIf="showComments && solution.comments">
-                <div class="flex flex-col pb-10  max-w-lg" *ngFor="let comment of solution.comments | keyvalue; let i =index">
-                    <div class="flex flex-nowrap">
+            <div  *ngFor="let comment of solution.comments | keyvalue; let i =index">
+                <div class="flex  mx-auto items-center my-2 bg-gray-100 p-2 " *ngIf="showComments && solution.comments">
+                    
+                        <div class="flex flex-col   max-w-lg">
+                            <div class="flex flex-nowrap">
+                                
+                                <img *ngIf="!commentUserProfilePicturePath[i]" [src]="avatarNoPicturePath" class="w-8 pt-1 rounded-full" alt="">
+                                <img *ngIf="commentUserProfilePicturePath[i]" [src]="commentUserProfilePicturePath[i]" class="w-8 pt-1 rounded-full" alt="">
+                                <h1 class="  px-2 py-2">{{commentUserNames[i]}} . {{commentTimeElapsed[i]}}</h1>
+                                    
+                            </div>
                         
-                        <img *ngIf="!commentUserProfilePicturePath[i]" [src]="avatarNoPicturePath" class="w-8 pt-1 rounded-full" alt="">
-                        <img *ngIf="commentUserProfilePicturePath[i]" [src]="commentUserProfilePicturePath[i]" class="w-8 pt-1 rounded-full" alt="">
-                        <h1 class="  px-2 py-2">{{commentUserNames[i]}} . {{commentTimeElapsed[i]}}</h1>
-                             
-                    </div>
-                 
-                    <div class="flex flex-row pl-16">
-                        <h1 class="">{{comment.value}}. </h1>
-                    </div>
-                    <!-- likes and dislike -->
-                    <div class="flex flex-nowrap items-center my-2 space-y-2">
+                            <div class="flex flex-row pl-10">
+                                <h1 class="">{{comment.value}}. </h1>
+                            </div>
+                            <!-- likes and dislike -->
+                            <div class="flex flex-nowrap items-center my-2 space-y-2">
 
-                        <div class="flex flex-nowrap my-1">
-                            <img src="../../../assets/img/like.png" class=" ml-16 w-6  items-center" alt=""> 
-                            <h1 class="px-1 items-center ">0</h1>
-                        </div>
+                                <div class="flex flex-nowrap mt-1 ">
+                                    <img src="../../../assets/img/like.png" class=" ml-16 w-4 h-4 " alt=""> 
+                                    <h1 class="px-1 text-sm items-center ">0</h1>
+                                </div>
 
-                        <div class="flex flex-nowrap ">
-                            <img src="../../../assets/img/dislike.png" class=" ml-8  w-6  items-center" alt=""> 
-                            <h1 class="px-1 items-center ">0</h1>
+                                <div class="flex flex-nowrap ">
+                                    <img src="../../../assets/img/dislike.png" class=" ml-5  w-4 h-4  " alt=""> 
+                                    <h1 class="px-1 text-sm items-center mb-1">0</h1>
+                                </div>
+                                
+                            </div>
                         </div>
-                        
                     </div>
-                </div>
                
 
               

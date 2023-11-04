@@ -50,7 +50,11 @@ const routes: Routes = [
     component: ProblemListFeedbackComponent,
     canActivate: [AuthGuard],
   },
-  { path: 'problem-feedback', component: ProblemFeedbackComponent },
+  {
+    path: 'problem-feedback/:id',
+    component: ProblemFeedbackComponent,
+    canActivate: [AuthGuard],
+  },
   { path: 'verify-email', component: VerifyEmailComponent },
 ];
 
