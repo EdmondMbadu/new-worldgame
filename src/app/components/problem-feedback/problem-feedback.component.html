@@ -1,7 +1,7 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [current]="''"></app-navbar>
 <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-24">
     <div class="flex flex-col md:mx-20">
-        <app-solution [solution]="userSolution"[user]="user"></app-solution>
+        <app-solution [solution]="userSolution"[teamMembers]="teamMembers"></app-solution>
 
     </div>
 
@@ -12,7 +12,7 @@
 
           <div class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row   p-4">
               <img class="object-cover  rounded-t-lg w-20 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg " src="../../../assets/img/evaluation.png" alt="">
-              <div class="flex flex-col p-4  leading-normal">
+              <div class="flex flex-col p-4">
                   <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900  text-center">Evaluation</h5>
                   <div class="flex flex-col justify-center items-center">
                         <div class="flex flex-row space-x-10  " *ngFor="let ev of evaluationArray; let i=index">

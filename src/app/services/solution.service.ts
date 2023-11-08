@@ -29,7 +29,9 @@ export class SolutionService {
     title: string,
     description: string,
     participants: any,
-    endDate: string
+    evaluators: any,
+    endDate: string,
+    sdg: string
   ) {
     let formatedDate = this.time.formatDateString(endDate);
     this.solutionId = this.afs.createId().toString();
@@ -41,15 +43,17 @@ export class SolutionService {
       authorEmail: this.auth.currentUser.email,
       description: description,
       participants: participants,
+      evaluators: evaluators,
       endDate: endDate,
       authorProfileCredential: this.auth.currentUser.profileCredential,
       endDateFormatted: formatedDate,
       creationDate: this.time.todaysDate(),
       views: '1',
       likes: '0',
+      sdg: sdg,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${this.auth.currentUser.uid}/solutions/${data.solutionId}`
+      `solutions/${data.solutionId}`
     );
 
     return solutionRef.set(data, { merge: true });
@@ -62,7 +66,8 @@ export class SolutionService {
     endDate: string,
     initiatorId: string,
     solutionId: string,
-    participantId: string
+    participantId: string,
+    sdg: string
   ) {
     let formatedDate = this.time.formatDateString(endDate);
 
@@ -76,22 +81,19 @@ export class SolutionService {
       endDate: endDate,
       endDateFormatted: formatedDate,
       creationDate: this.time.todaysDate(),
+      sdg: sdg,
       views: '1',
       likes: '0',
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${participantId}/solutions/${solutionId}`
+      `solutions/${solutionId}`
     );
 
     return solutionRef.set(data, { merge: true });
   }
 
   getSolution(solutionId: string) {
-    return this.afs
-      .doc<Solution>(
-        `users/${this.auth.currentUser.uid}/solutions/${solutionId}`
-      )
-      .valueChanges();
+    return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
   }
 
   getSolutionForNonAuthenticatedUser(solutionId: string) {
@@ -119,7 +121,20 @@ export class SolutionService {
 
   getAuthenticatedUserAllSolutions() {
     return this.afs
-      .collection<Solution>(`users/${this.auth.currentUser.uid}/solutions/`)
+      .collection<Solution>(`solutions`, (ref) =>
+        ref.where('participants', 'array-contains', {
+          name: this.auth.currentUser.email,
+        })
+      )
+      .valueChanges();
+  }
+  getAuthenticatedUserPendingEvaluations() {
+    return this.afs
+      .collection<Solution>(`solutions`, (ref) =>
+        ref.where('evaluators', 'array-contains', {
+          name: this.auth.currentUser.email,
+        })
+      )
       .valueChanges();
   }
   getAllSolutionsOfThisUser(uid: string) {
@@ -164,7 +179,7 @@ export class SolutionService {
       status: status,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${this.auth.currentUser.uid}/solutions/${solutionId}`
+      `solutions/${solutionId}`
     );
     return solutionRef.set(data, { merge: true });
   }
@@ -175,7 +190,7 @@ export class SolutionService {
       submissionDate: this.time.todaysDate(),
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${this.auth.currentUser.uid}/solutions/${solutionId}`
+      `solutions/${solutionId}`
     );
 
     return solutionRef.set(data, { merge: true });
@@ -190,7 +205,7 @@ export class SolutionService {
       feedbackRequest: feedbackRequest,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${participantId}/solutions/${solutionId}`
+      `solutions/${solutionId}`
     );
 
     return solutionRef.set(data, { merge: true });

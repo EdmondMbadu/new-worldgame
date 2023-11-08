@@ -23,7 +23,11 @@ const routes: Routes = [
   { path: 'signup', component: SignupComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'create-playground', component: CreatePlaygroundComponent },
+  {
+    path: 'create-playground',
+    component: CreatePlaygroundComponent,
+    canActivate: [AuthGuard],
+  },
   {
     path: 'playground-steps/:id',
     component: PlaygroundStepsComponent,

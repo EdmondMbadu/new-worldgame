@@ -26,6 +26,8 @@ export class ProblemFeedbackComponent {
   id: any;
   solutionId: string = '';
 
+  teamMembers: User[] = [];
+
   feebdackRequests: FeedbackRequest[] = [];
   userId: string = '';
   disabled = false;
@@ -58,25 +60,18 @@ export class ProblemFeedbackComponent {
     private solution: SolutionService
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    let elements = this.id.split('@@@');
-    this.userId = elements[0];
-    this.solutionId = elements[1];
 
-    this.solution
-      .getThisUserSolution(this.auth.currentUser.uid, this.solutionId)
-      .subscribe((data) => {
-        this.currenUserSolution = data!;
-        this.feebdackRequests = data!.feedbackRequest!;
-      });
-    this.auth.getAUser(this.userId).subscribe((data) => {
-      this.user = data!;
+    // this.solution
+    //   .getThisUserSolution(this.auth.currentUser.uid, this.solutionId)
+    //   .subscribe((data) => {
+    //     this.currenUserSolution = data!;
+    //     this.feebdackRequests = data!.feedbackRequest!;
+    //   });
+
+    this.solution.getSolution(this.id).subscribe((data) => {
+      this.userSolution = data!;
+      this.getMembers();
     });
-
-    this.solution
-      .getThisUserSolution(this.userId, this.solutionId)
-      .subscribe((data) => {
-        this.userSolution = data!;
-      });
   }
 
   markFeedbackRequestDone() {
@@ -85,6 +80,22 @@ export class ProblemFeedbackComponent {
         f.evaluated = 'true';
         return;
       }
+    }
+  }
+  getMembers() {
+    for (const key in this.userSolution.participants) {
+      let participant = this.userSolution.participants[key];
+      let email = Object.values(participant)[0];
+      this.auth.getUserFromEmail(email).subscribe((data) => {
+        // Check if the email of the incoming data is already in the teamMembers
+        if (
+          data &&
+          data[0] &&
+          !this.teamMembers.some((member) => member.email === data[0].email)
+        ) {
+          this.teamMembers.push(data[0]);
+        }
+      });
     }
   }
 
@@ -122,7 +133,7 @@ export class ProblemFeedbackComponent {
       // );
     }
 
-    this.markFeedbackRequestDone();
+    // this.markFeedbackRequestDone();
     // this.solution.updateFeedbackRequestAfterEvaluation(
     //   this.feebdackRequests,
     //   this.solutionId

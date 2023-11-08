@@ -6,6 +6,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
+import { DataService } from 'src/app/services/data.service';
+import { User } from 'src/app/models/user';
 
 @Component({
   selector: 'app-playground-steps',
@@ -15,19 +17,64 @@ import { SolutionService } from 'src/app/services/solution.service';
 export class PlaygroundStepsComponent implements OnInit {
   id: any = '';
   currentSolution: Solution = {};
+  teamMembers: User[] = [];
+  showPopUpTeam: boolean[] = [];
+  showPopUpEvaluators: boolean[] = [];
+  evaluators: User[] = [];
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
-    private solution: SolutionService
+    private solution: SolutionService,
+    public data: DataService
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+      this.getMembers();
+      this.getEvaluators();
     });
   }
   ngOnInit(): void {
     this.display[this.currentIndexDisplay] = true;
     this.buttontexts[this.steps.length - 1] = 'Submit';
+  }
+  getMembers() {
+    this.teamMembers = [];
+
+    for (const key in this.currentSolution.participants) {
+      let participant = this.currentSolution.participants[key];
+      let email = Object.values(participant)[0];
+      this.auth.getUserFromEmail(email).subscribe((data) => {
+        // Check if the email of the incoming data is already in the teamMembers
+        if (
+          data &&
+          data[0] &&
+          !this.teamMembers.some((member) => member.email === data[0].email)
+        ) {
+          this.teamMembers.push(data[0]);
+        }
+      });
+    }
+  }
+
+  getEvaluators() {
+    this.evaluators = [];
+
+    for (const key in this.currentSolution.evaluators) {
+      let evaluator = this.currentSolution.evaluators[key];
+      let email = Object.values(evaluator)[0];
+      // console.log('current email', email);
+      this.auth.getUserFromEmail(email).subscribe((data) => {
+        // Check if the email of the incoming data is already in the teamMembers
+        if (
+          data &&
+          data[0] &&
+          !this.evaluators.some((member) => member.email === data[0].email)
+        ) {
+          this.evaluators.push(data[0]);
+        }
+      });
+    }
   }
   currentIndexDisplay: number = 0;
 
@@ -70,5 +117,18 @@ export class PlaygroundStepsComponent implements OnInit {
     this.display[this.currentIndexDisplay] = false;
     this.currentIndexDisplay = current;
     this.display[this.currentIndexDisplay] = true;
+  }
+
+  onHoverImageTeam(index: number) {
+    this.showPopUpTeam[index] = true;
+  }
+  onLeaveTeam(index: number) {
+    this.showPopUpTeam[index] = false;
+  }
+  onHoverImageEvaluators(index: number) {
+    this.showPopUpEvaluators[index] = true;
+  }
+  onLeaveEvaluatros(index: number) {
+    this.showPopUpEvaluators[index] = false;
   }
 }

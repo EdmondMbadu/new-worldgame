@@ -12,7 +12,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 export class ProblemListViewComponent {
   solutions: Solution[] = [];
   pendingSolutions: Solution[] = [];
-  pendingSolutionsUsers: User[] = [];
+
   pending: number = 0;
   constructor(public auth: AuthService, private solution: SolutionService) {
     solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
@@ -24,28 +24,12 @@ export class ProblemListViewComponent {
 
   async findPendingSolutions() {
     this.pendingSolutions = [];
-    this.pendingSolutionsUsers = [];
 
-    const userPromises = this.solutions!.filter(
-      (s) =>
-        s.finished === undefined &&
-        this.auth.currentUser &&
-        s.authorAccountId === this.auth.currentUser.uid
-    ).map(async (s) => {
-      this.pendingSolutions.push(s); // Push solution to the array
-
-      // Create a promise for each user fetch
-      return new Promise<any>((resolve, reject) => {
-        this.auth.getAUser(s.authorAccountId!).subscribe(
-          (data) => resolve(data),
-          (error) => reject(error)
-        );
-      });
-    });
-
-    // Wait for all user-fetching promises to resolve
-    const users = await Promise.all(userPromises);
-    this.pendingSolutionsUsers.push(...users);
-    this.pending = users.length;
+    for (let s of this.solutions) {
+      if (s.finished === undefined) {
+        this.pendingSolutions.push(s);
+      }
+    }
+    this.pending = this.pendingSolutions.length;
   }
 }

@@ -9,8 +9,8 @@
             <ul role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngFor="let solution of solutions; let i=index" [routerLink]="[path, solution.solutionId]">
                 <li class="py-3 sm:py-4">
                     <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <img class="w-12 h-12 rounded-full" *ngIf="users[i]" [src]="users[i].profilePicture?.downloadURL" alt="">
+                        <div class="flex -space-x-4">
+                            <img class="w-14 h-14 border-white rounded-sm" [src]="data.sdgsPaths[solution.sdg!]" alt="">
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-md font-bold text-worldsecond truncate">
@@ -26,27 +26,30 @@
                     </div>
                 </li>
             </ul>
-        </div>
+    </div>
         <div class="flow-root" *ngIf="path==='/problem-feedback'">
-            <ul  role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngFor="let solution of solutions; let i=index" [routerLink]="[path, users[i].uid+'@@@'+ solution.solutionId]">
-                <li class="py-3 sm:py-4">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <img class="w-12 h-12 rounded-full" *ngIf="users[i]" [src]="users[i].profilePicture?.downloadURL" alt="">
+           <div  *ngFor="let solution of solutions; let i=index">
+                <ul   role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngIf="solution.finished!==undefined"  [routerLink]="[path, solution.solutionId]">
+                    <li class="py-3 sm:py-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="w-14 h-14 border-white rounded-sm" [src]="data.sdgsPaths[solution.sdg!]" alt="">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-md font-bold text-worldsecond truncate">
+                                {{solution.title}}
+                                </p>
+                                <!-- <p class="text-sm text-gray-400 truncate" *ngIf="myUsers[i]">
+                                {{myUsers[i].firstName}} {{myUsers[i].lastName}}
+                                </p> -->
+                            </div>
+                            <!-- <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                                $320
+                            </div> -->
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-md font-bold text-worldsecond truncate">
-                               {{solution.title}}
-                            </p>
-                            <p class="text-sm text-gray-400 truncate" *ngIf="users[i]">
-                               {{users[i].firstName}} {{users[i].lastName}}
-                            </p>
-                        </div>
-                        <!-- <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                            $320
-                        </div> -->
-                    </div>
-                </li>
-            </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
+        
 </div>

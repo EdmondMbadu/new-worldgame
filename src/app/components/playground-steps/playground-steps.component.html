@@ -16,15 +16,109 @@
 
     </div>
 
-        <div class=" flex flex-col mx-auto mt-24 ">
+        <div class=" flex flex-col mx-auto mt-28 ">
 
-            <a href="#" class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow md:flex-row md:max-w-xl hover:bg-gray-100   p-4">
-                <img class="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-32 md:rounded-none md:rounded-l-lg" src="../../../assets/img/global-network.png" alt="">
-                <div class="flex flex-col justify-between p-4 leading-normal">
-                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 ">Problem Description</h5>
-                    <div  class="mb-3 font-normal text-gray-700 " [innerHTML]="currentSolution.description">
+            <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-x   p-4">
+                <img class="object-cover mx-auto w-full rounded-t-lg h-96 md:h-auto md:w-32 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt="">
+                <div class="flex flex-col ">
+                    <h5 class="mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 ">ReadMe</h5>
+                    <div  class="mb-2 font-normal text-gray-700 " [innerHTML]="currentSolution.description">
                     </div>
                 </div>
+
+                <div class="flex flex-col ">
+                    <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center">Team Members :  {{teamMembers.length}}</h5>
+                </div>
+                    <div class="flex flex-row -space-x-1" >
+                        <div *ngFor="let user of teamMembers; let i= index" >
+                            <img   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                            <div>
+                                <div *ngIf="showPopUpTeam[i]" >
+                                    <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >
+                                        <div class="flex items-center justify-between mb-2" >
+                                            <a >
+                                                <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="Jese Leos">
+                                            </a>
+                                            <div>
+                                                <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                            </div>
+                                        </div>
+                                        <p class="text-base font-semibold leading-none text-gray-800">
+                                            <a>{{user.firstName}} {{user.lastName}}</a>
+                                        </p>
+                                        <p class="mb-3 text-sm font-normal">
+                                            <a class="hover:underline">{{user.email}}</a>
+                                        </p>
+                                        <p class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
+                                        <ul class="flex text-sm">
+                                            <li class="mr-2">
+                                                <a  class="hover:underline">
+                                                    <span class="font-semibold text-gray-800 ">{{user.following}} </span>
+                                                    <span>Following</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="hover:underline">
+                                                    <span class="font-semibold text-gray-900">{{user.followers}} </span>
+                                                    <span>Followers</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+               
+
+                <div class="flex flex-col p-4 ">
+                    <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center">Evaluators :  {{evaluators.length}}</h5>
+                </div>
+                <div class="flex flex-row -space-x-1" >
+                    <div *ngFor="let user of evaluators; let i= index" >
+                        <img   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <div>
+                            <div *ngIf="showPopUpEvaluators[i]" >
+                                <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >
+                                    <div class="flex items-center justify-between mb-2" >
+                                        <a >
+                                            <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="Jese Leos">
+                                        </a>
+                                        <div>
+                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-base font-semibold leading-none text-gray-800">
+                                        <a>{{user.firstName}} {{user.lastName}}</a>
+                                    </p>
+                                    <p class="mb-3 text-sm font-normal">
+                                        <a class="hover:underline">{{user.email}}</a>
+                                    </p>
+                                    <p class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
+                                    <ul class="flex text-sm">
+                                        <li class="mr-2">
+                                            <a  class="hover:underline">
+                                                <span class="font-semibold text-gray-800 ">{{user.following}} </span>
+                                                <span>Following</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="hover:underline">
+                                                <span class="font-semibold text-gray-900">{{user.followers}} </span>
+                                                <span>Followers</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                     
+                    
+                
+              
             </a>
 
         </div>

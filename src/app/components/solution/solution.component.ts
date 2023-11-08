@@ -16,23 +16,25 @@ export class PostComponent implements OnInit {
   displayAddCommentPermission: boolean = false;
   comment: string = '';
   commentUserNames: string[] = [];
+  @Input() teamMembers: User[] = [];
+  evaluators: User[] = [];
   commentTimeElapsed: string[] = [];
   commentUserProfilePicturePath: string[] = [];
   numberOfcomments: number = 0;
   currentUser: User = {};
 
   avatarNoPicturePath: string = '../../../assets/img/user.png';
+  showPopUpTeam: boolean[] = [];
   @Input() solution: Solution = {};
   @Input() comments = {};
   @Input() user: User = {};
-  dummyUser: User = { firstName: '', lastName: '', profilePicture: {} };
   excerpt: string = '';
   profilePicture?: string = '';
   constructor(
     private time: TimeService,
     private auth: AuthService,
     private solutionService: SolutionService,
-    private data: DataService
+    public data: DataService
   ) {}
 
   showComments: boolean = false;
@@ -42,6 +44,10 @@ export class PostComponent implements OnInit {
   ngOnInit(): void {
     this.timeElapsed = this.time.timeAgo(this.solution.submissionDate!);
     this.currentUser = this.auth.currentUser;
+    if (this.teamMembers.length === 0) {
+      this.getMembers();
+    }
+    // for(let p of this.solution.participants)
     if (
       this.currentUser?.profilePicture &&
       this.currentUser.profilePicture.path
@@ -50,6 +56,22 @@ export class PostComponent implements OnInit {
       // console.log('here  iam', this.profilePicturePath);
     }
     this.initializeComments();
+  }
+  getMembers() {
+    for (const key in this.solution.participants) {
+      let participant = this.solution.participants[key];
+      let email = Object.values(participant)[0];
+      this.auth.getUserFromEmail(email).subscribe((data) => {
+        // Check if the email of the incoming data is already in the teamMembers
+        if (
+          data &&
+          data[0] &&
+          !this.teamMembers.some((member) => member.email === data[0].email)
+        ) {
+          this.teamMembers.push(data[0]);
+        }
+      });
+    }
   }
 
   async initializeComments() {
@@ -128,5 +150,12 @@ export class PostComponent implements OnInit {
 
   closeDisplayCommentPermission() {
     this.displayAddCommentPermission = false;
+  }
+
+  onHoverImageTeam(index: number) {
+    this.showPopUpTeam[index] = true;
+  }
+  onLeaveTeam(index: number) {
+    this.showPopUpTeam[index] = false;
   }
 }

@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
@@ -10,13 +11,19 @@ import { SolutionService } from 'src/app/services/solution.service';
   styleUrls: ['./problem-list.component.css'],
 })
 export class ProblemListComponent {
-  @Input() solutions?: Solution[];
+  @Input() solutions?: Solution[] = [];
   currentUser: User;
-  constructor(private solution: SolutionService, public auth: AuthService) {
+  constructor(
+    private solution: SolutionService,
+    public auth: AuthService,
+    public data: DataService
+  ) {
     this.currentUser = this.auth.currentUser;
   }
+
   @Input() users: User[] = [];
   @Input() margin = '';
+
   @Input() path: string = '/problem-feedback';
   @Input() viewAllPath: string = '/problem-list-view';
   @Input() problems: string[] = [

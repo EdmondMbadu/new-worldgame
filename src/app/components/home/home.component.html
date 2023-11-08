@@ -25,7 +25,7 @@
             <h1 class="text-center hover:underline" routerLink="/problem-list-view">Pending Solutions ({{pending}})</h1>
             </div>    
          
-            <app-problem-list [path]="'/playground-steps'" [users]="pendingSolutionsUsers" [solutions]="pendingSolutions"></app-problem-list>
+            <app-problem-list [path]="'/playground-steps'"  [solutions]="pendingSolutions"></app-problem-list>
         </div>
 
     </div>
@@ -73,7 +73,7 @@
                 <h1 class="text-center hover:underline" routerLink="/problem-list-feedback">Strategy Evaluation ({{evaluation}})</h1>
                 </div>    
                 
-                <app-problem-list [path]="'/problem-feedback'" [viewAllPath]="'/problem-list-feedback'" [users]="evaluationSolutionsUsers" [solutions]="evaluationSolutions"></app-problem-list>
+                <app-problem-list [path]="'/problem-feedback'" [viewAllPath]="'/problem-list-feedback'" [solutions]="evaluationSolutions"></app-problem-list>
             </div>
 
         </div>

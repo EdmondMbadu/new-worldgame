@@ -35,8 +35,28 @@ export class CreatePlaygroundComponent {
   createdSolutionError: boolean = false;
   solutionError: Observable<any> = of(null);
   addOnBlur = true;
+  sdgs: string[] = [
+    'SDG1   No Poverty',
+    'SDG2   Zero Hunger',
+    'SDG3   Good Health And Well Being',
+    'SDG4   Quality Education',
+    'SDG5   Gender Equality',
+    'SDG6   Clean Water And Sanitation',
+    'SDG7   Affordable And Clean Energy',
+    'SDG8   Decent Work And Economic Growth',
+    'SDG9   Industry Innovation And Infrastructure',
+    'SDG10  Reduced Inequalities',
+    'SDG11  Sustainable Cities And Communities',
+    'SDG12  Responsible Consumption And Production',
+    'SDG13  Climate Action',
+    'SDG14  Life Below Water',
+    'SDG15  Life And Land',
+    'SDG16  Peace, Justice And Strong Institutions',
+    'SDG17  Partnership For ThE Goals',
+  ];
   readonly separatorKeysCodes = [ENTER, COMMA, SPACE] as const;
-  currentEmails: Email[] = [];
+  participantsEmails: Email[] = [];
+  evaluatorsEmails: Email[] = [];
   announcer = inject(LiveAnnouncer);
   constructor(
     public auth: AuthService,
@@ -47,9 +67,16 @@ export class CreatePlaygroundComponent {
     this.myForm = this.fb.group({
       title: ['', [Validators.required]],
       emails: ['', Validators.compose([Validators.email])],
+      evaluatorsEmails: [
+        '',
+        Validators.compose([Validators.email]),
+        this.isEvaluatorsValid(),
+      ],
       description: ['', [Validators.required]],
+      sdg: ['', [Validators.required]],
       date: ['', [Validators.required]],
     });
+    this.participantsEmails.push({ name: this.auth.currentUser.email });
   }
 
   get title() {
@@ -58,12 +85,18 @@ export class CreatePlaygroundComponent {
   get emails() {
     return this.myForm.get('emails');
   }
+  get evEmails() {
+    return this.myForm.get('evaluatorsEmails');
+  }
 
   get description() {
     return this.myForm.get('description');
   }
   get date() {
     return this.myForm.get('date');
+  }
+  get sdg() {
+    return this.myForm.get('sdg');
   }
 
   public Editor = ClassicEditor;
@@ -73,7 +106,18 @@ export class CreatePlaygroundComponent {
 
     // Add our fruit
     if (value) {
-      this.currentEmails.push({ name: value });
+      this.participantsEmails.push({ name: value });
+    }
+
+    // Clear the input value
+    event.chipInput!.clear();
+  }
+  addEvaluators(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+
+    // Add our fruit
+    if (value) {
+      this.evaluatorsEmails.push({ name: value });
     }
 
     // Clear the input value
@@ -81,15 +125,24 @@ export class CreatePlaygroundComponent {
   }
 
   remove(email: Email): void {
-    const index = this.currentEmails.indexOf(email);
+    const index = this.participantsEmails.indexOf(email);
 
     if (index >= 0) {
-      this.currentEmails.splice(index, 1);
+      this.participantsEmails.splice(index, 1);
 
       this.announcer.announce(`Removed ${email}`);
     }
   }
 
+  removeEvaluators(email: Email): void {
+    const index = this.evaluatorsEmails.indexOf(email);
+
+    if (index >= 0) {
+      this.evaluatorsEmails.splice(index, 1);
+
+      this.announcer.announce(`Removed ${email}`);
+    }
+  }
   edit(email: Email, event: MatChipEditedEvent) {
     const value = event.value.trim();
 
@@ -100,35 +153,58 @@ export class CreatePlaygroundComponent {
     }
 
     // Edit existing f
-    const index = this.currentEmails.indexOf(email);
+    const index = this.participantsEmails.indexOf(email);
     if (index >= 0) {
-      this.currentEmails[index].name = value;
+      this.participantsEmails[index].name = value;
     }
   }
 
+  isEvaluatorsValid() {
+    return this.evaluatorsEmails.some((evaluator) =>
+      this.participantsEmails.some(
+        (participant) => participant.name === evaluator.name
+      )
+    );
+  }
+
+  editEvaluators(email: Email, event: MatChipEditedEvent) {
+    const value = event.value.trim();
+
+    // Remove email if it no longer has a name
+    if (!value) {
+      this.removeEvaluators(email);
+      return;
+    }
+
+    // Edit existing f
+    const index = this.evaluatorsEmails.indexOf(email);
+    if (index >= 0) {
+      this.evaluatorsEmails[index].name = value;
+    }
+  }
   launchPlayground() {
     this.loading = true;
     let solutionId = '';
+    // console.log(
+    //   'here are the values',
+    //   this.myForm.value.title,
+    //   this.myForm.value.description,
+    //   this.participantsEmails,
+    //   this.evaluatorsEmails,
+    //   this.myForm.value.date,
+    //   this.myForm.value.sdg
+    // );
     this.solution
       .createdNewSolution(
         this.myForm.value.title,
         this.myForm.value.description,
-        this.currentEmails,
-        this.myForm.value.date
+        this.participantsEmails,
+        this.evaluatorsEmails,
+        this.myForm.value.date,
+        this.myForm.value.sdg
       )
       .then(() => {
         this.createdSolutionSuccess = true;
-        this.createSolutionForParticipants();
-
-        // setTimeout(() => {
-        //   this.createdSolutionSuccess = false;
-
-        //   solutionId = this.solution.solutionId;
-
-        //   this.createSolutionForParticipants();
-        //   // this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
-        //   // do something after 1000 milliseconds
-        // }, 2000);
       })
       .then(() => {
         this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
@@ -137,44 +213,9 @@ export class CreatePlaygroundComponent {
         this.solutionError = of(error);
         this.createdSolutionError = true;
         console.log('error now');
-        // alert('Error launching solution ');
       });
   }
 
-  createSolutionForParticipants() {
-    let initiatorEmail = this.auth.currentUser.email;
-
-    let myuser: User = {};
-    for (let email of this.currentEmails) {
-      this.auth.getUserFromEmail(email.name).subscribe((data) => {
-        myuser = data[0];
-
-        this.solution.createNewSolutionForParticipant(
-          this.myForm.value.title,
-          this.myForm.value.description,
-          this.findEmailsToSend(initiatorEmail, myuser.email!),
-          this.myForm.value.date,
-          this.auth.currentUser.uid,
-          this.solution.solutionId,
-          myuser.uid!
-        );
-      });
-    }
-  }
-
-  findEmailsToSend(initiatorEmail: string, authorEmail: string) {
-    let emailsToSend: Email[] = [];
-
-    for (let email of this.currentEmails) {
-      if (email.name !== authorEmail) {
-        emailsToSend.push(email);
-      }
-    }
-
-    emailsToSend.push({ name: initiatorEmail });
-
-    return emailsToSend;
-  }
   closePopUpSucess() {
     this.createdSolutionSuccess = false;
   }

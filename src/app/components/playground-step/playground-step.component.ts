@@ -122,7 +122,7 @@ export class PlaygroundStepComponent {
       if (this.submiResponse) {
         this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
 
-        this.sendRequestForEvaluation();
+        // this.sendRequestForEvaluation();
 
         window.removeEventListener('scroll', this.scrollHandler!);
         this.router.navigate(['/home']);
@@ -134,28 +134,28 @@ export class PlaygroundStepComponent {
     this.elements.length = 0;
   }
 
-  sendRequestForEvaluation() {
-    let emails: any = this.currentSolution.participants;
-    console.log('all emails', emails);
-    let myuser: User = {};
-    let feedback: FeedbackRequest[] = [];
-    for (let email of emails) {
-      this.auth.getUserFromEmail(email.name).subscribe((data) => {
-        myuser = data[0];
+  // sendRequestForEvaluation() {
+  //   let emails: any = this.currentSolution.participants;
+  //   // console.log('all emails', emails);
+  //   let myuser: User = {};
+  //   let feedback: FeedbackRequest[] = [];
+  //   for (let email of emails) {
+  //     this.auth.getUserFromEmail(email.name).subscribe((data) => {
+  //       myuser = data[0];
 
-        this.solution.sendSolutionRequestForEvaluation(
-          myuser.uid!,
-          this.currentSolution.solutionId!,
-          [
-            {
-              authorId: this.auth.currentUser.uid,
-              evaluated: 'false',
-            },
-          ]
-        );
-      });
-    }
-  }
+  //       this.solution.sendSolutionRequestForEvaluation(
+  //         myuser.uid!,
+  //         this.currentSolution.solutionId!,
+  //         [
+  //           {
+  //             authorId: this.auth.currentUser.uid,
+  //             evaluated: 'false',
+  //           },
+  //         ]
+  //       );
+  //     });
+  //   }
+  // }
   accept() {
     this.submiResponse = true;
     this.updatePlayground(this.stepNumber);
@@ -193,11 +193,6 @@ export class PlaygroundStepComponent {
         .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
         .then(() => {
           this.saveSuccess = true;
-          setTimeout(() => {
-            this.saveSuccess = false;
-
-            // do something after 1000 milliseconds
-          }, 4000);
         })
         .catch((error) => {
           this.saveError = true;
@@ -236,10 +231,31 @@ export class PlaygroundStepComponent {
 
       return prefixComparison;
     });
-    for (let a of array) {
-      // console.log('currently ', this.currentSolution.status![a]);
-      this.contentsArray[0] += `\n${this.currentSolution.status![a]}`;
-      this.staticContentArray[0] += `\n${this.currentSolution.status![a]}`;
+    let styles = `text-left text-xl font-bold underline underline-offset-8 my-4`;
+    let titles = [
+      `<h1 class="{{styles}}"> Preferred State  </h1>`,
+      `<h1 class="{{styles}}"> Plan </h1>`,
+    ];
+
+    console.log(' all the keys', array);
+
+    this.contentsArray[0] += `<h1 class="{{styles}}"> Problem State    </h1>`;
+
+    for (let i = 0, t = 1, j = 0; i < array.length - 1; i++, t++) {
+      if (
+        t < array.length - 2 &&
+        !array[i].startsWith(array[t].substring(0, 2))
+      ) {
+        console.log('displaying ', array[i], array[t]);
+        this.contentsArray[0] += titles[j];
+        j++;
+      }
+      this.contentsArray[0] += `\n${this.currentSolution.status![array[i]]}`;
+      // console.log('contents array ', this.contentsArray[0]);
+      this.staticContentArray[0] += `\n${
+        this.currentSolution.status![array[i]]
+      }`;
+      // console.log('the static array ', this.staticContentArray[0]);
     }
   }
 }

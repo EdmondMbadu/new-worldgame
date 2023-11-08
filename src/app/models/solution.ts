@@ -9,11 +9,14 @@ export class Solution {
   title?: string;
   description?: string;
   participants?: { [key: string]: string } = {};
+  evaluators?: { [key: string]: string } = {};
+  evaluated?: { [key: string]: string } = {};
   comments?: { [key: string]: string } = {};
   status?: { [key: string]: string } = {};
   likes?: string;
   views?: string;
   share?: string;
+  sdg?: string;
   feedbackRequest?: FeedbackRequest[] = [];
   evaluation?: { [key: string]: string } = {};
   endDate?: string;

@@ -17,9 +17,11 @@ export class ProblemListFeedbackComponent {
   evaluation: number = 0;
 
   constructor(public auth: AuthService, private solution: SolutionService) {
-    this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
-      this.currentUserSolutions = data;
-      this.findAwaitingEvaluationSolution();
+    this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
+      this.evaluationSolutions = data.filter((element) => {
+        return element.finished !== undefined;
+      });
+      this.evaluation = this.evaluationSolutions.length;
     });
   }
 
