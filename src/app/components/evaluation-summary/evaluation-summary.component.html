@@ -71,10 +71,12 @@
                 </div>
 
                 <div *ngIf="currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
+                    <h1 class="text-xl">Evaluators</h1>
                     <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[25rem]  " *ngFor="let ev of currentSolution.evaluationDetails; let i=index">
                         <div class="p-3 space-y-2">
                            <div class="flex flex-row space-x-4 items-center">
-                                <img *ngIf="evaluators[i]" [src]="evaluators[i].profilePicture?.downloadURL" class="w-20 rounded-lg" alt="">
+                                <img *ngIf="evaluators[i] && evaluators[i].profilePicture" [src]="evaluators[i].profilePicture?.downloadURL" class="w-20 rounded-lg" alt="">
+                                <img *ngIf="evaluators[i]  && !evaluators[i].profilePicture" src="../../../assets/img/user.png"class="w-20 rounded-lg" alt="">
                                 <h3 *ngIf="evaluators[i]" class="font-semibold text-gray-900 ">Evaluation by {{evaluators[i].firstName}} {{evaluators[i].lastName}} </h3>
                             </div>
                             <p class="font-bold">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{ev.average}} </p>
@@ -138,7 +140,7 @@
 
         <div class=" container flex flex-col max-w-2xl">
             <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6"> Solution</h1>
-            <app-solution [solution]="currentSolution" [teamMembers]="teamMembers"></app-solution>
+            <app-solution [comments]="comments" [timeElapsed]="timeElapsed" [solution]="currentSolution" [teamMembers]="teamMembers"></app-solution>
             
         </div>
 

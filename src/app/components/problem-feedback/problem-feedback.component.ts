@@ -21,6 +21,7 @@ export class ProblemFeedbackComponent {
   teamMembers: User[] = [];
   timeElapsed: string = '';
   submitDisplay: boolean = false;
+  comment: string = '';
 
   sendFeedback: boolean = false;
   evaluationSummary: Evaluation = {};
@@ -108,7 +109,12 @@ export class ProblemFeedbackComponent {
     (this.userSolution.evaluationSummary = this.evaluationSummary),
       (this.userSolution.evaluationDetails = this.evaluationDetails);
     this.updateEvaluators();
-    // console.log('user solution after', this.userSolution);
+    const comments = {
+      [`${
+        this.auth.currentUser.uid
+      }#${this.time.todaysDate()}`]: `${this.comment}`,
+    };
+    this.userSolution.comments = comments;
     if (this.sendFeedback) {
       this.solution.addEvaluation(this.userSolution).then(() => {
         this.router.navigate(['/home']);

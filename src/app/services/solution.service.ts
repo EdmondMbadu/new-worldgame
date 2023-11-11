@@ -146,7 +146,7 @@ export class SolutionService {
   }
 
   getAllSolutionsFromAllAccounts() {
-    return this.afs.collectionGroup<Solution>(`solutions`).valueChanges();
+    return this.afs.collection<Solution>(`solutions`).valueChanges();
   }
 
   addEvaluation(solution: Solution) {
@@ -155,10 +155,7 @@ export class SolutionService {
       evaluationSummary: solution.evaluationSummary,
       evaluators: solution.evaluators,
       numberofTimesEvaluated: solution.numberofTimesEvaluated,
-      // evaluators: {
-      //   name: this.auth.currentUser.email,
-      //   evaluated: 'true',
-      // },
+      comments: solution.comments,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solution.solutionId}`

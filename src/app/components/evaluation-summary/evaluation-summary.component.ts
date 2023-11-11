@@ -5,6 +5,7 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { TimeService } from 'src/app/services/time.service';
 
 @Component({
   selector: 'app-evaluation-summary',
@@ -20,16 +21,26 @@ export class EvaluationSummaryComponent {
   colors: any[] = [];
   evaluations: any[] = [];
   evaluators: User[] = [];
+  timeElapsed: string = '';
+  comments = {};
+  commentTimeElapsed: any;
+  numberOfcomments: number = 0;
+  commentUserNames: any;
+  commentUserProfilePicturePath: any;
+
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
     private solution: SolutionService,
-    private data: DataService
+    private data: DataService,
+    private time: TimeService
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
 
     solution.getSolution(this.id).subscribe((data) => {
       this.currentSolution = data!;
+      this.timeElapsed = time.timeAgo(data!.submissionDate!);
+
       this.evaluationSummary = this.data.mapEvaluationToNumeric(
         this.currentSolution.evaluationSummary!
       );
@@ -88,6 +99,40 @@ export class EvaluationSummaryComponent {
           });
         }
       }
+    }
+  }
+
+  async initializeComments() {
+    if (this.comments) {
+      this.numberOfcomments = Object.keys(this.comments).length;
+
+      // An array to store promises for user data fetching
+      const userPromises = Object.entries(this.comments!).map(([key]) => {
+        const element = key.split('#');
+        this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
+
+        return new Promise<any>((resolve, reject) => {
+          this.auth.getAUser(element[0]).subscribe(
+            (data: any) => resolve(data),
+            (error) => reject(error)
+          );
+        });
+      });
+
+      const users = await Promise.all(userPromises);
+      users.forEach((data) => {
+        this.commentUserNames.push(data.firstName + ' ' + data.lastName);
+
+        if (data.profilePicture && data.profilePicture.downloadURL) {
+          this.commentUserProfilePicturePath.push(
+            data.profilePicture.downloadURL
+          );
+        } else {
+          this.commentUserProfilePicturePath.push(
+            '../../../assets/img/user.png'
+          );
+        }
+      });
     }
   }
 }

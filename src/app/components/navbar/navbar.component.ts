@@ -27,7 +27,9 @@ export class NavbarComponent implements OnInit {
   allSolutions: Solution[] = [];
   allUsers: User[] = [];
   filteredItems: Solution[] = [];
-
+  @Input() currentPageHome: boolean = false;
+  @Input() currentPageEvaluation: boolean = false;
+  @Input() currentPagePending: boolean = false;
   constructor(
     private pageScrollService: PageScrollService,
     @Inject(DOCUMENT) private document: any,

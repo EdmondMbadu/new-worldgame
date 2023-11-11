@@ -18,7 +18,7 @@
 
         <div class=" flex flex-col mx-auto mt-28 ">
 
-            <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-x   p-4">
+            <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-xl   p-4">
                 <img class="object-cover mx-auto w-full rounded-t-lg h-96 md:h-auto md:w-32 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt="">
                 <div class="flex flex-col ">
                     <h5 class="mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 ">ReadMe</h5>
@@ -78,13 +78,15 @@
                 </div>
                 <div class="flex flex-row -space-x-1" >
                     <div *ngFor="let user of evaluators; let i= index" >
-                        <img   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <img *ngIf="user.profilePicture"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <img  *ngIf="!user.profilePicture"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full " src="../../../assets/img/user.png" routerLink="/user-profile/{{user.uid}}" alt="">
                         <div>
                             <div *ngIf="showPopUpEvaluators[i]" >
                                 <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >
                                     <div class="flex items-center justify-between mb-2" >
                                         <a >
-                                            <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="Jese Leos">
+                                            <img *ngIf="user.profilePicture"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
+                                            <img *ngIf="!user.profilePicture"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt="">
                                         </a>
                                         <div>
                                             <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>

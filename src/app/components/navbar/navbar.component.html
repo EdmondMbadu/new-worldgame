@@ -34,15 +34,24 @@
             </div>
 
             <!-- homes and friends -->
-            <div class="flex flex-row mx-auto items-center lg:space-x-12 space-x-6">
+            <div class="flex flex-row mx-auto items-center lg:space-x-12 space-x-4">
                 <div class="flex flex-col" routerLink="/home">
                     <img src="../../../assets/img/home.png"  class="w-10  px-1"> 
-                   <h1 class=" text-xs text-center pt-1 border-teal-700 {{current}}">Home </h1>
+                   <h1 *ngIf="currentPageHome"  class=" text-xs text-center pt-1 border-teal-700 {{current}}">Home </h1>
+                   <h1 *ngIf="!currentPageHome"  class=" text-xs text-center pt-1">Home </h1>
                 </div>
 
-                <div class=" flex flex-col">
+                <div class=" flex flex-col" routerLink="/problem-list-feedback">
                     <img src="../../../assets/img/letter.png"  class="w-10 px-1">
-                    <h1 class=" text-xs text-center pt-1 ">Answers </h1>
+                    <h1 *ngIf="currentPageEvaluation" class=" text-xs text-center pt-1 border-teal-700 {{current}}">Evaluations </h1>
+                    <h1 *ngIf="!currentPageEvaluation" class=" text-xs text-center pt-1 ">Evaluations </h1>
+                    
+                </div>
+
+                <div class=" flex flex-col" routerLink="/problem-list-view">
+                    <img src="../../../assets/img/deadline.png"  class="w-10 px-1">
+                    <h1 *ngIf="currentPagePending" class=" text-xs text-center pt-1 border-teal-700 {{current}}">Pending </h1>
+                    <h1 *ngIf="!currentPagePending" class=" text-xs text-center pt-1 ">Pending </h1>
                     
                 </div>
                    

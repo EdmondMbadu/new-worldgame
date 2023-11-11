@@ -68,6 +68,7 @@ export class PostComponent implements OnInit {
       this.profilePicture = this.currentUser.profilePicture.downloadURL;
       // console.log('here  iam', this.profilePicturePath);
     }
+    this.comments = this.solution.comments!;
     this.initializeComments();
   }
 
@@ -92,29 +93,27 @@ export class PostComponent implements OnInit {
   }
 
   async initializeComments() {
-    if (this.solution.comments) {
-      this.numberOfcomments = Object.keys(this.solution.comments!).length;
+    if (this.comments) {
+      this.numberOfcomments = Object.keys(this.comments).length;
 
       // An array to store promises for user data fetching
-      const userPromises = Object.entries(this.solution.comments!).map(
-        ([key]) => {
-          const element = key.split('#');
-          this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
+      const userPromises = Object.entries(this.comments!).map(([key]) => {
+        const element = key.split('#');
+        this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
 
-          return new Promise<any>((resolve, reject) => {
-            this.auth.getAUser(element[0]).subscribe(
-              (data: any) => resolve(data),
-              (error) => reject(error)
-            );
-          });
-        }
-      );
+        return new Promise<any>((resolve, reject) => {
+          this.auth.getAUser(element[0]).subscribe(
+            (data: any) => resolve(data),
+            (error) => reject(error)
+          );
+        });
+      });
 
       const users = await Promise.all(userPromises);
       users.forEach((data) => {
         this.commentUserNames.push(data.firstName + ' ' + data.lastName);
 
-        if (data.profilePicture.downloadURL) {
+        if (data.profilePicture && data.profilePicture.downloadURL) {
           this.commentUserProfilePicturePath.push(
             data.profilePicture.downloadURL
           );
@@ -154,15 +153,15 @@ export class PostComponent implements OnInit {
     if (!this.auth.currentUser) {
       this.displayAddCommentPermission = true;
     } else {
-      const comments = {
-        [`${
-          this.auth.currentUser.uid
-        }#${this.time.todaysDate()}`]: `${this.comment}`,
-      };
-
-      this.solutionService.addCommentToSolution(this.solution, comments);
-      this.comment = '';
     }
+    const comments = {
+      [`${
+        this.auth.currentUser.uid
+      }#${this.time.todaysDate()}`]: `${this.comment}`,
+    };
+
+    this.solutionService.addCommentToSolution(this.solution, comments);
+    this.comment = '';
   }
 
   closeDisplayCommentPermission() {

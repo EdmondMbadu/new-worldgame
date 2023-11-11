@@ -211,13 +211,13 @@ export class PlaygroundStepComponent {
     });
     let styles = `text-left text-xl font-bold  my-4`;
     let titles = [
-      `<h1 class="text-left text-xl font-bold "> Preferred State  </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> Preferred State  </h1>`,
       `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
     ];
 
     console.log(' all the keys', array);
 
-    this.contentsArray[0] += `<h1 class="text-left text-xl font-bold "> Problem State    </h1>`;
+    this.contentsArray[0] += `<h1 class="text-left text-xl font-bold my-4"> Problem State    </h1>`;
 
     for (let i = 0, t = 1, j = 0; i < array.length - 1; i++, t++) {
       if (
