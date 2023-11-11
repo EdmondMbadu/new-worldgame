@@ -60,20 +60,22 @@ export class PlaygroundStepsComponent implements OnInit {
   getEvaluators() {
     this.evaluators = [];
 
-    for (const key in this.currentSolution.evaluators) {
-      let evaluator = this.currentSolution.evaluators[key];
-      let email = Object.values(evaluator)[0];
-      // console.log('current email', email);
-      this.auth.getUserFromEmail(email).subscribe((data) => {
-        // Check if the email of the incoming data is already in the teamMembers
-        if (
-          data &&
-          data[0] &&
-          !this.evaluators.some((member) => member.email === data[0].email)
-        ) {
-          this.evaluators.push(data[0]);
+    if (this.currentSolution.evaluators) {
+      for (const evaluator of this.currentSolution.evaluators) {
+        let email = evaluator.name;
+        if (email && evaluator.evaluated !== 'true') {
+          this.auth.getUserFromEmail(email).subscribe((data) => {
+            // Check if the email of the incoming data is already in the teamMembers
+            if (
+              data &&
+              data[0] &&
+              !this.evaluators.some((member) => member.email === data[0].email)
+            ) {
+              this.evaluators.push(data[0]);
+            }
+          });
         }
-      });
+      }
     }
   }
   currentIndexDisplay: number = 0;

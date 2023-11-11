@@ -21,11 +21,11 @@ export abstract class BoxService {
     if (this.currentDisplay) {
       this.currentDisplay = false;
       this.display = of(this.currentDisplay);
-      console.log('entering here true then ', this.currentDisplay);
+      // console.log('entering here true then ', this.currentDisplay);
     } else {
       this.currentDisplay = true;
       this.display = of(this.display);
-      console.log('entering here false then ', this.currentDisplay);
+      // console.log('entering here false then ', this.currentDisplay);
     }
   }
 }

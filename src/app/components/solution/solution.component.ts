@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Solution } from 'src/app/models/solution';
+import { Router } from '@angular/router';
+import { Evaluation, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -14,6 +15,7 @@ import { TimeService } from 'src/app/services/time.service';
 export class PostComponent implements OnInit {
   @Input() title: string = 'Electrifying Africa';
   displayAddCommentPermission: boolean = false;
+  el: number = 100;
   comment: string = '';
   commentUserNames: string[] = [];
   @Input() teamMembers: User[] = [];
@@ -22,6 +24,9 @@ export class PostComponent implements OnInit {
   commentUserProfilePicturePath: string[] = [];
   numberOfcomments: number = 0;
   currentUser: User = {};
+  @Input() evaluationSummary: any = {};
+  colors: any = {};
+  displayEvaluationSummary: boolean = false;
 
   avatarNoPicturePath: string = '../../../assets/img/user.png';
   showPopUpTeam: boolean[] = [];
@@ -32,22 +37,30 @@ export class PostComponent implements OnInit {
   profilePicture?: string = '';
   constructor(
     private time: TimeService,
-    private auth: AuthService,
+    public auth: AuthService,
     private solutionService: SolutionService,
-    public data: DataService
+    public data: DataService,
+    private router: Router
   ) {}
 
   showComments: boolean = false;
   full: boolean = false;
   fullAritcle: string = '';
-  timeElapsed: string = '';
+  @Input() timeElapsed: string = '';
   ngOnInit(): void {
     this.timeElapsed = this.time.timeAgo(this.solution.submissionDate!);
     this.currentUser = this.auth.currentUser;
     if (this.teamMembers.length === 0) {
       this.getMembers();
     }
-    // for(let p of this.solution.participants)
+    this.evaluationSummary = this.data.mapEvaluationToNumeric(
+      this.solution.evaluationSummary!
+    );
+    this.colors = this.data.mapEvaluationToColors(
+      this.solution.evaluationSummary!
+    );
+    // console.log('Here i am evaluation summary', this.evaluationSummary);
+
     if (
       this.currentUser?.profilePicture &&
       this.currentUser.profilePicture.path
@@ -57,6 +70,7 @@ export class PostComponent implements OnInit {
     }
     this.initializeComments();
   }
+
   getMembers() {
     for (const key in this.solution.participants) {
       let participant = this.solution.participants[key];
@@ -72,6 +86,9 @@ export class PostComponent implements OnInit {
         }
       });
     }
+  }
+  goToEvaluationSummary() {
+    this.router.navigate(['/evaluation-summary/' + this.solution.solutionId]);
   }
 
   async initializeComments() {
@@ -157,5 +174,12 @@ export class PostComponent implements OnInit {
   }
   onLeaveTeam(index: number) {
     this.showPopUpTeam[index] = false;
+  }
+
+  onHoverEvaluation() {
+    this.displayEvaluationSummary = true;
+  }
+  onLeaveEvaluation() {
+    this.displayEvaluationSummary = false;
   }
 }

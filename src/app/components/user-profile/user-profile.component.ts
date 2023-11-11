@@ -29,14 +29,16 @@ export class UserProfileComponent implements OnInit {
 
     auth.getAUser(this.id).subscribe((data) => {
       this.user = data;
+      this.solution
+        .getAllSolutionsOfThisUser(data?.email!)
+        .subscribe((data: any) => {
+          this.solutions = data;
+          this.findCompletedSolutions();
+        });
       if (this.user?.profilePicture && this.user.profilePicture.path) {
         this.profilePicturePath = this.user.profilePicture.downloadURL;
         // console.log('here  iam', this.profilePicturePath);
       }
-    });
-    this.solution.getAllSolutionsOfThisUser(this.id).subscribe((data: any) => {
-      this.solutions = data;
-      this.findCompletedSolutions();
     });
   }
   ngOnInit(): void {

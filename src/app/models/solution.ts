@@ -9,7 +9,7 @@ export class Solution {
   title?: string;
   description?: string;
   participants?: { [key: string]: string } = {};
-  evaluators?: { [key: string]: string } = {};
+  evaluators?: Evaluator[] = [];
   evaluated?: { [key: string]: string } = {};
   comments?: { [key: string]: string } = {};
   status?: { [key: string]: string } = {};
@@ -17,8 +17,8 @@ export class Solution {
   views?: string;
   share?: string;
   sdg?: string;
-  feedbackRequest?: FeedbackRequest[] = [];
-  evaluation?: { [key: string]: string } = {};
+  evaluationSummary?: Evaluation = {};
+  evaluationDetails?: Evaluation[];
   endDate?: string;
   endDateFormatted?: string;
   finished?: string;
@@ -28,7 +28,18 @@ export class Solution {
   numberofTimesEvaluated?: string;
 }
 
-export interface FeedbackRequest {
-  authorId?: string;
+export class Evaluation {
+  evaluatorId?: string;
+  average?: string;
+  achievable?: string;
+  feasible?: string;
+  ecological?: string;
+  economical?: string;
+  equitable?: string;
+  understandable?: string;
+}
+
+export class Evaluator {
+  name?: string;
   evaluated?: string;
 }

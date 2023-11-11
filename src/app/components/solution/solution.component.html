@@ -1,23 +1,24 @@
     <!-- posts -->
     <div class="my-2">
         <div class=" w-fit bg-white p-4 rounded-lg shadow-lg">
-            <div *ngIf="solution" class="flex  pb-10" [routerLink]="['/user-profile',solution.authorAccountId]">
+            <div *ngIf="solution" class="flex  pb-10">
                 <!-- <div *ngIf="user">
                     <img *ngIf="!user.profilePicture ||user.profilePicture.downloadURL ===''" [src]="avatarNoPicturePath" class="w-16 flex-nowrap rounded-full"  alt="">
                     <img *ngIf="user.profilePicture && user.profilePicture.downloadURL!==''" [src]="user.profilePicture.downloadURL" class="w-16 flex-nowrap rounded-full" alt="" >
                 </div> -->
                 <div class="flex flex-row">
-                    <h1  class="  px-2  font-bold ">Participants <br> <span class="text-gray-500 font-light text-sm"> {{timeElapsed}}</span></h1>
+                    <h1  class="  px-2  font-bold ">Contributors <br> <span class="text-gray-500 font-light text-sm"> {{timeElapsed}}</span></h1>
              
                 </div>
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
-                    <img    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                    <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
+                    <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                     <div >
                         <div *ngIf="showPopUpTeam[i]" >
                             <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[5rem] bg-white  rounded-lg p-4 "  >
                                 <div class="flex items-center justify-between mb-2" >
                                     <a >
-                                        <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="Jese Leos">
+                                        <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="">
                                     </a>
                                     <div>
                                         <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
@@ -92,9 +93,71 @@
                     <img src="../../../assets/img/share.png" class="w-6 ml-6 flex-nowrap items-center" alt=""> 
                     <h1 class="px-1 items-center ">10</h1>
                 </div>
-                <div class="flex flex-nowrap py-2 items-center">
+                <div class="flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
                     <img src="../../../assets/img/rating.png" class="w-6 ml-6 flex-nowrap items-center" alt=""> 
-                    <h1 class="px-1 items-center ">30</h1>
+                    <h1 *ngIf="solution.evaluationSummary "     class="px-1 items-center ">{{solution.evaluationSummary.average}}</h1>
+                    <h1 *ngIf="!solution.evaluationSummary "  class="px-1 items-center  text-gray-100">__</h1>
+
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-72  " *ngIf="displayEvaluationSummary && solution.evaluationDetails">
+                        <div class="p-3 space-y-2">
+                            <h3 class="font-semibold text-gray-900 ">Evaluation Summary: {{solution.numberofTimesEvaluated}} evaluator(s) </h3>
+                            <p class="font-bold">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{solution.evaluationSummary!.average}} </p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                                <div class="{{colors.average}} h-2.5  rounded-full " style="width: 85%"></div>
+                            </div>
+                            <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
+                            <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                            </svg></a> -->
+                            <div>
+                                <h1 class="mb-2">Achievable: {{solution.evaluationSummary!.achievable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                 
+                                    <div class="{{colors.achievable}} h-1  rounded-full" style="width: {{evaluationSummary.achievable}}%" > </div>
+                                
+                                </div>
+                                <h1 class="mb-2">Feasible: {{solution.evaluationSummary!.feasible}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                    
+                                    <div class="{{colors.feasible}} h-1  rounded-full  " style="width: {{evaluationSummary.feasible}}%"> </div>
+                                
+                                </div>
+                                <h1 class="mb-2">Economical: {{solution.evaluationSummary!.economical}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                    
+                                    <div class="{{colors.economical}} h-1  rounded-full "style="width: {{evaluationSummary.economical}}%"> </div>
+                                
+                                </div>
+                                <h1 class="mb-2">Ecological: {{solution.evaluationSummary!.ecological}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                    
+                                    <div class="{{colors.ecological}} h-1  rounded-full " style="width: {{evaluationSummary.ecological}}%" > </div>
+                                
+                                </div>
+                                <h1 class="mb-2">Equitable: {{solution.evaluationSummary!.equitable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                    
+                                    <div class="{{colors.equitable}} h-1  rounded-full  " style="width: {{evaluationSummary.equitable}}%" > </div>
+                                
+                                </div>
+                                <h1 class="mb-2">Understandable: {{solution.evaluationSummary!.understandable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                    
+                                    <div class="{{colors.understandable}} h-1  rounded-full"style="width: {{evaluationSummary.understandable}}%" > </div>
+                                
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div data-popper-arrow></div>
+                    </div>
+
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-20 inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-64  " *ngIf="displayEvaluationSummary && !solution.evaluationDetails">
+                        <div class="p-3 space-y-2">
+                            <h3 class="font-semibold text-gray-900 ">No Evaluations Submited... </h3>
+                           
+                        </div>
+                    </div>  
+
                 </div>
 
 

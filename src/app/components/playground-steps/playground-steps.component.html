@@ -27,11 +27,12 @@
                 </div>
 
                 <div class="flex flex-col ">
-                    <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center">Team Members :  {{teamMembers.length}}</h5>
+                    <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center">Contributors :  {{teamMembers.length}}</h5>
                 </div>
                     <div class="flex flex-row -space-x-1" >
                         <div *ngFor="let user of teamMembers; let i= index" >
-                            <img   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                            <img *ngIf="user.uid === auth.currentUser.uid"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
+                            <img *ngIf="user.uid !== auth.currentUser.uid"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                             <div>
                                 <div *ngIf="showPopUpTeam[i]" >
                                     <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >

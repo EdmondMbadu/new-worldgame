@@ -16,6 +16,9 @@ export class SolutionViewComponent implements OnInit {
   otherSolutions: Solution[] = [];
   currentAuth: User = {};
   currentUser: User = {};
+
+  teamMembers: User[] = [];
+
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -26,11 +29,12 @@ export class SolutionViewComponent implements OnInit {
       .getSolutionForNonAuthenticatedUser(this.solutionId)
       .subscribe((data: any) => {
         this.currentSolution = data[0];
+        this.getMembers();
         this.auth
           .getAUser(this.currentSolution.authorAccountId!)
           .subscribe((user: any) => {
             this.currentUser = user!;
-            console.log('the current user', user);
+            // console.log('the current user', user);
           });
         this.solution
           .getAllSolutionsOfThisUser(this.currentSolution!.authorAccountId!)
@@ -40,4 +44,21 @@ export class SolutionViewComponent implements OnInit {
       });
   }
   ngOnInit(): void {}
+
+  getMembers() {
+    for (const key in this.currentSolution.participants) {
+      let participant = this.currentSolution.participants[key];
+      let email = Object.values(participant)[0];
+      this.auth.getUserFromEmail(email).subscribe((data) => {
+        // Check if the email of the incoming data is already in the teamMembers
+        if (
+          data &&
+          data[0] &&
+          !this.teamMembers.some((member) => member.email === data[0].email)
+        ) {
+          this.teamMembers.push(data[0]);
+        }
+      });
+    }
+  }
 }

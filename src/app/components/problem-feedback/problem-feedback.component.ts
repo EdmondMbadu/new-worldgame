@@ -1,21 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { Solution } from 'src/app/models/solution';
+import { Evaluation, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { FeedbackRequest } from '../playground-step/playground-step.component';
+import { TimeService } from 'src/app/services/time.service';
 
-export interface Eval {
-  evaluatorId?: string;
-  achievable?: string;
-  feasible?: string;
-  ecological?: string;
-  economical?: string;
-  equitable?: string;
-  understandable?: string;
-}
 @Component({
   selector: 'app-problem-feedback',
   templateUrl: './problem-feedback.component.html',
@@ -27,8 +19,12 @@ export class ProblemFeedbackComponent {
   solutionId: string = '';
 
   teamMembers: User[] = [];
+  timeElapsed: string = '';
+  submitDisplay: boolean = false;
 
-  feebdackRequests: FeedbackRequest[] = [];
+  sendFeedback: boolean = false;
+  evaluationSummary: Evaluation = {};
+  evaluationDetails: Evaluation[] = [];
   userId: string = '';
   disabled = false;
   max = 10;
@@ -46,42 +42,33 @@ export class ProblemFeedbackComponent {
     'Equitable',
     'Understandable',
   ];
-  evaluator: Eval = {};
+  evaluation: Evaluation = {};
+  evaluators: any = {};
 
   values: number[] = this.evaluationArray.map((data) => {
     return 0;
   });
 
-  currenUserSolution: Solution = {};
   userSolution: Solution = {};
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
-    private solution: SolutionService
+    private solution: SolutionService,
+    private time: TimeService,
+    private router: Router
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
 
-    // this.solution
-    //   .getThisUserSolution(this.auth.currentUser.uid, this.solutionId)
-    //   .subscribe((data) => {
-    //     this.currenUserSolution = data!;
-    //     this.feebdackRequests = data!.feedbackRequest!;
-    //   });
-
     this.solution.getSolution(this.id).subscribe((data) => {
       this.userSolution = data!;
+      if (data?.evaluationDetails !== undefined) {
+        this.evaluationDetails = data?.evaluationDetails!;
+      }
+      this.timeElapsed = this.time.timeAgo(data?.submissionDate!);
       this.getMembers();
     });
   }
 
-  markFeedbackRequestDone() {
-    for (let f of this.feebdackRequests) {
-      if (f.authorId === this.userId) {
-        f.evaluated = 'true';
-        return;
-      }
-    }
-  }
   getMembers() {
     for (const key in this.userSolution.participants) {
       let participant = this.userSolution.participants[key];
@@ -99,55 +86,55 @@ export class ProblemFeedbackComponent {
     }
   }
 
-  submitFeedback() {
-    this.evaluator = this.mapNumbersToEval(this.values);
+  makeSureBeforeSubmit() {
+    // console.log('user solution before submitting', this.userSolution);
+    this.submitDisplay = true;
+  }
+  submitEvaluation() {
+    this.evaluation = this.mapNumbersToEvaluation(this.values);
 
-    this.findAverage();
-    console.log('evaluator', this.evaluator);
-    console.log('the average is', this.average);
+    this.evaluationDetails.push(this.evaluation);
+    this.evaluationSummary = this.calculateAverageEvaluation(
+      this.evaluationDetails
+    );
 
-    if (this.userSolution.evaluationAverage === undefined) {
-      let n = 1;
-      console.log('here is the grade', this.average);
-
-      // this.solution.addEvaluation(
-      //   this.evaluator,
-      //   n.toString(),
-      //   this.userId,
-      //   this.solutionId
-      // );
+    if (this.userSolution.numberofTimesEvaluated) {
+      this.userSolution.numberofTimesEvaluated = (
+        Number(this.userSolution.numberofTimesEvaluated) + 1
+      ).toString();
     } else {
-      let n = Number(this.userSolution.numberofTimesEvaluated);
-      let weighted = Math.ceil(
-        (Number(this.userSolution.evaluationAverage) * n + this.average) / n + 1
-      );
-
-      this.average = weighted;
-      n++;
-      console.log('here is the grade', this.average);
-      // this.solution.addEvaluation(
-      //   this.evaluator,
-      //   n.toString(),
-      //   this.userId,
-      //   this.solutionId
-      // );
+      this.userSolution.numberofTimesEvaluated = (1).toString();
+    }
+    (this.userSolution.evaluationSummary = this.evaluationSummary),
+      (this.userSolution.evaluationDetails = this.evaluationDetails);
+    this.updateEvaluators();
+    // console.log('user solution after', this.userSolution);
+    if (this.sendFeedback) {
+      this.solution.addEvaluation(this.userSolution).then(() => {
+        this.router.navigate(['/home']);
+      });
+    }
+  }
+  updateEvaluators() {
+    this.evaluators = this.userSolution.evaluators;
+    for (let element of this.evaluators) {
+      if (element.name === this.auth.currentUser.email) {
+        element.evaluated = 'true';
+      }
     }
 
-    // this.markFeedbackRequestDone();
-    // this.solution.updateFeedbackRequestAfterEvaluation(
-    //   this.feebdackRequests,
-    //   this.solutionId
-    // );
-    console.log(' here is the feedback', this.feebdackRequests);
+    this.userSolution.evaluators = this.evaluators;
   }
 
-  mapNumbersToEval(numbers: number[]): Eval {
+  mapNumbersToEvaluation(numbers: number[]): Evaluation {
     if (numbers.length !== 6) {
       throw new Error('Expected an array of 7 numbers.');
     }
 
+    let average = this.findAverage(this.values);
     return {
       evaluatorId: this.auth.currentUser.uid,
+      average: average.toString(),
       achievable: numbers[0].toString(),
       feasible: numbers[1].toString(),
       ecological: numbers[2].toString(),
@@ -157,9 +144,55 @@ export class ProblemFeedbackComponent {
     };
   }
 
-  findAverage() {
-    this.average = Math.ceil(
-      this.values.reduce((x, y) => x + y) / this.values.length
+  findAverage(values: number[]) {
+    return (this.average = Math.ceil(
+      values.reduce((x, y) => x + y) / values.length
+    ));
+  }
+
+  calculateAverageEvaluation(evaluations: Evaluation[]): Evaluation {
+    const keys: (keyof Evaluation)[] = [
+      'achievable',
+      'feasible',
+      'ecological',
+      'economical',
+      'equitable',
+      'understandable',
+    ];
+
+    const sums = keys.reduce<{ [key in keyof Evaluation]?: number }>(
+      (acc, key) => {
+        acc[key] = evaluations.reduce((sum, ev) => sum + Number(ev[key]), 0);
+        return acc;
+      },
+      {}
     );
+
+    const averages = Object.fromEntries(
+      Object.entries(sums).map(([key, value]) => [
+        key,
+        Math.ceil(value! / evaluations.length),
+      ])
+    );
+
+    const average = Math.ceil(
+      keys.reduce((sum, key) => sum + (averages[key] ?? 0), 0) / keys.length
+    );
+
+    return {
+      evaluatorId: this.auth.currentUser.uid,
+      average: average.toString(),
+      ...Object.fromEntries(
+        Object.entries(averages).map(([key, value]) => [key, value!.toString()])
+      ),
+    };
+  }
+  closeSubmission() {
+    this.submitDisplay = false;
+  }
+  accept() {
+    this.sendFeedback = true;
+    this.submitEvaluation();
+    this.closeSubmission();
   }
 }

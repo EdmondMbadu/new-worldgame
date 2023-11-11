@@ -47,6 +47,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { DropZoneDirective } from './components/drop-zone.directive';
 import { SolutionViewComponent } from './components/solution-view/solution-view.component';
+import { EvaluationSummaryComponent } from './components/evaluation-summary/evaluation-summary.component';
 
 @NgModule({
   declarations: [
@@ -73,6 +74,7 @@ import { SolutionViewComponent } from './components/solution-view/solution-view.
     UserProfileComponent,
     DropZoneDirective,
     SolutionViewComponent,
+    EvaluationSummaryComponent,
   ],
   imports: [
     BrowserModule,

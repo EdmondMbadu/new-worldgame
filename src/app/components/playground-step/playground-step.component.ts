@@ -134,28 +134,6 @@ export class PlaygroundStepComponent {
     this.elements.length = 0;
   }
 
-  // sendRequestForEvaluation() {
-  //   let emails: any = this.currentSolution.participants;
-  //   // console.log('all emails', emails);
-  //   let myuser: User = {};
-  //   let feedback: FeedbackRequest[] = [];
-  //   for (let email of emails) {
-  //     this.auth.getUserFromEmail(email.name).subscribe((data) => {
-  //       myuser = data[0];
-
-  //       this.solution.sendSolutionRequestForEvaluation(
-  //         myuser.uid!,
-  //         this.currentSolution.solutionId!,
-  //         [
-  //           {
-  //             authorId: this.auth.currentUser.uid,
-  //             evaluated: 'false',
-  //           },
-  //         ]
-  //       );
-  //     });
-  //   }
-  // }
   accept() {
     this.submiResponse = true;
     this.updatePlayground(this.stepNumber);
@@ -231,15 +209,15 @@ export class PlaygroundStepComponent {
 
       return prefixComparison;
     });
-    let styles = `text-left text-xl font-bold underline underline-offset-8 my-4`;
+    let styles = `text-left text-xl font-bold  my-4`;
     let titles = [
-      `<h1 class="{{styles}}"> Preferred State  </h1>`,
-      `<h1 class="{{styles}}"> Plan </h1>`,
+      `<h1 class="text-left text-xl font-bold "> Preferred State  </h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
     ];
 
     console.log(' all the keys', array);
 
-    this.contentsArray[0] += `<h1 class="{{styles}}"> Problem State    </h1>`;
+    this.contentsArray[0] += `<h1 class="text-left text-xl font-bold "> Problem State    </h1>`;
 
     for (let i = 0, t = 1, j = 0; i < array.length - 1; i++, t++) {
       if (

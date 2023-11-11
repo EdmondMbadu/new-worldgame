@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { Observable, of } from 'rxjs';
 import { ActiveDescendantKeyManager } from '@angular/cdk/a11y';
 import { Avatar, User } from '../models/user';
+import { Evaluation } from '../models/solution';
 
 @Injectable({
   providedIn: 'root',
@@ -50,5 +51,61 @@ export class DataService implements OnInit {
   }
   getAllUsers() {
     return this.afs.collection<User>(`users`).valueChanges();
+  }
+  mapEvaluationToNumeric(evaluation: Evaluation) {
+    if (evaluation) {
+      return {
+        average: Math.floor(parseFloat(evaluation.average!) * 10),
+        achievable: Math.floor(parseFloat(evaluation.achievable!) * 10),
+        feasible: parseFloat(evaluation.feasible!) * 10,
+        ecological: parseFloat(evaluation.ecological!) * 10,
+        economical: parseFloat(evaluation.economical!) * 10,
+        equitable: parseFloat(evaluation.equitable!) * 10,
+        understandable: parseFloat(evaluation.understandable!) * 10,
+      };
+    } else {
+      return {};
+    }
+  }
+
+  getColorForValue(value: number): string {
+    if (value >= 0 && value <= 60) {
+      return 'bg-red-700';
+    } else if (value >= 61 && value <= 70) {
+      return 'bg-orange-500';
+    } else if (value >= 71 && value <= 80) {
+      return 'bg-amber-400';
+    } else if (value >= 81 && value <= 90) {
+      return 'bg-yellow-300';
+    } else if (value >= 91 && value <= 100) {
+      return 'bg-green-500';
+    } else {
+      return 'unknown'; // for values outside the range or NaN
+    }
+  }
+  mapEvaluationToColors(evaluation: Evaluation) {
+    if (evaluation) {
+      return {
+        average: this.getColorForValue(parseFloat(evaluation.average!) * 10),
+        achievable: this.getColorForValue(
+          parseFloat(evaluation.achievable!) * 10
+        ),
+        feasible: this.getColorForValue(parseFloat(evaluation.feasible!) * 10),
+        ecological: this.getColorForValue(
+          parseFloat(evaluation.ecological!) * 10
+        ),
+        economical: this.getColorForValue(
+          parseFloat(evaluation.economical!) * 10
+        ),
+        equitable: this.getColorForValue(
+          parseFloat(evaluation.equitable!) * 10
+        ),
+        understandable: this.getColorForValue(
+          parseFloat(evaluation.understandable!) * 10
+        ),
+      };
+    } else {
+      return {};
+    }
   }
 }

@@ -3,7 +3,7 @@ import {
   AngularFirestoreDocument,
   AngularFirestore,
 } from '@angular/fire/compat/firestore';
-import { Solution } from '../models/solution';
+import { Evaluation, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import { Observable } from 'rxjs';
@@ -109,14 +109,12 @@ export class SolutionService {
       comments: comments,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${solution.authorAccountId}/solutions/${solution.solutionId}`
+      `solutions/${solution.solutionId}`
     );
     return solutionRef.set(data, { merge: true });
   }
-  getThisUserSolution(uid: string, solutionId: string) {
-    return this.afs
-      .doc<Solution>(`users/${uid}/solutions/${solutionId}`)
-      .valueChanges();
+  getThisUserSolution(solutionId: string) {
+    return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
   }
 
   getAuthenticatedUserAllSolutions() {
@@ -137,39 +135,33 @@ export class SolutionService {
       )
       .valueChanges();
   }
-  getAllSolutionsOfThisUser(uid: string) {
+  getAllSolutionsOfThisUser(email: string) {
     return this.afs
-      .collection<Solution>(`users/${uid}/solutions/`)
+      .collection<Solution>(`solutions`, (ref) =>
+        ref.where('participants', 'array-contains', {
+          name: email,
+        })
+      )
       .valueChanges();
   }
 
   getAllSolutionsFromAllAccounts() {
-    // const allSolutionsRef = this.afs
-    //   .collectionGroup<Solution>(`solutions`)
-    //   .valueChanges();
-    //   allSolutionsRef.
     return this.afs.collectionGroup<Solution>(`solutions`).valueChanges();
   }
 
-  updateFeedbackRequestAfterEvaluation(
-    feedbackRequest: any,
-    solutionId: string
-  ) {
+  addEvaluation(solution: Solution) {
     const data = {
-      feedbackRequest: feedbackRequest,
+      evaluationDetails: solution.evaluationDetails,
+      evaluationSummary: solution.evaluationSummary,
+      evaluators: solution.evaluators,
+      numberofTimesEvaluated: solution.numberofTimesEvaluated,
+      // evaluators: {
+      //   name: this.auth.currentUser.email,
+      //   evaluated: 'true',
+      // },
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${this.auth.currentUser.uid}/solutions/${solutionId}`
-    );
-    return solutionRef.set(data, { merge: true });
-  }
-  addEvaluation(evaluation: any, n: string, uid: string, solutionId: string) {
-    const data = {
-      evaluation: evaluation,
-      numberofTimesEvaluated: n,
-    };
-    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `users/${uid}/solutions/${solutionId}`
+      `solutions/${solution.solutionId}`
     );
     return solutionRef.set(data, { merge: true });
   }
@@ -188,21 +180,6 @@ export class SolutionService {
       content: content,
       finished: 'true',
       submissionDate: this.time.todaysDate(),
-    };
-    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `solutions/${solutionId}`
-    );
-
-    return solutionRef.set(data, { merge: true });
-  }
-
-  sendSolutionRequestForEvaluation(
-    participantId: string,
-    solutionId: string,
-    feedbackRequest: any
-  ) {
-    const data = {
-      feedbackRequest: feedbackRequest,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
