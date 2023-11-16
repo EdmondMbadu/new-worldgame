@@ -12,7 +12,12 @@
     
             <div >
         
-                <app-solution  [teamMembers]="teamMembers"  [solution]="currentSolution"></app-solution>
+                <app-solution [evaluationSummary]="evaluationSummary" 
+                [timeElapsed]="timeElapsed"  
+                [teamMembers]="teamMembers"  
+                [solution]="currentSolution"
+                [comments]="comments"
+                [colors]="colors"></app-solution>
             </div>
             
         </div>

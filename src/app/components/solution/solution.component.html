@@ -11,14 +11,23 @@
              
                 </div>
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
-                    <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
-                    <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                    <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
+                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
+                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                    </div>
+                    <div *ngIf="user.profilePicture?.downloadURL===undefined">
+                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="avatarNoPicturePath" routerLink="/profile" alt="">
+                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="avatarNoPicturePath" routerLink="/user-profile/{{user.uid}}" alt="">
+                    </div>
+                    <!-- <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
+                    <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt=""> -->
                     <div >
                         <div *ngIf="showPopUpTeam[i]" >
                             <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[5rem] bg-white  rounded-lg p-4 "  >
                                 <div class="flex items-center justify-between mb-2" >
-                                    <a >
-                                        <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="">
+                                    <a > 
+                                        <img *ngIf="user.profilePicture?.downloadURL!==undefined" class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="">
+                                        <img *ngIf="user.profilePicture?.downloadURL===undefined" class="w-10 h-10 rounded-full" [src]="avatarNoPicturePath"alt="">
                                     </a>
                                     <div>
                                         <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
@@ -83,7 +92,8 @@
                
                 <div class="flex flex-nowrap py-2 items-center" (click)="displayComments()">
                     <img src="../../../assets/img/comment.png" class="w-6 flex-nowrap items-center" alt=""> 
-                    <h1  class="px-1 items-center ">{{numberOfcomments}}</h1>
+                    <h1 *ngIf="comments" class="px-1 items-center ">{{comments.length}}</h1>
+                    <h1 *ngIf="!comments" class="px-1 items-center ">0</h1>
                 </div>
                 <div class="flex flex-nowrap items-center">
                     <img src="../../../assets/img/bar-1.png" class=" ml-8 w-6  items-center" alt=""> 
@@ -197,7 +207,7 @@
             </div>
 
             <!-- Lists of comments -->
-            <div  *ngFor="let comment of comments | keyvalue; let i =index">
+            <div  *ngFor="let comment of comments ; let i =index">
                 <div class="flex  mx-auto items-center my-2 bg-gray-100 p-2 " *ngIf="showComments && comments">
                     
                         <div class="flex flex-col   max-w-lg">
@@ -210,7 +220,7 @@
                             </div>
                         
                             <div class="flex flex-row pl-10">
-                                <h1 class="">{{comment.value}}. </h1>
+                                <h1 class="">{{comment.content}}. </h1>
                             </div>
                             <!-- likes and dislike -->
                             <div class="flex flex-nowrap items-center my-2 space-y-2">

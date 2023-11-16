@@ -110,11 +110,11 @@ export class ProblemFeedbackComponent {
       (this.userSolution.evaluationDetails = this.evaluationDetails);
     this.updateEvaluators();
     const comments = {
-      [`${
-        this.auth.currentUser.uid
-      }#${this.time.todaysDate()}`]: `${this.comment}`,
+      authorId: this.auth.currentUser.uid,
+      date: this.time.todaysDate(),
+      content: this.comment,
     };
-    this.userSolution.comments = comments;
+    this.userSolution.comments?.push(comments);
     if (this.sendFeedback) {
       this.solution.addEvaluation(this.userSolution).then(() => {
         this.router.navigate(['/home']);

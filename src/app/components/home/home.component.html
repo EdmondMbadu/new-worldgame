@@ -3,15 +3,15 @@
 <div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-32">
  <!-- profile -->
     <div class=" flex flex-col mx-auto items-center my-10 ">
-        <div class=" w-[16rem]  bg-white p-4 rounded-lg shadow-lg " routerLink="/profile">
+        <div class=" w-[18rem]  bg-white p-4 rounded-lg shadow-lg " routerLink="/profile">
             <div class="">
                 <img *ngIf="profilePicturePath ==''" src="../../../assets/img/user.png" class="w-24 mx-auto rounded-full" alt="">
                 <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-24 mx-auto rounded-full"  alt="">
             </div>
             <h1 class="text-xl font-bold text-center">{{user.firstName}} {{user.lastName}}</h1>
-            <h2 class="text-center max-w-xs   text-gray-400 my-2 ">{{user.email}}</h2>
+             <h2 class="text-center max-w-xs   text-gray-400 my-2 truncate">{{user.email}}</h2>
             
-            <h2 class="text-center text-gray-500">{{user.profileCredential}} </h2>
+            <h2 class="text-center text-gray-500 truncate">{{user.profileCredential}} </h2>
           
 
             <h4  class=" py-2 text-gray-700 font-light text-center text-sm "> {{user.followers}} followers . {{user.following}} following </h4>

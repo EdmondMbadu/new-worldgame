@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Solution } from 'src/app/models/solution';
+import { Evaluation, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { TimeService } from 'src/app/services/time.service';
 
 @Component({
   selector: 'app-solution-view',
@@ -16,26 +18,34 @@ export class SolutionViewComponent implements OnInit {
   otherSolutions: Solution[] = [];
   currentAuth: User = {};
   currentUser: User = {};
+  timeElapsed: string = '';
+  evaluationSummary: any = {};
+  colors: any = {};
+  comments: any = {};
 
   teamMembers: User[] = [];
 
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private time: TimeService,
+    private data: DataService
   ) {
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution
       .getSolutionForNonAuthenticatedUser(this.solutionId)
       .subscribe((data: any) => {
         this.currentSolution = data[0];
+        this.timeElapsed = time.timeAgo(this.currentSolution.submissionDate!);
+        this.evaluationSummary = this.data.mapEvaluationToNumeric(
+          this.currentSolution.evaluationSummary!
+        );
+        this.colors = this.data.mapEvaluationToColors(
+          this.currentSolution.evaluationSummary!
+        );
+        this.comments = this.currentSolution.comments;
         this.getMembers();
-        this.auth
-          .getAUser(this.currentSolution.authorAccountId!)
-          .subscribe((user: any) => {
-            this.currentUser = user!;
-            // console.log('the current user', user);
-          });
         this.solution
           .getAllSolutionsOfThisUser(this.currentSolution!.authorAccountId!)
           .subscribe((data: any) => {

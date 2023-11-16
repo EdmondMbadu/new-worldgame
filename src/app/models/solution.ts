@@ -11,7 +11,7 @@ export class Solution {
   participants?: { [key: string]: string } = {};
   evaluators?: Evaluator[] = [];
   evaluated?: { [key: string]: string } = {};
-  comments?: { [key: string]: string } = {};
+  comments?: Comment[] = [];
   status?: { [key: string]: string } = {};
   likes?: string;
   views?: string;
@@ -42,4 +42,12 @@ export class Evaluation {
 export class Evaluator {
   name?: string;
   evaluated?: string;
+}
+
+export class Comment {
+  authorId?: string;
+  date?: string;
+  content?: string;
+  likes?: string;
+  dislikes?: string;
 }

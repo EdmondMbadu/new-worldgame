@@ -25,13 +25,13 @@ export class PostComponent implements OnInit {
   numberOfcomments: number = 0;
   currentUser: User = {};
   @Input() evaluationSummary: any = {};
-  colors: any = {};
+  @Input() colors: any = {};
   displayEvaluationSummary: boolean = false;
 
   avatarNoPicturePath: string = '../../../assets/img/user.png';
   showPopUpTeam: boolean[] = [];
   @Input() solution: Solution = {};
-  @Input() comments = {};
+  @Input() comments: any[] = [];
   @Input() user: User = {};
   excerpt: string = '';
   profilePicture?: string = '';
@@ -92,35 +92,77 @@ export class PostComponent implements OnInit {
     this.router.navigate(['/evaluation-summary/' + this.solution.solutionId]);
   }
 
+  // async initializeComments() {
+  //   if (this.comments) {
+  //     this.numberOfcomments = Object.keys(this.comments).length;
+
+  //     // An array to store promises for user data fetching
+  //     const userPromises = Object.entries(this.comments!).map(([key]) => {
+  //       const element = key.split('#');
+  //       this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
+
+  //       return new Promise<any>((resolve, reject) => {
+  //         this.auth.getAUser(element[0]).subscribe(
+  //           (data: any) => resolve(data),
+  //           (error) => reject(error)
+  //         );
+  //       });
+  //     });
+
+  //     const users = await Promise.all(userPromises);
+  //     users.forEach((data) => {
+  //       this.commentUserNames.push(data.firstName + ' ' + data.lastName);
+
+  //       if (data.profilePicture && data.profilePicture.downloadURL) {
+  //         this.commentUserProfilePicturePath.push(
+  //           data.profilePicture.downloadURL
+  //         );
+  //       } else {
+  //         this.commentUserProfilePicturePath.push(
+  //           '../../../assets/img/user.png'
+  //         );
+  //       }
+  //     });
+  //   }
+  // }
+
   async initializeComments() {
-    if (this.comments) {
-      this.numberOfcomments = Object.keys(this.comments).length;
+    if (this.comments && this.comments.length > 0) {
+      this.numberOfcomments = this.comments.length;
 
       // An array to store promises for user data fetching
-      const userPromises = Object.entries(this.comments!).map(([key]) => {
-        const element = key.split('#');
-        this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
+      const userPromises = this.comments.map((comment) => {
+        // Assuming 'date' is the time of the comment, similar to the previous key.split('#')[1]
+        if (comment.date) {
+          this.commentTimeElapsed.push(this.time.timeAgo(comment.date));
+        }
 
         return new Promise<any>((resolve, reject) => {
-          this.auth.getAUser(element[0]).subscribe(
-            (data: any) => resolve(data),
-            (error) => reject(error)
-          );
+          if (comment.authorId) {
+            this.auth.getAUser(comment.authorId).subscribe(
+              (data: any) => resolve(data),
+              (error) => reject(error)
+            );
+          } else {
+            resolve(null); // Or handle the lack of an authorId as needed
+          }
         });
       });
 
       const users = await Promise.all(userPromises);
-      users.forEach((data) => {
-        this.commentUserNames.push(data.firstName + ' ' + data.lastName);
+      users.forEach((data: any) => {
+        if (data) {
+          this.commentUserNames.push(data.firstName + ' ' + data.lastName);
 
-        if (data.profilePicture && data.profilePicture.downloadURL) {
-          this.commentUserProfilePicturePath.push(
-            data.profilePicture.downloadURL
-          );
-        } else {
-          this.commentUserProfilePicturePath.push(
-            '../../../assets/img/user.png'
-          );
+          if (data.profilePicture && data.profilePicture.downloadURL) {
+            this.commentUserProfilePicturePath.push(
+              data.profilePicture.downloadURL
+            );
+          } else {
+            this.commentUserProfilePicturePath.push(
+              '../../../assets/img/user.png'
+            );
+          }
         }
       });
     }
@@ -154,13 +196,33 @@ export class PostComponent implements OnInit {
       this.displayAddCommentPermission = true;
     } else {
     }
-    const comments = {
-      [`${
-        this.auth.currentUser.uid
-      }#${this.time.todaysDate()}`]: `${this.comment}`,
-    };
+    // const comments = {
+    //   [`${
+    //     this.auth.currentUser.uid
+    //   }#${this.time.todaysDate()}`]: `${this.comment}`,
+    // };
 
-    this.solutionService.addCommentToSolution(this.solution, comments);
+    if (this.comments) {
+      this.comments.push({
+        authorId: this.auth.currentUser.uid,
+        date: this.time.todaysDate(),
+        content: this.comment,
+        likes: '0',
+        dislikes: '0',
+      });
+    } else {
+      this.comments = [
+        {
+          authorId: this.auth.currentUser.uid,
+          date: this.time.todaysDate(),
+          content: this.comment,
+          likes: '0',
+          dislikes: '0',
+        },
+      ];
+    }
+
+    this.solutionService.addCommentToSolution(this.solution, this.comments);
     this.comment = '';
   }
 

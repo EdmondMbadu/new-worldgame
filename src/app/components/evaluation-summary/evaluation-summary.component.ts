@@ -22,7 +22,6 @@ export class EvaluationSummaryComponent {
   evaluations: any[] = [];
   evaluators: User[] = [];
   timeElapsed: string = '';
-  comments = {};
   commentTimeElapsed: any;
   numberOfcomments: number = 0;
   commentUserNames: any;
@@ -39,7 +38,6 @@ export class EvaluationSummaryComponent {
 
     solution.getSolution(this.id).subscribe((data) => {
       this.currentSolution = data!;
-      this.timeElapsed = time.timeAgo(data!.submissionDate!);
 
       this.evaluationSummary = this.data.mapEvaluationToNumeric(
         this.currentSolution.evaluationSummary!
@@ -49,27 +47,9 @@ export class EvaluationSummaryComponent {
       );
       if (this.currentSolution) {
         this.mapping();
-        this.getMembers();
         this.getEvaluators();
       }
     });
-  }
-
-  getMembers() {
-    for (const key in this.currentSolution.participants) {
-      let participant = this.currentSolution.participants[key];
-      let email = Object.values(participant)[0];
-      this.auth.getUserFromEmail(email).subscribe((data) => {
-        // Check if the email of the incoming data is already in the teamMembers
-        if (
-          data &&
-          data[0] &&
-          !this.teamMembers.some((member) => member.email === data[0].email)
-        ) {
-          this.teamMembers.push(data[0]);
-        }
-      });
-    }
   }
 
   mapping() {
@@ -99,40 +79,6 @@ export class EvaluationSummaryComponent {
           });
         }
       }
-    }
-  }
-
-  async initializeComments() {
-    if (this.comments) {
-      this.numberOfcomments = Object.keys(this.comments).length;
-
-      // An array to store promises for user data fetching
-      const userPromises = Object.entries(this.comments!).map(([key]) => {
-        const element = key.split('#');
-        this.commentTimeElapsed.push(this.time.timeAgo(element[1]));
-
-        return new Promise<any>((resolve, reject) => {
-          this.auth.getAUser(element[0]).subscribe(
-            (data: any) => resolve(data),
-            (error) => reject(error)
-          );
-        });
-      });
-
-      const users = await Promise.all(userPromises);
-      users.forEach((data) => {
-        this.commentUserNames.push(data.firstName + ' ' + data.lastName);
-
-        if (data.profilePicture && data.profilePicture.downloadURL) {
-          this.commentUserProfilePicturePath.push(
-            data.profilePicture.downloadURL
-          );
-        } else {
-          this.commentUserProfilePicturePath.push(
-            '../../../assets/img/user.png'
-          );
-        }
-      });
     }
   }
 }
