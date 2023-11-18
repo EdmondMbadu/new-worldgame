@@ -31,14 +31,24 @@
                 </div>
                     <div class="flex flex-row -space-x-1" >
                         <div *ngFor="let user of teamMembers; let i= index" >
-                            <img *ngIf="user.uid === auth.currentUser.uid"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
-                            <img *ngIf="user.uid !== auth.currentUser.uid"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                            <div *ngIf="user.uid === auth.currentUser.uid" >
+                                <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
+                                <img *ngIf="user.profilePicture?.downloadURL===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " src="../../../assets/img/user.png" routerLink="/profile" alt="">
+                                <!-- <h2>{{user.profilePicture}}</h2> -->
+                            </div>
+                            <div *ngIf="user.uid !== auth.currentUser.uid" >
+                                <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                                <img *ngIf="user.profilePicture!.downloadURL ===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " src="../../../assets/img/user.png"routerLink="/user-profile/{{user.uid}}"alt="">
+
+                            </div>
                             <div>
                                 <div *ngIf="showPopUpTeam[i]" >
                                     <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >
                                         <div class="flex items-center justify-between mb-2" >
                                             <a >
-                                                <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="Jese Leos">
+                                                <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
+                                                <img *ngIf="user.profilePicture!.downloadURL ===undefined"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt=""> 
+                                                <!-- <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt=""> -->
                                             </a>
                                             <div>
                                                 <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
@@ -50,7 +60,7 @@
                                         <p class="mb-3 text-sm font-normal">
                                             <a class="hover:underline">{{user.email}}</a>
                                         </p>
-                                        <p class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
+                                        <p  class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
                                         <ul class="flex text-sm">
                                             <li class="mr-2">
                                                 <a  class="hover:underline">
