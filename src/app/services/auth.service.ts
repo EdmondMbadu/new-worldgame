@@ -100,9 +100,16 @@ export class AuthService {
       .collection<User>(`users`, (ref) => ref.where('email', '==', email))
       .valueChanges();
   }
+  getAllOtherUsers(email: string) {
+    return this.afs
+      .collection<User>(`users`, (ref) =>
+        ref.where('email', '!=', email).limit(10)
+      )
+      .valueChanges();
+  }
 
   addNewUser(firstName: string, lastName: string, user: any) {
-    const userRef: AngularFirestoreDocument<any> = this.afs.doc(
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`
     );
     const data = {

@@ -92,7 +92,7 @@ export class PlaygroundStepsComponent implements OnInit {
   questionsTitles: Array<Array<string>> = [
     ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
     ['S2-A', 'S2-B'],
-    ['S3-A', 'S3-B', 'S3-C', 'S3-D'],
+    ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E', 'S3-F'],
     ['S4'],
   ];
   AllQuestions: Array<Array<string>> = [
@@ -111,6 +111,8 @@ export class PlaygroundStepsComponent implements OnInit {
       'What to do in the next 6 months?',
       'What resources does our plan need?',
       'How much will our strategy cost?',
+      'Where will you get the money?',
+      'What would you do with $100,000 if given to you? ',
     ],
     ['Review Your Entire Strategy and Submit'],
   ];

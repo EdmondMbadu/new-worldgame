@@ -33,9 +33,10 @@
     </div>
     <div id="chat-container" *ngIf="showBot" class=" fixed bottom-16 right-4 w-96">
         <div class="bg-white shadow-md rounded-lg max-w-lg w-full">
-            <div class="p-4 border-b bg-teal-700 text-white rounded-t-lg flex justify-between items-center">
-                <p class="text-lg font-semibold">Bucky</p>
-                <button id="close-chat" class="text-gray-300 hover:text-gray-400 focus:outline-none focus:text-gray-400" (click)="toggleBot()">
+            <div class="p-2 border-b shadow-lg bg-teal-700 text-white rounded-t-lg flex justify-between items-center">
+                <img src="../../../assets/img/bucky.png" class="w-14 rounded-full" alt="">
+                <p class="text-lg font-semibold ">Bucky</p>
+                <button id="close-chat" class="text-white hover:text-white focus:outline-none focus:text-gray-400" (click)="toggleBot()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -47,14 +48,20 @@
                 <ng-container *ngFor="let resp of responses">
                   <div class="" [ngClass]="resp.type == 'PROMPT' ? 'prompt' : 'response'">
                    
-                        <div *ngIf="resp.type=='PROMPT'" class="mb-2 text-right">
-                            
-                            <p class="bg-blue-500 text-white rounded-lg py-2 px-4 inline-block">{{ resp.text }}</p>
-                        </div>
-                        <div *ngIf="resp.type=='RESPONSE'"class="mb-2">
-                            
+                        <div *ngIf="resp.type=='PROMPT'" class="mb-2">
+                            <img  *ngIf="profilePicturePath !=='' " [src]="profilePicturePath" class="rounded-full w-14 mr-1" alt="">
+                            <img *ngIf="profilePicturePath ==='' " src="../../../assets/img/user.png"  class="rounded-full w-14 mr-1" alt="">
+                        
+
                           
-                            <p class="bg-gray-200 text-gray-700 py-2 rounded-lg items-center px-4 ">
+                            
+                            <p class="bg-slate-200 text-gray-700  rounded-lg py-2 px-4 items-center">{{ resp.text }}</p>
+                        </div>
+
+                        <div *ngIf="resp.type=='RESPONSE'"class="mb-2">
+                            <img src="../../../assets/img/bucky.png" class="w-14 rounded-full" alt="">
+                          
+                            <p class=" bg-gray-200 text-gray-950  py-2 rounded-lg items-center px-4 ">
                                  
 
                                

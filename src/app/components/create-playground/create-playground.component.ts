@@ -9,7 +9,7 @@ import {
   MatChipsModule,
 } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
-import { NgFor } from '@angular/common';
+import { NgFor, NgPlural } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -31,6 +31,7 @@ export interface Email {
 export class CreatePlaygroundComponent {
   myForm: FormGroup;
   loading: boolean = false;
+  numberOfEvaluators: number = 2;
   createdSolutionSuccess: boolean = false;
   createdSolutionError: boolean = false;
   solutionError: Observable<any> = of(null);
@@ -57,6 +58,7 @@ export class CreatePlaygroundComponent {
   readonly separatorKeysCodes = [ENTER, COMMA, SPACE] as const;
   participantsEmails: Email[] = [];
   evaluatorsEmails: Email[] = [];
+
   announcer = inject(LiveAnnouncer);
   constructor(
     public auth: AuthService,
@@ -64,6 +66,9 @@ export class CreatePlaygroundComponent {
     private solution: SolutionService,
     private router: Router
   ) {
+    let shuffle = (array: User[]) => {
+      return array.sort(() => Math.random() - 0.5);
+    };
     this.myForm = this.fb.group({
       title: ['', [Validators.required]],
       emails: ['', Validators.compose([Validators.email])],
@@ -76,6 +81,20 @@ export class CreatePlaygroundComponent {
       sdg: ['', [Validators.required]],
       date: ['', [Validators.required]],
     });
+    this.evaluatorsEmails = [];
+    this.auth
+      .getAllOtherUsers(this.auth.currentUser.email)
+      .subscribe((data) => {
+        data = shuffle(data);
+        for (
+          let i = 0;
+          i < this.numberOfEvaluators &&
+          this.evaluatorsEmails.length < this.numberOfEvaluators;
+          i++
+        ) {
+          this.evaluatorsEmails.push({ name: data[i].email! });
+        }
+      });
     this.participantsEmails.push({ name: this.auth.currentUser.email });
   }
 

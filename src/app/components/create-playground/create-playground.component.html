@@ -71,35 +71,12 @@
 
 
             <div class="mb-6 mt-4">
-                <label for="invite" class="block mb-2 text-sm font-medium ">Add Evaluators</label>
+                <label for="invite" class="block mb-2 text-md font-medium ">Randomly Generated Evaluators</label>
                 <div class="flex flex-col">
-                        <mat-form-field class="example-chip-list">
-                            <mat-label >Add emails</mat-label>
-                            <mat-chip-grid #chipGrid2 aria-label="add emails" >
-                            <mat-chip-row class="bg-white" *ngFor="let em of evaluatorsEmails"
-                                            (removed)="removeEvaluators(em)"
-                                            [editable]="true"
-                                            (edited)="editEvaluators(em, $event)"
-                                            [aria-description]="'press enter to edit ' + em.name">
-                                {{em.name}}
-                                <button matChipRemove [attr.aria-label]="'remove ' + em.name">
-                                <mat-icon>cancel</mat-icon>
-                                </button>
-                            </mat-chip-row>
-                            <input  placeholder="email..."
-                            formControlName="evaluatorsEmails" 
-                                    [matChipInputFor]="chipGrid2"
-                                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                                    [matChipInputAddOnBlur]="addOnBlur"
-                                    (matChipInputTokenEnd)="addEvaluators($event)"/>
-                            </mat-chip-grid>
-                        </mat-form-field>
-                        <div *ngIf="evEmails!.invalid && evEmails!.touched" class="text-red-400" >
-                        Make sure all emails are valid.
-                        </div>
-                        <div *ngIf="isEvaluatorsValid()" class="text-red-400" >
-                            Your team members cannot be evaluators.
-                        </div>
+                    <div *ngFor="let ev of evaluatorsEmails; let i=index">
+                        <h1 class="text-gray-400">{{i+1}}.  {{ev.name}}</h1>
+                    </div>
+                        
                 </div>
                 
             

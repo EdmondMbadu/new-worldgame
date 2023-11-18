@@ -15,9 +15,11 @@ export class UserProfileComponent implements OnInit {
   user: any = {};
   dateJoined: string = '';
   time: any;
-
+  authenticatedUser: User = this.auth.currentUser;
   profilePicturePath?: string = '';
   completedSolutions: Solution[] = [];
+  followingThisUser: boolean = false;
+  followingArray: string[] = [];
 
   solutions: Solution[] = [];
   constructor(
@@ -29,6 +31,7 @@ export class UserProfileComponent implements OnInit {
 
     auth.getAUser(this.id).subscribe((data) => {
       this.user = data;
+      this.followingThisUser = this.checkIfFollowing();
       this.solution
         .getAllSolutionsOfThisUser(data?.email!)
         .subscribe((data: any) => {
@@ -42,9 +45,30 @@ export class UserProfileComponent implements OnInit {
     });
   }
   ngOnInit(): void {
+    if (this.authenticatedUser.followingArray !== undefined) {
+      this.followingArray = this.authenticatedUser.followersArray!;
+    }
     // this.dateJoined = this.time.getMonthYear(this.user!.dateJoined);
   }
 
+  checkIfFollowing() {
+    if (this.user.followersArray === undefined) {
+      return false;
+    } else if (
+      this.user.followersArray.indexOf(this.authenticatedUser.uid) > -1
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  followSomeone() {
+    // if (this.followingThisUser) {
+    //   this.followingArray = this.followingArray.filter((item) => {
+    //     item !== this.user.uid;
+    //   });
+    // }
+  }
   findCompletedSolutions() {
     this.completedSolutions = [];
     for (let s of this.solutions) {

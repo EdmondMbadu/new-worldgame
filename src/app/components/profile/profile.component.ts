@@ -25,7 +25,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit {
-  user: User;
+  user: User = {};
   profilePicturePath?: string = '';
   editAvatarImage: boolean = false;
   solutions: Solution[] = [];
@@ -50,13 +50,7 @@ export class ProfileComponent implements OnInit {
     public boxLocation: BoxLocationCredential,
     private storage: AngularFireStorage,
     private data: DataService
-  ) {
-    this.user = this.auth.currentUser;
-    this.solution.getAuthenticatedUserAllSolutions().subscribe((data: any) => {
-      this.solutions = data;
-      this.findCompletedSolutions();
-    });
-  }
+  ) {}
 
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -77,6 +71,11 @@ export class ProfileComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    this.user = this.auth.currentUser;
+    this.solution.getAuthenticatedUserAllSolutions().subscribe((data: any) => {
+      this.solutions = data;
+      this.findCompletedSolutions();
+    });
     if (this.user?.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL;
     }
@@ -104,7 +103,7 @@ export class ProfileComponent implements OnInit {
     const uploadTask = await this.storage.upload(path, file);
     this.url = await uploadTask.ref.getDownloadURL();
     uploadTask.totalBytes;
-    console.log('the download url', this.url);
+    // console.log('the download url', this.url);
     const avatar = {
       path: path,
       downloadURL: this.url,
@@ -112,23 +111,6 @@ export class ProfileComponent implements OnInit {
     };
     this.data.uploadPictureToCloudStorage(this.user, avatar);
     this.router.navigate(['/home']);
-
-    // window.location.reload();
-    // this.percentage = this.task.percentageChanges();
-    // const ref = this.storage.ref(path);
-    // ref.getDownloadURL().subscribe((data) => {
-    //   this.url = data;
-    //   console.log('the downlao path ', this.url);
-    //   console.log(' the entire ref', ref);
-    //   console.log(' the task itself', this.task);
-    //   const avatar = {
-    //     path: path,
-    //     downloadURL: this.url,
-    //     // size: snapsho.totalBytes,
-    //   };
-    //   console.log('The avatar', avatar);
-    //   this.data.uploadPictureToCloudStorage(this.user, avatar);
-    // });
   }
 
   isActive(snapshot: any) {

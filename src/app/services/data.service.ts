@@ -41,7 +41,7 @@ export class DataService implements OnInit {
   ngOnInit(): void {}
 
   uploadPictureToCloudStorage(user: User, avatar: Avatar) {
-    const userRef: AngularFirestoreDocument<any> = this.afs.doc(
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`
     );
     const data = {
@@ -108,4 +108,6 @@ export class DataService implements OnInit {
       return {};
     }
   }
+
+  UnfollowUser() {}
 }

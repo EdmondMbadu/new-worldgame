@@ -4,6 +4,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 
 interface DisplayMessage {
@@ -17,22 +18,27 @@ interface DisplayMessage {
 })
 export class ChatbotComponent implements OnInit {
   showBot: boolean = false;
+  profilePicturePath: string = '';
+  user: User = {};
   @Input() botHeight: string = 'h-10';
   collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
   status = '';
   errorMsg = '';
   prompt = '';
   constructor(private afs: AngularFirestore, private auth: AuthService) {
+    this.user = this.auth.currentUser;
     this.deleteAllDocuments();
   }
   responses: DisplayMessage[] = [
     {
-      text: "I'm a Bucky, a chatbot that will be assisting you on your journey to tackle world problems.",
+      text: "I'm a Bucky, a chatbot that will be assisting you on your journey tackling world problems.",
       type: 'RESPONSE',
     },
   ];
   ngOnInit(): void {
-    // this.deleteAllDocuments();
+    if (this.user?.profilePicture && this.user.profilePicture.path) {
+      this.profilePicturePath = this.user.profilePicture.downloadURL!;
+    }
   }
 
   toggleBot() {
@@ -55,7 +61,7 @@ export class ChatbotComponent implements OnInit {
   endChat() {
     this.responses = [
       {
-        text: "I'm a Bucky, a chatbot that will be assisting you on your journey to tackle world problems.",
+        text: "I'm a Bucky, a chatbot that will be assisting you on your journey tackling world problems.",
         type: 'RESPONSE',
       },
     ];
