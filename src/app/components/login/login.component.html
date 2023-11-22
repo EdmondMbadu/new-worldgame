@@ -1,23 +1,25 @@
+
+<div class="dark:bg-slate-900 min-h-screen">
 <app-navbar></app-navbar>
 
-<div class="container flex mx-auto bg-gray-300 mt-24">
+<div class="container flex mx-auto bg-gray-300 mt-24 dark:bg-slate-900">
 
-    <div class="flex flex-col mx-auto m-10">
+    <div class="flex flex-col mx-auto m-10 dark:bg-slate-800">
 
-        <form class="bg-white p-10 shadow-lg w-[24rem]" [formGroup]="myForm">
+        <form class="bg-white p-10 shadow-lg w-[24rem] dark:bg-slate-800 dark:text-white" [formGroup]="myForm">
             <h1 class="flex flex-col mx-auto text-xl text-center my-4">Welcome Back!</h1>
             <h2 *ngIf="this.auth.logingError | async" class="text-red-400 pb-2">Incorrect email or password. Try Again</h2>
 
-            <div class="mb-6">
-                <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Email</label>
-                <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" formControlName="email" placeholder="" required>
+            <div class="mb-6 dark:text-white">
+                <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white ">Email</label>
+                <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" formControlName="email" placeholder="" required>
                 <div *ngIf="email!.invalid && email!.touched" class="text-red-400" >
                     Enter a valid email
                 </div>
             </div> 
             <div class="mb-6">
-                <label for="password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
-                <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" formControlName="password" placeholder="" required>
+                <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
+                <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" formControlName="password" placeholder="" required>
                 <div *ngIf="password!.invalid && password!.touched" class="text-red-400" >
                 Enter a valid password
                 </div>
@@ -25,7 +27,7 @@
 
             <div class="flex items-start mb-6">
             
-                <label for="remember" class="ml-2 text-sm font-medium text-gray-900 "> <a routerLink="/forgot-password" class="text-gray-600 underline">Forgot Password?</a></label>
+                <label for="remember" class="ml-2 text-sm font-medium text-gray-900 "> <a routerLink="/forgot-password" class="text-gray-600 underline dark:text-white">Forgot Password?</a></label>
             </div>
             <button type="submit" [disabled]="myForm.invalid" class="text-white bg-teal-700 hover:bg-teal-800   font-medium rounded-full text-sm w-full  px-5 py-2.5 text-center" (click)="SignIn()">Sign In</button>
             <div class="flex flex-col py-3 items-center" *ngIf="loading" role="status">
@@ -46,4 +48,5 @@
     </div>
 
 
+</div>
 </div>

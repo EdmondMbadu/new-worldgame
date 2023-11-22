@@ -1,156 +1,157 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
-
-<div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-32 ">
-
-
+<div class="dark:bg-slate-900 min-h-screen">
+        <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-16 ">
 
 
-    <div class=" flex flex-col md:flex-row justify-between mx-auto">
 
-        <div class=" container flex flex-col max-w-2xl  ">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-10">Evaluation Summary</h1>
-    
-            <div >
 
-                <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[30rem]  mb-10" *ngIf=" currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
-                    <div class="p-3 space-y-2">
-                        <h3 class="font-semibold text-gray-900 ">Evaluation Summary: {{currentSolution.numberofTimesEvaluated}} evaluator(s) </h3>
-                        <p class="font-bold">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{currentSolution.evaluationSummary!.average}} </p>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                            <div class="{{color.average}} h-2.5  rounded-full " style="width: {{evaluationSummary.average}}%"></div>
-                        </div>
-                        <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
-                        <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                        </svg></a> -->
-                        <div>
-                            <h1 class="mb-2">Achievable: {{currentSolution.evaluationSummary!.achievable}}</h1>
-                            <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                             
-                                <div class="{{color.achievable}} h-1  rounded-full" style="width: {{evaluationSummary.achievable}}%" > </div>
-                            
-                            </div>
-                            <h1 class="mb-2">Feasible: {{currentSolution.evaluationSummary!.feasible}}</h1>
-                            <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                
-                                <div class="{{color.feasible}} h-1  rounded-full  " style="width: {{evaluationSummary.feasible}}%"> </div>
-                            
-                            </div>
-                            <h1 class="mb-2">Economical: {{currentSolution.evaluationSummary!.economical}}</h1>
-                            <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                
-                                <div class="{{color.economical}} h-1  rounded-full "style="width: {{evaluationSummary.economical}}%"> </div>
-                            
-                            </div>
-                            <h1 class="mb-2">Ecological: {{currentSolution.evaluationSummary!.ecological}}</h1>
-                            <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                
-                                <div class="{{color.ecological}} h-1  rounded-full " style="width: {{evaluationSummary.ecological}}%" > </div>
-                            
-                            </div>
-                            <h1 class="mb-2">Equitable: {{currentSolution.evaluationSummary!.equitable}}</h1>
-                            <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                
-                                <div class="{{color.equitable}} h-1  rounded-full  " style="width: {{evaluationSummary.equitable}}%" > </div>
-                            
-                            </div>
-                            <h1 class="mb-2">Understandable: {{currentSolution.evaluationSummary!.understandable}}</h1>
-                            <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                
-                                <div class="{{color.understandable}} h-1  rounded-full"style="width: {{evaluationSummary.understandable}}%" > </div>
-                            
-                            </div>
-                        </div>
-                        
-                    </div>
-                    <div data-popper-arrow></div>
-                </div>
-        
+            <div class=" flex flex-col md:flex-row justify-between mx-auto ">
 
-                <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-96" *ngIf="!currentSolution.evaluationDetails ">
-                <h1 class="text-2xl">No Evaluations Submitted</h1>
-                </div>
-
-                <div *ngIf="currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
-                    <h1 class="text-xl">Evaluators</h1>
-                    <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[25rem]  " *ngFor="let ev of currentSolution.evaluationDetails; let i=index">
-                        <div class="p-3 space-y-2">
-                           <div class="flex flex-row space-x-4 items-center">
-                                <img *ngIf="evaluators[i] && evaluators[i].profilePicture" [src]="evaluators[i].profilePicture?.downloadURL" class="w-20 rounded-lg" alt="">
-                                <img *ngIf="evaluators[i]  && !evaluators[i].profilePicture" src="../../../assets/img/user.png"class="w-20 rounded-lg" alt="">
-                                <h3 *ngIf="evaluators[i]" class="font-semibold text-gray-900 ">Evaluation by {{evaluators[i].firstName}} {{evaluators[i].lastName}} </h3>
-                            </div>
-                            <p class="font-bold">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{ev.average}} </p>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                                <div class="{{colors[i].average}} h-2.5  rounded-full " style="width: {{evaluations[i].average}}%"></div>
-                            </div>
-                            <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
-                            <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                            </svg></a> -->
-                            <div>
-                                <h1 class="mb-2">Achievable: {{ev.achievable}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                
-                                    <div class="{{colors[i].achievable}} h-1  rounded-full" style="width: {{evaluations[i].achievable}}%" > </div>
-                                
-                                </div>
-                                <h1 class="mb-2">Feasible: {{ev.feasible}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                    
-                                    <div class="{{colors[i].feasible}} h-1  rounded-full  " style="width: {{evaluations[i].feasible}}%"> </div>
-                                
-                                </div>
-                                <h1 class="mb-2">Economical: {{ev.economical}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                    
-                                    <div class="{{colors[i].economical}} h-1  rounded-full "style="width: {{evaluations[i].economical}}%"> </div>
-                                
-                                </div>
-                                <h1 class="mb-2">Ecological: {{ev.ecological}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                    
-                                    <div class="{{colors[i].ecological}} h-1  rounded-full " style="width: {{evaluations[i].ecological}}%" > </div>
-                                
-                                </div>
-                                <h1 class="mb-2">Equitable: {{ev.equitable}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                    
-                                    <div class="{{colors[i].equitable}} h-1  rounded-full  " style="width: {{evaluations[i].equitable}}%" > </div>
-                                
-                                </div>
-                                <h1 class="mb-2">Understandable: {{ev.understandable}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
-                                    
-                                    <div class="{{colors[i].understandable}} h-1  rounded-full"style="width: {{evaluations[i].understandable}}%" > </div>
-                                
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <div data-popper-arrow></div>
-                    </div>
-                </div>
+                <div class=" container flex flex-col max-w-2xl  my-14">
+                    <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-10 dark:text-gray-200">Evaluation Summary</h1>
             
+                    <div >
+
+                        <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[30rem]  mb-10 dark:bg-slate-800" *ngIf=" currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
+                            <div class="p-3 space-y-2">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 ">Evaluation Summary: {{currentSolution.numberofTimesEvaluated}} evaluator(s) </h3>
+                                <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{currentSolution.evaluationSummary!.average}} </p>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
+                                    <div class="{{color.average}} h-2.5  rounded-full " style="width: {{evaluationSummary.average}}%"></div>
+                                </div>
+                                <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
+                                <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                                </svg></a> -->
+                                <div>
+                                    <h1 class="mb-2 dark:text-gray-200">Achievable: {{currentSolution.evaluationSummary!.achievable}}</h1>
+                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                    
+                                        <div class="{{color.achievable}} h-1  rounded-full" style="width: {{evaluationSummary.achievable}}%" > </div>
+                                    
+                                    </div>
+                                    <h1 class="mb-2 dark:text-gray-200">Feasible: {{currentSolution.evaluationSummary!.feasible}}</h1>
+                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                        
+                                        <div class="{{color.feasible}} h-1  rounded-full  " style="width: {{evaluationSummary.feasible}}%"> </div>
+                                    
+                                    </div>
+                                    <h1 class="mb-2 dark:text-gray-200">Economical: {{currentSolution.evaluationSummary!.economical}}</h1>
+                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                        
+                                        <div class="{{color.economical}} h-1  rounded-full "style="width: {{evaluationSummary.economical}}%"> </div>
+                                    
+                                    </div>
+                                    <h1 class="mb-2 dark:text-gray-200">Ecological: {{currentSolution.evaluationSummary!.ecological}}</h1>
+                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                        
+                                        <div class="{{color.ecological}} h-1  rounded-full " style="width: {{evaluationSummary.ecological}}%" > </div>
+                                    
+                                    </div>
+                                    <h1 class="mb-2 dark:text-gray-200">Equitable: {{currentSolution.evaluationSummary!.equitable}}</h1>
+                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                        
+                                        <div class="{{color.equitable}} h-1  rounded-full  " style="width: {{evaluationSummary.equitable}}%" > </div>
+                                    
+                                    </div>
+                                    <h1 class="mb-2 dark:text-gray-200">Understandable: {{currentSolution.evaluationSummary!.understandable}}</h1>
+                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                        
+                                        <div class="{{color.understandable}} h-1  rounded-full"style="width: {{evaluationSummary.understandable}}%" > </div>
+                                    
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div data-popper-arrow></div>
+                        </div>
+                
+
+                        <div  id="popover-description" role="tooltip" class=" p-2 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-96 dark:bg-slate-800" *ngIf="!currentSolution.evaluationDetails ">
+                        <h1 class="text-2xl dark:text-gray-200">No Evaluations Submitted</h1>
+                        </div>
+
+                        <div *ngIf="currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
+                            <h1 class="text-xl dark:text-gray-200 mb-4">Evaluators</h1>
+                            <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[25rem]  dark:bg-slate-800" *ngFor="let ev of currentSolution.evaluationDetails; let i=index">
+                                <div class="p-3 space-y-2">
+                                <div class="flex flex-row space-x-4 items-center">
+                                        <img *ngIf="evaluators[i] && evaluators[i].profilePicture" [src]="evaluators[i].profilePicture?.downloadURL" class="w-20 rounded-lg" alt="">
+                                        <img *ngIf="evaluators[i]  && !evaluators[i].profilePicture" src="../../../assets/img/user.png"class="w-20 rounded-lg" alt="">
+                                        <h3 *ngIf="evaluators[i]" class="font-semibold text-gray-900 dark:text-gray-200">Evaluation by {{evaluators[i].firstName}} {{evaluators[i].lastName}} </h3>
+                                    </div>
+                                    <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{ev.average}} </p>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
+                                        <div class="{{colors[i].average}} h-2.5  rounded-full " style="width: {{evaluations[i].average}}%"></div>
+                                    </div>
+                                    <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
+                                    <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                                    </svg></a> -->
+                                    <div>
+                                        <h1 class="mb-2  dark:text-gray-200">Achievable: {{ev.achievable}}</h1>
+                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                        
+                                            <div class="{{colors[i].achievable}} h-1  rounded-full" style="width: {{evaluations[i].achievable}}%" > </div>
+                                        
+                                        </div>
+                                        <h1 class="mb-2  dark:text-gray-200">Feasible: {{ev.feasible}}</h1>
+                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                            
+                                            <div class="{{colors[i].feasible}} h-1  rounded-full  " style="width: {{evaluations[i].feasible}}%"> </div>
+                                        
+                                        </div>
+                                        <h1 class="mb-2  dark:text-gray-200">Economical: {{ev.economical}}</h1>
+                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                            
+                                            <div class="{{colors[i].economical}} h-1  rounded-full "style="width: {{evaluations[i].economical}}%"> </div>
+                                        
+                                        </div>
+                                        <h1 class="mb-2  dark:text-gray-200">Ecological: {{ev.ecological}}</h1>
+                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                            
+                                            <div class="{{colors[i].ecological}} h-1  rounded-full " style="width: {{evaluations[i].ecological}}%" > </div>
+                                        
+                                        </div>
+                                        <h1 class="mb-2  dark:text-gray-200">Equitable: {{ev.equitable}}</h1>
+                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                            
+                                            <div class="{{colors[i].equitable}} h-1  rounded-full  " style="width: {{evaluations[i].equitable}}%" > </div>
+                                        
+                                        </div>
+                                        <h1 class="mb-2  dark:text-gray-200">Understandable: {{ev.understandable}}</h1>
+                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                            
+                                            <div class="{{colors[i].understandable}} h-1  rounded-full"style="width: {{evaluations[i].understandable}}%" > </div>
+                                        
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <div data-popper-arrow></div>
+                            </div>
+                        </div>
+                    
+                </div>
+
+
+
+            </div>
+
+            <div class=" flex flex-col md:flex-row  justify-between mx-auto my-14">
+
+                <div class=" container flex flex-col max-w-2xl">
+                    <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6 dark:text-gray-200"> Solution</h1>
+                    <app-solution *ngIf="currentSolution.finished"
+                    [solution]="currentSolution" 
+                    ></app-solution>
+                    
+                </div>
+
+
+
+            </div>
+
+
         </div>
-
-
-
-    </div>
-
-    <div class=" flex flex-col md:flex-row  justify-between mx-auto">
-
-        <div class=" container flex flex-col max-w-2xl">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6"> Solution</h1>
-            <app-solution *ngIf="currentSolution.finished"
-            [solution]="currentSolution" 
-            ></app-solution>
-            
-        </div>
-
-
-
-    </div>
-
-
 </div>
 
 <app-chatbot></app-chatbot>

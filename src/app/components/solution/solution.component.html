@@ -1,29 +1,25 @@
     <!-- posts -->
     <div class="my-2">
-        <div class=" w-fit bg-white p-4 rounded-lg shadow-lg">
+        <div class=" w-fit bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800 dark:text-gray-200">
             <div *ngIf="solution" class="flex  pb-10">
-                <!-- <div *ngIf="user">
-                    <img *ngIf="!user.profilePicture ||user.profilePicture.downloadURL ===''" [src]="avatarNoPicturePath" class="w-16 flex-nowrap rounded-full"  alt="">
-                    <img *ngIf="user.profilePicture && user.profilePicture.downloadURL!==''" [src]="user.profilePicture.downloadURL" class="w-16 flex-nowrap rounded-full" alt="" >
-                </div> -->
                 <div class="flex flex-row">
-                    <h1  class="  px-2  font-bold ">Contributors <br> <span class="text-gray-500 font-light text-sm"> {{timeElapsed}}</span></h1>
+                    <h1  class="  px-2  font-bold ">Contributors <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
              
                 </div>
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
                     <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
-                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
-                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
+                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                     </div>
                     <div *ngIf="user.profilePicture?.downloadURL===undefined">
-                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="avatarNoPicturePath" routerLink="/profile" alt="">
-                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="avatarNoPicturePath" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 dark:border-gray-700 border-white rounded-full " [src]="avatarNoPicturePath" routerLink="/profile" alt="">
+                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white  dark:border-gray-700 rounded-full " [src]="avatarNoPicturePath" routerLink="/user-profile/{{user.uid}}" alt="">
                     </div>
                     <!-- <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
                     <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt=""> -->
                     <div >
                         <div *ngIf="showPopUpTeam[i]" >
-                            <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[5rem] bg-white  rounded-lg p-4 "  >
+                            <div class=" shadow-lg border-2 border-gray-200 dark:border-gray-700 absolute z-10 -mt-[5rem] bg-white dark:bg-slate-800  rounded-lg p-4 "  >
                                 <div class="flex items-center justify-between mb-2" >
                                     <a > 
                                         <img *ngIf="user.profilePicture?.downloadURL!==undefined" class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="">
@@ -33,23 +29,23 @@
                                         <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
                                     </div>
                                 </div>
-                                <p class="text-base font-semibold leading-none text-gray-800">
+                                <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
                                     <a>{{user.firstName}} {{user.lastName}}</a>
                                 </p>
-                                <p class="mb-3 text-sm font-normal">
+                                <p class="mb-3 text-sm font-normal dark:text-gray-200">
                                     <a class="hover:underline">{{user.email}}</a>
                                 </p>
-                                <p class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
+                                <p class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
                                 <ul class="flex text-sm">
                                     <li class="mr-2">
                                         <a  class="hover:underline">
-                                            <span class="font-semibold text-gray-800 ">{{user.following}} </span>
+                                            <span class="font-semibold text-gray-800 dark:text-gray-200">{{user.following}} </span>
                                             <span>Following</span>
                                         </a>
                                     </li>
                                     <li>
                                         <a class="hover:underline">
-                                            <span class="font-semibold text-gray-900">{{user.followers}} </span>
+                                            <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
                                             <span>Followers</span>
                                         </a>
                                     </li>
@@ -74,7 +70,7 @@
                 <div>
                    
                 <p class="p-2" *ngIf="!full" [innerHTML]="solution.content?.slice(0,250)+'...'"></p> 
-                    <a   *ngIf="!full" (click)="showLessOrMore()" ><span class="text-blue-800 hover:underline" >(more)</span></a> 
+                    <a   *ngIf="!full" (click)="showLessOrMore()" ><span class="text-blue-800 dark:text-gray-400 hover:underline" >(more)</span></a> 
                 </div>
                   
                     
@@ -82,7 +78,7 @@
                     <p class="p-2 font-Nunito" *ngIf="full" [innerHTML]="solution.content"></p>
 
                        
-                      <a *ngIf="full"  (click)="showLessOrMore()" ><span class="text-blue-800" > show less</span> </a>   
+                      <a *ngIf="full"  (click)="showLessOrMore()" ><span class="text-blue-800 dark:text-gray-400 hover:underline" > show less</span> </a>   
 
                     
             </div>
@@ -91,66 +87,83 @@
             <div class="flex flex-nowrap items-center">
                
                 <div class="flex flex-nowrap py-2 items-center" (click)="displayComments()">
-                    <img src="../../../assets/img/comment.png" class="w-6 flex-nowrap items-center" alt=""> 
+                    <!-- <img src="../../../assets/img/comment.png" class="w-6 flex-nowrap items-center" alt="">  -->
+                    <svg width="20px" height="20px" class="dark:fill-white fill-black mr-1" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns"> 
+                        <g id="Page-1" stroke="none" stroke-width="1" fill-rule="evenodd" sketch:type="MSPage">
+                            <g id="Icon-Set" sketch:type="MSLayerGroup" transform="translate(-100.000000, -255.000000)" >
+                                <path d="M116,281 C114.832,281 113.704,280.864 112.62,280.633 L107.912,283.463 L107.975,278.824 C104.366,276.654 102,273.066 102,269 C102,262.373 108.268,257 116,257 C123.732,257 130,262.373 130,269 C130,275.628 123.732,281 116,281 L116,281 Z M116,255 C107.164,255 100,261.269 100,269 C100,273.419 102.345,277.354 106,279.919 L106,287 L113.009,282.747 C113.979,282.907 114.977,283 116,283 C124.836,283 132,276.732 132,269 C132,261.269 124.836,255 116,255 L116,255 Z" id="comment-1" sketch:type="MSShapeGroup">
+                    
+                        </path>
+                            </g>
+                        </g>
+                    </svg>
                     <h1 *ngIf="comments" class="px-1 items-center ">{{comments.length}}</h1>
                     <h1 *ngIf="!comments" class="px-1 items-center ">0</h1>
                 </div>
                 <div class="flex flex-nowrap items-center">
-                    <img src="../../../assets/img/bar-1.png" class=" ml-8 w-6  items-center" alt=""> 
-                    <h1 class="px-1 items-center">1K</h1>
+                    <!-- <img src="../../../assets/img/bar-1.png" class=" ml-8 w-6  items-center" alt="">  -->
+                    
+                    <svg width="20px" height="20px" class="dark:fill-white fill-black ml-4 mr-1" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" >
+                        <path  d="M9 17a1 1 0 102 0H9zm2-14a1 1 0 10-2 0h2zM3 17a1 1 0 102 0H3zm2-7a1 1 0 00-2 0h2zm10 7a1 1 0 102 0h-2zm2-10a1 1 0 10-2 0h2zm-6 10V3H9v14h2zm-6 0v-7H3v7h2zm12 0V7h-2v10h2z"/>
+                    </svg>
+                    <h1 class="px-1 items-center">5</h1>
                 </div>
                 <div class="flex flex-nowrap py-2 items-center">
-                    <img src="../../../assets/img/share.png" class="w-6 ml-6 flex-nowrap items-center" alt=""> 
+                    <!-- <img src="../../../assets/img/share.png" class="w-6 ml-6 flex-nowrap items-center" alt="">  -->
+                    <svg width="20px" height="20px" viewBox="0 0 24 24" class="dark:fill-white fill-black ml-4 " xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M13.803 5.33333C13.803 3.49238 15.3022 2 17.1515 2C19.0008 2 20.5 3.49238 20.5 5.33333C20.5 7.17428 19.0008 8.66667 17.1515 8.66667C16.2177 8.66667 15.3738 8.28596 14.7671 7.67347L10.1317 10.8295C10.1745 11.0425 10.197 11.2625 10.197 11.4872C10.197 11.9322 10.109 12.3576 9.94959 12.7464L15.0323 16.0858C15.6092 15.6161 16.3473 15.3333 17.1515 15.3333C19.0008 15.3333 20.5 16.8257 20.5 18.6667C20.5 20.5076 19.0008 22 17.1515 22C15.3022 22 13.803 20.5076 13.803 18.6667C13.803 18.1845 13.9062 17.7255 14.0917 17.3111L9.05007 13.9987C8.46196 14.5098 7.6916 14.8205 6.84848 14.8205C4.99917 14.8205 3.5 13.3281 3.5 11.4872C3.5 9.64623 4.99917 8.15385 6.84848 8.15385C7.9119 8.15385 8.85853 8.64725 9.47145 9.41518L13.9639 6.35642C13.8594 6.03359 13.803 5.6896 13.803 5.33333Z"/>
+                        </svg>
                     <h1 class="px-1 items-center ">10</h1>
                 </div>
                 <div class="flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
-                    <img src="../../../assets/img/rating.png" class="w-6 ml-6 flex-nowrap items-center" alt=""> 
+                    <!-- <img src="../../../assets/img/rating.png" class="w-6 ml-6 flex-nowrap items-center" alt="">  -->
+                    <svg width="20px" height="20px" class="dark:fill-white fill-black ml-6 mr-1" viewBox="0 0 1024 1024"   xmlns="http://www.w3.org/2000/svg"><path d="M981.333333 960h-21.333333V576a21.333333 21.333333 0 0 0-42.666667 0v384h-128V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666h42.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v21.333334a21.333333 21.333333 0 0 0 42.666667 0v-21.333334a85.333333 85.333333 0 0 0-85.333333-85.333333h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333333v746.666667h-85.333334V426.666667a85.333333 85.333333 0 0 0-85.333333-85.333334h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333334v533.333333h-85.333333V640a85.333333 85.333333 0 0 0-85.333334-85.333333h-42.666666a85.333333 85.333333 0 0 0-85.333334 85.333333v320H64V42.666667a21.333333 21.333333 0 0 0-42.666667 0v938.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h938.666666a21.333333 21.333333 0 0 0 0-42.666667z m-661.333333 0H192V640a42.666667 42.666667 0 0 1 42.666667-42.666667h42.666666a42.666667 42.666667 0 0 1 42.666667 42.666667z m298.666667 0h-128V426.666667a42.666667 42.666667 0 0 1 42.666666-42.666667h42.666667a42.666667 42.666667 0 0 1 42.666667 42.666667z"/><path d="M938.666667 384a21.333333 21.333333 0 0 0-21.333334 21.333333v85.333334a21.333333 21.333333 0 0 0 42.666667 0v-85.333334a21.333333 21.333333 0 0 0-21.333333-21.333333zM958.293333 311.893333a24.533333 24.533333 0 0 0-4.48-7.04l-3.2-2.56a16.213333 16.213333 0 0 0-3.84-1.92L942.933333 298.666667a21.333333 21.333333 0 0 0-12.373333 1.28 19.2 19.2 0 0 0-11.52 11.52 21.333333 21.333333 0 0 0-1.706667 8.533333 21.333333 21.333333 0 0 0 6.186667 15.146667 21.333333 21.333333 0 0 0 7.04 4.48A21.333333 21.333333 0 0 0 938.666667 341.333333a21.333333 21.333333 0 0 0 15.146666-6.186666A22.4 22.4 0 0 0 960 320a21.333333 21.333333 0 0 0-1.706667-8.106667z"  /></svg>
                     <h1 *ngIf="solution.evaluationSummary "     class="px-1 items-center ">{{solution.evaluationSummary.average}}</h1>
                     <h1 *ngIf="!solution.evaluationSummary "  class="px-1 items-center  text-gray-100">__</h1>
 
-                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-72  " *ngIf="displayEvaluationSummary && solution.evaluationDetails">
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-72  dark:bg-slate-800" *ngIf="displayEvaluationSummary && solution.evaluationDetails">
                         <div class="p-3 space-y-2">
-                            <h3 class="font-semibold text-gray-900 ">Evaluation Summary: {{solution.numberofTimesEvaluated}} evaluator(s) </h3>
-                            <p class="font-bold">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{solution.evaluationSummary!.average}} </p>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                            <h3 class="font-semibold text-gray-900  dark:text-gray-200">Evaluation Summary: {{solution.numberofTimesEvaluated}} evaluator(s) </h3>
+                            <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{solution.evaluationSummary!.average}} </p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
                                 <div class="{{colors.average}} h-2.5  rounded-full " style="width: {{evaluationSummary.average}}%"></div>
                             </div>
                             <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
                             <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
                             </svg></a> -->
                             <div>
-                                <h1 class="mb-2">Achievable: {{solution.evaluationSummary!.achievable}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                <h1 class="mb-2  dark:text-gray-200">Achievable: {{solution.evaluationSummary!.achievable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
                                  
                                     <div class="{{colors.achievable}} h-1  rounded-full" style="width: {{evaluationSummary.achievable}}%" > </div>
                                 
                                 </div>
-                                <h1 class="mb-2">Feasible: {{solution.evaluationSummary!.feasible}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                <h1 class="mb-2 dark:text-gray-200">Feasible: {{solution.evaluationSummary!.feasible}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
                                     
                                     <div class="{{colors.feasible}} h-1  rounded-full  " style="width: {{evaluationSummary.feasible}}%"> </div>
                                 
                                 </div>
-                                <h1 class="mb-2">Economical: {{solution.evaluationSummary!.economical}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                <h1 class="mb-2  dark:text-gray-200">Economical: {{solution.evaluationSummary!.economical}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
                                     
                                     <div class="{{colors.economical}} h-1  rounded-full "style="width: {{evaluationSummary.economical}}%"> </div>
                                 
                                 </div>
-                                <h1 class="mb-2">Ecological: {{solution.evaluationSummary!.ecological}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                <h1 class="mb-2  dark:text-gray-200">Ecological: {{solution.evaluationSummary!.ecological}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
                                     
                                     <div class="{{colors.ecological}} h-1  rounded-full " style="width: {{evaluationSummary.ecological}}%" > </div>
                                 
                                 </div>
-                                <h1 class="mb-2">Equitable: {{solution.evaluationSummary!.equitable}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                <h1 class="mb-2  dark:text-gray-200">Equitable: {{solution.evaluationSummary!.equitable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
                                     
                                     <div class="{{colors.equitable}} h-1  rounded-full  " style="width: {{evaluationSummary.equitable}}%" > </div>
                                 
                                 </div>
-                                <h1 class="mb-2">Understandable: {{solution.evaluationSummary!.understandable}}</h1>
-                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2">
+                                <h1 class="mb-2 dark:text-gray-200">Understandable: {{solution.evaluationSummary!.understandable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
                                     
                                     <div class="{{colors.understandable}} h-1  rounded-full"style="width: {{evaluationSummary.understandable}}%" > </div>
                                 
@@ -161,9 +174,9 @@
                         <div data-popper-arrow></div>
                     </div>
 
-                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-20 inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-64  " *ngIf="displayEvaluationSummary && !solution.evaluationDetails">
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-20 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-64  dark:bg-slate-800" *ngIf="displayEvaluationSummary && !solution.evaluationDetails">
                         <div class="p-3 space-y-2">
-                            <h3 class="font-semibold text-gray-900 ">No Evaluations Submited... </h3>
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-200">No Evaluations Submited... </h3>
                            
                         </div>
                     </div>  
@@ -180,11 +193,11 @@
             <div class=" flex flex-nowrap mx-auto items-center py-2">
 
                 <div class="">
-                    <img *ngIf="profilePicture===''" [src]="avatarNoPicturePath" class="w-8 pt-1 bg-gray-100 " alt="">
+                    <div *ngIf="profilePicture===''">
+                        <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> 
+                    </div>
+                   
                     <img *ngIf="profilePicture!==''" [src]="profilePicture" class="w-8 pt-1 rounded-full" alt="">
-                    <!-- <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full">
-                        <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                    </div> -->
     
                 </div>
                
@@ -192,7 +205,7 @@
                     <div class=" w:[16rem]  md:w-[26rem] flex-col mx-auto items-center">   
             
                         <div class="" >
-                            <input [(ngModel)]="comment" type="search" id="default-search" class="block w-full p-1.5 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50" placeholder="Add a comment ..." required>
+                            <input [(ngModel)]="comment" type="search" id="default-search" class="block w-full p-1.5 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Add a comment ..." required>
                            
                         </div>
                     </div>
@@ -208,12 +221,14 @@
 
             <!-- Lists of comments -->
             <div  *ngFor="let comment of comments ; let i =index">
-                <div class="flex  mx-auto items-center my-2 bg-gray-100 p-2 " *ngIf="showComments && comments">
+                <div class="flex  mx-auto items-center my-2 bg-gray-100 p-2 dark:bg-slate-700" *ngIf="showComments && comments">
                     
                         <div class="flex flex-col   max-w-lg">
                             <div class="flex flex-nowrap">
                                 
-                                <img *ngIf="!commentUserProfilePicturePath[i]" [src]="avatarNoPicturePath" class="w-8 pt-1 rounded-full" alt="">
+                                <div *ngIf="!commentUserProfilePicturePath[i]">
+                                    <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> 
+                                </div>
                                 <img *ngIf="commentUserProfilePicturePath[i]" [src]="commentUserProfilePicturePath[i]" class="w-8 pt-1 rounded-full" alt="">
                                 <h1 class="  px-2 py-2">{{commentUserNames[i]}} . {{commentTimeElapsed[i]}}</h1>
                                     

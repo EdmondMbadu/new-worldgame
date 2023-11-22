@@ -1,47 +1,49 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
 
-<div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-32 ">
+<div class="dark:bg-slate-900 min-h-screen">
+    <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-28 ">
 
 
 
 
-    <div class=" flex flex-col md:flex-row justify-between mx-auto">
+        <div class=" flex flex-col md:flex-row justify-between mx-auto">
 
-        <div class=" container flex flex-col max-w-2xl">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8">Solution</h1>
-    
-            <div >
+            <div class=" container flex flex-col max-w-2xl">
+                <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-white">Solution</h1>
         
-                <app-solution [evaluationSummary]="evaluationSummary" 
-                [timeElapsed]="timeElapsed"  
-                [teamMembers]="teamMembers"  
-                [solution]="currentSolution"
-                [comments]="comments"
-                [colors]="colors"></app-solution>
-            </div>
+                <div >
             
+                    <app-solution [evaluationSummary]="evaluationSummary" 
+                    [timeElapsed]="timeElapsed"  
+                    [teamMembers]="teamMembers"  
+                    [solution]="currentSolution"
+                    [comments]="comments"
+                    [colors]="colors"></app-solution>
+                </div>
+                
+            </div>
+
+
+
+        </div>
+
+        <div class=" flex flex-col md:flex-row  justify-between mx-auto">
+
+            <div class=" container flex flex-col max-w-2xl">
+                <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6 dark:text-white">Similar Solutions</h1>
+        
+                <div class="flex flex-row" *ngFor="let solution of otherSolutions">
+                    <h1 class="underline text-blue-600 text-left dark:text-gray-400"> {{solution.title}}</h1>
+                </div>
+                
+            </div>
+
+
+
         </div>
 
 
-
     </div>
-
-    <div class=" flex flex-col md:flex-row  justify-between mx-auto">
-
-        <div class=" container flex flex-col max-w-2xl">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6">Similar Solutions</h1>
-    
-            <div class="flex flex-row" *ngFor="let solution of otherSolutions">
-                <h1 class="underline text-blue-600 text-left"> {{solution.title}}</h1>
-            </div>
-            
-        </div>
-
-
-
-    </div>
-
-
 </div>
 
 <app-chatbot></app-chatbot>

@@ -1,19 +1,19 @@
-<div class="w-full {{margin}} md:p-8  bg-white border border-gray-200 rounded-lg shadow p-2">
+<div class="w-full {{margin}} md:p-8  bg-white dark:bg-slate-800 border dark:border-gray-700 border-gray-200 rounded-lg shadow p-2">
     <div class="flex items-center justify-between mb-4">
-        <h5 class="text-md font-semibold leading-none text-gray-900">Solutions</h5>
+        <h5 class="text-md font-semibold leading-none text-gray-900 dark:text-gray-200">Solutions</h5>
         <a routerLink="{{viewAllPath}}" class="text-sm font-medium text-blue-600 hover:underline ">
             View all
         </a>
     </div>
     <div class="flow-root" *ngIf="path==='/playground-steps'">
-            <ul role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngFor="let solution of solutions; let i=index" [routerLink]="[path, solution.solutionId]">
+            <ul role="list" class="divide-y divide-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700" *ngFor="let solution of solutions; let i=index" [routerLink]="[path, solution.solutionId]">
                 <li class="py-3 sm:py-4">
                     <div class="flex items-center space-x-4">
                         <div class="flex -space-x-4">
                             <img class="w-14 h-14 border-white rounded-sm" [src]="data.sdgsPaths[solution.sdg!]" alt="">
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-md font-bold text-worldsecond truncate">
+                            <p class="text-md font-bold text-worldsecond truncate dark:text-white">
                                {{solution.title}}
                             </p>
                             <p class="text-sm text-gray-400 truncate" *ngIf="users[i]">
@@ -29,23 +29,19 @@
     </div>
         <div class="flow-root" *ngIf="path==='/problem-feedback'">
            <div  *ngFor="let solution of solutions; let i=index">
-                <ul   role="list" class="divide-y divide-gray-200 hover:bg-gray-200" *ngIf="solution.finished!==undefined"  [routerLink]="[path, solution.solutionId]">
+                <ul   role="list" class="divide-y divide-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700" *ngIf="solution.finished!==undefined"  [routerLink]="[path, solution.solutionId]">
                     <li class="py-3 sm:py-4">
                         <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
                                 <img class="w-14 h-14 border-white rounded-sm" [src]="data.sdgsPaths[solution.sdg!]" alt="">
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-md font-bold text-worldsecond truncate">
+                                <p class="text-md font-bold text-worldsecond truncate dark:text-white">
                                 {{solution.title}}
                                 </p>
-                                <!-- <p class="text-sm text-gray-400 truncate" *ngIf="myUsers[i]">
-                                {{myUsers[i].firstName}} {{myUsers[i].lastName}}
-                                </p> -->
+                               
                             </div>
-                            <!-- <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                                $320
-                            </div> -->
+                            
                         </div>
                     </li>
                 </ul>

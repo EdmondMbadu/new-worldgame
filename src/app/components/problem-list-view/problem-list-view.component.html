@@ -1,11 +1,12 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPagePending]="true"></app-navbar>
-
-<div class="flex flex-col mx-auto justify-center mt-32">
-    <div class=" flex flex-col mx-auto justify-center mb-6">
-        <h1 class="text-center text-xl font-bold font-Nunito">{{title}} ({{pending}})</h1>
-    </div> 
-        <div class="flex flex-col justify-center mx-auto ">
-            <app-problem-list [path]="'/playground-steps'"  [solutions]="pendingSolutions" [margin]="'md:mx-16 p-4'"></app-problem-list>
-        </div>
- 
+<div class="dark:bg-slate-900 min-h-screen">
+    <div class="flex flex-col mx-auto justify-center mt-28">
+        <div class=" flex flex-col mx-auto justify-center mb-6 dark:text-white">
+            <h1 class="text-center text-xl font-bold font-Nunito">{{title}} ({{pending}})</h1>
+        </div> 
+            <div class="flex flex-col justify-center mx-auto ">
+                <app-problem-list [path]="'/playground-steps'"  [solutions]="pendingSolutions" [margin]="'md:mx-16 p-4'"></app-problem-list>
+            </div>
+    
+    </div>
 </div>

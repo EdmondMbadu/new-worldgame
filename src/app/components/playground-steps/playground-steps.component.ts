@@ -112,7 +112,7 @@ export class PlaygroundStepsComponent implements OnInit {
       'What resources does our plan need?',
       'How much will our strategy cost?',
       'Where will you get the money?',
-      'What would you do with $100,000 if given to you? ',
+      'What would you do with $100,000 to take the strategy to the next level? ',
     ],
     ['Review Your Entire Strategy and Submit'],
   ];

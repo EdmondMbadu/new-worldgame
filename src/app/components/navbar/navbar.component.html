@@ -1,6 +1,8 @@
-<nav class="  container mx-auto p-4 fixed top-0 left-0 right-0 bg-white"*ngIf="!loggedOn">
 
-    <div class="flex items-center justify-between">
+
+<nav class=" w-full    p-4 fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 "*ngIf="email===''">
+
+    <div class=" container mx-auto flex items-center justify-between dark:text-white">
             <div class=" pt-2  " routerLink="/{{path}}"  >
                 <img  class="w-20 rounded-lg"  src="../../../assets/img/new-worldgame.png" alt="">
             </div>
@@ -26,32 +28,53 @@
 
 </nav>
 
-<nav class=" container mx-auto p-4 fixed top-0 left-0 right-0 bg-white"*ngIf="email!==''">
 
-    <div class="flex items-center justify-between">
+<nav class=" w-full  p-4 fixed top-0 left-0 right-0 bg-white dark:bg-slate-900"*ngIf="email!==''">
+
+    <div class="container  mx-auto flex items-center justify-between dark:text-white">
             <div class="flex-col mx-auto items-center" routerLink="/{{path}}">
                 <img   class="w-20 rounded-lg  "  src="../../../assets/img/new-worldgame.png" alt="">
             </div>
 
             <!-- homes and friends -->
-            <div class="flex flex-row mx-auto items-center lg:space-x-12 space-x-4">
+            <div class="flex flex-row mx-auto items-center lg:space-x-10 space-x-4">
                 <div class="flex flex-col" routerLink="/home">
-                    <img src="../../../assets/img/home.png"  class="w-10  px-1"> 
+                    <!-- <img src="../../../assets/img/home.png"  class="w-10  px-1">  -->
+                    <svg class="dark:fill-white fill-black"  viewBox="0,0,256,256" width="35px" height="35px"><g  fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M24.96289,1.05469c-0.20987,0.00724 -0.41214,0.08036 -0.57812,0.20898l-23,17.94727c-0.43579,0.33978 -0.51361,0.96851 -0.17383,1.4043c0.33978,0.43579 0.96851,0.51361 1.4043,0.17383l1.38477,-1.08008v26.29102c0.00006,0.55226 0.44774,0.99994 1,1h13.83203c0.10799,0.01785 0.21818,0.01785 0.32617,0h11.67383c0.10799,0.01785 0.21818,0.01785 0.32617,0h13.8418c0.55226,-0.00006 0.99994,-0.44774 1,-1v-26.29102l1.38477,1.08008c0.2819,0.21983 0.65967,0.27257 0.991,0.13833c0.33133,-0.13423 0.56586,-0.43504 0.61526,-0.7891c0.0494,-0.35406 -0.09386,-0.70757 -0.37579,-0.92736l-7.61523,-5.94141v-7.26953h-6v2.58594l-9.38477,-7.32227c-0.18607,-0.14428 -0.41707,-0.21828 -0.65234,-0.20898zM25,3.32227l19,14.82617v26.85156h-12v-19h-14v19h-12v-26.85156zM37,8h2v3.70898l-2,-1.5625zM20,28h10v17h-10z"></path></g></g></svg>
                    <h1 *ngIf="currentPageHome"  class=" text-xs text-center pt-1 border-teal-700 {{current}}">Home </h1>
                    <h1 *ngIf="!currentPageHome"  class=" text-xs text-center pt-1">Home </h1>
                 </div>
 
                 <div class=" flex flex-col" routerLink="/problem-list-feedback">
-                    <img src="../../../assets/img/letter.png"  class="w-10 px-1">
-                    <h1 *ngIf="currentPageEvaluation" class=" text-xs text-center pt-1 border-teal-700 {{current}}">Evaluations </h1>
-                    <h1 *ngIf="!currentPageEvaluation" class=" text-xs text-center pt-1 ">Evaluations </h1>
+                    <!-- <img src="../../../assets/img/letter.png"  class="w-10 px-1"> -->
+                    <svg width="35px" height="35px" class="dark:fill-white fill-black" viewBox="0 0 1024 1024"><path d="M981.333333 960h-21.333333V576a21.333333 21.333333 0 0 0-42.666667 0v384h-128V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666h42.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v21.333334a21.333333 21.333333 0 0 0 42.666667 0v-21.333334a85.333333 85.333333 0 0 0-85.333333-85.333333h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333333v746.666667h-85.333334V426.666667a85.333333 85.333333 0 0 0-85.333333-85.333334h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333334v533.333333h-85.333333V640a85.333333 85.333333 0 0 0-85.333334-85.333333h-42.666666a85.333333 85.333333 0 0 0-85.333334 85.333333v320H64V42.666667a21.333333 21.333333 0 0 0-42.666667 0v938.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h938.666666a21.333333 21.333333 0 0 0 0-42.666667z m-661.333333 0H192V640a42.666667 42.666667 0 0 1 42.666667-42.666667h42.666666a42.666667 42.666667 0 0 1 42.666667 42.666667z m298.666667 0h-128V426.666667a42.666667 42.666667 0 0 1 42.666666-42.666667h42.666667a42.666667 42.666667 0 0 1 42.666667 42.666667z"/><path d="M938.666667 384a21.333333 21.333333 0 0 0-21.333334 21.333333v85.333334a21.333333 21.333333 0 0 0 42.666667 0v-85.333334a21.333333 21.333333 0 0 0-21.333333-21.333333zM958.293333 311.893333a24.533333 24.533333 0 0 0-4.48-7.04l-3.2-2.56a16.213333 16.213333 0 0 0-3.84-1.92L942.933333 298.666667a21.333333 21.333333 0 0 0-12.373333 1.28 19.2 19.2 0 0 0-11.52 11.52 21.333333 21.333333 0 0 0-1.706667 8.533333 21.333333 21.333333 0 0 0 6.186667 15.146667 21.333333 21.333333 0 0 0 7.04 4.48A21.333333 21.333333 0 0 0 938.666667 341.333333a21.333333 21.333333 0 0 0 15.146666-6.186666A22.4 22.4 0 0 0 960 320a21.333333 21.333333 0 0 0-1.706667-8.106667z"  /></svg>
+                    <h1 *ngIf="currentPageEvaluation" class=" text-xs text-center pt-1 -mx-3 border-teal-700 {{current}}">Evaluations </h1>
+                    <h1 *ngIf="!currentPageEvaluation" class=" text-xs text-center pt-1 -mx-3">Evaluations </h1>
                     
                 </div>
 
                 <div class=" flex flex-col" routerLink="/problem-list-view">
-                    <img src="../../../assets/img/deadline.png"  class="w-10 px-1">
-                    <h1 *ngIf="currentPagePending" class=" text-xs text-center pt-1 border-teal-700 {{current}}">Pending </h1>
-                    <h1 *ngIf="!currentPagePending" class=" text-xs text-center pt-1 ">Pending </h1>
+                 
+                    <svg class="dark:fill-white fill-black" width="35px" height="35px" viewBox="0 0 24 24" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+                        <style type="text/css">
+                            .st0{opacity:0.2;fill:none;stroke:#000000;stroke-width:5.000000e-02;stroke-miterlimit:10;}
+                        </style>
+                        
+                        <g id="grid_system"/>
+                        
+                        <g id="_icons">
+                        
+                        <path d="M17,2c-1.3,0-2.4,0.5-3.3,1.2c0,0-0.1,0-0.1-0.1C11.9,2.8,10,3.1,8.5,3.9C6.3,5.2,5,7.5,5,10v5.5c-0.6,0.5-1,1.2-1,2   C4,18.9,5.1,20,6.5,20h2.7c0.4,1.2,1.5,2,2.8,2s2.4-0.8,2.8-2h2.7c1.4,0,2.5-1.1,2.5-2.5c0-0.8-0.4-1.5-1-2v-3.9c0,0,0,0,0,0   c1.8-0.8,3-2.5,3-4.6C22,4.2,19.8,2,17,2z M17.5,18H14h-4H6.5C6.2,18,6,17.8,6,17.5S6.2,17,6.5,17h11c0.3,0,0.5,0.2,0.5,0.5   S17.8,18,17.5,18z M17,15H7v-5c0-1.8,1-3.4,2.5-4.3C10.4,5.2,11.4,5,12.4,5C12.1,5.6,12,6.3,12,7c0,2.8,2.2,5,5,5V15z M17,10   c-1.7,0-3-1.3-3-3s1.3-3,3-3s3,1.3,3,3S18.7,10,17,10z"/>
+                        
+                        <path d="M18.7,5.3c-0.4-0.4-1-0.4-1.4,0L17,5.6l-0.3-0.3c-0.4-0.4-1-0.4-1.4,0s-0.4,1,0,1.4L15.6,7l-0.3,0.3c-0.4,0.4-0.4,1,0,1.4   C15.5,8.9,15.7,9,16,9s0.5-0.1,0.7-0.3L17,8.4l0.3,0.3C17.5,8.9,17.7,9,18,9s0.5-0.1,0.7-0.3c0.4-0.4,0.4-1,0-1.4L18.4,7l0.3-0.3   C19.1,6.3,19.1,5.7,18.7,5.3z"/>
+                        
+                        </g>
+                        
+                        </svg>
+              
+                    <h1 *ngIf="currentPagePending" class=" text-xs text-center pt-1 -mx-1 border-teal-700 {{current}}">Pending </h1>
+                    <h1 *ngIf="!currentPagePending" class=" text-xs text-center pt-1 -mx-1 ">Pending </h1>
                     
                 </div>
                    
@@ -68,22 +91,22 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                         </svg>
                     </div>
-                    <input type="search" id="default-search" class="block w-full p-3 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50"  [formControl]="searchControl" placeholder="Search a problem ..." required>
+                    <input type="search" id="default-search" class="block w-full p-3 pl-10 text-sm text-gray-900 border-2 border-gray-400 rounded-full bg-gray-50 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  [formControl]="searchControl" placeholder="Search a problem ..." required>
                     <!-- <button type="submit" class="text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button> -->
                 </div>
                  <!-- Result cart  -->
-            <div *ngIf="filteredItems.length!==0" class="absolute top-20 lg:w-[30rem] md:w-[26rem]  bg-white p-4 rounded-xl shadow-lg border-2 border-gray-200 mx-20">
+            <div *ngIf="filteredItems.length!==0" class="absolute top-20 lg:w-[30rem] md:w-[26rem]  bg-white p-4 rounded-xl shadow-lg border-2 border-gray-200 mx-20 dark:bg-slate-800 dark:border-gray-700">
               <ul role="list" class="divide-y divide-gray-300">
-                  <li class="py-3 sm:py-4 hover:bg-gray-100" *ngFor="let s of filteredItems.slice(0,5); let i= index">
+                  <li class="py-3 sm:py-4 hover:bg-gray-100 dark:hover:bg-slate-600" *ngFor="let s of filteredItems.slice(0,5); let i= index">
                       <div class="flex items-center space-x-4" [routerLink]="['/solution-view',s.solutionId]">
-                          <div class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full ">
-                              <span class="font-medium text-gray-600 ">{{s.authorName?.substring(0,2)}}</span>
+                          <div class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700">
+                              <span class="font-medium text-gray-600 dark:text-white">{{s.authorName?.substring(0,2)}}</span>
                           </div>
                           <div class="flex-1 min-w-0">
-                              <p class="text-sm font-medium text-gray-900 ">
+                              <p class="text-sm font-medium text-gray-900 dark:text-white">
                               {{s.title}}
                               </p>
-                              <p class="text-sm text-gray-500 truncate ">
+                              <p class="text-sm text-gray-500 truncate dark:text-white">
                               <!-- ({{s.phoneNumber| slice:0:3}}) - {{s.phoneNumber| slice:3:6}} - {{s.phoneNumber| slice:6:10}}  -->
                               </p>
                           </div>
@@ -98,27 +121,31 @@
 
             <div class="hidden md:flex md:flex-col mx-auto items-center" (click)="toggleDropDown()"  >
 
-                <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full" >
-                    <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                <div class="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full hover:text-blue-600 dark:hover:text-blue-500 md:me-0 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-white" >
+                    <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                    {{firstName}} {{lastName}}
+                    <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                    </svg>
                 </div>
-                <div  *ngIf="showDropDown" class="z-10 mt-10 absolute  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44">
-                    <div class="px-4 py-3 text-sm text-gray-900">
-                      <div>{{firstName}} {{lastName}}</div>
+                <div  *ngIf="showDropDown" class="z-10 mt-10 absolute  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600">
+                    <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                      <!-- <div>{{firstName}} {{lastName}}</div> -->
                       <div class="font-medium truncate">{{email}}</div>
                     </div>
-                    <ul class="py-2 text-sm text-gray-700 ">
+                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
                       <li>
-                        <a  class="block px-4 py-2 hover:bg-gray-100 ">Overview</a>
+                        <a  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Overview</a>
                       </li>
                       <li>
-                        <a routerLink="/profile"  class="block px-4 py-2 hover:bg-gray-100 ">Profile</a>
+                        <a routerLink="/profile"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Profile</a>
                       </li>
                       <li>
-                        <a  class="block px-4 py-2 hover:bg-gray-100 ">Settings</a>
+                        <a  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
                       </li>
                     </ul>
-                    <div class="py-1">
-                      <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 " (click)="logOut()">Sign out</a>
+                    <div class="py-1 ">
+                      <a class="block px-4 py-2 text-sm  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" (click)="logOut()">Sign out</a>
                     </div>
                 </div>
             

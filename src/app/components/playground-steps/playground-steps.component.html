@@ -1,77 +1,126 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'" current="''"></app-navbar>
 
-<div class=" container flex flex-col-reverse lg:flex-row mx-auto md:justify-between justify-center">
-    <div class="flex flex-col mx-auto" *ngFor="let item of AllQuestions; let i = index">
-        <app-playground-step 
-        [title]="currentSolution.title" 
-        [step]="steps[i]" 
-        [questions]="AllQuestions[i]"
-        [questionsTitles]="questionsTitles[i]"
-        [stepNumber]="currentIndexDisplay"
-        [buttonText]="buttontexts[i]"
-        [solutionId]="id"
-        (buttonInfoEvent)="updatePlayground($event)"
-        *ngIf="display[i]">
-        </app-playground-step>
+<div class="dark:bg-slate-900 min-h-screen">
+    <div class=" container flex flex-col-reverse lg:flex-row mx-auto md:justify-between justify-center">
+        <div class="flex flex-col mx-auto" *ngFor="let item of AllQuestions; let i = index">
+            <app-playground-step 
+            [title]="currentSolution.title" 
+            [step]="steps[i]" 
+            [questions]="AllQuestions[i]"
+            [questionsTitles]="questionsTitles[i]"
+            [stepNumber]="currentIndexDisplay"
+            [buttonText]="buttontexts[i]"
+            [solutionId]="id"
+            (buttonInfoEvent)="updatePlayground($event)"
+            *ngIf="display[i]">
+            </app-playground-step>
 
-    </div>
+        </div>
 
-        <div class=" flex flex-col mx-auto mt-28 ">
+            <div class=" flex flex-col mx-auto mt-28 ">
 
-            <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-xl   p-4">
-                <img class="object-cover mx-auto w-full rounded-t-lg h-96 md:h-auto md:w-32 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt="">
-                <div class="flex flex-col ">
-                    <h5 class="mb-2 text-2xl text-center font-bold tracking-tight text-gray-900 ">ReadMe</h5>
-                    <div  class="mb-2 font-normal text-gray-700 " [innerHTML]="currentSolution.description">
+                <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-xl   p-4 dark:bg-slate-800 dark:border-gray-700">
+                    <img class="object-cover mx-auto w-full rounded-t-lg h-96 md:h-auto md:w-32 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt="">
+                    <div class="flex flex-col ">
+                        <h5 class="mb-2 text-2xl text-center font-bold tracking-tight text-gray-900  dark:text-gray-200">ReadMe</h5>
+                        <div  class="mb-2 font-normal text-gray-700 dark:text-gray-200" [innerHTML]="currentSolution.description">
+                        </div>
                     </div>
-                </div>
 
-                <div class="flex flex-col ">
-                    <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center">Contributors :  {{teamMembers.length}}</h5>
-                </div>
+                    <div class="flex flex-col ">
+                        <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Contributors :  {{teamMembers.length}}</h5>
+                    </div>
+                        <div class="flex flex-row -space-x-1" >
+                            <div *ngFor="let user of teamMembers; let i= index" >
+                                <div *ngIf="user.uid === auth.currentUser.uid" >
+                                    <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
+                                    <img *ngIf="user.profilePicture?.downloadURL===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" src="../../../assets/img/user.png" routerLink="/profile" alt="">
+                                    <!-- <h2>{{user.profilePicture}}</h2> -->
+                                </div>
+                                <div *ngIf="user.uid !== auth.currentUser.uid" >
+                                    <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                                    <img *ngIf="user.profilePicture!.downloadURL ===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700 " src="../../../assets/img/user.png"routerLink="/user-profile/{{user.uid}}"alt="">
+
+                                </div>
+                                <div>
+                                    <div *ngIf="showPopUpTeam[i]" >
+                                        <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
+                                            <div class="flex items-center justify-between mb-2" >
+                                                <a >
+                                                    <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
+                                                    <img *ngIf="user.profilePicture!.downloadURL ===undefined"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt=""> 
+                                                    <!-- <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt=""> -->
+                                                </a>
+                                                <div>
+                                                    <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                                </div>
+                                            </div>
+                                            <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
+                                                <a>{{user.firstName}} {{user.lastName}}</a>
+                                            </p>
+                                            <p class="mb-3 text-sm font-normal">
+                                                <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
+                                            </p>
+                                            <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
+                                            <ul class="flex text-sm">
+                                                <li class="mr-2">
+                                                    <a  class="hover:underline">
+                                                        <span class="font-semibold text-gray-800 dark:text-gray-200">{{user.following}} </span>
+                                                        <span class="dark:text-gray-200">Following</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="hover:underline">
+                                                        <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
+                                                        <span class="dark:text-gray-200">Followers</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                
+
+                    <div class="flex flex-col p-4 ">
+                        <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Evaluators :  {{evaluators.length}}</h5>
+                    </div>
                     <div class="flex flex-row -space-x-1" >
-                        <div *ngFor="let user of teamMembers; let i= index" >
-                            <div *ngIf="user.uid === auth.currentUser.uid" >
-                                <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
-                                <img *ngIf="user.profilePicture?.downloadURL===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " src="../../../assets/img/user.png" routerLink="/profile" alt="">
-                                <!-- <h2>{{user.profilePicture}}</h2> -->
-                            </div>
-                            <div *ngIf="user.uid !== auth.currentUser.uid" >
-                                <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                                <img *ngIf="user.profilePicture!.downloadURL ===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " src="../../../assets/img/user.png"routerLink="/user-profile/{{user.uid}}"alt="">
-
-                            </div>
+                        <div *ngFor="let user of evaluators; let i= index" >
+                            <img *ngIf="user.profilePicture"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                            <img  *ngIf="!user.profilePicture"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" src="../../../assets/img/user.png" routerLink="/user-profile/{{user.uid}}" alt="">
                             <div>
-                                <div *ngIf="showPopUpTeam[i]" >
-                                    <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >
+                                <div *ngIf="showPopUpEvaluators[i]" >
+                                    <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
                                         <div class="flex items-center justify-between mb-2" >
                                             <a >
-                                                <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
-                                                <img *ngIf="user.profilePicture!.downloadURL ===undefined"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt=""> 
-                                                <!-- <img class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt=""> -->
+                                                <img *ngIf="user.profilePicture"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
+                                                <img *ngIf="!user.profilePicture"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt="">
                                             </a>
                                             <div>
                                                 <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
                                             </div>
                                         </div>
-                                        <p class="text-base font-semibold leading-none text-gray-800">
+                                        <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
                                             <a>{{user.firstName}} {{user.lastName}}</a>
                                         </p>
                                         <p class="mb-3 text-sm font-normal">
-                                            <a class="hover:underline">{{user.email}}</a>
+                                            <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
                                         </p>
-                                        <p  class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
+                                        <p class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
                                         <ul class="flex text-sm">
                                             <li class="mr-2">
                                                 <a  class="hover:underline">
-                                                    <span class="font-semibold text-gray-800 ">{{user.following}} </span>
-                                                    <span>Following</span>
+                                                    <span class="font-semibold text-gray-800  dark:text-gray-200">{{user.following}} </span>
+                                                    <span class="dark:text-gray-200">Following</span>
                                                 </a>
                                             </li>
                                             <li>
                                                 <a class="hover:underline">
-                                                    <span class="font-semibold text-gray-900">{{user.followers}} </span>
-                                                    <span>Followers</span>
+                                                    <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
+                                                    <span class="dark:text-gray-200">Followers</span>
                                                 </a>
                                             </li>
                                         </ul>
@@ -80,59 +129,12 @@
                             </div>
                         </div>
                     </div>
-                    
-               
-
-                <div class="flex flex-col p-4 ">
-                    <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center">Evaluators :  {{evaluators.length}}</h5>
-                </div>
-                <div class="flex flex-row -space-x-1" >
-                    <div *ngFor="let user of evaluators; let i= index" >
-                        <img *ngIf="user.profilePicture"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                        <img  *ngIf="!user.profilePicture"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full " src="../../../assets/img/user.png" routerLink="/user-profile/{{user.uid}}" alt="">
-                        <div>
-                            <div *ngIf="showPopUpEvaluators[i]" >
-                                <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 "  >
-                                    <div class="flex items-center justify-between mb-2" >
-                                        <a >
-                                            <img *ngIf="user.profilePicture"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
-                                            <img *ngIf="!user.profilePicture"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt="">
-                                        </a>
-                                        <div>
-                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-base font-semibold leading-none text-gray-800">
-                                        <a>{{user.firstName}} {{user.lastName}}</a>
-                                    </p>
-                                    <p class="mb-3 text-sm font-normal">
-                                        <a class="hover:underline">{{user.email}}</a>
-                                    </p>
-                                    <p class="mb-4 text-sm text-gray-800">{{user.profileCredential}}</p>
-                                    <ul class="flex text-sm">
-                                        <li class="mr-2">
-                                            <a  class="hover:underline">
-                                                <span class="font-semibold text-gray-800 ">{{user.following}} </span>
-                                                <span>Following</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="hover:underline">
-                                                <span class="font-semibold text-gray-900">{{user.followers}} </span>
-                                                <span>Followers</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                     
+                        
+                        
                     
                 
-              
-            </a>
+                </a>
 
-        </div>
+            </div>
+    </div>
 </div>
