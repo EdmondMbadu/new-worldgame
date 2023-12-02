@@ -31,13 +31,22 @@ export class SolutionViewComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private time: TimeService,
     private data: DataService
-  ) {
-    this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
+  ) {}
+  ngOnInit(): void {
+    this.activatedRoute.paramMap.subscribe((params) => {
+      this.solutionId = params.get('id');
+      this.loadSolutionData(this.solutionId);
+    });
+  }
+
+  loadSolutionData(solutionId: string): void {
     this.solution
-      .getSolutionForNonAuthenticatedUser(this.solutionId)
+      .getSolutionForNonAuthenticatedUser(solutionId)
       .subscribe((data: any) => {
         this.currentSolution = data[0];
-        this.timeElapsed = time.timeAgo(this.currentSolution.submissionDate!);
+        this.timeElapsed = this.time.timeAgo(
+          this.currentSolution.submissionDate!
+        );
         this.evaluationSummary = this.data.mapEvaluationToNumeric(
           this.currentSolution.evaluationSummary!
         );
@@ -53,7 +62,6 @@ export class SolutionViewComponent implements OnInit {
           });
       });
   }
-  ngOnInit(): void {}
 
   getMembers() {
     for (const key in this.currentSolution.participants) {

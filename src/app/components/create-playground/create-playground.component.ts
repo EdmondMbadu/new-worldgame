@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
-import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
@@ -118,7 +119,7 @@ export class CreatePlaygroundComponent {
     return this.myForm.get('sdg');
   }
 
-  public Editor = ClassicEditor;
+  public Editor: any = Editor;
   public onReady(editor: any) {}
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();

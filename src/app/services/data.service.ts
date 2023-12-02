@@ -52,6 +52,27 @@ export class DataService implements OnInit {
   getAllUsers() {
     return this.afs.collection<User>(`users`).valueChanges();
   }
+
+  updateFollowers(uid: string, followers: string[]) {
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
+      `users/${uid}`
+    );
+    const data = {
+      followersArray: followers,
+      followers: followers.length.toString(),
+    };
+    return userRef.set(data, { merge: true });
+  }
+  updateFollowing(uid: string, following: string[]) {
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
+      `users/${uid}`
+    );
+    const data = {
+      followingArray: following,
+      following: following.length.toString(),
+    };
+    return userRef.set(data, { merge: true });
+  }
   mapEvaluationToNumeric(evaluation: Evaluation) {
     if (evaluation) {
       return {

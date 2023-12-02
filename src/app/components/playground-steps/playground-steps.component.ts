@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
+// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
 import { AuthService } from 'src/app/services/auth.service';

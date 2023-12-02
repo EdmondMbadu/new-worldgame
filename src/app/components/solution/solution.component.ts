@@ -159,9 +159,7 @@ export class PostComponent implements OnInit {
               data.profilePicture.downloadURL
             );
           } else {
-            this.commentUserProfilePicturePath.push(
-              '../../../assets/img/user.png'
-            );
+            this.commentUserProfilePicturePath.push();
           }
         }
       });

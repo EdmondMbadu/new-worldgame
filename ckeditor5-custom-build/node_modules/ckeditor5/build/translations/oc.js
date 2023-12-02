@@ -1,0 +1,1 @@
+!function(o){const e=o.oc=o.oc||{};e.dictionary=Object.assign(e.dictionary||{},{"%0 of %1":"",Cancel:"Anullar","Cannot upload file:":"",Clear:"","Remove color":"","Restore default":"","Rich Text Editor. Editing area: %0":"",Save:"Enregistrar","Show more items":""}),e.getPluralForm=function(o){return o>1}}(window.CKEDITOR_TRANSLATIONS||(window.CKEDITOR_TRANSLATIONS={}));

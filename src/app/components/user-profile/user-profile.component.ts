@@ -3,7 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { TimeService } from 'src/app/services/time.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -14,24 +16,34 @@ export class UserProfileComponent implements OnInit {
   id: any = '';
   user: any = {};
   dateJoined: string = '';
-  time: any;
+  followers: string[] = [];
+  following: string[] = [];
   authenticatedUser: User = this.auth.currentUser;
   profilePicturePath?: string = '';
   completedSolutions: Solution[] = [];
   followingThisUser: boolean = false;
-  followingArray: string[] = [];
 
   solutions: Solution[] = [];
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
-    private solution: SolutionService
+    private solution: SolutionService,
+    private time: TimeService,
+    private data: DataService
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
 
     auth.getAUser(this.id).subscribe((data) => {
       this.user = data;
-      this.followingThisUser = this.checkIfFollowing();
+      this.dateJoined = this.time.getMonthYear(this.user.dateJoined!);
+      if (this.auth.currentUser.followingArray !== undefined) {
+        this.following = this.auth.currentUser.followingArray;
+      }
+      if (this.user.followersArray !== undefined) {
+        this.followers = this.user.followersArray;
+      }
+      this.checkIfFollowing();
+
       this.solution
         .getAllSolutionsOfThisUser(data?.email!)
         .subscribe((data: any) => {
@@ -44,30 +56,30 @@ export class UserProfileComponent implements OnInit {
       }
     });
   }
-  ngOnInit(): void {
-    if (this.authenticatedUser.followingArray !== undefined) {
-      this.followingArray = this.authenticatedUser.followersArray!;
-    }
-    // this.dateJoined = this.time.getMonthYear(this.user!.dateJoined);
-  }
+  ngOnInit(): void {}
 
   checkIfFollowing() {
-    if (this.user.followersArray === undefined) {
-      return false;
-    } else if (
-      this.user.followersArray.indexOf(this.authenticatedUser.uid) > -1
-    ) {
-      return true;
-    }
-    return false;
+    this.followingThisUser =
+      this.followers.indexOf(this.auth.currentUser.uid) > -1;
   }
 
-  followSomeone() {
-    // if (this.followingThisUser) {
-    //   this.followingArray = this.followingArray.filter((item) => {
-    //     item !== this.user.uid;
-    //   });
-    // }
+  followThisUser() {
+    this.followers.push(this.auth.currentUser.uid);
+    this.following.push(this.user.uid);
+    this.checkIfFollowing();
+    this.data.updateFollowers(this.user.uid, this.followers);
+    this.data.updateFollowing(this.auth.currentUser.uid, this.following);
+  }
+  UnFollowThisUser() {
+    this.followers = this.followers.filter((item) => {
+      return item !== this.auth.currentUser.uid;
+    });
+    this.following = this.following.filter((item) => {
+      return item !== this.user.uid;
+    });
+    this.checkIfFollowing();
+    this.data.updateFollowers(this.user.uid, this.followers);
+    this.data.updateFollowing(this.auth.currentUser.uid!, this.following);
   }
   findCompletedSolutions() {
     this.completedSolutions = [];

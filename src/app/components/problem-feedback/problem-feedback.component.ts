@@ -45,6 +45,7 @@ export class ProblemFeedbackComponent {
   ];
   evaluation: Evaluation = {};
   evaluators: any = {};
+  comments: any[] = [];
 
   values: number[] = this.evaluationArray.map((data) => {
     return 0;
@@ -65,8 +66,10 @@ export class ProblemFeedbackComponent {
       if (data?.evaluationDetails !== undefined) {
         this.evaluationDetails = data?.evaluationDetails!;
       }
+
       this.timeElapsed = this.time.timeAgo(data?.submissionDate!);
       this.getMembers();
+      this.comments = this.userSolution.comments!;
     });
   }
 
@@ -104,17 +107,34 @@ export class ProblemFeedbackComponent {
         Number(this.userSolution.numberofTimesEvaluated) + 1
       ).toString();
     } else {
-      this.userSolution.numberofTimesEvaluated = (1).toString();
+      this.userSolution.numberofTimesEvaluated = '1';
     }
     (this.userSolution.evaluationSummary = this.evaluationSummary),
       (this.userSolution.evaluationDetails = this.evaluationDetails);
     this.updateEvaluators();
-    const comments = {
-      authorId: this.auth.currentUser.uid,
-      date: this.time.todaysDate(),
-      content: this.comment,
-    };
-    this.userSolution.comments?.push(comments);
+    if (this.comments) {
+      this.comments.push({
+        authorId: this.auth.currentUser.uid,
+        date: this.time.todaysDate(),
+        content: this.comment,
+        likes: '0',
+        dislikes: '0',
+      });
+    } else if (this.comment !== '') {
+      this.comments = [
+        {
+          authorId: this.auth.currentUser.uid,
+          date: this.time.todaysDate(),
+          content: this.comment,
+          likes: '0',
+          dislikes: '0',
+        },
+      ];
+    } else {
+      this.comments = [];
+    }
+
+    this.userSolution.comments = this.comments;
     if (this.sendFeedback) {
       this.solution.addEvaluation(this.userSolution).then(() => {
         this.router.navigate(['/home']);

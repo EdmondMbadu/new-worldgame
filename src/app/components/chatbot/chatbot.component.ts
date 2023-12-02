@@ -25,6 +25,7 @@ export class ChatbotComponent implements OnInit {
   status = '';
   errorMsg = '';
   prompt = '';
+  temp = '';
   constructor(private afs: AngularFirestore, private auth: AuthService) {
     this.user = this.auth.currentUser;
     this.deleteAllDocuments();

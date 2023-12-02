@@ -3,7 +3,7 @@
         <div class=" w-fit bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800 dark:text-gray-200">
             <div *ngIf="solution" class="flex  pb-10">
                 <div class="flex flex-row">
-                    <h1  class="  px-2  font-bold ">Contributors <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
+                    <h1  class="  px-2  font-bold ">Designers <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
              
                 </div>
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
@@ -12,18 +12,26 @@
                         <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                     </div>
                     <div *ngIf="user.profilePicture?.downloadURL===undefined">
-                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 dark:border-gray-700 border-white rounded-full " [src]="avatarNoPicturePath" routerLink="/profile" alt="">
-                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white  dark:border-gray-700 rounded-full " [src]="avatarNoPicturePath" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <div *ngIf="user.uid === auth.currentUser.uid"  (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/profile">
+               
+                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <div *ngIf="user.uid !== auth.currentUser.uid"  (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
+               
+                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        </div>   
                     </div>
-                    <!-- <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
-                    <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt=""> -->
+        
                     <div >
                         <div *ngIf="showPopUpTeam[i]" >
                             <div class=" shadow-lg border-2 border-gray-200 dark:border-gray-700 absolute z-10 -mt-[5rem] bg-white dark:bg-slate-800  rounded-lg p-4 "  >
                                 <div class="flex items-center justify-between mb-2" >
                                     <a > 
                                         <img *ngIf="user.profilePicture?.downloadURL!==undefined" class="w-10 h-10 rounded-full" [src]="user.profilePicture?.downloadURL"alt="">
-                                        <img *ngIf="user.profilePicture?.downloadURL===undefined" class="w-10 h-10 rounded-full" [src]="avatarNoPicturePath"alt="">
+                                        <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+               
+                                            <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        </div>   
                                     </a>
                                     <div>
                                         <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
@@ -118,7 +126,7 @@
                 <div class="flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
                     <!-- <img src="../../../assets/img/rating.png" class="w-6 ml-6 flex-nowrap items-center" alt="">  -->
                     <svg width="20px" height="20px" class="dark:fill-white fill-black ml-6 mr-1" viewBox="0 0 1024 1024"   xmlns="http://www.w3.org/2000/svg"><path d="M981.333333 960h-21.333333V576a21.333333 21.333333 0 0 0-42.666667 0v384h-128V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666h42.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v21.333334a21.333333 21.333333 0 0 0 42.666667 0v-21.333334a85.333333 85.333333 0 0 0-85.333333-85.333333h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333333v746.666667h-85.333334V426.666667a85.333333 85.333333 0 0 0-85.333333-85.333334h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333334v533.333333h-85.333333V640a85.333333 85.333333 0 0 0-85.333334-85.333333h-42.666666a85.333333 85.333333 0 0 0-85.333334 85.333333v320H64V42.666667a21.333333 21.333333 0 0 0-42.666667 0v938.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h938.666666a21.333333 21.333333 0 0 0 0-42.666667z m-661.333333 0H192V640a42.666667 42.666667 0 0 1 42.666667-42.666667h42.666666a42.666667 42.666667 0 0 1 42.666667 42.666667z m298.666667 0h-128V426.666667a42.666667 42.666667 0 0 1 42.666666-42.666667h42.666667a42.666667 42.666667 0 0 1 42.666667 42.666667z"/><path d="M938.666667 384a21.333333 21.333333 0 0 0-21.333334 21.333333v85.333334a21.333333 21.333333 0 0 0 42.666667 0v-85.333334a21.333333 21.333333 0 0 0-21.333333-21.333333zM958.293333 311.893333a24.533333 24.533333 0 0 0-4.48-7.04l-3.2-2.56a16.213333 16.213333 0 0 0-3.84-1.92L942.933333 298.666667a21.333333 21.333333 0 0 0-12.373333 1.28 19.2 19.2 0 0 0-11.52 11.52 21.333333 21.333333 0 0 0-1.706667 8.533333 21.333333 21.333333 0 0 0 6.186667 15.146667 21.333333 21.333333 0 0 0 7.04 4.48A21.333333 21.333333 0 0 0 938.666667 341.333333a21.333333 21.333333 0 0 0 15.146666-6.186666A22.4 22.4 0 0 0 960 320a21.333333 21.333333 0 0 0-1.706667-8.106667z"  /></svg>
-                    <h1 *ngIf="solution.evaluationSummary "     class="px-1 items-center ">{{solution.evaluationSummary.average}}</h1>
+                    <h1 *ngIf="solution.evaluationSummary "     class="px-1 items-center ">{{solution.numberofTimesEvaluated}}E-{{solution.evaluationSummary.average}}</h1>
                     <h1 *ngIf="!solution.evaluationSummary "  class="px-1 items-center  text-gray-100">__</h1>
 
                     <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-72  dark:bg-slate-800" *ngIf="displayEvaluationSummary && solution.evaluationDetails">

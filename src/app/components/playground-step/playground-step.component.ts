@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
@@ -102,7 +103,7 @@ export class PlaygroundStepComponent {
     }
   }
 
-  public Editor = ClassicEditor;
+  public Editor: any = Editor;
   public onReady(editor: any) {
     // console.log('CKEditor5 Angular Component is ready to use!', editor);
   }
