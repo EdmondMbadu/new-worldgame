@@ -13,7 +13,8 @@ export class Solution {
   evaluated?: { [key: string]: string } = {};
   comments?: Comment[] = [];
   status?: { [key: string]: string } = {};
-  likes?: string;
+  likes?: string[];
+  numLike?: string;
   views?: string;
   share?: string;
   sdg?: string;

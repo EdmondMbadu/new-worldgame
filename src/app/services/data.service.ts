@@ -63,6 +63,7 @@ export class DataService implements OnInit {
     };
     return userRef.set(data, { merge: true });
   }
+
   updateFollowing(uid: string, following: string[]) {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${uid}`

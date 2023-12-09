@@ -49,7 +49,8 @@ export class SolutionService {
       endDateFormatted: formatedDate,
       creationDate: this.time.todaysDate(),
       views: '1',
-      likes: '0',
+      likes: [],
+      numLike: '0',
       sdg: sdg,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
@@ -83,7 +84,8 @@ export class SolutionService {
       creationDate: this.time.todaysDate(),
       sdg: sdg,
       views: '1',
-      likes: '0',
+      numLike: '0',
+      likes: [],
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
@@ -162,6 +164,30 @@ export class SolutionService {
     );
     return solutionRef.set(data, { merge: true });
   }
+  addLikes(solution: Solution) {
+    let numLike = solution.numLike === undefined ? 0 : solution.numLike;
+    const data = {
+      numLike: (Number(numLike) + 1).toString(),
+      likes: solution.likes,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solution.solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
+  }
+  removeLikes(solution: Solution) {
+    let numberLike = solution.numLike === undefined ? 0 : solution.numLike;
+    numberLike = Math.max(0, Number(numberLike) - 1);
+    const data = {
+      numLike: numberLike.toString(),
+      likes: solution.likes,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solution.solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
+  }
+
   populateArrayOfSolutions() {}
   saveSolutionStatus(solutionId: string, status: any) {
     const data = {
