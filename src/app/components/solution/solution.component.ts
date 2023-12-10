@@ -156,6 +156,11 @@ export class PostComponent implements OnInit {
         ? []
         : this.solution.likes;
 
+    console.log(
+      'solution likes and liker ',
+      this.solution.likes,
+      this.auth.currentUser.uid
+    );
     if (
       this.solution.likes !== undefined &&
       this.solution.likes!.indexOf(this.auth.currentUser.uid) === -1

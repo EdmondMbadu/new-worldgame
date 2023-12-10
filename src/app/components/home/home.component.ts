@@ -30,12 +30,12 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
       this.allSolutions = data;
+      this.findCompletedSolutions();
     });
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       // console.log('this is the current user solutions', data);
       this.currentUserSolutions = data;
       this.findPendingSolutions();
-      this.findCompletedSolutions();
     });
 
     this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
