@@ -1,4 +1,4 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
+<app-navbar  [path]="'home'" current="''"></app-navbar>
 
 <div class="dark:bg-slate-900 min-h-screen">
     <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-28 ">
@@ -12,7 +12,6 @@
                 <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-white">Solution</h1>
         
                 <div >
-            
                     <app-solution [evaluationSummary]="evaluationSummary" 
                     [timeElapsed]="timeElapsed"  
                     [teamMembers]="teamMembers"  

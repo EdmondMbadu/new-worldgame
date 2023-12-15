@@ -15,6 +15,7 @@ export class Solution {
   status?: { [key: string]: string } = {};
   likes?: string[];
   numLike?: string;
+  numShare?: string;
   views?: string;
   share?: string;
   sdg?: string;

@@ -8,8 +8,9 @@
                 </div>
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
                     <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
-                        <img *ngIf="user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
-                        <img *ngIf="user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <img *ngIf="auth.currentUser!==null && user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
+                        <img *ngIf="auth.currentUser!==null && user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                        <img *ngIf="auth.currentUser===null"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                     </div>
                     <div *ngIf="user.profilePicture?.downloadURL===undefined">
                         <div *ngIf="user.uid === auth.currentUser.uid"  (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/profile">
@@ -118,12 +119,12 @@
                         </svg>
                     <h1 class="px-1 items-center">{{solution.numLike}}</h1>
                 </div>
-                <div class="flex flex-nowrap py-2 items-center">
+                <div class="flex flex-nowrap py-2 items-center" (click)="openSharetoSocialMedia()">
         
                     <svg width="20px" height="20px" viewBox="0 0 24 24" class="dark:fill-white fill-black ml-4 hover:fill-blue-700" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M13.803 5.33333C13.803 3.49238 15.3022 2 17.1515 2C19.0008 2 20.5 3.49238 20.5 5.33333C20.5 7.17428 19.0008 8.66667 17.1515 8.66667C16.2177 8.66667 15.3738 8.28596 14.7671 7.67347L10.1317 10.8295C10.1745 11.0425 10.197 11.2625 10.197 11.4872C10.197 11.9322 10.109 12.3576 9.94959 12.7464L15.0323 16.0858C15.6092 15.6161 16.3473 15.3333 17.1515 15.3333C19.0008 15.3333 20.5 16.8257 20.5 18.6667C20.5 20.5076 19.0008 22 17.1515 22C15.3022 22 13.803 20.5076 13.803 18.6667C13.803 18.1845 13.9062 17.7255 14.0917 17.3111L9.05007 13.9987C8.46196 14.5098 7.6916 14.8205 6.84848 14.8205C4.99917 14.8205 3.5 13.3281 3.5 11.4872C3.5 9.64623 4.99917 8.15385 6.84848 8.15385C7.9119 8.15385 8.85853 8.64725 9.47145 9.41518L13.9639 6.35642C13.8594 6.03359 13.803 5.6896 13.803 5.33333Z"/>
                         </svg>
-                    <h1 class="px-1 items-center ">10</h1>
+                    <h1 class="px-1 items-center ">{{solution.numShare}}</h1>
                 </div>
                 <div class="flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
             
@@ -272,10 +273,10 @@
     </div>
 
   
- <!-- Modal for submitting a solution  -->
+ <!-- Modal for asking user to login to add comment -->
 <div id="popup-modal"  class=" p-4" *ngIf="displayAddCommentPermission" >
     <div class="  w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
-        <div class="border-gray-200 border-2 relative bg-white rounded-lg shadow">
+        <div class="border-gray-200 border-2 relative bg-white rounded-lg shadow-lg">
             <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" (click)="closeDisplayCommentPermission()" >
                 <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -295,3 +296,104 @@
         </div>
     </div>
   </div>
+
+   <!-- Modal to share on social media -->
+
+   <!-- Main modal -->
+<div id="crypto-modal"  class="w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex" *ngIf="displaySharePost">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Share Solution
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" (click)="closeSharePost()">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-2 md:p-3">
+                <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Share this solution with the world!</p>
+                <ul class="my-4 space-y-3">
+                    <li>
+                        <a (click)="share('twitter')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                            <svg width="25px" height="25px" viewBox="0 -4 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    
+                                <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Color-" transform="translate(-300.000000, -164.000000)" fill="#00AAEC">
+                                        <path d="M348,168.735283 C346.236309,169.538462 344.337383,170.081618 342.345483,170.324305 C344.379644,169.076201 345.940482,167.097147 346.675823,164.739617 C344.771263,165.895269 342.666667,166.736006 340.418384,167.18671 C338.626519,165.224991 336.065504,164 333.231203,164 C327.796443,164 323.387216,168.521488 323.387216,174.097508 C323.387216,174.88913 323.471738,175.657638 323.640782,176.397255 C315.456242,175.975442 308.201444,171.959552 303.341433,165.843265 C302.493397,167.339834 302.008804,169.076201 302.008804,170.925244 C302.008804,174.426869 303.747139,177.518238 306.389857,179.329722 C304.778306,179.280607 303.256911,178.821235 301.9271,178.070061 L301.9271,178.194294 C301.9271,183.08848 305.322064,187.17082 309.8299,188.095341 C309.004402,188.33225 308.133826,188.450704 307.235077,188.450704 C306.601162,188.450704 305.981335,188.390033 305.381229,188.271578 C306.634971,192.28169 310.269414,195.2026 314.580032,195.280607 C311.210424,197.99061 306.961789,199.605634 302.349709,199.605634 C301.555203,199.605634 300.769149,199.559408 300,199.466956 C304.358514,202.327194 309.53689,204 315.095615,204 C333.211481,204 343.114633,188.615385 343.114633,175.270495 C343.114633,174.831347 343.106181,174.392199 343.089276,173.961719 C345.013559,172.537378 346.684275,170.760563 348,168.735283" id="Twitter">
+                            
+                            </path>
+                                    </g>
+                                </g>
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Twitter</span>
+                            <span class="inline-flex items-center justify-center px-2 py-0.5 ms-3 text-xs font-medium text-gray-500 bg-gray-200 rounded dark:bg-gray-700 dark:text-gray-400">Popular</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a (click)="share('facebook')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                            <svg width="25px" height="25px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+   
+                                <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0">
+                                        <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,208 Z" id="Facebook">
+                            
+                            </path>
+                                    </g>
+                                </g>
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Facebook</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a (click)="share('email')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                           
+                            <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="style=stroke">
+                                <g id="email">
+                                <path id="vector (Stroke)" fill-rule="evenodd" clip-rule="evenodd" d="M3.88534 5.2371C3.20538 5.86848 2.75 6.89295 2.75 8.5V15.5C2.75 17.107 3.20538 18.1315 3.88534 18.7629C4.57535 19.4036 5.61497 19.75 7 19.75H17C18.385 19.75 19.4246 19.4036 20.1147 18.7629C20.7946 18.1315 21.25 17.107 21.25 15.5V8.5C21.25 6.89295 20.7946 5.86848 20.1147 5.2371C19.4246 4.59637 18.385 4.25 17 4.25H7C5.61497 4.25 4.57535 4.59637 3.88534 5.2371ZM2.86466 4.1379C3.92465 3.15363 5.38503 2.75 7 2.75H17C18.615 2.75 20.0754 3.15363 21.1353 4.1379C22.2054 5.13152 22.75 6.60705 22.75 8.5V15.5C22.75 17.393 22.2054 18.8685 21.1353 19.8621C20.0754 20.8464 18.615 21.25 17 21.25H7C5.38503 21.25 3.92465 20.8464 2.86466 19.8621C1.79462 18.8685 1.25 17.393 1.25 15.5V8.5C1.25 6.60705 1.79462 5.13152 2.86466 4.1379Z" fill="#000000"/>
+                                <path id="vector (Stroke)_2" fill-rule="evenodd" clip-rule="evenodd" d="M19.3633 7.31026C19.6166 7.63802 19.5562 8.10904 19.2285 8.3623L13.6814 12.6486C12.691 13.4138 11.3089 13.4138 10.3185 12.6486L4.77144 8.3623C4.44367 8.10904 4.38328 7.63802 4.63655 7.31026C4.88982 6.98249 5.36083 6.9221 5.6886 7.17537L11.2356 11.4616C11.6858 11.8095 12.3141 11.8095 12.7642 11.4616L18.3113 7.17537C18.6391 6.9221 19.1101 6.98249 19.3633 7.31026Z" fill="#000000"/>
+                                </g>
+                                </g>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Email</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a (click)="share('linkedin')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                                                    
+                            <svg width="25px" height="25px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="24" cy="24" r="20" fill="#0077B5"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M18.7747 14.2839C18.7747 15.529 17.8267 16.5366 16.3442 16.5366C14.9194 16.5366 13.9713 15.529 14.0007 14.2839C13.9713 12.9783 14.9193 12 16.3726 12C17.8267 12 18.7463 12.9783 18.7747 14.2839ZM14.1199 32.8191V18.3162H18.6271V32.8181H14.1199V32.8191Z" fill="white"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M22.2393 22.9446C22.2393 21.1357 22.1797 19.5935 22.1201 18.3182H26.0351L26.2432 20.305H26.3322C26.9254 19.3854 28.4079 17.9927 30.8101 17.9927C33.7752 17.9927 35.9995 19.9502 35.9995 24.219V32.821H31.4922V24.7838C31.4922 22.9144 30.8404 21.6399 29.2093 21.6399C27.9633 21.6399 27.2224 22.4999 26.9263 23.3297C26.8071 23.6268 26.7484 24.0412 26.7484 24.4574V32.821H22.2411V22.9446H22.2393Z" fill="white"/>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Linkedin</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a  #copyLink (click)="copyToClipboard()"
+                        [class.flash-animation]="isCopied"
+                        [class.bg-green-500]="isCopied"
+                       
+                        class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                                                    
+                            <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.9983 10C20.9862 7.82497 20.8897 6.64706 20.1213 5.87868C19.2426 5 17.8284 5 15 5H12C9.17157 5 7.75736 5 6.87868 5.87868C6 6.75736 6 8.17157 6 11V16C6 18.8284 6 20.2426 6.87868 21.1213C7.75736 22 9.17157 22 12 22H15C17.8284 22 19.2426 22 20.1213 21.1213C21 20.2426 21 18.8284 21 16V15" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M3 10V16C3 17.6569 4.34315 19 6 19M18 5C18 3.34315 16.6569 2 15 2H11C7.22876 2 5.34315 2 4.17157 3.17157C3.51839 3.82475 3.22937 4.69989 3.10149 6" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Copy to clipboard</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</div>

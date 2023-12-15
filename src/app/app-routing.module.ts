@@ -42,7 +42,7 @@ const routes: Routes = [
   {
     path: 'solution-view/:id',
     component: SolutionViewComponent,
-    canActivate: [AuthGuard],
+    // canActivate: [AuthGuard],
   },
 
   {

@@ -15,6 +15,7 @@ import { TimeService } from 'src/app/services/time.service';
 export class PostComponent implements OnInit {
   @Input() title: string = 'Electrifying Africa';
   displayAddCommentPermission: boolean = false;
+  isCopied = false;
   el: number = 100;
   comment: string = '';
   commentUserNames: string[] = [];
@@ -28,6 +29,7 @@ export class PostComponent implements OnInit {
   @Input() evaluationSummary: any = {};
   @Input() colors: any = {};
   displayEvaluationSummary: boolean = false;
+  displaySharePost: boolean = false;
 
   avatarNoPicturePath: string = '../../../assets/img/user.png';
   showPopUpTeam: boolean[] = [];
@@ -148,6 +150,9 @@ export class PostComponent implements OnInit {
   displayComments() {
     this.showComments = !this.showComments;
   }
+  openSharetoSocialMedia() {
+    this.displaySharePost = true;
+  }
 
   addLike() {
     this.solution.likes =
@@ -177,6 +182,7 @@ export class PostComponent implements OnInit {
   addComment() {
     if (!this.auth.currentUser) {
       this.displayAddCommentPermission = true;
+      return;
     }
     if (this.comments) {
       this.comments.push({
@@ -204,6 +210,43 @@ export class PostComponent implements OnInit {
 
   closeDisplayCommentPermission() {
     this.displayAddCommentPermission = false;
+  }
+  share(social: string) {
+    if (social === 'facebook') {
+      const url = `https://www.facebook.com/sharer/sharer.php?u=https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;
+      window.open(url, '_blank');
+    } else if (social === 'twitter') {
+      const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view/${this.solution.solutionId}&text=Check%20this%20out!`;
+      window.open(url, '_blank');
+    } else if (social === 'email') {
+      const url = `mailto:?subject=I wanted you to see this solution &body=Check out this solution! https://new-worldgame.web.app/solution-view/${this.solution.solutionId}}`;
+      window.open(url, '_blank');
+    } else if (social === 'linkedin') {
+      const url = `https://www.linkedin.com/sharing/share-offsite/?url=https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;
+      window.open(url, '_blank');
+    } else {
+      this.copyToClipboard();
+    }
+    this.solutionService.addNumShare(this.solution);
+  }
+
+  closeSharePost() {
+    this.displaySharePost = false;
+  }
+  copyToClipboard(): void {
+    const listener = (e: ClipboardEvent) => {
+      e.clipboardData!.setData(
+        'text/plain',
+        `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`
+      );
+      e.preventDefault();
+    };
+
+    document.addEventListener('copy', listener);
+    document.execCommand('copy');
+    document.removeEventListener('copy', listener);
+    this.isCopied = true;
+    setTimeout(() => (this.isCopied = false), 2000); // Reset after 2 seconds
   }
 
   onHoverImageTeam(index: number) {

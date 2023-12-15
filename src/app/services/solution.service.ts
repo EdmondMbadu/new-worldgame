@@ -16,7 +16,7 @@ export class SolutionService {
   title: string = '';
   solutionId: string = '';
   solutionRef?: Observable<Solution>;
-  userRef: AngularFirestoreDocument<any>;
+  userRef?: AngularFirestoreDocument<any>;
   allSolutions: Solution[] = [];
   constructor(
     private auth: AuthService,
@@ -85,6 +85,7 @@ export class SolutionService {
       sdg: sdg,
       views: '1',
       numLike: '0',
+      numShare: '0',
       likes: [],
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
@@ -169,6 +170,16 @@ export class SolutionService {
     const data = {
       numLike: (Number(numLike) + 1).toString(),
       likes: solution.likes,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solution.solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
+  }
+  addNumShare(solution: Solution) {
+    let numShare = solution.numShare === undefined ? 0 : solution.numShare;
+    const data = {
+      numShare: (Number(numShare) + 1).toString(),
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solution.solutionId}`

@@ -31,9 +31,16 @@ export class UserProfileComponent implements OnInit {
     private time: TimeService,
     private data: DataService
   ) {
-    this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.activatedRoute.paramMap.subscribe((params) => {
+      this.profilePicturePath = '';
+      this.id = params.get('id');
+      this.loadUserProfileData(this.id);
+    });
+  }
+  ngOnInit(): void {}
 
-    auth.getAUser(this.id).subscribe((data) => {
+  loadUserProfileData(id: string) {
+    this.auth.getAUser(id).subscribe((data) => {
       this.user = data;
       this.dateJoined = this.time.getMonthYear(this.user.dateJoined!);
       if (this.auth.currentUser.followingArray !== undefined) {
@@ -56,7 +63,6 @@ export class UserProfileComponent implements OnInit {
       }
     });
   }
-  ngOnInit(): void {}
 
   checkIfFollowing() {
     this.followingThisUser =
