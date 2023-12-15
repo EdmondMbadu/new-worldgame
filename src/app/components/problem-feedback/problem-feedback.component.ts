@@ -112,29 +112,7 @@ export class ProblemFeedbackComponent {
     (this.userSolution.evaluationSummary = this.evaluationSummary),
       (this.userSolution.evaluationDetails = this.evaluationDetails);
     this.updateEvaluators();
-    if (this.comments) {
-      this.comments.push({
-        authorId: this.auth.currentUser.uid,
-        date: this.time.todaysDate(),
-        content: this.comment,
-        likes: '0',
-        dislikes: '0',
-      });
-    } else if (this.comment !== '') {
-      this.comments = [
-        {
-          authorId: this.auth.currentUser.uid,
-          date: this.time.todaysDate(),
-          content: this.comment,
-          likes: '0',
-          dislikes: '0',
-        },
-      ];
-    } else {
-      this.comments = [];
-    }
 
-    this.userSolution.comments = this.comments;
     if (this.sendFeedback) {
       this.solution.addEvaluation(this.userSolution).then(() => {
         this.router.navigate(['/home']);
@@ -167,6 +145,7 @@ export class ProblemFeedbackComponent {
       economical: numbers[3].toString(),
       equitable: numbers[4].toString(),
       understandable: numbers[5].toString(),
+      comment: this.comment,
     };
   }
 

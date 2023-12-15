@@ -39,6 +39,7 @@ export class Evaluation {
   economical?: string;
   equitable?: string;
   understandable?: string;
+  comment?: string;
 }
 
 export class Evaluator {

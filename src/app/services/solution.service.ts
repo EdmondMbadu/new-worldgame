@@ -158,7 +158,6 @@ export class SolutionService {
       evaluationSummary: solution.evaluationSummary,
       evaluators: solution.evaluators,
       numberofTimesEvaluated: solution.numberofTimesEvaluated,
-      comments: solution.comments,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solution.solutionId}`

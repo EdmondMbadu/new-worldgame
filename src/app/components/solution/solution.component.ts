@@ -18,6 +18,9 @@ export class PostComponent implements OnInit {
   isCopied = false;
   el: number = 100;
   comment: string = '';
+  hoverLikes: boolean = false;
+  hoverComments: boolean = false;
+  hoverShare: boolean = false;
   commentUserNames: string[] = [];
   @Input() teamMembers: User[] = [];
   evaluators: User[] = [];
@@ -252,6 +255,25 @@ export class PostComponent implements OnInit {
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
   }
+  onHoverLikes() {
+    this.hoverLikes = true;
+  }
+  onLeaveLikes() {
+    this.hoverLikes = false;
+  }
+  onHoverComments() {
+    this.hoverComments = true;
+  }
+  onLeaveComments() {
+    this.hoverComments = false;
+  }
+  onHoverShare() {
+    this.hoverShare = true;
+  }
+  onLeaveShare() {
+    this.hoverShare = false;
+  }
+
   onLeaveTeam(index: number) {
     this.showPopUpTeam[index] = false;
   }

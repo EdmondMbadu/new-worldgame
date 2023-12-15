@@ -17,26 +17,49 @@ export class DataService implements OnInit {
   sdgsPaths: { [key: string]: string } = {
     None: '../../../assets/img/global-network.png',
     'SDG1   No Poverty': '../../../assets/img/sdg1.png',
+    'SDG1   No Poverty-link': 'https://sdgs.un.org/goals/goal1',
     'SDG2   Zero Hunger': '../../../assets/img/sdg2.png',
+    'SDG2   Zero Hunger-link': 'https://sdgs.un.org/goals/goal2',
     'SDG3   Good Health And Well Being': '../../../assets/img/sdg3.png',
+    'SDG3   Good Health And Well Being-link': 'https://sdgs.un.org/goals/goal3',
     'SDG4   Quality Education': '../../../assets/img/sdg4.png',
+    'SDG4   Quality Education-link': 'https://sdgs.un.org/goals/goal4',
     'SDG5   Gender Equality': '../../../assets/img/sdg5.png',
+    'SDG5   Gender Equality-link': 'https://sdgs.un.org/goals/goal5',
     'SDG6   Clean Water And Sanitation': '../../../assets/img/sdg6.png',
+    'SDG6   Clean Water And Sanitation-link': 'https://sdgs.un.org/goals/goal6',
     'SDG7   Affordable And Clean Energy': '../../../assets/img/sdg7.png',
+    'SDG7   Affordable And Clean Energy-link':
+      'https://sdgs.un.org/goals/goal7',
     'SDG8   Decent Work And Economic Growth': '../../../assets/img/sdg8.png',
+    'SDG8   Decent Work And Economic Growth-link':
+      'https://sdgs.un.org/goals/goal8',
     'SDG9   Industry Innovation And Infrastructure':
       '../../../assets/img/sdg9.png',
+    'SDG9   Industry Innovation And Infrastructure-link':
+      'https://sdgs.un.org/goals/goal9',
     'SDG10  Reduced Inequalities': '../../../assets/img/sdg10.png',
+    'SDG10  Reduced Inequalities-link': 'https://sdgs.un.org/goals/goal10',
     'SDG11  Sustainable Cities And Communities':
       '../../../assets/img/sdg11.png',
+    'SDG11  Sustainable Cities And Communities-link':
+      'https://sdgs.un.org/goals/goal11',
     'SDG12  Responsible Consumption And Production':
       '../../../assets/img/sdg12.png',
+    'SDG12  Responsible Consumption And Production-link':
+      'https://sdgs.un.org/goals/goal12',
     'SDG13  Climate Action': '../../../assets/img/sdg13.png',
+    'SDG13  Climate Action-link': 'https://sdgs.un.org/goals/goal13',
     'SDG14  Life Below Water': '../../../assets/img/sdg14.png',
+    'SDG14  Life Below Water-link': 'https://sdgs.un.org/goals/goal14',
     'SDG15  Life And Land': '../../../assets/img/sdg15.png',
+    'SDG15  Life And Land-link': 'https://sdgs.un.org/goals/goal15',
     'SDG16  Peace, Justice And Strong Institutions':
       '../../../assets/img/sdg16.png',
+    'SDG16  Peace, Justice And Strong Institutions-link':
+      'https://sdgs.un.org/goals/goal16',
     'SDG17  Partnership For ThE Goals': '../../../assets/img/sdg17.png',
+    'SDG17  Partnership For ThE Goals-link': 'https://sdgs.un.org/goals/goal17',
   };
   ngOnInit(): void {}
 
