@@ -16,6 +16,7 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { UserProfileComponent } from './components/user-profile/user-profile.component';
 import { SolutionViewComponent } from './components/solution-view/solution-view.component';
 import { EvaluationSummaryComponent } from './components/evaluation-summary/evaluation-summary.component';
+import { OverviewComponent } from './components/overview/overview.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -54,6 +55,10 @@ const routes: Routes = [
     path: 'problem-list-feedback',
     component: ProblemListFeedbackComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'overview',
+    component: OverviewComponent,
   },
   {
     path: 'problem-feedback/:id',

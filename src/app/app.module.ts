@@ -48,6 +48,7 @@ import { UserProfileComponent } from './components/user-profile/user-profile.com
 import { DropZoneDirective } from './components/drop-zone.directive';
 import { SolutionViewComponent } from './components/solution-view/solution-view.component';
 import { EvaluationSummaryComponent } from './components/evaluation-summary/evaluation-summary.component';
+import { OverviewComponent } from './components/overview/overview.component';
 
 @NgModule({
   declarations: [
@@ -75,6 +76,7 @@ import { EvaluationSummaryComponent } from './components/evaluation-summary/eval
     DropZoneDirective,
     SolutionViewComponent,
     EvaluationSummaryComponent,
+    OverviewComponent,
   ],
   imports: [
     BrowserModule,
