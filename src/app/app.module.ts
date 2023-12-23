@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
+// import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -81,7 +81,7 @@ import { OverviewComponent } from './components/overview/overview.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgxPageScrollCoreModule,
+    // NgxPageScrollCoreModule,
     CKEditorModule,
     FormsModule,
     CommonModule,

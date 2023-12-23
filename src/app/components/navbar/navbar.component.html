@@ -7,10 +7,18 @@
                 <img  class="w-20 rounded-lg"  src="../../../assets/img/new-worldgame.png" alt="">
             </div>
         
-            <div class="hidden md:flex space-x-6" >
-                <a pagescroll href="#design-science"> Explore</a>
-                <a  routerLink="/signup">Join Now</a>
-                <a routerLink="/login"> Sign in</a>
+            <div class="hidden md:flex space-x-6  font-medium" >
+                <h1 *ngIf="currentPageAbout" class=" text-center  border-teal-700 {{current}}">About </h1>
+                <h1 *ngIf="!currentPageAbout" class="hover:text-teal-700" routerLink="/overview">About </h1>
+                
+                <h1 *ngIf="currentPageJoinNow" class=" text-center  border-teal-700 {{current}}">Join Now</h1>
+                <h1 *ngIf="!currentPageJoinNow" class="hover:text-teal-700" routerLink="/signup">Join Now </h1>
+                <h1 *ngIf="currentPageSignIn" class=" text-center  border-teal-700 {{current}}">Sign in </h1>
+                <h1 *ngIf="!currentPageSignIn" class="hover:text-teal-700" routerLink="/login">Sign in </h1>
+                
+<!--                 
+                <a class="hover:text-teal-700" routerLink="/signup">Join Now</a>
+                <a class="hover:text-teal-700"  routerLink="/login"> Sign in</a> -->
 
             </div>
 

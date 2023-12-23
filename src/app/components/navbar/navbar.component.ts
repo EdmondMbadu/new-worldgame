@@ -1,6 +1,5 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { PageScrollService } from 'ngx-page-scroll-core';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
@@ -30,26 +29,21 @@ export class NavbarComponent implements OnInit {
   @Input() currentPageHome: boolean = false;
   @Input() currentPageEvaluation: boolean = false;
   @Input() currentPagePending: boolean = false;
+  @Input() currentPageAbout: boolean = false;
+  @Input() currentPageJoinNow: boolean = false;
+  @Input() currentPageSignIn: boolean = false;
   constructor(
-    private pageScrollService: PageScrollService,
-    @Inject(DOCUMENT) private document: any,
     private auth: AuthService,
     private solution: SolutionService,
     private data: DataService
   ) {}
 
   ngOnInit(): void {
-    this.pageScrollService.scroll({
-      document: this.document,
-      scrollTarget: '.theEnd',
-    });
     this.filteredItems = [];
 
     if (this.email) {
       this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
         this.allSolutions = data;
-        // this.filteredItems = data;
-        // console.log('Oh my', this.filteredItems);
       });
       this.data.getAllUsers().subscribe((data) => {
         this.allUsers = data;
@@ -87,7 +81,6 @@ export class NavbarComponent implements OnInit {
           (solution) =>
             solution.title?.toLowerCase().includes(lowerCaseValue) ||
             solution.authorName?.toLowerCase().includes(lowerCaseValue)
-          // client.amountPaid?.includes(lowerCaseValue)
         )
       );
     } else {

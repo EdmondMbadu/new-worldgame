@@ -4,6 +4,8 @@ import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
+
 import {
   MatChipEditedEvent,
   MatChipInputEvent,
@@ -65,7 +67,8 @@ export class CreatePlaygroundComponent {
     public auth: AuthService,
     private fb: FormBuilder,
     private solution: SolutionService,
-    private router: Router
+    private router: Router,
+    private fns: AngularFireFunctions
   ) {
     let shuffle = (array: User[]) => {
       return array.sort(() => Math.random() - 0.5);
@@ -205,15 +208,7 @@ export class CreatePlaygroundComponent {
   launchPlayground() {
     this.loading = true;
     let solutionId = '';
-    // console.log(
-    //   'here are the values',
-    //   this.myForm.value.title,
-    //   this.myForm.value.description,
-    //   this.participantsEmails,
-    //   this.evaluatorsEmails,
-    //   this.myForm.value.date,
-    //   this.myForm.value.sdg
-    // );
+
     this.solution
       .createdNewSolution(
         this.myForm.value.title,
@@ -225,6 +220,7 @@ export class CreatePlaygroundComponent {
       )
       .then(() => {
         this.createdSolutionSuccess = true;
+        this.sendEmailToParticipants(); // Call the function here
       })
       .then(() => {
         this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
@@ -241,5 +237,51 @@ export class CreatePlaygroundComponent {
   }
   closePopUpError() {
     this.createdSolutionError = false;
+  }
+  sendEmailToParticipants() {
+    const genericEmail = this.fns.httpsCallable('genericEmail');
+
+    this.participantsEmails.forEach((participant) => {
+      const emailData = {
+        email: participant.name,
+        subject: `You Have Been Invited to Join a Solution Lab (New WorldGame)`,
+        title: this.myForm.value.title,
+        description: this.myForm.value.description,
+        path: `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`,
+        // Include any other data required by your Cloud Function
+      };
+
+      genericEmail(emailData).subscribe(
+        (result) => {
+          console.log('Email sent:', result);
+        },
+        (error) => {
+          console.error('Error sending email:', error);
+        }
+      );
+    });
+  }
+  sendEmailToEvaluators() {
+    const genericEmail = this.fns.httpsCallable('genericEmail');
+
+    this.evaluatorsEmails.forEach((evaluator) => {
+      const emailData = {
+        email: evaluator.name,
+        subject: `You Have Been Invited to Evaluate a Solution Lab`,
+        title: this.myForm.value.title,
+        description: this.myForm.value.description,
+        path: `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`,
+        // Include any other data required by your Cloud Function
+      };
+
+      genericEmail(emailData).subscribe(
+        (result) => {
+          console.log('Email sent:', result);
+        },
+        (error) => {
+          console.error('Error sending email:', error);
+        }
+      );
+    });
   }
 }
