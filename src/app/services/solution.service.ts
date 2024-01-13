@@ -31,7 +31,8 @@ export class SolutionService {
     participants: any,
     evaluators: any,
     endDate: string,
-    sdg: string
+    sdg: string,
+    sdgs: string[]
   ) {
     let formatedDate = this.time.formatDateString(endDate);
     this.solutionId = this.afs.createId().toString();
@@ -49,6 +50,7 @@ export class SolutionService {
       endDateFormatted: formatedDate,
       creationDate: this.time.todaysDate(),
       views: '1',
+      sdgs: sdgs,
       likes: [],
       numLike: '0',
       sdg: sdg,

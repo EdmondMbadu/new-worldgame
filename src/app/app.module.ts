@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
@@ -100,6 +101,7 @@ import { OverviewComponent } from './components/overview/overview.component';
     BrowserAnimationsModule,
     MatIconModule,
     MatChipsModule,
+    MatAutocompleteModule,
   ],
 
   providers: [],

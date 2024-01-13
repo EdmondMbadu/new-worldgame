@@ -22,7 +22,7 @@
                 </div> 
             
                 <header class="inverted">
-                    <h2 class="py-2 text-gray-900 dark:text-gray-200">Describe your problem in few words</h2>
+                    <h2 class="py-2 text-gray-900 dark:text-gray-200">Describe your Solution in few bullet points</h2>
                 </header>
                 <div class="" role="main">
                 
@@ -41,7 +41,7 @@
                     <div class="flex flex-col dark:bg-slate-800">
                             <mat-form-field class="example-chip-list dark:bg-slate-800">
                                 <mat-label >Add emails</mat-label>
-                                <mat-chip-grid #chipGrid aria-label="add emails" >
+                                <mat-chip-grid #chipGrid aria-label="Add emails" >
                                 <mat-chip-row class="bg-white" *ngFor="let email of participantsEmails"
                                                 (removed)="remove(email)"
                                                 [editable]="true"
@@ -52,7 +52,7 @@
                                     <mat-icon>cancel</mat-icon>
                                     </button>
                                 </mat-chip-row>
-                                <input  placeholder="email..."
+                                <input   placeholder="email..."
                                 formControlName="emails" 
                                         [matChipInputFor]="chipGrid"
                                         [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -100,10 +100,47 @@
                             </div>
                 </div>
 
+                <div class="mb-6 mt-4">
+                    <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">SDGs That Correspond To Your Solution</label>
+                    <div class="flex flex-col dark:bg-slate-800">
+                            <mat-form-field class="example-chip-list dark:bg-slate-800">
+                                <mat-label >Select SDGs</mat-label>
+                                <mat-chip-grid #chip aria-label="Add Sdgs" >
+                                <mat-chip-row class="bg-white" *ngFor="let sd of selectedSdgs"
+                                                (removed)="removeSdg(sd)">
+                                    {{sd}}
+                                    <button matChipRemove [attr.aria-label]="'remove ' + sd">
+                                    <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip-row>
+                                <input   placeholder="sdgs..." #sdgInput
+                                formControlName="mysdgs" 
+                                        [matChipInputFor]="chip"
+                                        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                        [matAutocomplete]="auto"
+                                        (matChipInputTokenEnd)="addSdg($event)"/>
+                                </mat-chip-grid>
+
+                                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)" >
+                                    <mat-option *ngFor="let sd of filteredSdgs | async" [value]="sd">{{sd}}</mat-option>
+                                  </mat-autocomplete>
+                            </mat-form-field>
+                            <div *ngIf="  mysdgs!.invalid && mysdgs!.touched  "class="text-red-400" >
+                            Make sure you select an SDG.
+                            </div>
+                    </div>
+                    
+                
+                </div> 
+          
+                  
+
+
+
 
                 
             <!-- Pop up save  -->
-            <div *ngIf="createdSolutionSuccess" id="toast-success" class="fixed inset-x-0 mx-auto top-[10rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert">
+                <div *ngIf="createdSolutionSuccess" id="toast-success" class="fixed inset-x-0 mx-auto top-[10rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert">
                     <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg ">
                         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
@@ -135,10 +172,10 @@
                 </button>   
             </div>
                 <div class=" my-6">
-                    <div class="flex flex-row items-center mb-2 space-x-2">
+                    <div class="flex flex-row items-center mb-2 space-x-2">     
                         <label for="title" class="block  text-md font-medium text-gray-900 dark:text-gray-200">Timer</label>
                         <mat-form-field>
-                            <mat-label>Choose a date</mat-label>
+                            <mat-label>Solution Deadline Date</mat-label>
                         <!-- #docregion toggle -->
                             <input  formControlName="date"  matInput [matDatepicker]="picker">
                             <mat-hint>MM/DD/YYYY</mat-hint>
@@ -157,7 +194,7 @@
                 
 
 
-                <button [disabled]="myForm.invalid" type="submit" class="text-white bg-teal-700 hover:bg-teal-800   font-medium rounded-full text-sm w-full  px-5 py-2.5 text-center" (click)="launchPlayground()">Launch Laboratory</button>
+                <button [disabled]="myForm.invalid" type="submit" class="text-white bg-teal-700 hover:bg-teal-800   font-medium rounded-full text-sm w-full  px-5 py-2.5 text-center" (click)="launchPlayground()">Launch Solution Lab</button>
                 <div class="flex flex-col py-3 items-center" *ngIf="loading" role="status">
                     <svg aria-hidden="true" class="w-8 h-8 mr-2 text-gray-200 animate-spin fill-teal-700" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>

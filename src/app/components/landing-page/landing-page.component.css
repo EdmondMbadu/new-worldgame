@@ -1,0 +1,85 @@
+
+
+
+.animated-text span{
+    position: relative;
+
+}
+
+.animated-text span::before{
+    content: "";
+    animation: words 20s infinite;
+}
+.animated-text span::after{
+    content:"";
+    position: absolute;
+    width: calc(100% + 8px);
+    height: 50px;
+    background-color: white;
+    border-left: 4px solid black;
+    right: -8px;
+    animation: cursor .8s infinite, typing 20s steps(14) infinite;
+}
+@media (prefers-color-scheme: dark) {
+    .animated-text span::before,
+    .animated-text span::after {
+        background-color: rgb(15 23 42);
+        /* dark theme specific styles */
+        color: rgb(15 118 110); /* text color for dark theme */
+        border-color: rgb(15 118 110); /* cursor color for dark theme */
+    }
+}
+
+@keyframes cursor {
+    to{
+        border-left: 2px solid #00000000;
+    }
+}
+
+@keyframes words {
+    0%,20%{
+        content: "Design";
+    }
+    21%,40%{
+        content: "Write";
+    }
+    41%,60%{
+        content: "Envision";
+    }
+    61%,80%{
+        content: "Build";
+    }
+    81%,100%{
+        content: "Share";
+    }
+    
+}
+
+@keyframes typing {
+    10%,15%,30%,35%,50%,55%,70%,75%,90%,95%{
+        width: 0;
+    }
+    5%,20%,25%,40%,45%,60%,65%,80%,85%{
+        width: calc(100% + 8px);
+    }
+    /* 0%, 11%, 34%, 45%, 66%, 77%, 100% {
+        width: 0;
+    }
+    5%, 30%, 40%, 65%, 75%, 95% {
+        width: calc(100% + 8px);
+    } */
+}
+
+.rotate {
+    animation: rotation 30s infinite linear;
+  }
+  
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(359deg);
+    }
+  }
+

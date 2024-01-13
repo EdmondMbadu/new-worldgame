@@ -1,10 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import {
+  MatAutocompleteSelectedEvent,
+  MatAutocompleteModule,
+} from '@angular/material/autocomplete';
 
 import {
   MatChipEditedEvent,
@@ -15,10 +19,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgFor, NgPlural } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import { SolutionService } from 'src/app/services/solution.service';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, map, of, startWith } from 'rxjs';
 import { User } from 'src/app/models/user';
 
 export interface Email {
@@ -34,11 +44,14 @@ export interface Email {
 export class CreatePlaygroundComponent {
   myForm: FormGroup;
   loading: boolean = false;
+  sdgCtrl = new FormControl('');
   numberOfEvaluators: number = 2;
   createdSolutionSuccess: boolean = false;
   createdSolutionError: boolean = false;
   solutionError: Observable<any> = of(null);
   addOnBlur = true;
+  selectedSdgs: string[] = [];
+  filteredSdgs?: Observable<string[]>;
   sdgs: string[] = [
     'SDG1   No Poverty',
     'SDG2   Zero Hunger',
@@ -61,6 +74,7 @@ export class CreatePlaygroundComponent {
   readonly separatorKeysCodes = [ENTER, COMMA, SPACE] as const;
   participantsEmails: Email[] = [];
   evaluatorsEmails: Email[] = [];
+  @ViewChild('sdgInput') sdgInput?: ElementRef<HTMLInputElement>;
 
   announcer = inject(LiveAnnouncer);
   constructor(
@@ -76,6 +90,7 @@ export class CreatePlaygroundComponent {
     this.myForm = this.fb.group({
       title: ['', [Validators.required]],
       emails: ['', Validators.compose([Validators.email])],
+      mysdgs: ['', this.selectedSdgsNonEmpty()],
       evaluatorsEmails: [
         '',
         Validators.compose([Validators.email]),
@@ -100,6 +115,12 @@ export class CreatePlaygroundComponent {
         }
       });
     this.participantsEmails.push({ name: this.auth.currentUser.email });
+    this.filteredSdgs = this.myForm.get('mysdgs')!.valueChanges.pipe(
+      startWith(''),
+      map((sd: string | null) => {
+        return sd ? this._filterSdg(sd) : this.sdgs.slice();
+      })
+    );
   }
 
   get title() {
@@ -118,8 +139,14 @@ export class CreatePlaygroundComponent {
   get date() {
     return this.myForm.get('date');
   }
+  get mysdgs() {
+    return this.myForm.get('mysdgs');
+  }
   get sdg() {
     return this.myForm.get('sdg');
+  }
+  selectedSdgsNonEmpty() {
+    return this.selectedSdgs.length > 0;
   }
 
   public Editor: any = Editor;
@@ -181,6 +208,55 @@ export class CreatePlaygroundComponent {
       this.participantsEmails[index].name = value;
     }
   }
+  addSdg(event: MatChipInputEvent): void {
+    const value = (event.value || '').trim();
+
+    console.log('current value before adding', value);
+    // Add our fruit
+    if (
+      value &&
+      this.sdgs.includes(value) &&
+      !this.selectedSdgs.includes(value)
+    ) {
+      this.selectedSdgs.push(value);
+    }
+
+    // Clear the input value
+    event.chipInput!.clear();
+
+    this.mysdgs?.setValue(null);
+    // this.sdgCtrl.setValue(null);
+  }
+
+  removeSdg(sd: string): void {
+    const index = this.selectedSdgs.indexOf(sd);
+
+    if (index >= 0) {
+      this.selectedSdgs.splice(index, 1);
+
+      this.announcer.announce(`Removed ${sd}`);
+    }
+  }
+
+  selected(event: MatAutocompleteSelectedEvent): void {
+    let value = event.option.viewValue;
+    if (value && !this.selectedSdgs.includes(value)) {
+      this.selectedSdgs.push(event.option.viewValue);
+    }
+
+    this.sdgInput!.nativeElement.value = '';
+    this.mysdgs?.setValue(null);
+    // this.sdgCtrl.setValue(null);
+  }
+
+  private _filterSdg(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    const filtered = this.sdgs.filter((sdg) =>
+      sdg.toLowerCase().includes(filterValue)
+    );
+
+    return filtered;
+  }
 
   isEvaluatorsValid() {
     return this.evaluatorsEmails.some((evaluator) =>
@@ -216,7 +292,8 @@ export class CreatePlaygroundComponent {
         this.participantsEmails,
         this.evaluatorsEmails,
         this.myForm.value.date,
-        this.myForm.value.sdg
+        this.myForm.value.sdg,
+        this.selectedSdgs
       )
       .then(() => {
         this.createdSolutionSuccess = true;

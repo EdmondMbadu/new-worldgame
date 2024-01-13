@@ -19,6 +19,7 @@ export class Solution {
   views?: string;
   share?: string;
   sdg?: string;
+  sdgs?: string[];
   evaluationSummary?: Evaluation = {};
   evaluationDetails?: Evaluation[];
   endDate?: string;
