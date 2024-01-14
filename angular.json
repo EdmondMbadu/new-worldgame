@@ -36,7 +36,12 @@
           "configurations": {
             "production": { 
               "aot": true,
-              "buildOptimizer": false,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true, 
+                  "inlineCritical": false 
+                },
            
               "budgets": [
                 {
