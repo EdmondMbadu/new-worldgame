@@ -21,7 +21,7 @@
 
                 <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-xl   p-4 dark:bg-slate-800 dark:border-gray-700">
                     <div  class="flex flex-wrap">
-                        <img class="object-cover mx-auto  rounded-t-lg h-48 p-2 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt="">
+                        <!-- <img class="object-cover mx-auto  rounded-t-lg h-48 p-2 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt=""> -->
                             
                         <a  *ngFor="let sd of currentSolution.sdgs"  href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank">
                             

@@ -1,6 +1,6 @@
     <!-- posts -->
     <div class="my-2">
-        <div class=" w-fit bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800 dark:text-gray-200">
+        <div class=" w-fit max-w-[38.3rem] bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800 dark:text-gray-200">
             <div *ngIf="solution" class="flex  pb-10">
                 <div class="flex flex-row">
                     <h1  class="  px-2  font-bold ">Designers <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
@@ -68,11 +68,12 @@
     
                     </div>
                 </div>
-               
-               <a href="{{data.sdgsPaths[solution.sdg!+'-link']}}" target="_blank"  class=" mx-auto mr-2 w-14 rounded-lg    mb-4" >
-                <img  class=" mx-auto mr-2 w-14 rounded-lg    mb-4" [src]="data.sdgsPaths[solution.sdg!]"alt="">
-                <!-- <h1>{{data.sdgsPaths[solution.sdg!+'-link']}}</h1> -->
-               </a>
+               <div class="mx-auto mr-2 px-2 ">
+                    <a *ngFor="let sd of solution.sdgs " href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"  class=" rounded-lg    mb-4" >
+                        <img  class=" mr-1 w-14 rounded-lg    mb-4" [src]="data.sdgsPaths[sd!]"alt="">
+                        <!-- <h1>{{data.sdgsPaths[solution.sdg!+'-link']}}</h1> -->
+                    </a>
+                </div>
                    
              
 
