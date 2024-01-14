@@ -36,13 +36,14 @@
           "configurations": {
             "production": { 
               "aot": true,
+              "outputHashing": "all",
               "optimization": {
                 "scripts": true,
                 "styles": {
-                  "minify": true, 
+                  "minify": true,
                   "inlineCritical": false 
-                },
-           
+                }
+              },
               "budgets": [
                 {
                   "type": "initial",
