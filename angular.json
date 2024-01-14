@@ -36,11 +36,11 @@
           "configurations": {
             "production": { 
               "aot": true,
-              "outputHashing": "all",
+             
               "optimization": {
                 "scripts": true,
                 "styles": {
-                  "minify": true,
+                  "minify": false,
                   "inlineCritical": false 
                 }
               },
