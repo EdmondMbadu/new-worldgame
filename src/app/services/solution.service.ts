@@ -31,7 +31,7 @@ export class SolutionService {
     participants: any,
     evaluators: any,
     endDate: string,
-    sdg: string,
+
     sdgs: string[]
   ) {
     let formatedDate = this.time.formatDateString(endDate);
@@ -53,7 +53,7 @@ export class SolutionService {
       sdgs: sdgs,
       likes: [],
       numLike: '0',
-      sdg: sdg,
+      // sdg: sdg,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${data.solutionId}`

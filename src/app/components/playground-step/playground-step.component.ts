@@ -20,6 +20,8 @@ export interface FeedbackRequest {
   styleUrls: ['./playground-step.component.css'],
 })
 export class PlaygroundStepComponent {
+  displayPopupInfo: boolean = false;
+  displayPopups: boolean[] = [];
   currentSolution: Solution = {};
   staticContentArray: string[] = [];
   saveSuccess: boolean = false;
@@ -69,6 +71,8 @@ export class PlaygroundStepComponent {
         }
       }
     };
+
+    this.displayPopups = new Array(this.questions.length).fill(false);
 
     // Add a scroll event listener to the window
     window.addEventListener('scroll', this.scrollHandler);
@@ -236,5 +240,11 @@ export class PlaygroundStepComponent {
       }`;
       // console.log('the static array ', this.staticContentArray[0]);
     }
+  }
+  onHoverPopup(index: number) {
+    this.displayPopups[index] = true;
+  }
+  onLeavePopup(index: number) {
+    this.displayPopups[index] = false;
   }
 }

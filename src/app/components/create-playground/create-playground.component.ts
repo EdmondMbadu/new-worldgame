@@ -97,7 +97,7 @@ export class CreatePlaygroundComponent {
         this.isEvaluatorsValid(),
       ],
       description: ['', [Validators.required]],
-      sdg: ['', [Validators.required]],
+      // sdg: ['', [Validators.required]],
       date: ['', [Validators.required]],
     });
     this.evaluatorsEmails = [];
@@ -142,9 +142,9 @@ export class CreatePlaygroundComponent {
   get mysdgs() {
     return this.myForm.get('mysdgs');
   }
-  get sdg() {
-    return this.myForm.get('sdg');
-  }
+  // get sdg() {
+  //   return this.myForm.get('sdg');
+  // }
   selectedSdgsNonEmpty() {
     return this.selectedSdgs.length > 0;
   }
@@ -292,7 +292,7 @@ export class CreatePlaygroundComponent {
         this.participantsEmails,
         this.evaluatorsEmails,
         this.myForm.value.date,
-        this.myForm.value.sdg,
+
         this.selectedSdgs
       )
       .then(() => {
