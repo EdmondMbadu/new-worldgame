@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Router, NavigationEnd, Route } from '@angular/router';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
@@ -26,7 +27,8 @@ export class PlaygroundStepsComponent implements OnInit {
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
-    public data: DataService
+    public data: DataService,
+    private router: Router
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
@@ -36,6 +38,7 @@ export class PlaygroundStepsComponent implements OnInit {
     });
   }
   ngOnInit(): void {
+    window.scrollTo(0, 0);
     this.display[this.currentIndexDisplay] = true;
     this.buttontexts[this.steps.length - 1] = 'Submit';
   }
@@ -96,6 +99,12 @@ export class PlaygroundStepsComponent implements OnInit {
     ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E', 'S3-F'],
     ['S4'],
   ];
+  timelineDisplay = [
+    'bg-gray-200 h-0.5',
+    'bg-gray-200 h-0.5',
+    'bg-gray-200 h-0.5',
+    'bg-gray-200 h-0.5',
+  ];
   AllQuestions: Array<Array<string>> = [
     [
       'What is the problem you have chosen and why ?',
@@ -121,9 +130,13 @@ export class PlaygroundStepsComponent implements OnInit {
   updatePlayground(current: number) {
     this.display[this.currentIndexDisplay] = false;
     this.currentIndexDisplay = current;
+    this.updateTimelineDisplay(current);
     this.display[this.currentIndexDisplay] = true;
   }
 
+  updateTimelineDisplay(index: number) {
+    this.timelineDisplay[index - 1] = 'bg-red-500 h-1 dark:bg-red-500';
+  }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
   }

@@ -22,6 +22,7 @@ export interface FeedbackRequest {
 export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayPopups: boolean[] = [];
+  clickedDisplayPopups: boolean[] = [];
   currentSolution: Solution = {};
   staticContentArray: string[] = [];
   saveSuccess: boolean = false;
@@ -47,6 +48,7 @@ export class PlaygroundStepComponent {
   ) {}
   data: string = '';
   ngOnInit() {
+    window.scrollTo(0, 0);
     this.initializeContents();
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
@@ -73,6 +75,7 @@ export class PlaygroundStepComponent {
     };
 
     this.displayPopups = new Array(this.questions.length).fill(false);
+    this.clickedDisplayPopups = new Array(this.questions.length).fill(false);
 
     // Add a scroll event listener to the window
     window.addEventListener('scroll', this.scrollHandler);
@@ -246,5 +249,11 @@ export class PlaygroundStepComponent {
   }
   onLeavePopup(index: number) {
     this.displayPopups[index] = false;
+  }
+  closePopups(index: number) {
+    this.clickedDisplayPopups[index] = false;
+  }
+  openPopups(index: number) {
+    this.clickedDisplayPopups[index] = true;
   }
 }
