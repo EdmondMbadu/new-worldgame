@@ -113,12 +113,12 @@ export class PlaygroundStepsComponent implements OnInit {
       'What will happen if nothing is done to deal with this problem?',
     ],
     [
-      'What will the world look like if this problem is solved?',
+      'What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved?',
       'How will you measure success? How will you know when you reach the preferred state?',
     ],
     [
-      'What to do to reach the preffered state?',
-      'What to do in the next 6 months?',
+      'What does your solution do to reach the preferred state?',
+      'What is done in the next 6 months to get your solution implemented?',
       'What resources does our plan need?',
       'How much will our strategy cost?',
       'Where will you get the money?',

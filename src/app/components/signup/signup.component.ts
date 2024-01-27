@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -7,7 +7,7 @@ import { AuthService } from 'src/app/services/auth.service';
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.css'],
 })
-export class SignupComponent {
+export class SignupComponent implements OnInit {
   email: string = '';
   password: string = '';
   firstName: string = '';
@@ -16,7 +16,9 @@ export class SignupComponent {
   createAccountSuccess: boolean = false;
   createAccountPopUp: boolean = false;
   createAccountError: boolean = false;
-
+  ngOnInit(): void {
+    window.scroll(0, 0);
+  }
   constructor(private auth: AuthService, private router: Router) {}
   createAccount() {
     if (

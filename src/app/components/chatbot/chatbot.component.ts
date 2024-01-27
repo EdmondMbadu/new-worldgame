@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 
 import {
   AngularFirestore,
@@ -26,9 +27,13 @@ export class ChatbotComponent implements OnInit {
   errorMsg = '';
   prompt = '';
   temp = '';
-  constructor(private afs: AngularFirestore, private auth: AuthService) {
+  constructor(
+    private afs: AngularFirestore,
+    private auth: AuthService,
+    private cdRef: ChangeDetectorRef
+  ) {
     this.user = this.auth.currentUser;
-    this.deleteAllDocuments();
+    // this.deleteAllDocuments();
   }
   responses: DisplayMessage[] = [
     {
@@ -39,6 +44,12 @@ export class ChatbotComponent implements OnInit {
   ngOnInit(): void {
     if (this.user?.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
+    }
+  }
+  scrollToBottom(): void {
+    const chatbox = document.getElementById('chatbox');
+    if (chatbox) {
+      chatbox.scrollTop = chatbox.scrollHeight;
     }
   }
 
@@ -73,14 +84,15 @@ export class ChatbotComponent implements OnInit {
 
   async submitPrompt() {
     // event.preventDefault();
-
+    // I create this variable to clear the screen right after the question is asked
+    let currentPrompt = this.prompt;
     if (!this.prompt) return;
 
     this.responses.push({
-      text: this.prompt,
+      text: currentPrompt,
       type: 'PROMPT',
     });
-    // this.prompt = '';
+    this.prompt = '';
 
     this.status = 'sure, one sec';
     let id = this.afs.createId();
@@ -88,7 +100,7 @@ export class ChatbotComponent implements OnInit {
     const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
       `users/${this.auth.currentUser.uid}/discussions/${id}`
     );
-    await discussionRef.set({ prompt: this.prompt });
+    await discussionRef.set({ prompt: currentPrompt });
 
     const destroyFn = discussionRef.valueChanges().subscribe({
       next: (conversation) => {
@@ -99,20 +111,27 @@ export class ChatbotComponent implements OnInit {
           switch (state) {
             case 'COMPLETED':
               this.status = '';
-              this.prompt = '';
+              currentPrompt = '';
+              // this.prompt = '';
               this.responses.push({
                 text: conversation['response'],
                 type: 'RESPONSE',
               });
+              this.cdRef.detectChanges(); // Detect changes to update the view
+
+              // Use setTimeout to allow time for the DOM to update
+              setTimeout(() => this.scrollToBottom(), 0);
 
               destroyFn.unsubscribe();
               break;
             case 'PROCESSING':
-              this.prompt = '';
+              currentPrompt = '';
+              // this.prompt = '';
               this.status = 'preparing your answer...';
               break;
             case 'ERRORED':
-              this.prompt = '';
+              currentPrompt = '';
+              // this.prompt = '';
               this.status = 'Oh no! Something went wrong. Please try again.';
               destroyFn.unsubscribe();
               break;
@@ -125,6 +144,7 @@ export class ChatbotComponent implements OnInit {
         destroyFn.unsubscribe();
       },
     });
+    this.scrollToBottom();
   }
 
   async deleteAllDocuments(): Promise<void> {

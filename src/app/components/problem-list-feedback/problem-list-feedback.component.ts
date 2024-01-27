@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -9,7 +9,7 @@ import { SolutionService } from 'src/app/services/solution.service';
   templateUrl: './problem-list-feedback.component.html',
   styleUrls: ['./problem-list-feedback.component.css'],
 })
-export class ProblemListFeedbackComponent {
+export class ProblemListFeedbackComponent implements OnInit {
   evaluationSolutions: Solution[] = [];
   evaluationSolutionsUsers: User[] = [];
   @Input() margin = '';
@@ -23,6 +23,9 @@ export class ProblemListFeedbackComponent {
       });
       this.evaluation = this.evaluationSolutions.length;
     });
+  }
+  ngOnInit(): void {
+    window.scroll(0, 0);
   }
 
   @Input() title: string = 'Strategy Evaluation';

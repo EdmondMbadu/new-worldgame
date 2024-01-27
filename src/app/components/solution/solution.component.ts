@@ -224,13 +224,13 @@ export class PostComponent implements OnInit {
 
       window.open(url, '_blank');
     } else if (social === 'twitter') {
-      const message = `Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
+      const message = `Hi! I've recently developed a NewWorld Game solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
       const encodedMessage = encodeURIComponent(message);
       const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view/${this.solution.solutionId}&text=${encodedMessage}`;
 
       window.open(url, '_blank');
     } else if (social === 'email') {
-      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view/${this.solution.solutionId}}`;
+      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;
       window.open(url, '_blank');
     } else if (social === 'linkedin') {
       const linkedInMessage = `Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;

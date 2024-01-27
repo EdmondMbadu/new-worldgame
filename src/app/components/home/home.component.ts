@@ -28,6 +28,7 @@ export class HomeComponent implements OnInit {
     this.user = this.auth.currentUser;
   }
   ngOnInit(): void {
+    window.scroll(0, 0);
     this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
       this.allSolutions = data;
       this.findCompletedSolutions();

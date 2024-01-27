@@ -37,7 +37,9 @@ export class UserProfileComponent implements OnInit {
       this.loadUserProfileData(this.id);
     });
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    window.scroll(0, 0);
+  }
 
   loadUserProfileData(id: string) {
     this.auth.getAUser(id).subscribe((data) => {

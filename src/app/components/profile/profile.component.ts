@@ -71,6 +71,7 @@ export class ProfileComponent implements OnInit {
     }
   }
   ngOnInit(): void {
+    window.scroll(0, 0);
     this.user = this.auth.currentUser;
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data: any) => {
       this.solutions = data;

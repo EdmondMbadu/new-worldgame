@@ -27,9 +27,15 @@
                 
                    
                     <a href="https://datatopics.worldbank.org/sdgatlas/?lang=en" target="_blank" class="flex items-center font-medium text-blue-600 dark:text-blue-500 dark:hover:text-blue-600 hover:text-blue-700 hover:underline">Atlas of SDGs <svg class="w-2 h-2 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
 
-              </svg></a>
+                    </svg></a> <h3 class="font-semibold text-gray-900 dark:text-white"> and/or</h3> 
+                    <a href="https://ourworldindata.org/sdgs" target="_blank" class="flex items-center font-medium text-blue-600 dark:text-blue-500 dark:hover:text-blue-600 hover:text-blue-700 hover:underline">SDG Tracker <svg class="w-2 h-2 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+        
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+
+                    </svg></a>
               <h3 class="font-semibold text-gray-900 dark:text-white">For more detailed info</h3>
                 
                 </div>
@@ -49,7 +55,7 @@
             </ckeditor>
           </div>
           <div *ngIf="isNotEmpty(contentsArray[i]) && contentField.touched" class="text-red-400" >
-            All textarea must be filled with something...
+            All text areas must be filled with something ...
          </div>
         
 
