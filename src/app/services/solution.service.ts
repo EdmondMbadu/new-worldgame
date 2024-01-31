@@ -22,9 +22,8 @@ export class SolutionService {
     private auth: AuthService,
     private afs: AngularFirestore,
     private time: TimeService
-  ) {
-    this.userRef = this.afs.doc(`users/${this.auth.currentUser.uid}`);
-  }
+  ) {}
+
   createdNewSolution(
     title: string,
     description: string,
