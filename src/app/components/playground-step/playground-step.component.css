@@ -1,0 +1,11 @@
+.ckeditor-container {
+
+    z-index: 1; /* Ensure it's lower than the navbar */
+    /* Other necessary styles */
+}
+.boxing{
+  
+    
+    z-index: 1; /* Ensure it's lower than the navbar */
+    /* Other necessary styles */
+}

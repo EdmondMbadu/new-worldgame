@@ -66,7 +66,7 @@ export class PlaygroundStepComponent {
       for (let i = 0; i < this.elements.length; i++) {
         const element = document.getElementById(`box-${i}`);
         let elementY = this.elements[i]?.getBoundingClientRect().top;
-        if (elementY! <= 110) {
+        if (elementY! <= 10) {
           element!.style.zIndex = '-1';
         } else {
           element!.style.zIndex = '0';
@@ -78,7 +78,7 @@ export class PlaygroundStepComponent {
     this.clickedDisplayPopups = new Array(this.questions.length).fill(false);
 
     // Add a scroll event listener to the window
-    window.addEventListener('scroll', this.scrollHandler);
+    // window.addEventListener('scroll', this.scrollHandler);
   }
 
   initializeContents() {
