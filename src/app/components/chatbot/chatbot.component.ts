@@ -37,7 +37,7 @@ export class ChatbotComponent implements OnInit {
   }
   responses: DisplayMessage[] = [
     {
-      text: "I'm a Bucky, a chatbot that will be assisting you on your journey tackling world problems.",
+      text: "I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems.",
       type: 'RESPONSE',
     },
   ];
