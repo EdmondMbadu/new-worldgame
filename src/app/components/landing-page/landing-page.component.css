@@ -88,7 +88,7 @@
     }
   
 }
-/* 
+
 .rotate {
     animation: rotation 30s infinite linear;
   }
@@ -100,5 +100,5 @@
     to {
       transform: rotate(359deg);
     }
-  } */
+  }
 
