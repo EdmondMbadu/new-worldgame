@@ -34,6 +34,7 @@ export class EvaluationSummaryComponent {
     private data: DataService,
     private time: TimeService
   ) {
+    window.scroll(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
 
     solution.getSolution(this.id).subscribe((data) => {

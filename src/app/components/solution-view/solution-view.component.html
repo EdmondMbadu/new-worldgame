@@ -95,6 +95,100 @@
             <p class="text-gray-900 dark:text-white" [innerHTML]="currentSolution.content">
                 
             </p>
+
+            <div class="mt-6 flex flex-nowrap items-center text-gray-900 dark:text-white" >
+
+               
+               
+               
+                <div class="flex flex-nowrap items-center"  (mouseenter)="onHoverLikes()" (mouseleave)="onLeaveLikes()"  (click)="addLike()">
+                    
+                    <div *ngIf="hoverLikes" class="-mt-12 p-1 absolute z-50 text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
+                        <span class="font-medium">Likes</span>
+                      </div>
+              
+                        <svg width="20px" height="20px" class="dark:fill-white fill-black ml-4 hover:fill-blue-700" fill="#1d4ed8" viewBox="0 0 24 24">
+                        <path d="M20.9752 12.1852L20.2361 12.0574L20.9752 12.1852ZM20.2696 16.265L19.5306 16.1371L20.2696 16.265ZM6.93777 20.4771L6.19056 20.5417L6.93777 20.4771ZM6.12561 11.0844L6.87282 11.0198L6.12561 11.0844ZM13.995 5.22142L14.7351 5.34269V5.34269L13.995 5.22142ZM13.3323 9.26598L14.0724 9.38725V9.38725L13.3323 9.26598ZM6.69814 9.67749L6.20855 9.10933H6.20855L6.69814 9.67749ZM8.13688 8.43769L8.62647 9.00585H8.62647L8.13688 8.43769ZM10.5181 4.78374L9.79208 4.59542L10.5181 4.78374ZM10.9938 2.94989L11.7197 3.13821V3.13821L10.9938 2.94989ZM12.6676 2.06435L12.4382 2.77841L12.4382 2.77841L12.6676 2.06435ZM12.8126 2.11093L13.042 1.39687L13.042 1.39687L12.8126 2.11093ZM9.86195 6.46262L10.5235 6.81599V6.81599L9.86195 6.46262ZM13.9047 3.24752L13.1787 3.43584V3.43584L13.9047 3.24752ZM11.6742 2.13239L11.3486 1.45675V1.45675L11.6742 2.13239ZM3.9716 21.4707L3.22439 21.5353L3.9716 21.4707ZM3 10.2342L3.74721 10.1696C3.71261 9.76945 3.36893 9.46758 2.96767 9.4849C2.5664 9.50221 2.25 9.83256 2.25 10.2342H3ZM20.2361 12.0574L19.5306 16.1371L21.0087 16.3928L21.7142 12.313L20.2361 12.0574ZM13.245 21.25H8.59635V22.75H13.245V21.25ZM7.68498 20.4125L6.87282 11.0198L5.3784 11.149L6.19056 20.5417L7.68498 20.4125ZM19.5306 16.1371C19.0238 19.0677 16.3813 21.25 13.245 21.25V22.75C17.0712 22.75 20.3708 20.081 21.0087 16.3928L19.5306 16.1371ZM13.2548 5.10015L12.5921 9.14472L14.0724 9.38725L14.7351 5.34269L13.2548 5.10015ZM7.18773 10.2456L8.62647 9.00585L7.64729 7.86954L6.20855 9.10933L7.18773 10.2456ZM11.244 4.97206L11.7197 3.13821L10.2678 2.76157L9.79208 4.59542L11.244 4.97206ZM12.4382 2.77841L12.5832 2.82498L13.042 1.39687L12.897 1.3503L12.4382 2.77841ZM10.5235 6.81599C10.8354 6.23198 11.0777 5.61339 11.244 4.97206L9.79208 4.59542C9.65573 5.12107 9.45699 5.62893 9.20042 6.10924L10.5235 6.81599ZM12.5832 2.82498C12.8896 2.92342 13.1072 3.16009 13.1787 3.43584L14.6307 3.05921C14.4252 2.26719 13.819 1.64648 13.042 1.39687L12.5832 2.82498ZM11.7197 3.13821C11.7548 3.0032 11.8523 2.87913 11.9998 2.80804L11.3486 1.45675C10.8166 1.71309 10.417 2.18627 10.2678 2.76157L11.7197 3.13821ZM11.9998 2.80804C12.1345 2.74311 12.2931 2.73181 12.4382 2.77841L12.897 1.3503C12.3873 1.18655 11.8312 1.2242 11.3486 1.45675L11.9998 2.80804ZM14.1537 10.9842H19.3348V9.4842H14.1537V10.9842ZM4.71881 21.4061L3.74721 10.1696L2.25279 10.2988L3.22439 21.5353L4.71881 21.4061ZM3.75 21.5127V10.2342H2.25V21.5127H3.75ZM3.22439 21.5353C3.2112 21.3828 3.33146 21.25 3.48671 21.25V22.75C4.21268 22.75 4.78122 22.1279 4.71881 21.4061L3.22439 21.5353ZM14.7351 5.34269C14.8596 4.58256 14.8241 3.80477 14.6307 3.0592L13.1787 3.43584C13.3197 3.97923 13.3456 4.54613 13.2548 5.10016L14.7351 5.34269ZM8.59635 21.25C8.12244 21.25 7.72601 20.887 7.68498 20.4125L6.19056 20.5417C6.29852 21.7902 7.3427 22.75 8.59635 22.75V21.25ZM8.62647 9.00585C9.30632 8.42 10.0392 7.72267 10.5235 6.81599L9.20042 6.10924C8.85404 6.75767 8.3025 7.30493 7.64729 7.86954L8.62647 9.00585ZM21.7142 12.313C21.9695 10.8365 20.8341 9.4842 19.3348 9.4842V10.9842C19.9014 10.9842 20.3332 11.4959 20.2361 12.0574L21.7142 12.313ZM3.48671 21.25C3.63292 21.25 3.75 21.3684 3.75 21.5127H2.25C2.25 22.1953 2.80289 22.75 3.48671 22.75V21.25ZM12.5921 9.14471C12.4344 10.1076 13.1766 10.9842 14.1537 10.9842V9.4842C14.1038 9.4842 14.0639 9.43901 14.0724 9.38725L12.5921 9.14471ZM6.87282 11.0198C6.8474 10.7258 6.96475 10.4378 7.18773 10.2456L6.20855 9.10933C5.62022 9.61631 5.31149 10.3753 5.3784 11.149L6.87282 11.0198Z"/>
+                        </svg>
+                    <h1 class="px-1 items-center">{{currentSolution.numLike}}</h1>
+                </div>
+                <div class="flex flex-nowrap py-2 items-center"(mouseenter)="onHoverShare()" (mouseleave)="onLeaveShare()"  (click)="openSharetoSocialMedia()">
+                    <div *ngIf="hoverShare" class="-mt-12 p-1 absolute z-50 text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
+                        <span class="font-medium">Share</span>
+                      </div>
+        
+                    <svg width="20px" height="20px" viewBox="0 0 24 24" class="dark:fill-white fill-black ml-4 hover:fill-blue-700" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M13.803 5.33333C13.803 3.49238 15.3022 2 17.1515 2C19.0008 2 20.5 3.49238 20.5 5.33333C20.5 7.17428 19.0008 8.66667 17.1515 8.66667C16.2177 8.66667 15.3738 8.28596 14.7671 7.67347L10.1317 10.8295C10.1745 11.0425 10.197 11.2625 10.197 11.4872C10.197 11.9322 10.109 12.3576 9.94959 12.7464L15.0323 16.0858C15.6092 15.6161 16.3473 15.3333 17.1515 15.3333C19.0008 15.3333 20.5 16.8257 20.5 18.6667C20.5 20.5076 19.0008 22 17.1515 22C15.3022 22 13.803 20.5076 13.803 18.6667C13.803 18.1845 13.9062 17.7255 14.0917 17.3111L9.05007 13.9987C8.46196 14.5098 7.6916 14.8205 6.84848 14.8205C4.99917 14.8205 3.5 13.3281 3.5 11.4872C3.5 9.64623 4.99917 8.15385 6.84848 8.15385C7.9119 8.15385 8.85853 8.64725 9.47145 9.41518L13.9639 6.35642C13.8594 6.03359 13.803 5.6896 13.803 5.33333Z"/>
+                        </svg>
+                    <h1 class="px-1 items-center ">{{currentSolution.numShare}}</h1>
+                </div>
+                <div class="flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
+            
+                    <svg width="20px" height="20px" class="dark:fill-white fill-black ml-6 mr-1 hover:fill-blue-700" viewBox="0 0 1024 1024"   xmlns="http://www.w3.org/2000/svg"><path d="M981.333333 960h-21.333333V576a21.333333 21.333333 0 0 0-42.666667 0v384h-128V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666h42.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v21.333334a21.333333 21.333333 0 0 0 42.666667 0v-21.333334a85.333333 85.333333 0 0 0-85.333333-85.333333h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333333v746.666667h-85.333334V426.666667a85.333333 85.333333 0 0 0-85.333333-85.333334h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333334v533.333333h-85.333333V640a85.333333 85.333333 0 0 0-85.333334-85.333333h-42.666666a85.333333 85.333333 0 0 0-85.333334 85.333333v320H64V42.666667a21.333333 21.333333 0 0 0-42.666667 0v938.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h938.666666a21.333333 21.333333 0 0 0 0-42.666667z m-661.333333 0H192V640a42.666667 42.666667 0 0 1 42.666667-42.666667h42.666666a42.666667 42.666667 0 0 1 42.666667 42.666667z m298.666667 0h-128V426.666667a42.666667 42.666667 0 0 1 42.666666-42.666667h42.666667a42.666667 42.666667 0 0 1 42.666667 42.666667z"/><path d="M938.666667 384a21.333333 21.333333 0 0 0-21.333334 21.333333v85.333334a21.333333 21.333333 0 0 0 42.666667 0v-85.333334a21.333333 21.333333 0 0 0-21.333333-21.333333zM958.293333 311.893333a24.533333 24.533333 0 0 0-4.48-7.04l-3.2-2.56a16.213333 16.213333 0 0 0-3.84-1.92L942.933333 298.666667a21.333333 21.333333 0 0 0-12.373333 1.28 19.2 19.2 0 0 0-11.52 11.52 21.333333 21.333333 0 0 0-1.706667 8.533333 21.333333 21.333333 0 0 0 6.186667 15.146667 21.333333 21.333333 0 0 0 7.04 4.48A21.333333 21.333333 0 0 0 938.666667 341.333333a21.333333 21.333333 0 0 0 15.146666-6.186666A22.4 22.4 0 0 0 960 320a21.333333 21.333333 0 0 0-1.706667-8.106667z"  /></svg>
+                    <h1 *ngIf="currentSolution.evaluationSummary "     class="px-1 items-center ">{{currentSolution.numberofTimesEvaluated}}E-{{currentSolution.evaluationSummary.average}}</h1>
+                    <h1 *ngIf="!currentSolution.evaluationSummary "  class="px-1 items-center  text-gray-100">__</h1>
+
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-72  dark:bg-slate-800" *ngIf="displayEvaluationSummary && currentSolution.evaluationDetails">
+                        <div class="p-3 space-y-2">
+                            <h3 class="font-semibold text-gray-900  dark:text-gray-200">Evaluation Summary: {{currentSolution.numberofTimesEvaluated}} evaluator(s) </h3>
+                            <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{currentSolution.evaluationSummary!.average}} </p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
+                                <div class="{{colors.average}} h-2.5  rounded-full " style="width: {{evaluationSummary.average}}%"></div>
+                            </div>
+                         
+                            <div>
+                                <h1 class="mb-2  dark:text-gray-200">Achievable: {{currentSolution.evaluationSummary!.achievable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                 
+                                    <div class="{{colors.achievable}} h-1  rounded-full" style="width: {{evaluationSummary.achievable}}%" > </div>
+                                
+                                </div>
+                                <h1 class="mb-2 dark:text-gray-200">Feasible: {{currentSolution.evaluationSummary!.feasible}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                    
+                                    <div class="{{colors.feasible}} h-1  rounded-full  " style="width: {{evaluationSummary.feasible}}%"> </div>
+                                
+                                </div>
+                                <h1 class="mb-2  dark:text-gray-200">Economical: {{currentSolution.evaluationSummary!.economical}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                    
+                                    <div class="{{colors.economical}} h-1  rounded-full "style="width: {{evaluationSummary.economical}}%"> </div>
+                                
+                                </div>
+                                <h1 class="mb-2  dark:text-gray-200">Ecological: {{currentSolution.evaluationSummary!.ecological}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                    
+                                    <div class="{{colors.ecological}} h-1  rounded-full " style="width: {{evaluationSummary.ecological}}%" > </div>
+                                
+                                </div>
+                                <h1 class="mb-2  dark:text-gray-200">Equitable: {{currentSolution.evaluationSummary!.equitable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                    
+                                    <div class="{{colors.equitable}} h-1  rounded-full  " style="width: {{evaluationSummary.equitable}}%" > </div>
+                                
+                                </div>
+                                <h1 class="mb-2 dark:text-gray-200">Understandable: {{currentSolution.evaluationSummary!.understandable}}</h1>
+                                <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
+                                    
+                                    <div class="{{colors.understandable}} h-1  rounded-full"style="width: {{evaluationSummary.understandable}}%" > </div>
+                                
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div data-popper-arrow></div>
+                    </div>
+
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-20 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-64  dark:bg-slate-800" *ngIf="displayEvaluationSummary && !currentSolution.evaluationDetails">
+                        <div class="p-3 space-y-2">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-200">No Evaluations Submited... </h3>
+                           
+                        </div>
+                    </div>  
+
+                </div>
+            </div>
+
             <section class="mt-6 not-format">
                 <div class="flex justify-between items-center mb-6">
                     <h2  *ngIf="comments"class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Discussion ({{comments.length}})</h2>
@@ -119,18 +213,7 @@
                        
                        
                         <div class="inline-flex items-center mr-3 font-semibold text-sm text-gray-900 dark:text-white">
-                            <!-- <div class="flex flex-nowrap">
-                                
-                                <div *ngIf="!commentUserProfilePicturePath[i]">
-                                    <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> 
-                                
-                                </div>
-                                <img *ngIf="commentUserProfilePicturePath[i]" [src]="commentUserProfilePicturePath[i]" class="w-8 pt-1 rounded-full" alt="">
-                                <h1 class="  px-2 py-2">{{commentUserNames[i]}} . {{commentTimeElapsed[i]}}</h1>
-                                    
-                            </div> -->
-                            
-                            
+                           
 
                             <img
                             *ngIf="commentUserProfilePicturePath[i]" 
@@ -143,7 +226,7 @@
                        
                             </div>
                             <h1 class="text-sm text-gray-600 dark:text-gray-400" >{{commentUserNames[i]}}</h1>
-</div>
+            </div>
                         <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-02-08"
                                 title="February 8th, 2022">{{commentTimeElapsed[i]}}</time></p>
                     </div>
@@ -166,49 +249,113 @@
     </div>
 </main>
 
-<!-- <div class="dark:bg-slate-900 min-h-screen">
-    <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-28 "> -->
 
 
 
 
-        <!-- <div class=" flex flex-col md:flex-row justify-between mx-auto">
 
-            <div class="  flex flex-col ">
-                <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-white">Solution</h1>
-        
-                <div >
-                    <app-solution [evaluationSummary]="evaluationSummary" 
-                    [timeElapsed]="timeElapsed"  
-                    [teamMembers]="teamMembers"  
-                    [solution]="currentSolution"
-                    [comments]="comments"
-                    [colors]="colors"></app-solution>
-                </div>
+   <!-- Modal to share on social media -->
+
+   <!-- Main modal -->
+   <div id="crypto-modal"  class="w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex" *ngIf="displaySharePost">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Share Solution
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" (click)="closeSharePost()">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-2 md:p-3">
+                <p class="text-sm font-normal text-gray-500 dark:text-gray-400">Share this solution with the world!</p>
+                <ul class="my-4 space-y-3">
+                    <li>
+                        <a (click)="share('twitter')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                            <svg width="25px" height="25px" viewBox="0 -4 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    
+                                <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Color-" transform="translate(-300.000000, -164.000000)" fill="#00AAEC">
+                                        <path d="M348,168.735283 C346.236309,169.538462 344.337383,170.081618 342.345483,170.324305 C344.379644,169.076201 345.940482,167.097147 346.675823,164.739617 C344.771263,165.895269 342.666667,166.736006 340.418384,167.18671 C338.626519,165.224991 336.065504,164 333.231203,164 C327.796443,164 323.387216,168.521488 323.387216,174.097508 C323.387216,174.88913 323.471738,175.657638 323.640782,176.397255 C315.456242,175.975442 308.201444,171.959552 303.341433,165.843265 C302.493397,167.339834 302.008804,169.076201 302.008804,170.925244 C302.008804,174.426869 303.747139,177.518238 306.389857,179.329722 C304.778306,179.280607 303.256911,178.821235 301.9271,178.070061 L301.9271,178.194294 C301.9271,183.08848 305.322064,187.17082 309.8299,188.095341 C309.004402,188.33225 308.133826,188.450704 307.235077,188.450704 C306.601162,188.450704 305.981335,188.390033 305.381229,188.271578 C306.634971,192.28169 310.269414,195.2026 314.580032,195.280607 C311.210424,197.99061 306.961789,199.605634 302.349709,199.605634 C301.555203,199.605634 300.769149,199.559408 300,199.466956 C304.358514,202.327194 309.53689,204 315.095615,204 C333.211481,204 343.114633,188.615385 343.114633,175.270495 C343.114633,174.831347 343.106181,174.392199 343.089276,173.961719 C345.013559,172.537378 346.684275,170.760563 348,168.735283" id="Twitter">
+                            
+                            </path>
+                                    </g>
+                                </g>
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Twitter</span>
+                            <span class="inline-flex items-center justify-center px-2 py-0.5 ms-3 text-xs font-medium text-gray-500 bg-gray-200 rounded dark:bg-gray-700 dark:text-gray-400">Popular</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a (click)="share('facebook')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                            <svg width="25px" height="25px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+   
+                                <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <g id="Color-" transform="translate(-200.000000, -160.000000)" fill="#4460A0">
+                                        <path d="M225.638355,208 L202.649232,208 C201.185673,208 200,206.813592 200,205.350603 L200,162.649211 C200,161.18585 201.185859,160 202.649232,160 L245.350955,160 C246.813955,160 248,161.18585 248,162.649211 L248,205.350603 C248,206.813778 246.813769,208 245.350955,208 L233.119305,208 L233.119305,189.411755 L239.358521,189.411755 L240.292755,182.167586 L233.119305,182.167586 L233.119305,177.542641 C233.119305,175.445287 233.701712,174.01601 236.70929,174.01601 L240.545311,174.014333 L240.545311,167.535091 C239.881886,167.446808 237.604784,167.24957 234.955552,167.24957 C229.424834,167.24957 225.638355,170.625526 225.638355,176.825209 L225.638355,182.167586 L219.383122,182.167586 L219.383122,189.411755 L225.638355,189.411755 L225.638355,208 L225.638355,208 Z" id="Facebook">
+                            
+                            </path>
+                                    </g>
+                                </g>
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Facebook</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a (click)="share('email')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                           
+                            <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="style=stroke">
+                                <g id="email">
+                                <path id="vector (Stroke)" fill-rule="evenodd" clip-rule="evenodd" d="M3.88534 5.2371C3.20538 5.86848 2.75 6.89295 2.75 8.5V15.5C2.75 17.107 3.20538 18.1315 3.88534 18.7629C4.57535 19.4036 5.61497 19.75 7 19.75H17C18.385 19.75 19.4246 19.4036 20.1147 18.7629C20.7946 18.1315 21.25 17.107 21.25 15.5V8.5C21.25 6.89295 20.7946 5.86848 20.1147 5.2371C19.4246 4.59637 18.385 4.25 17 4.25H7C5.61497 4.25 4.57535 4.59637 3.88534 5.2371ZM2.86466 4.1379C3.92465 3.15363 5.38503 2.75 7 2.75H17C18.615 2.75 20.0754 3.15363 21.1353 4.1379C22.2054 5.13152 22.75 6.60705 22.75 8.5V15.5C22.75 17.393 22.2054 18.8685 21.1353 19.8621C20.0754 20.8464 18.615 21.25 17 21.25H7C5.38503 21.25 3.92465 20.8464 2.86466 19.8621C1.79462 18.8685 1.25 17.393 1.25 15.5V8.5C1.25 6.60705 1.79462 5.13152 2.86466 4.1379Z" fill="#000000"/>
+                                <path id="vector (Stroke)_2" fill-rule="evenodd" clip-rule="evenodd" d="M19.3633 7.31026C19.6166 7.63802 19.5562 8.10904 19.2285 8.3623L13.6814 12.6486C12.691 13.4138 11.3089 13.4138 10.3185 12.6486L4.77144 8.3623C4.44367 8.10904 4.38328 7.63802 4.63655 7.31026C4.88982 6.98249 5.36083 6.9221 5.6886 7.17537L11.2356 11.4616C11.6858 11.8095 12.3141 11.8095 12.7642 11.4616L18.3113 7.17537C18.6391 6.9221 19.1101 6.98249 19.3633 7.31026Z" fill="#000000"/>
+                                </g>
+                                </g>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Email</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a (click)="share('linkedin')" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                                                    
+                            <svg width="25px" height="25px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="24" cy="24" r="20" fill="#0077B5"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M18.7747 14.2839C18.7747 15.529 17.8267 16.5366 16.3442 16.5366C14.9194 16.5366 13.9713 15.529 14.0007 14.2839C13.9713 12.9783 14.9193 12 16.3726 12C17.8267 12 18.7463 12.9783 18.7747 14.2839ZM14.1199 32.8191V18.3162H18.6271V32.8181H14.1199V32.8191Z" fill="white"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M22.2393 22.9446C22.2393 21.1357 22.1797 19.5935 22.1201 18.3182H26.0351L26.2432 20.305H26.3322C26.9254 19.3854 28.4079 17.9927 30.8101 17.9927C33.7752 17.9927 35.9995 19.9502 35.9995 24.219V32.821H31.4922V24.7838C31.4922 22.9144 30.8404 21.6399 29.2093 21.6399C27.9633 21.6399 27.2224 22.4999 26.9263 23.3297C26.8071 23.6268 26.7484 24.0412 26.7484 24.4574V32.821H22.2411V22.9446H22.2393Z" fill="white"/>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Linkedin</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a  #copyLink (click)="copyToClipboard()"
+                        [class.flash-animation]="isCopied"
+                        [class.bg-green-500]="isCopied"
+                       
+                        class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                                                    
+                            <svg width="25px" height="25px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.9983 10C20.9862 7.82497 20.8897 6.64706 20.1213 5.87868C19.2426 5 17.8284 5 15 5H12C9.17157 5 7.75736 5 6.87868 5.87868C6 6.75736 6 8.17157 6 11V16C6 18.8284 6 20.2426 6.87868 21.1213C7.75736 22 9.17157 22 12 22H15C17.8284 22 19.2426 22 20.1213 21.1213C21 20.2426 21 18.8284 21 16V15" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M3 10V16C3 17.6569 4.34315 19 6 19M18 5C18 3.34315 16.6569 2 15 2H11C7.22876 2 5.34315 2 4.17157 3.17157C3.51839 3.82475 3.22937 4.69989 3.10149 6" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Copy to clipboard</span>
+                        </a>
+                    </li>
+                    
+                </ul>
                 
             </div>
+        </div>
+    </div>
+   </div>
 
 
 
-        </div> -->
-
-        <!-- <div class=" flex flex-col md:flex-row  justify-between mx-auto">
-
-            <div class=" container flex flex-col max-w-2xl">
-                <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6 dark:text-white">Similar Solutions</h1>
-        
-                <div class="flex flex-row" *ngFor="let solution of otherSolutions">
-                    <h1 class="underline text-blue-600 text-left dark:text-gray-400"> {{solution.title}}</h1>
-                </div>
-                
-            </div>
-
-
-
-        </div> -->
-
-
-    <!-- </div>
-</div> -->
 
 <app-chatbot></app-chatbot>

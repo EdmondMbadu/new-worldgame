@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Evaluation, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -18,6 +18,7 @@ export class SolutionViewComponent implements OnInit {
   otherSolutions: Solution[] = [];
   showPopUpTeam: boolean[] = [];
   currentAuth: User = {};
+  isCopied = false;
   currentUser: User = {};
   timeElapsed: string = '';
   evaluationSummary: any = {};
@@ -30,13 +31,18 @@ export class SolutionViewComponent implements OnInit {
   commentUserNames: string[] = [];
 
   teamMembers: User[] = [];
+  hoverShare: boolean = false;
+  hoverLikes: boolean = false;
+  displayEvaluationSummary: boolean = false;
+  displaySharePost: boolean = false;
 
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
     private activatedRoute: ActivatedRoute,
     private time: TimeService,
-    public data: DataService
+    public data: DataService,
+    private router: Router
   ) {}
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe((params) => {
@@ -132,5 +138,106 @@ export class SolutionViewComponent implements OnInit {
   }
   onLeaveTeam(index: number) {
     this.showPopUpTeam[index] = false;
+  }
+  onHoverShare() {
+    this.hoverShare = true;
+  }
+  onLeaveShare() {
+    this.hoverShare = false;
+  }
+  onHoverLikes() {
+    this.hoverLikes = true;
+  }
+  onLeaveLikes() {
+    this.hoverLikes = false;
+  }
+
+  onHoverEvaluation() {
+    this.displayEvaluationSummary = true;
+  }
+  onLeaveEvaluation() {
+    this.displayEvaluationSummary = false;
+  }
+
+  addLike() {
+    this.currentSolution.likes =
+      typeof this.currentSolution.likes === 'string' ||
+      this.currentSolution.likes === undefined
+        ? []
+        : this.currentSolution.likes;
+
+    console.log(
+      'solution likes and liker ',
+      this.currentSolution.likes,
+      this.auth.currentUser.uid
+    );
+    if (
+      this.currentSolution.likes !== undefined &&
+      this.currentSolution.likes!.indexOf(this.auth.currentUser.uid) === -1
+    ) {
+      this.currentSolution.likes.push(this.auth.currentUser.uid);
+      this.solution.addLikes(this.currentSolution);
+    } else {
+      this.currentSolution.likes = this.currentSolution.likes!.filter(
+        (item) => {
+          return item !== this.auth.currentUser.uid;
+        }
+      );
+      this.solution.removeLikes(this.currentSolution);
+    }
+  }
+  openSharetoSocialMedia() {
+    this.displaySharePost = true;
+  }
+  goToEvaluationSummary() {
+    this.router.navigate([
+      '/evaluation-summary/' + this.currentSolution.solutionId,
+    ]);
+  }
+  closeSharePost() {
+    this.displaySharePost = false;
+  }
+  share(social: string) {
+    if (social === 'facebook') {
+      const facebookUrl = `https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
+      const encodedFacebookUrl = encodeURIComponent(facebookUrl);
+      const facebookMessage = `Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness.`;
+      const encodedFacebookMessage = encodeURIComponent(facebookMessage);
+      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodedFacebookUrl}&quote=${encodedFacebookMessage}`;
+
+      window.open(url, '_blank');
+    } else if (social === 'twitter') {
+      const message = `Hi! I've recently developed a NewWorld Game solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
+      const encodedMessage = encodeURIComponent(message);
+      const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view-external/${this.currentSolution.solutionId}&text=${encodedMessage}`;
+
+      window.open(url, '_blank');
+    } else if (social === 'email') {
+      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
+      window.open(url, '_blank');
+    } else if (social === 'linkedin') {
+      const linkedInMessage = `Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
+      const encodedLinkedInMessage = encodeURIComponent(linkedInMessage);
+      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLinkedInMessage}`;
+      window.open(url, '_blank');
+    } else {
+      this.copyToClipboard();
+    }
+    this.solution.addNumShare(this.currentSolution);
+  }
+  copyToClipboard(): void {
+    const listener = (e: ClipboardEvent) => {
+      e.clipboardData!.setData(
+        'text/plain',
+        `https://new-worldgame.web.app/solution-view-external/${this.currentSolution.solutionId}`
+      );
+      e.preventDefault();
+    };
+
+    document.addEventListener('copy', listener);
+    document.execCommand('copy');
+    document.removeEventListener('copy', listener);
+    this.isCopied = true;
+    setTimeout(() => (this.isCopied = false), 2000); // Reset after 2 seconds
   }
 }
