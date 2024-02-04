@@ -35,11 +35,10 @@ export class UserProfileComponent implements OnInit {
       this.profilePicturePath = '';
       this.id = params.get('id');
       this.loadUserProfileData(this.id);
+      window.scroll(0, 0);
     });
   }
-  ngOnInit(): void {
-    window.scroll(0, 0);
-  }
+  ngOnInit(): void {}
 
   loadUserProfileData(id: string) {
     this.auth.getAUser(id).subscribe((data) => {

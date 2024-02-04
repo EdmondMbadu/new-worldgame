@@ -17,6 +17,7 @@ import { UserProfileComponent } from './components/user-profile/user-profile.com
 import { SolutionViewComponent } from './components/solution-view/solution-view.component';
 import { EvaluationSummaryComponent } from './components/evaluation-summary/evaluation-summary.component';
 import { OverviewComponent } from './components/overview/overview.component';
+import { SolutionViewExternalComponent } from './components/solution-view-external/solution-view-external.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -43,9 +44,13 @@ const routes: Routes = [
   {
     path: 'solution-view/:id',
     component: SolutionViewComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'solution-view-external/:id',
+    component: SolutionViewExternalComponent,
     // canActivate: [AuthGuard],
   },
-
   {
     path: 'problem-list-view',
     component: ProblemListViewComponent,

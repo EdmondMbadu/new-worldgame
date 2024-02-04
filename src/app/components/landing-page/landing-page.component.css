@@ -1,8 +1,15 @@
 
+:root {
+    --after-background-color: white; /* Default background color */
+    --cursor-color:rgb(15 118 110);
+}
+
+
 
 
 .animated-text span{
     position: relative;
+  
 
 }
 
@@ -10,29 +17,44 @@
     content: "";
     animation: words 20s infinite;
 }
+
+
 .animated-text span::after{
     content:"";
     position: absolute;
     width: calc(100% + 8px);
     height: 50px;
-    background-color: white;
-    border-left: 4px solid black;
+   background-color: var(--after-background-color);
+    border-left: 4px solid var(--cursor-color);
+    color: rgb(15 118 110);
     right: -8px;
     animation: cursor .8s infinite, typing 20s steps(14) infinite;
 }
-@media (prefers-color-scheme: dark) {
+
+
+
+/* Styles for OS dark mode preference */
+/* @media (prefers-color-scheme: dark) {
     .animated-text span::before,
     .animated-text span::after {
         background-color: rgb(15 23 42);
-        /* dark theme specific styles */
-        color: rgb(15 118 110); /* text color for dark theme */
-        border-color: rgb(15 118 110); /* cursor color for dark theme */
+        color: rgb(15 118 110);
+        border-color: rgb(15 118 110);
     }
+} */
+
+/* Manual dark mode toggle using .dark class */
+.dark .animated-text  span::before,
+.dark .animated-text span::after {
+    background-color: black ;
+    color: rgb(15 118 110) ;
+    border-color: rgb(15 118 110) ;
 }
+
 
 @keyframes cursor {
     to{
-        border-left: 2px solid #00000000;
+        border-left: 2px solid transparent;
     }
 }
 
@@ -56,20 +78,17 @@
 }
 
 @keyframes typing {
+  
+  
     10%,15%,30%,35%,50%,55%,70%,75%,90%,95%{
         width: 0;
     }
     5%,20%,25%,40%,45%,60%,65%,80%,85%{
         width: calc(100% + 8px);
     }
-    /* 0%, 11%, 34%, 45%, 66%, 77%, 100% {
-        width: 0;
-    }
-    5%, 30%, 40%, 65%, 75%, 95% {
-        width: calc(100% + 8px);
-    } */
+  
 }
-
+/* 
 .rotate {
     animation: rotation 30s infinite linear;
   }
@@ -81,5 +100,5 @@
     to {
       transform: rotate(359deg);
     }
-  }
+  } */
 

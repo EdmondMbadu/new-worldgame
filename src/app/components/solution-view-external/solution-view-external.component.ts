@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Evaluation, Solution } from 'src/app/models/solution';
+import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -8,11 +8,11 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-solution-view',
-  templateUrl: './solution-view.component.html',
-  styleUrls: ['./solution-view.component.css'],
+  selector: 'app-solution-view-external',
+  templateUrl: './solution-view-external.component.html',
+  styleUrl: './solution-view-external.component.css',
 })
-export class SolutionViewComponent implements OnInit {
+export class SolutionViewExternalComponent {
   solutionId: any = '';
   currentSolution: Solution = {};
   otherSolutions: Solution[] = [];

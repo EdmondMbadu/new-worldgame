@@ -50,6 +50,7 @@ import { DropZoneDirective } from './components/drop-zone.directive';
 import { SolutionViewComponent } from './components/solution-view/solution-view.component';
 import { EvaluationSummaryComponent } from './components/evaluation-summary/evaluation-summary.component';
 import { OverviewComponent } from './components/overview/overview.component';
+import { SolutionViewExternalComponent } from './components/solution-view-external/solution-view-external.component';
 
 @NgModule({
   declarations: [
@@ -78,6 +79,7 @@ import { OverviewComponent } from './components/overview/overview.component';
     SolutionViewComponent,
     EvaluationSummaryComponent,
     OverviewComponent,
+    SolutionViewExternalComponent,
   ],
   imports: [
     BrowserModule,

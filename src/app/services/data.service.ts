@@ -4,7 +4,7 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AuthService } from './auth.service';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ActiveDescendantKeyManager } from '@angular/cdk/a11y';
 import { Avatar, User } from '../models/user';
 import { Evaluation } from '../models/solution';
@@ -13,7 +13,18 @@ import { Evaluation } from '../models/solution';
   providedIn: 'root',
 })
 export class DataService implements OnInit {
-  constructor(private auth: AuthService, private afs: AngularFirestore) {}
+  constructor(private auth: AuthService, private afs: AngularFirestore) {
+    this.loadInitialTheme();
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'theme') {
+        this.setTheme(event.newValue);
+      }
+    });
+  }
+  private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
+
+  currentTheme = this.themeSource.asObservable();
+
   sdgsPaths: { [key: string]: string } = {
     None: '../../../assets/img/global-network.png',
     'SDG1   No Poverty': '../../../assets/img/sdg1.png',
@@ -62,7 +73,32 @@ export class DataService implements OnInit {
     'SDG17  Partnership For ThE Goals-link': 'https://sdgs.un.org/goals/goal17',
   };
   ngOnInit(): void {}
+  private getInitialTheme(): string {
+    return localStorage.getItem('theme') || 'light';
+  }
 
+  private loadInitialTheme(): void {
+    const storedTheme = localStorage.getItem('theme');
+    this.setTheme(storedTheme);
+  }
+
+  private getSystemTheme(): string {
+    // Default to system theme if localStorage theme is null
+    return window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  }
+
+  setTheme(theme: string | null): void {
+    const effectiveTheme = theme || this.getSystemTheme();
+    this.themeSource.next(effectiveTheme);
+    document.documentElement.classList.toggle(
+      'dark',
+      effectiveTheme === 'dark'
+    );
+    localStorage.setItem('theme', effectiveTheme);
+  }
   uploadPictureToCloudStorage(user: User, avatar: Avatar) {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`

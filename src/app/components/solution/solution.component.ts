@@ -17,6 +17,7 @@ export class PostComponent implements OnInit {
   displayAddCommentPermission: boolean = false;
   isCopied = false;
   el: number = 100;
+  @Input() fullPage: boolean = true;
   comment: string = '';
   hoverLikes: boolean = false;
   hoverComments: boolean = false;
@@ -147,6 +148,9 @@ export class PostComponent implements OnInit {
   extractComments(comments: any) {}
 
   showLessOrMore() {
+    if (this.fullPage) {
+      this.router.navigate(['/solution-view', this.solution.solutionId]);
+    }
     this.full = !this.full;
   }
 
@@ -216,7 +220,7 @@ export class PostComponent implements OnInit {
   }
   share(social: string) {
     if (social === 'facebook') {
-      const facebookUrl = `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;
+      const facebookUrl = `https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
       const encodedFacebookUrl = encodeURIComponent(facebookUrl);
       const facebookMessage = `Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness.`;
       const encodedFacebookMessage = encodeURIComponent(facebookMessage);
@@ -226,14 +230,14 @@ export class PostComponent implements OnInit {
     } else if (social === 'twitter') {
       const message = `Hi! I've recently developed a NewWorld Game solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
       const encodedMessage = encodeURIComponent(message);
-      const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view/${this.solution.solutionId}&text=${encodedMessage}`;
+      const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}&text=${encodedMessage}`;
 
       window.open(url, '_blank');
     } else if (social === 'email') {
-      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;
+      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
       window.open(url, '_blank');
     } else if (social === 'linkedin') {
-      const linkedInMessage = `Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`;
+      const linkedInMessage = `Hi! I've recently developed a solution titled ${this.solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
       const encodedLinkedInMessage = encodeURIComponent(linkedInMessage);
       const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLinkedInMessage}`;
       window.open(url, '_blank');
@@ -250,7 +254,7 @@ export class PostComponent implements OnInit {
     const listener = (e: ClipboardEvent) => {
       e.clipboardData!.setData(
         'text/plain',
-        `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`
+        `https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`
       );
       e.preventDefault();
     };
