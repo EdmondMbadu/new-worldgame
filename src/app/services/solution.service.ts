@@ -222,33 +222,14 @@ export class SolutionService {
 
     return solutionRef.set(data, { merge: true });
   }
+  updateSolutionTitle(solutionId: string, title: string) {
+    const data = {
+      title: title,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
 
-  // share(social: string,solution:Solution) {
-  //   if (social === 'facebook') {
-  //     const facebookUrl = `https://new-worldgame.web.app/solution-view-external/${solution.solutionId}`;
-  //     const encodedFacebookUrl = encodeURIComponent(facebookUrl);
-  //     const facebookMessage = `Hi! I've recently developed a solution titled ${solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness.`;
-  //     const encodedFacebookMessage = encodeURIComponent(facebookMessage);
-  //     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodedFacebookUrl}&quote=${encodedFacebookMessage}`;
-
-  //     window.open(url, '_blank');
-  //   } else if (social === 'twitter') {
-  //     const message = `Hi! I've recently developed a NewWorld Game solution titled ${solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
-  //     const encodedMessage = encodeURIComponent(message);
-  //     const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view-external/${solution.solutionId}&text=${encodedMessage}`;
-
-  //     window.open(url, '_blank');
-  //   } else if (social === 'email') {
-  //     const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${solution.solutionId}`;
-  //     window.open(url, '_blank');
-  //   } else if (social === 'linkedin') {
-  //     const linkedInMessage = `Hi! I've recently developed a solution titled ${solution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view-external/${solution.solutionId}`;
-  //     const encodedLinkedInMessage = encodeURIComponent(linkedInMessage);
-  //     const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedLinkedInMessage}`;
-  //     window.open(url, '_blank');
-  //   } else {
-  //     this.copyToClipboard();
-  //   }
-  //   this.addNumShare(solution);
-  // }
+    return solutionRef.set(data, { merge: true });
+  }
 }

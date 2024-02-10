@@ -22,7 +22,10 @@ export class PlaygroundStepsComponent implements OnInit {
   teamMembers: User[] = [];
   showPopUpTeam: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
+  showAddTeamMember: boolean = false;
+  hoverAddTeamMember: boolean = false;
   evaluators: User[] = [];
+
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
@@ -148,5 +151,12 @@ export class PlaygroundStepsComponent implements OnInit {
   }
   onLeaveEvaluatros(index: number) {
     this.showPopUpEvaluators[index] = false;
+  }
+
+  onHoverAddTeamMember() {
+    this.hoverAddTeamMember = !this.hoverAddTeamMember;
+  }
+  toggleAddTeamMember() {
+    this.showAddTeamMember = !this.showAddTeamMember;
   }
 }

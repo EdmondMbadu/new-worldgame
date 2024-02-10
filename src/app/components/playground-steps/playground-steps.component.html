@@ -62,7 +62,8 @@
                     <div class="flex flex-col ">
                         <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Designers :  {{teamMembers.length}}</h5>
                     </div>
-                        <div class="flex flex-row -space-x-1" >
+                    
+                        <div class="flex flex-row -space-x-1 overflow-x-scroll" >
                             <div *ngFor="let user of teamMembers; let i= index" >
                                 <div *ngIf="user.uid === auth.currentUser.uid" >
                                     <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
@@ -71,8 +72,7 @@
                                         <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                                     </div> 
                                     
-                                    <!-- <img *ngIf="user.profilePicture?.downloadURL===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" src="../../../assets/img/user.png" routerLink="/profile" alt=""> -->
-
+                                   
                                 </div>
                                 <div *ngIf="user.uid !== auth.currentUser.uid" >
                                     <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
@@ -81,8 +81,7 @@
                                         <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                                     </div> 
                                     
-                                    <!-- <img *ngIf="user.profilePicture!.downloadURL ===undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700 " src="../../../assets/img/user.png"routerLink="/user-profile/{{user.uid}}"alt=""> -->
-
+                                  
                                 </div>
                                 <div>
                                     <div *ngIf="showPopUpTeam[i]" >
@@ -90,7 +89,7 @@
                                             <div class="flex items-center justify-between mb-2" >
                                                 <a >
                                                     <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
-                                                    <!-- <img *ngIf="user.profilePicture!.downloadURL ===undefined"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt="">  -->
+                                                    
                                                     <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
                
                                                         <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
@@ -126,6 +125,13 @@
                                     </div>
                                 </div>
                             </div>
+                            <div *ngIf="hoverAddTeamMember" class=" -mt-6  absolute   z-50 p-2 flex text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
+                                <span class="font-medium text-center">Add Team Member</span>
+                              </div>
+                            <svg  (mouseenter)="onHoverAddTeamMember()" (mouseleave)="onHoverAddTeamMember()"   class=" ml-4 mt-5 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black " width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
+                                </svg>
+                                
                         </div>
                         
                 
@@ -136,7 +142,6 @@
                     <div class="flex flex-row -space-x-1" >
                         <div *ngFor="let user of evaluators; let i= index" >
                             <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                            <!-- <img  *ngIf="user.profilePicture!.downloadURL ===undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" src="../../../assets/img/user.png" routerLink="/user-profile/{{user.uid}}" alt=""> -->
                              
                             <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)" routerLink="/user-profile/{{user.uid}}"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
                
@@ -144,12 +149,12 @@
                             </div> 
                             
                             <div>
-                                <div *ngIf="showPopUpEvaluators[i]" >
+                                <div *ngIf="showPopUpEvaluators[i]" class="overflow-x-scroll" >
                                     <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
                                         <div class="flex items-center justify-between mb-2" >
                                             <a >
                                                 <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
-                                                <!-- <img *ngIf="user.profilePicture!.downloadURL ===undefined"    class="w-10 h-10 rounded-full" src="../../../assets/img/user.png"alt=""> -->
+                                               
                                                 <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
                
                                                     <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
@@ -194,3 +199,7 @@
             </div>
     </div>
 </div>
+
+
+
+  <!-- Main modal -->

@@ -1,12 +1,12 @@
     <!-- posts -->
     <div class="my-2">
-        <div class=" w-fit   max-w-[38.3rem] bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800 dark:text-gray-200">
+        <div class=" w-[38.3rem]   max-w-[38.3rem] bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800 dark:text-gray-200">
             <div *ngIf="solution" class="flex  pb-10">
                 <div class="flex flex-row">
                     <h1  class="  px-2  font-bold ">Designers <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
              
                 </div>
-                <div class="flex flex-row justify-between">
+                <div class="flex flex-row justify-between overflow-x-scroll">
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
                     <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
                         <img *ngIf="auth.currentUser!==null && user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">

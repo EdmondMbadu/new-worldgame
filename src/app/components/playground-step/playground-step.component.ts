@@ -22,6 +22,7 @@ export interface FeedbackRequest {
 export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayPopups: boolean[] = [];
+  newTitle: string = '';
   clickedDisplayPopups: boolean[] = [];
   currentSolution: Solution = {};
   staticContentArray: string[] = [];
@@ -41,12 +42,14 @@ export class PlaygroundStepComponent {
   questionsAndAnswersTracker?: { [key: string]: string } = {};
   scrollHandler: (() => void) | undefined;
   elements: any = [];
+  updateTitleBox: boolean = false;
   constructor(
     private router: Router,
     private solution: SolutionService,
     private auth: AuthService
   ) {}
   data: string = '';
+  hoverChangeTitle: boolean = false;
   ngOnInit() {
     window.scrollTo(0, 0);
     this.initializeContents();
@@ -255,5 +258,31 @@ export class PlaygroundStepComponent {
   }
   openPopups(index: number) {
     this.clickedDisplayPopups[index] = true;
+  }
+
+  onHoverChangeTitle() {
+    this.hoverChangeTitle = !this.hoverChangeTitle;
+  }
+  onLeaveChangeTitle() {
+    this.hoverChangeTitle = !this.hoverChangeTitle;
+  }
+  toggleUpdateTitle() {
+    this.updateTitleBox = !this.updateTitleBox;
+  }
+
+  updateTitile() {
+    if (this.newTitle !== '') {
+      this.solution
+        .updateSolutionTitle(this.currentSolution.solutionId!, this.newTitle)
+        .then(() => {
+          this.title = this.newTitle;
+          this.toggleUpdateTitle();
+        })
+        .catch((error: any) => {
+          alert('Error occured while updating title. Try again!');
+        });
+    } else {
+      alert('Enter a title');
+    }
   }
 }
