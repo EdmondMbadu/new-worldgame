@@ -9,6 +9,7 @@ import { TimeService } from './time.service';
 import { Observable } from 'rxjs';
 import { User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
+import { Email } from '../components/create-playground/create-playground.component';
 
 @Injectable({
   providedIn: 'root',
@@ -225,6 +226,17 @@ export class SolutionService {
   updateSolutionTitle(solutionId: string, title: string) {
     const data = {
       title: title,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
+
+  addParticipantsToSolution(participants: any, solutionId: string) {
+    const data = {
+      participants: participants,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`

@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
   myForm: FormGroup;
   loading: boolean = false;
   ngOnInit() {
+    window.scroll(0, 0);
     this.auth.logingError = of(null);
   }
 

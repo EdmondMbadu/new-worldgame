@@ -128,7 +128,7 @@
                             <div *ngIf="hoverAddTeamMember" class=" -mt-6  absolute   z-50 p-2 flex text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
                                 <span class="font-medium text-center">Add Team Member</span>
                               </div>
-                            <svg  (mouseenter)="onHoverAddTeamMember()" (mouseleave)="onHoverAddTeamMember()"   class=" ml-4 mt-5 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black " width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
+                            <svg (click)="toggleAddTeamMember()"  (mouseenter)="onHoverAddTeamMember()"  (mouseleave)="onHoverAddTeamMember()"   class=" ml-4 mt-5 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black " width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
                                 </svg>
                                 
@@ -203,3 +203,31 @@
 
 
   <!-- Main modal -->
+  <div *ngIf="showAddTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed right-[10rem] bottom-[10rem] z-50 p-4 flex ">
+    <div class="relative p-2 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          
+          
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 min-w-xl">
+              
+                <div class="grid gap-4 mb-4 grid-cols-2">
+         
+                    <div class="col-span-2">
+                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add a new Participant (only one at a time)</label>
+                        <textarea [(ngModel)]="newTeamMember" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
+                    </div>
+                </div>
+                <button (click)="toggleAddTeamMember()"  class="mr-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    
+                    Cancel
+                </button>
+                <button  (click)="addParticipantToSolution()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
+                  
+                  Add Participant
+              </button>
+          </div>
+        </div>
+    </div>
+</div> 

@@ -25,6 +25,7 @@ export class PlaygroundStepsComponent implements OnInit {
   showAddTeamMember: boolean = false;
   hoverAddTeamMember: boolean = false;
   evaluators: User[] = [];
+  newTeamMember: string = '';
 
   constructor(
     public auth: AuthService,
@@ -36,6 +37,7 @@ export class PlaygroundStepsComponent implements OnInit {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+
       this.getMembers();
       this.getEvaluators();
     });
@@ -158,5 +160,37 @@ export class PlaygroundStepsComponent implements OnInit {
   }
   toggleAddTeamMember() {
     this.showAddTeamMember = !this.showAddTeamMember;
+  }
+  addParticipantToSolution() {
+    let participants: any = [];
+    if (this.isValidEmail(this.newTeamMember)) {
+      participants = this.currentSolution.participants;
+      participants.push({ name: this.newTeamMember });
+      console.log('participants', participants);
+      console.log('team member', this.newTeamMember);
+
+      this.solution
+        .addParticipantsToSolution(
+          participants,
+          this.currentSolution.solutionId!
+        )
+        .then(() => {
+          this.newTeamMember = '';
+          this.getMembers();
+          this.toggleAddTeamMember();
+        })
+        .catch((error) => {
+          alert('Error occured while adding a team member. Try Again!');
+        });
+    } else {
+      alert('Enter a valid email!');
+    }
+  }
+
+  // this regex needs to be revisted.
+  isValidEmail(email: string): boolean {
+    const regex =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regex.test(email);
   }
 }

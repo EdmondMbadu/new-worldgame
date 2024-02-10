@@ -51,6 +51,7 @@ import { SolutionViewComponent } from './components/solution-view/solution-view.
 import { EvaluationSummaryComponent } from './components/evaluation-summary/evaluation-summary.component';
 import { OverviewComponent } from './components/overview/overview.component';
 import { SolutionViewExternalComponent } from './components/solution-view-external/solution-view-external.component';
+import { CareersComponent } from './blogs/careers/careers.component';
 
 @NgModule({
   declarations: [
@@ -80,6 +81,7 @@ import { SolutionViewExternalComponent } from './components/solution-view-extern
     EvaluationSummaryComponent,
     OverviewComponent,
     SolutionViewExternalComponent,
+    CareersComponent,
   ],
   imports: [
     BrowserModule,
