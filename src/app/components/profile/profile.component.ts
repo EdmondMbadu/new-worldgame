@@ -27,7 +27,6 @@ import { Router } from '@angular/router';
 export class ProfileComponent implements OnInit {
   user: User = {};
   profilePicturePath?: string = '';
-  editAvatarImage: boolean = false;
   solutions: Solution[] = [];
   completedSolutions: Solution[] = [];
   dateJoined: string = '';
@@ -54,12 +53,6 @@ export class ProfileComponent implements OnInit {
 
   toggleHover(event: boolean) {
     this.isHovering = event;
-  }
-  displayEditAvatar() {
-    this.editAvatarImage = true;
-  }
-  hideEditAvatar() {
-    this.editAvatarImage = false;
   }
 
   findCompletedSolutions() {
