@@ -48,6 +48,7 @@ export class SolutionViewComponent implements OnInit {
     this.activatedRoute.paramMap.subscribe((params) => {
       this.solutionId = params.get('id');
       window.scroll(0, 0);
+
       this.loadSolutionData(this.solutionId);
     });
   }
@@ -118,6 +119,7 @@ export class SolutionViewComponent implements OnInit {
   }
 
   getMembers() {
+    this.teamMembers = [];
     for (const key in this.currentSolution.participants) {
       let participant = this.currentSolution.participants[key];
       let email = Object.values(participant)[0];

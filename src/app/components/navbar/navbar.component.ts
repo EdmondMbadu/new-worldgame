@@ -46,7 +46,7 @@ export class NavbarComponent implements OnInit {
 
     if (this.email) {
       this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
-        this.allSolutions = data;
+        this.allSolutions = data.filter((data) => data.finished === 'true');
       });
       this.data.getAllUsers().subscribe((data) => {
         this.allUsers = data;
