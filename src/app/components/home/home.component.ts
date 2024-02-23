@@ -62,7 +62,7 @@ export class HomeComponent implements OnInit {
     this.pendingSolutions = [];
 
     for (let s of this.currentUserSolutions) {
-      if (s.finished === undefined) {
+      if (s.finished === undefined || s.finished === 'false') {
         this.pendingSolutions.push(s);
       }
     }

@@ -19,6 +19,9 @@ import { EvaluationSummaryComponent } from './components/evaluation-summary/eval
 import { OverviewComponent } from './components/overview/overview.component';
 import { SolutionViewExternalComponent } from './components/solution-view-external/solution-view-external.component';
 import { CareersComponent } from './blogs/careers/careers.component';
+import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
+import { PrivacyComponent } from './blogs/privacy/privacy.component';
+import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -63,12 +66,25 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'join-tournament',
+    component: JoinTournamentComponent,
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'overview',
     component: OverviewComponent,
   },
   {
     path: 'careers',
     component: CareersComponent,
+  },
+  {
+    path: 'privacy',
+    component: PrivacyComponent,
+  },
+  {
+    path: 'custom-storyboard',
+    component: CustomGptDesignScienceStoryboardComponent,
   },
   {
     path: 'problem-feedback/:id',

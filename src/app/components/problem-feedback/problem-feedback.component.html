@@ -1,6 +1,6 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [current]="''"></app-navbar>
 <div class="dark:bg-slate-900 min-h-screen">
-        <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-24">
+        <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-28">
             <div class="flex flex-col md:mx-20">
                 <app-solution [fullPage]="false" [timeElapsed]="timeElapsed" [solution]="userSolution"[teamMembers]="teamMembers"></app-solution>
 
@@ -9,11 +9,11 @@
         
         
 
-            <div class="lg:absolute lg:top-20 lg:right-0 md:mx-10 flex flex-col ">
+            <div class="lg:absolute lg:top-24 lg:right-0 md:mx-10 flex flex-col ">
 
                 <div class="flex flex-col items-center bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow md:flex-row   p-4 dark:bg-slate-800">
                     <!-- <img class="object-cover  rounded-t-lg w-20 md:h-auto  md:rounded-none md:rounded-l-lg " src="../../../assets/img/evaluation.png" alt=""> -->
-                    <div class="flex flex-col p-2">
+                    <div class="flex flex-col ">
                         <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900  text-center dark:text-gray-200">Evaluation</h5>
                         <div class="flex flex-col justify-center items-center">
                                 <div class="flex flex-row space-x-10  " *ngFor="let ev of evaluationArray; let i=index">
@@ -53,7 +53,7 @@
                             
                             
                                 <div class=" mt-4 border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                                    <a  class="text-white" (click)="makeSureBeforeSubmit()"> Submit Feedback</a>
+                                    <a  class="text-white p-4" (click)="makeSureBeforeSubmit()"> Submit Feedback</a>
                                 </div>
 
 

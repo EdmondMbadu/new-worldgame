@@ -14,9 +14,16 @@ import { TimeService } from 'src/app/services/time.service';
 })
 export class SolutionViewComponent implements OnInit {
   solutionId: any = '';
+  edited: string = '';
+  displayEditSolution: boolean = false;
+  displayDeleteSolution: boolean = false;
+  confirmationEditSolution: boolean = false;
+  confirmationDeleteSolution: boolean = false;
   currentSolution: Solution = {};
   otherSolutions: Solution[] = [];
   showPopUpTeam: boolean[] = [];
+  isContributorOfThisSolution: boolean = false;
+  iscreatorOfThisSolution: boolean = false;
   currentAuth: User = {};
   isCopied = false;
   currentUser: User = {};
@@ -98,6 +105,12 @@ export class SolutionViewComponent implements OnInit {
       .getSolutionForNonAuthenticatedUser(solutionId)
       .subscribe((data: any) => {
         this.currentSolution = data[0];
+        if (this.currentSolution.authorEmail === this.auth.currentUser.email) {
+          this.iscreatorOfThisSolution = true;
+        }
+        if (this.currentSolution.edited === 'true') {
+          this.edited = ' (Edited)';
+        }
         this.timeElapsed = this.time.timeAgo(
           this.currentSolution.submissionDate!
         );
@@ -123,6 +136,10 @@ export class SolutionViewComponent implements OnInit {
     for (const key in this.currentSolution.participants) {
       let participant = this.currentSolution.participants[key];
       let email = Object.values(participant)[0];
+      if (email === this.auth.currentUser.email) {
+        this.isContributorOfThisSolution = true;
+      }
+
       this.auth.getUserFromEmail(email).subscribe((data) => {
         // Check if the email of the incoming data is already in the teamMembers
         if (
@@ -241,5 +258,28 @@ export class SolutionViewComponent implements OnInit {
     document.removeEventListener('copy', listener);
     this.isCopied = true;
     setTimeout(() => (this.isCopied = false), 2000); // Reset after 2 seconds
+  }
+  toggleEditSolution() {
+    this.displayEditSolution = !this.displayEditSolution;
+  }
+  toggleConfirmationEditSolution() {
+    this.confirmationEditSolution = !this.confirmationEditSolution;
+  }
+  toggleConfirmationDeleteSolution() {
+    this.confirmationDeleteSolution = !this.confirmationDeleteSolution;
+  }
+
+  submitDeleteSolution() {
+    this.solution.deleteSolution(this.currentSolution.solutionId!);
+    this.toggleConfirmationDeleteSolution();
+    this.router.navigate(['/home']);
+  }
+
+  submitEditSolution() {
+    this.solution.editSolutionAfterInitialSubmission(
+      this.currentSolution.solutionId!
+    );
+    this.toggleConfirmationEditSolution();
+    this.router.navigate(['/home']);
   }
 }

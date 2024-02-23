@@ -84,8 +84,10 @@ export class ProfileComponent implements OnInit {
       console.log('unsupported file type');
       return;
     }
-    if (file?.size >= 1000000) {
+    // the file sould not be larger than 5MB
+    if (file?.size >= 5000000) {
       console.log('the file is too big');
+      alert('The picture is too big. It should be less than 5MB');
       return;
     }
     const path = `avatar/${this.auth.currentUser.uid}-${file.name}`;

@@ -6,7 +6,7 @@
                     <h1  class="  px-2  font-bold ">Designers <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
              
                 </div>
-                <div class="flex flex-row justify-between overflow-x-scroll">
+                <div class="flex flex-row justify-between ">
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
                     <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
                         <img *ngIf="auth.currentUser!==null && user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
@@ -71,7 +71,7 @@
                     </div>
               
                 </div>
-                <div class="flex flex-row ml-60">
+                <div class="flex flex-row ml-56 max-w-sm">
         
              
                     <a *ngFor="let sd of solution.sdgs " href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"  class=" rounded-lg    mb-4" >

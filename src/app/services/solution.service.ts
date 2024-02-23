@@ -223,6 +223,25 @@ export class SolutionService {
 
     return solutionRef.set(data, { merge: true });
   }
+
+  editSolutionAfterInitialSubmission(solutionId: string) {
+    const data = {
+      finished: 'false',
+      edited: 'true',
+      submissionDate: '',
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
+  deleteSolution(solutionId: string) {
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+    return solutionRef.delete();
+  }
   updateSolutionTitle(solutionId: string, title: string) {
     const data = {
       title: title,
