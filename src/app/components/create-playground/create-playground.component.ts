@@ -321,7 +321,7 @@ export class CreatePlaygroundComponent {
     this.participantsEmails.forEach((participant) => {
       const emailData = {
         email: participant.name,
-        subject: `You Have Been Invited to Join a Solution Lab (New WorldGame)`,
+        subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
         title: this.myForm.value.title,
         description: this.myForm.value.description,
         path: `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`,
