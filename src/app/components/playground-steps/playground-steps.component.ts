@@ -112,8 +112,8 @@ export class PlaygroundStepsComponent implements OnInit {
   ];
   AllQuestions: Array<Array<string>> = [
     [
-      'What is the problem you have chosen and why ?',
-      'What are the symptoms of this problem? How do you measure it?',
+      'What is the problem you have chosen and why ?(Back up/document why you have chosen this problem.)',
+      'What are the symptoms of this problem? How do you measure it? (Show information)',
       'How many people does this problem impact in the world? Where is it most severe?',
       'What will happen if nothing is done to deal with this problem?',
     ],
@@ -122,12 +122,12 @@ export class PlaygroundStepsComponent implements OnInit {
       'How will you measure success? How will you know when you reach the preferred state?',
     ],
     [
-      'What does your solution do to reach the preferred state?',
-      'What is done in the next 6 months to get your solution implemented?',
+      'What does your solution do to reach the preferred state? how will it do it?',
+      'What is done in the next 6-12 months to get your solution implemented?',
       'What resources does our plan need?',
       'How much will our strategy cost?',
-      'Where will you get the money?',
-      'What would you do with $100,000 to take the strategy to the next level? ',
+      'Where will we get the money?',
+      'What would we do with $100,000 to advance the strategy implementation? ',
     ],
     ['Review Your Entire Strategy and Submit'],
   ];

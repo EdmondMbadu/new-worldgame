@@ -22,6 +22,7 @@ import { CareersComponent } from './blogs/careers/careers.component';
 import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
 import { PrivacyComponent } from './blogs/privacy/privacy.component';
 import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
+import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -81,6 +82,10 @@ const routes: Routes = [
   {
     path: 'privacy',
     component: PrivacyComponent,
+  },
+  {
+    path: 'evaluators',
+    component: EvaluatorsComponent,
   },
   {
     path: 'custom-storyboard',

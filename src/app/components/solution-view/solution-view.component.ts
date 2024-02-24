@@ -16,6 +16,7 @@ export class SolutionViewComponent implements OnInit {
   solutionId: any = '';
   edited: string = '';
   displayEditSolution: boolean = false;
+  displayAddCommentPermission: boolean = false;
   displayDeleteSolution: boolean = false;
   confirmationEditSolution: boolean = false;
   confirmationDeleteSolution: boolean = false;
@@ -281,5 +282,34 @@ export class SolutionViewComponent implements OnInit {
     );
     this.toggleConfirmationEditSolution();
     this.router.navigate(['/home']);
+  }
+
+  addComment() {
+    if (!this.auth.currentUser) {
+      this.displayAddCommentPermission = true;
+      return;
+    }
+    if (this.comments) {
+      this.comments.push({
+        authorId: this.auth.currentUser.uid,
+        date: this.time.todaysDate(),
+        content: this.comment,
+        likes: '0',
+        dislikes: '0',
+      });
+    } else {
+      this.comments = [
+        {
+          authorId: this.auth.currentUser.uid,
+          date: this.time.todaysDate(),
+          content: this.comment,
+          likes: '0',
+          dislikes: '0',
+        },
+      ];
+    }
+
+    this.solution.addCommentToSolution(this.currentSolution, this.comments);
+    this.comment = '';
   }
 }

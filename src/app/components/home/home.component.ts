@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
+
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -12,6 +12,8 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class HomeComponent implements OnInit {
   user: User;
+
+  showSortByDrowpDown: boolean = false;
   allUsers: User[] = [];
   evaluationSolutions: Solution[] = [];
   evaluationSolutionsUsers: User[] = [];
@@ -50,11 +52,6 @@ export class HomeComponent implements OnInit {
       this.profilePicturePath = this.user.profilePicture.downloadURL;
     }
   }
-  problems: string[] = [
-    'Ending Poverty',
-    'Inequality and Poverty',
-    'Mental Health',
-  ];
 
   findAwaitingEvaluationSolutionLength() {}
 
@@ -77,5 +74,48 @@ export class HomeComponent implements OnInit {
         this.completedSolutions.push(s);
       }
     }
+  }
+
+  toggleSortyByDropDown() {
+    this.showSortByDrowpDown = !this.showSortByDrowpDown;
+  }
+
+  sortByNumLikes(order: string) {
+    const sortedSolutions = this.completedSolutions.sort((a, b) => {
+      // Convert numLikes from string to number
+      const likesA = parseInt(a.numLike!, 10);
+      const likesB = parseInt(b.numLike!, 10);
+
+      // Compare likes for sorting
+
+      return order === 'ascending' ? likesA - likesB : likesB - likesA;
+    });
+    this.completedSolutions = sortedSolutions;
+    this.toggleSortyByDropDown();
+  }
+  sortBySubmissionDate(order: string) {
+    const sortedSolutions = this.completedSolutions.sort((a, b) => {
+      // Correctly parse the submissionDate to a comparable format
+      const dateA = new Date(
+        a.submissionDate!.replace(
+          /(\d+)-(\d+)-(\d+)-(\d+)-(\d+)-(\d+)/,
+          '$3/$1/$2 $4:$5:$6'
+        )
+      );
+      const dateB = new Date(
+        b.submissionDate!.replace(
+          /(\d+)-(\d+)-(\d+)-(\d+)-(\d+)-(\d+)/,
+          '$3/$1/$2 $4:$5:$6'
+        )
+      );
+
+      // Compare the dates based on the specified order
+      return order === 'ascending'
+        ? dateA.getTime() - dateB.getTime()
+        : dateB.getTime() - dateA.getTime();
+    });
+
+    this.completedSolutions = sortedSolutions;
+    this.toggleSortyByDropDown();
   }
 }
