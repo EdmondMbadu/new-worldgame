@@ -30,7 +30,7 @@ sgMail.setApiKey(API_KEY);
 export const welcomeEmail = functions.auth.user().onCreate((user) => {
   const msg = {
     to: user.email,
-    from: 'globalsollab@gmail.com',
+    from: 'newworld@newworld-game.org',
     templateId: TEMPLATE_ID,
     // dynamic_template_data: {
     //   name: user.displayName,
@@ -48,7 +48,7 @@ export const genericEmail = functions.https.onCall(async (data, context) => {
   //   }
   const msg = {
     to: data.email,
-    from: 'globalsollab@gmail.com',
+    from: 'newworld@newworld-game.org',
     templateId: TEMPLATE_ID_SOLUTION,
     dynamic_template_data: {
       subject: data.subject,

@@ -10,5 +10,5 @@ export class CareersComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
   }
-  email: string = 'globalsollab@gmail.com';
+  email: string = 'newworld@newworld-game.org';
 }
