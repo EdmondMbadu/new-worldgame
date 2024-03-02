@@ -25,6 +25,11 @@ import * as sgMail from '@sendgrid/mail';
 const API_KEY = functions.config().sendgrid.key;
 const TEMPLATE_ID = functions.config().sendgrid.template;
 const TEMPLATE_ID_SOLUTION = functions.config().sendgrid.templatesolutioninvite;
+const TEMPLATE_ID_COMMENT = functions.config().sendgrid.templatecommentinvite;
+const TEMPLATE_ID_EVALUTION =
+  functions.config().sendgrid.templatesolutionevaluationinvite;
+const TEMPLATE_ID_EVALUATION_COMPLETE =
+  functions.config().sendgrid.templateevaluationcomplete;
 sgMail.setApiKey(API_KEY);
 
 export const welcomeEmail = functions.auth.user().onCreate((user) => {
@@ -62,3 +67,60 @@ export const genericEmail = functions.https.onCall(async (data, context) => {
 
   return { success: true };
 });
+
+export const commentNotificationEmail = functions.https.onCall(
+  async (data, context) => {
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_COMMENT,
+      dynamic_template_data: {
+        subject: data.subject,
+        // title: data.title,
+        path: data.path,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+
+export const solutionEvaluationInvite = functions.https.onCall(
+  async (data, context) => {
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_EVALUTION,
+      dynamic_template_data: {
+        subject: data.subject,
+        // title: data.title,
+        path: data.path,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+
+export const solutionEvaluationComplete = functions.https.onCall(
+  async (data, context) => {
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_EVALUATION_COMPLETE,
+      dynamic_template_data: {
+        subject: data.subject,
+        // title: data.title,
+        path: data.path,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);

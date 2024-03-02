@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Evaluation, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
@@ -50,7 +51,8 @@ export class SolutionViewComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private time: TimeService,
     public data: DataService,
-    private router: Router
+    private router: Router,
+    private fns: AngularFireFunctions
   ) {}
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe((params) => {
@@ -185,12 +187,6 @@ export class SolutionViewComponent implements OnInit {
       this.currentSolution.likes === undefined
         ? []
         : this.currentSolution.likes;
-
-    console.log(
-      'solution likes and liker ',
-      this.currentSolution.likes,
-      this.auth.currentUser.uid
-    );
     if (
       this.currentSolution.likes !== undefined &&
       this.currentSolution.likes!.indexOf(this.auth.currentUser.uid) === -1
@@ -309,7 +305,43 @@ export class SolutionViewComponent implements OnInit {
       ];
     }
 
-    this.solution.addCommentToSolution(this.currentSolution, this.comments);
-    this.comment = '';
+    try {
+      this.solution
+        .addCommentToSolution(this.currentSolution, this.comments)
+        .then(() => {
+          this.initializeComments();
+        });
+      this.comment = '';
+      this.sendEmailForCommentNotification();
+    } catch (error) {
+      alert('An error occured while submitting the comment. Try Again.');
+      console.log(error);
+      console.log('an error ocurred. try again.');
+    }
+  }
+  sendEmailForCommentNotification() {
+    const commentNotificationEmail = this.fns.httpsCallable(
+      'commentNotificationEmail'
+    );
+
+    this.teamMembers.forEach((evaluator) => {
+      const emailData = {
+        email: evaluator.email,
+        subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} has commented on your NewWorld Game solution: ${this.currentSolution.title}`,
+        // title: this.myForm.value.title,
+        // description: this.myForm.value.description,
+        path: `https://newworld-game.org/solution-view/${this.currentSolution.solutionId}`,
+        // Include any other data required by your Cloud Function
+      };
+
+      commentNotificationEmail(emailData).subscribe(
+        (result) => {
+          console.log('Email sent:', result);
+        },
+        (error) => {
+          console.error('Error sending email:', error);
+        }
+      );
+    });
   }
 }

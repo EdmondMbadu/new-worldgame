@@ -324,30 +324,7 @@ export class CreatePlaygroundComponent {
         subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
         title: this.myForm.value.title,
         description: this.myForm.value.description,
-        path: `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`,
-        // Include any other data required by your Cloud Function
-      };
-
-      genericEmail(emailData).subscribe(
-        (result) => {
-          console.log('Email sent:', result);
-        },
-        (error) => {
-          console.error('Error sending email:', error);
-        }
-      );
-    });
-  }
-  sendEmailToEvaluators() {
-    const genericEmail = this.fns.httpsCallable('genericEmail');
-
-    this.evaluatorsEmails.forEach((evaluator) => {
-      const emailData = {
-        email: evaluator.name,
-        subject: `You Have Been Invited to Evaluate a Solution Lab`,
-        title: this.myForm.value.title,
-        description: this.myForm.value.description,
-        path: `https://new-worldgame.web.app/solution-view/${this.solution.solutionId}`,
+        path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
         // Include any other data required by your Cloud Function
       };
 

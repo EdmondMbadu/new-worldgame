@@ -6,9 +6,10 @@ import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
 import { SolutionService } from 'src/app/services/solution.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Solution } from 'src/app/models/solution';
+import { Evaluator, Solution } from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { User } from 'src/app/models/user';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -27,6 +28,7 @@ export class PlaygroundStepComponent {
   currentSolution: Solution = {};
   staticContentArray: string[] = [];
   saveSuccess: boolean = false;
+  evaluators: Evaluator[] = [];
   saveError: boolean = false;
   submiResponse: boolean = false;
   submitDisplay: boolean = false;
@@ -46,7 +48,8 @@ export class PlaygroundStepComponent {
   constructor(
     private router: Router,
     private solution: SolutionService,
-    private auth: AuthService
+    private auth: AuthService,
+    private fns: AngularFireFunctions
   ) {}
   data: string = '';
   hoverChangeTitle: boolean = false;
@@ -55,27 +58,12 @@ export class PlaygroundStepComponent {
     this.initializeContents();
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
+      // fill the evaluator class
+      this.currentSolution.evaluators?.forEach((ev: any) => {
+        this.evaluators.push(ev);
+      });
       this.initializeContents();
     });
-    this.scrollHandler = () => {
-      // Get the current scroll position
-      this.elements = [];
-      // Get the element that we want to change the z-index of
-
-      for (let i = 0; i < this.questions.length; i++) {
-        this.elements.push(document.getElementById(`box-${i}`));
-      }
-
-      for (let i = 0; i < this.elements.length; i++) {
-        const element = document.getElementById(`box-${i}`);
-        let elementY = this.elements[i]?.getBoundingClientRect().top;
-        if (elementY! <= 10) {
-          element!.style.zIndex = '-1';
-        } else {
-          element!.style.zIndex = '0';
-        }
-      }
-    };
 
     this.displayPopups = new Array(this.questions.length).fill(false);
     this.clickedDisplayPopups = new Array(this.questions.length).fill(false);
@@ -131,12 +119,14 @@ export class PlaygroundStepComponent {
       this.submitDisplay = true;
       // let conf = confirm('Are you sure you want to Submit?');
       if (this.submiResponse) {
-        this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
-
-        // this.sendRequestForEvaluation();
-
-        window.removeEventListener('scroll', this.scrollHandler!);
-        this.router.navigate(['/home']);
+        try {
+          this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
+          this.sendRequestForEvaluation();
+          this.router.navigate(['/home']);
+        } catch (error) {
+          alert('An error occured while submitting the solution. Try again');
+          console.log(error);
+        }
       } else {
         return;
       }
@@ -163,9 +153,6 @@ export class PlaygroundStepComponent {
       }
     }
     return false;
-  }
-  ngOnDestroy() {
-    window.removeEventListener('scroll', this.scrollHandler!);
   }
 
   saveSolutionStatus() {
@@ -284,5 +271,30 @@ export class PlaygroundStepComponent {
     } else {
       alert('Enter a title');
     }
+  }
+  sendRequestForEvaluation() {
+    const solutionEvaluationInvite = this.fns.httpsCallable(
+      'solutionEvaluationInvite'
+    );
+
+    this.evaluators.forEach((evaluator) => {
+      const emailData = {
+        email: evaluator.name,
+        subject: `You Have Been Invited to Evaluate the NewWorld Game) solution: ${this.currentSolution.title}`,
+        // title: this.myForm.value.title,
+        // description: this.myForm.value.description,
+        path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
+        // Include any other data required by your Cloud Function
+      };
+
+      solutionEvaluationInvite(emailData).subscribe(
+        (result) => {
+          console.log('Email sent:', result);
+        },
+        (error) => {
+          console.error('Error sending email:', error);
+        }
+      );
+    });
   }
 }

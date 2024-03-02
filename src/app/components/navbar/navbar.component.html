@@ -14,7 +14,9 @@
                 <h1 *ngIf="currentPageJoinNow" class=" text-center  border-teal-700 {{current}}">Join Now</h1>
                 <h1 *ngIf="!currentPageJoinNow" class="hover:text-teal-700" routerLink="/signup">Join Now </h1>
                 <h1 *ngIf="currentPageSignIn" class=" text-center  border-teal-700 {{current}}">Sign in </h1>
-                <h1 *ngIf="!currentPageSignIn" class="hover:text-teal-700" routerLink="/login">Sign in </h1>
+                <h1 *ngIf="!currentPageSignIn" class="hover:text-teal-700" routerLink="/login">Sign in </h1> 
+                <h1 *ngIf="currentPageBlogs" class=" text-center  border-teal-700 {{current}}">Blogs </h1>
+                <h1 *ngIf="!currentPageBlogs" class="hover:text-teal-700" routerLink="/blogs">Blogs </h1>
                
 <!--                 
                 <a class="hover:text-teal-700" routerLink="/signup">Join Now</a>

@@ -23,6 +23,8 @@ import { JoinTournamentComponent } from './components/join-tournament/join-tourn
 import { PrivacyComponent } from './blogs/privacy/privacy.component';
 import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
 import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
+import { BlogsComponent } from './blogs/blogs/blogs.component';
+import { TournamentComponent } from './blogs/tournament/tournament.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -84,11 +86,19 @@ const routes: Routes = [
     component: PrivacyComponent,
   },
   {
+    path: 'blogs',
+    component: BlogsComponent,
+  },
+  {
+    path: 'blogs/tournament',
+    component: TournamentComponent,
+  },
+  {
     path: 'evaluators',
     component: EvaluatorsComponent,
   },
   {
-    path: 'custom-storyboard',
+    path: 'blogs/custom-storyboard',
     component: CustomGptDesignScienceStoryboardComponent,
   },
   {

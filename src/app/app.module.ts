@@ -56,6 +56,8 @@ import { JoinTournamentComponent } from './components/join-tournament/join-tourn
 import { PrivacyComponent } from './blogs/privacy/privacy.component';
 import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
 import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
+import { BlogsComponent } from './blogs/blogs/blogs.component';
+import { TournamentComponent } from './blogs/tournament/tournament.component';
 
 @NgModule({
   declarations: [
@@ -90,6 +92,8 @@ import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
     PrivacyComponent,
     CustomGptDesignScienceStoryboardComponent,
     EvaluatorsComponent,
+    BlogsComponent,
+    TournamentComponent,
   ],
   imports: [
     BrowserModule,

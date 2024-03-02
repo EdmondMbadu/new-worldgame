@@ -7,6 +7,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { FeedbackRequest } from '../playground-step/playground-step.component';
 import { TimeService } from 'src/app/services/time.service';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 @Component({
   selector: 'app-problem-feedback',
@@ -57,7 +58,8 @@ export class ProblemFeedbackComponent {
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
     private time: TimeService,
-    private router: Router
+    private router: Router,
+    private fns: AngularFireFunctions
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
 
@@ -114,9 +116,14 @@ export class ProblemFeedbackComponent {
     this.updateEvaluators();
 
     if (this.sendFeedback) {
-      this.solution.addEvaluation(this.userSolution).then(() => {
-        this.router.navigate(['/home']);
-      });
+      try {
+        this.solution.addEvaluation(this.userSolution).then(() => {
+          this.router.navigate(['/home']);
+        });
+      } catch (error) {
+        alert('An error occured while submitting the evaluation. Try again.');
+        console.log(error);
+      }
     }
   }
   updateEvaluators() {
@@ -198,6 +205,32 @@ export class ProblemFeedbackComponent {
   accept() {
     this.sendFeedback = true;
     this.submitEvaluation();
+    this.sendSolutionEvaluationCompleteEmail();
     this.closeSubmission();
+  }
+  sendSolutionEvaluationCompleteEmail() {
+    const solutionEvaluationComplete = this.fns.httpsCallable(
+      'solutionEvaluationComplete'
+    );
+
+    this.teamMembers.forEach((team) => {
+      const emailData = {
+        email: team.email,
+        subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} Has Evaluated your Solution : ${this.userSolution.title}`,
+        // title: this.myForm.value.title,
+        // description: this.myForm.value.description,
+        path: `https://newworld-game.org/evaluation-summary/${this.userSolution.solutionId}`,
+        // Include any other data required by your Cloud Function
+      };
+
+      solutionEvaluationComplete(emailData).subscribe(
+        (result) => {
+          console.log('Email sent:', result);
+        },
+        (error) => {
+          console.error('Error sending email:', error);
+        }
+      );
+    });
   }
 }
