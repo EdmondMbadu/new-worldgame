@@ -253,6 +253,17 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
 
+  updateSolutionReadMe(solutionId: string, readMe: string) {
+    const data = {
+      description: readMe,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
+
   addParticipantsToSolution(participants: any, solutionId: string) {
     const data = {
       participants: participants,

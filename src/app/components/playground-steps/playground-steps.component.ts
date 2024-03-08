@@ -27,6 +27,10 @@ export class PlaygroundStepsComponent implements OnInit {
   evaluators: User[] = [];
   newTeamMember: string = '';
 
+  hoverChangeReadMe: boolean = false;
+  updateReadMeBox: boolean = false;
+  newReadMe: string = '';
+
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
@@ -37,6 +41,7 @@ export class PlaygroundStepsComponent implements OnInit {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+      this.newReadMe = this.currentSolution.description!;
 
       this.getMembers();
       this.getEvaluators();
@@ -192,5 +197,37 @@ export class PlaygroundStepsComponent implements OnInit {
     const regex =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regex.test(email);
+  }
+
+  onHoverChangeReadMe() {
+    this.hoverChangeReadMe = true;
+  }
+
+  onLeaveChangeReadMe() {
+    this.hoverChangeReadMe = false;
+  }
+
+  toggleUpdateReadMe() {
+    this.updateReadMeBox = !this.updateReadMeBox;
+  }
+
+  async updateReadMe() {
+    if (this.newReadMe === this.currentSolution.description) {
+      alert('You changed nothing.');
+      return;
+    } else if (this.newReadMe !== this.currentSolution.description) {
+      try {
+        const updatedReadMe = await this.solution.updateSolutionReadMe(
+          this.currentSolution.solutionId!,
+          this.newReadMe
+        );
+        this.currentSolution.description = this.newReadMe;
+        this.toggleUpdateReadMe();
+      } catch (error) {
+        alert('Error occured while updating title. Try again!');
+      }
+    } else {
+      alert('Enter a title');
+    }
   }
 }

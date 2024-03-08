@@ -69,7 +69,7 @@ export class CreatePlaygroundComponent {
     'SDG14  Life Below Water',
     'SDG15  Life And Land',
     'SDG16  Peace, Justice And Strong Institutions',
-    'SDG17  Partnership For ThE Goals',
+    'SDG17  Partnership For The Goals',
   ];
   readonly separatorKeysCodes = [ENTER, COMMA, SPACE] as const;
   participantsEmails: Email[] = [];
