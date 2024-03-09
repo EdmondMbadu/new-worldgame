@@ -171,8 +171,8 @@ export class PlaygroundStepsComponent implements OnInit {
     if (this.isValidEmail(this.newTeamMember)) {
       participants = this.currentSolution.participants;
       participants.push({ name: this.newTeamMember });
-      console.log('participants', participants);
-      console.log('team member', this.newTeamMember);
+      // console.log('participants', participants);
+      // console.log('team member', this.newTeamMember);
 
       this.solution
         .addParticipantsToSolution(

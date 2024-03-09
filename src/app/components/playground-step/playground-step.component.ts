@@ -22,6 +22,7 @@ export interface FeedbackRequest {
 })
 export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
+  displayCongrats: boolean = false;
   displayPopups: boolean[] = [];
   newTitle: string = '';
   clickedDisplayPopups: boolean[] = [];
@@ -120,9 +121,12 @@ export class PlaygroundStepComponent {
       // let conf = confirm('Are you sure you want to Submit?');
       if (this.submiResponse) {
         try {
+          // close the display
+          this.submitDisplay = false;
           this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
           this.sendRequestForEvaluation();
-          this.router.navigate(['/home']);
+          this.toggleCongrats();
+          // this.router.navigate(['/home']);
         } catch (error) {
           alert('An error occured while submitting the solution. Try again');
           console.log(error);
@@ -296,5 +300,20 @@ export class PlaygroundStepComponent {
         }
       );
     });
+  }
+
+  openFeedback() {
+    const url =
+      'https://docs.google.com/forms/d/e/1FAIpQLSdmK6F4EDAvXNZsuUBYdQ4CW1h9hIdlA44qYajMsmHBNa4jrQ/viewform?usp=sf_link';
+    window.open(url, '_blank');
+    this.toggleCongratsAndDone();
+  }
+
+  toggleCongrats() {
+    this.displayCongrats = !this.displayCongrats;
+  }
+  toggleCongratsAndDone() {
+    this.displayCongrats = !this.displayCongrats;
+    this.router.navigate(['/home']);
   }
 }

@@ -58,6 +58,9 @@ import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-de
 import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
 import { BlogsComponent } from './blogs/blogs/blogs.component';
 import { TournamentComponent } from './blogs/tournament/tournament.component';
+import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
+import { FooterComponent } from './components/footer/footer.component';
+import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
 
 @NgModule({
   declarations: [
@@ -94,6 +97,9 @@ import { TournamentComponent } from './blogs/tournament/tournament.component';
     EvaluatorsComponent,
     BlogsComponent,
     TournamentComponent,
+    ArchivePicturesComponent,
+    FooterComponent,
+    NwgNewsComponent,
   ],
   imports: [
     BrowserModule,

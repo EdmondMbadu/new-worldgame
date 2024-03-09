@@ -1,0 +1,36 @@
+<app-navbar ></app-navbar>
+<div class="dark:bg-slate-900 min-h-screen min-w-full ">
+
+
+
+    <div class="flex  container mx-auto mt-28">
+        <div class="">
+            <h1 class="my-10 font-bold text-3xl dark:text-gray-200 text-gray-900  text-center justify-center ">GSL ARCHIVE PICTURES</h1>
+        
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 ">
+                <div *ngFor="let im of imageList">
+                    <img class="max-h-96 max-w-full rounded-lg" [src]="im" alt="">
+                </div>
+
+        
+            </div>
+        </div>
+    </div>'
+
+    <!-- <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid gap-4">
+            <div *ngFor="let im of imageList">
+                <img class="h-auto max-w-full rounded-lg" [src]="im"alt="">
+            </div>
+       
+        </div>
+    
+   
+    
+    </div> -->
+    
+
+    <app-footer></app-footer>
+</div>
+
+

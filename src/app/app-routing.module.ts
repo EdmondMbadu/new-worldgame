@@ -25,6 +25,8 @@ import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-de
 import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
 import { BlogsComponent } from './blogs/blogs/blogs.component';
 import { TournamentComponent } from './blogs/tournament/tournament.component';
+import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
+import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -92,6 +94,14 @@ const routes: Routes = [
   {
     path: 'blogs/tournament',
     component: TournamentComponent,
+  },
+  {
+    path: 'blogs/nwg-news',
+    component: NwgNewsComponent,
+  },
+  {
+    path: 'archive-pictures',
+    component: ArchivePicturesComponent,
   },
   {
     path: 'evaluators',
