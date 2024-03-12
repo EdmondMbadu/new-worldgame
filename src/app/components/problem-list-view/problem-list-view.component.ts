@@ -29,7 +29,7 @@ export class ProblemListViewComponent implements OnInit {
     this.pendingSolutions = [];
 
     for (let s of this.solutions) {
-      if (s.finished === undefined) {
+      if (s.finished === undefined || s.finished !== 'true') {
         this.pendingSolutions.push(s);
       }
     }

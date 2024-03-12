@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit {
 
     this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
       this.evaluationSolutions = data.filter((element) => {
-        return element.finished !== undefined;
+        return element.finished !== undefined && element.finished === 'true';
       });
       this.evaluation = this.evaluationSolutions.length;
     });

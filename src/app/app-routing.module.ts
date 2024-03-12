@@ -27,6 +27,7 @@ import { BlogsComponent } from './blogs/blogs/blogs.component';
 import { TournamentComponent } from './blogs/tournament/tournament.component';
 import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
 import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
+import { GlobalStatisticalToolsComponent } from './blogs/global-statistical-tools/global-statistical-tools.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -94,6 +95,10 @@ const routes: Routes = [
   {
     path: 'blogs/tournament',
     component: TournamentComponent,
+  },
+  {
+    path: 'blogs/global-statistical-tools',
+    component: GlobalStatisticalToolsComponent,
   },
   {
     path: 'blogs/nwg-news',

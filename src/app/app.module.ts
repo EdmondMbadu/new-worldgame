@@ -61,6 +61,7 @@ import { TournamentComponent } from './blogs/tournament/tournament.component';
 import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
+import { GlobalStatisticalToolsComponent } from './blogs/global-statistical-tools/global-statistical-tools.component';
 
 @NgModule({
   declarations: [
@@ -100,6 +101,7 @@ import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
     ArchivePicturesComponent,
     FooterComponent,
     NwgNewsComponent,
+    GlobalStatisticalToolsComponent,
   ],
   imports: [
     BrowserModule,
