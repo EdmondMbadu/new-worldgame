@@ -19,7 +19,7 @@ export class ProblemListFeedbackComponent implements OnInit {
   constructor(public auth: AuthService, private solution: SolutionService) {
     this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
       this.evaluationSolutions = data.filter((element) => {
-        return element.finished !== undefined;
+        return element.finished !== undefined && element.finished === 'true';
       });
       this.evaluation = this.evaluationSolutions.length;
     });
