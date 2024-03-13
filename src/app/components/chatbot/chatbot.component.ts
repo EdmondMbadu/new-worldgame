@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/services/auth.service';
 
 interface DisplayMessage {
   text: string;
+  link?: { text?: string; url?: string };
   type: 'PROMPT' | 'RESPONSE';
 }
 @Component({
@@ -37,7 +38,8 @@ export class ChatbotComponent implements OnInit {
   }
   responses: DisplayMessage[] = [
     {
-      text: "I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems.",
+      text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. To Learn how to interact with me or other LLMs efficiently see `,
+      link: { text: 'here', url: '/blogs/nwg-ai' },
       type: 'RESPONSE',
     },
   ];
@@ -73,7 +75,8 @@ export class ChatbotComponent implements OnInit {
   endChat() {
     this.responses = [
       {
-        text: "I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems.",
+        text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. To Learn how to interact with me or other LLMs efficiently see `,
+        link: { text: 'here', url: '/blogs/nwg-ai' },
         type: 'RESPONSE',
       },
     ];

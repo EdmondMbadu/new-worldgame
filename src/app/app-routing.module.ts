@@ -28,6 +28,8 @@ import { TournamentComponent } from './blogs/tournament/tournament.component';
 import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
 import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
 import { GlobalStatisticalToolsComponent } from './blogs/global-statistical-tools/global-statistical-tools.component';
+import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
+import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -97,6 +99,10 @@ const routes: Routes = [
     component: TournamentComponent,
   },
   {
+    path: 'blogs/nwg-ai',
+    component: NwgAiComponent,
+  },
+  {
     path: 'blogs/global-statistical-tools',
     component: GlobalStatisticalToolsComponent,
   },
@@ -127,6 +133,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'verify-email', component: VerifyEmailComponent },
+  { path: '**', component: PageNotFoundComponent },
 ];
 
 @NgModule({

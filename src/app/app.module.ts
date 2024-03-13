@@ -62,6 +62,8 @@ import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictu
 import { FooterComponent } from './components/footer/footer.component';
 import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
 import { GlobalStatisticalToolsComponent } from './blogs/global-statistical-tools/global-statistical-tools.component';
+import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
+import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
 
 @NgModule({
   declarations: [
@@ -102,6 +104,8 @@ import { GlobalStatisticalToolsComponent } from './blogs/global-statistical-tool
     FooterComponent,
     NwgNewsComponent,
     GlobalStatisticalToolsComponent,
+    PageNotFoundComponent,
+    NwgAiComponent,
   ],
   imports: [
     BrowserModule,

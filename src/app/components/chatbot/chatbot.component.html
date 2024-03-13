@@ -37,19 +37,21 @@
 
                             
                                 
-                                <p class="bg-slate-200 text-gray-700  rounded-lg py-2 px-4 items-center dark:bg-slate-500 dark:text-gray-100">{{ resp.text }}</p>
+                                <p  class="bg-slate-200 text-gray-700  rounded-lg py-2 px-4 items-center dark:bg-slate-500 dark:text-gray-100">{{ resp.text }}</p>
                             </div>
 
                             <div *ngIf="resp.type=='RESPONSE'"class="">
                                 <img src="../../../assets/img/bucky-1.png" class="w-14 rounded-full" alt="">
                             
-                                <p class=" bg-gray-200 text-gray-950  py-2 rounded-lg items-center px-4 dark:bg-slate-500 dark:text-gray-100">
+                                <p  class=" bg-gray-200 text-gray-950  py-2 rounded-lg items-center px-4 dark:bg-slate-500 dark:text-gray-100">
                                     
+                                    {{ resp.text }}
 
+                                    <a *ngIf="resp.link" target="_blank" rel="noopener noreferrer"  [routerLink]="resp.link.url" class="text-blue-500" >{{ resp.link.text }}</a>
                                 
                                 
                                 
-                                    {{ resp.text }}</p>
+                                   </p>
                                 
                             </div>
                             

@@ -6,8 +6,16 @@
     <div class="flex  container mx-auto mt-28">
         <div class="">
             <h1 class="my-10 font-bold text-3xl dark:text-gray-200 text-gray-900  text-center justify-center ">GSL ARCHIVE PICTURES</h1>
+            <p class="text-gray-900 dark:text-white mb-6 px-2 ">
+               <span class="font-bold">  Previous Lab participants have come from:</span> 
+                Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania, Ukraine, 
+                Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Senegal, Ivory Coast, Kenya, Uganda, Zimbabwe, South Africa, DR Congo, Congo, Mozambique, Gabon, Togo,
+                Haiti, Canada, Mexico, Honduras, Venezuela, 
+                China, Hong Kong, Vietnam, Singapore, Thailand, Japan, New Zealand, Australia, India, Pakistan, Bangladesh, 
+                Palestine, United Arab Emirates, Saudi Arabia, Nepal, Turkey, and all over the U.S.
+            </p>
         
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 ">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 px-2">
                 <div *ngFor="let im of imageList">
                     <img class="max-h-96 max-w-full rounded-lg" [src]="im" alt="">
                 </div>
