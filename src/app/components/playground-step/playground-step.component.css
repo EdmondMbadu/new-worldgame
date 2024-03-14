@@ -1,3 +1,4 @@
+
 .ckeditor-container {
 
     z-index: 1; /* Ensure it's lower than the navbar */
@@ -8,4 +9,37 @@
     
     z-index: 1; /* Ensure it's lower than the navbar */
     /* Other necessary styles */
+}
+/* playground-step.component.css */
+::ng-deep .ck-content h1 {
+    font-size: 36px;
+}
+::ng-deep .ck-content h2 {
+    font-size: 32px;
+}
+::ng-deep .ck-content h3 {
+    font-size: 28px;
+}
+::ng-deep .ck-content h4 {
+    font-size: 24px;
+}
+::ng-deep .ck.ck-powered-by {
+    display: none !important;
+}
+
+/* Global styles.css or component CSS with ::ng-deep or ViewEncapsulation.None */
+
+
+::ng-deep .ck-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+::ng-deep .ck-content ol {
+    list-style-type: decimal;
+    margin-left: 20px;
+}  
+
+::ng-deep .ck-content li {
+    margin-bottom: 5px; /* Adjust spacing between list items as needed */
 }

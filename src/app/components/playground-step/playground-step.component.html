@@ -65,9 +65,12 @@
           <div class="md:max-w-2xl max-w-md" id="box-{{i}}">
             <ckeditor
             class="boxing"
+            id="ck-editor"
               [editor]="Editor"
-              data="<p></p>"
+             
+              data=""
               (ready)="onReady($event)"
+             
               [(ngModel)]="contentsArray[i]"
               #contentField="ngModel"
              
