@@ -66,7 +66,7 @@
                         </div>
                 
 
-                        <div  id="popover-description" role="tooltip" class=" p-2 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-96 dark:bg-slate-800" *ngIf="!currentSolution.evaluationDetails ">
+                        <div  id="popover-description" role="tooltip" class=" p-2 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-96 dark:bg-slate-800" *ngIf="!currentSolution.evaluationDetails || currentSolution.evaluationDetails.length==0 ">
                         <h1 class="text-2xl dark:text-gray-200">No Evaluations Submitted</h1>
                         </div>
 

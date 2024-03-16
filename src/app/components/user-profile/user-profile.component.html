@@ -142,7 +142,7 @@
     <div class="container flex flex-col md:flex-row mx-auto justify-center">
 
         <div class=" container flex flex-col max-w-2xl">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200">Solutions</h1>
+            <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200">Solutions ({{completedSolutions.length }})</h1>
             <div *ngFor="let solution of completedSolutions; let i= index">
                 <app-solution [user]="user"   [solution]="solution"></app-solution>
             

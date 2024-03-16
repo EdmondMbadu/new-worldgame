@@ -168,7 +168,7 @@
                     <h1 *ngIf="currentSolution.evaluationSummary "     class="px-1 items-center ">{{currentSolution.numberofTimesEvaluated}}E-{{currentSolution.evaluationSummary.average}}</h1>
                     <h1 *ngIf="!currentSolution.evaluationSummary "  class="px-1 items-center  text-gray-100">__</h1>
 
-                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-72  dark:bg-slate-800" *ngIf="displayEvaluationSummary && currentSolution.evaluationDetails">
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-[23rem]  inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-72  dark:bg-slate-800" *ngIf="displayEvaluationSummary && currentSolution.evaluationDetails && currentSolution.evaluationDetails.length>0">
                         <div class="p-3 space-y-2">
                             <h3 class="font-semibold text-gray-900  dark:text-gray-200">Evaluation Summary: {{currentSolution.numberofTimesEvaluated}} evaluator(s) </h3>
                             <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{currentSolution.evaluationSummary!.average}} </p>
@@ -219,7 +219,7 @@
                         <div data-popper-arrow></div>
                     </div>
 
-                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-20 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-64  dark:bg-slate-800" *ngIf="displayEvaluationSummary && !currentSolution.evaluationDetails">
+                    <div  id="popover-description" role="tooltip" class="absolute z-10 -mt-20 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-64  dark:bg-slate-800" *ngIf="(displayEvaluationSummary && !currentSolution.evaluationDetails)">
                         <div class="p-3 space-y-2">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-200">No Evaluations Submited... </h3>
                            

@@ -224,11 +224,18 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
 
-  editSolutionAfterInitialSubmission(solutionId: string) {
+  editSolutionAfterInitialSubmission(
+    solutionId: string,
+    currentSolution: Solution
+  ) {
     const data = {
       finished: 'false',
       edited: 'true',
       submissionDate: '',
+      evaluationDetails: [],
+      evaluationSummary: {},
+      evaluators: currentSolution.evaluators,
+      numberofTimesEvaluated: '',
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`

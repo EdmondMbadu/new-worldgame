@@ -30,6 +30,8 @@ import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
 import { GlobalStatisticalToolsComponent } from './blogs/global-statistical-tools/global-statistical-tools.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
+import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.component';
+import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -97,6 +99,14 @@ const routes: Routes = [
   {
     path: 'blogs/tournament',
     component: TournamentComponent,
+  },
+  {
+    path: 'plans',
+    component: PricingPlansComponent,
+  },
+  {
+    path: 'contact-us',
+    component: ContactUsComponent,
   },
   {
     path: 'blogs/nwg-ai',
