@@ -6,10 +6,11 @@ import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
-import { Solution } from 'src/app/models/solution';
+import { Evaluator, Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { User } from 'src/app/models/user';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 @Component({
   selector: 'app-playground-steps',
@@ -25,6 +26,7 @@ export class PlaygroundStepsComponent implements OnInit {
   showAddTeamMember: boolean = false;
   hoverAddTeamMember: boolean = false;
   evaluators: User[] = [];
+  etAl: string = '';
   newTeamMember: string = '';
 
   hoverChangeReadMe: boolean = false;
@@ -36,11 +38,19 @@ export class PlaygroundStepsComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
     public data: DataService,
-    private router: Router
+    private router: Router,
+    private fns: AngularFireFunctions
   ) {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+      this.currentSolution.evaluators?.forEach((ev: any) => {
+        this.evaluators.push(ev);
+      });
+      this.etAl =
+        Object.keys(this.currentSolution.participants!).length > 1
+          ? 'Et al'
+          : '';
       this.newReadMe = this.currentSolution.description!;
 
       this.getMembers();
@@ -144,8 +154,49 @@ export class PlaygroundStepsComponent implements OnInit {
     this.display[this.currentIndexDisplay] = true;
   }
 
+  sendRequestForEvaluation() {
+    const solutionEvaluationInvite = this.fns.httpsCallable(
+      'solutionEvaluationInvite'
+    );
+
+    console.log('current solution ok?', this.currentSolution);
+    console.log('evaluators ok?', this.evaluators);
+    this.evaluators.forEach((evaluator) => {
+      const emailData = {
+        email: evaluator.email,
+        subject: `You have been invited to evaluate the NewWorld Game solution: ${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl} `,
+        // title: this.myForm.value.title,
+        // description: this.myForm.value.description,
+        path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
+        // Include any other data required by your Cloud Function
+      };
+
+      solutionEvaluationInvite(emailData).subscribe(
+        (result) => {
+          console.log('Email sent:', result);
+        },
+        (error) => {
+          console.error('Error sending email:', error);
+        }
+      );
+    });
+  }
+
+  goBackAndForthTimeLine(current: number) {
+    this.display[this.currentIndexDisplay] = false;
+    this.currentIndexDisplay = current;
+    this.updateTimelineDisplay(current);
+    this.display[this.currentIndexDisplay] = true;
+  }
+
   updateTimelineDisplay(index: number) {
-    this.timelineDisplay[index - 1] = 'bg-red-500 h-1 dark:bg-red-500';
+    // Reset all to remove styles
+    this.timelineDisplay.fill('');
+
+    // Apply the style up to the current index
+    for (let i = 0; i < index; i++) {
+      this.timelineDisplay[i] = 'bg-red-500 h-1 dark:bg-red-500';
+    }
   }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;

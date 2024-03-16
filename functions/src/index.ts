@@ -89,20 +89,28 @@ export const commentNotificationEmail = functions.https.onCall(
 
 export const solutionEvaluationInvite = functions.https.onCall(
   async (data, context) => {
-    const msg = {
-      to: data.email,
-      from: 'newworld@newworld-game.org',
-      templateId: TEMPLATE_ID_EVALUTION,
-      dynamic_template_data: {
-        subject: data.subject,
-        // title: data.title,
-        path: data.path,
-      },
-    };
-
-    await sgMail.send(msg);
-
-    return { success: true };
+    try {
+      // Your existing email sending logic...
+      const msg = {
+        to: data.email,
+        from: 'newworld@newworld-game.org',
+        templateId: TEMPLATE_ID_EVALUTION,
+        dynamic_template_data: {
+          subject: data.subject,
+          // title: data.title,
+          path: data.path,
+        },
+      };
+      await sgMail.send(msg);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to send email', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to send email',
+        error
+      );
+    }
   }
 );
 

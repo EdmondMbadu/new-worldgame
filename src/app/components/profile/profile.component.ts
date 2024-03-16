@@ -35,6 +35,7 @@ export class ProfileComponent implements OnInit {
   snapshot?: Observable<any>;
   downloadURL?: Observable<string>;
   url: string = '';
+  points: number = 0;
 
   isHovering?: boolean;
   constructor(
@@ -57,8 +58,13 @@ export class ProfileComponent implements OnInit {
 
   findCompletedSolutions() {
     this.completedSolutions = [];
+    this.points = 0;
     for (let s of this.solutions) {
       if (s.finished === 'true') {
+        if (s.evaluationSummary && s.evaluationSummary.average !== undefined) {
+          this.points += Number(s.evaluationSummary.average);
+        }
+
         this.completedSolutions.push(s);
       }
     }

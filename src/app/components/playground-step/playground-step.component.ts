@@ -23,6 +23,7 @@ export interface FeedbackRequest {
 export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
+  etAl: string = '';
   displayPopups: boolean[] = [];
   newTitle: string = '';
   clickedDisplayPopups: boolean[] = [];
@@ -45,6 +46,7 @@ export class PlaygroundStepComponent {
   questionsAndAnswersTracker?: { [key: string]: string } = {};
   scrollHandler: (() => void) | undefined;
   elements: any = [];
+  @Output() submissionComplete: EventEmitter<any> = new EventEmitter();
   updateTitleBox: boolean = false;
   constructor(
     private router: Router,
@@ -63,6 +65,10 @@ export class PlaygroundStepComponent {
       this.currentSolution.evaluators?.forEach((ev: any) => {
         this.evaluators.push(ev);
       });
+      this.etAl =
+        Object.keys(this.currentSolution.participants!).length > 1
+          ? 'Et al'
+          : '';
       this.initializeContents();
     });
 
@@ -118,30 +124,33 @@ export class PlaygroundStepComponent {
       this.buttonInfoEvent.emit(current);
     } else {
       this.submitDisplay = true;
-      // let conf = confirm('Are you sure you want to Submit?');
-      if (this.submiResponse) {
-        try {
-          // close the display
-          this.submitDisplay = false;
-          this.solution.submitSolution(this.solutionId, this.contentsArray[0]);
-          this.sendRequestForEvaluation();
-          this.toggleCongrats();
-          // this.router.navigate(['/home']);
-        } catch (error) {
-          alert('An error occured while submitting the solution. Try again');
-          console.log(error);
-        }
-      } else {
-        return;
-      }
     }
 
     this.elements.length = 0;
   }
 
   accept() {
+    this.submitDisplay = false;
     this.submiResponse = true;
-    this.updatePlayground(this.stepNumber);
+    this.finallySubmitSolution();
+    // Reset submission response to allow future submissions, but only after current process is complete
+    this.submiResponse = false;
+  }
+
+  finallySubmitSolution() {
+    try {
+      this.solution
+        .submitSolution(this.solutionId, this.contentsArray[0])
+        .then(() => {
+          console.log('Submission successful, sending request for evaluation.');
+          this.submissionComplete.emit(); // Emit event to parent
+          this.toggleCongrats();
+          // Additional logic on successful submission
+        });
+    } catch (error) {
+      alert('An error occured while submitting the solution. Try again');
+      console.log(error);
+    }
   }
 
   isNotEmpty(content: string) {
@@ -217,7 +226,7 @@ export class PlaygroundStepComponent {
       `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
     ];
 
-    console.log(' all the keys', array);
+    // console.log(' all the keys', array);
 
     this.contentsArray[0] += `<h1 class="text-left text-xl font-bold my-4"> Problem State    </h1>`;
 
@@ -226,7 +235,7 @@ export class PlaygroundStepComponent {
         t < array.length - 2 &&
         !array[i].startsWith(array[t].substring(0, 2))
       ) {
-        console.log('displaying ', array[i], array[t]);
+        // console.log('displaying ', array[i], array[t]);
         this.contentsArray[0] += titles[j];
         j++;
       }
@@ -275,31 +284,6 @@ export class PlaygroundStepComponent {
     } else {
       alert('Enter a title');
     }
-  }
-  sendRequestForEvaluation() {
-    const solutionEvaluationInvite = this.fns.httpsCallable(
-      'solutionEvaluationInvite'
-    );
-
-    this.evaluators.forEach((evaluator) => {
-      const emailData = {
-        email: evaluator.name,
-        subject: `You Have Been Invited to Evaluate the NewWorld Game) solution: ${this.currentSolution.title}`,
-        // title: this.myForm.value.title,
-        // description: this.myForm.value.description,
-        path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
-        // Include any other data required by your Cloud Function
-      };
-
-      solutionEvaluationInvite(emailData).subscribe(
-        (result) => {
-          console.log('Email sent:', result);
-        },
-        (error) => {
-          console.error('Error sending email:', error);
-        }
-      );
-    });
   }
 
   openFeedback() {
