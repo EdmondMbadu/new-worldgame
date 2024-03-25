@@ -219,7 +219,7 @@ export class PlaygroundStepsComponent implements OnInit {
   }
   addParticipantToSolution() {
     let participants: any = [];
-    if (this.isValidEmail(this.newTeamMember)) {
+    if (this.data.isValidEmail(this.newTeamMember)) {
       participants = this.currentSolution.participants;
       participants.push({ name: this.newTeamMember });
       // console.log('participants', participants);
@@ -244,11 +244,6 @@ export class PlaygroundStepsComponent implements OnInit {
   }
 
   // this regex needs to be revisted.
-  isValidEmail(email: string): boolean {
-    const regex =
-      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return regex.test(email);
-  }
 
   onHoverChangeReadMe() {
     this.hoverChangeReadMe = true;

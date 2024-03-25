@@ -66,6 +66,7 @@ import { PageNotFoundComponent } from './components/page-not-found/page-not-foun
 import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
 import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.component';
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
+import { TeamDiscussionComponent } from './components/team-discussion/team-discussion.component';
 
 @NgModule({
   declarations: [
@@ -110,6 +111,7 @@ import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
     NwgAiComponent,
     PricingPlansComponent,
     ContactUsComponent,
+    TeamDiscussionComponent,
   ],
   imports: [
     BrowserModule,

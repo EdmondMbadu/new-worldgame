@@ -28,6 +28,8 @@ export class HomeComponent implements OnInit {
   evaluation: number = 0;
   constructor(public auth: AuthService, private solution: SolutionService) {
     this.user = this.auth.currentUser;
+    // I am not sure I should do this. but I am updating the status.
+    this.auth.updateStatusOnline(this.user.uid!);
   }
   ngOnInit(): void {
     window.scroll(0, 0);

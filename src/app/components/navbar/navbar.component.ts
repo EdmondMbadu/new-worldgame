@@ -20,6 +20,7 @@ export class NavbarComponent implements OnInit {
   searchControl = new FormControl();
   showThemeDropDown: boolean = false;
   @Input() path: string = '';
+  companyDropDown: boolean = false;
   @Input() colorTheme = '';
   @Input() firstName: string = '';
   @Input() lastName: string = '';
@@ -68,6 +69,9 @@ export class NavbarComponent implements OnInit {
 
   logOut() {
     this.auth.logout();
+  }
+  toggleCompanyDropDown() {
+    this.companyDropDown = !this.companyDropDown;
   }
 
   toggleDropDown() {

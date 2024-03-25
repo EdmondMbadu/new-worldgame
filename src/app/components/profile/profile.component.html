@@ -12,12 +12,17 @@
                         [class.hovering]="isHovering">
                         <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
 
+                       
                             <img  *ngIf="profilePicturePath !=='' " [src]="profilePicturePath"   class="rounded-full w-32" alt="">
                              
                             <div  *ngIf="profilePicturePath ===''"    class=" w-20 h-20 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto ">
                
                                 <svg class=" w-32 h-32 text-gray-400 -left-1 " fill="currentColor" viewBox="0 0 32 28" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                             </div>
+                            <!-- <span *ngIf="user.status==='offline'" class=" ml-3 absolute w-5 h-5 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
+                            <!-- <span *ngIf="user.status==='online'" class=" ml-3 absolute w-5 h-5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
+                           
+                   
                                 <div onclick="document.getElementById('getFile').click()" class="flex flex-row -mt-6 ml-24 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-slate-500 dark:text-gray-200 dark:hover:bg-slate-600">
                         
                                 <svg    class=" w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black " width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +35,7 @@
                     
                     <div class="flex flex-col px-6 space-y-2">
                         <h1 class=" text-2xl font-bold text-center md:text-left dark:text-gray-200">{{user.firstName}} {{user.lastName}} </h1>
-                        
+                        <span class=" text-2xl font-light">{{user.email}} </span>
                         <div class="flex flex-row">
                             <h2 class=" text-lg  font-Nunito font-semibold text-center md:text-left hover:underline dark:text-gray-200" (click)="toggleProfileCredential()"> {{user.profileCredential}}</h2>
                             <h2 (click)="toggleProfileCredential()" *ngIf="user.profileCredential==''" class="   text-center md:text-left hover:underline text-blue-500 " (click)="toggleProfileCredential()">Add profile credential</h2>

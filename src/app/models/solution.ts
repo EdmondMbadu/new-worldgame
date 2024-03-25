@@ -12,6 +12,7 @@ export class Solution {
   evaluators?: Evaluator[] = [];
   evaluated?: { [key: string]: string } = {};
   comments?: Comment[] = [];
+  discussion?: Comment[] = [];
   status?: { [key: string]: string } = {};
   likes?: string[];
   numLike?: string;
@@ -52,8 +53,11 @@ export class Evaluator {
 
 export class Comment {
   authorId?: string;
+  authorName?: string;
   date?: string;
+  displayTime?: string;
   content?: string;
   likes?: string;
   dislikes?: string;
+  profilePic?: string;
 }

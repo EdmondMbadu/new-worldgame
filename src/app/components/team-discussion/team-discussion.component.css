@@ -1,0 +1,6 @@
+#chatboxDiscussion {
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-y: auto;
+    height: 35vh; /* Adjust based on your needs */
+  }

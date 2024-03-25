@@ -38,6 +38,29 @@ export class AuthService {
     this.getCurrentUser();
   }
 
+  updateStatusOnline(userId: string) {
+    console.log('Updating status online for userId:', userId);
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
+      `users/${userId}`
+    );
+    const data = {
+      status: 'online',
+    };
+    userRef.set(data, { merge: true });
+  }
+  updateStatusOffline() {
+    console.log(
+      'Updating status offline for currentUser UID:',
+      this.currentUser?.uid
+    );
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
+      `users/${this.currentUser.uid}`
+    );
+    const data = {
+      status: 'offline',
+    };
+    userRef.set(data, { merge: true });
+  }
   getCurrentUser() {
     this.user$.subscribe((user) => {
       this.currentUser = user;
@@ -120,6 +143,7 @@ export class AuthService {
       followers: '0',
       following: '0',
       employement: '',
+      status: '',
       profileCredential: '',
       profileDescription: '',
       education: '',
@@ -138,6 +162,7 @@ export class AuthService {
       .signOut()
       .then(
         () => {
+          // this.updateStatusOffline();
           this.router.navigate(['/']);
         },
         (err) => {

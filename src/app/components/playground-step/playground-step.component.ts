@@ -6,10 +6,11 @@ import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
 import { SolutionService } from 'src/app/services/solution.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Evaluator, Solution } from 'src/app/models/solution';
+import { Comment, Evaluator, Solution } from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { TimeService } from 'src/app/services/time.service';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -52,15 +53,21 @@ export class PlaygroundStepComponent {
     private router: Router,
     private solution: SolutionService,
     private auth: AuthService,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private time: TimeService
   ) {}
   data: string = '';
+  discussion: Comment[] = [];
   hoverChangeTitle: boolean = false;
   ngOnInit() {
     window.scrollTo(0, 0);
     this.initializeContents();
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
+      if (this.currentSolution.discussion !== undefined) {
+        this.discussion = this.currentSolution.discussion;
+        this.displayTimeDiscussion();
+      }
       // fill the evaluator class
       this.currentSolution.evaluators?.forEach((ev: any) => {
         this.evaluators.push(ev);
@@ -77,6 +84,11 @@ export class PlaygroundStepComponent {
 
     // Add a scroll event listener to the window
     // window.addEventListener('scroll', this.scrollHandler);
+  }
+  displayTimeDiscussion() {
+    this.discussion.forEach((data) => {
+      data.displayTime = this.time.formatDate(data.date!);
+    });
   }
 
   initializeContents() {

@@ -11,6 +11,8 @@
                    
                     <div class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white ">
                         <div class="flex flex-row -space-x-1 "*ngFor="let user of teamMembers; let i= index" >
+                            <span *ngIf="user.status==='online'" class="absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span> 
+                            <!-- <span *ngIf="user.status==='offline'" class="absolute w-4 h-4 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
                             <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
                                 <img *ngIf="auth.currentUser!==null && user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
                                 <img *ngIf="auth.currentUser!==null && user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">

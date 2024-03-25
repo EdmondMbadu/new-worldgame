@@ -114,4 +114,36 @@ export class TimeService {
     const formatted = `${month}-${day}-${year}-${hour}-${minute}-${second}-${timezone}`;
     return formatted;
   }
+  formatDate(dateString: string): string {
+    // Split the dateString into its components
+    const parts = dateString.split('-');
+    // Construct a new Date object using the parts
+    // Note: Month is 0-indexed in JavaScript Date, so subtract 1 from the month part
+    const date = new Date(
+      parseInt(parts[2], 10), // Year
+      parseInt(parts[0], 10) - 1, // Month (0-indexed)
+      parseInt(parts[1], 10), // Day
+      parseInt(parts[3], 10), // Hours
+      parseInt(parts[4], 10), // Minutes
+      parseInt(parts[5], 10) // Seconds
+    );
+
+    // Use Intl.DateTimeFormat to format the date part
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      weekday: 'short', // "Sun" for Sunday
+      month: 'long', // "March" for 3
+      day: 'numeric', // "24"
+    }).format(date);
+
+    // Use Intl.DateTimeFormat to format the time part
+    const formattedTime = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true, // Use AM/PM
+    }).format(date);
+
+    // Combine the formatted date and time parts
+    return `${formattedDate}, ${formattedTime}`;
+  }
 }

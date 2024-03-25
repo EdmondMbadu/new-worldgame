@@ -8,10 +8,13 @@
                 </div>
                 <div class="flex flex-row justify-between ">
                 <div class="flex flex-row -space-x-1"*ngFor="let user of teamMembers; let i= index" >
+                    <!-- <span *ngIf="user.status==='online'" class="absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
+                    <!-- <span *ngIf="user.status==='offline'" class="absolute w-4 h-4 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
                     <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
                         <img *ngIf="auth.currentUser!==null && user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
                         <img *ngIf="auth.currentUser!==null && user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                         <img *ngIf="auth.currentUser===null"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                       
                     </div>
                     <div *ngIf="user.profilePicture?.downloadURL===undefined">
                         <div *ngIf=" auth.currentUser!==null && user.uid === auth.currentUser.uid"  (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/profile">
@@ -26,9 +29,11 @@
                         <div *ngIf=" auth.currentUser===null"  (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
                
                             <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                        </div>  
+                        </div> 
+                      
                     </div>
-        
+                   
+                   
                     <div >
                         <div *ngIf="showPopUpTeam[i]" >
                             <div class=" shadow-lg border-2 border-gray-200 dark:border-gray-700 absolute z-10 -mt-[5rem] bg-white dark:bg-slate-800  rounded-lg p-4 "  >
@@ -38,7 +43,8 @@
                                         <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
                
                                             <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                        </div>   
+                                        </div> 
+                                        <!-- <span class="top-4 left-11 absolute  w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>   -->
                                     </a>
                                     <div>
                                         <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
