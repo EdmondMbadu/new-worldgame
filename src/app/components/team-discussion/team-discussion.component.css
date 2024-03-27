@@ -4,3 +4,12 @@
     overflow-y: auto;
     height: 35vh; /* Adjust based on your needs */
   }
+
+  /* team-discussion.component.css */
+.draggable {
+    position: fixed; /* Use fixed to allow moving anywhere on the page */
+    bottom: 0; /* Start at the bottom-right corner */
+    left: 0;
+    cursor: move; /* Optional: Changes the cursor to indicate movability */
+  }
+  

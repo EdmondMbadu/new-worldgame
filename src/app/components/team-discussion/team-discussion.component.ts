@@ -29,6 +29,13 @@ export class TeamDiscussionComponent implements OnInit {
   showDiscussion: boolean = false;
   profilePicturePath: string = '';
   user: User = {};
+
+  showChatIcon: boolean = true;
+  private isDragging = false;
+  private originalX: number = 0;
+  private originalY: number = 0;
+  private offsetX: number = 0;
+  private offsetY: number = 0;
   private hasScrolled = false;
   @Input() solution?: Solution;
   @Input() botHeight: string = 'h-10';
@@ -69,6 +76,7 @@ export class TeamDiscussionComponent implements OnInit {
   }
 
   toggleDiscussion() {
+    this.showChatIcon = !this.showChatIcon;
     if (this.showDiscussion) {
       this.showDiscussion = false;
       this.hasScrolled = false;
@@ -114,5 +122,53 @@ export class TeamDiscussionComponent implements OnInit {
       });
       this.hasScrolled = true; // Prevent continuous scrolling
     }
+  }
+
+  onMouseDown(event: MouseEvent): void {
+    this.isDragging = true;
+
+    const draggableElement = document.getElementById(
+      'draggable-team-discussion'
+    );
+    if (draggableElement) {
+      // Calculate offsets from the mouse position to the element's top-left corner
+      this.offsetX =
+        event.clientX - draggableElement.getBoundingClientRect().left;
+      this.offsetY =
+        event.clientY - draggableElement.getBoundingClientRect().top;
+    }
+
+    document.addEventListener('mousemove', this.onMouseMove);
+    document.addEventListener('mouseup', this.onMouseUp);
+  }
+
+  onMouseMove = (event: MouseEvent): void => {
+    if (!this.isDragging) return;
+
+    // Use the offsets to keep the mouse position relative to the element's position
+    const newX = event.clientX - this.offsetX;
+    const newY = event.clientY - this.offsetY;
+
+    const draggableElement = document.getElementById(
+      'draggable-team-discussion'
+    );
+    if (draggableElement) {
+      draggableElement.style.left = `${newX}px`;
+      draggableElement.style.top = `${newY}px`;
+    }
+  };
+
+  onMouseUp = (): void => {
+    this.isDragging = false;
+
+    // Remove the event listeners when the mouse is released
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+  };
+
+  // Ensure to clean up the event listeners on component destroy
+  ngOnDestroy(): void {
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
   }
 }

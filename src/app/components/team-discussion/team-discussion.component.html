@@ -1,16 +1,25 @@
 
-<div class="fixed bottom-0 left-0 mb-4 ml-4 ">
-    <div (click)="toggleDiscussion()" class="mx-auto">
-        <img src="../../../assets/img/team-discussion.png" class="w-28 rounded-full -mb-4" alt="">
+<div 
+(mousedown)="onMouseDown($event)"
+  id="draggable-team-discussion"
+  class="draggable">
+
+
+<div class="bottom-0 left-0 mb-4 ml-4 ">
+    <div *ngIf="showChatIcon">
+        <div (click)="toggleDiscussion()" class="mx-auto">
+            <img   src="../../../assets/img/team-discussion.png" class="w-28 rounded-full -mb-4" alt="">
+        </div>
+            <button id="open-chat" (click)="toggleDiscussion()" class="bg-teal-700 text-white py-2 px-4 rounded-md hover:bg-teal-800 transition duration-300 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Team Discussion
+            </button>
+        </div>
     </div>
-        <button id="open-chat" (click)="toggleDiscussion()" class="bg-teal-700 text-white py-2 px-4 rounded-md hover:bg-teal-800 transition duration-300 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Team Discussion
-        </button>
-    </div>
-    <div id="chat-container" *ngIf="showDiscussion" class=" fixed bottom-16 left-4 w-96">
+  
+    <div id="chat-container" *ngIf="showDiscussion" class=" bottom-16 left-4 w-96">
         <div class="bg-white shadow-md rounded-lg max-w-lg w-full dark:bg-slate-700">
             <div class="p-2 border-b shadow-lg bg-teal-700 text-white rounded-t-lg flex justify-between items-center">
                 <!-- <img src="../../../assets/img/bucky-2.png" class="w-14 rounded-full" alt=""> -->
@@ -83,3 +92,4 @@
         </div>
     </div>
     
+</div>

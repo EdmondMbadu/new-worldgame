@@ -108,7 +108,7 @@ export class PlaygroundStepsComponent implements OnInit {
   steps: string[] = [
     'Step I:  Define the Problem State',
     'Step II: Envision the Preferred State',
-    'Step III: Develop Your Plan',
+    'Step III: Develop Our Plan',
     'Step IV: Strategy Review',
   ];
   display = new Array(this.steps.length).fill(false);
@@ -137,12 +137,11 @@ export class PlaygroundStepsComponent implements OnInit {
       'How will you measure success? How will you know when you reach the preferred state?',
     ],
     [
-      'What does your solution do to reach the preferred state? how will it do it?',
-      'What is done in the next 6-12 months to get your solution implemented?',
-      'What resources does our plan need?',
-      'How much will our strategy cost?',
-      'Where will we get the money?',
-      'What would we do with $100,000 to advance the strategy implementation? ',
+      'What does our solution do to reach the preferred state? how will it do it?',
+      'What technology, programs, policies will it need?',
+      'What resources does our solution need?',
+      'Who will implement our solution?',
+      ' How is our solution part of a circular, regenerative, more equitable economy?',
     ],
     ['Review Your Entire Strategy and Submit'],
   ];
