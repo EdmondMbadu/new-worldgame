@@ -109,17 +109,20 @@ export class PlaygroundStepsComponent implements OnInit {
     'Step I:  Define the Problem State',
     'Step II: Envision the Preferred State',
     'Step III: Develop Our Plan',
-    'Step IV: Strategy Review',
+    'Step IV: Implementation',
+    'Step V: Strategy Review',
   ];
   display = new Array(this.steps.length).fill(false);
   buttontexts = new Array(this.steps.length).fill('Next');
   questionsTitles: Array<Array<string>> = [
     ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
     ['S2-A', 'S2-B'],
-    ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E', 'S3-F'],
-    ['S4'],
+    ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E'],
+    ['S4-A', 'S4-B', 'S4-C', 'S4-D', 'S4-E', 'S4-F'],
+    ['S5'],
   ];
   timelineDisplay = [
+    'bg-gray-200 h-0.5',
     'bg-gray-200 h-0.5',
     'bg-gray-200 h-0.5',
     'bg-gray-200 h-0.5',
@@ -141,7 +144,15 @@ export class PlaygroundStepsComponent implements OnInit {
       'What technology, programs, policies will it need?',
       'What resources does our solution need?',
       'Who will implement our solution?',
-      ' How is our solution part of a circular, regenerative, more equitable economy?',
+      'How is our solution part of a circular, regenerative, more equitable economy?',
+    ],
+    [
+      `How much will our strategy cost?\n a. How much will it cost to test, for a proof-of-concept?`,
+      'b. How much will our strategy cost to implement at scale?',
+      'Where will we get the money needed to implement our solution, to do the above?',
+      'Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
+      'What does our implemented strategy  loook like,in more detail?\na. What is done in the ext-6-12 month to get our solution implemented?',
+      'What would we do with $50,000 to advance the strategy towrads implementation?',
     ],
     ['Review Your Entire Strategy and Submit'],
   ];

@@ -33,9 +33,10 @@
                 
 
             </div>
-            <!-- <div >
+            <div >
                 <button type="button" class=" mx-2 my-1 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Start a Zoom Call</button>
-            </div> -->
+                <!-- <button type="button" class=" mx-2 my-1 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Start a Zoom Call</button> -->
+            </div>
             
             <body>
                 
@@ -53,7 +54,7 @@
                                     <img *ngIf="comment.profilePic ==='' || comment.profilePic ===undefined"  src="../../../assets/img/user.png"  class="rounded-full w-14 " alt="">
                                    <div class="flex flex-col ml-2">
                                     <h1 class="text-sm  dark:text-white">{{comment.authorName}}</h1>
-                                    <h1 class="dark:text-white">{{comment.displayTime}}</h1>
+                                    <h1 class="dark:text-white text-sm">{{comment.displayTime}}</h1>
                                    </div> 
                                   
                                     

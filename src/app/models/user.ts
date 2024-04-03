@@ -25,3 +25,11 @@ export class Avatar {
   size?: string;
   downloadURL?: string;
 }
+export class Tournament {
+  solutionId?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  city?: string;
+  country?: string;
+}

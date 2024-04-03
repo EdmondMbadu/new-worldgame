@@ -2,11 +2,12 @@
     display: flex;
     flex-direction: column-reverse;
     overflow-y: auto;
-    height: 35vh; /* Adjust based on your needs */
+    height: 40vh; /* Adjust based on your needs */
   }
 
   /* team-discussion.component.css */
 .draggable {
+  z-index: 500;
     position: fixed; /* Use fixed to allow moving anywhere on the page */
     bottom: 0; /* Start at the bottom-right corner */
     left: 0;

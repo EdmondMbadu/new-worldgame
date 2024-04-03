@@ -221,13 +221,29 @@ export class PlaygroundStepComponent {
         array.push(key);
       });
     }
-    array.sort((a, b) => {
-      // Compare the prefix (e.g., "S1", "S2", etc.)
-      const prefixComparison = a.split('-')[0].localeCompare(b.split('-')[0]);
+    console.log('current soltution status', this.currentSolution.status);
+    console.log('array ', array);
+    // array.sort((a, b) => {
+    //   // Compare the prefix (e.g., "S1", "S2", etc.)
+    //   const prefixComparison = a.split('-')[0].localeCompare(b.split('-')[0]);
 
-      // If the prefix is the same, compare the suffix (e.g., "A", "B", etc.)
+    //   // If the prefix is the same, compare the suffix (e.g., "A", "B", etc.)
+    //   if (prefixComparison === 0) {
+    //     return a.split('-')[1].localeCompare(b.split('-')[1]);
+    //   }
+
+    //   return prefixComparison;
+    // });
+    array.sort((a, b) => {
+      // Split both elements by '-' and assign default values for prefix and suffix
+      let [aPrefix, aSuffix = ''] = a.split('-');
+      let [bPrefix, bSuffix = ''] = b.split('-');
+
+      // Compare the prefixes
+      const prefixComparison = aPrefix.localeCompare(bPrefix);
       if (prefixComparison === 0) {
-        return a.split('-')[1].localeCompare(b.split('-')[1]);
+        // If the prefix is the same, compare the suffixes
+        return aSuffix.localeCompare(bSuffix);
       }
 
       return prefixComparison;
@@ -236,6 +252,7 @@ export class PlaygroundStepComponent {
     let titles = [
       `<h1 class="text-left text-xl font-bold my-4"> Preferred State  </h1>`,
       `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Implementation</h1>`,
     ];
 
     // console.log(' all the keys', array);

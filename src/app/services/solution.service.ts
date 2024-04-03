@@ -6,8 +6,8 @@ import {
 import { Evaluation, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
-import { Observable } from 'rxjs';
-import { User } from '../models/user';
+import { count, last, Observable } from 'rxjs';
+import { Tournament, User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
 import { Email } from '../components/create-playground/create-playground.component';
 
@@ -63,6 +63,19 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
 
+  addToTournament(contact: Tournament) {
+    const data = {
+      solutionId: contact.solutionId,
+      firstName: contact.firstName,
+      last: contact.lastName,
+      city: contact.city,
+      country: contact.country,
+    };
+    const solutionRef: AngularFirestoreDocument<Tournament> = this.afs.doc(
+      `tournament/${contact.solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
+  }
   createNewSolutionForParticipant(
     title: string,
     description: string,
@@ -161,6 +174,15 @@ export class SolutionService {
       evaluationSummary: solution.evaluationSummary,
       evaluators: solution.evaluators,
       numberofTimesEvaluated: solution.numberofTimesEvaluated,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solution.solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
+  }
+  updateSolutionForTournament(solution: Solution) {
+    const data = {
+      tournament: 'true',
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solution.solutionId}`

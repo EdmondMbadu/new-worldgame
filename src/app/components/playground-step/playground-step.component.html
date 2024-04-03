@@ -24,7 +24,7 @@
 
     <!-- Questions -->
 
-    <div  class="  container flex flex-col mx-auto justify-center mt-8 px-2 md:px-16 z-"  *ngFor="let question of questions; let i =index">
+    <div  class="  container flex flex-col mx-auto justify-center mt-8 px-2 md:px-16 "  *ngFor="let question of questions; let i =index">
 
         <header class="inverted">
             <h2 class="py-4  text-gray-900 text-xl dark:text-gray-200">{{question}} <button (click)="openPopups(i)" (mouseenter)="onHoverPopup(i)" (mouseleave)="onLeavePopup(i)" type="button"><svg class="w-5 h-5 ms-2  text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg><span class="sr-only">Show information</span></button></h2>
@@ -146,8 +146,8 @@
     <div class="  flex flex-col mx-auto justify-center my-8 space-y-6" >
       
        <div class="flex flex-row space-x-6">
-        <button [disabled]="isInputInValid()" type="submit" class="bg-teal-600 text-white px-8 py-2 rounded-full" (click)="saveSolutionStatus()" >Save</button>
-          <button class="bg-teal-600 text-white px-8 py-2 rounded-full" [disabled]="isInputInValid()" (click)="updatePlayground(stepNumber)">{{buttonText}}</button>
+        <button  type="submit" class="bg-teal-600 text-white px-8 py-2 rounded-full" (click)="saveSolutionStatus()" >Save</button>
+          <button class="bg-teal-600 text-white px-8 py-2 rounded-full"  (click)="updatePlayground(stepNumber)">{{buttonText}}</button>
       </div>
        
 
