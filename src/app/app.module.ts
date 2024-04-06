@@ -67,6 +67,7 @@ import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
 import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.component';
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { TeamDiscussionComponent } from './components/team-discussion/team-discussion.component';
+import { InstructionsComponent } from './blogs/instructions/instructions.component';
 
 @NgModule({
   declarations: [
@@ -112,6 +113,7 @@ import { TeamDiscussionComponent } from './components/team-discussion/team-discu
     PricingPlansComponent,
     ContactUsComponent,
     TeamDiscussionComponent,
+    InstructionsComponent,
   ],
   imports: [
     BrowserModule,
