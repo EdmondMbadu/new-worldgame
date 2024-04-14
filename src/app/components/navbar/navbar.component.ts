@@ -35,7 +35,7 @@ export class NavbarComponent implements OnInit {
   @Input() currentPageAbout: boolean = false;
   @Input() currentPageJoinNow: boolean = false;
   @Input() currentPageSignIn: boolean = false;
-  @Input() currentPageBlogs: boolean = false;
+  @Input() currentPageNews: boolean = false;
   @Input() currentPageTournament: boolean = false;
   constructor(
     private auth: AuthService,

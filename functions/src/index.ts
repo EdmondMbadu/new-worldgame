@@ -132,3 +132,73 @@ export const solutionEvaluationComplete = functions.https.onCall(
     return { success: true };
   }
 );
+
+exports.dailyNews = functions.pubsub
+  .schedule('every day 23:30')
+  .timeZone('America/Los_Angeles') // Ensure time zone matches your requirements
+  .onRun(async (context) => {
+    const db = admin.firestore();
+    const now = new Date();
+    const yesterday = new Date(now.setDate(now.getDate() - 1));
+    const yesterdayStart = new Date(yesterday.setHours(0, 0, 0, 0));
+    const yesterdayEnd = new Date(yesterday.setHours(23, 59, 59, 999));
+
+    const solutions = await db
+      .collection('solutions')
+      .where('submissionDate', '>=', yesterdayStart)
+      .where('submissionDate', '<=', yesterdayEnd)
+      .get();
+
+    let solutionsToSummarize = [];
+
+    if (solutions.empty) {
+      const recentSolutions = await db
+        .collection('solutions')
+        .orderBy('submissionDate', 'desc')
+        .limit(5)
+        .get();
+      solutionsToSummarize = recentSolutions.docs.map((doc) => doc.data());
+    } else {
+      solutionsToSummarize = solutions.docs.map((doc) => doc.data());
+    }
+
+    const summaryText = solutionsToSummarize
+      .map((solution) => {
+        return `Title: ${solution.title}\nAuthor: ${
+          solution.authorName
+        }\nDate: ${solution.submissionDate.toISOString()}\nContent: ${
+          solution.content
+        }`;
+      })
+      .join('\n\n');
+
+    const enhancedPrompt = `
+      Envision yourself as a groundbreaking news reporter who embodies an exceptional combination of attributes: the ability to contextualize current events within their historical tapestry, akin to Ken Burns; the capacity to infuse news analysis with engaging and insightful wit, reminiscent of Jon Stewart; the skill to cover stories with the profound global awareness and nuanced understanding of Christiane Amanpour; and the profound commitment to and knowledge of sustainable development and environmental conservation, inspired by Elizabeth Wathuti. Your reporting not only informs and entertains but also enlightens viewers on the importance of environmental stewardship and sustainable practices.
+
+      My name is Rachel and today's date is ${new Date().toLocaleDateString()}.
+      ${summaryText}
+      Thank you, that is all for today. I will see you tomorrow.
+    `;
+
+    // Send the single concatenated summary to the summaries collection
+    const summaryDocRef = db.collection('summaries').doc();
+    await summaryDocRef.set({ text: enhancedPrompt });
+
+    // Listen for the summary response
+    listenForSummaryResponse(summaryDocRef);
+  });
+
+function listenForSummaryResponse(docRef: any) {
+  const unsubscribe = docRef.onSnapshot(
+    (docSnapshot: any) => {
+      if (docSnapshot.exists && docSnapshot.data().summary) {
+        console.log('Summary received:', docSnapshot.data().summary);
+        unsubscribe(); // Detach the listener after receiving the summary
+      }
+    },
+    (err: any) => {
+      console.log(`Encountered error: ${err}`);
+      unsubscribe();
+    }
+  );
+}

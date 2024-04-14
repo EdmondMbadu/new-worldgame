@@ -122,7 +122,7 @@ const routes: Routes = [
     component: GlobalStatisticalToolsComponent,
   },
   {
-    path: 'blogs/nwg-news',
+    path: 'nwg-news',
     component: NwgNewsComponent,
   },
   {
