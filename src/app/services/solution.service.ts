@@ -31,11 +31,11 @@ export class SolutionService {
     description: string,
     participants: any,
     evaluators: any,
-    endDate: string,
+    // endDate: string,
 
     sdgs: string[]
   ) {
-    let formatedDate = this.time.formatDateString(endDate);
+    // let formatedDate = this.time.formatDateString(endDate);
     this.solutionId = this.afs.createId().toString();
     const data = {
       solutionId: this.solutionId,
@@ -46,9 +46,9 @@ export class SolutionService {
       description: description,
       participants: participants,
       evaluators: evaluators,
-      endDate: endDate,
+      // endDate: endDate,
       authorProfileCredential: this.auth.currentUser.profileCredential,
-      endDateFormatted: formatedDate,
+      // endDateFormatted: formatedDate,
       creationDate: this.time.todaysDate(),
       views: '1',
       sdgs: sdgs,

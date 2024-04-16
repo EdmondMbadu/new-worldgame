@@ -44,6 +44,11 @@ export class TeamDiscussionComponent implements OnInit {
   errorMsg = '';
   prompt = '';
   temp = '';
+
+  nwgHubLink: string =
+    'https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt';
+
+  introMessage: string = `Welcome to the team discussion chat. You can use the following resources for more advanced prompts and insights on collaboration. `;
   profilePic: string =
     this.auth.currentUser.profilePicture.downloadURL !== undefined
       ? this.auth.currentUser.profilePicture.downloadURL

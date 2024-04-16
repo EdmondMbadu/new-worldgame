@@ -34,7 +34,8 @@
 
             </div>
             <div >
-                <button type="button" class=" mx-2 my-1 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Start a Zoom Call</button>
+                
+                <!-- <button type="button" class=" mx-2 my-1 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Start a Zoom Call</button> -->
                 <!-- <button type="button" class=" mx-2 my-1 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Start a Zoom Call</button> -->
             </div>
             
@@ -42,8 +43,15 @@
                 
            
                 <div id="chatboxDiscussion" class="p-4 h-80 overflow-y-auto">
+                    
                 <!-- Chat messages will be displayed here -->
                 <section class="responses">
+                    <p class="dark:text-white text-md m-2 mb-3">
+                        {{introMessage}}
+                        <a class="text-blue-500 underline" target="_blank" href="https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt">Advanced Search </a>
+                       - 
+                        <a class="text-blue-500 underline" target="_blank" href="https://rocketgoals.beehiiv.com/"> collaboration</a>
+                    </p>
                     <ng-container *ngFor="let comment of comments">
                     <div>
                     

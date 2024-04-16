@@ -130,7 +130,7 @@ export class PlaygroundStepsComponent implements OnInit {
   ];
   AllQuestions: Array<Array<string>> = [
     [
-      'What is the problem you have chosen and why ?(Back up/document why you have chosen this problem.)',
+      'What is the problem you have chosen and why? (Document why you have chosen this problem.)',
       'What are the symptoms of this problem? How do you measure it? (Show information)',
       'How many people does this problem impact in the world? Where is it most severe?',
       'What will happen if nothing is done to deal with this problem?',
@@ -149,7 +149,7 @@ export class PlaygroundStepsComponent implements OnInit {
     [
       `How much will our strategy cost?\n a. How much will it cost to test, for a proof-of-concept?`,
       'b. How much will our strategy cost to implement at scale?',
-      'Where will we get the money needed to implement our solution, to do the above?',
+      'Where will we get the funding needed to implement our solution, to do the above?',
       'Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
       'What does our implemented strategy  loook like,in more detail?\na. What is done in the ext-6-12 month to get our solution implemented?',
       'What would we do with $50,000 to advance the strategy towrads implementation?',

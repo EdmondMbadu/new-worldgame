@@ -98,7 +98,7 @@ export class CreatePlaygroundComponent {
       ],
       description: ['', [Validators.required]],
       // sdg: ['', [Validators.required]],
-      date: ['', [Validators.required]],
+      // date: ['', [Validators.required]],
     });
     this.evaluatorsEmails = [];
     this.auth
@@ -291,7 +291,7 @@ export class CreatePlaygroundComponent {
         this.myForm.value.description,
         this.participantsEmails,
         this.evaluatorsEmails,
-        this.myForm.value.date,
+        // this.myForm.value.date,
 
         this.selectedSdgs
       )
