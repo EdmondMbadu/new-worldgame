@@ -11,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -22,6 +23,7 @@ export interface FeedbackRequest {
   styleUrls: ['./playground-step.component.css'],
 })
 export class PlaygroundStepComponent {
+  loader: any;
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
@@ -54,7 +56,8 @@ export class PlaygroundStepComponent {
     private solution: SolutionService,
     private auth: AuthService,
     private fns: AngularFireFunctions,
-    private time: TimeService
+    private time: TimeService,
+    private storage: AngularFireStorage
   ) {}
   data: string = '';
   discussion: Comment[] = [];
@@ -81,9 +84,6 @@ export class PlaygroundStepComponent {
 
     this.displayPopups = new Array(this.questions.length).fill(false);
     this.clickedDisplayPopups = new Array(this.questions.length).fill(false);
-
-    // Add a scroll event listener to the window
-    // window.addEventListener('scroll', this.scrollHandler);
   }
   displayTimeDiscussion() {
     this.discussion.forEach((data) => {
@@ -105,7 +105,7 @@ export class PlaygroundStepComponent {
       this.initializeStrategy();
     } else if (
       this.currentSolution.status !== undefined &&
-      this.currentSolution.status![this.questionsTitles[0]]
+      this.currentSolution.status[this.questionsTitles[0]]
     ) {
       this.contentsArray = [];
       this.staticContentArray = [];
@@ -119,7 +119,7 @@ export class PlaygroundStepComponent {
       }
     }
   }
-
+  public editorConfig: any;
   public Editor: any = Editor;
   public onReady(editor: any) {
     // console.log('CKEditor5 Angular Component is ready to use!', editor);
@@ -189,16 +189,26 @@ export class PlaygroundStepComponent {
         this.questionsAndAnswersTracker![`${this.questionsTitles[i]}`] =
           this.contentsArray[i];
       }
-      // save solution
-      this.solution
-        .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
-        .then(() => {
-          this.saveSuccess = true;
-        })
-        .catch((error) => {
-          this.saveError = true;
-          // alert('Error launching solution ');
-        });
+
+      if (
+        // this is some risky business. Say that you saved but don't save.
+        // this is because we want to keep the last changes for submission.
+        this.questionsTitles.length === 1 &&
+        this.currentSolution.status !== undefined
+      ) {
+        this.saveSuccess = true;
+      } else {
+        // save solution
+        this.solution
+          .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
+          .then(() => {
+            this.saveSuccess = true;
+          })
+          .catch((error) => {
+            this.saveError = true;
+            // alert('Error launching solution ');
+          });
+      }
     }
   }
 
@@ -223,17 +233,7 @@ export class PlaygroundStepComponent {
     }
     console.log('current soltution status', this.currentSolution.status);
     console.log('array ', array);
-    // array.sort((a, b) => {
-    //   // Compare the prefix (e.g., "S1", "S2", etc.)
-    //   const prefixComparison = a.split('-')[0].localeCompare(b.split('-')[0]);
 
-    //   // If the prefix is the same, compare the suffix (e.g., "A", "B", etc.)
-    //   if (prefixComparison === 0) {
-    //     return a.split('-')[1].localeCompare(b.split('-')[1]);
-    //   }
-
-    //   return prefixComparison;
-    // });
     array.sort((a, b) => {
       // Split both elements by '-' and assign default values for prefix and suffix
       let [aPrefix, aSuffix = ''] = a.split('-');
@@ -257,6 +257,8 @@ export class PlaygroundStepComponent {
 
     // console.log(' all the keys', array);
 
+    console.log('what is content array content', this.contentsArray);
+
     this.contentsArray[0] += `<h1 class="text-left text-xl font-bold my-4"> Problem State    </h1>`;
 
     for (let i = 0, t = 1, j = 0; i < array.length - 1; i++, t++) {
@@ -273,7 +275,6 @@ export class PlaygroundStepComponent {
       this.staticContentArray[0] += `\n${
         this.currentSolution.status![array[i]]
       }`;
-      // console.log('the static array ', this.staticContentArray[0]);
     }
   }
   onHoverPopup(index: number) {

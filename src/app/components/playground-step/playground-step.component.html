@@ -70,8 +70,9 @@
              
               data=""
               (ready)="onReady($event)"
-             
+             placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
               [(ngModel)]="contentsArray[i]"
+              
               #contentField="ngModel"
              
              
@@ -197,7 +198,7 @@
   
 
     <!-- Congratulations Modal -->
-    <div *ngIf="displayCongrats" id="progress-modal" tabindex="-1" aria-hidden="true" class="w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
+    <div *ngIf="displayCongrats" id="progress-modal" tabindex="-1" aria-hidden="true" class="w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[5rem] z-50 p-4 flex">
         <div class="relative p-4 w-full max-w-md max-h-full">
             <!-- Modal content -->
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -213,7 +214,7 @@
                     <p class="text-gray-500 dark:text-gray-400 ">You wiill gain <span class=" text-lg dark:text-blue-500 text-blue-700">  points</span> from this solution after the evaluators have evaluated your solution. <p>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">The number of points will be the average of the evaluations. <p> 
                             <p class="text-gray-500 dark:text-gray-400 mb-6">An email has been sent to each evaluator, but you can always reach out to them independently for a more prompt feedback. The evaluators are located on the lower right.<p>  
-                      <img class="rounded-full w-40 mx-auto" src="../../../assets/img/nwg-solution-badge.png" alt="">
+                      <img class="rounded-full w-32 mx-auto" src="../../../assets/img/nwg-solution-badge.png" alt="">
                     <!-- <div class="flex justify-between mb-1 text-gray-500 dark:text-gray-400">
                         <span class="text-base font-normal">My storage</span>
                         <span class="text-sm font-semibold text-gray-900 dark:text-white">376,3 of 500 GB used</span>
