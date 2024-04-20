@@ -27,6 +27,10 @@ export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
+  simpleUpload: any = {
+    // The URL that the images are uploaded to.
+    uploadUrl: 'http://example.com',
+  };
   displayPopups: boolean[] = [];
   newTitle: string = '';
   clickedDisplayPopups: boolean[] = [];

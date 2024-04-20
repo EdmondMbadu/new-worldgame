@@ -6,6 +6,7 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
+// const cors = require('cors')({ origin: true });
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 const axios = require('axios');
@@ -15,7 +16,8 @@ admin.initializeApp();
 // const db = admin.firestore();
 
 const storage = new Storage();
-const bucket = storage.bucket('new-worldgame.appspot.com');
+
+const bucketName = storage.bucket('new-worldgame.appspot.com');
 
 import * as sgMail from '@sendgrid/mail';
 
@@ -312,7 +314,7 @@ exports.videoReady = functions.https.onRequest(async (req, res) => {
       // Download the video content
       const response = await axios.get(videoUrl, { responseType: 'stream' });
       const fileStream = response.data;
-      const file = bucket.file('nwg-news');
+      const file = bucketName.file('nwg-news');
       const writeStream = file.createWriteStream({
         metadata: {
           contentType: 'video/mp4', // Adjust depending on the actual video format
@@ -337,3 +339,60 @@ exports.videoReady = functions.https.onRequest(async (req, res) => {
     res.status(405).send('Method not allowed');
   }
 });
+
+// exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
+//   // Enable CORS using the `cors` express middleware.
+//   return cors(req, res, async () => {
+//     try {
+//       if (req.method !== 'POST') {
+//         console.log(' for logging purposes full request body ', req);
+//         // Only allow POST method for image uploading
+//         return res.status(405).end('Method Not Allowed', req);
+//       }
+
+//       // Ensure the `req.files` object is present and has an 'image' property
+//       if (!req.files || !req.files.image) {
+//         console.log(' for logging purposes full request body ', req);
+//         return res.status(400).send('No image uploaded');
+//       }
+
+//       // Extract the file from the request
+//       const file = req.files.image;
+//       const bucket = storage.bucket(bucketName);
+//       const fileName = `ckeditor/${Date.now()}-${file.originalname}`;
+//       const fileBlob = bucket.file(fileName);
+
+//       // Create a stream to write file to Cloud Storage
+//       const blobStream = fileBlob.createWriteStream({
+//         metadata: {
+//           contentType: file.mimetype,
+//         },
+//       });
+
+//       blobStream.on('error', (err: any) => {
+//         console.error(err);
+//         console.log(' for logging purposes full request body ', req);
+//         return res.status(500).send('Error uploading file');
+//       });
+
+//       blobStream.on('finish', async () => {
+//         // The public URL can be used to directly access the file via HTTP.
+//         const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+
+//         // Make the image public on the web (setting ACL)
+//         await fileBlob.makePublic();
+
+//         // Respond with the URL of the uploaded image
+//         console.log(' for logging purposes full request body ', req);
+//         res.status(200).send({ url: publicUrl });
+//       });
+
+//       // End the stream by pushing the file buffer
+//       blobStream.end(file.buffer);
+//     } catch (error) {
+//       console.log(' for logging purposes full request body ', req);
+//       console.error('Unexpected error', error);
+//       res.status(500).send('Internal Server Error');
+//     }
+//   });
+// });

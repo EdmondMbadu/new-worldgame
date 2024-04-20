@@ -4,7 +4,10 @@
  */
 
 import { ClassicEditor } from '@ckeditor/ckeditor5-editor-classic';
-import { Base64UploadAdapter } from '@ckeditor/ckeditor5-upload';
+import {
+  Base64UploadAdapter,
+  // SimpleUploadAdapter,
+} from '@ckeditor/ckeditor5-upload';
 import { Alignment } from '@ckeditor/ckeditor5-alignment';
 import { Autoformat } from '@ckeditor/ckeditor5-autoformat';
 import { Autosave } from '@ckeditor/ckeditor5-autosave';
@@ -65,26 +68,6 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 // See https://ckeditor.com/docs/ckeditor5/latest/installation/plugins/installing-plugins.html for details.
 
 class Editor extends ClassicEditor {
-  public editorConfig: any;
-  public Editor = Editor;
-  constructor(private storage: AngularFireStorage) {
-    super('Hello');
-  }
-
-  ngOnInit() {
-    this.editorConfig = {
-      ...Editor.defaultConfig,
-      extraPlugins: [this.uploadAdapterPlugin.bind(this)],
-    };
-  }
-
-  private uploadAdapterPlugin(editor: any) {
-    editor.plugins.get('FileRepository').createUploadAdapter = (
-      loader: any
-    ) => {
-      return new CloudStorageUploadAdapter(loader, this.storage);
-    };
-  }
   public static override builtinPlugins = [
     Alignment,
     AutoImage,
@@ -132,6 +115,7 @@ class Editor extends ClassicEditor {
     Style,
     Subscript,
     Superscript,
+    // SimpleUploadAdapter,
     Table,
     TableToolbar,
     TextTransformation,
@@ -174,6 +158,11 @@ class Editor extends ClassicEditor {
       ],
     },
     language: 'en',
+    // simpleUpload: {
+    //   // The URL that the images are uploaded to.
+    //   uploadUrl:
+    //     'https://us-central1-new-worldgame.cloudfunctions.net/uploadImage',
+    // },
     image: {
       toolbar: [
         'imageTextAlternative',
@@ -191,33 +180,3 @@ class Editor extends ClassicEditor {
 }
 
 export default Editor;
-
-class CloudStorageUploadAdapter {
-  private loader: any;
-
-  constructor(loader: any, private storage: AngularFireStorage) {
-    this.loader = loader;
-  }
-
-  async upload(): Promise<{ default: string }> {
-    const file = await this.loader.file;
-    const path = `images/${Date.now()}-${file.name}`;
-
-    try {
-      const task = this.storage.upload(path, file);
-      await task.snapshotChanges().toPromise(); // Ensures the upload completes
-      const downloadURL = await this.storage
-        .ref(path)
-        .getDownloadURL()
-        .toPromise();
-      return { default: downloadURL }; // CKEditor uses this URL in the content
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      throw error;
-    }
-  }
-
-  abort() {
-    console.log('Upload aborted'); // Implement logic if necessary
-  }
-}
