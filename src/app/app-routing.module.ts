@@ -33,6 +33,7 @@ import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
 import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.component';
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
+import { HowToComponent } from './components/how-to/how-to.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -104,6 +105,10 @@ const routes: Routes = [
   {
     path: 'blogs/instructions',
     component: InstructionsComponent,
+  },
+  {
+    path: 'how-to',
+    component: HowToComponent,
   },
   {
     path: 'plans',

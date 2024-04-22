@@ -68,6 +68,7 @@ import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.compo
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { TeamDiscussionComponent } from './components/team-discussion/team-discussion.component';
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
+import { HowToComponent } from './components/how-to/how-to.component';
 
 @NgModule({
   declarations: [
@@ -114,6 +115,7 @@ import { InstructionsComponent } from './blogs/instructions/instructions.compone
     ContactUsComponent,
     TeamDiscussionComponent,
     InstructionsComponent,
+    HowToComponent,
   ],
   imports: [
     BrowserModule,

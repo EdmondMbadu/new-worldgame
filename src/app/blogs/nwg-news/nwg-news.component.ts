@@ -8,6 +8,6 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NwgNewsComponent implements OnInit {
   ngOnInit(): void {
-    window.scroll(0, 200);
+    window.scroll(0, 100);
   }
 }
