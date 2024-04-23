@@ -6,7 +6,7 @@ import {
 import { Evaluation, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
-import { count, last, Observable } from 'rxjs';
+import { combineLatest, count, last, map, Observable } from 'rxjs';
 import { Tournament, User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
 import { Email } from '../components/create-playground/create-playground.component';
@@ -146,13 +146,37 @@ export class SolutionService {
       .valueChanges();
   }
   getAuthenticatedUserPendingEvaluations() {
-    return this.afs
-      .collection<Solution>(`solutions`, (ref) =>
+    const email = this.auth.currentUser.email;
+
+    // Query for solutions where evaluators contain the email and evaluated is 'false'
+    const queryEvaluatedFalse = this.afs
+      .collection<Solution>('solutions', (ref) =>
         ref.where('evaluators', 'array-contains', {
-          name: this.auth.currentUser.email,
+          name: email,
+          evaluated: 'false',
         })
       )
       .valueChanges();
+
+    // Query for solutions where evaluators contain the email regardless of 'evaluated'
+    const queryIgnoreEvaluated = this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref.where('evaluators', 'array-contains', { name: email })
+      )
+      .valueChanges();
+
+    // Combine results from both queries
+    return combineLatest([queryEvaluatedFalse, queryIgnoreEvaluated]).pipe(
+      map(([resultsFalse, resultsIgnoreEvaluated]) => {
+        // Filter to remove duplicates that might appear in both queries
+        const combinedResults = [...resultsFalse, ...resultsIgnoreEvaluated];
+        return combinedResults.filter(
+          (solution, index, self) =>
+            index ===
+            self.findIndex((t) => t.solutionId === solution.solutionId)
+        );
+      })
+    );
   }
   getAllSolutionsOfThisUser(email: string) {
     return this.afs
@@ -303,4 +327,23 @@ export class SolutionService {
 
     return solutionRef.set(data, { merge: true });
   }
+}
+function collection(afs: AngularFirestore, arg1: string) {
+  throw new Error('Function not implemented.');
+}
+
+function query(solutionsRef: any, arg1: any) {
+  throw new Error('Function not implemented.');
+}
+
+function or(arg0: any, arg1: any, arg2: any): any {
+  throw new Error('Function not implemented.');
+}
+
+function where(
+  arg0: string,
+  arg1: string,
+  arg2: { name: string; evaluated: string }
+): any {
+  throw new Error('Function not implemented.');
 }

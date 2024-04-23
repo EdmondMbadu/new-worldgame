@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit {
       this.evaluationSolutions = data.filter((element) => {
         return element.finished !== undefined && element.finished === 'true';
       });
+      console.log(' all evaluations pending', this.evaluationSolutions);
       this.evaluation = this.evaluationSolutions.length;
     });
 

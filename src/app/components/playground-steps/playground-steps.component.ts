@@ -151,7 +151,7 @@ export class PlaygroundStepsComponent implements OnInit {
       'b. How much will our strategy cost to implement at scale?',
       'Where will we get the funding needed to implement our solution, to do the above?',
       'Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
-      'What does our implemented strategy  loook like,in more detail?\na. What is done in the ext-6-12 month to get our solution implemented?',
+      'What does our implemented strategy  look like, in more detail?\na. What is done in the ext-6-12 month to get our solution implemented?',
       'What would we do with $50,000 to advance the strategy towrads implementation?',
     ],
     ['Review Your Entire Strategy and Submit'],
