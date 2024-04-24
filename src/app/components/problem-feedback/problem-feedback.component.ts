@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Evaluation, Solution } from 'src/app/models/solution';
@@ -14,7 +14,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
   templateUrl: './problem-feedback.component.html',
   styleUrls: ['./problem-feedback.component.css'],
 })
-export class ProblemFeedbackComponent {
+export class ProblemFeedbackComponent implements OnInit {
   user: User = {};
   id: any;
   solutionId: string = '';
@@ -53,6 +53,9 @@ export class ProblemFeedbackComponent {
   });
 
   userSolution: Solution = {};
+  ngOnInit(): void {
+    window.scroll(0, 0);
+  }
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
