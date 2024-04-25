@@ -34,6 +34,7 @@ import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.compo
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
 import { HowToComponent } from './components/how-to/how-to.component';
+import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -83,6 +84,16 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'operating-manual',
+    component: OperatingManualComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'how-to',
+    component: HowToComponent,
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'overview',
     component: OverviewComponent,
   },
@@ -98,6 +109,7 @@ const routes: Routes = [
     path: 'blogs',
     component: BlogsComponent,
   },
+
   {
     path: 'blogs/tournament',
     component: TournamentComponent,
@@ -106,10 +118,7 @@ const routes: Routes = [
     path: 'blogs/instructions',
     component: InstructionsComponent,
   },
-  {
-    path: 'how-to',
-    component: HowToComponent,
-  },
+
   {
     path: 'plans',
     component: PricingPlansComponent,

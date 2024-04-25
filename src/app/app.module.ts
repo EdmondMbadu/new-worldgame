@@ -69,6 +69,7 @@ import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { TeamDiscussionComponent } from './components/team-discussion/team-discussion.component';
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
 import { HowToComponent } from './components/how-to/how-to.component';
+import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 
 @NgModule({
   declarations: [
@@ -116,6 +117,7 @@ import { HowToComponent } from './components/how-to/how-to.component';
     TeamDiscussionComponent,
     InstructionsComponent,
     HowToComponent,
+    OperatingManualComponent,
   ],
   imports: [
     BrowserModule,
