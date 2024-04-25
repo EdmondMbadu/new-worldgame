@@ -32,7 +32,7 @@
 }
 
 /* Apply animations only for large screens */
-@media (min-width: 992px) {
+/* @media (min-width: 992px) { */
     .animated-text span::before {
         animation: words 20s infinite;
     }
@@ -40,7 +40,7 @@
     .animated-text span::after {
         animation: cursor .8s infinite, typing 20s steps(14) infinite;
     }
-}
+/* } */
 
 
 /* Styles for OS dark mode preference */
