@@ -1,10 +1,10 @@
 <app-navbar ></app-navbar>
-<div class="dark:bg-slate-900 min-h-screen min-w-full ">
+<div class="dark:bg-slate-900 min-h-screen min-w-max">
 
 
 
-    <div class="flex  container mx-auto mt-28">
-        <div class="">
+    <div class="flex  container mx-auto mt-28 ">
+        <div class=" max-w-lg md:max-w-max mx-auto">
             <h1 class="my-10 font-bold text-3xl dark:text-gray-200 text-gray-900  text-center justify-center ">GSL ARCHIVE PICTURES</h1>
             <p class="text-gray-900 dark:text-white mb-6 px-2 ">
                <span class="font-bold">  Previous Lab participants have come from:</span> 
@@ -15,27 +15,22 @@
                 Palestine, United Arab Emirates, Saudi Arabia, Nepal, Turkey, and all over the U.S.
             </p>
         
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 px-2">
-                <div *ngFor="let im of imageList">
-                    <img class="max-h-96 max-w-full rounded-lg" [src]="im" alt="">
-                </div>
-
+            
+        </div>
         
-            </div>
-        </div>
     </div>'
-
-    <!-- <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="grid gap-4">
+    <div class="container mx-auto ">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 px-4 max-w-lg md:max-w-max mx-auto">
             <div *ngFor="let im of imageList">
-                <img class="h-auto max-w-full rounded-lg" [src]="im"alt="">
+                <img class="max-h-96 md:max-w-full w-52 rounded-lg max-w-md md:w-full" [src]="im" alt="">
             </div>
-       
+    
+    
         </div>
+    </div>
     
+
    
-    
-    </div> -->
     
 
     <app-footer></app-footer>

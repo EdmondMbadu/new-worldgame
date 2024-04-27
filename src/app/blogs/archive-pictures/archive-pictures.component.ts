@@ -4,7 +4,6 @@ import { Observable, from, map, mergeMap } from 'rxjs';
 
 @Component({
   selector: 'app-archive-pictures',
-
   templateUrl: './archive-pictures.component.html',
   styleUrl: './archive-pictures.component.css',
 })
