@@ -1,16 +1,17 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
-<div class="dark:bg-slate-900 min-h-screen">
-        <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-16 ">
+
+<div class="dark:bg-slate-900 min-h-screen min-w-max">
+    <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
+        <div class=" container flex flex-col lg:flex-row mx-auto justify-center lg:justify-between mt-16 ">
 
 
 
 
-            <div class=" flex flex-col md:flex-row justify-between mx-auto ">
+            <div class=" flex flex-col lg:flex-row justify-between mx-auto ">
 
                 <div class=" container flex flex-col max-w-2xl  my-14">
                     <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-10 dark:text-gray-200">Evaluation Summary</h1>
             
-                    <div >
+                    <div class="mx-auto " >
 
                         <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[30rem]  mb-10 dark:bg-slate-800" *ngIf=" currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
                             <div class="p-3 space-y-2">
@@ -137,7 +138,7 @@
 
             </div>
 
-            <div class=" flex flex-col md:flex-row  justify-between mx-auto my-14">
+            <div class=" flex flex-col lg:flex-row  justify-between mx-auto my-14">
 
                 <div class=" container flex flex-col max-w-2xl">
                     <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6 dark:text-gray-200"> Solution</h1>

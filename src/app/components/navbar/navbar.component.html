@@ -7,9 +7,7 @@
                 <img  class="w-20 rounded-lg"  src="../../../assets/img/earth-triangle-test.png" alt="">
             </div>
         
-            <div class="hidden md:flex space-x-6  font-medium" >
-                <!-- <h1 *ngIf="currentPageAbout" class=" text-center  border-teal-700 {{current}}">About </h1>
-                <h1 *ngIf="!currentPageAbout" class="hover:text-teal-700" routerLink="/overview">About </h1> -->
+            <div class="hidden lg:flex space-x-6  font-medium" >
                
                 <h1 *ngIf="currentPageJoinNow" class=" text-center  border-teal-700 {{current}}">Join Now</h1>
                 <h1 *ngIf="!currentPageJoinNow" class="hover:text-teal-700" routerLink="/signup">Join Now </h1>
@@ -46,7 +44,7 @@
               </button>
             </div>
 
-            <div class="flex flex--row space-x-6 ">
+            <div class="flex flex-row space-x-6 ">
                 <a  class="mt-2" >
                     <svg (click)="toggleDropDownTheme()"  class="hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black  " width="25px" height="25px" viewBox="0 0 35 35" ><path d="M18.44,34.68a18.22,18.22,0,0,1-2.94-.24,18.18,18.18,0,0,1-15-20.86A18.06,18.06,0,0,1,9.59.63,2.42,2.42,0,0,1,12.2.79a2.39,2.39,0,0,1,1,2.41L11.9,3.1l1.23.22A15.66,15.66,0,0,0,23.34,21h0a15.82,15.82,0,0,0,8.47.53A2.44,2.44,0,0,1,34.47,25,18.18,18.18,0,0,1,18.44,34.68ZM10.67,2.89a15.67,15.67,0,0,0-5,22.77A15.66,15.66,0,0,0,32.18,24a18.49,18.49,0,0,1-9.65-.64A18.18,18.18,0,0,1,10.67,2.89Z"/></svg>
                     <div  *ngIf="showThemeDropDown" class="z-10   absolute  -ml-8  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-32 dark:bg-gray-700 dark:divide-gray-600">
@@ -65,15 +63,78 @@
                        
                     </div>
                 </a>
-                <a routerLink="/signup" class="hidden md:block p-3 px-6 pt-2 text-white border- bg-teal-700 rounded-lg hover:bg-teal-800"> Get Started</a>
+                <a routerLink="/signup" class="hidden lg:block p-3 px-6 pt-2 text-white border- bg-teal-700 rounded-lg hover:bg-teal-800"> Get Started</a>
                 
 
             </div>
            
-            <div class="md:hidden flex items-center">
-                  <a  class="w-6" href="">
-                    <img src="../../../assets/img/hamburger.png" alt="">
+            <div class="lg:hidden flex items-center">
+                  <a  (click)="toggleHamburger()" class="" >
+                    <!-- <img *ngIf="displayHamburgerMenu" src="../../../assets/img/hamburger.png" alt=""> -->
+                    <svg class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"   *ngIf="displayHamburgerMenu" width="35px" height="35px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6.5 11.75C6.08579 11.75 5.75 12.0858 5.75 12.5C5.75 12.9142 6.08579 13.25 6.5 13.25V11.75ZM18.5 13.25C18.9142 13.25 19.25 12.9142 19.25 12.5C19.25 12.0858 18.9142 11.75 18.5 11.75V13.25ZM6.5 15.75C6.08579 15.75 5.75 16.0858 5.75 16.5C5.75 16.9142 6.08579 17.25 6.5 17.25V15.75ZM18.5 17.25C18.9142 17.25 19.25 16.9142 19.25 16.5C19.25 16.0858 18.9142 15.75 18.5 15.75V17.25ZM6.5 7.75C6.08579 7.75 5.75 8.08579 5.75 8.5C5.75 8.91421 6.08579 9.25 6.5 9.25V7.75ZM18.5 9.25C18.9142 9.25 19.25 8.91421 19.25 8.5C19.25 8.08579 18.9142 7.75 18.5 7.75V9.25ZM6.5 13.25H18.5V11.75H6.5V13.25ZM6.5 17.25H18.5V15.75H6.5V17.25ZM6.5 9.25H18.5V7.75H6.5V9.25Z" fill="#000000"/>
+                      </svg>
                   </a>
+
+
+                  <div (click)="toggleHamburger()" *ngIf="displayHamburgerMenuClose" class="">
+                    <svg width="35px" class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"  height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <!-- <rect width="24" height="24" /> -->
+                      <path d="M7 17L16.8995 7.10051"  stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7 7.00001L16.8995 16.8995"  stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                  </div>
+
+                  <div  *ngIf="displayHamburgerMenuClose" class="z-10 mt-44 right-12  absolute  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600">
+                  
+                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                      <li>
+                        <a routerLink="/signup"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Join Now</a>
+                      </li>
+                      <li>
+                        <a routerLink="/login"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Sign in</a>
+                      </li>
+                      <li>
+                        <a  routerLink="/nwg-news"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">NewWorld News</a>
+                      </li>
+                     
+                    </ul>
+                
+                    <button
+                    
+                     (click)="toggleResourcesMenuPhone()" id="doubleDropdownButton" data-dropdown-toggle="doubleDropdown" data-dropdown-placement="right-start" type="button" class="flex items-center  w-full px-4 pb-2 hover:bg-gray-100  dark:hover:bg-gray-600 dark:hover:text-white text-md">
+                     <svg class="h-5 w-5 mr-2 text-gray-400 dark:stroke-white stroke-black" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 12H18M6 12L11 7M6 12L11 17"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                     Resources
+                    
+                  
+                    </button>
+                   
+                      
+                      <div *ngIf="resourcesMenu"  id="doubleDropdown" class="z-10 absolute right-40 -mt-8   bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="doubleDropdownButton">
+                         
+                          <li>
+                            <a routerLink="/overview"   class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">About</a>
+                          </li>
+                          <li>
+                            <a routerLink="/blogs" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Operating Manual</a>
+                          </li>
+                          <li>
+                            <a routerLink="/plans"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Plans</a>
+                          </li>
+                          <li>
+                            <a routerLink="/archive-pictures" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">GSL Archive Pictures</a>
+                          </li>
+                          
+                         
+                        </ul>
+                    </div>
+                    
+                   
+                </div>
+                
               
               </div>
  
@@ -91,7 +152,7 @@
             </div>
 
             <!-- homes and friends -->
-            <div class="flex flex-row mx-auto items-center lg:space-x-10 space-x-4">
+            <div class=" hidden lg:flex flex-row mx-auto items-center lg:space-x-10 space-x-4">
                 <div class="flex flex-col" routerLink="/home">
                     <!-- <img src="../../../assets/img/home.png"  class="w-10  px-1">  -->
                     <svg class="dark:fill-white fill-black"  viewBox="0,0,256,256" width="35px" height="35px"><g  fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M24.96289,1.05469c-0.20987,0.00724 -0.41214,0.08036 -0.57812,0.20898l-23,17.94727c-0.43579,0.33978 -0.51361,0.96851 -0.17383,1.4043c0.33978,0.43579 0.96851,0.51361 1.4043,0.17383l1.38477,-1.08008v26.29102c0.00006,0.55226 0.44774,0.99994 1,1h13.83203c0.10799,0.01785 0.21818,0.01785 0.32617,0h11.67383c0.10799,0.01785 0.21818,0.01785 0.32617,0h13.8418c0.55226,-0.00006 0.99994,-0.44774 1,-1v-26.29102l1.38477,1.08008c0.2819,0.21983 0.65967,0.27257 0.991,0.13833c0.33133,-0.13423 0.56586,-0.43504 0.61526,-0.7891c0.0494,-0.35406 -0.09386,-0.70757 -0.37579,-0.92736l-7.61523,-5.94141v-7.26953h-6v2.58594l-9.38477,-7.32227c-0.18607,-0.14428 -0.41707,-0.21828 -0.65234,-0.20898zM25,3.32227l19,14.82617v26.85156h-12v-19h-14v19h-12v-26.85156zM37,8h2v3.70898l-2,-1.5625zM20,28h10v17h-10z"></path></g></g></svg>
@@ -152,7 +213,7 @@
             </div>
 
 
-            <form class="hidden md:flex md:flex-col mx-auto items-center">  
+            <form class="hidden lg:flex md:flex-col mx-auto items-center">  
                 
                 
                 <div class=" relative lg:w-[30rem] md:w-[24rem]">
@@ -186,7 +247,7 @@
               </ul>
             </div>
             </form>
-            <a  class="" >
+            <a  class="mx-4" >
                 <svg (click)="toggleDropDownTheme()"  class="hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black  " width="25px" height="25px" viewBox="0 0 35 35" ><path d="M18.44,34.68a18.22,18.22,0,0,1-2.94-.24,18.18,18.18,0,0,1-15-20.86A18.06,18.06,0,0,1,9.59.63,2.42,2.42,0,0,1,12.2.79a2.39,2.39,0,0,1,1,2.41L11.9,3.1l1.23.22A15.66,15.66,0,0,0,23.34,21h0a15.82,15.82,0,0,0,8.47.53A2.44,2.44,0,0,1,34.47,25,18.18,18.18,0,0,1,18.44,34.68ZM10.67,2.89a15.67,15.67,0,0,0-5,22.77A15.66,15.66,0,0,0,32.18,24a18.49,18.49,0,0,1-9.65-.64A18.18,18.18,0,0,1,10.67,2.89Z"/></svg>
                 <div  *ngIf="showThemeDropDown" class="z-10   absolute  -ml-8  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-32 dark:bg-gray-700 dark:divide-gray-600">
                    
@@ -207,7 +268,7 @@
 
            
 
-            <div class="hidden md:flex md:flex-col mx-auto items-center" (click)="toggleDropDown()"  >
+            <div class=" lg:flex md:flex-col mx-auto items-center" (click)="toggleDropDown()"  >
 
                 <div class="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full hover:text-blue-600 dark:hover:text-blue-500 md:me-0 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-white" >
                     <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
@@ -241,10 +302,40 @@
 
             </div>
             
-            <div class="md:hidden flex items-center">
-                <a  class="w-6" href="">
-                  <img src="../../../assets/img/hamburger.png" alt="">
-                </a>
+            <div class="lg:hidden flex items-center">
+              <a  (click)="toggleHamburgerHome()" class="" >
+               
+                <svg class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"   *ngIf="displayHamburgerHomeMenu" width="35px" height="35px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6.5 11.75C6.08579 11.75 5.75 12.0858 5.75 12.5C5.75 12.9142 6.08579 13.25 6.5 13.25V11.75ZM18.5 13.25C18.9142 13.25 19.25 12.9142 19.25 12.5C19.25 12.0858 18.9142 11.75 18.5 11.75V13.25ZM6.5 15.75C6.08579 15.75 5.75 16.0858 5.75 16.5C5.75 16.9142 6.08579 17.25 6.5 17.25V15.75ZM18.5 17.25C18.9142 17.25 19.25 16.9142 19.25 16.5C19.25 16.0858 18.9142 15.75 18.5 15.75V17.25ZM6.5 7.75C6.08579 7.75 5.75 8.08579 5.75 8.5C5.75 8.91421 6.08579 9.25 6.5 9.25V7.75ZM18.5 9.25C18.9142 9.25 19.25 8.91421 19.25 8.5C19.25 8.08579 18.9142 7.75 18.5 7.75V9.25ZM6.5 13.25H18.5V11.75H6.5V13.25ZM6.5 17.25H18.5V15.75H6.5V17.25ZM6.5 9.25H18.5V7.75H6.5V9.25Z" fill="#000000"/>
+                  </svg>
+              </a>
+
+
+              <div (click)="toggleHamburgerHome()" *ngIf="displayHamburgerHomeMenuClose" class="">
+                <svg width="35px" class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"  height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- <rect width="24" height="24" /> -->
+                  <path d="M7 17L16.8995 7.10051"  stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 7.00001L16.8995 16.8995"  stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+              </div>
+
+              <div  *ngIf="displayHamburgerHomeMenuClose" class="z-10 mt-44 right-12  absolute  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600">
+              
+                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                  <li>
+                    <a routerLink="/home"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Home</a>
+                  </li>
+                  <li>
+                    <a routerLink="/problem-list-view"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Pending Solutions</a>
+                  </li>
+                  <li>
+                    <a  routerLink="/problem-list-feedback"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Strategy Evaluations</a>
+                  </li>
+                  <li>
+                    <a  routerLink="/join-tournament"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Tournament </a>
+                  </li>
+                </ul>
+              </div>
             
             </div>
 

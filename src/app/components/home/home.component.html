@@ -4,9 +4,9 @@
 <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" [currentPageHome]="true"  ></app-navbar>
 
 
-<div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-30 dark:bg-slate-900">
+<div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-30 dark:bg-slate-900 ">
  <!-- profile -->
-    <div class=" flex flex-col mx-auto items-center my-32">
+    <div class=" flex flex-col mx-auto items-center mt-32 mb-4">
         <div class=" w-[18rem]  bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800" routerLink="/profile">
             <div class="">
                 <!-- <span class="ml-24 absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
@@ -46,7 +46,7 @@
         </div>
  
 
-    </div>
+        </div>
     
         <div class="  w-[20rem]  bg-white p-4 rounded-lg shadow-lg mt-6 dark:bg-slate-800">
             <div class=" py-2">
@@ -82,7 +82,7 @@
 
  
 
-    <div class="flex flex-col mt-32" >
+    <div class="flex flex-col lg:mt-32 mt-10 mx-auto" >
         <div class=" flex flex-row items-center mx-auto">
             <svg (click)="toggleSortyByDropDown()" width="30px" class="stroke-black dark:stroke-white" height="30px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 6H19M5 10H15M5 14H19M5 18H15"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -115,7 +115,7 @@
     
         <!-- start a playground -->
 
-        <div class="hidden lg:flex flex-col mx-auto items-center my-32">
+        <div class="hidden lg:flex flex-col mx-auto items-center mt-32 mb-4">
             <div class="  w-[16rem]  bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800">
                 <div class=" py-2 px-16">
                     

@@ -29,7 +29,12 @@ export class NavbarComponent implements OnInit {
   allSolutions: Solution[] = [];
   allUsers: User[] = [];
   filteredItems: Solution[] = [];
+  displayHamburgerMenu: boolean = true;
+  displayHamburgerMenuClose: boolean = false;
+  displayHamburgerHomeMenu: boolean = true;
+  displayHamburgerHomeMenuClose: boolean = false;
   @Input() currentPageHome: boolean = false;
+  resourcesMenu: boolean = false;
   @Input() currentPageEvaluation: boolean = false;
   @Input() currentPagePending: boolean = false;
   @Input() currentPageAbout: boolean = false;
@@ -74,12 +79,20 @@ export class NavbarComponent implements OnInit {
     this.companyDropDown = !this.companyDropDown;
   }
 
+  toggleHamburger() {
+    this.displayHamburgerMenu = !this.displayHamburgerMenu;
+    this.displayHamburgerMenuClose = !this.displayHamburgerMenuClose;
+  }
+  toggleHamburgerHome() {
+    this.displayHamburgerHomeMenu = !this.displayHamburgerHomeMenu;
+    this.displayHamburgerHomeMenuClose = !this.displayHamburgerHomeMenuClose;
+  }
+  toggleResourcesMenuPhone() {
+    this.resourcesMenu = !this.resourcesMenu;
+  }
+
   toggleDropDown() {
-    if (this.showDropDown) {
-      this.showDropDown = false;
-    } else {
-      this.showDropDown = true;
-    }
+    this.showDropDown = !this.showDropDown;
   }
   toggleDropDownTheme() {
     this.showThemeDropDown = !this.showThemeDropDown;
