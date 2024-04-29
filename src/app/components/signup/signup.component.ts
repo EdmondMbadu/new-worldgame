@@ -12,6 +12,8 @@ export class SignupComponent implements OnInit {
   password: string = '';
   firstName: string = '';
   lastName: string = '';
+  agree: boolean = false;
+  solverEvaluator: boolean = false;
   rePassword: string = '';
   createAccountSuccess: boolean = false;
   createAccountPopUp: boolean = false;
@@ -30,6 +32,9 @@ export class SignupComponent implements OnInit {
     ) {
       alert('Fill all the fields');
       return;
+    } else if (!this.agree || !this.solverEvaluator) {
+      alert('You must check both checkbox conditions to proceed.');
+      return;
     } else if (this.password !== this.rePassword) {
       alert(' Both Passwords need to match');
       return;
@@ -41,6 +46,30 @@ export class SignupComponent implements OnInit {
       this.password
     );
     this.resetFields();
+  }
+  onCheckboxChangeAgree(event: Event) {
+    // Access the checkbox via event.target, which is typed as EventTarget, so cast it
+    const checkbox = event.target as HTMLInputElement;
+
+    if (checkbox.checked) {
+      this.agree = true;
+      console.log('Agree on terms and conditions is checked');
+    } else {
+      this.agree = false;
+      console.log('Agree to be an evaluator is unchecked');
+    }
+  }
+  onCheckboxChangeAgreeEvaluator(event: Event) {
+    // Access the checkbox via event.target, which is typed as EventTarget, so cast it
+    const checkbox = event.target as HTMLInputElement;
+
+    if (checkbox.checked) {
+      this.solverEvaluator = true;
+      console.log('CAgree to be an evaluator is checked');
+    } else {
+      this.solverEvaluator = false;
+      console.log('Agree to be an evaluator is unchecked');
+    }
   }
 
   resetFields() {

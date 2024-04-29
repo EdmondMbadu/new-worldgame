@@ -40,9 +40,17 @@
         </div> 
         <div class="flex items-start mb-6">
             <div class="flex items-center h-5">
-            <input id="remember" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800" required>
+            <input id="agree" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800" (change)="onCheckboxChangeAgree($event)" required>
             </div>
-            <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree with the <a routerLink="/privacy" class="text-red-600 hover:underline">terms and conditions</a>.</label>
+            <label for="agree" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree with the <a target="_blank" routerLink="/privacy" class="text-red-600 hover:underline ">terms and conditions</a>.</label>
+            <!-- <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, that I wi <a routerLink="/privacy" class="text-red-600 hover:underline">terms and conditions</a>.</label> -->
+        </div>
+        <div class="flex items-start mb-6 max-w-sm">
+            <div class="flex items-center h-5">
+            <input id="solverEvaluator" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800" (change)="onCheckboxChangeAgreeEvaluator($event)"required>
+            </div>
+           
+            <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, I sign up to be both <a target="_blank" routerLink="/overview" class="text-blue-500  underline">a problem solver</a> and <a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">an evaluator</a>.</label>
         </div>
 
         <div class="flex flex-col items-start mb-6 max-w-sm">
