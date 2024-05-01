@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -12,9 +13,14 @@ import { SolutionService } from 'src/app/services/solution.service';
 export class ProblemListViewComponent implements OnInit {
   solutions: Solution[] = [];
   pendingSolutions: Solution[] = [];
-
+  confirmationDeleteSolution: boolean = false;
+  currentSolution?: Solution;
   pending: number = 0;
-  constructor(public auth: AuthService, private solution: SolutionService) {
+  constructor(
+    public auth: AuthService,
+    private solution: SolutionService,
+    private router: Router
+  ) {
     solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       this.solutions = data;
       this.findPendingSolutions();
@@ -34,5 +40,19 @@ export class ProblemListViewComponent implements OnInit {
       }
     }
     this.pending = this.pendingSolutions.length;
+  }
+  toggleConfirmationDeleteSolution() {
+    console.log('button clicked ');
+    this.confirmationDeleteSolution = !this.confirmationDeleteSolution;
+  }
+  submitDeleteSolution() {
+    this.solution.deleteSolution(this.currentSolution!.solutionId!);
+    this.toggleConfirmationDeleteSolution();
+    this.router.navigate(['/home']);
+  }
+
+  receiveConfirmationDelete(eventData: Solution) {
+    this.currentSolution = eventData;
+    this.toggleConfirmationDeleteSolution();
   }
 }

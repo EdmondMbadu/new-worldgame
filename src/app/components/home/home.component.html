@@ -53,7 +53,7 @@
             <h1 class="text-center hover:underline dark:text-white" routerLink="/problem-list-view">Pending Solutions ({{pending}})</h1>
             </div>    
          
-            <app-problem-list [path]="'/playground-steps'"  [solutions]="pendingSolutions"></app-problem-list>
+            <app-problem-list [home]="true" [path]="'/playground-steps'"  [solutions]="pendingSolutions"></app-problem-list>
         </div>
 
     </div>

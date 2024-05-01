@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -16,13 +17,16 @@ export class ProblemListComponent {
   constructor(
     private solution: SolutionService,
     public auth: AuthService,
-    public data: DataService
+    public data: DataService,
+    private router: Router
   ) {
     this.currentUser = this.auth.currentUser;
   }
+  confirmationDeleteSolution: boolean = false;
 
   @Input() users: User[] = [];
   @Input() margin = '';
+  @Input() home: boolean = false;
 
   @Input() path: string = '/problem-feedback';
   @Input() viewAllPath: string = '/problem-list-view';
@@ -36,6 +40,10 @@ export class ProblemListComponent {
     'medardgabel@gmail.com',
     'bucky@gmail.com',
   ];
+  @Output() notify: EventEmitter<Solution> = new EventEmitter();
 
+  sendDeleteConfirmation(currentSolution: Solution) {
+    this.notify.emit(currentSolution);
+  }
   imagesPath: string = '../../../assets/img/user.png';
 }

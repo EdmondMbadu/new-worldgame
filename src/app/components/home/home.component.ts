@@ -77,6 +77,9 @@ export class HomeComponent implements OnInit {
         this.completedSolutions.push(s);
       }
     }
+    // added sorted by number of likes. so that not random solutions appear first
+    this.sortByNumLikes('descending');
+    this.toggleSortyByDropDown();
   }
 
   toggleSortyByDropDown() {

@@ -340,13 +340,30 @@
 
 
                         </div>
+                        <div id="delete-pending-solution"  #section>
+                          <figure class="mt-6 mb-6 "><img   class="h-[25rem]" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fedit-solution-nwg.png?alt=media&token=cab95750-47db-4a35-91d8-d20fd50b7f28" alt="">
+                            <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Solution View - Delete Solution</figcaption>
+                            </figure>
+                         
+                              <h1  class="my-4 text-2xl  font-extrabold leading-tight text-gray-900 lg:mb-6  dark:text-white">11. Delete Pending Solution</h1> 
+
+                              <p class="text-md mb-2 text-gray-900 dark:text-white">
+
+                                You can also delete a pending solution. To do so, go to the pending section ( see below), and click on the trash icon of the given solution to delete the pending solution. 
+
+                               
+                              </p>
+                            
+
+
+                      </div>
 
                         <div id="evaluate-solution"  #section>
-                            <figure class="mt-6 mb-6 "><img   class="h-[25rem]" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fedit-solution-nwg.png?alt=media&token=cab95750-47db-4a35-91d8-d20fd50b7f28" alt="">
-                                <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Solution View - Delete Solution</figcaption>
+                            <figure class="mt-6 mb-6 "><img   class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fdelete-pending-solution.png?alt=media&token=3fd9ddbf-d5da-4f72-b73c-cab1b8ae6166" alt="">
+                                <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Delete Pending Solution</figcaption>
                                 </figure>
                              
-                                <h1  class="my-4 text-2xl  font-extrabold leading-tight text-gray-900 lg:mb-6  dark:text-white">11. Evaluate Submitted Solution</h1> 
+                                <h1  class="my-4 text-2xl  font-extrabold leading-tight text-gray-900 lg:mb-6  dark:text-white">12. Evaluate Submitted Solution</h1> 
 
                                 <p class="text-md mb-2 text-gray-900 dark:text-white">
 
@@ -377,11 +394,11 @@
                                 <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Solution Evaluation Page</figcaption>
                                 </figure>
                              
-                                <h1  class="my-4 text-2xl  font-extrabold leading-tight text-gray-900 lg:mb-6  dark:text-white">12. Join a Tournament</h1> 
+                                <h1  class="my-4 text-2xl  font-extrabold leading-tight text-gray-900 lg:mb-6  dark:text-white">13. Join a Tournament</h1> 
 
                                 <p class="text-md mb-2 text-gray-900 dark:text-white">
 
-                                 To join a tournament, you need to have at least two evluations from a given solution and have an average of 9 from these evaluations.
+                                 To join a tournament, you need to have at least two evaluations from a given solution and have an average of 9 from these evaluations.
                                  Assuming that these requirements are met,
                                  click on Join a Tournanment on the left of your Home page ( see picture below) to Join a tournament.
 
@@ -563,8 +580,16 @@
                 </a>
             </li>
             <li>
+              <a (click)="scrollTo('delete-pending-solution')"
+                 [ngClass]="{ 'text-blue-500': currentActive === 15, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                 class="cursor-pointer">
+                <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
+               Delete Pending Solution
+              </a>
+          </li>
+            <li>
                 <a (click)="scrollTo('evaluate-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 15, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 16, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                  Evaluate Submitted Solution
@@ -572,7 +597,7 @@
             </li>
             <li>
                 <a (click)="scrollTo('join-tournament')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 16, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 17, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                  Join Tournament
