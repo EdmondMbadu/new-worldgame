@@ -124,7 +124,7 @@ export class PlaygroundStepsComponent implements OnInit {
   questionsTitles: Array<Array<string>> = [
     ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
     ['S2-A', 'S2-B'],
-    ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E'],
+    ['S3-A', 'S3-B', 'S3-C', 'S3-D'],
     ['S4-A', 'S4-B', 'S4-C', 'S4-D', 'S4-E', 'S4-F', 'S4-G', 'S4-H'],
     ['S5'],
   ];
@@ -150,14 +150,13 @@ export class PlaygroundStepsComponent implements OnInit {
       'What does our solution do to reach the preferred state? How will it do it?',
       'What technology, programs, policies will it need?',
       'What resources does our solution need?',
-      'Who will implement our solution?',
       'How is our solution part of a circular, regenerative, more equitable economy?',
     ],
     [
       `How much will our strategy cost?\n a. How much will it cost to test, for a proof-of-concept?`,
       'b. How much will our strategy cost to implement at scale?',
       'Where will we get the resources and funding needed to implement our solution, to do the above?',
-      'Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
+      'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
       'What does our implemented strategy  look like, in more detail?',
       'What is done in the next 6-12 month to get our solution implemented? Who will do what, when, where?',
       'What would we do with $50,000 to advance the strategy towards implementation?',
