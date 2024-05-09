@@ -27,15 +27,14 @@ export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
-  YOUR_TOKEN =
-    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImFjM2UzZTU1ODExMWM3YzdhNzVjNWI2NTEzNGQyMmY2M2VlMDA2ZDAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJPVXJ5V3FkNTVXaVBZanY2MDBlb213IiwiaWF0IjoxNzE1MjM1MDgyLCJleHAiOjE3MTUyMzg2ODJ9.S3MaKGokk12co6EcnEofjxZJnueWAOuAUycj9F_YH5CdcZZveUmsCo3NHUmUdrXd9accQ_ciwBa_eAgKbS1-JxFmA9o5w8SAZ0HD8wqKs2SsJyHVHXKMAJ1umZBRqKys6dHFHnAXgGerdymUkSdBreJo3RlHWBBez7-XrM5nDOlJbobipiedkeFtjpRX-n-RxrIHMo0YTdJJ8dDMmdrwoynr6D61WtzwA_cspMzjYNBKFiLb8IYeTdGgInDfjcL9C3VGcjFyDIsqmFDkkWgiAFroQL9qjmo5KEMIdHUCEFfsCTdqRX25Y2SHE2YcAI97rr2C3jU-0njC-g9HlugZJg';
+  YOUR_TOKEN = '';
   public editorConfig: any = {
     simpleUpload: {
       uploadUrl:
         'https://us-central1-new-worldgame.cloudfunctions.net/uploadImage',
       withCredentials: true,
       headers: {
-        Authorization: `Bearer ${this.YOUR_TOKEN}`,
+        // Authorization: `Bearer ${this.YOUR_TOKEN}`,
         // 'X-CSRF-TOKEN': 'CSRF-Token' // if needed
       },
     },
