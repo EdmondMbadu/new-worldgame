@@ -6,18 +6,40 @@
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
-// const cors = require('cors')({ origin: true });
+// const cors = require('cors');
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 const axios = require('axios');
+const cors = require('cors');
+const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
+
+// const corsHandler = cors({
+//   origin: true, // You can specify domains if you want to restrict e.g., 'http://localhost:4200'
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include OPTIONS
+//   allowedHeaders: [
+//     'Content-Type',
+//     'Authorization',
+//     'Content-Length',
+//     'X-Requested-With',
+//     'Accept',
+//   ], // Make sure 'Authorization' is allowed
+// });
+
 const { Storage } = require('@google-cloud/storage');
+const Busboy = require('busboy');
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
 
 admin.initializeApp();
 // const db = admin.firestore();
 
+// Automatically allow cross-origin requests
 const storage = new Storage();
+// Multer configuration for file uploads
 
-const bucketName = storage.bucket('new-worldgame.appspot.com');
+const bucketName = 'new-worldgame.appspot.com'; // replace 'your-bucket-name' with your actual bucket name
+const bucket = storage.bucket(bucketName);
 
 import * as sgMail from '@sendgrid/mail';
 
@@ -314,7 +336,7 @@ exports.videoReady = functions.https.onRequest(async (req, res) => {
       // Download the video content
       const response = await axios.get(videoUrl, { responseType: 'stream' });
       const fileStream = response.data;
-      const file = bucketName.file('nwg-news');
+      const file = bucket.file('nwg-news');
       const writeStream = file.createWriteStream({
         metadata: {
           contentType: 'video/mp4', // Adjust depending on the actual video format
@@ -340,59 +362,257 @@ exports.videoReady = functions.https.onRequest(async (req, res) => {
   }
 });
 
+// exports.uploadImage = functions.https.onRequest(async (req: any, res: any) => {
+//   if (req.method !== 'POST') {
+//     console.log(
+//       `Failed because the request body is not POST. The request itself is: ${req}`
+//     );
+//     return res.status(405).send('Method Not Allowed');
+//   }
+
+//   if (!req.body || !req.body.image) {
+//     console.log(
+//       `Failed because there is no request image or body. The request itself is: ${req}`
+//     );
+//     return res.status(400).send('No image provided');
+//   }
+
+//   const image = req.body.image; // Assuming the image is sent as a base64 encoded string
+//   const buffer = Buffer.from(image, 'base64');
+//   const fileName = `uploads/${Date.now()}_uploaded_image.jpg`; // You might want to adjust the filename and extension
+//   const file = bucket.file(fileName);
+
+//   try {
+//     await file.save(buffer, {
+//       metadata: {
+//         contentType: 'image/jpeg', // You might want to dynamically determine the MIME type
+//       },
+//     });
+
+//     await file.makePublic();
+//     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+//     res.status(200).send({ url: publicUrl });
+//   } catch (error) {
+//     console.log(
+//       `Failed because while uploading image to cloud. The request itself: ${req}`
+//     );
+//     console.error('Failed to upload image:', error);
+//     res.status(500).send('Error uploading image');
+//   }
+// });
+
+// exports.uploadImage = functions.https.onRequest(async (req: any, res: any) => {
+//   if (req.method !== 'POST') {
+//     return res.status(405).send('Method Not Allowed');
+//   }
+
+//   const imageUrl = req.body.imageUrl;
+//   if (!imageUrl) {
+//     return res.status(400).send('No image URL provided');
+//   }
+
+//   try {
+//     const response = await axios({
+//       method: 'get',
+//       url: imageUrl,
+//       responseType: 'arraybuffer',
+//     });
+
+//     const buffer = Buffer.from(response.data, 'binary');
+//     const contentType = response.headers['content-type'];
+//     const fileName = `uploads/${Date.now()}_uploaded_image.${
+//       contentType.split('/')[1]
+//     }`;
+//     const file = bucket.file(fileName);
+
+//     await file.save(buffer, {
+//       metadata: {
+//         contentType: contentType,
+//       },
+//     });
+
+//     await file.makePublic();
+//     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+//     res.status(200).send({ url: publicUrl });
+//   } catch (error) {
+//     console.error('Failed to upload image:', error);
+//     res.status(500).send('Error uploading image');
+//   }
+// });
+
 // exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
-//   // Enable CORS using the `cors` express middleware.
-//   return cors(req, res, async () => {
+//   if (req.method !== 'POST') {
+//     console.log('this method is not allowed', req.body);
+//     return res.status(405).send('Method Not Allowed');
+//   }
+
+//   const busboy = new Busboy({ headers: req.headers });
+//   const tmpdir = os.tmpdir();
+//   let fileWrites: any = [];
+//   let publicUrl = '';
+
+//   console.log('being processed by busboy');
+//   busboy.on(
+//     'file',
+//     (
+//       fieldname: any,
+//       file: any,
+//       filename: any,
+//       encoding: any,
+//       mimetype: any
+//     ) => {
+//       // Note: os.tmpdir() is not recommended for production use; consider using a dedicated temp directory
+
+//       const filepath = path.join(tmpdir, filename);
+//       const filenamePath = `ckeditor-images/${filename}`;
+//       console.log(' the filename path', filenamePath);
+//       const writeStream = fs.createWriteStream(filepath);
+
+//       file.pipe(writeStream);
+
+//       const promise = new Promise((resolve, reject) => {
+//         file.on('end', () => {
+//           writeStream.end();
+//           console.log('File stream ended:', filename);
+//         });
+//         writeStream.on('finish', () => {
+//           console.log('File write finished, starting upload to GCS:', filename);
+//           fs.createReadStream(filepath).pipe(
+//             bucket
+//               .file(filename)
+//               .createWriteStream({
+//                 metadata: {
+//                   contentType: mimetype,
+//                 },
+//               })
+//               .on('error', (error: any) => {
+//                 console.error('Error uploading to GCS:', error);
+//                 reject(error);
+//               })
+//               .on('finish', async () => {
+//                 try {
+//                   const uploadedFile = bucket.file(filename);
+//                   await uploadedFile.makePublic();
+//                   publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+//                   console.log('File uploaded and made public:', publicUrl);
+//                   resolve(publicUrl);
+//                 } catch (error) {
+//                   reject(error);
+//                 }
+//               })
+//           );
+//         });
+//         writeStream.on('error', (error: any) => {
+//           console.error('Error writing file on server:', error);
+//           reject(error);
+//         });
+//       });
+
+//       fileWrites.push(promise);
+//     }
+//   );
+
+//   busboy.on('finish', async () => {
+//     console.log('Busboy finished processing');
 //     try {
-//       if (req.method !== 'POST') {
-//         console.log(' for logging purposes full request body ', req);
-//         // Only allow POST method for image uploading
-//         return res.status(405).end('Method Not Allowed', req);
-//       }
-
-//       // Ensure the `req.files` object is present and has an 'image' property
-//       if (!req.files || !req.files.image) {
-//         console.log(' for logging purposes full request body ', req);
-//         return res.status(400).send('No image uploaded');
-//       }
-
-//       // Extract the file from the request
-//       const file = req.files.image;
-//       const bucket = storage.bucket(bucketName);
-//       const fileName = `ckeditor/${Date.now()}-${file.originalname}`;
-//       const fileBlob = bucket.file(fileName);
-
-//       // Create a stream to write file to Cloud Storage
-//       const blobStream = fileBlob.createWriteStream({
-//         metadata: {
-//           contentType: file.mimetype,
-//         },
-//       });
-
-//       blobStream.on('error', (err: any) => {
-//         console.error(err);
-//         console.log(' for logging purposes full request body ', req);
-//         return res.status(500).send('Error uploading file');
-//       });
-
-//       blobStream.on('finish', async () => {
-//         // The public URL can be used to directly access the file via HTTP.
-//         const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
-
-//         // Make the image public on the web (setting ACL)
-//         await fileBlob.makePublic();
-
-//         // Respond with the URL of the uploaded image
-//         console.log(' for logging purposes full request body ', req);
-//         res.status(200).send({ url: publicUrl });
-//       });
-
-//       // End the stream by pushing the file buffer
-//       blobStream.end(file.buffer);
+//       await Promise.all(fileWrites);
+//       res.status(200).send({ url: publicUrl });
 //     } catch (error) {
-//       console.log(' for logging purposes full request body ', req);
-//       console.error('Unexpected error', error);
-//       res.status(500).send('Internal Server Error');
+//       console.error('Failed to upload one or more files:', error);
+//       res.status(500).send('Error uploading image');
 //     }
 //   });
+
+//   busboy.end(req.rawBody);
 // });
+
+exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
+  corsOptions(req, res, () => {
+    if (req.method === 'OPTIONS') {
+      // Sending response for preflight request
+      res.status(200).send('OK');
+      return;
+    }
+
+    if (req.method !== 'POST') {
+      console.log('This method is not allowed', req.method);
+      return res.status(405).send('Method Not Allowed');
+    }
+    const busboy = new Busboy({ headers: req.headers });
+    const tmpdir = os.tmpdir();
+    let fileWrites: any = [];
+    let publicUrls = [];
+
+    busboy.on(
+      'file',
+      (
+        fieldname: any,
+        file: any,
+        filename: any,
+        encoding: any,
+        mimetype: any
+      ) => {
+        const filepath = path.join(tmpdir, filename);
+        // const filenamePath = `ckeditor-images/${filename}`;
+        const writeStream = fs.createWriteStream(filepath);
+
+        file.pipe(writeStream);
+
+        const promise = new Promise((resolve, reject) => {
+          file.on('end', () => {
+            writeStream.end();
+          });
+
+          writeStream.on('finish', () => {
+            const readStream = fs.createReadStream(filepath);
+            readStream.pipe(
+              bucket
+                .file(filename)
+                .createWriteStream({
+                  metadata: {
+                    contentType: mimetype,
+                  },
+                })
+                .on('error', (error: any) => {
+                  console.error('Error uploading to GCS:', error);
+                  reject(error);
+                })
+                .on('finish', async () => {
+                  try {
+                    const uploadedFile = bucket.file(filename);
+                    await uploadedFile.makePublic();
+                    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+                    console.log('File uploaded and made public:', publicUrl);
+                    resolve(publicUrl);
+                  } catch (error) {
+                    console.error('Error making file public:', error);
+                    reject(error);
+                  }
+                })
+            );
+          });
+
+          writeStream.on('error', (error: any) => {
+            console.error('Error writing file on server:', error);
+            reject(error);
+          });
+        });
+
+        fileWrites.push(promise);
+      }
+    );
+
+    busboy.on('finish', async () => {
+      try {
+        publicUrls = await Promise.all(fileWrites);
+        console.log('All files have been processed and uploaded', publicUrls);
+        res.status(200).send({ urls: publicUrls });
+      } catch (error) {
+        console.error('Failed to upload one or more files:', error);
+        res.status(500).send('Error uploading one or more files');
+      }
+    });
+
+    busboy.end(req.rawBody);
+  });
+});

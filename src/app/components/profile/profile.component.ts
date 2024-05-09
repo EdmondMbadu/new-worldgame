@@ -90,7 +90,7 @@ export class ProfileComponent implements OnInit {
       console.log('unsupported file type');
       return;
     }
-    // the file sould not be larger than 5MB
+    // the file should not be larger than 5MB
     if (file?.size >= 5000000) {
       console.log('the file is too big');
       alert('The picture is too big. It should be less than 5MB');

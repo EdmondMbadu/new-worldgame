@@ -27,9 +27,18 @@ export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
-  simpleUpload: any = {
-    // The URL that the images are uploaded to.
-    uploadUrl: 'http://example.com',
+  YOUR_TOKEN =
+    'eyJhbGciOiJSUzI1NiIsImtpZCI6ImFjM2UzZTU1ODExMWM3YzdhNzVjNWI2NTEzNGQyMmY2M2VlMDA2ZDAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJPVXJ5V3FkNTVXaVBZanY2MDBlb213IiwiaWF0IjoxNzE1MjM1MDgyLCJleHAiOjE3MTUyMzg2ODJ9.S3MaKGokk12co6EcnEofjxZJnueWAOuAUycj9F_YH5CdcZZveUmsCo3NHUmUdrXd9accQ_ciwBa_eAgKbS1-JxFmA9o5w8SAZ0HD8wqKs2SsJyHVHXKMAJ1umZBRqKys6dHFHnAXgGerdymUkSdBreJo3RlHWBBez7-XrM5nDOlJbobipiedkeFtjpRX-n-RxrIHMo0YTdJJ8dDMmdrwoynr6D61WtzwA_cspMzjYNBKFiLb8IYeTdGgInDfjcL9C3VGcjFyDIsqmFDkkWgiAFroQL9qjmo5KEMIdHUCEFfsCTdqRX25Y2SHE2YcAI97rr2C3jU-0njC-g9HlugZJg';
+  public editorConfig: any = {
+    simpleUpload: {
+      uploadUrl:
+        'https://us-central1-new-worldgame.cloudfunctions.net/uploadImage',
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${this.YOUR_TOKEN}`,
+        // 'X-CSRF-TOKEN': 'CSRF-Token' // if needed
+      },
+    },
   };
   displayPopups: boolean[] = [];
   newTitle: string = '';
@@ -123,7 +132,7 @@ export class PlaygroundStepComponent {
       }
     }
   }
-  public editorConfig: any;
+
   public Editor: any = Editor;
   public onReady(editor: any) {
     // console.log('CKEditor5 Angular Component is ready to use!', editor);
@@ -333,5 +342,19 @@ export class PlaygroundStepComponent {
   toggleCongratsAndDone() {
     this.displayCongrats = !this.displayCongrats;
     this.router.navigate(['/home']);
+  }
+  testCORS() {
+    fetch('https://us-central1-new-worldgame.cloudfunctions.net/uploadImage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization:
+          'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImFjM2UzZTU1ODExMWM3YzdhNzVjNWI2NTEzNGQyMmY2M2VlMDA2ZDAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJHOE1Qdkl6eWF6Y1RmR1BVaUZWcmh3IiwiaWF0IjoxNzE1MjMyNDQzLCJleHAiOjE3MTUyMzYwNDN9.RQNuigf0cc2jMEsUZgh_hFJ0iQRxy1MQ5BWbnWlC4cnKbN9GtttyhdrmM2D5-HNKYTMiEumDTNaAU80KK3HagpQm-_apTfYAev3bj6z5uhTZDaAVDKW517EOjoDIj40HZdfKnzTToTQ4Ga3WkQiRZ0FNOr3MsBAvZxUvIWsOAZc9E2ny2wpZ5nPvRqpGz3gZKJo9VpGpBWzCvbwW1K1z0p5Q_4YxKiLdtX4T-6F-v5_HLYqYvDwpaU6Gb7VNg1lHkJfssfqzuWVu_taCkb8I14MRPHqqbNhi32x-5wDrh895C1cRNP_5Wy6XxFG7IhT1bnBoPsiS8Pm9toXdDy3ZcQ',
+      },
+      body: JSON.stringify({ data: 'test' }),
+    })
+      .then((response) => response.text())
+      .then((data) => console.log(data))
+      .catch((error) => console.error('Error:', error));
   }
 }

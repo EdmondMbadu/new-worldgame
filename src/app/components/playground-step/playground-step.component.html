@@ -19,7 +19,7 @@
        
       
 
-        <h3 class="mt-4 text-xl text-center dark:text-white">{{step}}</h3>
+        <h3 class="mt-4 text-xl text-center dark:text-white">{{step}} <span  *ngIf="step.startsWith('Step III')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" href="https://designsciencelab.com/global-solutions-database/">(Global Solutions Database)</a> </span> </h3>
     </div>
 
     <!-- Questions -->
@@ -56,7 +56,7 @@
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
 
                     </svg></a>
-              <h3 class="font-semibold text-gray-900 dark:text-white">For more detailed info</h3>
+              <h3 class="font-semibold text-gray-900 dark:text-white">For more detailed info {{i}}</h3>
                 
                 </div>
                 <div data-popper-arrow></div>
@@ -66,9 +66,11 @@
             <ckeditor
             class="boxing"
             id="ck-editor"
+            
               [editor]="Editor"
              
               data=""
+             
               (ready)="onReady($event)"
              placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
               [(ngModel)]="contentsArray[i]"
@@ -82,6 +84,7 @@
           <div *ngIf="isNotEmpty(contentsArray[i]) && contentField.touched" class="text-red-400" >
             All text areas must be filled with something ...
          </div>
+         <!-- <button class="bg-blue-500" (click)="testCORS()"> testCors</button> -->
         
 
 
