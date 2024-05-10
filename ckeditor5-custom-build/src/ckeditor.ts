@@ -161,13 +161,13 @@ class Editor extends ClassicEditor {
     //   uploadUrl:
     //     'https://us-central1-new-worldgame.cloudfunctions.net/uploadImage',
     //   // Enable the XMLHttpRequest.withCredentials property.
-    //   // withCredentials: true,
+    //   withCredentials: true,
 
     //   // Headers sent along with the XMLHttpRequest to the upload server.
     //   headers: {
     //     // 'X-CSRF-TOKEN': 'CSRF-Token',
     //     Authorization:
-    //       'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImFjM2UzZTU1ODExMWM3YzdhNzVjNWI2NTEzNGQyMmY2M2VlMDA2ZDAiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJfRWJIUGdlY1BDOEFJZXJzbFpsWW5nIiwiaWF0IjoxNzE1MjMxNzcwLCJleHAiOjE3MTUyMzUzNzB9.kVkbnlhwGcC1PwMMoeFM6l0D2SZXvvtK0JTAH6F1eNWvqaVGmgcYvuAFPukY6F7dHnZPsGHww0hQZYPp8SXjIMe4ToJ0LOdz4oo4UHNso6uCQ2rKkjfRY0OiFOtmksfR3Y3YHEpITM4EfaO45TdTYejUQ5JvmS0TJwjBpXTV8vfK-t8FPA1YuZazXSoeg6UdJqagmIsR3HfbKkRmXb26powMQWFKa6GBUs_qktYsvcZKWwQwGDAlwiSxyihG4Yb0aWEAUqETSXPCe_Bos3JMGXxZ-57iYipl0rw5ZlMUwPTUwt9-jwk7OMxhnIG18K0Y4NO4fBk12ljZQkIYrBeE1g',
+    //       'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzYjc2MmY4NzFjZGIzYmFlMDA0NGM2NDk2MjJmYzEzOTZlZGEzZTMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJ3OXNSQzB6N0hFZXFEOE1hV0pmeFFBIiwiaWF0IjoxNzE1MzIyMDIxLCJleHAiOjE3MTUzMjU2MjF9.HFPrQe_i7ERkxyGj2jt9IE3XD60NJT96O9U6FLp8A2Lx6L6GbWZzMew6KLfIsdCkFUKas_02s1kDSn5EAEuzetkL63JdC6nci0ffAQMevMeeezRNX96Bt3f8Wx98GjUljHZQWo5TJ-W-LzA_jPvi5XFZaJClKKggfji1IQyxWcSVsLCUWrryJoHFg23ZgRFx8aK15ysEHqbbbm6ODCVdR1J6IAeyGL9tvb_9QUmrsqQcC_kTxWAi0fDsvtiMisOURhmLk-I72y6PgPa1a9f__LORIYm1QBkVr37cTQV4qdxJaTiSyA03-TAeQNb46PRVlYqHO7pNQ-DyiK-tXpHVMg',
     //   },
     // },
     image: {

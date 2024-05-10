@@ -11,19 +11,15 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 const axios = require('axios');
 const cors = require('cors');
-const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
+// const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
 
-// const corsHandler = cors({
-//   origin: true, // You can specify domains if you want to restrict e.g., 'http://localhost:4200'
-//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include OPTIONS
-//   allowedHeaders: [
-//     'Content-Type',
-//     'Authorization',
-//     'Content-Length',
-//     'X-Requested-With',
-//     'Accept',
-//   ], // Make sure 'Authorization' is allowed
-// });
+const corsHandler = cors({
+  origin: ['http://localhost:4200'], // You can specify domains if you want to restrict e.g., 'http://localhost:4200'
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include OPTIONS
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // Make sure 'Authorization' is allowed
+  optionsSuccessStatus: 204,
+});
 
 const { Storage } = require('@google-cloud/storage');
 const Busboy = require('busboy');
@@ -527,16 +523,19 @@ exports.videoReady = functions.https.onRequest(async (req, res) => {
 // });
 
 exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
-  corsOptions(req, res, () => {
+  corsHandler(req, res, () => {
     if (req.method === 'OPTIONS') {
       // Sending response for preflight request
-      res.status(200).send('OK');
-      return;
+      return res.status(204).send('OK');
     }
 
     if (req.method !== 'POST') {
       console.log('This method is not allowed', req.method);
       return res.status(405).send('Method Not Allowed');
+    }
+    if (req.method === 'POST') {
+      console.log('This is a post method', req.method);
+      return res.status(200).send('Method Processed!');
     }
     const busboy = new Busboy({ headers: req.headers });
     const tmpdir = os.tmpdir();
