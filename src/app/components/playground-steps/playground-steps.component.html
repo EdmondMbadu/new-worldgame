@@ -243,7 +243,328 @@
                 
                 </a>
 
+                <div class="shadow my-6 dark:bg-slate-800 py-4">
+                    <div class="px-4  text-center md:max-w-screen-md lg:max-w-screen-lg ">
+                        <span class="font-semibold dark:text-gray-200 uppercase m-4 py-3 text-black ">OCCUPIED ROLES</span>
+                        <div class="flex flex-col justify-center items-center mt-8 dark:text-gray-200 text-gray-700 sm:justify-between space-y-3">
+                            <a *ngIf="teamLeader?.firstName!==undefined && teamLeader?.firstName!==''"  class="mx-2 mb-5 lg:mb-0   flex flex-row">
+                               
+                                
+                                    <svg class="fill-black dark:fill-white dark:hover:fill-blue-700 hover:fill-blue-600" height="45px" width="45px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                                    viewBox="0 0 477.13 477.13" xml:space="preserve">
+                                    <g>
+                                    <path d="M254.604,108.371c25.443,0,46.143-20.699,46.143-46.142c0-25.443-20.7-46.144-46.143-46.144
+                                    c-25.437,0-46.131,20.7-46.131,46.144C208.473,87.672,229.167,108.371,254.604,108.371z"/>
+                                    <path d="M368.937,6.477C365.252,2.421,359.736,0,354.178,0c-9.97,0-17.132,7.021-19.164,18.799L325,79.645
+                                    c-0.059,0.411-0.478,1.479-0.755,1.947l-36.277,37.99h-66.716L184.973,81.59c-0.276-0.467-0.697-1.538-0.763-1.996L174.201,18.78
+                                    C172.204,7.196,164.863,0,155.04,0c-5.849,0-11.774,2.686-15.467,7.01c-3.095,3.625-4.408,8.089-3.695,12.583l9.975,60.788
+                                    c0.064,9.399,4.6,20.647,11.071,27.426l41.867,43.844v55.683h-72.559l7.303-30.201c0.982-4.056,4.709-10.28,7.822-13.059
+                                    l6.605-5.896c3.241,2.591,7.342,4.151,11.805,4.151c10.449,0,18.95-8.501,18.95-18.95c0-10.449-8.501-18.95-18.95-18.95
+                                    s-18.95,8.501-18.95,18.95c0,1.182,0.123,2.334,0.331,3.456l-8.447,7.542c-5.115,4.565-10.188,13.034-11.801,19.7l-8.042,33.257
+                                    h-2.85c-1.979,0-3.786,0.827-4.96,2.271c-1.174,1.443-1.615,3.382-1.212,5.319l9.33,44.754c0.76,3.643,4.27,6.496,7.99,6.496
+                                    h12.123l15.468,162.145h-8.036c-7.622,0-13.822,6.2-13.822,13.821v21.17c0,7.621,6.2,13.821,13.822,13.821h182.977
+                                    c7.622,0,13.822-6.2,13.822-13.821v-21.17c0-7.621-6.2-13.821-13.822-13.821h-8.036l15.469-162.145h12.122
+                                    c3.721,0,7.23-2.854,7.99-6.496l9.33-44.754c0.403-1.938-0.038-3.876-1.212-5.319c-1.174-1.443-2.982-2.271-4.96-2.271h-43.962
+                                    v-55.682l41.869-43.846c6.472-6.78,11.005-18.028,11.069-27.425l9.975-60.788l0.022-0.162
+                                    C373.816,14.718,372.244,10.117,368.937,6.477z"/>
+                                    </g>
+                                    </svg>
+                                    <span  class="mt-3">
+                                        Team Leader: 
+                                    </span>
+                                        <div *ngIf="teamLeader!.uid === auth.currentUser.uid" >
+                                            <img *ngIf="teamLeader!.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="teamLeader!.profilePicture!.downloadURL" routerLink="/profile" alt="">
+                                            <div *ngIf="teamLeader!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{teamLeader!.uid}}">
+                       
+                                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            </div> 
+                                            
+                                           
+                                        </div>
+                                        <div *ngIf="teamLeader!.uid !== auth.currentUser.uid" >
+                                            <img *ngIf="teamLeader!.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="teamLeader!.profilePicture!.downloadURL" routerLink="/user-profile/{{teamLeader!.uid}}" alt="">
+                                            <div *ngIf="teamLeader!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{teamLeader!.uid}}">
+                       
+                                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            </div> 
+                                            
+                                          
+                                        </div>
+                                   
+                                            <div *ngIf="showTeamLeader" >
+                                                <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[10rem] -ml-10 bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
+                                                    <div class="flex items-center justify-between mb-2" >
+                                                        <a >
+                                                            <img *ngIf="teamLeader!.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="teamLeader!.profilePicture!.downloadURL"alt="">
+                                                            
+                                                            <div *ngIf="teamLeader!.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+                       
+                                                                <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                                            </div>   
+                                                           
+                                                        </a>
+                                                        <div>
+                                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
+                                                        <a>{{teamLeader!.firstName}} {{teamLeader!.lastName}}</a>
+                                                    </p>
+                                                    <p class="mb-3 text-sm font-normal">
+                                                        <a class="hover:underline dark:text-gray-200">{{teamLeader!.email}}</a>
+                                                    </p>
+                                                    <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{teamLeader!.profileCredential}}</p>
+                                                    <ul class="flex text-sm">
+                                                        <li class="mr-2">
+                                                            <a  class="hover:underline">
+                                                                <span class="font-semibold text-gray-800 dark:text-gray-200">{{teamLeader!.following}} </span>
+                                                                <span class="dark:text-gray-200">Following</span>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="hover:underline">
+                                                                <span class="font-semibold text-gray-900 dark:text-gray-200">{{teamLeader!.followers}} </span>
+                                                                <span class="dark:text-gray-200">Followers</span>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                     
+                                  
+                                   
+                            </a>
+                            <a *ngIf="factChecker?.firstName!==undefined && factChecker?.firstName!==''" class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
+                                <svg class="fill-black dark:fill-white " width="35px" height="35px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.4 4h17.2A2.4 2.4 0 0 1 23 6.4v11.2a2.4 2.4 0 0 1-2.4 2.4H3.4A2.4 2.4 0 0 1 1 17.6V6.4A2.4 2.4 0 0 1 3.4 4ZM4 9a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm1 2a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm0 3a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm10.707.707 4-4a1 1 0 0 0-1.414-1.414L15 12.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0Z" /></svg>                   
+                                <span class="mx-2 mt-1">
+                                   Fact Checker: 
+                                   
+                                </span>
+                                <div *ngIf="factChecker!.uid === auth.currentUser.uid" >
+                                    <img *ngIf="factChecker!.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="factChecker!.profilePicture!.downloadURL" routerLink="/profile" alt="">
+                                    <div *ngIf="factChecker!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{factChecker!.uid}}">
+               
+                                        <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                    </div> 
+                                    
+                                   
+                                </div>
+                                <div *ngIf="factChecker!.uid !== auth.currentUser.uid" >
+                                    <img *ngIf="factChecker!.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="factChecker!.profilePicture!.downloadURL" routerLink="/user-profile/{{factChecker!.uid}}" alt="">
+                                    <div *ngIf="factChecker!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{factChecker!.uid}}">
+               
+                                        <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                    </div> 
+                                    
+                                  
+                                </div>
+                           
+                                    <div *ngIf="showFactChecker" >
+                                        <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[10rem] -ml-10 bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
+                                            <div class="flex items-center justify-between mb-2" >
+                                                <a >
+                                                    <img *ngIf="factChecker!.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="factChecker!.profilePicture!.downloadURL"alt="">
+                                                    
+                                                    <div *ngIf="factChecker!.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+               
+                                                        <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                                    </div>   
+                                                   
+                                                </a>
+                                                <div>
+                                                    <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                                </div>
+                                            </div>
+                                            <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
+                                                <a>{{factChecker!.firstName}} {{factChecker!.lastName}}</a>
+                                            </p>
+                                            <p class="mb-3 text-sm font-normal">
+                                                <a class="hover:underline dark:text-gray-200">{{factChecker!.email}}</a>
+                                            </p>
+                                            <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{factChecker!.profileCredential}}</p>
+                                            <ul class="flex text-sm">
+                                                <li class="mr-2">
+                                                    <a  class="hover:underline">
+                                                        <span class="font-semibold text-gray-800 dark:text-gray-200">{{factChecker!.following}} </span>
+                                                        <span class="dark:text-gray-200">Following</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="hover:underline">
+                                                        <span class="font-semibold text-gray-900 dark:text-gray-200">{{factChecker!.followers}} </span>
+                                                        <span class="dark:text-gray-200">Followers</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                             
+                            </a>
+                            <a *ngIf="facilitator?.firstName!==undefined && facilitator?.firstName!==''"  class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
+                                <svg class="fill-black dark:fill-white"  width="35px" height="35px" viewBox="0 0 128 128" id="Layer_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+                                    <g>
+                                    
+                                    <polygon points="91,45 83,45 83,73 73,73 73,119 61,119 61,73 51,73 51,45 43,45 43,81 53,81 53,127 81,127 81,81 91,81  "/>
+                                    
+                                    <path d="M53,15c0,7.7,6.3,14,14,14s14-6.3,14-14S74.7,1,67,1S53,7.3,53,15z M73,15c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S73,11.7,73,15z"/>
+                                    
+                                    <path d="M19,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S19,17.3,19,25z M39,25c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S39,21.7,39,25z"/>
+                                    
+                                    <polygon points="113,83 103,83 103,119 87,119 87,127 111,127 111,91 121,91 121,51 113,51  "/>
+                                    
+                                    <path d="M87,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S87,17.3,87,25z M101,19c3.3,0,6,2.7,6,6s-2.7,6-6,6s-6-2.7-6-6   S97.7,19,101,19z"/>
+                                    
+                                    <polygon points="31,83 21,83 21,51 13,51 13,91 23,91 23,127 47,127 47,119 31,119  "/>
+                                    
+                                    </g>
+                                    
+                                    </svg>  
+                                    <span class="mx-2 mt-1">
+                                        Facilitator: 
+                                     </span>  
+                                     
+                                     <div *ngIf="facilitator!.uid === auth.currentUser.uid" >
+                                        <img *ngIf="facilitator!.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="facilitator!.profilePicture!.downloadURL" routerLink="/profile" alt="">
+                                        <div *ngIf="teamLeader!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{facilitator!.uid}}">
+                   
+                                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        </div> 
+                                        
+                                       
+                                    </div>
+                                    <div *ngIf="facilitator!.uid !== auth.currentUser.uid" >
+                                        <img *ngIf="facilitator!.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="facilitator!.profilePicture!.downloadURL" routerLink="/user-profile/{{facilitator!.uid}}" alt="">
+                                        <div *ngIf="facilitator!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{facilitator!.uid}}">
+                   
+                                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        </div> 
+                                        
+                                      
+                                    </div>
+                               
+                                        <div *ngIf="showFacilitator" >
+                                            <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[10rem] -ml-10 bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
+                                                <div class="flex items-center justify-between mb-2" >
+                                                    <a >
+                                                        <img *ngIf="facilitator!.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="facilitator!.profilePicture!.downloadURL"alt="">
+                                                        
+                                                        <div *ngIf="facilitator!.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+                   
+                                                            <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                                        </div>   
+                                                       
+                                                    </a>
+                                                    <div>
+                                                        <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                                    </div>
+                                                </div>
+                                                <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
+                                                    <a>{{facilitator!.firstName}} {{facilitator!.lastName}}</a>
+                                                </p>
+                                                <p class="mb-3 text-sm font-normal">
+                                                    <a class="hover:underline dark:text-gray-200">{{facilitator!.email}}</a>
+                                                </p>
+                                                <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{facilitator!.profileCredential}}</p>
+                                                <ul class="flex text-sm">
+                                                    <li class="mr-2">
+                                                        <a  class="hover:underline">
+                                                            <span class="font-semibold text-gray-800 dark:text-gray-200">{{facilitator!.following}} </span>
+                                                            <span class="dark:text-gray-200">Following</span>
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="hover:underline">
+                                                            <span class="font-semibold text-gray-900 dark:text-gray-200">{{facilitator!.followers}} </span>
+                                                            <span class="dark:text-gray-200">Followers</span>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                 
+                            </a>         
+                            
+                        </div>
+                    </div> 
+
+                    <div class="px-4  text-center md:max-w-screen-md lg:max-w-screen-lg mt-6 mx-auto ">
+                        <span class="font-semibold dark:text-gray-200 uppercase m-4 py-3 text-black ">UNOCCUPIED ROLES</span>
+                        <div class="flex flex-col justify-center items-center mt-8 dark:text-gray-200 text-gray-700 sm:justify-between space-y-3">
+                            <a *ngIf="teamLeader?.firstName===undefined || teamLeader?.firstName==='' || currentUserIsTeamleader"  class="mx-2 mb-5 lg:mb-0   flex flex-row">
+                               
+                                
+                                    <svg class="fill-black dark:fill-white " height="45px" width="45px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                                    viewBox="0 0 477.13 477.13" xml:space="preserve">
+                                    <g>
+                                    <path d="M254.604,108.371c25.443,0,46.143-20.699,46.143-46.142c0-25.443-20.7-46.144-46.143-46.144
+                                    c-25.437,0-46.131,20.7-46.131,46.144C208.473,87.672,229.167,108.371,254.604,108.371z"/>
+                                    <path d="M368.937,6.477C365.252,2.421,359.736,0,354.178,0c-9.97,0-17.132,7.021-19.164,18.799L325,79.645
+                                    c-0.059,0.411-0.478,1.479-0.755,1.947l-36.277,37.99h-66.716L184.973,81.59c-0.276-0.467-0.697-1.538-0.763-1.996L174.201,18.78
+                                    C172.204,7.196,164.863,0,155.04,0c-5.849,0-11.774,2.686-15.467,7.01c-3.095,3.625-4.408,8.089-3.695,12.583l9.975,60.788
+                                    c0.064,9.399,4.6,20.647,11.071,27.426l41.867,43.844v55.683h-72.559l7.303-30.201c0.982-4.056,4.709-10.28,7.822-13.059
+                                    l6.605-5.896c3.241,2.591,7.342,4.151,11.805,4.151c10.449,0,18.95-8.501,18.95-18.95c0-10.449-8.501-18.95-18.95-18.95
+                                    s-18.95,8.501-18.95,18.95c0,1.182,0.123,2.334,0.331,3.456l-8.447,7.542c-5.115,4.565-10.188,13.034-11.801,19.7l-8.042,33.257
+                                    h-2.85c-1.979,0-3.786,0.827-4.96,2.271c-1.174,1.443-1.615,3.382-1.212,5.319l9.33,44.754c0.76,3.643,4.27,6.496,7.99,6.496
+                                    h12.123l15.468,162.145h-8.036c-7.622,0-13.822,6.2-13.822,13.821v21.17c0,7.621,6.2,13.821,13.822,13.821h182.977
+                                    c7.622,0,13.822-6.2,13.822-13.821v-21.17c0-7.621-6.2-13.821-13.822-13.821h-8.036l15.469-162.145h12.122
+                                    c3.721,0,7.23-2.854,7.99-6.496l9.33-44.754c0.403-1.938-0.038-3.876-1.212-5.319c-1.174-1.443-2.982-2.271-4.96-2.271h-43.962
+                                    v-55.682l41.869-43.846c6.472-6.78,11.005-18.028,11.069-27.425l9.975-60.788l0.022-0.162
+                                    C373.816,14.718,372.244,10.117,368.937,6.477z"/>
+                                    </g>
+                                    </svg>
+                                    <span class="mt-3">
+                                        Team Leader:
+                                        <a *ngIf="!currentUserIsTeamleader" target="_blank" (click)="toggleClaimTeamLeader()" class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-6">Claim</a> 
+                                        <a *ngIf="currentUserIsTeamleader" target="_blank"(click)="toggleClaimTeamLeader()" class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-6">Unclaim</a> 
+                                    </span>
+                                   
+                            </a>
+                            <a *ngIf="factChecker?.firstName===undefined || factChecker?.firstName=='' || currentUserIsFactChecker"  class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
+                                <svg class="fill-black dark:fill-white " width="35px" height="35px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.4 4h17.2A2.4 2.4 0 0 1 23 6.4v11.2a2.4 2.4 0 0 1-2.4 2.4H3.4A2.4 2.4 0 0 1 1 17.6V6.4A2.4 2.4 0 0 1 3.4 4ZM4 9a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm1 2a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm0 3a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm10.707.707 4-4a1 1 0 0 0-1.414-1.414L15 12.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0Z" /></svg>                   
+                                <span class="mx-2 mt-1">
+                                   Fact Checker: 
+                                   <a *ngIf="!currentUserIsFactChecker" target="_blank"(click)="toggleClaimFactChecker()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-8">Claim</a>
+                                   <a *ngIf="currentUserIsFactChecker" target="_blank" (click)="toggleClaimFactChecker()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-8">Unclaim</a>
+                                </span>
+
+                            </a>
+                            <a *ngIf="facilitator?.firstName===undefined || facilitator?.firstName=='' || currentUserIsFacilitator"  class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
+                                <svg class="fill-black dark:fill-white"  width="35px" height="35px" viewBox="0 0 128 128" id="Layer_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+                                    <g>
+                                    
+                                    <polygon points="91,45 83,45 83,73 73,73 73,119 61,119 61,73 51,73 51,45 43,45 43,81 53,81 53,127 81,127 81,81 91,81  "/>
+                                    
+                                    <path d="M53,15c0,7.7,6.3,14,14,14s14-6.3,14-14S74.7,1,67,1S53,7.3,53,15z M73,15c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S73,11.7,73,15z"/>
+                                    
+                                    <path d="M19,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S19,17.3,19,25z M39,25c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S39,21.7,39,25z"/>
+                                    
+                                    <polygon points="113,83 103,83 103,119 87,119 87,127 111,127 111,91 121,91 121,51 113,51  "/>
+                                    
+                                    <path d="M87,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S87,17.3,87,25z M101,19c3.3,0,6,2.7,6,6s-2.7,6-6,6s-6-2.7-6-6   S97.7,19,101,19z"/>
+                                    
+                                    <polygon points="31,83 21,83 21,51 13,51 13,91 23,91 23,127 47,127 47,119 31,119  "/>
+                                    
+                                    </g>
+                                    
+                                    </svg>  
+                                    <span class="mx-2 mt-1">
+                                        Facilitator: 
+                                        <a *ngIf="!currentUserIsFacilitator" target="_blank" (click)="toggleClaimFacilitator()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-12">Claim</a>
+                                        <a *ngIf="currentUserIsFacilitator" target="_blank" (click)="toggleClaimFacilitator()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-12">Unclaim</a>
+                                     
+                                    </span>                                           
+                            </a>         
+                              
+                        </div>
+                    </div> 
+                    
+                </div>
+
             </div>
+
+           
     </div>
 </div>
 

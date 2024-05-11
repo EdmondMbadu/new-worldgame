@@ -3,7 +3,7 @@ import {
   AngularFirestoreDocument,
   AngularFirestore,
 } from '@angular/fire/compat/firestore';
-import { Evaluation, Solution } from '../models/solution';
+import { Evaluation, Roles, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import { combineLatest, count, last, map, Observable } from 'rxjs';
@@ -298,6 +298,16 @@ export class SolutionService {
   updateSolutionTitle(solutionId: string, title: string) {
     const data = {
       title: title,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
+  updateSolutionRoles(roles: Roles, solutionId: string) {
+    const data = {
+      roles: roles,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`

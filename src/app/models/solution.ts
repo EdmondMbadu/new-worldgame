@@ -10,6 +10,7 @@ export class Solution {
   description?: string;
   participants?: { [key: string]: string } = {};
   evaluators?: Evaluator[] = [];
+  roles?: Roles = {};
   evaluated?: { [key: string]: string } = {};
   comments?: Comment[] = [];
   discussion?: Comment[] = [];
@@ -60,4 +61,10 @@ export class Comment {
   likes?: string;
   dislikes?: string;
   profilePic?: string;
+}
+
+export class Roles {
+  teamLeader?: string;
+  facilitator?: string;
+  factChecker?: string;
 }

@@ -243,8 +243,8 @@ export class PlaygroundStepComponent {
         array.push(key);
       });
     }
-    console.log('current soltution status', this.currentSolution.status);
-    console.log('array ', array);
+    // console.log('current soltution status', this.currentSolution.status);
+    // console.log('array ', array);
 
     array.sort((a, b) => {
       // Split both elements by '-' and assign default values for prefix and suffix
@@ -269,7 +269,7 @@ export class PlaygroundStepComponent {
 
     // console.log(' all the keys', array);
 
-    console.log('what is content array content', this.contentsArray);
+    // console.log('what is content array content', this.contentsArray);
 
     this.contentsArray[0] += `<h1 class="text-left text-xl font-bold my-4"> Problem State    </h1>`;
 

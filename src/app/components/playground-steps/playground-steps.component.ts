@@ -6,7 +6,7 @@ import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { Element } from '@angular/compiler';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
-import { Evaluator, Solution } from 'src/app/models/solution';
+import { Evaluator, Roles, Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { User } from 'src/app/models/user';
@@ -21,7 +21,17 @@ export class PlaygroundStepsComponent implements OnInit {
   id: any = '';
   currentSolution: Solution = {};
   teamMembers: User[] = [];
+  roles: Roles = {
+    facilitator: '',
+    teamLeader: '',
+    factChecker: '',
+  };
+  currentUser: User = {};
   showPopUpTeam: boolean[] = [];
+  showTeamLeader: boolean = false;
+  showFactChecker: boolean = false;
+  showFacilitator: boolean = false;
+  showPopUpContributors: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
   showAddTeamMember: boolean = false;
   hoverAddTeamMember: boolean = false;
@@ -33,6 +43,14 @@ export class PlaygroundStepsComponent implements OnInit {
   updateReadMeBox: boolean = false;
   newReadMe: string = '';
 
+  teamLeader: User = {};
+  factChecker: User = {};
+  facilitator: User = {};
+
+  currentUserIsTeamleader: boolean = false;
+  currentUserIsFactChecker: boolean = false;
+  currentUserIsFacilitator: boolean = false;
+
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
@@ -41,9 +59,14 @@ export class PlaygroundStepsComponent implements OnInit {
     private router: Router,
     private fns: AngularFireFunctions
   ) {
+    this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+      this.roles =
+        this.currentSolution.roles !== undefined
+          ? this.currentSolution.roles
+          : {};
       this.currentSolution.evaluators?.forEach((ev: any) => {
         this.evaluators.push(ev);
       });
@@ -77,10 +100,81 @@ export class PlaygroundStepsComponent implements OnInit {
         ) {
           this.teamMembers.push(data[0]);
         }
+
+        if (this.roles.facilitator === email) {
+          this.facilitator = data[0];
+          if (this.currentUser.email === email)
+            this.currentUserIsFacilitator = true;
+        }
+        if (this.roles.teamLeader === email) {
+          this.teamLeader = data[0];
+          if (this.currentUser.email === email)
+            this.currentUserIsTeamleader = true;
+        }
+        if (this.roles.factChecker === email) {
+          this.factChecker = data[0];
+          if (this.currentUser.email === email)
+            this.currentUserIsFactChecker = true;
+        }
       });
     }
   }
 
+  toggleClaimTeamLeader() {
+    if (this.isEmpty(this.teamLeader)) {
+      this.teamLeader = this.currentUser;
+      this.currentUserIsTeamleader = true;
+    } else {
+      this.teamLeader = {};
+      this.currentUserIsTeamleader = false;
+    }
+    this.updateSolutionRoles();
+  }
+  toggleClaimFactChecker() {
+    if (this.isEmpty(this.factChecker)) {
+      this.factChecker = this.currentUser;
+      this.currentUserIsFactChecker = true;
+    } else {
+      this.factChecker = {};
+      this.currentUserIsFactChecker = false;
+    }
+    this.updateSolutionRoles();
+  }
+  toggleClaimFacilitator() {
+    if (this.isEmpty(this.facilitator)) {
+      this.facilitator = this.currentUser;
+      this.currentUserIsFacilitator = true;
+    } else {
+      this.facilitator = {};
+      this.currentUserIsFacilitator = false;
+    }
+    this.updateSolutionRoles();
+  }
+  async updateSolutionRoles() {
+    this.roles.facilitator = this.isEmpty(this.facilitator)
+      ? ''
+      : this.facilitator.email;
+    this.roles.teamLeader = this.isEmpty(this.teamLeader)
+      ? ''
+      : this.teamLeader.email;
+    this.roles.factChecker = this.isEmpty(this.factChecker)
+      ? ''
+      : this.factChecker.email;
+
+    try {
+      let response = await this.solution.updateSolutionRoles(
+        this.roles,
+        this.currentSolution.solutionId!
+      );
+      console.log('Roles updated successfully');
+    } catch (error) {
+      alert('An error occured while updating roles. Try Again!');
+      console.log('error occured while updating roles', error);
+    }
+  }
+  isEmpty(obj: Object) {
+    return JSON.stringify(obj) === '{}';
+  }
   getEvaluators() {
     this.evaluators = [];
 
@@ -177,8 +271,6 @@ export class PlaygroundStepsComponent implements OnInit {
       'solutionEvaluationInvite'
     );
 
-    console.log('current solution ok?', this.currentSolution);
-    console.log('evaluators ok?', this.evaluators);
     this.evaluators.forEach((evaluator) => {
       const emailData = {
         email: evaluator.email,
@@ -222,6 +314,27 @@ export class PlaygroundStepsComponent implements OnInit {
   onLeaveTeam(index: number) {
     this.showPopUpTeam[index] = false;
   }
+  onHoverTeamleader() {
+    this.showTeamLeader = true;
+  }
+  onHoverFactChecker() {
+    this.showFactChecker = true;
+  }
+  onHoverFacilitator() {
+    this.showFacilitator = true;
+  }
+
+  onLeaveTeamLeader() {
+    this.showTeamLeader = false;
+  }
+
+  OnLeaveFactChecker() {
+    this.showFactChecker = false;
+  }
+  OnLeaveFacilitator() {
+    this.showFacilitator = false;
+  }
+
   onHoverImageEvaluators(index: number) {
     this.showPopUpEvaluators[index] = true;
   }
@@ -240,8 +353,6 @@ export class PlaygroundStepsComponent implements OnInit {
     if (this.data.isValidEmail(this.newTeamMember)) {
       participants = this.currentSolution.participants;
       participants.push({ name: this.newTeamMember });
-      // console.log('participants', participants);
-      // console.log('team member', this.newTeamMember);
 
       this.solution
         .addParticipantsToSolution(
