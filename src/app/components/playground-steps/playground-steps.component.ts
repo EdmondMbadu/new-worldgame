@@ -120,58 +120,58 @@ export class PlaygroundStepsComponent implements OnInit {
     }
   }
 
-  toggleClaimTeamLeader() {
-    if (this.isEmpty(this.teamLeader)) {
-      this.teamLeader = this.currentUser;
-      this.currentUserIsTeamleader = true;
-    } else {
-      this.teamLeader = {};
-      this.currentUserIsTeamleader = false;
-    }
-    this.updateSolutionRoles();
-  }
-  toggleClaimFactChecker() {
-    if (this.isEmpty(this.factChecker)) {
-      this.factChecker = this.currentUser;
-      this.currentUserIsFactChecker = true;
-    } else {
-      this.factChecker = {};
-      this.currentUserIsFactChecker = false;
-    }
-    this.updateSolutionRoles();
-  }
-  toggleClaimFacilitator() {
-    if (this.isEmpty(this.facilitator)) {
-      this.facilitator = this.currentUser;
-      this.currentUserIsFacilitator = true;
-    } else {
-      this.facilitator = {};
-      this.currentUserIsFacilitator = false;
-    }
-    this.updateSolutionRoles();
-  }
-  async updateSolutionRoles() {
-    this.roles.facilitator = this.isEmpty(this.facilitator)
-      ? ''
-      : this.facilitator.email;
-    this.roles.teamLeader = this.isEmpty(this.teamLeader)
-      ? ''
-      : this.teamLeader.email;
-    this.roles.factChecker = this.isEmpty(this.factChecker)
-      ? ''
-      : this.factChecker.email;
+  // toggleClaimTeamLeader() {
+  //   if (this.isEmpty(this.teamLeader)) {
+  //     this.teamLeader = this.currentUser;
+  //     this.currentUserIsTeamleader = true;
+  //   } else {
+  //     this.teamLeader = {};
+  //     this.currentUserIsTeamleader = false;
+  //   }
+  //   this.updateSolutionRoles();
+  // }
+  // toggleClaimFactChecker() {
+  //   if (this.isEmpty(this.factChecker)) {
+  //     this.factChecker = this.currentUser;
+  //     this.currentUserIsFactChecker = true;
+  //   } else {
+  //     this.factChecker = {};
+  //     this.currentUserIsFactChecker = false;
+  //   }
+  //   this.updateSolutionRoles();
+  // }
+  // toggleClaimFacilitator() {
+  //   if (this.isEmpty(this.facilitator)) {
+  //     this.facilitator = this.currentUser;
+  //     this.currentUserIsFacilitator = true;
+  //   } else {
+  //     this.facilitator = {};
+  //     this.currentUserIsFacilitator = false;
+  //   }
+  //   this.updateSolutionRoles();
+  // }
+  // async updateSolutionRoles() {
+  //   this.roles.facilitator = this.isEmpty(this.facilitator)
+  //     ? ''
+  //     : this.facilitator.email;
+  //   this.roles.teamLeader = this.isEmpty(this.teamLeader)
+  //     ? ''
+  //     : this.teamLeader.email;
+  //   this.roles.factChecker = this.isEmpty(this.factChecker)
+  //     ? ''
+  //     : this.factChecker.email;
 
-    try {
-      let response = await this.solution.updateSolutionRoles(
-        this.roles,
-        this.currentSolution.solutionId!
-      );
-      console.log('Roles updated successfully');
-    } catch (error) {
-      alert('An error occured while updating roles. Try Again!');
-      console.log('error occured while updating roles', error);
-    }
-  }
+  //   try {
+  //     let response = await this.solution.updateSolutionRoles(
+  //       this.roles,
+  //       this.currentSolution.solutionId!
+  //     );
+  //     console.log('Roles updated successfully');
+  //   } catch (error) {
+  //     alert('An error occured while updating roles. Try Again!');
+  //     console.log('error occured while updating roles', error);
+  //   }
+  // }
   isEmpty(obj: Object) {
     return JSON.stringify(obj) === '{}';
   }

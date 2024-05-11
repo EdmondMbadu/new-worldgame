@@ -533,10 +533,10 @@ exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
       console.log('This method is not allowed', req.method);
       return res.status(405).send('Method Not Allowed');
     }
-    if (req.method === 'POST') {
-      console.log('This is a post method', req.method);
-      return res.status(200).send('Method Processed!');
-    }
+    // if (req.method === 'POST') {
+    //   console.log('This is a post method', req.method);
+    //   return res.status(200).send('Method Processed!');
+    // }
     const busboy = new Busboy({ headers: req.headers });
     const tmpdir = os.tmpdir();
     let fileWrites: any = [];
