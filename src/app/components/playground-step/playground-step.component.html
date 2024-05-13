@@ -19,12 +19,12 @@
        
       
 
-        <h3 *ngIf="!step.startsWith('Step II')"class="mt-4 text-xl text-center dark:text-white">{{step}} <span  *ngIf="step.startsWith('Step III')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" href="https://designsciencelab.com/global-solutions-database/">(Global Solutions Database)</a> </span>
-
+        <h3 class="mt-4 text-xl text-center dark:text-white">{{step}} <span  *ngIf="step.startsWith('Step III')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" href="https://designsciencelab.com/global-solutions-database/">(Global Solutions Database)</a> </span>
+            <span  *ngIf="step.startsWith('Step II:')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/sample-preferred-states">(Sample Preferred States)</a> </span> 
         </h3>
-        <h3 *ngIf="step.startsWith('Step II')" class="mt-4 text-xl text-center dark:text-white">{{step}} 
+        <!-- <h3 *ngIf="step.startsWith('Step II')" class="mt-4 text-xl text-center dark:text-white">{{step}} 
             <span  *ngIf="step.startsWith('Step II')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/sample-preferred-states">(Sample Preferred States)</a> </span> 
-        </h3>
+        </h3> -->
     </div>
 
     <!-- Questions -->
