@@ -70,6 +70,7 @@ import { TeamDiscussionComponent } from './components/team-discussion/team-discu
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
 import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
+import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
 
 @NgModule({
   declarations: [
@@ -118,6 +119,7 @@ import { OperatingManualComponent } from './components/operating-manual/operatin
     InstructionsComponent,
     HowToComponent,
     OperatingManualComponent,
+    SamplePrefferedStatesComponent,
   ],
   imports: [
     BrowserModule,
