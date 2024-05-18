@@ -27,20 +27,7 @@ export class PlaygroundStepComponent {
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
-  // YOUR_TOKEN =
-  //   'eyJhbGciOiJSUzI1NiIsImtpZCI6IjMyM2IyMTRhZTY5NzVhMGYwMzRlYTc3MzU0ZGMwYzI1ZDAzNjQyZGMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJldk90MmZJTU5zQk03OTZyd2trNWRnIiwiaWF0IjoxNzE2MDEwNzMwLCJleHAiOjE3MTYwMTQzMzB9.sqKxeB3uP5lczuDb1_idE9muQeL-uZ-4SP311oWRcs9mbTAyeDiHjUY1Ls8-BeHy6w-0dky5BRMX0rVE6y5XCSmlhBGSGeUpdjgoyPkbWyI0-Iy638A0gfENK2Ki8YVyyonjTP4yg1mCBpGgkwdiBBjgWDEzhSNgvwWdo_uD1JS5iXsHfsA292us_UZ2A6caAXnvVzhb_elCTfvvztUV2xJorRZtwAonfLWTJrLvrImge0PixtDuS4AAyrKlQrRJzm0k--9R3L-nN5qjjoqPKoNv__cb2ShYjuLxOLu_G_S8vBFzQnLLzlolqe5ikKa33y4Mii7_GxkP9c9DT8eowA';
-  // public editorConfig: any = {
-  //   simpleUpload: {
-  //     uploadUrl:
-  //       'https://us-central1-new-worldgame.cloudfunctions.net/uploadImage',
-  //     withCredentials: true,
-  //     headers: {
-  //       Authorization: `Bearer ${this.YOUR_TOKEN}`,
-  //       'Content-Type': 'multipart/form-data',
-  //       // 'X-CSRF-TOKEN': 'CSRF-Token' // if needed
-  //     },
-  //   },
-  // };
+
   displayPopups: boolean[] = [];
   newTitle: string = '';
   clickedDisplayPopups: boolean[] = [];
