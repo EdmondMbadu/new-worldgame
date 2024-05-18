@@ -223,11 +223,11 @@ export class PlaygroundStepsComponent implements OnInit {
     ['S5'],
   ];
   timelineDisplay = [
-    'bg-gray-200 h-0.5',
-    'bg-gray-200 h-0.5',
-    'bg-gray-200 h-0.5',
-    'bg-gray-200 h-0.5',
-    'bg-gray-200 h-0.5',
+    'bg-gray-200 h-0.8',
+    'bg-gray-200 h-0.8',
+    'bg-gray-200 h-0.8',
+    'bg-gray-200 h-0.8',
+    'bg-gray-200 h-0.8',
   ];
   AllQuestions: Array<Array<string>> = [
     [

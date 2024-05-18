@@ -165,9 +165,8 @@ class Editor extends ClassicEditor {
 
     //   // Headers sent along with the XMLHttpRequest to the upload server.
     //   headers: {
-    //     // 'X-CSRF-TOKEN': 'CSRF-Token',
-    //     Authorization:
-    //       'Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImEzYjc2MmY4NzFjZGIzYmFlMDA0NGM2NDk2MjJmYzEzOTZlZGEzZTMiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiIzMjU1NTk0MDU1OS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjMyNTU1OTQwNTU5LmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwic3ViIjoiMTA4MzgxNTEwMzcyNjM4NzE2MjUyIiwiZW1haWwiOiJnbG9iYWxzb2xsYWJAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF0X2hhc2giOiJ3OXNSQzB6N0hFZXFEOE1hV0pmeFFBIiwiaWF0IjoxNzE1MzIyMDIxLCJleHAiOjE3MTUzMjU2MjF9.HFPrQe_i7ERkxyGj2jt9IE3XD60NJT96O9U6FLp8A2Lx6L6GbWZzMew6KLfIsdCkFUKas_02s1kDSn5EAEuzetkL63JdC6nci0ffAQMevMeeezRNX96Bt3f8Wx98GjUljHZQWo5TJ-W-LzA_jPvi5XFZaJClKKggfji1IQyxWcSVsLCUWrryJoHFg23ZgRFx8aK15ysEHqbbbm6ODCVdR1J6IAeyGL9tvb_9QUmrsqQcC_kTxWAi0fDsvtiMisOURhmLk-I72y6PgPa1a9f__LORIYm1QBkVr37cTQV4qdxJaTiSyA03-TAeQNb46PRVlYqHO7pNQ-DyiK-tXpHVMg',
+    // Authorization:
+    //       'Bearer ',
     //   },
     // },
     image: {

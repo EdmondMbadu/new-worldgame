@@ -10,16 +10,16 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 const axios = require('axios');
-const cors = require('cors');
+// const cors = require('cors')({ origin: true });
 // const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
 
-const corsHandler = cors({
-  origin: ['http://localhost:4200'], // You can specify domains if you want to restrict e.g., 'http://localhost:4200'
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include OPTIONS
-  credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // Make sure 'Authorization' is allowed
-  optionsSuccessStatus: 204,
-});
+// const corsHandler = cors({
+//   origin: ['http://localhost:4200'], // You can specify domains if you want to restrict e.g., 'http://localhost:4200'
+//   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // Include OPTIONS
+//   credentials: true,
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'], // Make sure 'Authorization' is allowed
+//   optionsSuccessStatus: 204,
+// });
 
 const { Storage } = require('@google-cloud/storage');
 const Busboy = require('busboy');
@@ -523,95 +523,102 @@ exports.videoReady = functions.https.onRequest(async (req, res) => {
 // });
 
 exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
-  corsHandler(req, res, () => {
-    if (req.method === 'OPTIONS') {
-      // Sending response for preflight request
-      return res.status(204).send('OK');
-    }
+  console.log('Request received with method:', req.method);
+  res.set('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Max-Age', '3600');
+  // cors(req, res, () => {
+  if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
 
-    if (req.method !== 'POST') {
-      console.log('This method is not allowed', req.method);
-      return res.status(405).send('Method Not Allowed');
-    }
-    // if (req.method === 'POST') {
-    //   console.log('This is a post method', req.method);
-    //   return res.status(200).send('Method Processed!');
-    // }
-    const busboy = new Busboy({ headers: req.headers });
-    const tmpdir = os.tmpdir();
-    let fileWrites: any = [];
-    let publicUrls = [];
+    // Sending response for preflight request
+    return res.status(204).send('');
+  }
 
-    busboy.on(
-      'file',
-      (
-        fieldname: any,
-        file: any,
-        filename: any,
-        encoding: any,
-        mimetype: any
-      ) => {
-        const filepath = path.join(tmpdir, filename);
-        // const filenamePath = `ckeditor-images/${filename}`;
-        const writeStream = fs.createWriteStream(filepath);
+  if (req.method !== 'POST') {
+    console.log('This method is not allowed', req.method);
+    return res.status(405).send('Method Not Allowed');
+  }
+  // if (req.method === 'POST') {
+  //   console.log('This is a post method', req.method);
+  //   return res.status(200).send('Method Processed!');
+  // }
+  const busboy = new Busboy({ headers: req.headers });
+  const tmpdir = os.tmpdir();
+  let fileWrites: any = [];
+  let publicUrls = [];
 
-        file.pipe(writeStream);
+  busboy.on(
+    'file',
+    (
+      fieldname: any,
+      file: any,
+      filename: any,
+      encoding: any,
+      mimetype: any
+    ) => {
+      const filepath = path.join(tmpdir, filename);
+      // const filenamePath = `ckeditor-images/${filename}`;
+      const writeStream = fs.createWriteStream(filepath);
 
-        const promise = new Promise((resolve, reject) => {
-          file.on('end', () => {
-            writeStream.end();
-          });
+      file.pipe(writeStream);
 
-          writeStream.on('finish', () => {
-            const readStream = fs.createReadStream(filepath);
-            readStream.pipe(
-              bucket
-                .file(filename)
-                .createWriteStream({
-                  metadata: {
-                    contentType: mimetype,
-                  },
-                })
-                .on('error', (error: any) => {
-                  console.error('Error uploading to GCS:', error);
-                  reject(error);
-                })
-                .on('finish', async () => {
-                  try {
-                    const uploadedFile = bucket.file(filename);
-                    await uploadedFile.makePublic();
-                    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
-                    console.log('File uploaded and made public:', publicUrl);
-                    resolve(publicUrl);
-                  } catch (error) {
-                    console.error('Error making file public:', error);
-                    reject(error);
-                  }
-                })
-            );
-          });
-
-          writeStream.on('error', (error: any) => {
-            console.error('Error writing file on server:', error);
-            reject(error);
-          });
+      const promise = new Promise((resolve, reject) => {
+        file.on('end', () => {
+          writeStream.end();
         });
 
-        fileWrites.push(promise);
-      }
-    );
+        writeStream.on('finish', () => {
+          const readStream = fs.createReadStream(filepath);
+          readStream.pipe(
+            bucket
+              .file(filename)
+              .createWriteStream({
+                metadata: {
+                  contentType: mimetype,
+                },
+              })
+              .on('error', (error: any) => {
+                console.error('Error uploading to GCS:', error);
+                reject(error);
+              })
+              .on('finish', async () => {
+                try {
+                  const uploadedFile = bucket.file(filename);
+                  await uploadedFile.makePublic();
+                  const publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
+                  console.log('File uploaded and made public:', publicUrl);
+                  resolve(publicUrl);
+                } catch (error) {
+                  console.error('Error making file public:', error);
+                  reject(error);
+                }
+              })
+          );
+        });
 
-    busboy.on('finish', async () => {
-      try {
-        publicUrls = await Promise.all(fileWrites);
-        console.log('All files have been processed and uploaded', publicUrls);
-        res.status(200).send({ urls: publicUrls });
-      } catch (error) {
-        console.error('Failed to upload one or more files:', error);
-        res.status(500).send('Error uploading one or more files');
-      }
-    });
+        writeStream.on('error', (error: any) => {
+          console.error('Error writing file on server:', error);
+          reject(error);
+        });
+      });
 
-    busboy.end(req.rawBody);
+      fileWrites.push(promise);
+    }
+  );
+
+  busboy.on('finish', async () => {
+    try {
+      publicUrls = await Promise.all(fileWrites);
+      console.log('All files have been processed and uploaded', publicUrls);
+      res.status(200).send({ urls: publicUrls });
+    } catch (error) {
+      console.error('Failed to upload one or more files:', error);
+      res.status(500).send('Error uploading one or more files');
+    }
   });
+
+  busboy.end(req.rawBody);
+  // });
 });
