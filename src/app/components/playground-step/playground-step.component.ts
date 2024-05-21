@@ -12,7 +12,7 @@ import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { tinyApiKey } from 'environments/environments';
+import { environment } from 'environments/environments';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -25,7 +25,7 @@ export interface FeedbackRequest {
 })
 export class PlaygroundStepComponent {
   loader: any;
-  apiKey: string = tinyApiKey;
+  apiKey: string = environment.tinyApiKey;
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
