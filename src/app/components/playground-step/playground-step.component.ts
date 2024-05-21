@@ -12,6 +12,7 @@ import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { tinyApiKey } from 'environments/environments';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -24,9 +25,54 @@ export interface FeedbackRequest {
 })
 export class PlaygroundStepComponent {
   loader: any;
+  apiKey: string = tinyApiKey;
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
+  editorConfig: any = {
+    height: 500,
+    menubar: true,
+    plugins: [
+      'a11ychecker',
+      'advlist',
+      'advcode',
+      'advtable',
+      'autolink',
+      'checklist',
+      'markdown',
+      'lists',
+      'link',
+      'image',
+      'charmap',
+      'preview',
+      'anchor',
+      'searchreplace',
+      'visualblocks',
+      'powerpaste',
+      'fullscreen',
+      'formatpainter',
+      'insertdatetime',
+      'media',
+      'table',
+      'help',
+      'wordcount',
+    ],
+    toolbar:
+      'undo redo | casechange blocks | bold italic backcolor | \
+              alignleft aligncenter alignright alignjustify | \
+              bullist numlist checklist outdent indent | removeformat | \
+              a11ycheck code table help',
+    branding: false,
+    // setup: (editor: any) => {
+    //   editor.on('init', () => {
+    //     // editor.setContent(this.contentsArray[i]);
+    //   });
+    //   // Add keyup event handler
+    //   editor.on('keyup', () => {
+    //     console.log('Content being typed:', this.data);
+    //   });
+    // },
+  };
 
   displayPopups: boolean[] = [];
   newTitle: string = '';

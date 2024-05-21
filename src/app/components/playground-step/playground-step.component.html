@@ -68,7 +68,7 @@
             </div>
           </header>
           <div class="md:max-w-2xl max-w-lg sm:mx-auto mx-6" id="box-{{i}}">
-            <ckeditor
+            <!-- <ckeditor
             class="boxing"
             id="ck-editor"
             
@@ -84,9 +84,16 @@
              
              
               >
-            </ckeditor>
+            </ckeditor> -->
+            <editor [apiKey]=apiKey 
+            [init]="editorConfig"
+            [(ngModel)]="contentsArray[i]"
+            #contentField="ngModel"
+              
+
+                 ></editor>
           </div>
-          <div *ngIf="isNotEmpty(contentsArray[i]) && contentField.touched" class="text-red-400" >
+          <div *ngIf="isNotEmpty(contentsArray[i]) && contentField.touched " class="text-red-400" >
             All text areas must be filled with something ...
          </div>
          <!-- <button class="bg-blue-500" (click)="testCORS()"> testCors</button> -->

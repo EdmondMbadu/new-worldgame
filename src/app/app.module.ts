@@ -71,6 +71,7 @@ import { InstructionsComponent } from './blogs/instructions/instructions.compone
 import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
+import { EditorModule } from '@tinymce/tinymce-angular';
 
 @NgModule({
   declarations: [
@@ -144,6 +145,7 @@ import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/
     MatIconModule,
     MatChipsModule,
     MatAutocompleteModule,
+    EditorModule,
   ],
 
   providers: [],

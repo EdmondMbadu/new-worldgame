@@ -36,6 +36,8 @@ export class ProfileComponent implements OnInit {
   downloadURL?: Observable<string>;
   url: string = '';
   points: number = 0;
+  showSolutionCompletedBadge: boolean = false;
+  showSolutionWithPointsBadge: boolean = false;
 
   isHovering?: boolean;
   constructor(
@@ -80,6 +82,13 @@ export class ProfileComponent implements OnInit {
       this.profilePicturePath = this.user.profilePicture.downloadURL;
     }
     this.dateJoined = this.time.getMonthYear(this.user.dateJoined!);
+  }
+  onHoverImageToggle(imageName: string) {
+    if (imageName === 'solution-completed') {
+      this.showSolutionCompletedBadge = !this.showSolutionCompletedBadge;
+    } else if (imageName === 'points') {
+      this.showSolutionWithPointsBadge = !this.showSolutionWithPointsBadge;
+    }
   }
 
   async startUpload(event: FileList) {

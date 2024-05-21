@@ -23,6 +23,8 @@ export class UserProfileComponent implements OnInit {
   completedSolutions: Solution[] = [];
   followingThisUser: boolean = false;
   points: number = 0;
+  showSolutionCompletedBadge: boolean = false;
+  showSolutionWithPointsBadge: boolean = false;
 
   solutions: Solution[] = [];
   constructor(
@@ -69,6 +71,13 @@ export class UserProfileComponent implements OnInit {
   checkIfFollowing() {
     this.followingThisUser =
       this.followers.indexOf(this.auth.currentUser.uid) > -1;
+  }
+  onHoverImageToggle(imageName: string) {
+    if (imageName === 'solution-completed') {
+      this.showSolutionCompletedBadge = !this.showSolutionCompletedBadge;
+    } else if (imageName === 'points') {
+      this.showSolutionWithPointsBadge = !this.showSolutionWithPointsBadge;
+    }
   }
 
   followThisUser() {
