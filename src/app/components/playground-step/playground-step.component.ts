@@ -32,6 +32,7 @@ export class PlaygroundStepComponent {
   editorConfig: any = {
     height: 500,
     menubar: true,
+    selector: 'textarea',
     plugins: [
       'a11ychecker',
       'advlist',
@@ -56,12 +57,13 @@ export class PlaygroundStepComponent {
       'table',
       'help',
       'wordcount',
+      'export',
     ],
     toolbar:
       'undo redo | casechange blocks | bold italic backcolor | \
               alignleft aligncenter alignright alignjustify | \
               bullist numlist checklist outdent indent | removeformat | \
-              a11ycheck code table help',
+              a11ycheck code table help export',
     branding: false,
     // setup: (editor: any) => {
     //   editor.on('init', () => {

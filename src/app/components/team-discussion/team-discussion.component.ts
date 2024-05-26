@@ -38,6 +38,7 @@ export class TeamDiscussionComponent implements OnInit {
   private offsetY: number = 0;
   private hasScrolled = false;
   @Input() solution?: Solution;
+  displayOtherVoiceChannels: boolean = false;
   @Input() botHeight: string = 'h-10';
   collectionPath: string = '';
   status = '';
@@ -66,6 +67,11 @@ export class TeamDiscussionComponent implements OnInit {
 
     // this.deleteAllDocuments();
   }
+
+  toggleShowOtherVoiceChannels() {
+    this.displayOtherVoiceChannels = !this.displayOtherVoiceChannels;
+  }
+
   responses: DisplayMessage[] = [];
   ngOnInit(): void {
     this.collectionPath = `solutions/${this.solution!.solutionId}`;
