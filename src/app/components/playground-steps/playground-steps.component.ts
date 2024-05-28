@@ -252,9 +252,9 @@ export class PlaygroundStepsComponent implements OnInit {
       'Where will we get the resources and funding needed to implement our solution, to do the above?',
       'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
       'What does our implemented strategy  look like, in more detail?',
-      'What is done in the next 6-12 month to get our solution implemented? Who will do what, when, where?',
+      'What is done in the next 6-12 months to get our solution implemented? Who will do what, when, where?',
       'What would we do with $50,000 to advance the strategy towards implementation?',
-      'What can you/your team do — starting now, with just the resources you have access, to move your strategy forward?',
+      'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
     ],
     ['Review Your Entire Strategy and Submit'],
   ];

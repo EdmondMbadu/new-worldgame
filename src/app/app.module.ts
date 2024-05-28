@@ -72,6 +72,7 @@ import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
 import { EditorModule } from '@tinymce/tinymce-angular';
+import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
 
 @NgModule({
   declarations: [
@@ -121,6 +122,7 @@ import { EditorModule } from '@tinymce/tinymce-angular';
     HowToComponent,
     OperatingManualComponent,
     SamplePrefferedStatesComponent,
+    SolutionLibrariesComponent,
   ],
   imports: [
     BrowserModule,

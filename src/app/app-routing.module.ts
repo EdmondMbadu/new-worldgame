@@ -36,6 +36,7 @@ import { InstructionsComponent } from './blogs/instructions/instructions.compone
 import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
+import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -114,6 +115,10 @@ const routes: Routes = [
   {
     path: 'blogs/tournament',
     component: TournamentComponent,
+  },
+  {
+    path: 'blogs/solution-libraries',
+    component: SolutionLibrariesComponent,
   },
   {
     path: 'blogs/sample-preferred-states',
