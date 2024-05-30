@@ -37,6 +37,7 @@ import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
 import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
+import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -119,6 +120,10 @@ const routes: Routes = [
   {
     path: 'blogs/solution-libraries',
     component: SolutionLibrariesComponent,
+  },
+  {
+    path: 'blogs/facilitators',
+    component: FacilitatorsComponent,
   },
   {
     path: 'blogs/sample-preferred-states',
