@@ -34,7 +34,6 @@ export class PlaygroundStepComponent {
     menubar: true,
     selector: 'textarea',
     plugins: [
-      'a11ychecker',
       'advlist',
       'advcode',
       'advtable',
@@ -49,7 +48,6 @@ export class PlaygroundStepComponent {
       'anchor',
       'searchreplace',
       'visualblocks',
-      'powerpaste',
       'fullscreen',
       'formatpainter',
       'insertdatetime',

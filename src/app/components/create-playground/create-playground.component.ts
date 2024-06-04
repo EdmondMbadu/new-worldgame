@@ -89,6 +89,7 @@ export class CreatePlaygroundComponent {
     };
     this.myForm = this.fb.group({
       title: ['', [Validators.required]],
+      solutionArea: ['', [Validators.required]],
       emails: ['', Validators.compose([Validators.email])],
       mysdgs: ['', this.selectedSdgsNonEmpty()],
       evaluatorsEmails: [
@@ -125,6 +126,9 @@ export class CreatePlaygroundComponent {
 
   get title() {
     return this.myForm.get('title');
+  }
+  get solutionArea() {
+    return this.myForm.get('solutionArea');
   }
   get emails() {
     return this.myForm.get('emails');
@@ -288,6 +292,7 @@ export class CreatePlaygroundComponent {
     this.solution
       .createdNewSolution(
         this.myForm.value.title,
+        this.myForm.value.solutionArea,
         this.myForm.value.description,
         this.participantsEmails,
         this.evaluatorsEmails,

@@ -33,6 +33,7 @@ export class Solution {
   creationDate?: string;
   submissionDate?: string;
   numberofTimesEvaluated?: string;
+  solutionArea?: string;
 }
 
 export class Evaluation {

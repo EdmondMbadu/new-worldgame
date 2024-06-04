@@ -38,6 +38,7 @@ import { OperatingManualComponent } from './components/operating-manual/operatin
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
 import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
 import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
+import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -120,6 +121,10 @@ const routes: Routes = [
   {
     path: 'blogs/solution-libraries',
     component: SolutionLibrariesComponent,
+  },
+  {
+    path: 'blogs/ask-bucky',
+    component: AskBuckyComponent,
   },
   {
     path: 'blogs/facilitators',

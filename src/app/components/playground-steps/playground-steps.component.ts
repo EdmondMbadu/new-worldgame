@@ -200,9 +200,9 @@ export class PlaygroundStepsComponent implements OnInit {
 
   @Input() title?: string = 'World Hunger';
   steps: string[] = [
-    'Step I:  Define the Problem State',
-    'Step II: Envision the Preferred State',
-    'Step III: Develop Our Solution',
+    'Step I:  Defining the Problem State',
+    'Step II: Envisioning the Preferred State',
+    'Step III: Developing Our Solution',
     'Step IV: Implementation',
     'Step V: Strategy Review',
   ];
@@ -231,8 +231,8 @@ export class PlaygroundStepsComponent implements OnInit {
   ];
   AllQuestions: Array<Array<string>> = [
     [
-      'What is the problem you have chosen and why? (Document why you have chosen this problem.)',
-      'What are the symptoms of this problem? How do you measure it? (Show information)',
+      'What is the problem you have chosen and why?',
+      'What are the symptoms of this problem? How do you measure it?',
       'How many people does this problem impact in the world? Where is it most severe?',
       'What will happen if nothing is done to deal with this problem?',
     ],
@@ -247,7 +247,8 @@ export class PlaygroundStepsComponent implements OnInit {
       'How is our solution part of a circular, regenerative, more equitable economy?',
     ],
     [
-      `How much will our strategy cost?\n a. How much will it cost to test, for a proof-of-concept?`,
+      `a. How much will our strategy cost to test, for a proof-of-concept, in the country where
+      we will test and first implement the solution?`,
       'b. How much will our strategy cost to implement at scale?',
       'Where will we get the resources and funding needed to implement our solution, to do the above?',
       'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',

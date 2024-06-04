@@ -28,9 +28,11 @@ export class SolutionService {
 
   createdNewSolution(
     title: string,
+    solutionArea: string,
     description: string,
     participants: any,
     evaluators: any,
+
     // endDate: string,
 
     sdgs: string[]
@@ -40,6 +42,7 @@ export class SolutionService {
     const data = {
       solutionId: this.solutionId,
       title: title,
+      solutionArea: solutionArea,
       authorAccountId: this.auth.currentUser.uid,
       authorName: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
       authorEmail: this.auth.currentUser.email,

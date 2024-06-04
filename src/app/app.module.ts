@@ -74,6 +74,7 @@ import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
 import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
+import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 
 @NgModule({
   declarations: [
@@ -125,6 +126,7 @@ import { FacilitatorsComponent } from './blogs/facilitators/facilitators.compone
     SamplePrefferedStatesComponent,
     SolutionLibrariesComponent,
     FacilitatorsComponent,
+    AskBuckyComponent,
   ],
   imports: [
     BrowserModule,
