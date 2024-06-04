@@ -20,6 +20,67 @@
                                 <div class="flex flex-row space-x-10  " *ngFor="let ev of evaluationArray; let i=index">
                         
                                     <h1 class="text-gray-900 font-Nunito font-extralight w-44 py-4 dark:text-gray-200" >{{ev}}</h1>
+                                    <button  (mouseenter)="onHoverPopup(i)" (mouseleave)="onLeavePopup(i)" type="button"><svg class="w-5 h-5 ms-2  text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg><span class="sr-only">Show information</span></button>
+                                    <div *ngIf="displayTableEvaluator[i]" class="popup -ml-10 absolute overflow-x-auto shadow-lg sm:rounded-lg bg-white">
+                                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            <thead class="text-xs text-gray-700 uppercase dark:text-gray-400">
+                                                <tr>
+                                                    <th scope="col" class="px-6 py-3 bg-gray-50 dark:bg-gray-800">
+                                                        Score Bracket
+                                                    </th>
+                                                    <th scope="col" class="px-6 py-3">
+                                                        Description
+                                                    </th>
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800">
+                                                        1-3
+                                                    </th>
+                                                    <td class="px-6 py-4">
+                                                        <span class="font-bold">Initial Conceptualization</span> — Basic problem definition and rudimentary Preferred State.
+                                                       
+                                                    </td>
+                                                   
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800">
+                                                        4-6
+                                                    </th>
+                                                    <td class="px-6 py-4">
+                                                        <span class="font-bold">Preliminary Design</span> — More developed problem and Preferred State definitions. Basic
+                                                        solution idea and conceptual framework with practical elements. 
+
+                                                    </td>
+                                                   
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800">
+                                                        7-8
+                                                    </th>
+                                                    <td class="px-6 py-4">
+                                                        <span class="font-bold">Advanced Development</span> — Complete problem and Preferred State descriptions.
+                                                    </td>
+                                                   
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800">
+                                                        9-10
+                                                    </th>
+                                                    <td class="px-6 py-4">
+                                                        <span class="font-bold">Ready to Implement </span>— Problem state, Preferred State complete. Solution is fully
+                                                        developed, uses available technology, is implementable at scale, with costs of test and
+                                                        implementation worked out. 
+                                                    </td>
+                                                   
+                                                </tr>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                                 
 
                                         <div class="my-2">
                                             <mat-card-content> 

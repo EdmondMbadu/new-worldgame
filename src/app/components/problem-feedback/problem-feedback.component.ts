@@ -18,6 +18,7 @@ export class ProblemFeedbackComponent implements OnInit {
   user: User = {};
   id: any;
   solutionId: string = '';
+  displayTableEvaluator: boolean[] = [];
 
   teamMembers: User[] = [];
   timeElapsed: string = '';
@@ -76,6 +77,7 @@ export class ProblemFeedbackComponent implements OnInit {
       this.getMembers();
       this.comments = this.userSolution.comments!;
     });
+    this.displayTableEvaluator = new Array(6).fill(false);
   }
 
   getMembers() {
@@ -235,5 +237,14 @@ export class ProblemFeedbackComponent implements OnInit {
         }
       );
     });
+  }
+  openPopups(index: number) {
+    this.displayTableEvaluator[index] = true;
+  }
+  onHoverPopup(index: number) {
+    this.displayTableEvaluator[index] = !this.displayTableEvaluator[index];
+  }
+  onLeavePopup(index: number) {
+    this.displayTableEvaluator[index] = !this.displayTableEvaluator[index];
   }
 }

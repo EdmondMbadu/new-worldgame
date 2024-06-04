@@ -8,5 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class EvaluatorsComponent implements OnInit {
   constructor() {}
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    window.scroll(0, 0);
+  }
 }
