@@ -26,11 +26,24 @@
         <!-- <h3 *ngIf="step.startsWith('Step II')" class="mt-4 text-xl text-center dark:text-white">{{step}} 
             <span  *ngIf="step.startsWith('Step II')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/sample-preferred-states">(Sample Preferred States)</a> </span> 
         </h3> -->
+
+        <div *ngIf="step.startsWith('Step V:') && strategyReview!==''" class="flex flex-row mt-4">
+            <button (click)="chooseDefaultReview()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800">
+                <span class="{{chosenColorDefault}} dark:{{chosenColorDefault}} relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                Current
+                </span>
+                </button>
+                <button (click)="chooseStrategyReview()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
+                <span class="{{chosenColorReview}} dark:{{chooseStrategyReview}} relative px-5 py-2.5 transition-all ease-in duration-75  bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+                Previous Save
+                </span>
+                </button>
+        </div>
     </div>
 
     <!-- Questions -->
 
-    <div  class="  container flex flex-col mx-auto justify-center mt-8 px-2 lg:px-16 "  *ngFor="let question of questions; let i =index">
+    <div  class="  container flex flex-col mx-auto justify-center mt-4 px-2 lg:px-16 "  *ngFor="let question of questions; let i =index">
 
         <header class="inverted sm:mx-6 lg:mx-0">
             <h2 *ngIf="i==0 && step.startsWith('Step IV:')" class="pt-4 font-bold  text-gray-900 text-2xl dark:text-gray-200">Cost:</h2>
@@ -69,14 +82,14 @@
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
 
                     </svg></a>
-              <h3 class="font-semibold text-gray-900 dark:text-white">For more detailed info {{i}}</h3>
+              <h3 class="font-semibold text-gray-900 dark:text-white">For more detailed info </h3>
                 
                 </div>
                 <div data-popper-arrow></div>
             </div>
             
           </header>
-          <div class="md:max-w-2xl max-w-lg sm:mx-auto mx-6" id="box-{{i}}">
+          <div class="md:max-w-full max-w-lg sm:mx-auto mx-6 " id="box-{{i}}">
             <!-- <ckeditor
             class="boxing"
             id="ck-editor"
@@ -94,9 +107,31 @@
              
               >
             </ckeditor> -->
+
+            <!-- another risk business DO Not remove this useless code
+            it allows to compare staticContents with the dynamic. It is purely utilitarian -->
+            <div class="hidden">
+                <editor [apiKey]=apiKey 
+                [init]="editorConfig"
+                [(ngModel)]="staticContentArray[i]"
+                #contentField="ngModel"
+                class=""
+                  
+    
+                     ></editor>
+            </div>
+            <editor [apiKey]=apiKey 
+            [init]="editorConfig"
+            [(ngModel)]="strategyReview"
+            #contentField="ngModel"
+            *ngIf="step.startsWith('Step V:') && strategyReviewSelected"
+              
+
+                 ></editor>
             <editor [apiKey]=apiKey 
             [init]="editorConfig"
             [(ngModel)]="contentsArray[i]"
+            *ngIf="!strategyReviewSelected"
             #contentField="ngModel"
               
 

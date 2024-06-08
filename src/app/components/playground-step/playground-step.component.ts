@@ -24,11 +24,23 @@ export interface FeedbackRequest {
   styleUrls: ['./playground-step.component.css'],
 })
 export class PlaygroundStepComponent {
+  strategyReviewSelected: boolean = false;
+  defaultReviewSelected = true;
+  chosenColorDefault = 'bg-teal-400';
+  chosenColorReview = '';
   loader: any;
+  titles = [
+    `<h1 class="text-left text-xl font-bold my-4"> Problem State </h1>`,
+    `<h1 class="text-left text-xl font-bold my-4"> Preferred State </h1>`,
+    `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
+    `<h1 class="text-left text-xl font-bold  my-4"> Implementation </h1>`,
+  ];
+  array: string[] = [];
   apiKey: string = environment.tinyApiKey;
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
+  strategyReview: string = '';
   editorConfig: any = {
     height: 500,
     menubar: true,
@@ -118,6 +130,11 @@ export class PlaygroundStepComponent {
         this.discussion = this.currentSolution.discussion;
         this.displayTimeDiscussion();
       }
+      this.strategyReview =
+        this.currentSolution.strategyReview !== undefined
+          ? this.currentSolution.strategyReview
+          : '';
+      console.log('strategy review saved :', this.strategyReview);
       // fill the evaluator class
       this.currentSolution.evaluators?.forEach((ev: any) => {
         this.evaluators.push(ev);
@@ -138,6 +155,20 @@ export class PlaygroundStepComponent {
     });
   }
 
+  chooseStrategyReview() {
+    this.strategyReviewSelected = true;
+    this.chosenColorDefault = '';
+    this.chosenColorReview = 'bg-teal-400';
+    this.defaultReviewSelected = false;
+    this.staticContentArray[0] = this.strategyReview;
+  }
+  chooseDefaultReview() {
+    this.defaultReviewSelected = true;
+    this.chosenColorDefault = 'bg-teal-400';
+    this.chosenColorReview = '';
+    this.strategyReviewSelected = false;
+    this.staticContentArray[0] = this.contentsArray[0];
+  }
   initializeContents() {
     this.contentsArray = [];
     this.staticContentArray = [];
@@ -175,10 +206,11 @@ export class PlaygroundStepComponent {
   updatePlayground(current: number) {
     // only save data if both are different.
 
-    this.saveSolutionStatus();
+    // this.saveSolutionStatus();
 
     // console.log('The data', this.questionsAndAnswersTracker);
     if (this.buttonText === 'Next') {
+      this.saveSolutionStatus();
       current++;
       this.buttonInfoEvent.emit(current);
     } else {
@@ -191,24 +223,46 @@ export class PlaygroundStepComponent {
   accept() {
     this.submitDisplay = false;
     this.submiResponse = true;
+    this.saveSolutionStatus();
     this.finallySubmitSolution();
     // Reset submission response to allow future submissions, but only after current process is complete
     this.submiResponse = false;
   }
 
   finallySubmitSolution() {
-    try {
-      this.solution
-        .submitSolution(this.solutionId, this.contentsArray[0])
-        .then(() => {
-          console.log('Submission successful, sending request for evaluation.');
-          this.submissionComplete.emit(); // Emit event to parent
-          this.toggleCongrats();
-          // Additional logic on successful submission
-        });
-    } catch (error) {
-      alert('An error occured while submitting the solution. Try again');
-      console.log(error);
+    // check if one is submitting what was previously saved
+    if (this.strategyReviewSelected) {
+      try {
+        this.solution
+          .submitSolution(this.solutionId, this.strategyReview)
+          .then(() => {
+            console.log(
+              'Submission successful, sending request for evaluation.'
+            );
+            this.submissionComplete.emit(); // Emit event to parent
+            this.toggleCongrats();
+            // Additional logic on successful submission
+          });
+      } catch (error) {
+        alert('An error occured while submitting the solution. Try again');
+        console.log(error);
+      }
+    } else {
+      try {
+        this.solution
+          .submitSolution(this.solutionId, this.contentsArray[0])
+          .then(() => {
+            console.log(
+              'Submission successful, sending request for evaluation.'
+            );
+            this.submissionComplete.emit(); // Emit event to parent
+            this.toggleCongrats();
+            // Additional logic on successful submission
+          });
+      } catch (error) {
+        alert('An error occured while submitting the solution. Try again');
+        console.log(error);
+      }
     }
   }
 
@@ -229,25 +283,16 @@ export class PlaygroundStepComponent {
 
   saveSolutionStatus() {
     if (
-      JSON.stringify(this.contentsArray) !==
-      JSON.stringify(this.staticContentArray)
+      // check if this is the strategy review phase
+      this.questionsTitles.length === 1 &&
+      this.currentSolution.status !== undefined
     ) {
-      for (let i = 0; i < this.contentsArray.length; i++) {
-        this.questionsAndAnswersTracker![`${this.questionsTitles[i]}`] =
-          this.contentsArray[i];
-      }
-
       if (
-        // this is some risky business. Say that you saved but don't save.
-        // this is because we want to keep the last changes for submission.
-        this.questionsTitles.length === 1 &&
-        this.currentSolution.status !== undefined
+        this.strategyReviewSelected &&
+        this.strategyReview !== this.staticContentArray[0]
       ) {
-        this.saveSuccess = true;
-      } else {
-        // save solution
         this.solution
-          .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
+          .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
           .then(() => {
             this.saveSuccess = true;
           })
@@ -256,6 +301,42 @@ export class PlaygroundStepComponent {
             // alert('Error launching solution ');
           });
       }
+      // check if something has been changed on the strategy review
+      else if (this.contentsArray[0] !== this.staticContentArray[0]) {
+        // this.saveSuccess = true;
+        this.staticContentArray[0] = this.contentsArray[0];
+        // if (this.strategyReview === '') {
+        this.solution
+          .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
+          .then(() => {
+            this.saveSuccess = true;
+          })
+          .catch((error) => {
+            this.saveError = true;
+            // alert('Error launching solution ');
+          });
+        // }
+        // save strategy review
+      }
+    } else if (
+      JSON.stringify(this.contentsArray) !==
+      JSON.stringify(this.staticContentArray)
+    ) {
+      for (let i = 0; i < this.contentsArray.length; i++) {
+        this.questionsAndAnswersTracker![`${this.questionsTitles[i]}`] =
+          this.contentsArray[i];
+      }
+
+      // save solution
+      this.solution
+        .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
+        .then(() => {
+          this.saveSuccess = true;
+        })
+        .catch((error) => {
+          this.saveError = true;
+          // alert('Error launching solution ');
+        });
     }
   }
 
@@ -295,34 +376,45 @@ export class PlaygroundStepComponent {
 
       return prefixComparison;
     });
-    let styles = `text-left text-xl font-bold  my-4`;
+    this.array = array;
     let titles = [
-      `<h1 class="text-left text-xl font-bold my-4"> Preferred State  </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> Problem State </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> Preferred State </h1>`,
       `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
-      `<h1 class="text-left text-xl font-bold  my-4"> Implementation</h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Implementation </h1>`,
     ];
 
     // console.log(' all the keys', array);
 
     // console.log('what is content array content', this.contentsArray);
 
-    this.contentsArray[0] += `<h1 class="text-left text-xl font-bold my-4"> Problem State    </h1>`;
+    let result = []; // Initialize the result array
+    let j = 0; // Initialize the title index
 
-    for (let i = 0, t = 1, j = 0; i < array.length - 1; i++, t++) {
+    // Add the first title before any status
+    result.push(titles[0]);
+    for (let i = 0; i < array.length; i++) {
+      // Add the current status to the result
+      result.push(this.currentSolution.status![array[i]]);
+
+      // Check for the switch and add the next title accordingly
       if (
-        t < array.length - 2 &&
-        !array[i].startsWith(array[t].substring(0, 2))
+        i < array.length - 1 &&
+        !array[i].startsWith(array[i + 1].substring(0, 2))
       ) {
-        // console.log('displaying ', array[i], array[t]);
-        this.contentsArray[0] += titles[j];
-        j++;
+        j++; // Move to the next title
+        result.push(titles[j]); // Add the next title
       }
-      this.contentsArray[0] += `\n${this.currentSolution.status![array[i]]}`;
-      // console.log('contents array ', this.contentsArray[0]);
-      this.staticContentArray[0] += `\n${
-        this.currentSolution.status![array[i]]
-      }`;
     }
+
+    console.log('result ', result);
+    // Handle the last element
+    // result.push(this.currentSolution.status![array[array.length - 1]]);
+
+    // Convert result array to string or any format you need
+
+    this.staticContentArray[0] = result.join('\n');
+    this.contentsArray[0] = result.join('\n');
   }
   onHoverPopup(index: number) {
     this.displayPopups[index] = true;

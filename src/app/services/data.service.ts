@@ -69,8 +69,8 @@ export class DataService implements OnInit {
       '../../../assets/img/sdg16.png',
     'SDG16  Peace, Justice And Strong Institutions-link':
       'https://sdgs.un.org/goals/goal16',
-    'SDG17  Partnership For ThE Goals': '../../../assets/img/sdg17.png',
-    'SDG17  Partnership For ThE Goals-link': 'https://sdgs.un.org/goals/goal17',
+    'SDG17  Partnership For The Goals': '../../../assets/img/sdg17.png',
+    'SDG17  Partnership For The Goals-link': 'https://sdgs.un.org/goals/goal17',
   };
   ngOnInit(): void {}
   private getInitialTheme(): string {
@@ -195,6 +195,36 @@ export class DataService implements OnInit {
     const regex =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regex.test(email);
+  }
+
+  deepEqual(obj1: any, obj2: any): boolean {
+    if (obj1 === obj2) {
+      return true; // same reference
+    }
+
+    if (
+      typeof obj1 !== 'object' ||
+      obj1 === null ||
+      typeof obj2 !== 'object' ||
+      obj2 === null
+    ) {
+      return false; // not objects or one is null
+    }
+
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+
+    if (keys1.length !== keys2.length) {
+      return false; // different number of keys
+    }
+
+    for (const key of keys1) {
+      if (!keys2.includes(key) || !this.deepEqual(obj1[key], obj2[key])) {
+        return false; // keys don't match or values don't match
+      }
+    }
+
+    return true;
   }
 
   UnfollowUser() {}

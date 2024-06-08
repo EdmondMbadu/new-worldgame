@@ -250,7 +250,15 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
 
-  populateArrayOfSolutions() {}
+  saveSolutionStrategyReview(solutionId: string, review: string) {
+    const data = {
+      strategyReview: review,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+    return solutionRef.set(data, { merge: true });
+  }
   saveSolutionStatus(solutionId: string, status: any) {
     const data = {
       status: status,

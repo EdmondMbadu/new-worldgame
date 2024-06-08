@@ -34,6 +34,7 @@ export class Solution {
   submissionDate?: string;
   numberofTimesEvaluated?: string;
   solutionArea?: string;
+  strategyReview?: string;
 }
 
 export class Evaluation {
