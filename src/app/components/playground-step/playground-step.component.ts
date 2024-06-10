@@ -26,7 +26,7 @@ export interface FeedbackRequest {
 export class PlaygroundStepComponent {
   strategyReviewSelected: boolean = false;
   defaultReviewSelected = true;
-  chosenColorDefault = 'bg-teal-400';
+  chosenColorDefault = 'font-bold text-xl';
   chosenColorReview = '';
   loader: any;
   titles = [
@@ -158,13 +158,13 @@ export class PlaygroundStepComponent {
   chooseStrategyReview() {
     this.strategyReviewSelected = true;
     this.chosenColorDefault = '';
-    this.chosenColorReview = 'bg-teal-400';
+    this.chosenColorReview = 'font-bold text-xl';
     this.defaultReviewSelected = false;
     this.staticContentArray[0] = this.strategyReview;
   }
   chooseDefaultReview() {
     this.defaultReviewSelected = true;
-    this.chosenColorDefault = 'bg-teal-400';
+    this.chosenColorDefault = 'font-bold text-xl';
     this.chosenColorReview = '';
     this.strategyReviewSelected = false;
     this.staticContentArray[0] = this.contentsArray[0];
