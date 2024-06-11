@@ -318,6 +318,7 @@ export class PlaygroundStepComponent {
         // }
         // save strategy review
       }
+      this.chooseStrategyReview();
     } else if (
       JSON.stringify(this.contentsArray) !==
       JSON.stringify(this.staticContentArray)
@@ -468,18 +469,5 @@ export class PlaygroundStepComponent {
   toggleCongratsAndDone() {
     this.displayCongrats = !this.displayCongrats;
     this.router.navigate(['/home']);
-  }
-  testCORS() {
-    fetch('https://us-central1-new-worldgame.cloudfunctions.net/uploadImage', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ',
-      },
-      body: JSON.stringify({ data: 'test' }),
-    })
-      .then((response) => response.text())
-      .then((data) => console.log(data))
-      .catch((error) => console.error('Error:', error));
   }
 }

@@ -128,7 +128,9 @@
               
 
                  ></editor>
-            <editor [apiKey]=apiKey 
+        <div class="">
+            <editor [apiKey]=apiKey
+            class="min-w-[40rem]" 
             [init]="editorConfig"
             [(ngModel)]="contentsArray[i]"
             *ngIf="!strategyReviewSelected"
@@ -136,6 +138,8 @@
               
 
                  ></editor>
+        </div>
+           
           </div>
           <div *ngIf="isNotEmpty(contentsArray[i]) && contentField.touched " class="text-red-400" >
             All text areas must be filled with something ...
