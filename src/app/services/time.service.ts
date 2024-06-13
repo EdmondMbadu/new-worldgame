@@ -13,44 +13,58 @@ export class TimeService {
     return `${month}-${day}-${year}`;
   }
 
+  // timeAgo(dateString: string) {
+  //   if (!dateString) return '';
+  //   const [month, day, year, hours, minutes, seconds] = dateString
+  //     .split('-')
+  //     .map(Number);
+  //   const givenDate = new Date(year, month - 1, day, hours, minutes, seconds);
+  //   const now = new Date();
+
+  //   const secondsDiff = Math.floor(
+  //     (now.getTime() - givenDate.getTime()) / 1000
+  //   );
+  //   if (secondsDiff < 60) {
+  //     return `${secondsDiff} second${secondsDiff > 1 ? 's' : ''} ago`;
+  //   }
+
+  //   const minutesDiff = Math.floor(secondsDiff / 60);
+  //   if (minutesDiff < 60) {
+  //     return `${minutesDiff} minute${minutesDiff > 1 ? 's' : ''} ago`;
+  //   }
+
+  //   const hoursDiff = Math.floor(minutesDiff / 60);
+  //   if (hoursDiff < 24) {
+  //     return `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ago`;
+  //   }
+
+  //   const daysDiff = Math.floor(hoursDiff / 24);
+  //   if (daysDiff < 30) {
+  //     return `${daysDiff} day${daysDiff > 1 ? 's' : ''} ago`;
+  //   }
+
+  //   // Rough estimate for months, not accounting for varying days in months
+  //   const monthsDiff = Math.floor(daysDiff / 30);
+  //   if (monthsDiff < 12) {
+  //     return `${monthsDiff} month${monthsDiff > 1 ? 's' : ''} ago`;
+  //   }
+
+  //   const yearsDiff = Math.floor(monthsDiff / 12);
+  //   return `${yearsDiff} year${yearsDiff > 1 ? 's' : ''} ago`;
+  // }
   timeAgo(dateString: string) {
     if (!dateString) return '';
+
     const [month, day, year, hours, minutes, seconds] = dateString
       .split('-')
       .map(Number);
     const givenDate = new Date(year, month - 1, day, hours, minutes, seconds);
-    const now = new Date();
 
-    const secondsDiff = Math.floor(
-      (now.getTime() - givenDate.getTime()) / 1000
-    );
-    if (secondsDiff < 60) {
-      return `${secondsDiff} second${secondsDiff > 1 ? 's' : ''} ago`;
-    }
+    // Format the date as "Month day, year"
+    const options: any = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = givenDate.toLocaleDateString('en-US', options);
 
-    const minutesDiff = Math.floor(secondsDiff / 60);
-    if (minutesDiff < 60) {
-      return `${minutesDiff} minute${minutesDiff > 1 ? 's' : ''} ago`;
-    }
-
-    const hoursDiff = Math.floor(minutesDiff / 60);
-    if (hoursDiff < 24) {
-      return `${hoursDiff} hour${hoursDiff > 1 ? 's' : ''} ago`;
-    }
-
-    const daysDiff = Math.floor(hoursDiff / 24);
-    if (daysDiff < 30) {
-      return `${daysDiff} day${daysDiff > 1 ? 's' : ''} ago`;
-    }
-
-    // Rough estimate for months, not accounting for varying days in months
-    const monthsDiff = Math.floor(daysDiff / 30);
-    if (monthsDiff < 12) {
-      return `${monthsDiff} month${monthsDiff > 1 ? 's' : ''} ago`;
-    }
-
-    const yearsDiff = Math.floor(monthsDiff / 12);
-    return `${yearsDiff} year${yearsDiff > 1 ? 's' : ''} ago`;
+    return formattedDate;
   }
 
   todaysDate(): string {
