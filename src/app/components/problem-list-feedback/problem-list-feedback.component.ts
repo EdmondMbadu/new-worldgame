@@ -28,7 +28,7 @@ export class ProblemListFeedbackComponent implements OnInit {
     window.scroll(0, 0);
   }
 
-  @Input() title: string = 'Strategy Evaluation';
+  @Input() title: string = 'Evalute a Strategy';
   @Input() path: string = '/problem-feedback';
   problems: string[] = [
     'Ending Poverty',
