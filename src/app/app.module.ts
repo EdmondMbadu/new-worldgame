@@ -75,6 +75,7 @@ import { EditorModule } from '@tinymce/tinymce-angular';
 import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
 import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
 import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
+import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
 
 @NgModule({
   declarations: [
@@ -127,6 +128,7 @@ import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
     SolutionLibrariesComponent,
     FacilitatorsComponent,
     AskBuckyComponent,
+    StateOfWorldComponent,
   ],
   imports: [
     BrowserModule,

@@ -39,6 +39,7 @@ import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/
 import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
 import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
 import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
+import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -117,6 +118,10 @@ const routes: Routes = [
   {
     path: 'blogs/tournament',
     component: TournamentComponent,
+  },
+  {
+    path: 'blogs/state-of-world',
+    component: StateOfWorldComponent,
   },
   {
     path: 'blogs/solution-libraries',
