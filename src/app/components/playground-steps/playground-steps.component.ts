@@ -117,6 +117,27 @@ export class PlaygroundStepsComponent implements OnInit {
             this.currentUserIsFactChecker = true;
         }
       });
+      this.popupStyles = this.teamMembers.map(() => ({}));
+    }
+  }
+
+  adjustPopupPosition(event: MouseEvent, index: number) {
+    const popup = event.target as HTMLElement;
+    const rect = popup.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const popupWidth = rect.width;
+
+    // Adjust the position if it overflows the right edge
+    if (rect.right > windowWidth) {
+      this.popupStyles[index] = {
+        right: '0',
+        left: 'auto',
+      };
+    } else {
+      this.popupStyles[index] = {
+        left: '0',
+        right: 'auto',
+      };
     }
   }
 
@@ -259,6 +280,7 @@ export class PlaygroundStepsComponent implements OnInit {
     ],
     ['Review Your Entire Strategy and Submit'],
   ];
+  popupStyles: any = [];
 
   updatePlayground(current: number) {
     this.display[this.currentIndexDisplay] = false;
