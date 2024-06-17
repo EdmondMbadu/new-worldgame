@@ -120,7 +120,7 @@
                     </div>
                     
                     
-                        <div class="flex flex-row -space-x-1 overflow-x-auto" >
+                        <div class="flex flex-wrap -space-x-1 overflow-x-auto" >
                             <div *ngFor="let user of teamMembers; let i= index" class="flex-shrink-0" >
                                 <div *ngIf="user.uid === auth.currentUser.uid" >
                                     <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
