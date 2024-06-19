@@ -251,6 +251,7 @@ export class SolutionService {
   }
 
   saveSolutionStrategyReview(solutionId: string, review: string) {
+    console.log('saving solution strategy review', review);
     const data = {
       strategyReview: review,
     };

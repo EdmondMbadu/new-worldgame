@@ -6,8 +6,8 @@
                     <h1  class="  px-2  font-bold ">Designers <br> <span class="text-gray-500 font-light text-sm dark:text-gray-200"> {{timeElapsed}}</span></h1>
              
                 </div>
-                <div class="flex flex-wrap justify-between overflow-x-auto">
-                <div class="flex flex-row -space-x-1 flex-shrink-0"*ngFor="let user of teamMembers; let i= index" >
+                <div class="flex flex-wrap justify-between ">
+                <div class="flex flex-wrap -space-x-1 flex-shrink-0"*ngFor="let user of teamMembers; let i= index" >
                     <!-- <span *ngIf="user.status==='online'" class="absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
                     <!-- <span *ngIf="user.status==='offline'" class="absolute w-4 h-4 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
                     <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
@@ -77,10 +77,10 @@
                     </div>
               
                 </div>
-                <div class="flex flex-row ml-56 max-w-sm">
+                <div class="flex flex-wrap  ml-20 max-w-sm ">
         
              
-                    <a *ngFor="let sd of solution.sdgs " href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"  class=" rounded-lg    mb-4" >
+                    <a *ngFor="let sd of solution.sdgs " href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"  class=" rounded-lg    mb-4 " >
                         <img  class=" mx-1 w-14 rounded-lg    mb-4" [src]="data.sdgsPaths[sd!]"alt="">
                         <!-- <h1>{{data.sdgsPaths[solution.sdg!+'-link']}}</h1> -->
                     </a>
