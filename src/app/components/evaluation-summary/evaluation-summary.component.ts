@@ -22,6 +22,7 @@ export class EvaluationSummaryComponent {
   evaluations: any[] = [];
   evaluators: User[] = [];
   timeElapsed: string = '';
+  evaluatorDictionary: { [key: string]: User } = {};
   commentTimeElapsed: any;
   numberOfcomments: number = 0;
   commentUserNames: any;
@@ -47,24 +48,40 @@ export class EvaluationSummaryComponent {
         this.currentSolution.evaluationSummary!
       );
       if (this.currentSolution) {
-        this.mapping();
         this.getEvaluators();
+        this.mapping();
+        // this.getEvaluators().then(() => {
+        //   this.mapping();
+        // });
       }
     });
   }
 
   mapping() {
-    if (this.currentSolution.evaluationDetails) {
+    console.log(' are there evaluators', this.evaluators);
+    this.currentSolution!.evaluationDetails!.sort((a: any, b: any) => {
+      if (a.evaluatorId < b.evaluatorId) {
+        return -1;
+      }
+      if (a.evaluatorId > b.evaluatorId) {
+        return 1;
+      }
+      return 0;
+    });
+    if (this.currentSolution.evaluationDetails!) {
       for (let a of this.currentSolution.evaluationDetails!) {
+        console.log('here  ai m ', a.evaluator);
         this.colors.push(this.data.mapEvaluationToColors(a));
         this.evaluations.push(this.data.mapEvaluationToNumeric(a));
       }
     }
   }
+
   getEvaluators() {
     this.evaluators = [];
 
     if (this.currentSolution.evaluators) {
+      let i = 0;
       for (const evaluator of this.currentSolution.evaluators) {
         let email = evaluator.name;
         if (email && evaluator.evaluated === 'true') {
@@ -75,8 +92,23 @@ export class EvaluationSummaryComponent {
               data[0] &&
               !this.evaluators.some((member) => member.email === data[0].email)
             ) {
+              this.currentSolution.evaluators![i]!.user! = data[0];
+              this.evaluatorDictionary[data[0].uid!] = data[0]; // Store in dictionary
+              console.log('here is theh dctionnary', this.evaluatorDictionary);
               this.evaluators.push(data[0]);
+
+              // need to be looked at closely soon.
+              this.evaluators.sort((a: any, b: any) => {
+                if (a.uid < b.uid) {
+                  return -1;
+                }
+                if (a.uid > b.uid) {
+                  return 1;
+                }
+                return 0;
+              });
             }
+            i++;
           });
         }
       }

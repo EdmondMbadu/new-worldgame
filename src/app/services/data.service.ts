@@ -134,6 +134,7 @@ export class DataService implements OnInit {
     return userRef.set(data, { merge: true });
   }
   mapEvaluationToNumeric(evaluation: Evaluation) {
+    let user: any = {};
     if (evaluation) {
       return {
         average: Math.floor(parseFloat(evaluation.average!) * 10),
@@ -143,6 +144,7 @@ export class DataService implements OnInit {
         economical: parseFloat(evaluation.economical!) * 10,
         equitable: parseFloat(evaluation.equitable!) * 10,
         understandable: parseFloat(evaluation.understandable!) * 10,
+        evaluator: user,
       };
     } else {
       return {};

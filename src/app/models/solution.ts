@@ -1,3 +1,5 @@
+import { User } from '../models/user';
+
 export class Solution {
   solutionId?: string;
   authorEmail?: string;
@@ -47,11 +49,13 @@ export class Evaluation {
   equitable?: string;
   understandable?: string;
   comment?: string;
+  evaluator?: User;
 }
 
 export class Evaluator {
   name?: string;
   evaluated?: string;
+  user?: User;
 }
 
 export class Comment {
