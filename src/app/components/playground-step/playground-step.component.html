@@ -90,27 +90,70 @@
             
           </header>
           <div class="md:max-w-full max-w-lg sm:mx-auto mx-6 " id="box-{{i}}">
-            <!-- <ckeditor
-            class="boxing"
-            id="ck-editor"
+
+            <div class="hidden">
+                <ckeditor
+                class="boxing"
+                id="ck-editor"
+                
+                  [editor]="Editor"
             
-              [editor]="Editor"
-        
-              data=""
-             
-              (ready)="onReady($event)"
-             placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
-              [(ngModel)]="contentsArray[i]"
-              
-              #contentField="ngModel"
-             
-             
-              >
-            </ckeditor> -->
+                  data=""
+                 
+                  (ready)="onReady($event)"
+                 placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
+                 [(ngModel)]="staticContentArray[i]"
+                  
+                  #contentField="ngModel"
+                 
+                 
+                  >
+                </ckeditor>
+                
+            </div>
+
+          
+                <ckeditor
+                class="boxing"
+                id="ck-editor"
+                
+                  [editor]="Editor"
+            
+                  data=""
+                 
+                  (ready)="onReady($event)"
+                 placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
+                 [(ngModel)]="strategyReview"
+                 *ngIf="step.startsWith('Step V:') && strategyReviewSelected"
+                  #contentField="ngModel"
+                 
+                 
+                  >
+                </ckeditor>
+         
+           
+         
+                <ckeditor
+                class="boxing"
+                id="ck-editor"
+                
+                  [editor]="Editor"
+            
+                  data=""
+                 
+                  (ready)="onReady($event)"
+                 placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
+                 *ngIf="!strategyReviewSelected"
+                 [(ngModel)]="contentsArray[i]"
+                  #contentField="ngModel"
+                 
+                 
+                  >
+                </ckeditor>
 
             <!-- another risk business DO Not remove this useless code
             it allows to compare staticContents with the dynamic. It is purely utilitarian -->
-            <div class="hidden">
+            <!-- <div class="hidden">
                 <editor [apiKey]=apiKey 
                 [init]="editorConfig"
                 [(ngModel)]="staticContentArray[i]"
@@ -138,7 +181,7 @@
               
 
                  ></editor>
-        </div>
+        </div> -->
            
           </div>
           <div *ngIf="isNotEmpty(contentsArray[i]) && contentField.touched " class="text-red-400" >

@@ -10,7 +10,7 @@
                         (hovered)="toggleHover($event)"
                         (dropped)="startUpload($event)"
                         [class.hovering]="isHovering">
-                        <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
+                        <input type="file " id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
 
                        
                             <img  *ngIf="profilePicturePath !=='' " [src]="profilePicturePath"   class="rounded-full w-32" alt="">
