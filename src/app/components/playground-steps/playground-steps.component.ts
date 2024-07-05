@@ -252,7 +252,7 @@ export class PlaygroundStepsComponent implements OnInit {
   ];
   AllQuestions: Array<Array<string>> = [
     [
-      'What is the problem you have chosen and why?',
+      'What is the problem you have chosen and why is it important?',
       'What are the symptoms of this problem? How do you measure it?',
       'How many people does this problem impact in the world? Where is it most severe?',
       'What will happen if nothing is done to deal with this problem?',
