@@ -23,7 +23,6 @@ import { JoinTournamentComponent } from './components/join-tournament/join-tourn
 import { PrivacyComponent } from './blogs/privacy/privacy.component';
 import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
 import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
-import { BlogsComponent } from './blogs/blogs/blogs.component';
 import { TournamentComponent } from './blogs/tournament/tournament.component';
 import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
 import { NwgNewsComponent } from './blogs/nwg-news/nwg-news.component';
@@ -91,7 +90,6 @@ const routes: Routes = [
   {
     path: 'operating-manual',
     component: OperatingManualComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'how-to',
@@ -110,10 +108,10 @@ const routes: Routes = [
     path: 'privacy',
     component: PrivacyComponent,
   },
-  {
-    path: 'blogs',
-    component: BlogsComponent,
-  },
+  // {
+  //   path: 'blogs',
+  //   component: BlogsComponent,
+  // },
 
   {
     path: 'blogs/tournament',

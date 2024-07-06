@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
+import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
   selector: 'app-operating-manual',
@@ -7,8 +8,16 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrl: './operating-manual.component.css',
 })
 export class OperatingManualComponent implements OnInit {
-  constructor(public auth: AuthService) {}
   ngOnInit(): void {
     window.scroll(0, 0);
+  }
+  isLoggedIn: boolean = false;
+  constructor(public auth: AuthService, private solution: SolutionService) {
+    if (
+      this.auth.currentUser !== null &&
+      this.auth.currentUser.email !== undefined
+    ) {
+      this.isLoggedIn = true;
+    }
   }
 }

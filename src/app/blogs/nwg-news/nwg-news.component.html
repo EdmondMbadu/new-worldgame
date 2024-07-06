@@ -1,5 +1,11 @@
 <div class="dark:bg-slate-900  min-h-screen min-w-max">
-    <app-navbar [currentPageNews]="true"></app-navbar>
+    <div *ngIf="!isLoggedIn">
+        <app-navbar></app-navbar>
+      </div>
+      <div *ngIf="isLoggedIn">
+        <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
+    
     <section class="bg-white dark:bg-gray-900 mt-12">
         <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
             <div class="mx-auto max-w-screen-md sm:text-center">

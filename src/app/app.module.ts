@@ -56,7 +56,7 @@ import { JoinTournamentComponent } from './components/join-tournament/join-tourn
 import { PrivacyComponent } from './blogs/privacy/privacy.component';
 import { CustomGptDesignScienceStoryboardComponent } from './blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
 import { EvaluatorsComponent } from './blogs/evaluators/evaluators.component';
-import { BlogsComponent } from './blogs/blogs/blogs.component';
+
 import { TournamentComponent } from './blogs/tournament/tournament.component';
 import { ArchivePicturesComponent } from './blogs/archive-pictures/archive-pictures.component';
 import { FooterComponent } from './components/footer/footer.component';
@@ -110,7 +110,6 @@ import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.com
     PrivacyComponent,
     CustomGptDesignScienceStoryboardComponent,
     EvaluatorsComponent,
-    BlogsComponent,
     TournamentComponent,
     ArchivePicturesComponent,
     FooterComponent,

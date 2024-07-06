@@ -1,5 +1,12 @@
 <div class="dark:bg-slate-900 min-h-screen min-w-max ">
+
+  <div *ngIf="!isLoggedIn">
     <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+  </div>
+
     
 <div class="flex mt-20">
     <!-- Main content -->

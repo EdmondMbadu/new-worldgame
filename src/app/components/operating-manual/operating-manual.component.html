@@ -1,7 +1,14 @@
 <div class="dark:bg-slate-900 min-h-screen min-w-full min-w-max">
     
+    <div *ngIf="!isLoggedIn">
+        <app-navbar></app-navbar>
+      </div>
+      <div *ngIf="isLoggedIn">
+        <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
 
-    <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" ></app-navbar>
+
+    
     <aside aria-label="Related articles" class="py-24 mt-6  bg-gray-50 dark:bg-slate-900">
         <div class="px-8 mx-auto max-w-screen-xl ">
             <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">Operating Manual</h2>
@@ -80,7 +87,7 @@
                     </a>
                 </article>
                 <article class="max-w-xs mb-4 md:mb-0">
-                    <a target="_blank" href="https://www.youtube.com/@globalsolutionslab6445/videos">
+                    <a  href="https://www.youtube.com/@globalsolutionslab6445/videos">
                         <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fbackground-videos.png?alt=media&token=06b311b9-a35d-426e-84d8-814037178300" class="mb-5 rounded-lg  h-40 md:h-auto" alt="Image 1">
                     </a>
                     <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
@@ -92,65 +99,65 @@
                     </a>
                 </article>
                 <article class="max-w-xs mb-4 md:mb-0">
-                    <a target="_blank" routerLink="/blogs/sample-preferred-states">
+                    <a routerLink="/blogs/sample-preferred-states">
                         <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/news-anchor%2Fnewworld-news.png?alt=media&token=a011df9a-8877-4d8d-a0b3-2dddf8dc4e6b" class="mb-5 rounded-lg  h-40 md:h-auto" alt="Image 1">
                     </a>
                     <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                        <a target="_blank" routerLink="/blogs/sample-preferred-states">Sample Preferred States</a>
+                        <a  routerLink="/blogs/sample-preferred-states">Sample Preferred States</a>
                     </h2>
                     <p class="mb-4 text-gray-500 dark:text-gray-400">The below are taken from previous work by participants in the 2005-2023 Global Solutions
                         Lab, published in the Designs for a World That Works for All, Volumes I-III....</p>
-                    <a target="_blank" routerLink="/blogs/sample-preferred-states" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
+                    <a routerLink="/blogs/sample-preferred-states" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
                        Read in ... minutes.
                     </a>
                 </article>
                 <article class="max-w-xs mb-4 md:mb-0">
-                    <a target="_blank" routerLink="/nwg-news">
+                    <a  routerLink="/nwg-news">
                         <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/news-anchor%2Fnewworld-news.png?alt=media&token=a011df9a-8877-4d8d-a0b3-2dddf8dc4e6b" class="mb-5 rounded-lg  h-40 md:h-auto" alt="Image 1">
                     </a>
                     <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                        <a target="_blank" routerLink="/nwg-news">NewWorld News</a>
+                        <a  routerLink="/nwg-news">NewWorld News</a>
                     </h2>
                     <p class="mb-4 text-gray-500 dark:text-gray-400">Weekly News on solutions being developed on the NewWorld Game platform</p>
-                    <a target="_blank" routerLink="/nwg-news" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
+                    <a  routerLink="/nwg-news" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
                        
                     </a>
                 </article>
                 <article class="max-w-xs mb-4 md:mb-0">
-                    <a target="_blank" routerLink="/blogs/solution-libraries">
+                    <a  routerLink="/blogs/solution-libraries">
                         <img src="https://i.postimg.cc/Z5Pp7CHs/A-vibrant-and-futuristic-library-scene-showcasing-various-global-solution-databases-and-libraries-T.jpg" class="mb-5 rounded-lg  h-40 md:h-auto" alt="Image 1">
                     </a>
                     <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                        <a target="_blank" routerLink="/blogs/solution-libraries">Global Solutions Libraries/Databases:
+                        <a  routerLink="/blogs/solution-libraries">Global Solutions Libraries/Databases:
                             Options for Changing the World</a>
                     </h2>
                     <p class="mb-4 text-gray-500 dark:text-gray-400">Check out the following for ideas, alternatives, technology for possible use in your strategy:</p>
-                    <a target="_blank" routerLink="/blogs/solution-libraries" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
+                    <a routerLink="/blogs/solution-libraries" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
                        
                     </a>
                 </article>
                 <article class="max-w-xs mb-4 md:mb-0">
-                    <a target="_blank" routerLink="/blogs/ask-bucky">
+                    <a  routerLink="/blogs/ask-bucky">
                         <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fask-bucky-prompts.png?alt=media&token=5dfbbbc8-4f5f-4291-b897-f59b375fb03e" class="mb-5 rounded-lg  h-40 md:h-auto" alt="Image 1">
                     </a>
                     <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                        <a target="_blank" routerLink="/blogs/ask-bucky">Ask Bucky Prompts for Global Solution Implementation:</a>
+                        <a  routerLink="/blogs/ask-bucky">Ask Bucky Prompts for Global Solution Implementation:</a>
                     </h2>
                     <p class="mb-4 text-gray-500 dark:text-gray-400">What foundations, government agencies, or other funding sources would fund ...</p>
-                    <a target="_blank" routerLink="/blogs/ask-bucky" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
+                    <a  routerLink="/blogs/ask-bucky" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
                        
                     </a>
                 </article>
 
                 <article class="max-w-xs mb-4 md:mb-0">
-                    <a target="_blank" routerLink="/blogs/state-of-world">
+                    <a  routerLink="/blogs/state-of-world">
                         <img src="https://i.postimg.cc/KYc8qQCH/DALL-E-2024-06-17-06-42-32-Create-an-image-for-a-blog-titled-State-of-the-World-The-image-shoul.webp" class="mb-5 rounded-lg  h-40 md:h-auto" alt="Image 1">
                     </a>
                     <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                        <a target="_blank" routerLink="/blogs/state-of-world">State of the World Reports</a>
+                        <a  routerLink="/blogs/state-of-world">State of the World Reports</a>
                     </h2>
                     <p class="mb-4 text-gray-500 dark:text-gray-400">The link below takes you to our collection of over 400 state-of-the-world reports ...</p>
-                    <a target="_blank" routerLink="/blogs/state-of-world" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
+                    <a  routerLink="/blogs/state-of-world" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
                        
                     </a>
                 </article>
