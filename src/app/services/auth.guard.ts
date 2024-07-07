@@ -29,7 +29,8 @@ export class AuthGuard {
       tap((loggedIn: any) => {
         if (!loggedIn) {
           this.auth.setRedirectUrl(state.url);
-          console.log('Acced denied');
+          console.log(' the snapshot url is', state.url);
+          console.log('Acced denied. Redirect to login');
           this.router.navigate(['/login']);
         }
       })
