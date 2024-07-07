@@ -23,18 +23,13 @@ export class AuthGuard {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    console.log('AuthGuard: canActivate called');
     return this.auth.user$.pipe(
       take(1),
-      map((user: User) => {
-        console.log('AuthGuard: user fetched', user);
-        !!user;
-      }),
+      map((user: User) => !!user),
       tap((loggedIn: any) => {
         if (!loggedIn) {
           this.auth.setRedirectUrl(state.url);
-          console.log(' the snapshot url is', state.url);
-          console.log('Acced denied. Redirect to login');
+          console.log('Acced denied');
           this.router.navigate(['/login']);
         }
       })

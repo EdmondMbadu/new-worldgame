@@ -39,7 +39,6 @@ export class AuthService {
     this.getCurrentUser();
   }
   setRedirectUrl(url: string) {
-    console.log('AuthService: setRedirectUrl called with', url);
     this.redirectUrl = url;
   }
   getRedirectUrl(): string {
@@ -185,7 +184,6 @@ export class AuthService {
   }
 
   SignIn(email: string, password: string) {
-    console.log('AuthService: SignIn called');
     this.fireauth
       .signInWithEmailAndPassword(email, password)
       .then(
@@ -193,7 +191,6 @@ export class AuthService {
           if (res.user?.emailVerified == true) {
             // this is the redirect flow here.
             if (this.redirectUrl) {
-              console.log('AuthService: Redirecting to', this.redirectUrl);
               this.router.navigate([this.redirectUrl]);
               this.redirectUrl = '';
             } else {
@@ -211,7 +208,6 @@ export class AuthService {
       )
       .catch((error) => {
         // alert('Something went wrong');
-        console.error('AuthService: SignIn catch error', error);
         this.logingError = of(error);
         // this.router.navigate(['/']);
         // ...
