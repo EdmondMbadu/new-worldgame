@@ -23,9 +23,13 @@ export class AuthGuard {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
+    console.log('AuthGuard: canActivate called');
     return this.auth.user$.pipe(
       take(1),
-      map((user: User) => !!user),
+      map((user: User) => {
+        console.log('AuthGuard: user fetched', user);
+        !!user;
+      }),
       tap((loggedIn: any) => {
         if (!loggedIn) {
           this.auth.setRedirectUrl(state.url);
