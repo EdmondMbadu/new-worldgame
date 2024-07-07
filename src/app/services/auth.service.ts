@@ -18,6 +18,7 @@ export class AuthService {
   email?: Observable<any>;
   currentUser: any = {};
   logingError?: Observable<any>;
+  private redirectUrl: string = '';
 
   constructor(
     private fireauth: AngularFireAuth,
@@ -36,6 +37,12 @@ export class AuthService {
       })
     );
     this.getCurrentUser();
+  }
+  setRedirectUrl(url: string) {
+    this.redirectUrl = url;
+  }
+  getRedirectUrl(): string {
+    return this.redirectUrl;
   }
 
   updateStatusOnline(userId: string) {
@@ -182,7 +189,13 @@ export class AuthService {
       .then(
         (res) => {
           if (res.user?.emailVerified == true) {
-            this.router.navigate(['/home']);
+            // this is the redirect flow here.
+            if (this.redirectUrl) {
+              this.router.navigate([this.redirectUrl]);
+              this.redirectUrl = '';
+            } else {
+              this.router.navigate(['/home']);
+            }
           } else {
             this.router.navigate(['/verify-email']);
           }

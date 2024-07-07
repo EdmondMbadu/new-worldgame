@@ -28,8 +28,9 @@ export class AuthGuard {
       map((user: User) => !!user),
       tap((loggedIn: any) => {
         if (!loggedIn) {
+          this.auth.setRedirectUrl(state.url);
           console.log('Acced denied');
-          this.router.navigate(['/']);
+          this.router.navigate(['/login']);
         }
       })
     );

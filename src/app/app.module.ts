@@ -68,7 +68,6 @@ import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.compo
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { TeamDiscussionComponent } from './components/team-discussion/team-discussion.component';
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
-import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
 import { EditorModule } from '@tinymce/tinymce-angular';
@@ -121,7 +120,6 @@ import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.com
     ContactUsComponent,
     TeamDiscussionComponent,
     InstructionsComponent,
-    HowToComponent,
     OperatingManualComponent,
     SamplePrefferedStatesComponent,
     SolutionLibrariesComponent,

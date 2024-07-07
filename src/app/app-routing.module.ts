@@ -32,7 +32,6 @@ import { NwgAiComponent } from './blogs/nwg-ai/nwg-ai.component';
 import { PricingPlansComponent } from './blogs/pricing-plans/pricing-plans.component';
 import { ContactUsComponent } from './blogs/contact-us/contact-us.component';
 import { InstructionsComponent } from './blogs/instructions/instructions.component';
-import { HowToComponent } from './components/how-to/how-to.component';
 import { OperatingManualComponent } from './components/operating-manual/operating-manual.component';
 import { SamplePrefferedStatesComponent } from './blogs/sample-preffered-states/sample-preffered-states.component';
 import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-libraries.component';
@@ -91,11 +90,7 @@ const routes: Routes = [
     path: 'operating-manual',
     component: OperatingManualComponent,
   },
-  {
-    path: 'how-to',
-    component: HowToComponent,
-    canActivate: [AuthGuard],
-  },
+
   {
     path: 'overview',
     component: OverviewComponent,
