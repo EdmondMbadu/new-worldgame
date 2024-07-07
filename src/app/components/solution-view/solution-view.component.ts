@@ -343,7 +343,7 @@ export class SolutionViewComponent implements OnInit {
         subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} has commented on your NewWorld Game solution: ${this.currentSolution.title}`,
         // title: this.myForm.value.title,
         // description: this.myForm.value.description,
-        path: `https://newworld-game.org/solution-view-external/${this.currentSolution.solutionId}`,
+        path: `https://newworld-game.org/solution-view/${this.currentSolution.solutionId}`,
         // Include any other data required by your Cloud Function
       };
 
