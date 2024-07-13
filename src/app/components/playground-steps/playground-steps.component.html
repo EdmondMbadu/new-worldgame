@@ -4,9 +4,9 @@
 
 
 <div class="dark:bg-slate-900 min-h-screen min-w-max">
-    <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'" current="''"></app-navbar>
+    <app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'" current="''"></app-navbar>
 
-    <div class="mt-28 container px-16 flex flex-row mx-auto lg:justify-between justify-center">
+    <div class="mt-20 container px-16 flex flex-row mx-auto lg:justify-between justify-center">
         <ol class="items-center sm:flex">
             <li *ngFor="let step of steps; let i = index" class="relative mb-6 sm:mb-0">
                 <div class="flex items-center">

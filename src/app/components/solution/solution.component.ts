@@ -22,6 +22,7 @@ export class PostComponent implements OnInit {
   hoverLikes: boolean = false;
   hoverComments: boolean = false;
   hoverShare: boolean = false;
+  hoverTournament: boolean = false;
   commentUserNames: string[] = [];
   @Input() teamMembers: User[] = [];
   evaluators: User[] = [];
@@ -277,6 +278,13 @@ export class PostComponent implements OnInit {
   }
   onHoverComments() {
     this.hoverComments = true;
+  }
+  onHoverTournament() {
+    this.hoverTournament = true;
+  }
+
+  onLeaveTournament() {
+    this.hoverTournament = false;
   }
   onLeaveComments() {
     this.hoverComments = false;

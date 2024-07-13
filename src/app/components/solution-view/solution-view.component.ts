@@ -38,6 +38,7 @@ export class SolutionViewComponent implements OnInit {
   commentTimeElapsed: string[] = [];
   comment: string = '';
   commentUserNames: string[] = [];
+  hoverTournament: boolean = false;
 
   teamMembers: User[] = [];
   hoverShare: boolean = false;
@@ -179,6 +180,13 @@ export class SolutionViewComponent implements OnInit {
   }
   onLeaveEvaluation() {
     this.displayEvaluationSummary = false;
+  }
+  onHoverTournament() {
+    this.hoverTournament = true;
+  }
+
+  onLeaveTournament() {
+    this.hoverTournament = false;
   }
 
   addLike() {

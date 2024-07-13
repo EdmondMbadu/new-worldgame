@@ -1,7 +1,7 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [current]="''"></app-navbar>
+<app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [current]="''"></app-navbar>
 <body class="dark:bg-slate-900  min-h-screen min-w-max">
 
-        <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-28">
+        <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-20">
             <div class="flex flex-col md:mx-20">
                 <app-solution [fullPage]="false" [timeElapsed]="timeElapsed" [solution]="userSolution"[teamMembers]="teamMembers"></app-solution>
 

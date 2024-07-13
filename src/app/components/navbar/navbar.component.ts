@@ -35,6 +35,8 @@ export class NavbarComponent implements OnInit {
   displayHamburgerHomeMenuClose: boolean = false;
   @Input() currentPageHome: boolean = false;
   resourcesMenu: boolean = false;
+  @Input() sideBarBig: boolean = true;
+  @Input() sideBarSmall: boolean = false;
   @Input() currentPageEvaluation: boolean = false;
   @Input() currentPagePending: boolean = false;
   @Input() currentPageAbout: boolean = false;
@@ -42,11 +44,19 @@ export class NavbarComponent implements OnInit {
   @Input() currentPageSignIn: boolean = false;
   @Input() currentPageNews: boolean = false;
   @Input() currentPageTournament: boolean = false;
+  profilePicturePath: string = '';
   constructor(
     private auth: AuthService,
     private solution: SolutionService,
     private data: DataService
   ) {}
+
+  @Input() hoveredHomePath: string = ``;
+  @Input() hoveredEvaluationPath: string = ``;
+  @Input() hoveredTournamentPath: string = ``;
+  @Input() hoveredManualPath: string = ``;
+  @Input() hoveredPendingPath: string = ``;
+  @Input() hoveredStartLabPath: string = ``;
 
   ngOnInit(): void {
     this.applyTheme();
@@ -59,6 +69,13 @@ export class NavbarComponent implements OnInit {
       this.data.getAllUsers().subscribe((data) => {
         this.allUsers = data;
       });
+      if (
+        this.auth.currentUser!.profilePicture &&
+        this.auth.currentUser.profilePicture.path
+      ) {
+        this.profilePicturePath =
+          this.auth.currentUser.profilePicture.downloadURL;
+      }
     }
 
     this.searchControl.valueChanges
@@ -70,6 +87,11 @@ export class NavbarComponent implements OnInit {
       .subscribe((results) => {
         this.filteredItems = results!;
       });
+  }
+
+  toggleAside() {
+    this.sideBarBig = !this.sideBarBig;
+    this.sideBarSmall = !this.sideBarSmall;
   }
 
   logOut() {

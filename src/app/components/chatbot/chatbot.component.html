@@ -10,16 +10,23 @@
             Ask Bucky
         </button>
     </div>
-    <div id="chat-container" *ngIf="showBot" class=" fixed bottom-16 right-4 w-96">
+    <div id="chat-container" *ngIf="showBot" class=" fixed bottom-16 right-4 w-{{botWidth}}">
         <div class="bg-white shadow-md rounded-lg max-w-lg w-full dark:bg-slate-700">
             <div class="p-2 border-b shadow-lg bg-teal-700 text-white rounded-t-lg flex justify-between items-center">
                 <!-- <img src="../../../assets/img/bucky-2.png" class="w-14 rounded-full" alt=""> -->
                 <p class="text-lg font-semibold  mx-auto">Bucky</p>
+                <button id="close-chat" class="text-white hover:text-white focus:outline-none focus:text-gray-400 mr-4" (click)="toggleChatSize()">
+                    <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H4m0 0v4m0-4 5 5m7-5h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5m7 5h4m0 0v-4m0 4-5-5"/>
+                      </svg>
+                      
+                </button>
                 <button id="close-chat" class="text-white hover:text-white focus:outline-none focus:text-gray-400" (click)="toggleBot()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
+             
             </div>
             <body>
                 
@@ -43,9 +50,9 @@
                             <div *ngIf="resp.type=='RESPONSE'"class="">
                                 <img src="../../../assets/img/bucky-1.png" class="w-14 rounded-full" alt="">
                             
-                                <p  class=" bg-gray-200 text-gray-950  py-2 rounded-lg items-center px-4 dark:bg-slate-500 dark:text-gray-100">
+                                <p    class=" text-gray-950  py-2 rounded-lg items-center px-4 bg-white " [innerHTML]="formatText(resp.text)" >
                                     
-                                    {{ resp.text }}
+                                   
 
                                     <a *ngIf="resp.link" target="_blank" rel="noopener noreferrer"  [routerLink]="resp.link.url" class="text-blue-500" >{{ resp.link.text }}</a>
                                 

@@ -3,7 +3,7 @@
 
 
 
-<main class="mt-24 pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased min-w-max">
+<main class="mt-20 pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased min-w-max">
     <div class="flex justify-between px-4 mx-auto max-w-screen-xl ">
         <article class="mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert">
             <header class="mb-4 lg:mb-6 not-format">
@@ -221,6 +221,17 @@
                         </div>
                     </div>  
 
+                </div>
+                <div *ngIf="currentSolution.tournament!==undefined && currentSolution.tournament==='true' " class="flex flex-nowrap py-2 items-center px-4"(mouseenter)="onHoverTournament()" (mouseleave)="onLeaveTournament()">
+                    <div *ngIf="hoverTournament" class="-mt-12 p-1 absolute z-50 text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
+                        <span class="font-medium">Tournament Participant</span>
+                      </div>
+        
+                      <svg class="w-8 h-8 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7.171 12.906-2.153 6.411 2.672-.89 1.568 2.34 1.825-5.183m5.73-2.678 2.154 6.411-2.673-.89-1.568 2.34-1.825-5.183M9.165 4.3c.58.068 1.153-.17 1.515-.628a1.681 1.681 0 0 1 2.64 0 1.68 1.68 0 0 0 1.515.628 1.681 1.681 0 0 1 1.866 1.866c-.068.58.17 1.154.628 1.516a1.681 1.681 0 0 1 0 2.639 1.682 1.682 0 0 0-.628 1.515 1.681 1.681 0 0 1-1.866 1.866 1.681 1.681 0 0 0-1.516.628 1.681 1.681 0 0 1-2.639 0 1.681 1.681 0 0 0-1.515-.628 1.681 1.681 0 0 1-1.867-1.866 1.681 1.681 0 0 0-.627-1.515 1.681 1.681 0 0 1 0-2.64c.458-.361.696-.935.627-1.515A1.681 1.681 0 0 1 9.165 4.3ZM14 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+                      </svg>
+                      
+          
                 </div>
             </div>
 

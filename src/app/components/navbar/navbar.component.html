@@ -139,22 +139,189 @@
 
 <nav class=" w-full  p-4 fixed top-0 left-0 right-0 bg-white dark:bg-slate-900"*ngIf="email!==''">
 
+
+  <aside *ngIf="sideBarBig" id="logo-sidebar" class="fixed top-0 left-0 z-40 w-64 h-screen pt-2 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
+    <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+       <ul class="space-y-2 font-medium">
+        <li>
+          <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white group">
+            <div class="hover:bg-gray-100 dark:hover:bg-gray-700 p-2">
+              <img  routerLink="/home"  class="w-20 rounded-lg  hover:bg-gray-100 dark:hover:bg-gray-700 "  src="../../../assets/img/earth-triangle-test.png" alt="">
+              <span routerLink="/home" class="ms-1 hover:bg-gray-100 dark:hover:bg-gray-700 pt-2">NewWorld Game</span>
+            
+            </div>
+           
+             <svg (click)="toggleAside()" class="w-[36px] h-[36px] text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
+            </svg>
+            
+          </a>
+     
+          
+       </li>
+          <li >
+             <a  routerLink="/home" class=" {{hoveredHomePath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group ">
+           
+              <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5"/>
+              </svg>
+              
+              
+                <span class="ms-3">Home</span>
+             </a>
+          </li>
+          <li>
+            <a routerLink="/create-playground" class="{{hoveredStartLabPath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+         
+               <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                 <path fill-rule="evenodd" d="M8.64 4.737A7.97 7.97 0 0 1 12 4a7.997 7.997 0 0 1 6.933 4.006h-.738c-.65 0-1.177.25-1.177.9 0 .33 0 2.04-2.026 2.008-1.972 0-1.972-1.732-1.972-2.008 0-1.429-.787-1.65-1.752-1.923-.374-.105-.774-.218-1.166-.411-1.004-.497-1.347-1.183-1.461-1.835ZM6 4a10.06 10.06 0 0 0-2.812 3.27A9.956 9.956 0 0 0 2 12c0 5.289 4.106 9.619 9.304 9.976l.054.004a10.12 10.12 0 0 0 1.155.007h.002a10.024 10.024 0 0 0 1.5-.19 9.925 9.925 0 0 0 2.259-.754 10.041 10.041 0 0 0 4.987-5.263A9.917 9.917 0 0 0 22 12a10.025 10.025 0 0 0-.315-2.5A10.001 10.001 0 0 0 12 2a9.964 9.964 0 0 0-6 2Zm13.372 11.113a2.575 2.575 0 0 0-.75-.112h-.217A3.405 3.405 0 0 0 15 18.405v1.014a8.027 8.027 0 0 0 4.372-4.307ZM12.114 20H12A8 8 0 0 1 5.1 7.95c.95.541 1.421 1.537 1.835 2.415.209.441.403.853.637 1.162.54.712 1.063 1.019 1.591 1.328.52.305 1.047.613 1.6 1.316 1.44 1.825 1.419 4.366 1.35 5.828Z" clip-rule="evenodd"/>
+               </svg>
+               
+               <span class="flex-1 ms-3 whitespace-nowrap">Start a Lab</span>
+             
+            </a>
+         </li>
+          <li>
+             <a routerLink="/problem-list-feedback" class="{{hoveredEvaluationPath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+               
+                <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v15a1 1 0 0 0 1 1h15M8 16l2.5-5.5 3 3L17.273 7 20 9.667"/>
+                </svg>
+                
+                <span class="flex-1 ms-3 whitespace-nowrap">Evaluations</span>
+              
+             </a>
+          </li>
+        
+          <li>
+             <a routerLink="/problem-list-view" class="{{hoveredPendingPath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z"/>
+              </svg>
+              
+                <span class="flex-1 ms-3 whitespace-nowrap">Pending</span>
+             </a>
+          </li>
+          <li>
+             <a routerLink="/join-tournament" class="{{hoveredTournamentPath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7.171 12.906-2.153 6.411 2.672-.89 1.568 2.34 1.825-5.183m5.73-2.678 2.154 6.411-2.673-.89-1.568 2.34-1.825-5.183M9.165 4.3c.58.068 1.153-.17 1.515-.628a1.681 1.681 0 0 1 2.64 0 1.68 1.68 0 0 0 1.515.628 1.681 1.681 0 0 1 1.866 1.866c-.068.58.17 1.154.628 1.516a1.681 1.681 0 0 1 0 2.639 1.682 1.682 0 0 0-.628 1.515 1.681 1.681 0 0 1-1.866 1.866 1.681 1.681 0 0 0-1.516.628 1.681 1.681 0 0 1-2.639 0 1.681 1.681 0 0 0-1.515-.628 1.681 1.681 0 0 1-1.867-1.866 1.681 1.681 0 0 0-.627-1.515 1.681 1.681 0 0 1 0-2.64c.458-.361.696-.935.627-1.515A1.681 1.681 0 0 1 9.165 4.3ZM14 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+              </svg>
+              
+                <span class="flex-1 ms-3 whitespace-nowrap">Tournament</span>
+             </a>
+          </li>
+          <li>
+             <a routerLink="/operating-manual" class="{{hoveredManualPath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4"/>
+              </svg>
+              
+                <span class="flex-1 ms-3 whitespace-nowrap">Operating Manual</span>
+             </a>
+          </li>
+          
+       </ul>
+    </div>
+ </aside>
+ <aside *ngIf="sideBarSmall" (click)="toggleAside()" id="logo-sidebar" class="fixed top-0 left-0 z-40 w-16 h-screen pt-2 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700" aria-label="Sidebar">
+  <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
+    <ul class="space-y-2 font-medium">
+
+      <li>
+        <a (click)="toggleAside()" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+      
+          <svg class="flex-shrink-0  w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h14"/>
+          </svg>
+          
+         
+           <!-- <span class="ms-3">Home</span> -->
+        </a>
+     </li>
+
+        <li>
+           <a routerLink="/home" class="{{hoveredHomePath}} flex items-center px-1 py-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+         
+            <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5"/>
+            </svg>
+            
+            
+              <!-- <span class="ms-3">Home</span> -->
+           </a>
+        </li>
+        <li>
+          <a routerLink="/create-playground" class="{{hoveredStartLabPath}}  flex items-center px-1 py-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+       
+             <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+               <path fill-rule="evenodd" d="M8.64 4.737A7.97 7.97 0 0 1 12 4a7.997 7.997 0 0 1 6.933 4.006h-.738c-.65 0-1.177.25-1.177.9 0 .33 0 2.04-2.026 2.008-1.972 0-1.972-1.732-1.972-2.008 0-1.429-.787-1.65-1.752-1.923-.374-.105-.774-.218-1.166-.411-1.004-.497-1.347-1.183-1.461-1.835ZM6 4a10.06 10.06 0 0 0-2.812 3.27A9.956 9.956 0 0 0 2 12c0 5.289 4.106 9.619 9.304 9.976l.054.004a10.12 10.12 0 0 0 1.155.007h.002a10.024 10.024 0 0 0 1.5-.19 9.925 9.925 0 0 0 2.259-.754 10.041 10.041 0 0 0 4.987-5.263A9.917 9.917 0 0 0 22 12a10.025 10.025 0 0 0-.315-2.5A10.001 10.001 0 0 0 12 2a9.964 9.964 0 0 0-6 2Zm13.372 11.113a2.575 2.575 0 0 0-.75-.112h-.217A3.405 3.405 0 0 0 15 18.405v1.014a8.027 8.027 0 0 0 4.372-4.307ZM12.114 20H12A8 8 0 0 1 5.1 7.95c.95.541 1.421 1.537 1.835 2.415.209.441.403.853.637 1.162.54.712 1.063 1.019 1.591 1.328.52.305 1.047.613 1.6 1.316 1.44 1.825 1.419 4.366 1.35 5.828Z" clip-rule="evenodd"/>
+             </svg>
+             
+             <!-- <span class="flex-1 ms-3 whitespace-nowrap">Start a Lab</span> -->
+           
+          </a>
+       </li>
+        <li>
+           <a routerLink="/problem-list-feedback" class="{{hoveredEvaluationPath}} flex items-center px-1 py-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+             
+              <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v15a1 1 0 0 0 1 1h15M8 16l2.5-5.5 3 3L17.273 7 20 9.667"/>
+              </svg>
+              
+              <!-- <span class="flex-1 ms-3 whitespace-nowrap">Evaluations</span> -->
+            
+           </a>
+        </li>
+      
+        <li>
+           <a routerLink="/problem-list-view" class="{{hoveredPendingPath}} flex items-center px-1 py-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z"/>
+            </svg>
+            
+              <!-- <span class="flex-1 ms-3 whitespace-nowrap">Pending</span> -->
+           </a>
+        </li>
+        <li>
+           <a routerLink="/join-tournament" class="{{hoveredTournamentPath}} flex items-center px-1 py-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7.171 12.906-2.153 6.411 2.672-.89 1.568 2.34 1.825-5.183m5.73-2.678 2.154 6.411-2.673-.89-1.568 2.34-1.825-5.183M9.165 4.3c.58.068 1.153-.17 1.515-.628a1.681 1.681 0 0 1 2.64 0 1.68 1.68 0 0 0 1.515.628 1.681 1.681 0 0 1 1.866 1.866c-.068.58.17 1.154.628 1.516a1.681 1.681 0 0 1 0 2.639 1.682 1.682 0 0 0-.628 1.515 1.681 1.681 0 0 1-1.866 1.866 1.681 1.681 0 0 0-1.516.628 1.681 1.681 0 0 1-2.639 0 1.681 1.681 0 0 0-1.515-.628 1.681 1.681 0 0 1-1.867-1.866 1.681 1.681 0 0 0-.627-1.515 1.681 1.681 0 0 1 0-2.64c.458-.361.696-.935.627-1.515A1.681 1.681 0 0 1 9.165 4.3ZM14 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"/>
+            </svg>
+            
+              <!-- <span class="flex-1 ms-3 whitespace-nowrap">Tournament</span> -->
+           </a>
+        </li>
+        <li>
+           <a routerLink="/operating-manual" class="{{hoveredManualPath}} flex items-center px-1 py-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <svg class="flex-shrink-0 w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v13H7a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h12M9 3v14m7 0v4"/>
+            </svg>
+            
+              <!-- <span class="flex-1 ms-3 whitespace-nowrap">Operating Manual</span> -->
+           </a>
+        </li>
+        
+     </ul>
+  </div>
+</aside>
+
     <div class="container  mx-auto flex items-center justify-between dark:text-white">
-            <div class="flex-col mx-auto items-center" routerLink="/{{path}}">
+            <div class="sm:flex-col md:hidden mx-auto items-center" routerLink="/{{path}}">
                 <img   class="w-20 rounded-lg  "  src="../../../assets/img/earth-triangle-test.png" alt="">
             </div>
 
             <!-- homes and friends -->
-            <div class=" hidden lg:flex flex-row mx-auto items-center lg:space-x-10 space-x-4">
+            <!-- <div class=" hidden lg:flex flex-row mx-auto items-center lg:space-x-10 space-x-4">
                 <div class="flex flex-col" routerLink="/home">
-                    <!-- <img src="../../../assets/img/home.png"  class="w-10  px-1">  -->
+                 
                     <svg class="dark:fill-white fill-black"  viewBox="0,0,256,256" width="35px" height="35px"><g  fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M24.96289,1.05469c-0.20987,0.00724 -0.41214,0.08036 -0.57812,0.20898l-23,17.94727c-0.43579,0.33978 -0.51361,0.96851 -0.17383,1.4043c0.33978,0.43579 0.96851,0.51361 1.4043,0.17383l1.38477,-1.08008v26.29102c0.00006,0.55226 0.44774,0.99994 1,1h13.83203c0.10799,0.01785 0.21818,0.01785 0.32617,0h11.67383c0.10799,0.01785 0.21818,0.01785 0.32617,0h13.8418c0.55226,-0.00006 0.99994,-0.44774 1,-1v-26.29102l1.38477,1.08008c0.2819,0.21983 0.65967,0.27257 0.991,0.13833c0.33133,-0.13423 0.56586,-0.43504 0.61526,-0.7891c0.0494,-0.35406 -0.09386,-0.70757 -0.37579,-0.92736l-7.61523,-5.94141v-7.26953h-6v2.58594l-9.38477,-7.32227c-0.18607,-0.14428 -0.41707,-0.21828 -0.65234,-0.20898zM25,3.32227l19,14.82617v26.85156h-12v-19h-14v19h-12v-26.85156zM37,8h2v3.70898l-2,-1.5625zM20,28h10v17h-10z"></path></g></g></svg>
                    <h1 *ngIf="currentPageHome"  class=" text-xs text-center pt-1 border-teal-700 {{current}}">Home </h1>
                    <h1 *ngIf="!currentPageHome"  class=" text-xs text-center pt-1">Home </h1>
                 </div>
 
                 <div class=" flex flex-col" routerLink="/problem-list-feedback">
-                    <!-- <img src="../../../assets/img/letter.png"  class="w-10 px-1"> -->
+      
                     <svg width="35px" height="35px" class="dark:fill-white fill-black" viewBox="0 0 1024 1024"><path d="M981.333333 960h-21.333333V576a21.333333 21.333333 0 0 0-42.666667 0v384h-128V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666h42.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v21.333334a21.333333 21.333333 0 0 0 42.666667 0v-21.333334a85.333333 85.333333 0 0 0-85.333333-85.333333h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333333v746.666667h-85.333334V426.666667a85.333333 85.333333 0 0 0-85.333333-85.333334h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333334v533.333333h-85.333333V640a85.333333 85.333333 0 0 0-85.333334-85.333333h-42.666666a85.333333 85.333333 0 0 0-85.333334 85.333333v320H64V42.666667a21.333333 21.333333 0 0 0-42.666667 0v938.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h938.666666a21.333333 21.333333 0 0 0 0-42.666667z m-661.333333 0H192V640a42.666667 42.666667 0 0 1 42.666667-42.666667h42.666666a42.666667 42.666667 0 0 1 42.666667 42.666667z m298.666667 0h-128V426.666667a42.666667 42.666667 0 0 1 42.666666-42.666667h42.666667a42.666667 42.666667 0 0 1 42.666667 42.666667z"/><path d="M938.666667 384a21.333333 21.333333 0 0 0-21.333334 21.333333v85.333334a21.333333 21.333333 0 0 0 42.666667 0v-85.333334a21.333333 21.333333 0 0 0-21.333333-21.333333zM958.293333 311.893333a24.533333 24.533333 0 0 0-4.48-7.04l-3.2-2.56a16.213333 16.213333 0 0 0-3.84-1.92L942.933333 298.666667a21.333333 21.333333 0 0 0-12.373333 1.28 19.2 19.2 0 0 0-11.52 11.52 21.333333 21.333333 0 0 0-1.706667 8.533333 21.333333 21.333333 0 0 0 6.186667 15.146667 21.333333 21.333333 0 0 0 7.04 4.48A21.333333 21.333333 0 0 0 938.666667 341.333333a21.333333 21.333333 0 0 0 15.146666-6.186666A22.4 22.4 0 0 0 960 320a21.333333 21.333333 0 0 0-1.706667-8.106667z"  /></svg>
                     <h1 *ngIf="currentPageEvaluation" class=" text-xs text-center pt-1 -mx-3 border-teal-700 {{current}}">Evaluations </h1>
                     <h1 *ngIf="!currentPageEvaluation" class=" text-xs text-center pt-1 -mx-3">Evaluations </h1>
@@ -203,10 +370,10 @@
                 
                     
 
-            </div>
+            </div> -->
 
 
-            <form class="hidden lg:flex md:flex-col mx-auto items-center">  
+            <form class="hidden lg:flex md:flex-col mx-auto items-center pl-32">  
                 
                 
                 <div class=" relative lg:w-[30rem] md:w-[24rem]">
@@ -240,7 +407,7 @@
               </ul>
             </div>
             </form>
-            <a  class="mx-4" >
+            <a  class="lg:mx-4 mx-16" >
                 <svg (click)="toggleDropDownTheme()"  class="hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black  " width="25px" height="25px" viewBox="0 0 35 35" ><path d="M18.44,34.68a18.22,18.22,0,0,1-2.94-.24,18.18,18.18,0,0,1-15-20.86A18.06,18.06,0,0,1,9.59.63,2.42,2.42,0,0,1,12.2.79a2.39,2.39,0,0,1,1,2.41L11.9,3.1l1.23.22A15.66,15.66,0,0,0,23.34,21h0a15.82,15.82,0,0,0,8.47.53A2.44,2.44,0,0,1,34.47,25,18.18,18.18,0,0,1,18.44,34.68ZM10.67,2.89a15.67,15.67,0,0,0-5,22.77A15.66,15.66,0,0,0,32.18,24a18.49,18.49,0,0,1-9.65-.64A18.18,18.18,0,0,1,10.67,2.89Z"/></svg>
                 <div  *ngIf="showThemeDropDown" class="z-10   absolute  -ml-8  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-32 dark:bg-gray-700 dark:divide-gray-600">
                    
@@ -263,8 +430,30 @@
 
             <div class=" lg:flex md:flex-col mx-auto items-center" (click)="toggleDropDown()"  >
 
+              <!-- <div class="">
+               
+               
+                <div  *ngIf="profilePicturePath ==''"  class=" w-20 h-20 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+           
+                    <svg class=" w-8 h-8 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                </div>
+             
+           
+                <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-8 h-8 mx-auto rounded-full"  alt="">
+           
+              </div> -->
                 <div class="flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full hover:text-blue-600 dark:hover:text-blue-500 md:me-0 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-white" >
-                    <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                    <!-- <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                     -->
+                    
+                      <svg *ngIf="profilePicturePath ==''" class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                    
+                      <!-- <svg class=" w-8 h-8 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> -->
+                
+               
+             
+                  <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-12 h-12 me-2 rounded-full"  alt="">
+             
                     {{firstName}} {{lastName}}
                     <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>

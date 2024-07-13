@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Pipe } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
+import * as marked from 'marked';
 
 import {
   AngularFirestore,
@@ -13,6 +14,7 @@ interface DisplayMessage {
   link?: { text?: string; url?: string };
   type: 'PROMPT' | 'RESPONSE';
 }
+
 @Component({
   selector: 'app-chatbot',
   templateUrl: './chatbot.component.html',
@@ -21,12 +23,14 @@ interface DisplayMessage {
 export class ChatbotComponent implements OnInit {
   showBot: boolean = false;
   profilePicturePath: string = '';
+
   user: User = {};
   @Input() botHeight: string = 'h-10';
   collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
   status = '';
   errorMsg = '';
   prompt = '';
+  botWidth: string = '96';
   temp = '';
   constructor(
     private afs: AngularFirestore,
@@ -75,7 +79,7 @@ export class ChatbotComponent implements OnInit {
   endChat() {
     this.responses = [
       {
-        text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. To Learn how to interact with me or other LLMs efficiently see `,
+        text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. `,
         link: { text: 'here', url: '/blogs/nwg-ai' },
         type: 'RESPONSE',
       },
@@ -120,6 +124,10 @@ export class ChatbotComponent implements OnInit {
                 text: conversation['response'],
                 type: 'RESPONSE',
               });
+              console.log(
+                ' the response date and format',
+                conversation['response']
+              );
               this.cdRef.detectChanges(); // Detect changes to update the view
 
               // Use setTimeout to allow time for the DOM to update
@@ -150,6 +158,55 @@ export class ChatbotComponent implements OnInit {
     this.scrollToBottom();
   }
 
+  toggleChatSize() {
+    if (this.botWidth === '96') {
+      this.botWidth = 'max';
+    } else {
+      this.botWidth = '96';
+    }
+  }
+
+  formatText(value: string): string {
+    if (!value) {
+      return '';
+    }
+
+    // Replace single # headers with <h1> headers
+    let formattedText = value.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+
+    // Replace double ## headers with <h2> headers
+    formattedText = formattedText.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+
+    // Replace triple ### headers with <h3> headers
+    formattedText = formattedText.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+
+    // Replace **bold** with <strong>bold</strong>
+    formattedText = formattedText.replace(
+      /\*\*(.*?)\*\*/g,
+      '<strong>$1</strong>'
+    );
+
+    // Replace *italic* with <em>italic</em>
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Ensure bullet points start on a new line
+    formattedText = formattedText.replace(/ \* /g, '\n* ');
+
+    // Replace * bullet points with <li> items inside <ul>
+    formattedText = formattedText.replace(/^\* (.*?)(?=\n|$)/gm, '<li>$1</li>');
+    formattedText = formattedText.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
+
+    // Replace single-line breaks with HTML line breaks
+    formattedText = formattedText.replace(/\n/g, '<br>');
+
+    // Replace [link text](URL) with <a href="URL">link text</a>
+    formattedText = formattedText.replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a class="text-blue-500 underline" target="_blank" href="$2">$1</a>'
+    );
+
+    return formattedText;
+  }
   async deleteAllDocuments(): Promise<void> {
     const batch = this.afs.firestore.batch();
 

@@ -84,6 +84,7 @@ export class CreatePlaygroundComponent {
     private router: Router,
     private fns: AngularFireFunctions
   ) {
+    window.scroll(0, 0);
     let shuffle = (array: User[]) => {
       return array.sort(() => Math.random() - 0.5);
     };
