@@ -231,7 +231,7 @@ export class PlaygroundStepsComponent implements OnInit {
     'Where we are now',
     'Where we want to be',
     'How we get to the Preferred State',
-    'Actions: What, where, when, costs, You',
+    'Actions: What, where, who, when, costs, funders, You',
     'Final Review and update order of things',
   ];
   display = new Array(this.steps.length).fill(false);
