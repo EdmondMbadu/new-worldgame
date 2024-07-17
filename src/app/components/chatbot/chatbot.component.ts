@@ -205,6 +205,12 @@ export class ChatbotComponent implements OnInit {
       '<a class="text-blue-500 underline" target="_blank" href="$2">$1</a>'
     );
 
+    // Replace text (URL) with <a href="URL">text</a>
+    formattedText = formattedText.replace(
+      /(\b[\w\s]+\b)\s*\((https?:\/\/[^\s]+)\)/g,
+      '<a class="text-blue-500 underline" target="_blank" href="$2">$1</a>'
+    );
+
     return formattedText;
   }
   async deleteAllDocuments(): Promise<void> {
