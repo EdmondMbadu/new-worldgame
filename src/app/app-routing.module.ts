@@ -38,6 +38,7 @@ import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-
 import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
 import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
+import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -168,6 +169,10 @@ const routes: Routes = [
   {
     path: 'blogs/custom-storyboard',
     component: CustomGptDesignScienceStoryboardComponent,
+  },
+  {
+    path: 'blogs/nwg-solution-tour',
+    component: NwgSolutionTourComponent,
   },
   {
     path: 'problem-feedback/:id',

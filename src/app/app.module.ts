@@ -75,6 +75,7 @@ import { SolutionLibrariesComponent } from './blogs/solution-libraries/solution-
 import { FacilitatorsComponent } from './blogs/facilitators/facilitators.component';
 import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
+import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
 
 @NgModule({
   declarations: [
@@ -126,6 +127,7 @@ import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.com
     FacilitatorsComponent,
     AskBuckyComponent,
     StateOfWorldComponent,
+    NwgSolutionTourComponent,
   ],
   imports: [
     BrowserModule,

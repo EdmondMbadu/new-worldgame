@@ -1,0 +1,479 @@
+<div class="dark:bg-slate-900 min-h-screen  min-w-max ">
+    <div *ngIf="!isLoggedIn">
+        <app-navbar></app-navbar>
+      </div>
+      <div *ngIf="isLoggedIn">
+        <app-navbar [hoveredSolutionTourPath]="'bg-gray-100 dark:bg-gray-700'"[email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
+
+
+<main class="mt-20 pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased">
+    <div class="flex justify-between px-4 mx-auto max-w-screen-xl ">
+        <article class="mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert">
+            <header class="mb-4 lg:mb-6 not-format">
+                <address class="flex items-center mb-6 not-italic">
+                    <div class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
+                        <img class="mr-4 w-16 h-18 rounded-full" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2FNG73q08IBlW39QiC3CzwTGe6zVo2-medard-jpeg.jpeg?alt=media&token=111999e5-6382-4868-b6df-0db2d06ba419" alt="Jese Leos">
+                        <div>
+                            <a href="#" rel="author" class="text-xl font-bold text-gray-900 dark:text-white">Medard Gabel</a>
+                            <p class="text-base text-gray-500 dark:text-gray-400">EarthGame Inc Director, NewWorld Game Designer</p>
+                            <p class="text-base text-gray-500 dark:text-gray-400"><time pubdate datetime="2023-12-15" title="December 15th, 2023">July. 19, 2024</time></p>
+                        </div>
+                    </div>
+                </address>
+                <h1 class="mb-4 text-3xl font-extrabold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white">NewWorld Game Solution Tour</h1>
+                <!-- <p class="max-w-xl text-xl italic text-center lg:text-left text-gray-400">
+                    "We are called to be the architects of the future, not its victims."
+                   
+                    <span class=" px-2 not-italic"> - Buckminster Fuller</span>
+
+                    <p class="max-w-xl text-xl italic text-center lg:text-left text-gray-400">
+                        "We are also called to be evaluators, discerners of future options."
+                       
+                        <span class=" px-2 not-italic"> - Medard Gabel</span>
+    
+                </p> -->
+            
+            </header>
+                <p class="text-md mb-2 text-gray-900 dark:text-white">
+                    Welcome to the NewWorld Game Solution Tour.
+                    In this blog, we will walk you through an exemplary solution that will serve as a blueprint for completing a solution in the NewWorld Game. 
+                    
+                    After you have started a solution ( see <a routerLink="/blogs/instructions" class="text-blue-400 underline">here</a>  on how to start a Soluion Lab), the answers below will give you ideas on how to tackle each question. 
+                    The complete solution can be found <a class="text-blue-400 underline" routerLink="/solution-view/RW6yDQXeEI4ovvoQnViA">here</a>.
+                </p>
+               <p class="text-md mb-2 text-gray-900 dark:text-white">
+               
+           </p>
+           <p class="text-xl mb-2 text-gray-900 dark:text-white">
+           <span class="font-bold">Solution Title: Electrifying Africa Through Healthcare: Phased Accumulation of Solar Power Production <br>
+          </span> 
+          <h1 class="text-xl my-4 font-bold text-gray-900 dark:text-white">Step I. Defining the Problem State </h1>
+          
+               <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What are the symptoms of this problem? How do you measure it? </h1>
+            <p class="mb-2 text-gray-900 dark:text-white">The problem we chosen is getting electricity to all the health clinics in Africa.  Health and healthcare are compromised when there is no, inadequate, or unreliable access to electricity. Electricity is required for the proper function of medical equipment, refrigerator storage for vaccines, and air circulation systems. Without reliable and safe electricity, services like childbirth, emergency care, and vaccinations cannot be confidently provided at local healthcare facilities. 
+
+                Getting electricity to all the health clinics in Africa will have profound impacts on infant and maternal mortality, life expectancy, quality of life, and economic productivity. 
+                
+                
+            </p>
+            <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What is the problem you have chosen and why is it important? </h1>
+            <p class="mb-2 text-gray-900 dark:text-white"> In 2018, only 40% of health facilities in Sub-Saharan Africa (SSA) had access to electricity2. Of those, just 28% have had reliable access—with power being unavailable for up to 540 hours per year across the entire region2. A few leading causes of low electricity access include inequitable distribution across Africa, inadequate buy-in from local and federal governments, and poor infrastructure. 
+            </p>
+                 <figure class="mt-6 mb-4"><img src="https://i.postimg.cc/7h6H8h4w/access-electricity.png" alt="">
+                <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 1. Access to electricity in Africa by country. Countries in North Africa, as well as Gabon, South Africa, and outlying islands have high access rates. Landlocked countries and those with expansive rural areas experience lower energy access3.</figcaption>
+                </figure>
+            <!-- <ul class="list-disc mb-2 text-gray-900 dark:text-white">
+                <li>Does the solution <span class="font-bold">achieve the Preferred State</span> </li>
+               <li> Is it <span class="font-bold">technologically feasible</span> — does the solution use current technology (no
+                magic wands)</li>
+                <li>Is it  <span class="font-bold">ecologically positive</span> — does it do no harm, preserve, or better,
+                    regenerate the environment (destroying the environment is no solution)</li>
+                <li> <span class="font-bold">Economical</span> — is it affordable, is there a reasonable source for funding the
+                    strategy (no Santa Claus)</li>
+                <li> <span class="font-bold">Equitable</span>  — is it fair, just, builds social cohesion, reduces wealth disparities
+                    (no subsidies to billionaires)</li>
+                <li>  <span class="font-bold">Understandable</span> — is it straight-forward, organized so it can be understood
+                    by a high school student (and if you are a HS student—by your parents)</li>
+              </ul>
+            -->
+          
+     
+     
+            <p class="mb-2 text-gray-900 dark:text-white">
+                In SSA, there are large disparities between urban and rural areas in per capita consumption of energy. Those residing in cities most often have better access to reliable, affordable, and modern forms of energy compared to those in rural areas. North African countries and South Africa experience the highest rates of electricity access (Figure 1), with more than 99% of the population having access in Morocco, Algeria, Tunisia, Libya, and Egypt and 94% of the population having access in South Africa. Countries with more rural areas, such as Niger, Chad, Central African Republic, Democratic Republic of the Congo, and South Sudan have greatly lower electricity access rates (Figure 1). The average person living in SSA consumes as little as 200 kWh/year of electricity2. In North African countries and South Africa, the average electricity use per person is 1,442 kWh/year and 4,148 kWh/year, respectively2. In rural areas of SSA, electricity use can be as low as 50 kWh/year per person, just enough to charge a mobile phone and power minimal lighting for a few hours a day2. 
+
+                Almost 50% of African countries do not have an officially approved electrification plan4. Energy access is a complicated goal to achieve, as access alone cannot be a stand-alone objective. Countries need to be looking to achieve a productive use of electrification4. Oftentimes, and especially in rural areas, this requires investment in other infrastructure at the same time as energy and electricity. This makes energy investment even more expensive, labor intensive, and time consuming for governments. The countries in Africa that have produced an electrification plan have reported success in improving their national electricity access rates, attributing this to a thought-out strategy that addresses institutional, technical, and financial aspects of electrification3. Nevertheless, at the midpoint of the United Nations’ Sustainable Development Goals, 600 million people in Sub-Saharan Africa are without access to electricity5.
+            </p>
+            <!-- <h3 class="my-4 text-xl font-bold leading-tight text-gray-900 lg:mb-6 lg:text-xl dark:text-white">2. Your Role</h3> -->
+            <p class="mb-2 text-gray-900 dark:text-white">
+                This quantitative scoring system is very important. But more important is your
+                qualitative feedback and suggestions for improvements to the solution. You add
+                these in the “Comment” windows. If you put in a low score for a solution on any
+                criteria there is a good reason for it. Put that/those reason(s) in the Comments. The
+                designers who developed the solution will use your comments to improve their
+                solution—and re-submit it to be evaluated again. When it reaches a high enough
+                numerical level, it is eligible to be submitted to the NewWorld Tournament.
+              </p>
+            
+              <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">How many people does this problem impact in the world? Where is it most severe?</h1>
+              <p class="mb-2 text-gray-900 dark:text-white">1.  There are 746 million people without access to electricity in the world. As the chart below shows, most of these people are in Africa.
+            </p>
+            <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/2Sdm5tgR/pic-3.png" alt="">
+                <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 1. Access to electricity in Africa by country. Countries in North Africa, as well as Gabon, South Africa, and outlying islands have high access rates. Landlocked countries and those with expansive rural areas experience lower energy access3.</figcaption> -->
+                </figure>
+                <figure class="mt-6 mb-4"><img src="https://i.postimg.cc/BnfLyd2d/pic-4.png" alt="">
+                    <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 1. Access to electricity in Africa by country. Countries in North Africa, as well as Gabon, South Africa, and outlying islands have high access rates. Landlocked countries and those with expansive rural areas experience lower energy access3.</figcaption> -->
+                    </figure>
+
+                    <figure class="mt-6 mb-4"><img src="https://i.postimg.cc/pXcx58Lk/pic-5.png" alt="">
+                        <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 1. Access to electricity in Africa by country. Countries in North Africa, as well as Gabon, South Africa, and outlying islands have high access rates. Landlocked countries and those with expansive rural areas experience lower energy access3.</figcaption> -->
+                        </figure>
+            <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What will happen if nothing is done to deal with this problem?</h1>
+            <p class="mb-2 text-gray-900 dark:text-white">If nothing is done to get electricity to all the health clinics and everyone in Africa there will continue to be negative impacts on life-expectancy, quality of life, and economic productivity.
+            </p>
+
+            <h1 class="text-xl my-4 font-bold text-gray-900 dark:text-white">Step II. Envisioning the Preferred State</h1>
+          
+            <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved? </h1>
+            <p class="mb-2 text-gray-900 dark:text-white">Our Preferred State for health care in Sub-Saharan Africa is:
+ 
+
+            100% of the people and healthcare clinics and hospitals in Sub-Saharan Africa (SSA) will have access to clean, reliable, affordable, and abundant energy.  The energy system implemented to address the needs of the healthcare sector will be:
+            
+            Built from materials easily sourced in the operating country, 
+            Owned by the local community, 
+            Delivered with training on operation, maintenance, and troubleshooting.
+            The energy system will also be designed to address the systemic barriers that have kept Africa from equitable access to energy. 
+             
+         </p>
+         <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">How will you measure success? How will you know when you reach the preferred state? Show information </h1>
+         <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/LXqLH057/pic-2.png" alt="">
+            <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 1. Access to electricity in Africa by country. Countries in North Africa, as well as Gabon, South Africa, and outlying islands have high access rates. Landlocked countries and those with expansive rural areas experience lower energy access3.</figcaption> -->
+            </figure>
+        
+
+            <ul class="list-disc mb-2 text-gray-900 dark:text-white">
+                Success (as well as progress and failure) will be measured by:
+                <li>The number of and percent of the total health care facilities that are electrified and fully equipped with dianostic and treatment equipment.</li>
+               <li>  The reliability of that electric supply, including number of outages, brownouts, and percent of reliable access.</li>
+                <li>IThe cost of electricity measured by per KWh cost, annual expenditures, and maintenance of the system.</li>
+                <li>   The surplus amount of power generated by the health clinics solar systems and its availability to the surrounding community.</li>
+                <li>  The health and well being of the community being served by the health clinic, as compared with the pre-electrified health clinic.</li>
+                
+              </ul>
+           
+
+            <h1 class="text-xl my-4 font-bold text-gray-900 dark:text-white">Step III. Developing Our Solution</h1>
+          
+            <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What does our solution do to reach the preferred state? How will it do it?</h1>
+            <p class="mb-2 text-gray-900 dark:text-white">
+                Strategy
+                To address the need for electricity in the healthcare sector, the government, private sector, and healthcare facilities need to implement energy systems that stimulate investment, integration of technology, and holistic community well-being and growth. The strategy proposed here focuses on cost-effective, phased developments that grow with a community’s identified needs and capacities.
+
+                There are many electrification projects that occur across Africa that supply a large amount of energy over one or two project phases. These projects may over (or under) estimate the amount of electricity needed by a community, as areas in rural Africa do not have many devices requiring electrification (since it is not often available). However, the healthcare facility would obtain—and benefit from—such devices if electricity is available. Focusing on supplying small amounts of electricity in phases to communities will facilitate greater change across Africa, faster, in a way in-tune with economic development and needs, and in a more cost-effective manner.
+
+                A sustainable strategy that supplies clean, not fossil-fuel based, electricity would begin with targeting communities with identified needs, existing healthcare infrastructure, and appropriate geographic conditions for solar systems. The strategy builds upon and partners with one or more Non-Governmental Organizations (NGOs) in the surrounding areas, leverages current infrastructure, and develops additional opportunities for local residents and business owners. The strategy will be tailored to the characteristics of the operating areas in order to provide the best results for each partner community. The strategy focuses on solar energy providing electricity to healthcare facilities, although the general idea and principles can be used with wind, hydropower, and other green electric systems. The strategy, the Solar Growth System (SGS), has five stages: Community Assessment, Stand Alone Systems, Micro-Grids, Mini-Grids, and Distribution.  
+             
+         </p>
+         <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/jqgP2gP1/pic-6.jpg" alt="">
+            <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 3. The systematic, cyclic strategy of the Solar Growth System (SGS).  </figcaption>
+            </figure>
+            <p class="mb-2 text-gray-900 dark:text-white">
+                <span class="font-bold">Community Assessment<br> </span>
+
+                The Community Assessment stage (Stage One) requires the implementing entity—whether it be a large NGO, the local or federal government, an international organization, a self-organized community, or healthcare facility—to complete a full evaluation of the target healthcare facility and community. This would include but is not limited to understanding current energy systems and access, current and future energy needs of the community, current infrastructure, community leadership and access to capital, and where necessary, the politics of the area. 
+                    
+                    Developing an energy system that can provide a rural African health facility with enough electricity to power the needs of 100 hospital beds, heavy duty lighting, and hundreds of electric medical devices might be a good goal but is not in line with the current medical infrastructure of a typical rural clinic in SSA. Clinics in rural SSA are often open-air, have few electric devices, capacity for just tens of patients, and only a few medical staff. Clinics in different geographical areas may serve different quantities of people and some may currently have some energy access—which needs to be evaluated for integrity, reliability, affordability, and safety. Technology and material availability needs to be assessed, taking stock of where parts can be sourced and ensuring local businesses will benefit. Sophisticated parts (for large solar systems) will most likely not be immediately available locally, but the community assessment stage will assess the business environment for its ability to grow to procure and sell these parts and materials. After taking into account these characteristics, the implementing organization will be able to confidently develop a successful electrification plan for the healthcare facility and surrounding community. 
+                    
+                    <span class="font-bold">Stand-Alone Solar System<br> </span>
+                    
+                    Stage Two (Figure 4) of the Solar Growth System (SGS) is to construct a stand-alone solar system for the clinic for whom the Community Assessment has been done. After considering the current and anticipated energy needs and aligning these with available funds, the first modular system is built. It could consist of just one solar panel on the ground, one battery, and a simple control system. When the clinic’s energy needs grow or it secures more funds (or both), the health care facility can begin to upgrade their solar system. By adding one or two solar panels, followed by more batteries and upgrading the control system, the system will grow to accommodate greater energy needs while becoming more sophisticated. The SGS strategy considers systems under 1 kW, or three 380 W solar panels, to be stand-alone systems. During this stage, the clinic will be able to power handheld devices, or up to 60 light bulbs for a period of a day7.
+         </p>
+         <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/XJGSksNQ/pic-7.png" alt="">
+            <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 4. An example of a maximum capacity stand-alone system. The solar panels will be placed on the ground. The control system and batteries would be nearby, in a protected and shielded area. </figcaption>
+            </figure>
+
+            <p class="mb-2 text-gray-900 dark:text-white">
+           
+         
+                The implementing organization will provide technical support and training to the clinic staff on how to set up and maintain their Solar Growth System. Eventually, the system’s technical requirements (regarding maintenance and safety) will grow to be greater than the clinic staff can support. At this point, theimplementing organization will provide technical support to the Stage Two communities. It will provide training to the needed number of local community members to maintain the system. Once trained, the new “Solar Mechanics'' will be supported financially by the clinic (funded by their own revenue sources, government, or private funding). 
+
+                <br>
+                <span class="font-bold">Micro-Grid <br> </span>
+                As the clinic’s energy needs grow, they will continue to upgrade their Solar Growth System (SGS) at their own pace (dependent on their energy needs and funds).
+                
+            </p>
+            <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/3w3x95z9/pic-8.png" alt="">
+                <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 4. An example of a maximum capacity stand-alone system. The solar panels will be placed on the ground. The control system and batteries would be nearby, in a protected and shielded area. </figcaption> -->
+                </figure>
+
+                <p class="mb-2 text-gray-900 dark:text-white">
+           
+                    <span class="font-bold">Mini-Grid<br> </span>
+                    In Stage Four (Figure 6) of the Solar Growth System (SGS), the system will reach its maximum energy production of 25 kW and be considered a mini-grid.
+
+                  
+                </p>
+                <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/L5JtXZTq/pic-9.png" alt="">
+                    <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 4. An example of a maximum capacity stand-alone system. The solar panels will be placed on the ground. The control system and batteries would be nearby, in a protected and shielded area. </figcaption> -->
+                    </figure>
+
+                    <p class="mb-2 text-gray-900 dark:text-white">
+           
+                        <span class="font-bold">Distribution<br> </span>
+                        The fifth and final stage of the SGS is Distribution (Figure 7). At the three major production phases of the SGS—stand-alone system, micro-grid, and mini-grid—surplus energy will be available.
+                      
+                    </p>
+                    <figure class="mt-6 mb-4 mx-auto"><img src="https://i.postimg.cc/MpHn889T/pic-10.png" alt="">
+                        <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Figure 7. Stage Five of the SGS (Solar Growth System), distribution of electricity. Distribution can occur either through direct household connection or the sale of portable rechargeable batteries. </figcaption>
+                        </figure>
+
+
+            <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What resources does our solution need? </h1>
+            <p class="mb-2 text-gray-900 dark:text-white">
+                Our solution needs the resources for the above technology.
+             
+         </p>
+         <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">What resources does our solution need?How is our solution part of a circular, regenerative, more equitable economy?  </h1>
+         <p class="mb-2 text-gray-900 dark:text-white">
+            Implementing our solutions needs local partners. The organizations we will speak with first are listed in the next section, "Where will our solution be tested (and first implemented)? Who will be our in-country/on-the-ground partner?”
+          
+      </p>
+      <h1 class="text-xl my-4 font-bold text-gray-900 dark:text-white">Step IV. Implementation </h1>
+          
+      <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">Cost:
+        <br>
+        a. How much will our strategy cost to test, for a proof-of-concept, in the country where we will test and first implement the solution? Show information</h1>
+        <ul class="list-decimal mb-2 text-gray-900 dark:text-white">
+     
+            <li>
+                <span class="font-bold">How much will it cost to test, for a proof-of-concept?<br> </span>
+                A stand-alone system will cost $1,000-$3,000 USD. A mini-grid will cost approximately $50,000, including the solar panels. </li>
+           <li> 
+            <span class="font-bold">How much will our strategy cost to implement at scale? <br> </span>
+            Assuming there are 1,000 clinics that need electricity, the total cost (assuming a stand-alone system cost is $2,000) will be $2 million US.
+ 
+
+            Electrifying all the communities that surround ach of those 1,000 clinics will cost approximately $50 million.
+            
+            
+            
+            The cost of the stand-alone, micro-grid, and mini-grid systems are $2.61, $2.38, and $2.15 USD per watt respectively (see below for details). The cost measures what it takes to implement the system compared to how much energy is being produced. In the United States, the average cost per watt of a solar system in 2023 is $2.95 USD9. This cost is before rebates and incentives and includes installation costs. The costs of the SGS do not include installation estimates.
+            
+            
+            
+            The cost of solar panels, and therefore solar systems, are decreasing (Figure 8). The cost of the three stages (stand-alone, micro- and mini-grid) included in the SGS were calculated using figures (as many as possible) from African countries, mostly South Africa. This gives a more accurate estimate of the cost of implementing the SGS in Africa, represented in US Dollars. The costs will vary from country to country, depending on the economic climate and availability of solar resources.  
+            
+            
+            
+            In the United States, if electricity is sold back to the grid, consumers can expect a profit of $0.10-$0.30 USD per kWh sold12. Applying this to the Solar Growth System, if the healthcare facility sells 10,000 kilowatt-hours of electricity, or 10 kWh to 1,000 beneficiaries, they will generate enough revenue to repay a loan for a stand-alone system ($1,000-$3,000 USD). By selling 100,000 kWh of electricity (100 kWh to 1,000 beneficiaries), the clinic will generate enough revenue to purchase all of the technology needed to upgrade a micro-grid to a mini-grid ($30,000 USD), with the exception of solar panels (which will cost $23,100 USD for 70 panels, see Appendix A).  </li>
+           
+          </ul>
+          <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">
+            b. How much will our strategy cost to implement at scale? </h1>
+
+        <p class="mb-2 text-gray-900 dark:text-white">Assuming there are 1,000 clinics that need electricity, the total cost (assuming a stand-alone system cost is $2,000) will be $2 million US.
+ 
+
+            Electrifying all the communities that surround ach of those 1,000 clinics will cost approximately $50 million.
+            
+            
+            The control system for each system considers the following in the price estimation:
+            
+          
+            
+       
+   </p>
+
+   <ul class="list-disc mb-2 text-gray-900 dark:text-white">
+    <span class="font-bold">Stand-Alone System:<br> </span>
+    <li>
+        
+        1 kW 24VDC Inverter ($375 USD)14</li>
+        <li>
+           
+            1 kW 24V 30A Lithium Battery Solar Charge Controller ($329 USD)15</li>
+        <li>
+           
+            Wiring ($100 USD, estimate)</li>
+     
+
+        <span class="font-bold">Micro-Grid<br> </span>
+        <li>
+            
+            5 kW 48V Multifunction Inverter (19,000 ZAR or ~$1,020 USD)16</li>
+            <li>
+               
+        5 kW 120V 30A Lithium Battery Solar Charge Controller ($879 USD)17</li>
+        <li>
+               
+                5 kW Transformer ($329 USD)18</li>
+         <li>
+               
+            Wiring ($100 USD, estimate)</li>
+
+    <span class="font-bold">Mini-Grid<br> </span>
+    <li>
+        
+        30kW Inverter ($3,725 - $6,000 USD, assume a mid-range cost)14</li>
+        <li>
+            
+            20 kW 220V Lithium Battery Solar Charge Controller ($2,459 USD)19 (Pricing for 30 kW model not available)</li>
+    <li>
+            
+        20 kW Power Phase Converter ($3,500 USD)20</li>
+        <li>
+            
+            Wiring ($100 USD, estimate)
+
+        </li>
+    
+           
+
+   
+  </ul>
+
+  <h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">Where will we get the resources and funding needed to implement our solution, to do the above?</h1>
+       
+  <p class="mb-2 text-gray-900 dark:text-white">For electrifying healthcare facilities in Africa, several initiatives and foundations are actively working to fund and support projects aimed at improving access to reliable electricity in healthcare settings. These initiatives are crucial for enhancing the quality of healthcare services and ensuring the safe storage of medicines and vaccines. Here are some of the current foundations and initiatives:
+
+    Power Africa: A USAID initiative aimed at increasing access to power in sub-Saharan Africa. Power Africa focuses on off-grid healthcare electrification and has awarded over $2.5 million in electrification grants to solar companies to electrify healthcare facilities across the region​ (Pact World)​.
+    Sustainable Energy for All (SEforALL): Working in close coordination with global partners, SEforALL aims to improve access to quality healthcare by electrifying health facilities with clean, reliable, and cost-effective electricity. They focus on overcoming barriers like lack of long-term financing and sustainable business models​ (Sustainable Energy for All | SEforALL)​.
+    The African Development Bank Group's Health in Africa Fund: Although not exclusively focused on electrification, the Health in Africa Fund, managed by Aureos Capital, aims to invest in Africa’s health sector, which could include infrastructure improvements like electrification​ (African Development Bank Group)​.
+    The Doris Duke Charitable Foundation's African Health Initiative (AHI): The AHI focuses on strengthening health systems in sub-Saharan Africa, which may include support for infrastructure improvements such as electrification, as part of their larger goal to improve the delivery of integrated primary healthcare​ (Doris Duke Foundation)​.
+    The Rockefeller Foundation: Through its commitment to expand access to renewable energy in sub-Saharan Africa, The Rockefeller Foundation works on projects that could potentially include the electrification of healthcare facilities. Their strategy encompasses leveraging health data and accelerating data-driven decisions to empower community health systems​ (The Rockefeller Foundation)​.
+    
+    
+    
+    These initiatives are part of a broader effort to address the critical link between healthcare and energy, recognizing that reliable power is fundamental to improving healthcare outcomes in rural and underserved areas. By focusing on sustainable and renewable energy solutions, such as solar power, these initiatives aim to create more resilient and effective healthcare systems across Africa.
+    
+    
+    
+    In addition to the above list, the following may also be funders for out strategy:
+    
+    The Global Fund to Fight AIDS, Tuberculosis and Malaria (GFATM) –
+    The World Bank 
+    The United States Agency for International Development (USAID) –
+    The United Kingdom Department for International Development (DFID) 
+     The European Union (EU) – 
+    The Bill & Melinda Gates Foundation – 
+    The World Health Organization (WHO) – 
+    The United Nations Development Programme (UNDP) – 
+    The African Union (AU)
+    The Ford Foundation – 
+    The Wellcome Trust – 
+    The Mastercard Foundation – 
+    The Children's Investment Fund Foundation (CIFF) – 
+    The Conrad N. Hilton Foundation – 
+    The Howard G. Buffett Foundation – 
+    The ELMA Foundation – 
+    The African Development Foundation (ADF)
+    
+    
+    
+  
+    
+
+</p>
+
+<h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?</h1>
+       
+  <p class="mb-2 text-gray-900 dark:text-white">
+    <span class="font-bold"> Potential Health Care Partners in Africa:<br> </span>
+   
+    There are several organizations working on improving healthcare in rural Africa, addressing various health issues and providing essential services to underserved communities. Here are some notable ones:
+    
+    
+    
+    African Medical and Research Foundation (AMREF), based in Kenya, focuses on increasing sustainable health access to communities in Africa through a wide range of programs, including training health workers and improving health services delivery​ (Philanthropy Circuit)​.
+    
+    Afya Kenya Foundation offers quality healthcare to the rural and urban poor through free community health outreach camps, covering services from diagnosis to treatment of basic diseases​ (Philanthropy Circuit)​.
+    
+    Women’s Health Foundation (WHF) in Uganda aims to promote women's well-being through a comprehensive community-based healthcare approach​ (Philanthropy Circuit)​.
+    
+    South Africa Medical & Education Foundation (S.A.M.E) works on creating an environment where quality healthcare and education are accessible to everyone, funding projects in hospitals and clinics​ (Philanthropy Circuit)​.
+    
+    Africa Health Organisation (AHO), based in Zimbabwe, strives to improve health quality and lengthen lives in Africa through technical cooperation and direct healthcare services​ (Philanthropy Circuit)​.
+    
+    Wellbeing Foundation in Nigeria focuses on educating, empowering, and advocating for accessible and sustainable health in Africa, with significant achievements in maternal and child health​ (Philanthropy Circuit)​.
+    
+    West Africa Health Foundation (WAHF) aims to promote health through wellness education and disease prevention with comprehensive medical outreach interventions​ (Philanthropy Circuit)​.
+    
+    Partners in Health works in developing countries to care for patients in their homes and communities, partnering with local governments to strengthen health systems​ (Human Rights Careers)​.
+    
+    The Alliance for International Medical Action (ALIMA) focuses on treating and caring for as many people as possible, working in areas affected by malnutrition, malaria, Ebola, and surgery​ (Human Rights Careers)​.
+    
+    AMREF Health Africa serves about nine million people per year in almost 35 countries, with over 130 community-based programs aimed at strengthening health systems and training health workers​ (Human Rights Careers)​.
+    
+    Additionally, the World Health Organization (WHO) has been involved in initiatives like the Health Extension Programme in Ethiopia, which trains Health Extension Workers (HEWs) to bring primary healthcare services to rural communities. This model has shown significant success in improving health outcomes and is being studied and adapted by other African countries​ (WHO | Regional Office for Africa)​.
+    
+    
+    <br>
+    <span class="font-bold">   Potential Health Care Partners in Kenya:<br> </span>
+ 
+    Several organizations are actively involved in addressing healthcare challenges in rural Kenya:
+    
+    Amref Health Africa: This is one of the largest African-based international NGOs devoted to improving health in Africa. Amref Health Africa works extensively in Kenya, focusing on various health issues, including maternal and child health, HIV/AIDS prevention and treatment, water and sanitation, and community health.
+    Médecins Sans Frontières (Doctors Without Borders): MSF provides medical assistance to populations in distress, including in rural areas of Kenya. They often focus on responding to emergencies, providing healthcare to marginalized communities, and addressing outbreaks of diseases like malaria and cholera.
+    Kenya Medical Research Institute (KEMRI): KEMRI is a state corporation responsible for conducting health research in Kenya. They engage in a wide range of health studies, including epidemiological research, clinical trials, and public health interventions, which often extend to rural areas.
+    World Health Organization (WHO): The WHO works closely with the Kenyan government and other partners to improve healthcare systems and address health challenges. They provide technical support, policy guidance, and assistance in disease surveillance and response, including in rural areas.
+    Kenya Red Cross Society: The Kenya Red Cross implements various health programs in rural areas, including community health initiatives, disaster preparedness, and response, and provision of healthcare services in underserved regions.
+    Community Health Workers (CHWs): While not a single organization, CHWs play a crucial role in delivering healthcare services in rural Kenya. They are often trained and supported by NGOs, government health agencies, and international organizations to provide basic healthcare services, health education, and referrals to communities.
+    
+    These organizations work individually and sometimes collaboratively to address the multifaceted healthcare needs of rural populations in Kenya. Their efforts encompass a wide range of interventions, from direct service provision to capacity building and advocacy for policy change.
+    
+    
+   <br> <span class="font-bold"> Potential Electricity Partners<br> </span>
+   
+    
+    These organizations and programs demonstrate a broad and impactful effort to address the healthcare challenges faced by rural communities across Africa, from improving access to medical care and education to empowering local health workers and communities.Our strategy will be first tested and implemented in Kenya. Some non-governmental organizations (NGOs) currently working in Africa on providing electricity for health clinics with whom we could partner:
+    
+     The Solar Electric Light Fund (SELF)**: SELF is a non-profit organization that provides solar electric systems to health clinics in rural Africa. SELF has installed over 1,000 solar electric systems in health clinics in 20 African countries. – 
+     The World Health Organization (WHO)**: WHO is a specialized agency of the United Nations that is responsible for international public health. WHO has a number of programs that support the electrification of health clinics in Africa, including the "Health in the African Region" program and the "Global Health Workforce Alliance" program. – 
+    The United Nations Development Programme (UNDP)**: UNDP is a United Nations agency that works to improve the living standards of people in developing countries. UNDP has a number of programs that support the electrification of health clinics in Africa, including the "Sustainable Energy for All" program and the "Access to Modern Energy Services" program. 
+    The African Development Bank (AfDB)**: AfDB is a regional development bank that provides financial and technical assistance to African countries. AfDB has a number of programs that support the electrification of health clinics in Africa, including the "Energy for All" program and the "Rural Electrification Fund" program. –
+    The Global Fund to Fight AIDS, Tuberculosis and Malaria (GFATM)**: GFATM is a global partnership that provides financial support to countries to fight AIDS, tuberculosis and malaria. GFATM has a number of programs that support the electrification of health clinics in Africa, including the "Health Systems Strengthening" program and the "Community Systems Strengthening" program. 
+     
+
+   
+
+</p>
+
+
+<h1 class="text-xl my-4 font-bold text-gray-900 dark:text-white">Step V. Strategy Review</h1>
+<p class="mb-2 text-gray-900 dark:text-white">  
+    Add the authors and a summary of your strategy at the top. Take the time to rearrange your solution into a coherent whole in ths final step
+</p>
+<h1 class="text-md my-4 font-bold text-gray-900 dark:text-white">Review Your Entire Strategy and Submit</h1>
+<p class="mb-2 text-gray-900 dark:text-white">
+   
+   
+    Author: Carley Williamson (USA)
+    <br>
+
+Advisors: Ella Blanco (USA), Fawwaz Khan (Pakistan)
+<br>
+Team: Carley Williamson (USA), Elliot Ampofo (USA), Jarae Braggs (USA), Muhammed Bryant (USA), Caroline Maina (Kenya), Glaire Lelei (Kenya), Juliette Lelei (Kenya), Gwen (Kenya), Ella Blanco (USA), Fawwaz Khan (Pakistan)
+
+
+<br>
+
+<br> <span class="font-bold italic">Strategic Summary<br> </span>
+
+Health and healthcare are compromised when there is no, inadequate, or unreliable access to electricity. Electricity is required for the proper function of medical equipment, refrigerator storage for vaccines, and air circulation systems. Without reliable and safe electricity, services like childbirth, emergency care, and vaccinations cannot be confidently provided at local healthcare facilities1. In Sub-Saharan Africa only 40% of the healthcare facilities have access to electricity2. This lack of electrification mirrors the availability of electricity in Africa’s general population. The nearly 600 million people without electricity in Africa are nearly all located where health clinics are not electrified3,4. The strategy in this report presents a design and plan for not just electrifying all the health facilities of Africa, but the surrounding homes, shops, schools, and other non-electrified parts of Africa. It does this through a modular, phased implementation of solar panels and control systems connecting the surrounding community.
+
+
+<br> <span class="font-bold "> Complete solution can be found <a class="text-blue-400 underline" routerLink="/solution-view/RW6yDQXeEI4ovvoQnViA">here</a>. <br> </span>
+    
+</p>
+
+
+
+           
+
+
+
+
+           
+
+
+
+
+
+
+
+
+
+
+              
+
+              
+           
+    </article>
+    </div>
+
+ 
+</main>
+<app-footer></app-footer>
+</div>

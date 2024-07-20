@@ -57,6 +57,7 @@ export class NavbarComponent implements OnInit {
   @Input() hoveredManualPath: string = ``;
   @Input() hoveredPendingPath: string = ``;
   @Input() hoveredStartLabPath: string = ``;
+  @Input() hoveredSolutionTourPath: string = ``;
 
   ngOnInit(): void {
     this.applyTheme();
