@@ -40,13 +40,13 @@ export class ChatbotComponent implements OnInit {
     this.user = this.auth.currentUser;
     // this.deleteAllDocuments();
   }
-  responses: DisplayMessage[] = [
-    {
-      text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. To Learn how to interact with me or other LLMs efficiently see `,
-      link: { text: 'here', url: '/blogs/nwg-ai' },
-      type: 'RESPONSE',
-    },
-  ];
+  introMessage: DisplayMessage = {
+    text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. To learn how to interact with me or other LLMs efficiently see `,
+    link: { text: 'here.', url: '/blogs/nwg-ai' },
+    type: 'RESPONSE',
+  };
+
+  responses: DisplayMessage[] = [];
   ngOnInit(): void {
     if (this.user?.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
@@ -77,13 +77,13 @@ export class ChatbotComponent implements OnInit {
   // }
 
   endChat() {
-    this.responses = [
-      {
-        text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. `,
-        link: { text: 'here', url: '/blogs/nwg-ai' },
-        type: 'RESPONSE',
-      },
-    ];
+    // this.responses = [
+    //   {
+    //     text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. `,
+    //     link: { text: 'here', url: '/blogs/nwg-ai' },
+    //     type: 'RESPONSE',
+    //   },
+    // ];
 
     this.deleteAllDocuments();
     this.toggleBot();

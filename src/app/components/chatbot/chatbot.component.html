@@ -34,8 +34,24 @@
                 <div id="chatbox" class="p-4 h-80 overflow-y-auto">
                 <!-- Chat messages will be displayed here -->
                 <section class="responses">
+                    <div class="">
+                        <img src="../../../assets/img/bucky-1.png" class="w-14 rounded-full" alt="">
+                    
+                        <p    class=" text-gray-950  py-2 rounded-lg items-center px-4 bg-white "  >
+                            
+                           {{introMessage.text}}
+
+                            <a *ngIf="introMessage.link" target="_blank" rel="noopener noreferrer"  [routerLink]="introMessage.link.url" class="text-blue-500" >{{ introMessage.link.text }}</a>
+                        
+                        
+                        
+                           </p>
+                        
+                    </div>
                     <ng-container *ngFor="let resp of responses">
+                        
                     <div class="" [ngClass]="resp.type == 'PROMPT' ? 'prompt' : 'response'">
+                        
                     
                             <div *ngIf="resp.type=='PROMPT'" class="mb-2">
                                 <img  *ngIf="profilePicturePath !=='' " [src]="profilePicturePath" class="rounded-full w-14 mr-1" alt="">
@@ -51,14 +67,8 @@
                                 <img src="../../../assets/img/bucky-1.png" class="w-14 rounded-full" alt="">
                             
                                 <p    class=" text-gray-950  py-2 rounded-lg items-center px-4 bg-white " [innerHTML]="formatText(resp.text)" >
-                                    
-                                   
-
-                                    <a *ngIf="resp.link" target="_blank" rel="noopener noreferrer"  [routerLink]="resp.link.url" class="text-blue-500" >{{ resp.link.text }}</a>
                                 
-                                
-                                
-                                   </p>
+                                </p>
                                 
                             </div>
                             
