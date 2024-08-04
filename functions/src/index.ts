@@ -51,7 +51,7 @@ const TEMPLATE_ID_EVALUATION_COMPLETE =
   functions.config().sendgrid.templateevaluationcomplete;
 sgMail.setApiKey(API_KEY);
 
-export const welcomeEmail = functions.auth.user().onCreate((user) => {
+export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
   const msg = {
     to: user.email,
     from: 'newworld@newworld-game.org',
@@ -63,32 +63,34 @@ export const welcomeEmail = functions.auth.user().onCreate((user) => {
   return sgMail.send(msg);
 });
 
-export const genericEmail = functions.https.onCall(async (data, context) => {
-  //   if (!context.auth && !context.auth!.token.email) {
-  //     throw new functions.https.HttpsError(
-  //       'failed-precondition',
-  //       'Must be logged with email-address'
-  //     );
-  //   }
-  const msg = {
-    to: data.email,
-    from: 'newworld@newworld-game.org',
-    templateId: TEMPLATE_ID_SOLUTION,
-    dynamic_template_data: {
-      subject: data.subject,
-      description: data.description,
-      title: data.title,
-      path: data.path,
-    },
-  };
+export const genericEmail = functions.https.onCall(
+  async (data: any, context: any) => {
+    //   if (!context.auth && !context.auth!.token.email) {
+    //     throw new functions.https.HttpsError(
+    //       'failed-precondition',
+    //       'Must be logged with email-address'
+    //     );
+    //   }
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_SOLUTION,
+      dynamic_template_data: {
+        subject: data.subject,
+        description: data.description,
+        title: data.title,
+        path: data.path,
+      },
+    };
 
-  await sgMail.send(msg);
+    await sgMail.send(msg);
 
-  return { success: true };
-});
+    return { success: true };
+  }
+);
 
 export const commentNotificationEmail = functions.https.onCall(
-  async (data, context) => {
+  async (data: any, context: any) => {
     const msg = {
       to: data.email,
       from: 'newworld@newworld-game.org',
@@ -107,7 +109,7 @@ export const commentNotificationEmail = functions.https.onCall(
 );
 
 export const solutionEvaluationInvite = functions.https.onCall(
-  async (data, context) => {
+  async (data: any, context: any) => {
     try {
       // Your existing email sending logic...
       const msg = {
@@ -134,7 +136,7 @@ export const solutionEvaluationInvite = functions.https.onCall(
 );
 
 export const solutionEvaluationComplete = functions.https.onCall(
-  async (data, context) => {
+  async (data: any, context: any) => {
     const msg = {
       to: data.email,
       from: 'newworld@newworld-game.org',
@@ -152,13 +154,13 @@ export const solutionEvaluationComplete = functions.https.onCall(
   }
 );
 
-exports.dailyNews = functions.pubsub
-  .schedule('every day 04:10')
-  .timeZone('America/Los_Angeles')
-  .onRun(async (context) => {
-    const summary = await createAndFetchSummary();
-    sendSummaryToDID(summary);
-  });
+// exports.dailyNews = functions.pubsub
+//   .schedule('every day 04:10')
+//   .timeZone('America/Los_Angeles')
+//   .onRun(async (context:any) => {
+//     const summary = await createAndFetchSummary();
+//     sendSummaryToDID(summary);
+//   });
 
 async function createAndFetchSummary() {
   const db = admin.firestore();
@@ -322,7 +324,7 @@ function sendSummaryToDID(summaryText: any) {
 }
 
 // Function to handle the webhook response
-exports.videoReady = functions.https.onRequest(async (req, res) => {
+exports.videoReady = functions.https.onRequest(async (req: any, res: any) => {
   if (req.method === 'POST') {
     const videoId = req.body.id;
     const videoUrl = `https://api.d-id.com/talks/${videoId}`;
