@@ -1,0 +1,5 @@
+<div *ngIf="isLayoutReady">
+    <ckeditor [editor]="Editor" (ready)="onReady($event)" [config]="config"></ckeditor>
+  </div>
+  <div #editorAnnotationsElement></div>
+  <div #editorPresenceElement></div>

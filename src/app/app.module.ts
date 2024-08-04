@@ -76,6 +76,8 @@ import { FacilitatorsComponent } from './blogs/facilitators/facilitators.compone
 import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
 import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
+import { CkeditorComponent } from './components/ckeditor/ckeditor.component';
+import { OtherAisComponent } from './components/other-ais/other-ais.component';
 
 @NgModule({
   declarations: [
@@ -128,6 +130,8 @@ import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution
     AskBuckyComponent,
     StateOfWorldComponent,
     NwgSolutionTourComponent,
+    CkeditorComponent,
+    OtherAisComponent,
   ],
   imports: [
     BrowserModule,
@@ -153,6 +157,7 @@ import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution
     MatChipsModule,
     MatAutocompleteModule,
     EditorModule,
+    CKEditorModule,
   ],
 
   providers: [],

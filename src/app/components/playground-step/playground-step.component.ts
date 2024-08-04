@@ -36,55 +36,10 @@ export class PlaygroundStepComponent {
     `<h1 class="text-left text-xl font-bold  my-4"> Implementation </h1>`,
   ];
   array: string[] = [];
-  apiKey: string = environment.tinyApiKey;
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
   etAl: string = '';
   strategyReview: string = '';
-  editorConfig: any = {
-    height: 500,
-    menubar: true,
-    selector: 'textarea',
-    plugins: [
-      'advlist',
-      'advcode',
-      'advtable',
-      'autolink',
-      'checklist',
-      'markdown',
-      'lists',
-      'link',
-      'image',
-      'charmap',
-      'preview',
-      'anchor',
-      'searchreplace',
-      'visualblocks',
-      'fullscreen',
-      'formatpainter',
-      'insertdatetime',
-      'media',
-      'table',
-      'help',
-      'wordcount',
-      'export',
-    ],
-    toolbar:
-      'undo redo | casechange blocks | bold italic backcolor | \
-              alignleft aligncenter alignright alignjustify | \
-              bullist numlist checklist outdent indent | removeformat | \
-              a11ycheck code table help export',
-    branding: false,
-    // setup: (editor: any) => {
-    //   editor.on('init', () => {
-    //     // editor.setContent(this.contentsArray[i]);
-    //   });
-    //   // Add keyup event handler
-    //   editor.on('keyup', () => {
-    //     console.log('Content being typed:', this.data);
-    //   });
-    // },
-  };
 
   displayPopups: boolean[] = [];
   newTitle: string = '';

@@ -39,6 +39,7 @@ import { FacilitatorsComponent } from './blogs/facilitators/facilitators.compone
 import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
 import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
+import { OtherAisComponent } from './components/other-ais/other-ais.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -85,6 +86,11 @@ const routes: Routes = [
   {
     path: 'join-tournament',
     component: JoinTournamentComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'other-ais',
+    component: OtherAisComponent,
     canActivate: [AuthGuard],
   },
   {
