@@ -162,96 +162,96 @@ export const solutionEvaluationComplete = functions.https.onCall(
 //     sendSummaryToDID(summary);
 //   });
 
-async function createAndFetchSummary() {
-  const db = admin.firestore();
-  const now = new Date();
-  const yesterday = new Date(now.setDate(now.getDate() - 1));
-  const yesterdayStartString = formatDateAsString(yesterday, 'start');
-  const yesterdayEndString = formatDateAsString(yesterday, 'end');
-  const today = new Date();
+// async function createAndFetchSummary() {
+//   const db = admin.firestore();
+//   const now = new Date();
+//   const yesterday = new Date(now.setDate(now.getDate() - 1));
+//   const yesterdayStartString = formatDateAsString(yesterday, 'start');
+//   const yesterdayEndString = formatDateAsString(yesterday, 'end');
+//   const today = new Date();
 
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
+//   const monthNames = [
+//     'January',
+//     'February',
+//     'March',
+//     'April',
+//     'May',
+//     'June',
+//     'July',
+//     'August',
+//     'September',
+//     'October',
+//     'November',
+//     'December',
+//   ];
 
-  const year = today.getFullYear();
+//   const year = today.getFullYear();
 
-  const date = today.getDate();
+//   const date = today.getDate();
 
-  const suffix = ['st', 'nd', 'rd'][
-    date % 100 > 10 && date % 100 < 20
-      ? 0
-      : date % 10 === 1
-      ? 1
-      : date % 10 === 2
-      ? 2
-      : 3
-  ];
-  const formattedDate = `${
-    monthNames[today.getMonth()]
-  } ${date}${suffix}, ${year}`;
+//   const suffix = ['st', 'nd', 'rd'][
+//     date % 100 > 10 && date % 100 < 20
+//       ? 0
+//       : date % 10 === 1
+//       ? 1
+//       : date % 10 === 2
+//       ? 2
+//       : 3
+//   ];
+//   const formattedDate = `${
+//     monthNames[today.getMonth()]
+//   } ${date}${suffix}, ${year}`;
 
-  const solutions = await db
-    .collection('solutions')
-    .where('submissionDate', '>=', yesterdayStartString)
-    .where('submissionDate', '<=', yesterdayEndString)
-    .get();
+//   const solutions = await db
+//     .collection('solutions')
+//     .where('submissionDate', '>=', yesterdayStartString)
+//     .where('submissionDate', '<=', yesterdayEndString)
+//     .get();
 
-  let solutionsToSummarize = [];
+//   let solutionsToSummarize = [];
 
-  if (solutions.empty) {
-    const recentSolutions = await db
-      .collection('solutions')
-      .orderBy('submissionDate', 'desc')
-      .limit(5)
-      .get();
-    solutionsToSummarize = recentSolutions.docs.map((doc: any) => doc.data());
-  } else {
-    solutionsToSummarize = solutions.docs.map((doc: any) => doc.data());
-  }
+//   if (solutions.empty) {
+//     const recentSolutions = await db
+//       .collection('solutions')
+//       .orderBy('submissionDate', 'desc')
+//       .limit(5)
+//       .get();
+//     solutionsToSummarize = recentSolutions.docs.map((doc: any) => doc.data());
+//   } else {
+//     solutionsToSummarize = solutions.docs.map((doc: any) => doc.data());
+//   }
 
-  const summaryText = solutionsToSummarize
-    .map(
-      (solution: any) =>
-        `Title: ${solution.title}\nAuthor: ${
-          solution.authorName
-        }\nDate: ${convertToDate(
-          solution.submissionDate
-        ).toISOString()}\nContent: ${solution.content}`
-    )
-    .join('\n\n');
+//   const summaryText = solutionsToSummarize
+//     .map(
+//       (solution: any) =>
+//         `Title: ${solution.title}\nAuthor: ${
+//           solution.authorName
+//         }\nDate: ${convertToDate(
+//           solution.submissionDate
+//         ).toISOString()}\nContent: ${solution.content}`
+//     )
+//     .join('\n\n');
 
-  const enhancedPrompt = `
-      Envision yourself as a groundbreaking news reporter who embodies an exceptional combination of attributes: the ability to contextualize current events within their historical tapestry; the capacity to infuse news analysis with engaging and insightful wit; the skill to cover stories with the profound global awareness and nuanced understanding; and the profound commitment to and knowledge of sustainable development and environmental conservation. Your reporting not only informs and entertains but also enlightens viewers on the importance of environmental stewardship and sustainable practices.
-      Your approach to news:
-      - Start with your name ( My name is Rachel) and todays' date ${formattedDate} 
-      - Place the event within a historical continuum, highlighting how past events and trends have shaped the current situation, providing viewers with a deep understanding of its roots.
-      - Incorporates a balanced use of wit to make the news more engaging, ensuring humor serves to enlighten rather than detract from the gravity of topics, especially those concerning environmental issues.
-      - Expands the story’s scope to include its global implications, drawing on a wide-ranging knowledge of international affairs and cultural insights, while always mindful of the environmental angle.
-      - Integrates sustainable development insights into your analysis, inspired by Elizabeth Wathuti’s work. You highlight the environmental impact of events, advocate for sustainable solutions, and inspire action towards a more sustainable future.
-      - Add a closing message ( like thank you that is all for today. I will see you tomorrow)\n
-      - Remove weird characaters on the summary text such *, or #.
-      - Make the summary about 3-4 minutes long
-      Now summarize the text below: \n
-      ${summaryText}
-    `;
+//   const enhancedPrompt = `
+//       Envision yourself as a groundbreaking news reporter who embodies an exceptional combination of attributes: the ability to contextualize current events within their historical tapestry; the capacity to infuse news analysis with engaging and insightful wit; the skill to cover stories with the profound global awareness and nuanced understanding; and the profound commitment to and knowledge of sustainable development and environmental conservation. Your reporting not only informs and entertains but also enlightens viewers on the importance of environmental stewardship and sustainable practices.
+//       Your approach to news:
+//       - Start with your name ( My name is Rachel) and todays' date ${formattedDate}
+//       - Place the event within a historical continuum, highlighting how past events and trends have shaped the current situation, providing viewers with a deep understanding of its roots.
+//       - Incorporates a balanced use of wit to make the news more engaging, ensuring humor serves to enlighten rather than detract from the gravity of topics, especially those concerning environmental issues.
+//       - Expands the story’s scope to include its global implications, drawing on a wide-ranging knowledge of international affairs and cultural insights, while always mindful of the environmental angle.
+//       - Integrates sustainable development insights into your analysis, inspired by Elizabeth Wathuti’s work. You highlight the environmental impact of events, advocate for sustainable solutions, and inspire action towards a more sustainable future.
+//       - Add a closing message ( like thank you that is all for today. I will see you tomorrow)\n
+//       - Remove weird characaters on the summary text such *, or #.
+//       - Make the summary about 3-4 minutes long
+//       Now summarize the text below: \n
+//       ${summaryText}
+//     `;
 
-  const summaryDocRef = db.collection('summaries').doc();
-  await summaryDocRef.set({ text: enhancedPrompt });
+//   const summaryDocRef = db.collection('summaries').doc();
+//   await summaryDocRef.set({ text: enhancedPrompt });
 
-  listenForSummaryResponse(summaryDocRef);
-}
+//   listenForSummaryResponse(summaryDocRef);
+// }
 
 function formatDateAsString(date: any, type: any) {
   const year = date.getFullYear();
@@ -294,34 +294,34 @@ function listenForSummaryResponse(docRef: any) {
   );
 }
 
-function sendSummaryToDID(summaryText: any) {
-  axios
-    .post(
-      'https://api.d-id.com/talks',
-      {
-        source_url:
-          's3://d-id-images-prod/auth0|65ea804bc78b9c5681c49d5d/img_gPCzWvI6vGdaEj_is9nlx/news-anchor.png',
-        script: {
-          type: 'text',
-          input: summaryText,
-        },
-        webhook:
-          'https://us-central1-new-worldgame.cloudfunctions.net/videoReady', // Replace 'your-project-id' with your actual Firebase project ID
-      },
-      {
-        headers: {
-          Authorization: `Basic ${DID_API_KEY}`, // Replace 'YOUR_API_KEY' with your actual D-ID API Key
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    .then((response: any) =>
-      console.log('Video creation request sent successfully', response.data)
-    )
-    .catch((error: any) =>
-      console.error('Failed to send video creation request', error)
-    );
-}
+// function sendSummaryToDID(summaryText: any) {
+//   axios
+//     .post(
+//       'https://api.d-id.com/talks',
+//       {
+//         source_url:
+//           's3://d-id-images-prod/auth0|65ea804bc78b9c5681c49d5d/img_gPCzWvI6vGdaEj_is9nlx/news-anchor.png',
+//         script: {
+//           type: 'text',
+//           input: summaryText,
+//         },
+//         webhook:
+//           'https://us-central1-new-worldgame.cloudfunctions.net/videoReady', // Replace 'your-project-id' with your actual Firebase project ID
+//       },
+//       {
+//         headers: {
+//           Authorization: `Basic ${DID_API_KEY}`, // Replace 'YOUR_API_KEY' with your actual D-ID API Key
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     )
+//     .then((response: any) =>
+//       console.log('Video creation request sent successfully', response.data)
+//     )
+//     .catch((error: any) =>
+//       console.error('Failed to send video creation request', error)
+//     );
+// }
 
 // Function to handle the webhook response
 exports.videoReady = functions.https.onRequest(async (req: any, res: any) => {
