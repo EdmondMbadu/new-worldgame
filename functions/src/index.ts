@@ -43,7 +43,7 @@ const API_KEY = functions.config().sendgrid.key;
 const TEMPLATE_ID = functions.config().sendgrid.template;
 const TEMPLATE_ID_SOLUTION = functions.config().sendgrid.templatesolutioninvite;
 const TEMPLATE_ID_COMMENT = functions.config().sendgrid.templatecommentinvite;
-const DID_API_KEY = functions.config().did.key;
+// const DID_API_KEY = functions.config().did.key;
 
 const TEMPLATE_ID_EVALUTION =
   functions.config().sendgrid.templatesolutionevaluationinvite;
@@ -253,46 +253,46 @@ export const solutionEvaluationComplete = functions.https.onCall(
 //   listenForSummaryResponse(summaryDocRef);
 // }
 
-function formatDateAsString(date: any, type: any) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = type === 'start' ? '00' : '23';
-  const minutes = type === 'start' ? '00' : '59';
-  const seconds = type === 'start' ? '00' : '59';
-  return `${month}-${day}-${year}-${hours}-${minutes}-${seconds}`;
-}
+// function formatDateAsString(date: any, type: any) {
+//   const year = date.getFullYear();
+//   const month = date.getMonth() + 1;
+//   const day = date.getDate();
+//   const hours = type === 'start' ? '00' : '23';
+//   const minutes = type === 'start' ? '00' : '59';
+//   const seconds = type === 'start' ? '00' : '59';
+//   return `${month}-${day}-${year}-${hours}-${minutes}-${seconds}`;
+// }
 
-function convertToDate(dateStr: any) {
-  const parts = dateStr.split('-');
-  return new Date(
-    parts[2],
-    parts[0] - 1,
-    parts[1],
-    parts[3],
-    parts[4],
-    parts[5]
-  );
-}
+// function convertToDate(dateStr: any) {
+//   const parts = dateStr.split('-');
+//   return new Date(
+//     parts[2],
+//     parts[0] - 1,
+//     parts[1],
+//     parts[3],
+//     parts[4],
+//     parts[5]
+//   );
+// }
 
-function listenForSummaryResponse(docRef: any) {
-  const unsubscribe = docRef.onSnapshot(
-    (docSnapshot: any) => {
-      if (docSnapshot.exists && docSnapshot.data().summary) {
-        console.log('Summary received:', docSnapshot.data().summary);
-        return docSnapshot.data().summary;
-        unsubscribe(); // Detach the listener after receiving the summary
-      }
-    },
-    (err: any) => {
-      console.log(`Encountered error: ${err}`);
+// function listenForSummaryResponse(docRef: any) {
+//   const unsubscribe = docRef.onSnapshot(
+//     (docSnapshot: any) => {
+//       if (docSnapshot.exists && docSnapshot.data().summary) {
+//         console.log('Summary received:', docSnapshot.data().summary);
+//         return docSnapshot.data().summary;
+//         unsubscribe(); // Detach the listener after receiving the summary
+//       }
+//     },
+//     (err: any) => {
+//       console.log(`Encountered error: ${err}`);
 
-      unsubscribe();
+//       unsubscribe();
 
-      return;
-    }
-  );
-}
+//       return;
+//     }
+//   );
+// }
 
 // function sendSummaryToDID(summaryText: any) {
 //   axios
