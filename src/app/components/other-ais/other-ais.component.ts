@@ -138,10 +138,15 @@ export class OtherAisComponent implements OnInit {
                 ' the response date and format',
                 conversation['response']
               );
-              this.cdRef.detectChanges(); // Detect changes to update the view
+              // this.cdRef.detectChanges(); // Detect changes to update the view
 
-              // Use setTimeout to allow time for the DOM to update
-              setTimeout(() => this.scrollToBottom(), 0);
+              // // Use setTimeout to allow time for the DOM to update
+              // setTimeout(() => this.scrollToBottom(), 0);
+              this.typewriterEffect(conversation['response'], () => {
+                this.cdRef.detectChanges(); // Detect changes to update the view
+                setTimeout(() => this.scrollToBottom(), 0);
+                destroyFn.unsubscribe();
+              });
 
               destroyFn.unsubscribe();
               break;
@@ -178,6 +183,23 @@ export class OtherAisComponent implements OnInit {
     // } catch (err) {
     //   console.error('Scroll to bottom failed:', err);
     // }
+  }
+  typewriterEffect(text: string, callback: () => void) {
+    let index = 0;
+    this.responses[this.responses.length - 1].text = '';
+
+    const interval = setInterval(() => {
+      this.responses[this.responses.length - 1].text += text[index];
+      index++;
+
+      if (index === text.length) {
+        clearInterval(interval);
+        callback();
+      }
+
+      this.cdRef.detectChanges();
+      this.scrollToBottom();
+    }, 1); // Adjust typing speed here
   }
   async deleteAllDocuments(): Promise<void> {
     const batch = this.afs.firestore.batch();
