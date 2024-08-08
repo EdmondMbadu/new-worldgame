@@ -41,7 +41,7 @@ export class OtherAisComponent implements OnInit {
 
   aiOptions = [
     {
-      avatarPath: '../../../assets/img/bucky-1.png',
+      avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
       intro:
         'American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.',
@@ -61,9 +61,15 @@ export class OtherAisComponent implements OnInit {
         'South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa ',
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
+    {
+      avatarPath: '../../../assets/img/jane-goodal.png',
+      name: 'Jane Goodal',
+      intro: `English zoologist, primatologist and anthropologist considered the world's foremost expert on chimpanzees...`,
+      collectionPath: `users/${this.auth.currentUser.uid}/jane/`,
+    },
   ];
   // einstein is the default personna
-  aiSelected: any = this.aiOptions[1];
+  aiSelected: any = this.aiOptions[2];
   errorMsg = '';
   responses: DisplayMessage[] = [
     {

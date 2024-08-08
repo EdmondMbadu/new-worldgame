@@ -51,6 +51,7 @@ export class ChatbotComponent implements OnInit {
     if (this.user?.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
     }
+    this.deleteAllDocuments();
   }
   scrollToBottom(): void {
     const chatbox = document.getElementById('chatbox');

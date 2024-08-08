@@ -8,7 +8,7 @@
         <div class="flex flex-col mx-auto m-10">
 
             <form class="max-w-2xl bg-white p-10 shadow-lg w-max md:w-[32rem] dark:bg-slate-800" [formGroup]="myForm">
-                <h1 class="flex flex-col text-xl text-center my-4 mb-4 dark:text-gray-200">Starting a Solution Lab</h1>
+                <h1 class="flex flex-col text-xl text-center my-4 mb-4 dark:text-gray-200">Starting a NewWorld Game Lab</h1>
                 <div *ngIf="solutionError | async" class="text-red-400" >
                     An error occured while launching the Laboratory.
                     Try again. 
@@ -22,7 +22,7 @@
                     </div>
                 </div> 
                 <div class="mb-6">
-                    <label for="title" class="block mb-2 text-md font-medium text-gray-900 dark:text-gray-200">Solution Lab Project working Title</label>
+                    <label for="title" class="block mb-2 text-md font-medium text-gray-900 dark:text-gray-200">NewWorld Game Project working Title</label>
                     <input type="email" id="text" formControlName="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="">
                     <div *ngIf="title!.invalid && title!.touched " class="text-red-400" >
                     A title is required.
