@@ -43,6 +43,7 @@ export class NewUser {
   password?: string;
   goal?: string;
   sdgsSelected?: string[];
+  success?: boolean;
 }
 export class SolutionEnvironment {
   focus?: string;

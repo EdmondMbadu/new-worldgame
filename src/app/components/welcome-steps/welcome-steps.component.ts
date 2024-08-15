@@ -22,6 +22,8 @@ export class WelcomeStepsComponent implements OnInit {
   @Input() stepNumber: number = 0;
   @Input() focusSelectedArray: boolean[] = [];
   focusSelected: number = -1;
+
+  registrationSuccess: boolean = true;
   sdgSelectedArray: number[] = [];
   @Input() sdgSelected: number[] = [];
   sdgInterest: string[] = [];
@@ -276,6 +278,9 @@ export class WelcomeStepsComponent implements OnInit {
   }
   closeAccountCreatedError() {
     this.createAccountError = false;
+  }
+  closeRegistrationSuccess() {
+    this.registrationSuccess = !this.registrationSuccess;
   }
 }
 interface Focus {

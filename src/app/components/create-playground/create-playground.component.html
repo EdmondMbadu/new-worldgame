@@ -22,7 +22,7 @@
                     </div>
                 </div> 
                 <div class="mb-6">
-                    <label for="title" class="block mb-2 text-md font-medium text-gray-900 dark:text-gray-200">NewWorld Game Project working Title</label>
+                    <label for="title" class="block mb-2 text-md font-medium text-gray-900 dark:text-gray-200">NewWorld Game Project Working Title</label>
                     <input type="email" id="text" formControlName="title" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="">
                     <div *ngIf="title!.invalid && title!.touched " class="text-red-400" >
                     A title is required.
@@ -30,7 +30,7 @@
                 </div> 
             
                 <header class="inverted">
-                    <h2 class="py-2 text-gray-900 dark:text-gray-200">Describe your problem focus in few words</h2>
+                    <h2 class="py-2 text-gray-900 dark:text-gray-200">Describe your problem focus in a few words</h2>
                 </header>
                 <div class="" role="main">
                 
@@ -185,7 +185,7 @@
                 
 
 
-                <button [disabled]="myForm.invalid" type="submit" class="text-white bg-teal-700 hover:bg-teal-800   font-medium rounded-full text-sm w-full  px-5 py-2.5 text-center" (click)="launchPlayground()">Launch Solution Lab</button>
+                <button [disabled]="myForm.invalid" type="submit" class="text-white bg-teal-700 hover:bg-teal-800   font-medium rounded-full text-sm w-full  px-5 py-2.5 text-center" (click)="launchPlayground()">Launch NewWorld Game Lab</button>
                 <div class="flex flex-col py-3 items-center" *ngIf="loading" role="status">
                     <svg aria-hidden="true" class="w-8 h-8 mr-2 text-gray-200 animate-spin fill-teal-700" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>

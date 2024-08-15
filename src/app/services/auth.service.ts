@@ -97,7 +97,8 @@ export class AuthService {
       .createUserWithEmailAndPassword(email, password)
       .then(
         (res) => {
-          alert('Registration was Successful');
+          // alert('Registration was Successful');
+          this.newUser.success = true;
           this.sendEmailForVerification(res.user);
 
           this.addNewUser(firstName, lastName, res.user, goal, sdgsSelected);
