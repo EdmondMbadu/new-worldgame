@@ -1,0 +1,150 @@
+
+<div class="flex justify-center  gap-2.5">
+    <img class="h-12 rounded-full" src="../../../assets/img/bucky-1.png" alt="Jese image">
+    <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6">
+       <div class="flex items-center space-x-2 rtl:space-x-reverse">
+          <span class="text-md font-semibold text-gray-900 dark:text-white">Bucky</span>
+
+       </div>
+       <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white ">{{ result }}</p>
+      
+    </div>
+
+    
+    
+</div>
+<div *ngIf="stepNumber==1" class=" space-y-4 mt-10">
+    <div *ngFor="let f of focus; let i=index" (click)="chooseFocus(i)" class="p-4   flex flex-row shadow-sm border-2 border-gray-400  text-md text-gray-950 rounded-lg hover:dark:border-gray-200 hover:border-gray-900 dark:bg-gray-800 dark:text-gray-300 {{f.backgroundSelected}}" role="alert">
+       <img class="h-10" [src]="f.imagePath" alt="">
+      
+        <h1 class="mt-2 mx-4">{{f.text}}</h1>
+      </div>
+
+      <div class="container flex mx-auto  justify-center my-10">
+    
+      
+        <button *ngIf="focusSelected>=0" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button [disabled]="true" *ngIf="focusSelected==-1" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+    </div>
+ 
+</div>
+<section *ngIf="stepNumber==2" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
+    <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+      <div  class="mb-4 flex items-center justify-between gap-4 md:mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Sustainable Development Goals (SDGs)</h2>
+  
+     
+      </div>
+  
+      <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <a *ngFor="let sdg of sdgs; let i=index" (click)="chooseSDG(i)" class=" flex items-center rounded-lg border border-gray-200  px-4 py-2 hover:border-4  dark:bg-gray-800 dark:hover:bg-gray-700 {{sdg.backgroundSelected}} ">
+          <!-- <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v5m-3 0h6M4 11h16M5 15h14a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1Z"></path>
+          </svg> -->
+          <img  class=" me-2 h-14  shrink-0 text-gray-900 dark:text-white" [src]="sdg.imagePath" alt="">
+          <span class="text-sm font-medium text-gray-900 dark:text-white">{{ sdg.fullname }}</span>
+        </a>
+        <div class="flex  my-5">
+            <div class="flex items-center h-5">
+            <input (change)="selectAllSdgs()" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
+            </div>
+            <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Select all SDGs</label>
+        
+    </div>
+        
+     
+      </div>
+    </div>
+    <div class="container flex mx-auto  justify-center my-10">
+    
+      
+        <button *ngIf="hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button [disabled]="true" *ngIf="!hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+    </div>
+    
+  </section>
+
+  <div *ngIf="stepNumber==3" class="mt-10">
+        <div class="grid md:grid-cols-2 md:gap-6">
+            <div class="relative z-0 w-full mb-5 group">
+                <input  [(ngModel)]="auth.newUser.firstName"  type="text" name="floating_first_name" id="floating_first_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+                <label for="floating_first_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">First name</label>
+            </div>
+            <div class="relative z-0 w-full mb-5 group">
+                <input  [(ngModel)]="auth.newUser.lastname"  type="text" name="floating_last_name" id="floating_last_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+                <label for="floating_last_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Last name</label>
+            </div>
+        </div>
+        <div class="container flex mx-auto  justify-center my-10">
+            <button *ngIf="!namesFieldEmpty" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+            <button [disabled]="true" *ngIf="namesFieldEmpty" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        </div>
+  </div>
+
+  <div *ngIf="stepNumber==4" class="mt-10">
+    <div class="relative z-0 w-full mb-5 group">
+        <input [(ngModel)]="auth.newUser.email"   type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+        <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
+    </div>
+    <div class="container flex mx-auto  justify-center my-10">
+        <button *ngIf="!emailEmptyOrInvalid" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button [disabled]="true" *ngIf="emailEmptyOrInvalid" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+    </div>
+  </div>
+
+  <div  *ngIf="stepNumber==5" class="mt-10">
+    <div class="relative z-0 w-full mb-5 group">
+        <input [(ngModel)]="auth.newUser.password"   type="password" name="floating_password" id="floating_password" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+        <label for="floating_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Password</label>
+    </div>
+    <div class="relative z-0 w-full mb-5 group">
+        <input [(ngModel)]="rePassword"   type="password" name="repeat_password" id="floating_repeat_password" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+        <label for="floating_repeat_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Confirm password</label>
+    </div>
+    <div class="container flex mx-auto  justify-center my-10">
+        <button *ngIf="!passwordEmptyOrDifferent" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button [disabled]="true" *ngIf="passwordEmptyOrDifferent" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+    </div>
+  </div>
+
+  <div  *ngIf="stepNumber==6" class="mt-10 mx-auto max-w-xl bg-gray-100 dark:bg-gray-800 p-6">
+        <div class="">
+            <h1 class="mb-4 text-xl font-bold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white">Terms and Conditions</h1>
+
+            <p class="mb-2 text-gray-900 dark:text-white">NewWorld Game will not, under any circumstances release, sell, or make available to anyone for any reason any information obtained during your interactions with NewWorld Game.
+
+                The solutions written in the platform will be made public for the world to see and use for the benefit of the world.
+            </p>
+            
+        </div>
+        <div class="flex  mb-5">
+                <div class="flex items-center h-5">
+                <input (change)="onCheckboxChangeAgree($event)" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
+                </div>
+                <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">I agree with the <a routerLink="/privacy" class="text-blue-600 hover:underline dark:text-blue-500">terms and conditions</a></label>
+            
+        </div>
+        <div class="flex  mb-5">
+            <div class="flex items-center h-5">
+                <input (change)="onCheckboxChangeAgreeEvaluator($event)" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
+            </div>
+            
+                <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, I sign up to be both <a target="_blank" routerLink="/overview" class="text-blue-500  underline">a problem solver</a> and <a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">an evaluator</a>.</label>
+        
+        </div>
+        <div class="container flex mx-auto  justify-center my-10">
+            <button *ngIf="agree &&solverEvaluator" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+            <button [disabled]="true" *ngIf="!agree || !solverEvaluator" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        </div>
+
+        
+    </div>
+       
+    <div class="container flex mx-auto  justify-center my-10">
+    
+      
+        <button *ngIf="stepNumber==0 || stepNumber===7" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+       
+    </div>
+    
+  

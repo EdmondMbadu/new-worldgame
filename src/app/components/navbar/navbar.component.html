@@ -4,10 +4,12 @@
 
     <div class=" container mx-auto flex items-center justify-between dark:text-white px-12">
             <div class=" pt-2  " routerLink="/{{path}}"  >
+             
                 <img  class="w-20 rounded-lg"  src="../../../assets/img/earth-triangle-test.png" alt="">
-            </div>
+            
+              </div>
         
-            <div class="hidden lg:flex space-x-6  font-medium" >
+            <!-- <div class="hidden lg:flex space-x-6  font-medium" >
                
                 <h1 *ngIf="currentPageJoinNow" class=" text-center  border-teal-700 {{current}}">Join Now</h1>
                 <h1 *ngIf="!currentPageJoinNow" class="hover:text-teal-700" routerLink="/signup">Join Now </h1>
@@ -37,7 +39,7 @@
                  
               </div>
               </button>
-            </div>
+            </div> -->
 
             <div class="flex flex-row space-x-6 ">
                 <a  class="mt-2" >
@@ -58,14 +60,14 @@
                        
                     </div>
                 </a>
-                <a routerLink="/signup" class="hidden lg:block p-3 px-6 pt-2 text-white border- bg-teal-700 rounded-lg hover:bg-teal-800"> Get Started</a>
-                
+                <a routerLink="/login" class="flex p-2 px-6 pt-2 text-gray-900 border-2 border-gray-400  bg-white rounded-full hover:border-gray-900"> Log in</a>
+                <!-- <button type="button" class="text-gray-900 bg-white border border-gray-500 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-md px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Log In</button> -->
 
             </div>
            
-            <div class="lg:hidden flex items-center">
+            <!-- <div class="lg:hidden flex items-center">
                   <a  (click)="toggleHamburger()" class="" >
-                    <!-- <img *ngIf="displayHamburgerMenu" src="../../../assets/img/hamburger.png" alt=""> -->
+                   
                     <svg class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"   *ngIf="displayHamburgerMenu" width="35px" height="35px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M6.5 11.75C6.08579 11.75 5.75 12.0858 5.75 12.5C5.75 12.9142 6.08579 13.25 6.5 13.25V11.75ZM18.5 13.25C18.9142 13.25 19.25 12.9142 19.25 12.5C19.25 12.0858 18.9142 11.75 18.5 11.75V13.25ZM6.5 15.75C6.08579 15.75 5.75 16.0858 5.75 16.5C5.75 16.9142 6.08579 17.25 6.5 17.25V15.75ZM18.5 17.25C18.9142 17.25 19.25 16.9142 19.25 16.5C19.25 16.0858 18.9142 15.75 18.5 15.75V17.25ZM6.5 7.75C6.08579 7.75 5.75 8.08579 5.75 8.5C5.75 8.91421 6.08579 9.25 6.5 9.25V7.75ZM18.5 9.25C18.9142 9.25 19.25 8.91421 19.25 8.5C19.25 8.08579 18.9142 7.75 18.5 7.75V9.25ZM6.5 13.25H18.5V11.75H6.5V13.25ZM6.5 17.25H18.5V15.75H6.5V17.25ZM6.5 9.25H18.5V7.75H6.5V9.25Z" fill="#000000"/>
                       </svg>
@@ -74,62 +76,14 @@
 
                   <div (click)="toggleHamburger()" *ngIf="displayHamburgerMenuClose" class="">
                     <svg width="35px" class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"  height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <!-- <rect width="24" height="24" /> -->
+                      
                       <path d="M7 17L16.8995 7.10051"  stroke-linecap="round" stroke-linejoin="round"/>
                       <path d="M7 7.00001L16.8995 16.8995"  stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                   </div>
 
-                  <div  *ngIf="displayHamburgerMenuClose" class="z-10 mt-44 right-12  absolute  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600">
-                  
-                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                      <li>
-                        <a routerLink="/signup"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Join Now</a>
-                      </li>
-                      <li>
-                        <a routerLink="/login"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Sign in</a>
-                      </li>
-            
-                     
-                    </ul>
-                
-                    <button
-                    
-                     (click)="toggleResourcesMenuPhone()" id="doubleDropdownButton" data-dropdown-toggle="doubleDropdown" data-dropdown-placement="right-start" type="button" class="flex items-center  w-full px-4 pb-2 hover:bg-gray-100  dark:hover:bg-gray-600 dark:hover:text-white text-md">
-                     <svg class="h-5 w-5 mr-2 text-gray-400 dark:stroke-white stroke-black" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 12H18M6 12L11 7M6 12L11 17"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                     Resources
-                    
-                  
-                    </button>
-                   
-                      
-                      <div *ngIf="resourcesMenu"  id="doubleDropdown" class="z-10 absolute right-40 -mt-8   bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="doubleDropdownButton">
-                         
-                          <li>
-                            <a routerLink="/overview"   class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">About</a>
-                          </li>
-                          <li>
-                            <a routerLink="/blogs" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Operating Manual</a>
-                          </li>
-                          <li>
-                            <a routerLink="/plans"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Support NewWorld Game</a>
-                          </li>
-                          <li>
-                            <a routerLink="/archive-pictures" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">GSL Archive Pictures</a>
-                          </li>
-                          
-                         
-                        </ul>
-                    </div>
-                    
-                   
-                </div>
-                
               
-              </div>
+              </div> -->
  
             
     </div>
@@ -519,7 +473,7 @@
                       </li>
                     </ul>
                     <div class="">
-                      <a class="block px-4 py-1 text-sm  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" (click)="logOut()">Sign out</a>
+                      <a class="block px-4 py-1 text-sm  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" (click)="logOut()">Log out</a>
                     </div>
                 </div>
             

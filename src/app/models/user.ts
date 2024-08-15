@@ -18,6 +18,9 @@ export class User {
   numberOfPosts?: string;
   numberOfContributions?: string;
   contentViews?: string;
+  goal?: string;
+  sdgsSelected?: string[];
+  solutionEnvironment?: SolutionEnvironment;
 }
 
 export class Avatar {
@@ -32,4 +35,16 @@ export class Tournament {
   email?: string;
   city?: string;
   country?: string;
+}
+export class NewUser {
+  firstName?: string;
+  lastname?: string;
+  email?: string;
+  password?: string;
+  goal?: string;
+  sdgsSelected?: string[];
+}
+export class SolutionEnvironment {
+  focus?: string;
+  sdgInterested?: string[];
 }

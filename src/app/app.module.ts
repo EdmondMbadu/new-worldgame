@@ -78,6 +78,8 @@ import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.com
 import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
 import { CkeditorComponent } from './components/ckeditor/ckeditor.component';
 import { OtherAisComponent } from './components/other-ais/other-ais.component';
+import { WelcomeComponent } from './components/welcome/welcome.component';
+import { WelcomeStepsComponent } from './components/welcome-steps/welcome-steps.component';
 
 @NgModule({
   declarations: [
@@ -132,6 +134,8 @@ import { OtherAisComponent } from './components/other-ais/other-ais.component';
     NwgSolutionTourComponent,
     CkeditorComponent,
     OtherAisComponent,
+    WelcomeComponent,
+    WelcomeStepsComponent,
   ],
   imports: [
     BrowserModule,

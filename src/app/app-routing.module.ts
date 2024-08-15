@@ -40,6 +40,7 @@ import { AskBuckyComponent } from './blogs/ask-bucky/ask-bucky.component';
 import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.component';
 import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
 import { OtherAisComponent } from './components/other-ais/other-ais.component';
+import { WelcomeComponent } from './components/welcome/welcome.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -191,6 +192,10 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'verify-email', component: VerifyEmailComponent },
+  {
+    path: 'welcome',
+    component: WelcomeComponent,
+  },
   { path: '**', component: PageNotFoundComponent },
 ];
 

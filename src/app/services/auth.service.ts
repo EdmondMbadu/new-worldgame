@@ -7,7 +7,7 @@ import {
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { Observable, of, switchMap } from 'rxjs';
-import { User } from '../models/user';
+import { NewUser, User } from '../models/user';
 import { TimeService } from './time.service';
 
 @Injectable({
@@ -17,6 +17,7 @@ export class AuthService {
   user$: Observable<any>;
   email?: Observable<any>;
   currentUser: any = {};
+  newUser: NewUser = {};
   logingError?: Observable<any>;
   private redirectUrl: string = '';
 
@@ -26,6 +27,13 @@ export class AuthService {
     private router: Router,
     private time: TimeService
   ) {
+    this.newUser = {
+      firstName: '',
+      lastname: '',
+      password: '',
+      goal: '',
+      sdgsSelected: [],
+    };
     this.user$ = this.fireauth.authState.pipe(
       switchMap((user) => {
         if (user) {
@@ -81,7 +89,9 @@ export class AuthService {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    goal: string,
+    sdgsSelected: string[]
   ) {
     this.fireauth
       .createUserWithEmailAndPassword(email, password)
@@ -90,8 +100,8 @@ export class AuthService {
           alert('Registration was Successful');
           this.sendEmailForVerification(res.user);
 
-          this.addNewUser(firstName, lastName, res.user);
-          this.router.navigate(['/verify-email']);
+          this.addNewUser(firstName, lastName, res.user, goal, sdgsSelected);
+          // this.router.navigate(['/verify-email']);
         },
         (err) => {
           alert(err.message);
@@ -109,7 +119,8 @@ export class AuthService {
       .sendEmailVerification()
       .then(
         (res: any) => {
-          this.router.navigate(['verify-email']);
+          console.log('verify your email');
+          // this.router.navigate(['verify-email']);
         },
         (err: any) => {
           alert('Something went wrong. Unable to send you an email');
@@ -138,7 +149,13 @@ export class AuthService {
       .valueChanges();
   }
 
-  addNewUser(firstName: string, lastName: string, user: any) {
+  addNewUser(
+    firstName: string,
+    lastName: string,
+    user: any,
+    goal: string,
+    sdgsSelected: string[]
+  ) {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`
     );
@@ -158,6 +175,8 @@ export class AuthService {
       profilePicture: {},
       dateJoined: this.time.getCurrentDate(),
       contentViews: '0',
+      goal: goal,
+      sdgsSelected: sdgsSelected,
       profilePicPath: '',
     };
     return userRef.set(data, { merge: true });

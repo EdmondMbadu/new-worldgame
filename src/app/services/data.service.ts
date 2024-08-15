@@ -20,7 +20,9 @@ export class DataService implements OnInit {
         this.setTheme(event.newValue);
       }
     });
+    this.sdgs = this.transformSDGs(this.sdgsPaths);
   }
+  sdgs: SDG[] = [];
   private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
 
   currentTheme = this.themeSource.asObservable();
@@ -72,6 +74,26 @@ export class DataService implements OnInit {
     'SDG17  Partnership For The Goals': '../../../assets/img/sdg17.png',
     'SDG17  Partnership For The Goals-link': 'https://sdgs.un.org/goals/goal17',
   };
+  transformSDGs(sdgsPaths: { [key: string]: string }): SDG[] {
+    const sdgs: SDG[] = [];
+    const sdgNames = Object.keys(sdgsPaths).filter(
+      (key) => !key.includes('-link')
+    );
+    for (const sdgName of sdgNames) {
+      const name = sdgName.split(' ')[0];
+      const fullname = sdgName.substring(name.length).trim();
+      const imagePath = sdgsPaths[sdgName];
+      const linkKey = `${sdgName}-link`;
+      const backgroundSelected = '';
+      const link = sdgsPaths[linkKey] || '';
+      if (name !== 'None')
+        sdgs.push({ name, fullname, imagePath, link, backgroundSelected });
+    }
+    return sdgs;
+  }
+  get sdgEntries(): any {
+    return Object.entries(this.sdgsPaths);
+  }
   ngOnInit(): void {}
   private getInitialTheme(): string {
     return localStorage.getItem('theme') || 'light';
@@ -230,4 +252,12 @@ export class DataService implements OnInit {
   }
 
   UnfollowUser() {}
+}
+
+interface SDG {
+  name: string;
+  fullname: string;
+  imagePath: string;
+  link: string;
+  backgroundSelected?: string;
 }

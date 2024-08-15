@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AuthService } from './auth.service';
 
@@ -68,5 +68,29 @@ export class ChatBotService {
     );
 
     return formattedText;
+  }
+
+  typewriterEffect(
+    text: string,
+    callback: () => void,
+    cdRef: ChangeDetectorRef,
+    typingSpeed: number = 100
+  ): string {
+    let displayedText: string = '';
+    let index = 0;
+
+    const interval = setInterval(() => {
+      displayedText += text[index];
+      index++;
+
+      if (index === text.length) {
+        clearInterval(interval);
+        callback();
+      }
+
+      cdRef.detectChanges();
+    }, typingSpeed); // Adjust typing speed here
+
+    return displayedText;
   }
 }
