@@ -24,6 +24,7 @@ export class WelcomeStepsComponent implements OnInit {
   focusSelected: number = -1;
 
   registrationSuccess: boolean = true;
+  registrationFailure: boolean = true;
   sdgSelectedArray: number[] = [];
   @Input() sdgSelected: number[] = [];
   sdgInterest: string[] = [];
@@ -170,6 +171,11 @@ export class WelcomeStepsComponent implements OnInit {
     return this.sdgSelected
       .map((value, index) => (value === 1 ? `sdg${index + 1}` : ''))
       .filter((sdg) => sdg !== '');
+    // return this.sdgSelected
+    //   .map((value, index) =>
+    //     value === 1 ? this.data.getSdgLabel(`SDG${index + 1}`) : ''
+    //   )
+    //   .filter((sdg) => sdg !== '');
   }
 
   get namesFieldEmpty() {
@@ -281,6 +287,9 @@ export class WelcomeStepsComponent implements OnInit {
   }
   closeRegistrationSuccess() {
     this.registrationSuccess = !this.registrationSuccess;
+  }
+  closeRegistrationFailure() {
+    this.registrationFailure = false;
   }
 }
 interface Focus {

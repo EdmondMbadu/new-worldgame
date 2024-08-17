@@ -98,6 +98,14 @@ export class DataService implements OnInit {
   private getInitialTheme(): string {
     return localStorage.getItem('theme') || 'light';
   }
+  getSdgLabel(sdgCode: string) {
+    for (let key in this.sdgsPaths) {
+      if (key.startsWith(sdgCode) && !key.includes('-link')) {
+        return key;
+      }
+    }
+    return '';
+  }
 
   private loadInitialTheme(): void {
     const storedTheme = localStorage.getItem('theme');

@@ -1,0 +1,33 @@
+<div class="dark:bg-slate-900 min-h-screen min-w-max ">
+    <div *ngIf="currentIndexDisplay>=0" class=" container px-6 flex  mx-auto  justify-center">
+    
+      
+
+
+            <svg   (click)="goBackTimeLine(currentIndexDisplay)" class=" mt-8  w-[32px] h-[32px] text-gray-800 dark:text-white  mx-2 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
+        </svg>
+        
+            <div class="w-full max-w-2xl  bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-10 ">
+                <div class="bg-teal-600 h-2.5 rounded-full" style="width: {{initial}}%"></div>
+            </div>
+    
+    </div>
+    <div class="mt-10"></div>
+        <div class="container flex mx-auto  justify-center max-w-4xl" *ngFor="let s of steps; let i= index">
+
+            <app-create-solution-steps
+            [text]="s"
+            *ngIf="display[i]"
+            [buttonText]="buttontexts[i]"
+            (buttonInfoEvent)="updatePlayground($event)"
+            [stepNumber]="currentIndexDisplay"
+            [focusSelectedArray]="selected"
+            [sdgSelected]="sdgSelected"     
+            >
+
+            </app-create-solution-steps>
+          
+        </div>
+
+</div>

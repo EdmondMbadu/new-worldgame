@@ -20,11 +20,18 @@ export class SolutionService {
   solutionRef?: Observable<Solution>;
   userRef?: AngularFirestoreDocument<any>;
   allSolutions: Solution[] = [];
+  newSolution: Solution = {};
   constructor(
     private auth: AuthService,
     private afs: AngularFirestore,
     private time: TimeService
-  ) {}
+  ) {
+    this.newSolution = {
+      title: '',
+      solutionArea: '',
+      description: '',
+    };
+  }
 
   createdNewSolution(
     title: string,

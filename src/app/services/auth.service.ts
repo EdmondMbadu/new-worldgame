@@ -105,12 +105,16 @@ export class AuthService {
           // this.router.navigate(['/verify-email']);
         },
         (err) => {
-          alert(err.message);
+          this.newUser.success = false;
+          this.newUser.errorMessage = err.message;
+          // alert(err.message);
         }
       )
       .catch((error) => {
-        alert('Something went wrong');
-        this.router.navigate(['/']);
+        this.newUser.success = false;
+        this.newUser.errorMessage = error.message;
+        // alert('Something went wrong');
+        // this.router.navigate(['/']);
         // ...
       });
   }

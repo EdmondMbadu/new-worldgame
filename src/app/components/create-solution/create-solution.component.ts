@@ -2,25 +2,24 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-welcome',
+  selector: 'app-create-solution',
 
-  templateUrl: './welcome.component.html',
-  styleUrl: './welcome.component.css',
+  templateUrl: './create-solution.component.html',
+  styleUrl: './create-solution.component.css',
 })
-export class WelcomeComponent {
-  initial: number = 12.5;
-  increment: number = 12.5;
-  text: string = `Hi, I am Bucky the game has begun. Let's build a solution environment just for you.`;
+export class CreateSolutionComponent {
+  initial: number = 10;
+  increment: number = 15;
+  text: string = `Welcome to the NewWorld Game Lab! Ready to kickstart your journey with the NewWorld Game Lab? I'm here to guide you through the process step by step. Together, we'll explore your ideas, build a strong team, and align your project with global goals. Let's begin by getting to know the basics of your project!`;
   result: string = '';
   steps: string[] = [
-    `Hi, I am Bucky. To start the NewWorld Game, let's build a solution environment just for you.`,
-    `What is your primary focus for using NewWorld Game?`,
+    `Welcome to the NewWorld Game Lab! I'm here to guide you through the process step by step. Together, we'll explore your ideas, build a strong team, and align your project with global goals. Let's begin by getting to know the basics of your project!`,
+    `What is your NewWorld Game Project Working Title.`,
+    "In a few words, how would you describe the specific problem you're focusing on?",
+    'Who are the key members of your team? Add their emails below.',
+    'Here are some randomly selected evaluators who might be interested in your project. You can add more evaluators below.',
     'Select all Sustainable Development Goals (SDGs) that interest you.',
-    'Enter your first and last name.',
-    'Enter Your email.',
-    'Create a password to get started',
-    'Please accept the Terms and Conditions.',
-    'Voila! Almost done! Go to your email to verify your account. Once completed, click done below. ',
+    'Almost done! Submit to start solving your new solution.',
   ];
   buttontexts = new Array(this.steps.length).fill('Continue');
   selected: boolean[] = new Array(this.steps.length).fill(false);
@@ -33,7 +32,7 @@ export class WelcomeComponent {
     window.scrollTo(0, 0);
     this.sdgSelected = new Array(17).fill(-1);
     this.display[this.currentIndexDisplay] = true;
-    this.buttontexts[this.steps.length - 1] = 'Done';
+    this.buttontexts[this.steps.length - 1] = 'Submit';
   }
   updatePlayground(current: number) {
     this.display[this.currentIndexDisplay] = false;
@@ -45,7 +44,7 @@ export class WelcomeComponent {
     this.display[this.currentIndexDisplay] = false;
     current--;
     if (current === -1) {
-      this.router.navigate(['']);
+      this.router.navigate(['/home']);
     }
     this.currentIndexDisplay = current;
     this.updateTimelineDisplay(current);

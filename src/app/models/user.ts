@@ -44,6 +44,7 @@ export class NewUser {
   goal?: string;
   sdgsSelected?: string[];
   success?: boolean;
+  errorMessage?: string;
 }
 export class SolutionEnvironment {
   focus?: string;

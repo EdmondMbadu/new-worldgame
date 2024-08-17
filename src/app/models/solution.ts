@@ -37,6 +37,7 @@ export class Solution {
   numberofTimesEvaluated?: string;
   solutionArea?: string;
   strategyReview?: string;
+  errorMessage?: string;
 }
 
 export class Evaluation {

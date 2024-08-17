@@ -80,6 +80,8 @@ import { CkeditorComponent } from './components/ckeditor/ckeditor.component';
 import { OtherAisComponent } from './components/other-ais/other-ais.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
 import { WelcomeStepsComponent } from './components/welcome-steps/welcome-steps.component';
+import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
+import { CreateSolutionStepsComponent } from './components/create-solution-steps/create-solution-steps.component';
 
 @NgModule({
   declarations: [
@@ -136,6 +138,8 @@ import { WelcomeStepsComponent } from './components/welcome-steps/welcome-steps.
     OtherAisComponent,
     WelcomeComponent,
     WelcomeStepsComponent,
+    CreateSolutionComponent,
+    CreateSolutionStepsComponent,
   ],
   imports: [
     BrowserModule,

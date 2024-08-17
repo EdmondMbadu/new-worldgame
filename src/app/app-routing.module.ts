@@ -41,6 +41,7 @@ import { StateOfWorldComponent } from './blogs/state-of-world/state-of-world.com
 import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution-tour.component';
 import { OtherAisComponent } from './components/other-ais/other-ais.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
+import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -52,6 +53,11 @@ const routes: Routes = [
   {
     path: 'create-playground',
     component: CreatePlaygroundComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'create-solution',
+    component: CreateSolutionComponent,
     canActivate: [AuthGuard],
   },
   {
