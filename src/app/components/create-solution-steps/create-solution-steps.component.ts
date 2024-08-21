@@ -91,6 +91,7 @@ export class CreateSolutionStepsComponent implements OnInit {
     private fb: FormBuilder,
     private fns: AngularFireFunctions
   ) {
+    this.auth.newUser = {}; // reinitialize the new user in case it happens.
     let shuffle = (array: User[]) => {
       return array.sort(() => Math.random() - 0.5);
     };
