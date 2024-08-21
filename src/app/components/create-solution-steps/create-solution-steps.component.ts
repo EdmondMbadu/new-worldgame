@@ -62,6 +62,15 @@ export class CreateSolutionStepsComponent implements OnInit {
   agree: boolean = false;
   solverEvaluator: boolean = false;
   rePassword: string = '';
+  imagePaths: string[] = [
+    '../../../assets/img/nwg-start-solution.png',
+    '../../../assets/img/nwg-working-title.png',
+    '../../../assets/img/nwg-description.png',
+    '../../../assets/img/nwg-email.png',
+    '../../../assets/img/nwg-email.png',
+    '',
+    '../../../assets/img/nwg-submit.png',
+  ];
 
   createAccountSuccess: boolean = false;
   createAccountPopUp: boolean = false;

@@ -38,6 +38,15 @@ export class WelcomeStepsComponent implements OnInit {
   agree: boolean = false;
   solverEvaluator: boolean = false;
   rePassword: string = '';
+  imagePaths: string[] = [
+    '../../../assets/img/nw-intro.png',
+    '../../../assets/img/nwg-focus.png',
+    '',
+    '../../../assets/img/nwg-names.png',
+    '../../../assets/img/nwg-email.png',
+    '../../../assets/img/nwg-password.png',
+    '../../../assets/img/nwg-terms-conditions.png',
+  ];
 
   createAccountSuccess: boolean = false;
   createAccountPopUp: boolean = false;
