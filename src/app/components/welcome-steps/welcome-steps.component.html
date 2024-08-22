@@ -5,7 +5,7 @@
     
     
 </div>
-<div class="flex justify-center  gap-2.5 mx-4 ">
+<div *ngIf="stepNumber!==2" class="flex justify-center  gap-2.5 mx-4 ">
     <img class="h-12 rounded-full " src="../../../assets/img/bucky-1.png" alt="Jese image">
     <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6">
        <div class="flex items-center space-x-2 rtl:space-x-reverse">
@@ -19,6 +19,7 @@
     
     
 </div>
+
 <div *ngIf="stepNumber==1" class=" space-y-4 mt-10 mx-4">
     <div *ngFor="let f of focus; let i=index" (click)="chooseFocus(i)" class="p-4   flex flex-row shadow-sm border-2 border-gray-400  text-md text-gray-950 rounded-lg hover:dark:border-gray-200 hover:border-gray-900 dark:bg-gray-800 dark:text-gray-300 {{f.backgroundSelected}}" role="alert">
        <img class="h-10" [src]="f.imagePath" alt="">
@@ -34,7 +35,21 @@
     </div>
  
 </div>
-<section *ngIf="stepNumber==2" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
+<div *ngIf="stepNumber==2" class=" space-y-4 mt-10 ">
+    <div class="container flex mx-auto  justify-center">
+        <img class="h-96" src="../../../assets/img/nwg-fitin.png" alt="">
+    </div>
+      
+    
+          <div class="container flex mx-auto  justify-center my-10">
+        
+          
+           
+            <button  (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        </div>
+     
+    </div>
+<section *ngIf="stepNumber==3" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
       <div  class="mb-4 flex items-center justify-between gap-4 md:mb-8">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Sustainable Development Goals (SDGs)</h2>
@@ -70,7 +85,7 @@
     
   </section>
 
-  <div *ngIf="stepNumber==3" class="mt-10">
+  <div *ngIf="stepNumber==4" class="mt-10">
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="relative z-0 w-full mb-5 group">
                 <input  [(ngModel)]="auth.newUser.firstName"  type="text" name="floating_first_name" id="floating_first_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
@@ -87,7 +102,7 @@
         </div>
   </div>
 
-  <div *ngIf="stepNumber==4" class="mt-10">
+  <div *ngIf="stepNumber==5" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <input [(ngModel)]="auth.newUser.email"   type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
         <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
@@ -98,7 +113,7 @@
     </div>
   </div>
 
-  <div  *ngIf="stepNumber==5" class="mt-10">
+  <div  *ngIf="stepNumber==6" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <input [(ngModel)]="auth.newUser.password"   type="password" name="floating_password" id="floating_password" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
         <label for="floating_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Password</label>
@@ -113,7 +128,7 @@
     </div>
   </div>
 
-  <div  *ngIf="stepNumber==6" class="mt-10 mx-auto max-w-xl bg-gray-100 dark:bg-gray-800 p-6">
+  <div  *ngIf="stepNumber==7" class="mt-10 mx-auto max-w-xl bg-gray-100 dark:bg-gray-800 p-6">
         <div class="">
             <h1 class="mb-4 text-xl font-bold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white">Terms and Conditions</h1>
 
@@ -149,7 +164,7 @@
     <div class="container flex mx-auto  justify-center my-10">
     
       
-        <button *ngIf="stepNumber==0 || stepNumber===7" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button *ngIf="stepNumber==0 || stepNumber===8" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
        
     </div>
     

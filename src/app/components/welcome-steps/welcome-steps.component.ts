@@ -42,6 +42,7 @@ export class WelcomeStepsComponent implements OnInit {
     '../../../assets/img/nw-intro.png',
     '../../../assets/img/nwg-focus.png',
     '',
+    '',
     '../../../assets/img/nwg-names.png',
     '../../../assets/img/nwg-email.png',
     '../../../assets/img/nwg-password.png',
@@ -116,7 +117,7 @@ export class WelcomeStepsComponent implements OnInit {
       current++;
       this.buttonInfoEvent.emit(current);
     }
-    if (current === 7 && this.buttonText !== 'Done') {
+    if (current === 8 && this.buttonText !== 'Done') {
       let createAccount = await this.createAccount();
     } else {
       if (this.buttonText === 'Done') {
