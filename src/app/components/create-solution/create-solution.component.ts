@@ -13,7 +13,9 @@ export class CreateSolutionComponent {
   text: string = `Welcome to the NewWorld Game Lab! Ready to kickstart your journey with the NewWorld Game Lab? I'm here to guide you through the process step by step. Together, we'll explore your ideas, build a strong team, and align your project with global goals. Let's begin by getting to know the basics of your project!`;
   result: string = '';
   steps: string[] = [
-    `Welcome to the NewWorld Game Lab! I'm here to guide you through the process step by step. Together, we'll explore your ideas, build a strong team, and align your project with global goals. Let's begin by getting to know the basics of your project!`,
+    `“Welcome to the NewWorld Game!
+My role, as your colleague— your problem-solving partner— is to help us develop a
+solution to a global problem on which you choose to work. Let’s start.`,
     `What is your NewWorld Game Project Working Title.`,
     "In a few words, how would you describe the specific problem you're focusing on?",
     'Who are the key members of your team? Add their emails below.',

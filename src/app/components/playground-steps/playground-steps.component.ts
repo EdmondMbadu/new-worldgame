@@ -268,9 +268,9 @@ export class PlaygroundStepsComponent implements OnInit {
       'How is our solution part of a circular, regenerative, more equitable economy?',
     ],
     [
-      `a. How much will our strategy cost to test, for a proof-of-concept, in the country where
+      `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where
       we will test and first implement the solution?`,
-      'b. How much will our strategy cost to implement at scale?',
+      'Cost 2. How much will our strategy cost to implement at scale?',
       'Where will we get the resources and funding needed to implement our solution, to do the above?',
       'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
       'What does our implemented strategy  look like, in more detail?',
