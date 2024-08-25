@@ -153,9 +153,17 @@
                 <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, I sign up to be both <a target="_blank" routerLink="/overview" class="text-blue-500  underline">a problem solver</a> and <a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">an evaluator</a>.</label>
         
         </div>
+        <div class="flex  mb-5">
+            <div class="flex items-center h-5">
+                <input (change)="onCheckboxChangeAgreeFun($event)" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
+            </div>
+            
+                <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree  to have fun.</label>
+        
+        </div>
         <div class="container flex mx-auto  justify-center my-10">
-            <button *ngIf="agree &&solverEvaluator" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-            <button [disabled]="true" *ngIf="!agree || !solverEvaluator" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+            <button *ngIf="agree &&solverEvaluator && agreeFun" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+            <button [disabled]="true" *ngIf="!agree || !solverEvaluator || !agreeFun" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
         </div>
 
         

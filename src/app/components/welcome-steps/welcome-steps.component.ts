@@ -35,6 +35,7 @@ export class WelcomeStepsComponent implements OnInit {
   namesCompleted: boolean = false;
   agreeTerm: boolean = false;
   agreeEvaluator: boolean = false;
+  agreeFun: boolean = false;
   agree: boolean = false;
   solverEvaluator: boolean = false;
   rePassword: string = '';
@@ -251,10 +252,22 @@ export class WelcomeStepsComponent implements OnInit {
 
     if (checkbox.checked) {
       this.solverEvaluator = true;
-      console.log('CAgree to be an evaluator is checked');
+      console.log('Agree to be an evaluator is checked');
     } else {
       this.solverEvaluator = false;
       console.log('Agree to be an evaluator is unchecked');
+    }
+  }
+  onCheckboxChangeAgreeFun(event: Event) {
+    // Access the checkbox via event.target, which is typed as EventTarget, so cast it
+    const checkbox = event.target as HTMLInputElement;
+
+    if (checkbox.checked) {
+      this.agreeFun = true;
+      console.log('Agree to have fun');
+    } else {
+      this.agreeFun = false;
+      console.log('Agree to have fun is unchecked');
     }
   }
 
