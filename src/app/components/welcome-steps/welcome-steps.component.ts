@@ -56,7 +56,7 @@ export class WelcomeStepsComponent implements OnInit {
 
   focus: Focus[] = [
     {
-      text: 'Developing Specific Problem-Solving Skills',
+      text: 'Developing solutions to global and local problems',
       imagePath: '../../../assets/img/puzzle.png',
       backgroundSelected: '',
     },
@@ -71,7 +71,7 @@ export class WelcomeStepsComponent implements OnInit {
       backgroundSelected: '',
     },
     {
-      text: 'Innovating and Implementing Solutions',
+      text: 'Locating Partners and Funding for Implementing Solutions',
       imagePath: '../../../assets/img/implement.png',
       backgroundSelected: '',
     },
