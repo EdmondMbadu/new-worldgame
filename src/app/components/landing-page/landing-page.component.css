@@ -99,7 +99,7 @@
   
 }
 
-.rotate {
+/* .rotate {
     animation: rotation 30s infinite linear;
   }
   
@@ -110,5 +110,19 @@
     to {
       transform: rotate(359deg);
     }
+  } */
+
+  .rotate {
+    animation: rotation 30s linear forwards;
   }
+  
+  @keyframes rotation {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
 
