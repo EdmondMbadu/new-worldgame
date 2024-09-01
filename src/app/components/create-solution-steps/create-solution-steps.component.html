@@ -154,7 +154,7 @@
             </div>
             <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Select all SDGs</label>
         
-    </div>
+        </div>
         
      
       </div>
@@ -176,8 +176,9 @@
     
       
         <button *ngIf="stepNumber==0 || stepNumber===6" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-       
+        <div id="confettiContainer"></div>
     </div>
+   
     
     <div *ngIf="registrationSuccess && auth.newUser.success " id="toast-success" class="fixed inset-x-0 mx-auto top-[5rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert">
         <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg ">
@@ -248,3 +249,6 @@
     </button>   
 </div>
   
+
+
+

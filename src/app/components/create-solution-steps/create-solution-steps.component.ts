@@ -201,6 +201,9 @@ export class CreateSolutionStepsComponent implements OnInit {
     console.log('sdgs selected', this.sdgInterest);
     this.solution.newSolution.sdgs = this.sdgInterest;
   }
+  delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
   get hasSelectedSDG(): boolean {
     return this.sdgSelected.some((value) => value === 1);
   }
