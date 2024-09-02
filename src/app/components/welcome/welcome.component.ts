@@ -10,11 +10,11 @@ import { Router } from '@angular/router';
 export class WelcomeComponent {
   initial: number = 11.1;
   increment: number = 11.1;
-  text: string = `Hi, I am Bucky the game has begun. Let's build a solution environment just for you.`;
+  text: string = `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`;
   result: string = '';
   steps: string[] = [
     `Hi, I am Bucky. To start the NewWorld Game, let's build a solution environment just for you.`,
-    `What is your primary focus for using NewWorld Game?`,
+    `What is your focus for using NewWorld Game?`,
     '',
     'Select all Sustainable Development Goals (SDGs) that interest you.',
     'Enter your first and last name.',

@@ -61,7 +61,8 @@ export class NavbarComponent implements OnInit {
   @Input() hoveredOtherAisPath: string = ``;
 
   ngOnInit(): void {
-    this.applyTheme();
+    // this.applyTheme();
+    this.darkModeInitial();
     this.filteredItems = [];
 
     if (this.email) {
@@ -141,6 +142,12 @@ export class NavbarComponent implements OnInit {
     localStorage['theme'] = 'light'; // Save to localStorage
     this.applyTheme();
     this.showThemeDropDown = !this.showThemeDropDown;
+  }
+  darkModeInitial() {
+    localStorage['theme'] = 'dark'; // Save to localStorage
+    // Save to localStorage
+
+    this.applyTheme();
   }
   darkMode() {
     localStorage['theme'] = 'dark'; // Save to localStorage
