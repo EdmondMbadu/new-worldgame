@@ -13,7 +13,7 @@ export class WelcomeComponent {
   text: string = `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`;
   result: string = '';
   steps: string[] = [
-    `Hi, I am Bucky. To start the NewWorld Game, let's build a solution environment just for you.`,
+    `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`,
     `What is your focus for using NewWorld Game?`,
     '',
     'Select all Sustainable Development Goals (SDGs) that interest you.',
