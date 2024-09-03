@@ -21,7 +21,7 @@ export class WelcomeComponent {
     'Enter Your email.',
     'Create a password to get started',
     'Please accept the Terms and Conditions.',
-    'Voila! Almost done! Go to your email to verify your account. Once completed, click done below. ',
+    `Voila! Almost done! Go to your email to verify your account. Once completed, click done below. If you don't see our verification eMail within 2 minutes, please double check your Spam folder.`,
   ];
   buttontexts = new Array(this.steps.length).fill('Continue');
   selected: boolean[] = new Array(this.steps.length).fill(false);
