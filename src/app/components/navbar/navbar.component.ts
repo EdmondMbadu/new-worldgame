@@ -63,6 +63,7 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     // this.applyTheme();
     this.darkModeInitial();
+
     this.filteredItems = [];
 
     if (this.email) {
@@ -163,8 +164,12 @@ export class NavbarComponent implements OnInit {
   }
   applyTheme() {
     const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
+    console.log('theme ', userTheme);
     this.data.setTheme(userTheme);
     // Explicitly check for 'light' and 'dark' settings
+
+    // Always start with dark mode
+
     if (userTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else if (userTheme === 'light') {
