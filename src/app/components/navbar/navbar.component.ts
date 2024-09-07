@@ -60,6 +60,8 @@ export class NavbarComponent implements OnInit {
   @Input() hoveredSolutionTourPath: string = ``;
   @Input() hoveredOtherAisPath: string = ``;
 
+  beta: boolean = true;
+
   ngOnInit(): void {
     // this.applyTheme();
     this.darkModeInitial();
@@ -93,6 +95,9 @@ export class NavbarComponent implements OnInit {
       });
   }
 
+  toggle(property: 'beta') {
+    this[property] = !this[property];
+  }
   toggleAside() {
     this.sideBarBig = !this.sideBarBig;
     this.sideBarSmall = !this.sideBarSmall;

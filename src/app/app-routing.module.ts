@@ -42,6 +42,7 @@ import { NwgSolutionTourComponent } from './blogs/nwg-solution-tour/nwg-solution
 import { OtherAisComponent } from './components/other-ais/other-ais.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
 import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
+import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -201,6 +202,10 @@ const routes: Routes = [
   {
     path: 'welcome',
     component: WelcomeComponent,
+  },
+  {
+    path: 'blogs/new-features',
+    component: NewFeaturesComponent,
   },
   { path: '**', component: PageNotFoundComponent },
 ];

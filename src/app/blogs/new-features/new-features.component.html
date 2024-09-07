@@ -1,0 +1,33 @@
+<div class="dark:bg-slate-900  min-h-screen">
+    <div *ngIf="!isLoggedIn">
+        <app-navbar></app-navbar>
+      </div>
+      <div *ngIf="isLoggedIn">
+        <app-navbar [sideBarSmall]="true" [sideBarBig]="false"  [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
+    
+    <section class="bg-white dark:bg-gray-900 mt-20">
+        <div class="gap-16 items-center py-8 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6">
+            <div class="font-light text-gray-500 sm:text-lg dark:text-gray-400">
+               
+                <h1 class="mb-4 text-3xl font-extrabold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"><span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Upcoming NWG</span> Features.</h1>
+                      
+                
+                <p class="mb-4"><strong>The upcoming NWG features will include:</strong></p>
+                <ul class="mb-4 list-disc">
+                    <li><strong class="font-semibold">Multiple AI Colleagues:</strong>  Soon you will be able to add Nelson (Nelson Mandela), Al (Albert Einstein), Rachel (Rachel Carson), and many more as NWG team colleagues.</li>
+                    <li><strong class="font-semibold">Start a Tournament:</strong> Soon you will be able to start a tournament and fund solutions based on problems that interest you.</li>
+                    <li><strong class="font-semibold">Invite people around the world:</strong> Soon you will be able to invite people from around the world to join your team to solve problems that interest you.</li>
+                   
+                </ul>
+               
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-8">
+                <img class="w-full rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fnew-features-1.webp?alt=media&token=3d3838f5-90cb-472b-a4fd-9997d0d3d8a5" alt="office content 1">
+                <img class="mt-4 w-full lg:mt-10 rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fnew-features-2.webp?alt=media&token=f8ae7381-9846-4aaa-9ff0-22d0d847e5bf" alt="office content 2">
+            </div>
+        </div>
+    </section>
+    <app-footer></app-footer>
+</div>
+    
