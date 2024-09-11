@@ -16,7 +16,7 @@
             <!-- <header class="dark:text-gray-200">
                 <h1>Firebase 🤝 Palm API 🤝 Angular</h1>
             </header> -->
-        <div class="flex flex-col mx-auto items-center mt-32 mb-8 ">
+        <div class="flex flex-col mx-auto items-center mt-20  mb-8 ">
 
 
                 <button  (click)="toggleAiOptions()" id="dropdownNotificationButton" data-dropdown-toggle="dropdownNotification" class=" relative inline-flex items-center text-sm font-medium text-center text-gray-500 hover:text-gray-900 focus:outline-none dark:hover:text-white dark:text-gray-400 " type="button">
@@ -30,29 +30,40 @@
                     </svg>
                     <!-- <div class="absolute block w-3 h-3 bg-red-500 border-2 border-white rounded-full -top-0.5 start-2.5 dark:border-gray-900"></div> -->
                 </button>
+                <div class="flex flex-row">
+                    <a *ngFor="let ai of aiOptions" (click)="selectAi(ai)"  class=" px-4 py-3 hover:bg-gray-300 dark:hover:bg-gray-700">
+                        <div >
+                            <img class="rounded-full  h-16 " src="{{ai.avatarPath}}" alt="Jese image">
+                            <span class="font-semibold text-sm text-gray-900 dark:text-white">{{ai.name}}</span>
+                        </div>
+                        
+                    </a>
+                </div>
+               
+               
                 
                 <!-- Dropdown menu -->
                 <div *ngIf="allAIOptions" id="dropdownNotification" class="z-50   w-full max-w-sm bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-800 dark:divide-gray-700  " aria-labelledby="dropdownNotificationButton">
-                <div class="  block px-4 py-2 font-medium text-center text-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-800 dark:text-white ">
-                    AIs
-                </div>
-                <div class=" divide-y divide-gray-100 dark:divide-gray-700 ">
-                    <a *ngFor="let ai of aiOptions" (click)="selectAi(ai)"  class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <div class="flex-shrink-0">
-                            <img class="rounded-full w-20 " src="{{ai.avatarPath}}" alt="Jese image">
-                        
-                        </div>
-                        <div class="w-full ps-3">
-                            <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400"> <span class="font-semibold text-gray-900 dark:text-white">{{ai.name}}</span>:  {{ai.intro}}</div>
-                        
-                        </div>
-                    </a>
-                   
-                   
-                   
-                </div>
+                    <div class="  block px-4 py-2 font-medium text-center text-gray-700 rounded-t-lg bg-gray-50 dark:bg-gray-800 dark:text-white ">
+                        AIs
+                    </div>
+                    <div class=" divide-y divide-gray-100 dark:divide-gray-700 ">
+                        <a *ngFor="let ai of aiOptions" (click)="selectAiFromDropDown(ai)"  class="flex px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <div class="flex-shrink-0">
+                                <img class="rounded-full w-20 " src="{{ai.avatarPath}}" alt="Jese image">
+                            
+                            </div>
+                            <div class="w-full ps-3">
+                                <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400"> <span class="font-semibold text-gray-900 dark:text-white">{{ai.name}}</span>:  {{ai.intro}}</div>
+                            
+                            </div>
+                        </a>
+                    
+                    
+                    
+                    </div>
                
-        </div>
+                </div>
                 
   
         <div  id="chatbox"   class="flex flex-col mx-auto items-center mt-4  mb-4 max-w-4xl ">
@@ -67,7 +78,7 @@
                         class="chatbot-logo"
                         src="{{aiSelected.avatarPath}}"
                     />
-                    <p *ngIf="i==0">{{aiSelected.intro}}</p>
+                    <p *ngIf="i==0"> <span class="font-bold">{{aiSelected.name}}</span> <br> {{aiSelected.intro}}</p>
                     <p *ngIf="i!==0"  [innerHTML]="chat.formatText(resp.text)"></p>
                     </div>
                 </ng-container>

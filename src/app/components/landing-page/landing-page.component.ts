@@ -30,8 +30,7 @@ export class LandingPageComponent implements OnInit {
         theme === 'dark' ? 'rgb(15, 23, 42)' : 'white'
       );
     });
-
-    window.scroll(0, 0);
+    // Check if dark mode was initialized before
   }
   @ViewChild('globeContainer', { static: true }) globeContainer:
     | ElementRef

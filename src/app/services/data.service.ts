@@ -91,6 +91,36 @@ export class DataService implements OnInit {
     }
     return sdgs;
   }
+  darkModeInitial() {
+    localStorage['theme'] = 'dark'; // Save to localStorage
+    // Save to localStorage
+
+    this.applyTheme();
+  }
+
+  applyTheme() {
+    const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
+    console.log('theme ', userTheme);
+    this.setTheme(userTheme);
+    // Explicitly check for 'light' and 'dark' settings
+
+    if (userTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (userTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      // Apply OS preference only if no user preference is set
+      const osPrefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      if (osPrefersDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      }
+    }
+  }
 
   loadScript(src: string): Promise<void> {
     return new Promise((resolve, reject) => {

@@ -64,7 +64,16 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     // this.applyTheme();
-    this.darkModeInitial();
+    // this.darkModeInitial();
+    const darkModeInitialized = localStorage.getItem('darkModeInitialized');
+
+    if (!darkModeInitialized) {
+      // set the default to dark mode if and only if not initialized before
+      this.data.darkModeInitial();
+
+      // Mark dark mode as initialized so it doesn't run again
+      localStorage.setItem('darkModeInitialized', 'true');
+    }
 
     this.filteredItems = [];
 

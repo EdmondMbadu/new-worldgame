@@ -151,6 +151,7 @@ export class CreateSolutionStepsComponent implements OnInit {
     }, 5); // Adjust typing speed here
   }
   async updatePlayground(current: number) {
+    console.log('the solution field', this.solution);
     if (this.buttonText === 'Continue') {
       current++;
       this.buttonInfoEvent.emit(current);
@@ -284,7 +285,7 @@ export class CreateSolutionStepsComponent implements OnInit {
 
     // Update the selected SDG strings
     this.sdgInterest = this.getSelectedSDGStrings();
-    this.auth.newUser.sdgsSelected = this.sdgInterest;
+    this.solution.newSolution.sdgs = this.sdgInterest;
   }
   editEvaluators(email: Email, event: MatChipEditedEvent) {
     const value = event.value.trim();

@@ -22,7 +22,9 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class OtherAisComponent implements OnInit {
   ngOnInit(): void {
-    window.scroll(0, 0);
+    setTimeout(() => {
+      window.scrollTo(0, 0); // Ensure the scroll happens after the content is loaded
+    }, 0);
     this.checkLoginStatus();
     this.deleteAllDocuments();
   }
@@ -43,33 +45,30 @@ export class OtherAisComponent implements OnInit {
     {
       avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
-      intro:
-        'American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.',
+      intro: `${name} American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
     },
     {
       avatarPath: '../../../assets/img/albert.png',
       name: 'Albert Einstein',
-      intro:
-        'German-born physicist who developed the special and general theories of relativity',
+      intro: `${name} German-born physicist who developed the special and general theories of relativity`,
       collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
     },
     {
       avatarPath: '../../../assets/img/mandela.png',
       name: 'Nelson Mandela',
-      intro:
-        'South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa ',
+      intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa`,
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
     {
       avatarPath: '../../../assets/img/jane-goodal.png',
-      name: 'Jane Goodal',
-      intro: `English zoologist, primatologist and anthropologist considered the world's foremost expert on chimpanzees...`,
+      name: 'Jane Goodall',
+      intro: `${name} English zoologist, primatologist and anthropologist considered the world's foremost expert on chimpanzees...`,
       collectionPath: `users/${this.auth.currentUser.uid}/jane/`,
     },
   ];
   // einstein is the default personna
-  aiSelected: any = this.aiOptions[2];
+  aiSelected: any = this.aiOptions[3];
   errorMsg = '';
   responses: DisplayMessage[] = [
     {
@@ -95,6 +94,17 @@ export class OtherAisComponent implements OnInit {
     }
   }
   selectAi(ai: any) {
+    this.aiSelected = ai;
+    // this.toggleAiOptions();
+    this.responses = [
+      {
+        text: '',
+        type: 'RESPONSE',
+      },
+    ];
+    this.deleteAllDocuments();
+  }
+  selectAiFromDropDown(ai: any) {
     this.aiSelected = ai;
     this.toggleAiOptions();
     this.responses = [
