@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 // import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 
@@ -172,5 +172,6 @@ import { NewFeaturesComponent } from './blogs/new-features/new-features.componen
 
   providers: [],
   bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA], // Add this line
 })
 export class AppModule {}
