@@ -22,7 +22,7 @@ export class OurTeamComponent implements OnInit {
       name: 'Jim Walker',
       title: 'Head of AI, NewWorld Game Designer',
       description:
-        'Jim, the Head of AI at EarthGame, oversees all AI developments and is one the creative minds that shape the NewWorld Game experience.',
+        'Jim, the Head of AI at EarthGame, oversees all AI developments and is one the creative minds behind the NewWorld Game.',
 
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fjim.png?alt=media&token=e576589f-8879-48ad-be93-4c9ce1d1b677',
