@@ -43,6 +43,7 @@ import { OtherAisComponent } from './components/other-ais/other-ais.component';
 import { WelcomeComponent } from './components/welcome/welcome.component';
 import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
+import { OurTeamComponent } from './components/our-team/our-team.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -159,6 +160,10 @@ const routes: Routes = [
   {
     path: 'contact-us',
     component: ContactUsComponent,
+  },
+  {
+    path: 'our-team',
+    component: OurTeamComponent,
   },
   {
     path: 'blogs/nwg-ai',

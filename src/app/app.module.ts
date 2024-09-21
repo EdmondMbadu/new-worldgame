@@ -83,6 +83,7 @@ import { WelcomeStepsComponent } from './components/welcome-steps/welcome-steps.
 import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
 import { CreateSolutionStepsComponent } from './components/create-solution-steps/create-solution-steps.component';
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
+import { OurTeamComponent } from './components/our-team/our-team.component';
 
 @NgModule({
   declarations: [
@@ -142,6 +143,7 @@ import { NewFeaturesComponent } from './blogs/new-features/new-features.componen
     CreateSolutionComponent,
     CreateSolutionStepsComponent,
     NewFeaturesComponent,
+    OurTeamComponent,
   ],
   imports: [
     BrowserModule,
