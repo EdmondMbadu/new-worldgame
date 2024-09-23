@@ -38,7 +38,7 @@ import { ProblemListFeedbackComponent } from './components/problem-list-feedback
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SliderComponent } from './components/slider/slider.component';
-import { environment } from 'environments/environments';
+import { environment } from '../../environments/environments';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { CommonModule } from '@angular/common';
 import { TextPopupComponent } from './components/text-popup/text-popup.component';
@@ -84,6 +84,17 @@ import { CreateSolutionComponent } from './components/create-solution/create-sol
 import { CreateSolutionStepsComponent } from './components/create-solution-steps/create-solution-steps.component';
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
 import { OurTeamComponent } from './components/our-team/our-team.component';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { getAnalytics, provideAnalytics, ScreenTrackingService, UserTrackingService } from '@angular/fire/analytics';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, provideAppCheck } from '@angular/fire/app-check';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getDatabase, provideDatabase } from '@angular/fire/database';
+import { getFunctions, provideFunctions } from '@angular/fire/functions';
+import { getMessaging, provideMessaging } from '@angular/fire/messaging';
+import { getPerformance, providePerformance } from '@angular/fire/performance';
+import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getRemoteConfig, provideRemoteConfig } from '@angular/fire/remote-config';
 
 @NgModule({
   declarations: [
@@ -172,7 +183,10 @@ import { OurTeamComponent } from './components/our-team/our-team.component';
     CKEditorModule,
   ],
 
-  providers: [],
+  providers: [
+    ScreenTrackingService,
+    UserTrackingService
+  ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA], // Add this line
 })

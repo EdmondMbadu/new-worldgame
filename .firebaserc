@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "new-worldgame"
+  },
+  "targets": {
+    "new-worldgame": {
+      "hosting": {
+        "new-worldgame-ng": [
+          "new-worldgame"
+        ]
+      }
+    }
   }
 }

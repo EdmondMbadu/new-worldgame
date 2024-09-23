@@ -16,7 +16,7 @@
             "allowedCommonJsDependencies": [
               "@ckeditor/ckeditor5-build-classic",
               "@ckeditor/ckeditor5-angular"
-           ],
+            ],
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -27,7 +27,11 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" }
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "/tinymce/"
+              }
             ],
             "styles": [
               "src/styles.css"
@@ -35,14 +39,13 @@
             "scripts": []
           },
           "configurations": {
-            "production": { 
+            "production": {
               "aot": true,
-             
               "optimization": {
                 "scripts": true,
                 "styles": {
                   "minify": false,
-                  "inlineCritical": false 
+                  "inlineCritical": false
                 }
               },
               "budgets": [
@@ -105,6 +108,23 @@
             ],
             "scripts": []
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {
+            "version": 2
+          },
+          "configurations": {
+            "production": {
+              "buildTarget": "new-worldgame-ng:build:production",
+              "serveTarget": "new-worldgame-ng:serve:production"
+            },
+            "development": {
+              "buildTarget": "new-worldgame-ng:build:development",
+              "serveTarget": "new-worldgame-ng:serve:development"
+            }
+          },
+          "defaultConfiguration": "production"
         }
       }
     }

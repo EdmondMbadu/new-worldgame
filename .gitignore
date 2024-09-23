@@ -44,3 +44,8 @@ Thumbs.db
 #keys
 /environments
 firebase-debug.log
+
+# Firebase
+.firebase
+*-debug.log
+.runtimeconfig.json
