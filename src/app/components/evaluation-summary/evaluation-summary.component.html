@@ -1,6 +1,6 @@
 
 <div class="dark:bg-slate-900 min-h-screen min-w-max">
-    <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
+    <app-navbar  [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
         <div class=" container flex flex-col lg:flex-row mx-auto justify-center lg:justify-between mt-16 ">
 
 
