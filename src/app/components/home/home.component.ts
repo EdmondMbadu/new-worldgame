@@ -33,10 +33,15 @@ export class HomeComponent implements OnInit {
   }
   ngOnInit(): void {
     window.scroll(0, 0);
-    this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
+    this.solution.getHomePageSolutions().subscribe((data) => {
       this.allSolutions = data;
+      console.log(' the data', data);
       this.findCompletedSolutions();
     });
+    // this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
+    //   this.allSolutions = data;
+    //   this.findCompletedSolutions();
+    // });
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       // console.log('this is the current user solutions', data);
       this.currentUserSolutions = data;

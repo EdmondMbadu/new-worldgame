@@ -198,6 +198,27 @@ export class SolutionService {
       .valueChanges();
   }
 
+  getHomePageSolutions() {
+    const tournamentSolutions$ = this.afs
+      .collectionGroup<Solution>('solutions', (ref) =>
+        ref.where('tournament', '==', 'true')
+      )
+      .valueChanges();
+
+    const emailSolutions$ = this.afs
+      .collectionGroup<Solution>('solutions', (ref) =>
+        ref.where('authorEmail', '==', 'globalsollab@gmail.com')
+      )
+      .valueChanges();
+
+    return combineLatest([tournamentSolutions$, emailSolutions$]).pipe(
+      map(([tournamentSolutions, emailSolutions]) => [
+        ...tournamentSolutions,
+        ...emailSolutions,
+      ])
+    );
+  }
+
   getAllSolutionsFromAllAccounts() {
     return this.afs.collection<Solution>(`solutions`).valueChanges();
   }
