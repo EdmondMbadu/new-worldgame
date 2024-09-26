@@ -40,6 +40,8 @@ export class SolutionViewComponent implements OnInit {
   commentUserNames: string[] = [];
   hoverTournament: boolean = false;
 
+  hoverWinner: boolean = false;
+
   teamMembers: User[] = [];
   hoverShare: boolean = false;
   hoverLikes: boolean = false;
@@ -212,6 +214,13 @@ export class SolutionViewComponent implements OnInit {
   }
   openSharetoSocialMedia() {
     this.displaySharePost = true;
+  }
+
+  onHoverWinner() {
+    this.hoverWinner = true;
+  }
+  onLeaveWinner() {
+    this.hoverWinner = false;
   }
   goToEvaluationSummary() {
     this.router.navigate([
