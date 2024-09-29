@@ -1,0 +1,44 @@
+<div class="flex flex-col items-center p-4 space-y-2 bg-white rounded-lg shadow-md dark:bg-slate-800">
+    <audio #audioPlayer (timeupdate)="updateCurrentTime()" (loadedmetadata)="setDuration()">
+      <source [src]="audioFile" type="audio/wav">
+      Your browser does not support the audio element.
+    </audio>
+  
+    <!-- Control Buttons -->
+    <div class="flex items-center space-x-4 text-gray-600 dark:text-gray-300">
+
+  
+      <!-- Previous Button -->
+      <button (click)="backward()" class="focus:outline-none">
+        ⏮️
+      </button>
+  
+      <!-- Play/Pause Button -->
+      <button (click)="playPause()" class="w-12 h-12 text-white bg-blue-500 rounded-full focus:outline-none flex items-center justify-center">
+        {{ isPlaying ? '⏸️' : '▶️' }}
+      </button>
+  
+      <!-- Next Button -->
+      <button (click)="forward()" class="focus:outline-none">
+        ⏭️
+      </button>
+  
+
+    </div>
+  
+    <!-- Seek Bar -->
+    <div class="w-full flex items-center space-x-2">
+      <span class="text-sm text-gray-600 dark:text-gray-300">{{ formatTime(currentTime) }}</span>
+      <input
+        type="range"
+        #seekBar
+        (input)="seekAudio($event)"
+        [value]="currentTime"
+        [max]="duration"
+        [style.background]="getSeekBarBackground()"
+        class="w-full appearance-none h-2 bg-blue-500 rounded dark:bg-gray-700"
+      />
+      <span class="text-sm text-gray-600 dark:text-gray-300">{{ formatTime(duration) }}</span>
+    </div>
+  </div>
+  

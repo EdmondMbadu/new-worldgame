@@ -90,6 +90,9 @@
                 <h1 class="mb-4 text-3xl font-extrabold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white ">{{currentSolution.title}}</h1>
         
             </header>
+            <div *ngIf="currentSolution.audioFile">
+                <app-audio-player [audioFile]="currentSolution.audioFile"></app-audio-player>
+            </div>
 
             <p class="text-gray-900 dark:text-white" [innerHTML]="currentSolution.content">
                 
