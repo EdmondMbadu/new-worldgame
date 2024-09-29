@@ -10,6 +10,7 @@
                 <address class="flex items-center mb-6 not-italic">
                    
                     <div class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white  overflow-x-auto">
+                        
                         <div class="flex flex-row -space-x-1 flex-shrink-0 "*ngFor="let user of teamMembers; let i= index" >
                             <!-- <span *ngIf="user.status==='online'" class="absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
                             <!-- <span *ngIf="user.status==='offline'" class="absolute w-4 h-4 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
@@ -104,6 +105,9 @@
                 <h1 class="ml-2"> Edit</h1> 
                 <span class="sr-only">Comment settings</span>
                 </button>
+                <div *ngIf="currentSolution.audioFile">
+                    <app-audio-player [audioFile]="currentSolution.audioFile"></app-audio-player>
+                </div>
                 <div *ngIf="displayEditSolution" id="dropdownComment1"
                         class=" z-10 w-36  bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
                             <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"

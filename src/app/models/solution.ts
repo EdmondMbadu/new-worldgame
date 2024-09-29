@@ -39,6 +39,7 @@ export class Solution {
   strategyReview?: string;
   errorMessage?: string;
   winner?: string;
+  audioFile?: string;
 }
 
 export class Evaluation {
