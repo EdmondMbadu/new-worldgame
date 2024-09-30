@@ -15,7 +15,7 @@
                         <!-- <svg class="w-3 h-3 hover:text-teal-600 dark:hover:text-green-500 text-blue-800 dark:text-blue-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                         </svg> -->
-                        <img class="" src="../../../assets/img/step-{{i+1}}.png" alt="">
+                        <img class="cursor-pointer" src="../../../assets/img/step-{{i+1}}.png" alt="">
                     </div>
                     <div class="hidden sm:flex w-full {{timelineDisplay[i]}} dark:bg-gray-700"></div>
                 </div>
@@ -113,7 +113,7 @@
                             <span class="font-medium text-center">Add Team Member</span>
                           </div>
                         <h5 class="mb-1 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Designers :  {{teamMembers.length}}</h5>
-                        <svg class="  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" (click)="toggleAddTeamMember()"  (mouseenter)="onHoverAddTeamMember()"  (mouseleave)="onHoverAddTeamMember()"  width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="cursor-pointer  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" (click)="toggleAddTeamMember()"  (mouseenter)="onHoverAddTeamMember()"  (mouseleave)="onHoverAddTeamMember()"  width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="12" cy="12" r="10" stroke="#1C274C" stroke-width="1.5"/>
                             <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
                             </svg>
@@ -122,7 +122,7 @@
                     
                     
                         <div class="flex flex-wrap -space-x-1 overflow-x-auto" >
-                            <div *ngFor="let user of teamMembers; let i= index" class="flex-shrink-0" >
+                            <div *ngFor="let user of teamMembers; let i= index" class="cursor-pointer flex-shrink-0" >
                                 <div *ngIf="user.uid === auth.currentUser.uid" >
                                     <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
                                     <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
@@ -203,7 +203,7 @@
                         <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Evaluators :  {{evaluators.length}}</h5>
                     </div>
                     <div class="flex flex-row -space-x-1" >
-                        <div *ngFor="let user of evaluators; let i= index" >
+                        <div *ngFor="let user of evaluators; let i= index" class = "cursor-pointer">
                             <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                              
                             <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)" routerLink="/user-profile/{{user.uid}}"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">

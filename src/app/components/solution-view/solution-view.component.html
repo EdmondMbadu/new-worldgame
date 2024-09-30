@@ -140,7 +140,7 @@
                
                
                
-                <div class="flex flex-nowrap items-center"  (mouseenter)="onHoverLikes()" (mouseleave)="onLeaveLikes()"  (click)="addLike()">
+                <div class="cursor-pointer flex flex-nowrap items-center"  (mouseenter)="onHoverLikes()" (mouseleave)="onLeaveLikes()"  (click)="addLike()">
                     
                     <div *ngIf="hoverLikes" class="-mt-12 p-1 absolute z-50 text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
                         <span class="font-medium">Likes</span>
@@ -151,7 +151,7 @@
                         </svg>
                     <h1 class="px-1 items-center">{{currentSolution.numLike}}</h1>
                 </div>
-                <div class="flex flex-nowrap py-2 items-center"(mouseenter)="onHoverShare()" (mouseleave)="onLeaveShare()"  (click)="openSharetoSocialMedia()">
+                <div class="cursor-pointer flex flex-nowrap py-2 items-center"(mouseenter)="onHoverShare()" (mouseleave)="onLeaveShare()"  (click)="openSharetoSocialMedia()">
                     <div *ngIf="hoverShare" class="-mt-12 p-1 absolute z-50 text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
                         <span class="font-medium">Share</span>
                       </div>
@@ -161,7 +161,7 @@
                         </svg>
                     <h1 class="px-1 items-center ">{{currentSolution.numShare}}</h1>
                 </div>
-                <div class="flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
+                <div class="cursor-pointer flex flex-nowrap py-2 items-center"  (mouseenter)="onHoverEvaluation()" (mouseleave)="onLeaveEvaluation()" (click)="goToEvaluationSummary()">
             
                     <svg width="20px" height="20px" class="dark:fill-white fill-black ml-6 mr-1 hover:fill-blue-700" viewBox="0 0 1024 1024"   xmlns="http://www.w3.org/2000/svg"><path d="M981.333333 960h-21.333333V576a21.333333 21.333333 0 0 0-42.666667 0v384h-128V213.333333a42.666667 42.666667 0 0 1 42.666667-42.666666h42.666667a42.666667 42.666667 0 0 1 42.666666 42.666666v21.333334a21.333333 21.333333 0 0 0 42.666667 0v-21.333334a85.333333 85.333333 0 0 0-85.333333-85.333333h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333333v746.666667h-85.333334V426.666667a85.333333 85.333333 0 0 0-85.333333-85.333334h-42.666667a85.333333 85.333333 0 0 0-85.333333 85.333334v533.333333h-85.333333V640a85.333333 85.333333 0 0 0-85.333334-85.333333h-42.666666a85.333333 85.333333 0 0 0-85.333334 85.333333v320H64V42.666667a21.333333 21.333333 0 0 0-42.666667 0v938.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h938.666666a21.333333 21.333333 0 0 0 0-42.666667z m-661.333333 0H192V640a42.666667 42.666667 0 0 1 42.666667-42.666667h42.666666a42.666667 42.666667 0 0 1 42.666667 42.666667z m298.666667 0h-128V426.666667a42.666667 42.666667 0 0 1 42.666666-42.666667h42.666667a42.666667 42.666667 0 0 1 42.666667 42.666667z"/><path d="M938.666667 384a21.333333 21.333333 0 0 0-21.333334 21.333333v85.333334a21.333333 21.333333 0 0 0 42.666667 0v-85.333334a21.333333 21.333333 0 0 0-21.333333-21.333333zM958.293333 311.893333a24.533333 24.533333 0 0 0-4.48-7.04l-3.2-2.56a16.213333 16.213333 0 0 0-3.84-1.92L942.933333 298.666667a21.333333 21.333333 0 0 0-12.373333 1.28 19.2 19.2 0 0 0-11.52 11.52 21.333333 21.333333 0 0 0-1.706667 8.533333 21.333333 21.333333 0 0 0 6.186667 15.146667 21.333333 21.333333 0 0 0 7.04 4.48A21.333333 21.333333 0 0 0 938.666667 341.333333a21.333333 21.333333 0 0 0 15.146666-6.186666A22.4 22.4 0 0 0 960 320a21.333333 21.333333 0 0 0-1.706667-8.106667z"  /></svg>
                     <h1 *ngIf="currentSolution.evaluationSummary "     class="px-1 items-center ">{{currentSolution.numberofTimesEvaluated}}E-{{currentSolution.evaluationSummary.average}}</h1>
