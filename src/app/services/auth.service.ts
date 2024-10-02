@@ -140,6 +140,9 @@ export class AuthService {
   getAUser(uid: string) {
     return this.afs.doc<User>(`users/${uid}`).valueChanges();
   }
+  getALlUsers() {
+    return this.afs.collection<User>(`users`).valueChanges();
+  }
 
   getUserFromEmail(email: string) {
     return this.afs

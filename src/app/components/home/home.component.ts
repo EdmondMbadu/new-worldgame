@@ -33,7 +33,6 @@ export class HomeComponent implements OnInit {
     window.scroll(0, 0);
     this.solution.getHomePageSolutions().subscribe((data) => {
       this.allSolutions = data;
-      console.log(' the data', data);
       this.findCompletedSolutions();
     });
     // this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
@@ -50,7 +49,7 @@ export class HomeComponent implements OnInit {
       this.evaluationSolutions = data.filter((element) => {
         return element.finished !== undefined && element.finished === 'true';
       });
-      console.log(' all evaluations pending', this.evaluationSolutions);
+
       this.evaluation = this.evaluationSolutions.length;
     });
 
