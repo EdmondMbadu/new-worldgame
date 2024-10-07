@@ -15,6 +15,7 @@ import { DataService } from 'src/app/services/data.service';
 })
 export class NavbarComponent implements OnInit {
   @Input() loggedOn: boolean = false;
+  dark: boolean = false;
 
   @Input() current: string = 'pb-1  border-b-4';
   searchControl = new FormControl();
@@ -64,7 +65,8 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     // this.applyTheme();
-    // this.darkModeInitial();
+    // // this.darkModeInitial();
+    this.dark = true;
     const darkModeInitialized = localStorage.getItem('darkModeInitialized');
 
     if (!darkModeInitialized) {
@@ -156,20 +158,23 @@ export class NavbarComponent implements OnInit {
   lightMode() {
     localStorage['theme'] = 'light'; // Save to localStorage
     this.applyTheme();
-    this.showThemeDropDown = !this.showThemeDropDown;
+    this.dark = false;
+    // this.showThemeDropDown = !this.showThemeDropDown;
   }
   darkModeInitial() {
     localStorage['theme'] = 'dark'; // Save to localStorage
     // Save to localStorage
 
     this.applyTheme();
+    this.dark = true;
   }
   darkMode() {
     localStorage['theme'] = 'dark'; // Save to localStorage
     // Save to localStorage
 
     this.applyTheme();
-    this.showThemeDropDown = !this.showThemeDropDown;
+    this.dark = true;
+    // this.showThemeDropDown = !this.showThemeDropDown;
   }
   systemMode() {
     localStorage.removeItem('theme');
@@ -183,8 +188,10 @@ export class NavbarComponent implements OnInit {
     // Explicitly check for 'light' and 'dark' settings
 
     if (userTheme === 'dark') {
+      this.dark = true;
       document.documentElement.classList.add('dark');
     } else if (userTheme === 'light') {
+      this.dark = false;
       document.documentElement.classList.remove('dark');
     } else {
       // Apply OS preference only if no user preference is set

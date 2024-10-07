@@ -60,15 +60,16 @@ export class OtherAisComponent implements OnInit {
       intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa`,
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
-    {
-      avatarPath: '../../../assets/img/jane-goodal.png',
-      name: 'Jane Goodall',
-      intro: `${name} English zoologist, primatologist and anthropologist considered the world's foremost expert on chimpanzees...`,
-      collectionPath: `users/${this.auth.currentUser.uid}/jane/`,
-    },
+    // waiting for approval to get jane goodall
+    // {
+    //   avatarPath: '../../../assets/img/jane-goodal.png',
+    //   name: 'Jane Goodall',
+    //   intro: `${name} English zoologist, primatologist and anthropologist considered the world's foremost expert on chimpanzees...`,
+    //   collectionPath: `users/${this.auth.currentUser.uid}/jane/`,
+    // },
   ];
   // einstein is the default personna
-  aiSelected: any = this.aiOptions[3];
+  aiSelected: any = this.aiOptions[2];
   errorMsg = '';
   responses: DisplayMessage[] = [
     {

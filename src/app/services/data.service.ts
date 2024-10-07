@@ -24,7 +24,6 @@ export class DataService implements OnInit {
   }
   sdgs: SDG[] = [];
   private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
-
   currentTheme = this.themeSource.asObservable();
 
   sdgsPaths: { [key: string]: string } = {
@@ -100,7 +99,7 @@ export class DataService implements OnInit {
 
   applyTheme() {
     const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
-    console.log('theme ', userTheme);
+    // console.log('theme ', userTheme);
     this.setTheme(userTheme);
     // Explicitly check for 'light' and 'dark' settings
 
