@@ -4,6 +4,7 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
+  Renderer2,
 } from '@angular/core';
 import { json } from 'express';
 import { Subscription } from 'rxjs';
@@ -21,7 +22,7 @@ declare var am4themes_animated: any;
 export class LandingPageComponent implements OnInit {
   themeSubscription?: Subscription;
 
-  constructor(private data: DataService) {}
+  constructor(private data: DataService, private renderer: Renderer2) {}
   colorTheme: string = 'rgb(15, 23, 42)';
   ngOnInit(): void {
     this.themeSubscription = this.data.currentTheme.subscribe((theme) => {
@@ -30,6 +31,12 @@ export class LandingPageComponent implements OnInit {
         theme === 'dark' ? 'rgb(15, 23, 42)' : 'white'
       );
     });
+    const script = this.renderer.createElement('script');
+    script.src =
+      'https://s3-us-west-2.amazonaws.com/b2bjsstore/b/QOQRJHYWK762/reb2b.js.gz';
+    script.async = true;
+    this.renderer.appendChild(document.body, script);
+
     // Check if dark mode was initialized before
   }
   @ViewChild('globeContainer', { static: true }) globeContainer:
