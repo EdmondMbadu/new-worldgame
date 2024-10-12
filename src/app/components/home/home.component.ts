@@ -39,6 +39,20 @@ export class HomeComponent implements OnInit {
     //   this.allSolutions = data;
     //   this.findCompletedSolutions();
     // });
+
+    this.auth.getALlUsers().subscribe((data) => {
+      this.allUsers = data;
+      console.log('this is all users', this.allUsers);
+      for (let user of this.allUsers) {
+        console.log(
+          user.firstName,
+          user.lastName,
+          user.email,
+          user.dateJoined,
+          user.goal
+        );
+      }
+    });
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       // console.log('this is the current user solutions', data);
       this.currentUserSolutions = data;
