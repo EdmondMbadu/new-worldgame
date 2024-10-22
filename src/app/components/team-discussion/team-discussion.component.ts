@@ -30,7 +30,7 @@ export class TeamDiscussionComponent implements OnInit {
   profilePicturePath: string = '';
   user: User = {};
 
-  showChatIcon: boolean = true;
+  @Input() showChatIcon: boolean = true;
   private isDragging = false;
   private originalX: number = 0;
   private originalY: number = 0;

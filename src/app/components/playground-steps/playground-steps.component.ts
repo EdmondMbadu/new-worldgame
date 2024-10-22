@@ -85,6 +85,7 @@ export class PlaygroundStepsComponent implements OnInit {
     this.display[this.currentIndexDisplay] = true;
     this.buttontexts[this.steps.length - 1] = 'Submit';
   }
+
   getMembers() {
     this.teamMembers = [];
 

@@ -142,6 +142,13 @@ export class SolutionService {
     );
     return solutionRef.set(data, { merge: true });
   }
+  // updateSolutionStatus(solutionId: string, updateData: any) {
+  //   const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+  //     `solutions/${solutionId}`
+  //   );
+
+  //   return solutionRef.set(updateData, { merge: true });
+  // }
   getThisUserSolution(solutionId: string) {
     return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
   }
@@ -279,7 +286,7 @@ export class SolutionService {
   }
 
   saveSolutionStrategyReview(solutionId: string, review: string) {
-    console.log('saving solution strategy review', review);
+    // console.log('saving solution strategy review', review);
     const data = {
       strategyReview: review,
     };

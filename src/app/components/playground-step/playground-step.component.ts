@@ -60,6 +60,8 @@ export class PlaygroundStepComponent {
   @Input() stepNumber: number = 0;
   @Output() buttonInfoEvent = new EventEmitter<number>();
   contentsArray: string[] = [];
+  public isUpdatingContent = false;
+  public editorInstance: any;
   questionsAndAnswersTracker?: { [key: string]: string } = {};
   scrollHandler: (() => void) | undefined;
   elements: any = [];
@@ -81,7 +83,7 @@ export class PlaygroundStepComponent {
     this.initializeContents();
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
-      if (this.currentSolution.discussion !== undefined) {
+      if (this.currentSolution.discussion) {
         this.discussion = this.currentSolution.discussion;
         this.displayTimeDiscussion();
       }
@@ -89,7 +91,7 @@ export class PlaygroundStepComponent {
         this.currentSolution.strategyReview !== undefined
           ? this.currentSolution.strategyReview
           : '';
-      console.log('strategy review saved :', this.strategyReview);
+      // console.log('strategy review saved :', this.strategyReview);
       // fill the evaluator class
       this.currentSolution.evaluators?.forEach((ev: any) => {
         this.evaluators.push(ev);
@@ -117,6 +119,7 @@ export class PlaygroundStepComponent {
     this.defaultReviewSelected = false;
     this.staticContentArray[0] = this.strategyReview;
   }
+
   chooseDefaultReview() {
     this.defaultReviewSelected = true;
     this.chosenColorDefault = 'font-bold text-xl';
@@ -149,14 +152,38 @@ export class PlaygroundStepComponent {
         this.staticContentArray.push(
           this.currentSolution.status![this.questionsTitles[i]]
         );
+        // for (let i = 0; i < this.questionsTitles.length; i++) {
+        //   const questionTitle = this.questionsTitles[i];
+        //   const newContent = this.currentSolution.status[questionTitle];
+        //   if (this.contentsArray[i] !== newContent) {
+        //     this.isUpdatingContent = true;
+        //     this.contentsArray[i] = newContent;
+        //     this.isUpdatingContent = false;
+        //   }
       }
     }
   }
 
   public Editor: any = Editor;
+  // public onReady(editor: any) {
+  //   // console.log('CKEditor5 Angular Component is ready to use!', editor);
+  // }
   public onReady(editor: any) {
-    // console.log('CKEditor5 Angular Component is ready to use!', editor);
+    this.editorInstance = editor;
   }
+
+  // onContentChange(newContent: string, index: number) {
+  //   if (!this.isUpdatingContent) {
+  //     this.updateContentInDatabase(newContent, index);
+  //   }
+  // }
+
+  // updateContentInDatabase(newContent: string, index: number) {
+  //   const questionTitle = this.questionsTitles[index];
+  //   const updateData: any = {};
+  //   updateData[`status.${questionTitle}`] = newContent;
+  //   this.solution.updateSolutionStatus(this.solutionId, updateData);
+  // }
 
   updatePlayground(current: number) {
     // only save data if both are different.

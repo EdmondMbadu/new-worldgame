@@ -103,7 +103,7 @@
                   (ready)="onReady($event)"
                  placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                  [(ngModel)]="staticContentArray[i]"
-                  
+               
                   #contentField="ngModel"
                  
                  
@@ -124,6 +124,7 @@
                   (ready)="onReady($event)"
                  placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                  [(ngModel)]="strategyReview"
+                 
                  *ngIf="step.startsWith('Step V:') && strategyReviewSelected"
                   #contentField="ngModel"
                  
@@ -145,6 +146,7 @@
                  placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                  *ngIf="!strategyReviewSelected"
                  [(ngModel)]="contentsArray[i]"
+          
                   #contentField="ngModel"
                  
                  
@@ -273,7 +275,7 @@
 <app-chatbot></app-chatbot>
 
 
-<app-team-discussion [comments]="discussion" [solution]="currentSolution"></app-team-discussion>
+<app-team-discussion  [comments]="discussion" [solution]="currentSolution"></app-team-discussion>
 
 
 
