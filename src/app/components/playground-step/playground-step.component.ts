@@ -120,6 +120,7 @@ export class PlaygroundStepComponent {
     this.chosenColorReview = 'font-bold text-xl';
     this.defaultReviewSelected = false;
     this.staticContentArray[0] = this.strategyReview;
+    this.contentsArray[0] = this.strategyReview;
   }
 
   chooseDefaultReview() {
@@ -360,7 +361,7 @@ export class PlaygroundStepComponent {
       // check if something has been changed on the strategy review
       else if (this.contentsArray[0] !== this.staticContentArray[0]) {
         // this.saveSuccess = true;
-        this.staticContentArray[0] = this.contentsArray[0]; // Update to prevent infinite loop
+        // this.staticContentArray[0] = this.contentsArray[0]; // Update to prevent infinite loop
         // if (this.strategyReview === '') {
         this.solution
           .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
