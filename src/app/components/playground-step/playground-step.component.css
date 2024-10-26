@@ -9,7 +9,7 @@
     
     z-index: 1; /* Ensure it's lower than the navbar */
     /* Other necessary styles */
-    min-width: 10rem;
+    min-width: 20rem;
 }
 /* playground-step.component.css */
 ::ng-deep .ck-content h1 {

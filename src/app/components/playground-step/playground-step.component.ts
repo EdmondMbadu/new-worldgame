@@ -78,9 +78,10 @@ export class PlaygroundStepComponent {
   data: string = '';
   discussion: Comment[] = [];
   hoverChangeTitle: boolean = false;
+  isInitialized = false;
   ngOnInit() {
     window.scrollTo(0, 0);
-    this.initializeContents();
+    // this.initializeContents();
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
       if (this.currentSolution.discussion) {
@@ -101,6 +102,7 @@ export class PlaygroundStepComponent {
           ? 'Et al'
           : '';
       this.initializeContents();
+      this.dataInitialized = true; // Set flag to true
     });
 
     this.displayPopups = new Array(this.questions.length).fill(false);
@@ -146,12 +148,15 @@ export class PlaygroundStepComponent {
       this.contentsArray = [];
       this.staticContentArray = [];
       for (let i = 0; i < this.questionsTitles.length; i++) {
-        this.contentsArray.push(
-          this.currentSolution.status![this.questionsTitles[i]]
-        );
-        this.staticContentArray.push(
-          this.currentSolution.status![this.questionsTitles[i]]
-        );
+        // this.contentsArray.push(
+        //   this.currentSolution.status![this.questionsTitles[i]]
+        // );
+        // this.staticContentArray.push(
+        //   this.currentSolution.status![this.questionsTitles[i]]
+        // );
+        const content = this.currentSolution.status![this.questionsTitles[i]];
+        this.contentsArray.push(content);
+        this.staticContentArray.push(content); // Sync both arrays initially
         // for (let i = 0; i < this.questionsTitles.length; i++) {
         //   const questionTitle = this.questionsTitles[i];
         //   const newContent = this.currentSolution.status[questionTitle];
@@ -162,8 +167,11 @@ export class PlaygroundStepComponent {
         //   }
       }
     }
-  }
 
+    // Set the initialization flag to true after arrays are populated
+    this.isInitialized = true;
+  }
+  dataInitialized = false; // New flag for ensuring data is loaded
   public Editor: any = Editor;
   private saveTimeout: any;
   public onReady(editor: any) {
@@ -172,14 +180,21 @@ export class PlaygroundStepComponent {
     editor.model.document.on('change:data', () => {
       console.log('Content changed:', editor.getData());
 
-      // Clear previous timeout to reset debounce
       clearTimeout(this.saveTimeout);
 
-      // Set a new timeout for saving
       this.saveTimeout = setTimeout(() => {
-        this.saveSolutionStatusDirectly();
-      }, 2000); // Waits for 2 seconds of no typing before saving
+        if (this.dataInitialized && !this.areContentsSame()) {
+          this.saveSolutionStatusDirectly();
+        }
+      }, 2000);
     });
+  }
+
+  areContentsSame(): boolean {
+    return (
+      JSON.stringify(this.contentsArray) ===
+      JSON.stringify(this.staticContentArray)
+    );
   }
 
   updatePlayground(current: number) {
@@ -321,6 +336,7 @@ export class PlaygroundStepComponent {
   }
 
   saveSolutionStatusDirectly() {
+    if (!this.dataInitialized) return; // Prevent execution if not initialized
     if (
       // check if this is the strategy review phase
       this.questionsTitles.length === 1 &&
@@ -333,6 +349,7 @@ export class PlaygroundStepComponent {
         this.solution
           .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
           .then(() => {
+            this.staticContentArray[0] = this.strategyReview; // Update static content after saving
             // this.saveSuccess = true;
           })
           .catch((error) => {
@@ -343,12 +360,13 @@ export class PlaygroundStepComponent {
       // check if something has been changed on the strategy review
       else if (this.contentsArray[0] !== this.staticContentArray[0]) {
         // this.saveSuccess = true;
-        this.staticContentArray[0] = this.contentsArray[0];
+        this.staticContentArray[0] = this.contentsArray[0]; // Update to prevent infinite loop
         // if (this.strategyReview === '') {
         this.solution
           .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
           .then(() => {
             // this.saveSuccess = true;
+            this.staticContentArray[0] = this.contentsArray[0];
           })
           .catch((error) => {
             // this.saveError = true;
@@ -372,6 +390,7 @@ export class PlaygroundStepComponent {
         .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
         .then(() => {
           // this.saveSuccess = true;
+          this.staticContentArray = [...this.contentsArray]; // Update static array after successful save
         })
         .catch((error) => {
           // this.saveError = true;

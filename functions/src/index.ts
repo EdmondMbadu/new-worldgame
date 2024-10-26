@@ -118,7 +118,7 @@ export const solutionEvaluationInvite = functions.https.onCall(
         templateId: TEMPLATE_ID_EVALUTION,
         dynamic_template_data: {
           subject: data.subject,
-          // title: data.title,
+          title: data.title,
           path: data.path,
         },
       };
@@ -143,7 +143,7 @@ export const solutionEvaluationComplete = functions.https.onCall(
       templateId: TEMPLATE_ID_EVALUATION_COMPLETE,
       dynamic_template_data: {
         subject: data.subject,
-        // title: data.title,
+        title: data.title,
         path: data.path,
       },
     };

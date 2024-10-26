@@ -300,7 +300,7 @@ export class PlaygroundStepsComponent implements OnInit {
       const emailData = {
         email: evaluator.email,
         subject: `You have been invited to evaluate the NewWorld Game solution: ...`,
-        // title: this.myForm.value.title,
+        title: this.currentSolution.title,
         description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
         path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
         // Include any other data required by your Cloud Function
