@@ -7,8 +7,16 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrl: './overview.component.css',
 })
 export class OverviewComponent implements OnInit {
-  constructor(public auth: AuthService) {}
   ngOnInit(): void {
     window.scroll(0, 0);
+  }
+  isLoggedIn: boolean = false;
+  constructor(public auth: AuthService) {
+    if (
+      this.auth.currentUser !== null &&
+      this.auth.currentUser.email !== undefined
+    ) {
+      this.isLoggedIn = true;
+    }
   }
 }

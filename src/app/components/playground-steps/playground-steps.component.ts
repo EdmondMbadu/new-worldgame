@@ -142,6 +142,7 @@ export class PlaygroundStepsComponent implements OnInit {
     }
   }
 
+  // this code might be used later on to give users control over different positions
   // toggleClaimTeamLeader() {
   //   if (this.isEmpty(this.teamLeader)) {
   //     this.teamLeader = this.currentUser;

@@ -1,5 +1,9 @@
-<app-navbar [currentPageAbout]="true"   ></app-navbar>
+
 <div class="dark:bg-slate-900 min-h-screen min-w-max">
+    <div *ngIf="isLoggedIn">
+        <app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
+    
 
 <main class="mt-20 pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased">
     <div class="flex justify-between px-4 mx-auto max-w-screen-xl ">

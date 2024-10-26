@@ -165,25 +165,22 @@ export class PlaygroundStepComponent {
   }
 
   public Editor: any = Editor;
-  // public onReady(editor: any) {
-  //   // console.log('CKEditor5 Angular Component is ready to use!', editor);
-  // }
+  private saveTimeout: any;
   public onReady(editor: any) {
-    this.editorInstance = editor;
+    console.log('CKEditor5 Angular Component is ready to use!', editor.state);
+
+    editor.model.document.on('change:data', () => {
+      console.log('Content changed:', editor.getData());
+
+      // Clear previous timeout to reset debounce
+      clearTimeout(this.saveTimeout);
+
+      // Set a new timeout for saving
+      this.saveTimeout = setTimeout(() => {
+        this.saveSolutionStatusDirectly();
+      }, 2000); // Waits for 2 seconds of no typing before saving
+    });
   }
-
-  // onContentChange(newContent: string, index: number) {
-  //   if (!this.isUpdatingContent) {
-  //     this.updateContentInDatabase(newContent, index);
-  //   }
-  // }
-
-  // updateContentInDatabase(newContent: string, index: number) {
-  //   const questionTitle = this.questionsTitles[index];
-  //   const updateData: any = {};
-  //   updateData[`status.${questionTitle}`] = newContent;
-  //   this.solution.updateSolutionStatus(this.solutionId, updateData);
-  // }
 
   updatePlayground(current: number) {
     // only save data if both are different.
@@ -318,6 +315,66 @@ export class PlaygroundStepComponent {
         })
         .catch((error) => {
           this.saveError = true;
+          // alert('Error launching solution ');
+        });
+    }
+  }
+
+  saveSolutionStatusDirectly() {
+    if (
+      // check if this is the strategy review phase
+      this.questionsTitles.length === 1 &&
+      this.currentSolution.status !== undefined
+    ) {
+      if (
+        this.strategyReviewSelected &&
+        this.strategyReview !== this.staticContentArray[0]
+      ) {
+        this.solution
+          .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
+          .then(() => {
+            // this.saveSuccess = true;
+          })
+          .catch((error) => {
+            // this.saveError = true;
+            // alert('Error launching solution ');
+          });
+      }
+      // check if something has been changed on the strategy review
+      else if (this.contentsArray[0] !== this.staticContentArray[0]) {
+        // this.saveSuccess = true;
+        this.staticContentArray[0] = this.contentsArray[0];
+        // if (this.strategyReview === '') {
+        this.solution
+          .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
+          .then(() => {
+            // this.saveSuccess = true;
+          })
+          .catch((error) => {
+            // this.saveError = true;
+            alert('Error launching solution ');
+          });
+        // }
+        // save strategy review
+      }
+      this.chooseStrategyReview();
+    } else if (
+      JSON.stringify(this.contentsArray) !==
+      JSON.stringify(this.staticContentArray)
+    ) {
+      for (let i = 0; i < this.contentsArray.length; i++) {
+        this.questionsAndAnswersTracker![`${this.questionsTitles[i]}`] =
+          this.contentsArray[i];
+      }
+
+      // save solution
+      this.solution
+        .saveSolutionStatus(this.solutionId, this.questionsAndAnswersTracker)
+        .then(() => {
+          // this.saveSuccess = true;
+        })
+        .catch((error) => {
+          // this.saveError = true;
           // alert('Error launching solution ');
         });
     }
