@@ -85,6 +85,7 @@ import { CreateSolutionStepsComponent } from './components/create-solution-steps
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
 import { OurTeamComponent } from './components/our-team/our-team.component';
 import { AudioPlayerComponent } from './components/audio-player/audio-player.component';
+import { UserManagementComponent } from './components/user-management/user-management.component';
 
 @NgModule({
   declarations: [
@@ -146,6 +147,7 @@ import { AudioPlayerComponent } from './components/audio-player/audio-player.com
     NewFeaturesComponent,
     OurTeamComponent,
     AudioPlayerComponent,
+    UserManagementComponent,
   ],
   imports: [
     BrowserModule,

@@ -59,59 +59,6 @@ export class HomeComponent implements OnInit {
     //   console.log('this is every solution', this.everySolution);
     // });
 
-    this.auth.getALlUsers().subscribe((data) => {
-      this.allUsers = data;
-      console.log('this is all users', this.allUsers);
-
-      // Fetch all solutions first
-      this.solution.getAllSolutionsFromAllAccounts().subscribe((solutions) => {
-        this.everySolution = solutions;
-        console.log('this is every solution', this.everySolution);
-
-        // Iterate through all users
-        for (let user of this.allUsers) {
-          let solutionCount = 0;
-          let solutionSubmittedCount = 0;
-
-          // Normalize the user's email by trimming spaces and converting to lowercase
-          const normalizedUserEmail = user.email!.trim().toLowerCase();
-
-          // Iterate through all solutions to check if the user is a participant
-          for (let solution of this.everySolution) {
-            if (solution.participants && Array.isArray(solution.participants)) {
-              // Check if the user's email is in the participants array
-              const isParticipant = solution.participants.some(
-                (participant: { name: string }) =>
-                  participant.name.trim().toLowerCase() === normalizedUserEmail
-              );
-
-              if (isParticipant) {
-                solutionCount++; // Increment the count if the user is a participant
-
-                // Check if the solution is submitted (finished is 'true')
-                if (solution.finished === 'true') {
-                  solutionSubmittedCount++; // Increment the count if the solution is submitted
-                }
-              }
-            }
-          }
-
-          // Log the user details along with the number of solutions started and submitted
-          console.log(
-            user.firstName,
-            user.lastName,
-            user.email,
-            user.dateJoined,
-            user.goal,
-            // 'Number of solutions started:',
-            solutionCount,
-            // 'Number of solutions submitted:',
-            solutionSubmittedCount
-          );
-        }
-      });
-    });
-
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       // console.log('this is the current user solutions', data);
       this.currentUserSolutions = data;

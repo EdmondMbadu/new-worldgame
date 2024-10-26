@@ -21,6 +21,10 @@ export class User {
   goal?: string;
   sdgsSelected?: string[];
   solutionEnvironment?: SolutionEnvironment;
+  admin?: string;
+  lastLogin?: string;
+  tempSolutionstarted?: string;
+  tempSolutionSubmitted?: string;
 }
 
 export class Avatar {

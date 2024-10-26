@@ -44,6 +44,7 @@ import { WelcomeComponent } from './components/welcome/welcome.component';
 import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
 import { OurTeamComponent } from './components/our-team/our-team.component';
+import { UserManagementComponent } from './components/user-management/user-management.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -110,6 +111,12 @@ const routes: Routes = [
   {
     path: 'overview',
     component: OverviewComponent,
+  },
+  {
+    path: 'user-management',
+    component: UserManagementComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
   },
   {
     path: 'careers',
