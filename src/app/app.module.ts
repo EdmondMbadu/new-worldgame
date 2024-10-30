@@ -86,6 +86,9 @@ import { NewFeaturesComponent } from './blogs/new-features/new-features.componen
 import { OurTeamComponent } from './components/our-team/our-team.component';
 import { AudioPlayerComponent } from './components/audio-player/audio-player.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
+import { WorkshopComponent } from './blogs/workshop/workshop.component';
+import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
+import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
 
 @NgModule({
   declarations: [
@@ -148,6 +151,9 @@ import { UserManagementComponent } from './components/user-management/user-manag
     OurTeamComponent,
     AudioPlayerComponent,
     UserManagementComponent,
+    WorkshopComponent,
+    WorkshopRegisterComponent,
+    TemplateThanksComponent
   ],
   imports: [
     BrowserModule,

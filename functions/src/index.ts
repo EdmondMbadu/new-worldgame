@@ -9,7 +9,7 @@
 // const cors = require('cors');
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-const axios = require('axios');
+// const axios = require('axios');
 // const cors = require('cors')({ origin: true });
 // const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
 
@@ -43,6 +43,7 @@ const API_KEY = functions.config().sendgrid.key;
 const TEMPLATE_ID = functions.config().sendgrid.template;
 const TEMPLATE_ID_SOLUTION = functions.config().sendgrid.templatesolutioninvite;
 const TEMPLATE_ID_COMMENT = functions.config().sendgrid.templatecommentinvite;
+const TEMPLATE_ID_WORKSHOP = functions.config().sendgrid.templateworkshop;
 // const DID_API_KEY = functions.config().did.key;
 
 const TEMPLATE_ID_EVALUTION =
@@ -107,6 +108,27 @@ export const commentNotificationEmail = functions.https.onCall(
     return { success: true };
   }
 );
+
+export const workshopRegistrationEmail = functions.https.onCall(
+  async (data: any, context: any) => {
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_WORKSHOP,
+      dynamic_template_data: {
+        subject: data.subject,
+        firstname: data.firstName,
+        lastname: data.lastName
+     
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+
 
 export const solutionEvaluationInvite = functions.https.onCall(
   async (data: any, context: any) => {
@@ -324,41 +346,41 @@ export const solutionEvaluationComplete = functions.https.onCall(
 // }
 
 // Function to handle the webhook response
-exports.videoReady = functions.https.onRequest(async (req: any, res: any) => {
-  if (req.method === 'POST') {
-    const videoId = req.body.id;
-    const videoUrl = `https://api.d-id.com/talks/${videoId}`;
-    console.log('The video id is', videoId);
+// exports.videoReady = functions.https.onRequest(async (req: any, res: any) => {
+//   if (req.method === 'POST') {
+//     const videoId = req.body.id;
+//     const videoUrl = `https://api.d-id.com/talks/${videoId}`;
+//     console.log('The video id is', videoId);
 
-    try {
-      // Download the video content
-      const response = await axios.get(videoUrl, { responseType: 'stream' });
-      const fileStream = response.data;
-      const file = bucket.file('nwg-news');
-      const writeStream = file.createWriteStream({
-        metadata: {
-          contentType: 'video/mp4', // Adjust depending on the actual video format
-        },
-      });
+//     try {
+//       // Download the video content
+//       const response = await axios.get(videoUrl, { responseType: 'stream' });
+//       const fileStream = response.data;
+//       const file = bucket.file('nwg-news');
+//       const writeStream = file.createWriteStream({
+//         metadata: {
+//           contentType: 'video/mp4', // Adjust depending on the actual video format
+//         },
+//       });
 
-      fileStream
-        .pipe(writeStream)
-        .on('error', (error: any) => {
-          console.error('Stream Error:', error);
-          res.status(500).send('Failed to upload video');
-        })
-        .on('finish', () => {
-          console.log('Video uploaded successfully');
-          res.status(200).send('Video uploaded successfully');
-        });
-    } catch (error) {
-      console.error('Failed to handle video:', error);
-      res.status(500).send('Failed to handle video');
-    }
-  } else {
-    res.status(405).send('Method not allowed');
-  }
-});
+//       fileStream
+//         .pipe(writeStream)
+//         .on('error', (error: any) => {
+//           console.error('Stream Error:', error);
+//           res.status(500).send('Failed to upload video');
+//         })
+//         .on('finish', () => {
+//           console.log('Video uploaded successfully');
+//           res.status(200).send('Video uploaded successfully');
+//         });
+//     } catch (error) {
+//       console.error('Failed to handle video:', error);
+//       res.status(500).send('Failed to handle video');
+//     }
+//   } else {
+//     res.status(405).send('Method not allowed');
+//   }
+// });
 
 // exports.uploadImage = functions.https.onRequest(async (req: any, res: any) => {
 //   if (req.method !== 'POST') {

@@ -202,6 +202,18 @@ export class DataService implements OnInit {
     };
     return userRef.set(data, { merge: true });
   }
+  workshopSignUp(wid: string, signUps: any) {
+    const workshopRef: AngularFirestoreDocument<any> = this.afs.doc(
+      `workshop/${wid}`
+    );
+    const data = {
+      signUps: signUps,
+    };
+    return workshopRef.set(data, { merge: true });
+  }
+  getWorkshopData() {
+    return this.afs.collection<any>(`workshop`).valueChanges();
+  }
   mapEvaluationToNumeric(evaluation: Evaluation) {
     let user: any = {};
     if (evaluation) {
