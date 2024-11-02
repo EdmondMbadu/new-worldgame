@@ -89,6 +89,7 @@ import { UserManagementComponent } from './components/user-management/user-manag
 import { WorkshopComponent } from './blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
 import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
+import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
 
 @NgModule({
   declarations: [
@@ -153,7 +154,8 @@ import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks
     UserManagementComponent,
     WorkshopComponent,
     WorkshopRegisterComponent,
-    TemplateThanksComponent
+    TemplateThanksComponent,
+    ManagementWorkshopComponent,
   ],
   imports: [
     BrowserModule,

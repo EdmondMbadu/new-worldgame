@@ -1,18 +1,18 @@
-import { WeekDay } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
+
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
-import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-workshop-register',
-  templateUrl: './workshop-register.component.html',
-  styleUrl: './workshop-register.component.css',
+  selector: 'app-management-workshop',
+
+  templateUrl: './management-workshop.component.html',
+  styleUrl: './management-workshop.component.css',
 })
-export class WorkshopRegisterComponent implements OnInit {
+export class ManagementWorkshopComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
     if (
@@ -64,8 +64,6 @@ export class WorkshopRegisterComponent implements OnInit {
           this.wid,
           this.workshopData
         );
-        this.sendConfirmationEmail();
-        this.router.navigate(['/thank-you']);
       } catch (error) {
         alert(
           'There was an error during the  registration process. Please tryagain. '
@@ -73,26 +71,5 @@ export class WorkshopRegisterComponent implements OnInit {
         return;
       }
     }
-  }
-  sendConfirmationEmail() {
-    const workshopConfirmation = this.fns.httpsCallable(
-      'workshopRegistrationEmail'
-    );
-
-    const emailData = {
-      email: this.email,
-      subject: `Registration Confirmation.`,
-      firstName: this.firstName,
-      lastName: this.lastName,
-    };
-
-    workshopConfirmation(emailData).subscribe(
-      (result) => {
-        console.log('Email sent:', result);
-      },
-      (error) => {
-        console.error('Error sending email:', error);
-      }
-    );
   }
 }

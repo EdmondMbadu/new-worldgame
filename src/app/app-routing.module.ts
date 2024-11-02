@@ -48,6 +48,7 @@ import { UserManagementComponent } from './components/user-management/user-manag
 import { WorkshopComponent } from './blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
 import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
+import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -118,6 +119,12 @@ const routes: Routes = [
   {
     path: 'user-management',
     component: UserManagementComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'management-workshop',
+    component: ManagementWorkshopComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
@@ -230,6 +237,7 @@ const routes: Routes = [
     path: 'workshop-register',
     component: WorkshopRegisterComponent,
   },
+
   {
     path: 'thank-you',
     component: TemplateThanksComponent,
