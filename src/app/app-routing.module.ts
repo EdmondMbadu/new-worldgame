@@ -45,6 +45,7 @@ import { CreateSolutionComponent } from './components/create-solution/create-sol
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
 import { OurTeamComponent } from './components/our-team/our-team.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
+import { VideoCallComponent } from './components/video-call/video-call.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -218,6 +219,11 @@ const routes: Routes = [
   {
     path: 'blogs/new-features',
     component: NewFeaturesComponent,
+  },
+  {
+    path: 'video-call',
+    component: VideoCallComponent,
+    canActivate: [AuthGuard],
   },
   { path: '**', component: PageNotFoundComponent },
 ];

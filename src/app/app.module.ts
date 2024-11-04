@@ -86,6 +86,7 @@ import { NewFeaturesComponent } from './blogs/new-features/new-features.componen
 import { OurTeamComponent } from './components/our-team/our-team.component';
 import { AudioPlayerComponent } from './components/audio-player/audio-player.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
+import { VideoCallComponent } from './components/video-call/video-call.component';
 
 @NgModule({
   declarations: [
@@ -148,6 +149,7 @@ import { UserManagementComponent } from './components/user-management/user-manag
     OurTeamComponent,
     AudioPlayerComponent,
     UserManagementComponent,
+    VideoCallComponent,
   ],
   imports: [
     BrowserModule,
