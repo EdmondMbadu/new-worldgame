@@ -45,6 +45,7 @@ import { CreateSolutionComponent } from './components/create-solution/create-sol
 import { NewFeaturesComponent } from './blogs/new-features/new-features.component';
 import { OurTeamComponent } from './components/our-team/our-team.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
+import { VideoCallComponent } from './components/video-call/video-call.component';
 import { WorkshopComponent } from './blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
 import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
@@ -228,6 +229,11 @@ const routes: Routes = [
   {
     path: 'blogs/new-features',
     component: NewFeaturesComponent,
+  },
+  {
+    path: 'video-call',
+    component: VideoCallComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'workshop',
