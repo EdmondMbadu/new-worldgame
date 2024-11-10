@@ -100,7 +100,7 @@
                     <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
                         <mat-label >Add Evaluator emails</mat-label>
                         <mat-chip-grid #chipGrid aria-label="Add Team Members email" >
-                        <mat-chip-row class="bg-white" *ngFor="let email of evaluatorsEmails"
+                        <mat-chip-row class="bg-white" *ngFor="let email of solution.newSolution.evaluatorsHolder"
                                         (removed)="removeEvaluators(email)"
                                         [editable]="true"
                                         (edited)="editEvaluators(email, $event)"

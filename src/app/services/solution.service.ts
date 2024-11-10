@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import {
   AngularFirestoreDocument,
   AngularFirestore,
@@ -28,22 +28,6 @@ export class SolutionService {
     private afs: AngularFirestore,
     private time: TimeService
   ) {
-    let shuffle = (array: User[]) => {
-      return array.sort(() => Math.random() - 0.5);
-    };
-    this.auth
-      .getAllOtherUsers(this.auth.currentUser.email)
-      .subscribe((data) => {
-        data = shuffle(data);
-        for (
-          let i = 0;
-          i < this.numberOfEvaluators &&
-          this.evaluatorsEmails.length < this.numberOfEvaluators;
-          i++
-        ) {
-          this.evaluatorsEmails.push({ name: data[i].email! });
-        }
-      });
     this.newSolution = {
       title: '',
       solutionArea: '',
@@ -51,6 +35,24 @@ export class SolutionService {
       participantsHolder: [{ name: this.auth.currentUser.email }],
       evaluatorsHolder: this.evaluatorsEmails,
     };
+    let shuffle = (array: User[]) => {
+      return array.sort(() => Math.random() - 0.5);
+    };
+    if (this.auth.currentUser.email) {
+      this.auth
+        .getAllOtherUsers(this.auth.currentUser.email)
+        .subscribe((data) => {
+          data = shuffle(data);
+          for (
+            let i = 0;
+            i < this.numberOfEvaluators &&
+            this.evaluatorsEmails.length < this.numberOfEvaluators;
+            i++
+          ) {
+            this.evaluatorsEmails.push({ name: data[i].email! });
+          }
+        });
+    }
   }
 
   createdNewSolution(
