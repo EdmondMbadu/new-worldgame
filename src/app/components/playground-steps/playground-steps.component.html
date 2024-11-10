@@ -163,8 +163,8 @@
                     <div class="flex flex-col p-4 ">
                         <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Evaluators :  {{evaluators.length}}</h5>
                     </div>
-                    <div class="flex flex-row -space-x-1" >
-                        <div *ngFor="let user of evaluators; let i= index" class = "cursor-pointer">
+                    <div class="flex flex-wrap -space-x-1 overflow-x-auto space-y-1" >
+                        <div *ngFor="let user of evaluators; let i= index" class = "cursor-pointer flex-shrink-0">
                             <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
                              
                             <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)" routerLink="/user-profile/{{user.uid}}"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
