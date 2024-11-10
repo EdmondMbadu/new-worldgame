@@ -333,6 +333,27 @@ export class PlaygroundStepsComponent implements OnInit {
       this.timelineDisplay[i] = 'bg-red-500 h-1 dark:bg-red-500';
     }
   }
+  sendEmailToParticipant() {
+    const genericEmail = this.fns.httpsCallable('genericEmail');
+
+    const emailData = {
+      email: this.newTeamMember,
+      subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+      title: this.currentSolution.title,
+      description: this.currentSolution.description,
+      path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+      // Include any other data required by your Cloud Function
+    };
+
+    genericEmail(emailData).subscribe(
+      (result) => {
+        console.log('Email sent:', result);
+      },
+      (error) => {
+        console.error('Error sending email:', error);
+      }
+    );
+  }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
   }
@@ -385,8 +406,9 @@ export class PlaygroundStepsComponent implements OnInit {
           this.currentSolution.solutionId!
         )
         .then(() => {
-          this.newTeamMember = '';
           this.getMembers();
+          this.sendEmailToParticipant();
+          this.newTeamMember = '';
           this.toggleAddTeamMember();
         })
         .catch((error) => {

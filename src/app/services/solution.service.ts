@@ -21,15 +21,35 @@ export class SolutionService {
   userRef?: AngularFirestoreDocument<any>;
   allSolutions: Solution[] = [];
   newSolution: Solution = {};
+  numberOfEvaluators: number = 3;
+  evaluatorsEmails: Email[] = [];
   constructor(
     private auth: AuthService,
     private afs: AngularFirestore,
     private time: TimeService
   ) {
+    let shuffle = (array: User[]) => {
+      return array.sort(() => Math.random() - 0.5);
+    };
+    this.auth
+      .getAllOtherUsers(this.auth.currentUser.email)
+      .subscribe((data) => {
+        data = shuffle(data);
+        for (
+          let i = 0;
+          i < this.numberOfEvaluators &&
+          this.evaluatorsEmails.length < this.numberOfEvaluators;
+          i++
+        ) {
+          this.evaluatorsEmails.push({ name: data[i].email! });
+        }
+      });
     this.newSolution = {
       title: '',
       solutionArea: '',
       description: '',
+      participantsHolder: [{ name: this.auth.currentUser.email }],
+      evaluatorsHolder: this.evaluatorsEmails,
     };
   }
 
@@ -44,6 +64,7 @@ export class SolutionService {
 
     sdgs: string[]
   ) {
+    console.log('The list of designers', participants);
     // let formatedDate = this.time.formatDateString(endDate);
     this.solutionId = this.afs.createId().toString();
     const data = {

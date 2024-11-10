@@ -1,3 +1,4 @@
+import { Email } from '../components/create-playground/create-playground.component';
 import { User } from '../models/user';
 
 export class Solution {
@@ -40,6 +41,8 @@ export class Solution {
   errorMessage?: string;
   winner?: string;
   audioFile?: string;
+  participantsHolder?: Email[];
+  evaluatorsHolder?: Email[];
 }
 
 export class Evaluation {
