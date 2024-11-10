@@ -28,15 +28,17 @@ export class SolutionService {
     private afs: AngularFirestore,
     private time: TimeService
   ) {
-    if (this.auth.currentUser && this.auth.currentUser.email) {
-      this.newSolution = {
-        title: '',
-        solutionArea: '',
-        description: '',
-        participantsHolder: [{ name: this.auth.currentUser.email }],
-        evaluatorsHolder: this.evaluatorsEmails,
-      };
-    }
+    this.auth.user$.subscribe((user) => {
+      if (user && user.email) {
+        this.newSolution = {
+          title: '',
+          solutionArea: '',
+          description: '',
+          participantsHolder: [{ name: user.email }],
+          evaluatorsHolder: this.evaluatorsEmails,
+        };
+      }
+    });
 
     // let shuffle = (array: User[]) => {
     //   return array.sort(() => Math.random() - 0.5);
