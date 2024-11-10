@@ -95,19 +95,25 @@ export class CreateSolutionStepsComponent implements OnInit {
     let shuffle = (array: User[]) => {
       return array.sort(() => Math.random() - 0.5);
     };
-    // this.auth
-    //   .getAllOtherUsers(this.auth.currentUser.email)
-    //   .subscribe((data) => {
-    //     data = shuffle(data);
-    //     for (
-    //       let i = 0;
-    //       i < this.numberOfEvaluators &&
-    //       this.evaluatorsEmails.length < this.numberOfEvaluators;
-    //       i++
-    //     ) {
-    //       this.evaluatorsEmails.push({ name: data[i].email! });
-    //     }
-    //   });
+    // this.solution.newSolution.participantsHolder = [
+    //   {
+    //     name: this.auth.currentUser.email,
+    //   },
+    // ];
+    this.auth
+      .getAllOtherUsers(this.auth.currentUser.email)
+      .subscribe((data) => {
+        data = shuffle(data);
+        for (
+          let i = 0;
+          i < this.numberOfEvaluators &&
+          this.evaluatorsEmails.length < this.numberOfEvaluators;
+          i++
+        ) {
+          this.evaluatorsEmails.push({ name: data[i].email! });
+        }
+        this.solution.newSolution.evaluatorsHolder = this.evaluatorsEmails;
+      });
     this.myForm = this.fb.group({
       emails: ['', Validators.compose([Validators.email])],
 
@@ -178,6 +184,8 @@ export class CreateSolutionStepsComponent implements OnInit {
             this.sendEmailToParticipants(); // Call the function here
           })
           .then(() => {
+            // reinitialize the solution holder
+            this.resetNewSolution();
             this.router.navigate([
               '/playground-steps/' + this.solution.solutionId,
             ]);
@@ -222,6 +230,15 @@ export class CreateSolutionStepsComponent implements OnInit {
       .filter((sdg) => sdg !== '');
   }
 
+  resetNewSolution() {
+    this.solution.newSolution = {
+      title: '',
+      solutionArea: '',
+      description: '',
+      participantsHolder: [{ name: this.auth.currentUser.email }],
+      evaluatorsHolder: this.evaluatorsEmails,
+    };
+  }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
 

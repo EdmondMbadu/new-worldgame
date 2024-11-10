@@ -28,31 +28,34 @@ export class SolutionService {
     private afs: AngularFirestore,
     private time: TimeService
   ) {
-    this.newSolution = {
-      title: '',
-      solutionArea: '',
-      description: '',
-      participantsHolder: [{ name: this.auth.currentUser.email }],
-      evaluatorsHolder: this.evaluatorsEmails,
-    };
-    let shuffle = (array: User[]) => {
-      return array.sort(() => Math.random() - 0.5);
-    };
-    if (this.auth.currentUser.email) {
-      this.auth
-        .getAllOtherUsers(this.auth.currentUser.email)
-        .subscribe((data) => {
-          data = shuffle(data);
-          for (
-            let i = 0;
-            i < this.numberOfEvaluators &&
-            this.evaluatorsEmails.length < this.numberOfEvaluators;
-            i++
-          ) {
-            this.evaluatorsEmails.push({ name: data[i].email! });
-          }
-        });
+    if (this.auth.currentUser && this.auth.currentUser.email) {
+      this.newSolution = {
+        title: '',
+        solutionArea: '',
+        description: '',
+        participantsHolder: [{ name: this.auth.currentUser.email }],
+        evaluatorsHolder: this.evaluatorsEmails,
+      };
     }
+
+    // let shuffle = (array: User[]) => {
+    //   return array.sort(() => Math.random() - 0.5);
+    // };
+    // if (this.auth.currentUser && this.auth.currentUser.email) {
+    //   this.auth
+    //     .getAllOtherUsers(this.auth.currentUser.email)
+    //     .subscribe((data) => {
+    //       data = shuffle(data);
+    //       for (
+    //         let i = 0;
+    //         i < this.numberOfEvaluators &&
+    //         this.evaluatorsEmails.length < this.numberOfEvaluators;
+    //         i++
+    //       ) {
+    //         this.evaluatorsEmails.push({ name: data[i].email! });
+    //       }
+    //     });
+    // }
   }
 
   createdNewSolution(
