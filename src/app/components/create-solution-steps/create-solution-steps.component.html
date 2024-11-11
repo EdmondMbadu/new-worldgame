@@ -54,7 +54,7 @@
                     <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
                         <mat-label >Add Team Members email</mat-label>
                         <mat-chip-grid #chipGrid aria-label="Add Team Members email" >
-                        <mat-chip-row class="bg-white" *ngFor="let email of participantsEmails"
+                        <mat-chip-row class="bg-white" *ngFor="let email of solution.newSolution.participantsHolder"
                                         (removed)="remove(email)"
                                         [editable]="true"
                                         (edited)="edit(email, $event)"
@@ -89,7 +89,7 @@
 <form [formGroup]="myForm" *ngIf="stepNumber==4" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <div class="flex flex-col">
-            <div *ngFor="let ev of evaluatorsEmails; let i=index">
+            <div *ngFor="let ev of solution.newSolution.evaluatorsHolder; let i=index">
                 <h1 class="text-gray-400 dark:text-gray-400">{{i+1}}.  {{ev.name}}</h1>
             </div>
                 
@@ -100,7 +100,7 @@
                     <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
                         <mat-label >Add Evaluator emails</mat-label>
                         <mat-chip-grid #chipGrid aria-label="Add Team Members email" >
-                        <mat-chip-row class="bg-white" *ngFor="let email of evaluatorsEmails"
+                        <mat-chip-row class="bg-white" *ngFor="let email of solution.newSolution.evaluatorsHolder"
                                         (removed)="removeEvaluators(email)"
                                         [editable]="true"
                                         (edited)="editEvaluators(email, $event)"

@@ -46,6 +46,10 @@ import { NewFeaturesComponent } from './blogs/new-features/new-features.componen
 import { OurTeamComponent } from './components/our-team/our-team.component';
 import { UserManagementComponent } from './components/user-management/user-management.component';
 import { VideoCallComponent } from './components/video-call/video-call.component';
+import { WorkshopComponent } from './blogs/workshop/workshop.component';
+import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
+import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
+import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -116,6 +120,12 @@ const routes: Routes = [
   {
     path: 'user-management',
     component: UserManagementComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'management-workshop',
+    component: ManagementWorkshopComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
@@ -224,6 +234,19 @@ const routes: Routes = [
     path: 'video-call/:id',
     component: VideoCallComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'workshop',
+    component: WorkshopComponent,
+  },
+  {
+    path: 'workshop-register',
+    component: WorkshopRegisterComponent,
+  },
+
+  {
+    path: 'thank-you',
+    component: TemplateThanksComponent,
   },
   { path: '**', component: PageNotFoundComponent },
 ];

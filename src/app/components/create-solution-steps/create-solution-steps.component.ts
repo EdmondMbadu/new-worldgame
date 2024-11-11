@@ -95,6 +95,11 @@ export class CreateSolutionStepsComponent implements OnInit {
     let shuffle = (array: User[]) => {
       return array.sort(() => Math.random() - 0.5);
     };
+    // this.solution.newSolution.participantsHolder = [
+    //   {
+    //     name: this.auth.currentUser.email,
+    //   },
+    // ];
     this.auth
       .getAllOtherUsers(this.auth.currentUser.email)
       .subscribe((data) => {
@@ -107,6 +112,7 @@ export class CreateSolutionStepsComponent implements OnInit {
         ) {
           this.evaluatorsEmails.push({ name: data[i].email! });
         }
+        this.solution.newSolution.evaluatorsHolder = this.evaluatorsEmails;
       });
     this.myForm = this.fb.group({
       emails: ['', Validators.compose([Validators.email])],
@@ -123,8 +129,11 @@ export class CreateSolutionStepsComponent implements OnInit {
   }
   ngOnInit(): void {
     window.scrollTo(0, 0);
+
     this.sdgs = this.data.sdgs;
-    this.participantsEmails.push({ name: this.auth.currentUser.email });
+    // this.solution.newSolution.participantsHolder =
+    // this.participantsEmails.push({ name: this.auth.currentUser.email });
+
     this.typewriterEffect(this.text, () => {});
   }
 
@@ -151,7 +160,7 @@ export class CreateSolutionStepsComponent implements OnInit {
     }, 5); // Adjust typing speed here
   }
   async updatePlayground(current: number) {
-    console.log('the solution field', this.solution);
+    // console.log('the solution field', this.solution);
     if (this.buttonText === 'Continue') {
       current++;
       this.buttonInfoEvent.emit(current);
@@ -162,8 +171,10 @@ export class CreateSolutionStepsComponent implements OnInit {
             this.solution.newSolution.title!,
             this.solution.newSolution.solutionArea!,
             this.solution.newSolution.description!,
-            this.participantsEmails,
-            this.evaluatorsEmails,
+            this.solution.newSolution.participantsHolder,
+            this.solution.newSolution.evaluatorsHolder,
+            // this.evaluatorsEmails,
+
             // this.myForm.value.date,
 
             this.solution.newSolution.sdgs!
@@ -173,6 +184,8 @@ export class CreateSolutionStepsComponent implements OnInit {
             this.sendEmailToParticipants(); // Call the function here
           })
           .then(() => {
+            // reinitialize the solution holder
+            this.resetNewSolution();
             this.router.navigate([
               '/playground-steps/' + this.solution.solutionId,
             ]);
@@ -199,7 +212,7 @@ export class CreateSolutionStepsComponent implements OnInit {
       this.sdgSelected[index] = 1;
     }
     this.sdgInterest = this.getSelectedSDGStrings();
-    console.log('sdgs selected', this.sdgInterest);
+    // console.log('sdgs selected', this.sdgInterest);
     this.solution.newSolution.sdgs = this.sdgInterest;
   }
   delay(ms: number) {
@@ -217,6 +230,15 @@ export class CreateSolutionStepsComponent implements OnInit {
       .filter((sdg) => sdg !== '');
   }
 
+  resetNewSolution() {
+    this.solution.newSolution = {
+      title: '',
+      solutionArea: '',
+      description: '',
+      participantsHolder: [{ name: this.auth.currentUser.email }],
+      evaluatorsHolder: this.evaluatorsEmails,
+    };
+  }
   add(event: MatChipInputEvent): void {
     const value = (event.value || '').trim();
 
@@ -224,6 +246,8 @@ export class CreateSolutionStepsComponent implements OnInit {
     if (value) {
       this.participantsEmails.push({ name: value });
     }
+    this.solution.newSolution.participantsHolder!.push({ name: value });
+    // console.log('new email list afer adding', this.participantsEmails);
 
     // Clear the input value
     event.chipInput!.clear();
@@ -233,7 +257,8 @@ export class CreateSolutionStepsComponent implements OnInit {
 
     // Add our fruit
     if (value) {
-      this.evaluatorsEmails.push({ name: value });
+      // this.evaluatorsEmails.push({ name: value });
+      this.solution.newSolution.evaluatorsHolder?.push({ name: value });
     }
 
     // Clear the input value
@@ -241,10 +266,10 @@ export class CreateSolutionStepsComponent implements OnInit {
   }
 
   remove(email: Email): void {
-    const index = this.participantsEmails.indexOf(email);
+    const index = this.solution.newSolution.participantsHolder!.indexOf(email);
 
     if (index >= 0) {
-      this.participantsEmails.splice(index, 1);
+      this.solution.newSolution.participantsHolder!.splice(index, 1);
 
       this.announcer.announce(`Removed ${email}`);
     }
@@ -328,7 +353,7 @@ export class CreateSolutionStepsComponent implements OnInit {
   sendEmailToParticipants() {
     const genericEmail = this.fns.httpsCallable('genericEmail');
 
-    this.participantsEmails.forEach((participant) => {
+    this.solution.newSolution.participantsHolder!.forEach((participant) => {
       const emailData = {
         email: participant.name,
         subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,

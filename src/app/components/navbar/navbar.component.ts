@@ -66,14 +66,16 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     // this.applyTheme();
     // // this.darkModeInitial();
-    this.dark = true;
+    this.setThemeModeLogo();
+
     const darkModeInitialized = localStorage.getItem('darkModeInitialized');
 
     if (!darkModeInitialized) {
       // set the default to dark mode if and only if not initialized before
       this.data.darkModeInitial();
-
+      console.log('dark mode initializing ...', this.dark);
       // Mark dark mode as initialized so it doesn't run again
+      this.dark = true;
       localStorage.setItem('darkModeInitialized', 'true');
     }
 
@@ -104,6 +106,14 @@ export class NavbarComponent implements OnInit {
       .subscribe((results) => {
         this.filteredItems = results!;
       });
+  }
+
+  setThemeModeLogo() {
+    if (localStorage['theme'] === 'light') {
+      this.dark = false;
+    } else {
+      this.dark = true;
+    }
   }
 
   toggle(property: 'beta') {

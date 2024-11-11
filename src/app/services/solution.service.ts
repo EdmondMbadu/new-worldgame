@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import {
   AngularFirestoreDocument,
   AngularFirestore,
@@ -21,16 +21,43 @@ export class SolutionService {
   userRef?: AngularFirestoreDocument<any>;
   allSolutions: Solution[] = [];
   newSolution: Solution = {};
+  numberOfEvaluators: number = 3;
+  evaluatorsEmails: Email[] = [];
   constructor(
     private auth: AuthService,
     private afs: AngularFirestore,
     private time: TimeService
   ) {
-    this.newSolution = {
-      title: '',
-      solutionArea: '',
-      description: '',
-    };
+    this.auth.user$.subscribe((user) => {
+      if (user && user.email) {
+        this.newSolution = {
+          title: '',
+          solutionArea: '',
+          description: '',
+          participantsHolder: [{ name: user.email }],
+          evaluatorsHolder: this.evaluatorsEmails,
+        };
+      }
+    });
+
+    // let shuffle = (array: User[]) => {
+    //   return array.sort(() => Math.random() - 0.5);
+    // };
+    // if (this.auth.currentUser && this.auth.currentUser.email) {
+    //   this.auth
+    //     .getAllOtherUsers(this.auth.currentUser.email)
+    //     .subscribe((data) => {
+    //       data = shuffle(data);
+    //       for (
+    //         let i = 0;
+    //         i < this.numberOfEvaluators &&
+    //         this.evaluatorsEmails.length < this.numberOfEvaluators;
+    //         i++
+    //       ) {
+    //         this.evaluatorsEmails.push({ name: data[i].email! });
+    //       }
+    //     });
+    // }
   }
 
   createdNewSolution(
@@ -44,6 +71,7 @@ export class SolutionService {
 
     sdgs: string[]
   ) {
+    console.log('The list of designers', participants);
     // let formatedDate = this.time.formatDateString(endDate);
     this.solutionId = this.afs.createId().toString();
     const data = {

@@ -6,8 +6,11 @@
     <div class="flex justify-between px-4 mx-auto max-w-screen-xl ">
         <article class="mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert">
             <header class="mb-4 lg:mb-6 not-format">
+                <div class="flex flex-row mx-auto mb-4">
+                    <h1 class="text-3xl font-extrabold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white ">{{currentSolution.title}}</h1>
+                </div>
                 <address class="flex items-center mb-6 not-italic">
-                   
+
                     <div class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white overflow-x-auto">
                         <div class="flex flex-wrap -space-x-1 flex-shrink-0"*ngFor="let user of teamMembers; let i= index" >
                             <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
@@ -76,18 +79,11 @@
                         </div>
                         <p class="pl-4 text-base text-gray-500 dark:text-gray-400"><time pubdate datetime="2023-12-15" title="December 15th, 2023">{{timeElapsed}}</time></p>
                           
-                        <div class="flex flex-row ml-60">
-                
-                     
-                            <a *ngFor="let sd of currentSolution.sdgs " href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"  class=" rounded-lg    mb-4" >
-                                <img  class=" mx-1 w-14 rounded-lg    mb-4" [src]="data.sdgsPaths[sd!]"alt="">
-                                <!-- <h1>{{data.sdgsPaths[solution.sdg!+'-link']}}</h1> -->
-                            </a>
-                        </div>
+                       
                     </div>
                   
                 </address>
-                <h1 class="mb-4 text-3xl font-extrabold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white ">{{currentSolution.title}}</h1>
+                
         
             </header>
             <div *ngIf="currentSolution.audioFile">
@@ -121,19 +117,6 @@
                        
                        
                         <div class="inline-flex items-center mr-3 font-semibold text-sm text-gray-900 dark:text-white">
-                            <!-- <div class="flex flex-nowrap">
-                                
-                                <div *ngIf="!commentUserProfilePicturePath[i]">
-                                    <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> 
-                                
-                                </div>
-                                <img *ngIf="commentUserProfilePicturePath[i]" [src]="commentUserProfilePicturePath[i]" class="w-8 pt-1 rounded-full" alt="">
-                                <h1 class="  px-2 py-2">{{commentUserNames[i]}} . {{commentTimeElapsed[i]}}</h1>
-                                    
-                            </div> -->
-                            
-                            
-
                             <img
                             *ngIf="commentUserProfilePicturePath[i]" 
                                 class="mr-2 w-6 h-6 rounded-full"
@@ -168,49 +151,7 @@
     </div>
 </main>
 
-<!-- <div class="dark:bg-slate-900 min-h-screen">
-    <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-28 "> -->
 
 
-
-
-        <!-- <div class=" flex flex-col md:flex-row justify-between mx-auto">
-
-            <div class="  flex flex-col ">
-                <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-white">Solution</h1>
-        
-                <div >
-                    <app-solution [evaluationSummary]="evaluationSummary" 
-                    [timeElapsed]="timeElapsed"  
-                    [teamMembers]="teamMembers"  
-                    [solution]="currentSolution"
-                    [comments]="comments"
-                    [colors]="colors"></app-solution>
-                </div>
-                
-            </div>
-
-
-
-        </div> -->
-
-        <!-- <div class=" flex flex-col md:flex-row  justify-between mx-auto">
-
-            <div class=" container flex flex-col max-w-2xl">
-                <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6 dark:text-white">Similar Solutions</h1>
-        
-                <div class="flex flex-row" *ngFor="let solution of otherSolutions">
-                    <h1 class="underline text-blue-600 text-left dark:text-gray-400"> {{solution.title}}</h1>
-                </div>
-                
-            </div>
-
-
-
-        </div> -->
-
-
-    <!-- </div>
-</div> -->
 
 <app-chatbot></app-chatbot>
