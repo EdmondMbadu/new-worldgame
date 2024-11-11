@@ -221,7 +221,7 @@ const routes: Routes = [
     component: NewFeaturesComponent,
   },
   {
-    path: 'video-call',
+    path: 'video-call/:id',
     component: VideoCallComponent,
     canActivate: [AuthGuard],
   },
