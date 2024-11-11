@@ -1,15 +1,25 @@
 <div class="dark:bg-slate-900 min-h-screen flex items-center justify-center">
     <div class="flex flex-col items-center">
-        <div class="flex flex-row justify-center space-x-4 mb-4">
-            <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 13vh;">
-                <img src="src\assets\img\albert-einstein.png" alt="smaller video">
+        <div class="flex flex-row item-center space-x-4 mb-4">
+            <!-- scrolling left -->
+            <button (click)="scrollLeft()"> 
+                <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
+                  </svg>                  
+            </button>
+            <!-- smaller videos container-->
+            <div class="flex flex-row item-center space-x-4 mb-4 overflow-x-hidden" style="max-width: 73vw" #scrollingVideo> 
+                <!-- each smaller video -->
+                <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 13vh;" *ngFor="let u of users">
+                    <img src="src\assets\img\albert-einstein.png" alt="smaller video">
+                </div>
             </div>
-            <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 13vh;">
-                <img src="src\assets\img\albert-einstein.png" alt="smaller video">
-            </div>
-            <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 13vh;">
-                <img src="src\assets\img\albert-einstein.png" alt="smaller video">
-            </div>
+            <!-- scrolling right -->
+            <button (click)="scrollRight()"> 
+                <svg  class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
+                  </svg>                  
+            </button>
         </div>
         <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 60vh;">
             <img src="src\assets\img\jane-goodal.png" alt="video of primary speaker goes here">
