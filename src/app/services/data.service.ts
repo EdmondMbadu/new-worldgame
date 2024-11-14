@@ -211,8 +211,20 @@ export class DataService implements OnInit {
     };
     return workshopRef.set(data, { merge: true });
   }
+  primerSignUp(pid: string, signUps: any) {
+    const primerRef: AngularFirestoreDocument<any> = this.afs.doc(
+      `primer/${pid}`
+    );
+    const data = {
+      signUps: signUps,
+    };
+    return primerRef.set(data, { merge: true });
+  }
   getWorkshopData() {
     return this.afs.collection<any>(`workshop`).valueChanges();
+  }
+  getPrimerData() {
+    return this.afs.collection<any>(`primer`).valueChanges();
   }
   mapEvaluationToNumeric(evaluation: Evaluation) {
     let user: any = {};

@@ -91,6 +91,8 @@ import { WorkshopComponent } from './blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
 import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
 import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
+import { PrimerComponent } from './blogs/primer/primer.component';
+import { PrimerRegisterComponent } from './blogs/primer-register/primer-register.component';
 
 @NgModule({
   declarations: [
@@ -158,6 +160,8 @@ import { ManagementWorkshopComponent } from './components/management-workshop/ma
     WorkshopRegisterComponent,
     TemplateThanksComponent,
     ManagementWorkshopComponent,
+    PrimerComponent,
+    PrimerRegisterComponent,
   ],
   imports: [
     BrowserModule,

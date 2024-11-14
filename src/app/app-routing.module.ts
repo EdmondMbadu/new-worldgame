@@ -50,6 +50,8 @@ import { WorkshopComponent } from './blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from './blogs/workshop-register/workshop-register.component';
 import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks.component';
 import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
+import { PrimerComponent } from './blogs/primer/primer.component';
+import { PrimerRegisterComponent } from './blogs/primer-register/primer-register.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -239,6 +241,7 @@ const routes: Routes = [
     path: 'workshop',
     component: WorkshopComponent,
   },
+
   {
     path: 'workshop-register',
     component: WorkshopRegisterComponent,
@@ -247,6 +250,14 @@ const routes: Routes = [
   {
     path: 'thank-you',
     component: TemplateThanksComponent,
+  },
+  {
+    path: 'primer',
+    component: PrimerComponent,
+  },
+  {
+    path: 'primer-register',
+    component: PrimerRegisterComponent,
   },
   { path: '**', component: PageNotFoundComponent },
 ];
