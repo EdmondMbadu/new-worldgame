@@ -27,7 +27,6 @@ export class PrimerRegisterComponent implements OnInit {
         this.primerData = data[0].signUps;
       }
       this.pid = data[0].id;
-      console.log('design science primer', this.pid);
     });
   }
   email: string = '';
@@ -62,14 +61,12 @@ export class PrimerRegisterComponent implements OnInit {
           email: this.email,
           registerDate: this.time.todaysDate(),
         };
-        console.log('data ', wData);
-        console.log('primer ', this.primerData);
+
         this.primerData.push(wData);
         let workshop = await this.data.primerSignUp(this.pid, this.primerData);
-        // this.sendConfirmationEmail();
+
         window.location.href =
           'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2FTools%20for%20Changing%20the%20Worlda%CC%82%E2%82%AC%E2%80%9D%20A%20Design%20Science%20Primer_FOR%20WEB.pdf?alt=media&token=7ebaba13-2a28-4be8-8da9-026c3c0f1232';
-        // this.router.navigate(['/thank-you']);
       } catch (error) {
         alert(
           'There was an error during the  registration process. Please tryagain. '
@@ -79,25 +76,4 @@ export class PrimerRegisterComponent implements OnInit {
       }
     }
   }
-  // sendConfirmationEmail() {
-  //   const workshopConfirmation = this.fns.httpsCallable(
-  //     'workshopRegistrationEmail'
-  //   );
-
-  //   const emailData = {
-  //     email: this.email,
-  //     subject: `Registration Confirmation.`,
-  //     firstName: this.firstName,
-  //     lastName: this.lastName,
-  //   };
-
-  //   workshopConfirmation(emailData).subscribe(
-  //     (result) => {
-  //       console.log('Email sent:', result);
-  //     },
-  //     (error) => {
-  //       console.error('Error sending email:', error);
-  //     }
-  //   );
-  // }
 }

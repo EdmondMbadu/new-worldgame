@@ -53,6 +53,15 @@ export class AuthService {
     return this.redirectUrl;
   }
 
+  getCurrentUserPromise() {
+    return new Promise((resolve) => {
+      this.user$.subscribe((user) => {
+        this.currentUser = user;
+        resolve(user);
+      });
+    });
+  }
+
   updateStatusOnline(userId: string) {
     console.log('Updating status online for userId:', userId);
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(

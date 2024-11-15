@@ -14,11 +14,8 @@ export class EvaluatorsComponent implements OnInit {
   }
   isLoggedIn: boolean = false;
   constructor(public auth: AuthService, private solution: SolutionService) {
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 }

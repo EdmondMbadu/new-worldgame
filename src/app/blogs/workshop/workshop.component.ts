@@ -14,12 +14,9 @@ export class WorkshopComponent implements OnInit {
   }
   isLoggedIn: boolean = false;
   constructor(public auth: AuthService, private solution: SolutionService) {
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
   private initializeCountdown(): void {
     const eventDate = new Date('December 12, 2024 12:00:00 EST').getTime();

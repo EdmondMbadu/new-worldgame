@@ -12,11 +12,8 @@ export class CustomGptDesignScienceStoryboardComponent {
   isLoggedIn: boolean = false;
   constructor(public auth: AuthService, private solution: SolutionService) {
     window.scroll(0, 0);
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 }

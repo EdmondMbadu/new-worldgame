@@ -12,11 +12,8 @@ export class OverviewComponent implements OnInit {
   }
   isLoggedIn: boolean = false;
   constructor(public auth: AuthService) {
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 }

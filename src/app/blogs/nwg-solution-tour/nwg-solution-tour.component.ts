@@ -11,18 +11,11 @@ import { SolutionService } from 'src/app/services/solution.service';
 export class NwgSolutionTourComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
-    this.checkLoginStatus();
   }
   isLoggedIn: boolean = false;
-  constructor(public auth: AuthService, private solution: SolutionService) {}
-  checkLoginStatus(): void {
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    } else {
-      this.isLoggedIn = false;
-    }
+  constructor(public auth: AuthService, private solution: SolutionService) {
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 }

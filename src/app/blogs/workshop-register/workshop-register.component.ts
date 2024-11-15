@@ -15,12 +15,9 @@ import { TimeService } from 'src/app/services/time.service';
 export class WorkshopRegisterComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
   email: string = '';
   workshopData: any[] = [];
