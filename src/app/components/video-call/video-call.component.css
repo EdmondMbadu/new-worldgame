@@ -1,0 +1,34 @@
+/* .local-video {
+  width: 50%;
+  height: auto;
+}
+
+.remote-video {
+  width: 200px;
+  height: auto;
+  margin: 5px;
+} */
+
+/* video-call.component.css */
+
+.local-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remote-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-call-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.controls img {
+  cursor: pointer;
+}

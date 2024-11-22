@@ -412,6 +412,17 @@ export class SolutionService {
 
     return solutionRef.set(data, { merge: true });
   }
+
+  sendSignal(solutionId: string, signalData: any) {
+    const signalsRef = this.afs.collection(`solutions/${solutionId}/signals`);
+    return signalsRef.add(signalData);
+  }
+
+  getSignals(solutionId: string): Observable<any[]> {
+    return this.afs
+      .collection(`solutions/${solutionId}/signals`)
+      .valueChanges();
+  }
 }
 function collection(afs: AngularFirestore, arg1: string) {
   throw new Error('Function not implemented.');

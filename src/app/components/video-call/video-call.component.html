@@ -1,37 +1,142 @@
 <div class="dark:bg-slate-900 min-h-screen flex items-center justify-center">
     <div class="flex flex-col items-center">
-        <div class="flex flex-row item-center space-x-4 mb-4">
-            <!-- scrolling left -->
-            <button (click)="scrollLeft()"> 
-                <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 19-7-7 7-7"/>
-                  </svg>                  
-            </button>
-            <!-- smaller videos container-->
-            <div class="flex flex-row item-center space-x-4 mb-4 overflow-x-hidden" style="max-width: 73vw" #scrollingVideo> 
-                <!-- each smaller video -->
-                <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 13vh;" *ngFor="let u of users">
-                    <img src="src\assets\img\albert-einstein.png" alt="smaller video">
-                </div>
-            </div>
-            <!-- scrolling right -->
-            <button (click)="scrollRight()"> 
-                <svg  class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 5 7 7-7 7"/>
-                  </svg>                  
-            </button>
+      <!-- Scrolling Videos Container -->
+      <div class="flex flex-row item-center space-x-4 mb-4">
+        <!-- Scroll Left Button -->
+        <button (click)="scrollLeft()">
+          <!-- Left Arrow Icon -->
+          <svg
+            class="w-[36px] h-[36px] text-gray-800 dark:text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m15 19-7-7 7-7"
+            />
+          </svg>
+        </button>
+  
+        <!-- Smaller Videos Container -->
+        <div
+          class="flex flex-row item-center space-x-4 mb-4 overflow-x-hidden"
+          style="max-width: 73vw"
+          #scrollingVideo
+        >
+          <!-- Each Smaller Video -->
+          <div
+            class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
+            style="height: 13vh;"
+            *ngFor="let participant of participants; let i = index"
+          >
+            <!-- Remote Participant Video -->
+            <video
+              #remoteVideo
+              [id]="'remoteVideo' + i"
+              autoplay
+              playsinline
+              class="remote-video"
+              [muted]="false"
+            ></video>
+          </div>
         </div>
-        <div class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video" style="height: 60vh;">
-            <img src="src\assets\img\jane-goodal.png" alt="video of primary speaker goes here">
-        </div>
-        <div class="flex flex-row justify-center space-x-36 mt-4 dark:bg-gray-700 sm:rounded-lg pt-3 pb-3 pl-10 pr-10">
-            <img class = "w-20 rounded-lg  hover:bg-gray-100 dark:hover:bg-gray-700" src="https://static-00.iconduck.com/assets.00/video-camera-icon-2048x1536-s5guccor.png">
-            <img class = "w-10 rounded-lg  hover:bg-gray-100 dark:hover:bg-gray-700" src="https://static-00.iconduck.com/assets.00/mic-icon-1433x2048-yncr751o.png">
-            <img class = "w-14 rounded-lg  hover:bg-gray-100 dark:hover:bg-gray-700" src="https://www.freeiconspng.com/uploads/call-end-icon-1.png">
-        </div>
+  
+        <!-- Scroll Right Button -->
+        <button (click)="scrollRight()">
+          <!-- Right Arrow Icon -->
+          <svg
+            class="w-[36px] h-[36px] text-gray-800 dark:text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m9 5 7 7-7 7"
+            />
+          </svg>
+        </button>
+      </div>
+  
+      <!-- Main Video Area -->
+      <div
+        class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
+        style="height: 60vh;"
+      >
+        <!-- Local Video -->
+        <video
+          #localVideo
+          autoplay
+          playsinline
+          [muted]="true"
+          class="local-video w-full h-full object-cover"
+        ></video>
+        <h1 class="m-2">{{this.auth.currentUser.firstName}} {{this.auth.currentUser.lastName}}</h1>
+      </div>
+  
+      <!-- Controls -->
+      <div
+        class="flex flex-row justify-center space-x-36 mt-4 dark:bg-gray-700 sm:rounded-lg pt-3 pb-3 pl-10 pr-10"
+      >
+        <!-- Toggle Video Button -->
+        <svg
+        (click)="toggleVideo()"
+        [title]="isVideoMuted ? 'Turn On Video' : 'Turn Off Video'" class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M14 7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7Zm2 9.387 4.684 1.562A1 1 0 0 0 22 17V7a1 1 0 0 0-1.316-.949L16 7.613v8.774Z" clip-rule="evenodd"/>
+          </svg>
+          
+        <!-- <img
+          class="w-20 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+          src="https://static-00.iconduck.com/assets.00/video-camera-icon-2048x1536-s5guccor.png"
+          (click)="toggleVideo()"
+          [title]="isVideoMuted ? 'Turn On Video' : 'Turn Off Video'"
+        /> -->
+        <!-- Toggle Audio Button -->
+        <svg 
+
+        (click)="toggleAudio()"
+          [title]="isAudioMuted ? 'Unmute Audio' : 'Mute Audio'"
+         class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M5 8a1 1 0 0 1 1 1v3a4.006 4.006 0 0 0 4 4h4a4.006 4.006 0 0 0 4-4V9a1 1 0 1 1 2 0v3.001A6.006 6.006 0 0 1 14.001 18H13v2h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2H9.999A6.006 6.006 0 0 1 4 12.001V9a1 1 0 0 1 1-1Z" clip-rule="evenodd"/>
+            <path d="M7 6a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4V6Z"/>
+          </svg>
+          
+          
+        <!-- <img
+          class="w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+          src="https://static-00.iconduck.com/assets.00/mic-icon-1433x2048-yncr751o.png"
+          (click)="toggleAudio()"
+          [title]="isAudioMuted ? 'Unmute Audio' : 'Mute Audio'"
+        /> -->
+        <!-- Leave Call Button -->
+        <svg
+      
+        (click)="leaveCall()"
+        title="Leave Call" class="w-[36px] h-[36px] text-gray-800 dark:text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.017 6.995c-2.306 0-4.534.408-6.215 1.507-1.737 1.135-2.788 2.944-2.797 5.451a4.8 4.8 0 0 0 .01.62c.015.193.047.512.138.763a2.557 2.557 0 0 0 2.579 1.677H7.31a2.685 2.685 0 0 0 2.685-2.684v-.645a.684.684 0 0 1 .684-.684h2.647a.686.686 0 0 1 .686.687v.645c0 .712.284 1.395.787 1.898.478.478 1.101.787 1.847.787h1.647a2.555 2.555 0 0 0 2.575-1.674c.09-.25.123-.57.137-.763.015-.2.022-.433.01-.617-.002-2.508-1.049-4.32-2.785-5.458-1.68-1.1-3.907-1.51-6.213-1.51Z"/>
+          </svg>
+          
+        <!-- <img
+          class="w-14 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+          src="https://www.freeiconspng.com/uploads/call-end-icon-1.png"
+          (click)="leaveCall()"
+          title="Leave Call"
+        /> -->
+      </div>
     </div>
-    <app-team-discussion  [comments]="discussion" [solution]="currentSolution"></app-team-discussion>
-</div>
-
-
-
+    <!-- Team Discussion Component -->
+    <app-team-discussion
+      [comments]="discussion"
+      [solution]="currentSolution"
+    ></app-team-discussion>
+  </div>
+  
