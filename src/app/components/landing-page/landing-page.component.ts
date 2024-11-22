@@ -24,6 +24,7 @@ export class LandingPageComponent implements OnInit {
   constructor(private data: DataService) {}
   colorTheme: string = 'rgb(15, 23, 42)';
   ngOnInit(): void {
+    window.scroll(0, 0);
     this.themeSubscription = this.data.currentTheme.subscribe((theme) => {
       document.documentElement.style.setProperty(
         '--after-background-color',

@@ -246,11 +246,10 @@ export class PlaygroundStepsComponent implements OnInit {
     ['S5'],
   ];
   timelineDisplay = [
-    'bg-gray-200 h-0.8',
-    'bg-gray-200 h-0.8',
-    'bg-gray-200 h-0.8',
-    'bg-gray-200 h-0.8',
-    'bg-gray-200 h-0.8',
+    'bg-gray-500 h-2',
+    'bg-gray-500 h-2',
+    'bg-gray-500 h-2',
+    'bg-gray-500 h-2',
   ];
   AllQuestions: Array<Array<string>> = [
     [
@@ -323,14 +322,17 @@ export class PlaygroundStepsComponent implements OnInit {
     this.updateTimelineDisplay(current);
     this.display[this.currentIndexDisplay] = true;
   }
+  isCurrentStep(index: number): boolean {
+    return this.currentIndexDisplay === index; // Replace with your current step logic
+  }
 
   updateTimelineDisplay(index: number) {
     // Reset all to remove styles
-    this.timelineDisplay.fill('');
+    this.timelineDisplay.fill('bg-gray-500 h-1.5');
 
     // Apply the style up to the current index
     for (let i = 0; i < index; i++) {
-      this.timelineDisplay[i] = 'bg-red-500 h-1 dark:bg-red-500';
+      this.timelineDisplay[i] = 'bg-red-500 h-1.5 dark:bg-red-500';
     }
   }
   sendEmailToParticipant() {

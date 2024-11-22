@@ -23,6 +23,7 @@ export class PrimerComponent implements OnInit {
     private time: TimeService,
     private data: DataService
   ) {
+    window.scroll(0, 0);
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
     });

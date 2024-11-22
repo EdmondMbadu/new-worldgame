@@ -1,0 +1,26 @@
+.active {
+  position: relative;
+  animation: glow 1.5s infinite alternate;
+  box-shadow: 0 0 20px 5px rgba(0, 150, 255, 0.5);
+  border: 2px solid rgba(0, 150, 255, 0.8);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Glow animation */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 20px 5px rgba(0, 150, 255, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 30px 10px rgba(0, 150, 255, 0.8);
+  }
+}
+
+/* Optional hover effect for more interactivity */
+.active:hover {
+  transform: scale(1.1);
+}
+
+.flex {
+  scroll-behavior: smooth;
+}
