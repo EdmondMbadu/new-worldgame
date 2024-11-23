@@ -441,7 +441,10 @@ export class SolutionService {
     const participantsRef = this.afs.collection(
       `solutions/${solutionId}/participants`
     );
-    return participantsRef.doc(userId).set({ userId: userId });
+    return participantsRef.doc(userId).set({
+      userId: userId,
+      sessionId: this.generateSessionId(),
+    });
   }
 
   removeParticipant(solutionId: string, userId: string) {
@@ -451,13 +454,36 @@ export class SolutionService {
     return participantsRef.doc(userId).delete();
   }
 
-  getParticipants(solutionId: string): Observable<string[]> {
+  getParticipants(
+    solutionId: string
+  ): Observable<{ userId: string; sessionId: string }[]> {
     const participantsRef = this.afs.collection(
       `solutions/${solutionId}/participants`
     );
     return participantsRef
       .valueChanges()
-      .pipe(map((participants) => participants.map((p: any) => p.userId)));
+      .pipe(
+        map((participants) =>
+          participants.map((p: any) => ({
+            userId: p.userId,
+            sessionId: p.sessionId,
+          }))
+        )
+      );
+  }
+  deleteSignalsBySender(solutionId: string, senderId: string) {
+    const signalsRef = this.afs.collection(
+      `solutions/${solutionId}/signals`,
+      (ref) => ref.where('senderId', '==', senderId)
+    );
+    signalsRef.get().subscribe((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        doc.ref.delete();
+      });
+    });
+  }
+  private generateSessionId(): string {
+    return Date.now().toString(); // Generates a simple session ID based on timestamp
   }
 }
 

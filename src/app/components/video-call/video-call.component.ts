@@ -45,9 +45,10 @@ export class VideoCallComponent
   userId: string = '';
   isAudioMuted = false;
   isVideoMuted = false;
-
+  private negotiationLock: boolean = false;
   private peers: { [id: string]: SimplePeer.Instance } = {};
   localStream: MediaStream | null = null;
+  private participantSessions: { [id: string]: string } = {};
 
   @ViewChild('scrollingVideo') scrollingVideo!: ElementRef<HTMLDivElement>;
   @ViewChild('localVideo')
@@ -119,7 +120,12 @@ export class VideoCallComponent
       this.localStream.getTracks().forEach((track) => track.stop());
       this.localStream = null;
     }
+    // Clear participants
+    this.participants = [];
+    // Optionally, delete any signals sent by this user
     this.solution.removeParticipant(this.solutionId, this.userId);
+    this.solution.deleteSignalsBySender(this.solutionId, this.userId);
+    delete this.participantSessions[this.userId];
   }
 
   scrollLeft() {
@@ -138,29 +144,78 @@ export class VideoCallComponent
   setupSignaling() {
     // Listen for participants
     this.solution.getParticipants(this.solutionId).subscribe(
-      (participantIds) => {
-        participantIds.forEach((participantId) => {
+      (participants) => {
+        participants.forEach((participant) => {
+          const participantId = participant.userId;
+          const sessionId = participant.sessionId;
+
           if (participantId === this.userId) return;
 
-          if (!this.peers[participantId]) {
+          // Check if the participant's sessionId has changed
+          if (this.participantSessions[participantId] !== sessionId) {
+            // Participant has rejoined
+            console.log(
+              `Participant ${participantId} has rejoined with new sessionId`
+            );
+
+            // Destroy existing peer if any
+            if (this.peers[participantId]) {
+              this.peers[participantId].destroy();
+              delete this.peers[participantId];
+              this.participants = this.participants.filter(
+                (p) => p.id !== participantId
+              );
+            }
+
+            // Update sessionId
+            this.participantSessions[participantId] = sessionId;
+
+            // Create new peer
+            console.log(`Adding participant ${participantId}`);
             this.peers[participantId] = this.createPeer(participantId);
+          }
+        });
+
+        // Handle removed participants
+        const participantIds = participants.map((p) => p.userId);
+        const currentPeerIds = Object.keys(this.peers);
+        currentPeerIds.forEach((peerId) => {
+          if (peerId !== this.userId && !participantIds.includes(peerId)) {
+            console.log(`Participant ${peerId} has left`);
+            // Close the peer connection
+            this.peers[peerId].destroy();
+            delete this.peers[peerId];
+            // Remove from participants list
+            this.participants = this.participants.filter(
+              (p) => p.id !== peerId
+            );
+            // Remove sessionId
+            delete this.participantSessions[peerId];
           }
         });
       },
       (error) => console.error('Error fetching participants:', error)
     );
+
     // Listen for signals intended for us
     this.solution
       .getSignals(this.solutionId, this.userId)
       .subscribe((signals) => {
         signals.forEach((signal) => {
           const senderId = signal.senderId;
-
-          if (!this.peers[senderId]) {
-            this.peers[senderId] = this.createPeer(senderId);
+          if (!this.peers[senderId] || this.peers[senderId].destroyed) {
+            console.warn(
+              `Cannot signal destroyed or nonexistent peer: ${senderId}`
+            );
+            // Optionally, delete the signal if the peer no longer exists
+            this.solution.deleteSignal(this.solutionId, signal.id);
+            return;
           }
-
-          this.peers[senderId].signal(signal.signal);
+          try {
+            this.peers[senderId].signal(signal.signal);
+          } catch (error) {
+            console.error(`Error signaling peer ${senderId}:`, error);
+          }
 
           // Clean up the signal
           this.solution.deleteSignal(this.solutionId, signal.id);
@@ -169,26 +224,28 @@ export class VideoCallComponent
   }
   createPeer(remoteUserId: string): SimplePeer.Instance {
     const initiator = this.userId < remoteUserId;
+    console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
+
     const peer = new SimplePeer({
       initiator: initiator,
-      trickle: false,
+      trickle: true,
       stream: this.localStream!,
       config: {
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
       },
-      // debug: true, // Enable debug logging
     });
 
     peer.on('signal', (data) => {
+      // Sanitize the signal data by removing undefined values
+      const sanitizedSignal = this.sanitizeSignal(data);
       this.solution.sendSignal(this.solutionId, {
         senderId: this.userId,
         receiverId: remoteUserId,
-        signal: data,
+        signal: sanitizedSignal,
       });
     });
 
     peer.on('stream', (stream) => {
-      // Avoid duplicates
       if (!this.participants.some((p) => p.id === remoteUserId)) {
         this.participants.push({
           id: remoteUserId,
@@ -212,9 +269,14 @@ export class VideoCallComponent
         (p) => p.id !== remoteUserId
       );
       delete this.peers[remoteUserId];
+      delete this.participantSessions[remoteUserId];
     });
 
     return peer;
+  }
+
+  sanitizeSignal(signal: any): any {
+    return JSON.parse(JSON.stringify(signal));
   }
 
   toggleAudio() {
@@ -232,14 +294,7 @@ export class VideoCallComponent
   }
 
   leaveCall() {
-    // Close all peer connections
-    Object.values(this.peers).forEach((peer) => peer.destroy());
-    this.peers = {};
-    // Stop local media tracks
-    if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => track.stop());
-      this.localStream = null;
-    }
+    this.ngOnDestroy();
     // Navigate away or update UI accordingly
     this.router.navigate(['/playground-steps/' + this.solutionId]);
   }
