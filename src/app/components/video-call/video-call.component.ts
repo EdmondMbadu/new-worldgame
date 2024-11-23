@@ -112,20 +112,7 @@ export class VideoCallComponent
 
   ngOnDestroy() {
     // Close all peer connections
-    Object.values(this.peers).forEach((peer) => peer.destroy());
-    this.peers = {};
-
-    // Stop local media tracks
-    if (this.localStream) {
-      this.localStream.getTracks().forEach((track) => track.stop());
-      this.localStream = null;
-    }
-    // Clear participants
-    this.participants = [];
-    // Optionally, delete any signals sent by this user
-    this.solution.removeParticipant(this.solutionId, this.userId);
-    this.solution.deleteSignalsBySender(this.solutionId, this.userId);
-    delete this.participantSessions[this.userId];
+    this.cleanup();
   }
 
   scrollLeft() {
@@ -147,30 +134,11 @@ export class VideoCallComponent
       (participants) => {
         participants.forEach((participant) => {
           const participantId = participant.userId;
-          const sessionId = participant.sessionId;
 
           if (participantId === this.userId) return;
 
-          // Check if the participant's sessionId has changed
-          if (this.participantSessions[participantId] !== sessionId) {
-            // Participant has rejoined
-            console.log(
-              `Participant ${participantId} has rejoined with new sessionId`
-            );
-
-            // Destroy existing peer if any
-            if (this.peers[participantId]) {
-              this.peers[participantId].destroy();
-              delete this.peers[participantId];
-              this.participants = this.participants.filter(
-                (p) => p.id !== participantId
-              );
-            }
-
-            // Update sessionId
-            this.participantSessions[participantId] = sessionId;
-
-            // Create new peer
+          // Create new peer
+          if (!this.peers[participantId]) {
             console.log(`Adding participant ${participantId}`);
             this.peers[participantId] = this.createPeer(participantId);
           }
@@ -180,7 +148,7 @@ export class VideoCallComponent
         const participantIds = participants.map((p) => p.userId);
         const currentPeerIds = Object.keys(this.peers);
         currentPeerIds.forEach((peerId) => {
-          if (peerId !== this.userId && !participantIds.includes(peerId)) {
+          if (!participantIds.includes(peerId)) {
             console.log(`Participant ${peerId} has left`);
             // Close the peer connection
             this.peers[peerId].destroy();
@@ -190,7 +158,7 @@ export class VideoCallComponent
               (p) => p.id !== peerId
             );
             // Remove sessionId
-            delete this.participantSessions[peerId];
+            // delete this.participantSessions[peerId];
           }
         });
       },
@@ -222,13 +190,30 @@ export class VideoCallComponent
         });
       });
   }
+  hashCode(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = Math.imul(31, hash) + str.charCodeAt(i);
+    }
+    return hash;
+  }
   createPeer(remoteUserId: string): SimplePeer.Instance {
-    const initiator = this.userId < remoteUserId;
+    const myHash = this.hashCode(this.userId);
+    const remoteHash = this.hashCode(remoteUserId);
+    const initiator = myHash > remoteHash;
+
     console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
+
+    // const initiator = this.userId < remoteUserId;
+    // const initiator = this.userId.localeCompare(remoteUserId) < 0;
+    console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
+    console.log(
+      `User ID: ${this.userId}, Remote User ID: ${remoteUserId}, Initiator: ${initiator}`
+    );
 
     const peer = new SimplePeer({
       initiator: initiator,
-      trickle: true,
+      trickle: false,
       stream: this.localStream!,
       config: {
         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -294,11 +279,31 @@ export class VideoCallComponent
   }
 
   leaveCall() {
-    this.ngOnDestroy();
+    this.cleanup();
     // Navigate away or update UI accordingly
     this.router.navigate(['/playground-steps/' + this.solutionId]);
   }
   trackById(index: number, participant: Participant) {
     return participant.id;
+  }
+  cleanup() {
+    // Close all peer connections
+    Object.values(this.peers).forEach((peer) => peer.destroy());
+    this.peers = {};
+
+    // Stop local media tracks
+    if (this.localStream) {
+      this.localStream.getTracks().forEach((track) => track.stop());
+      this.localStream = null;
+    }
+
+    // Clear participants
+    this.participants = [];
+
+    // Remove participant
+    this.solution.removeParticipant(this.solutionId, this.userId);
+
+    // Delete signals sent by this user
+    this.solution.deleteSignalsBySender(this.solutionId, this.userId);
   }
 }

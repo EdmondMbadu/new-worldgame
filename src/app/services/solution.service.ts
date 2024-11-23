@@ -443,7 +443,6 @@ export class SolutionService {
     );
     return participantsRef.doc(userId).set({
       userId: userId,
-      sessionId: this.generateSessionId(),
     });
   }
 
@@ -454,22 +453,17 @@ export class SolutionService {
     return participantsRef.doc(userId).delete();
   }
 
-  getParticipants(
-    solutionId: string
-  ): Observable<{ userId: string; sessionId: string }[]> {
+  getParticipants(solutionId: string): Observable<{ userId: string }[]> {
     const participantsRef = this.afs.collection(
       `solutions/${solutionId}/participants`
     );
-    return participantsRef
-      .valueChanges()
-      .pipe(
-        map((participants) =>
-          participants.map((p: any) => ({
-            userId: p.userId,
-            sessionId: p.sessionId,
-          }))
-        )
-      );
+    return participantsRef.valueChanges().pipe(
+      map((participants) =>
+        participants.map((p: any) => ({
+          userId: p.userId,
+        }))
+      )
+    );
   }
   deleteSignalsBySender(solutionId: string, senderId: string) {
     const signalsRef = this.afs.collection(
