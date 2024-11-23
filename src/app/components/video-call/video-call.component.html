@@ -25,13 +25,14 @@
         <!-- Smaller Videos Container -->
         <div
           class="flex flex-row item-center space-x-4 mb-4 overflow-x-hidden"
+       
           style="max-width: 73vw"
           #scrollingVideo
         >
           <!-- Each Smaller Video -->
                 <div
                 class="relative bg-black px-6 pb-8 pt-10 shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
-                style="height: 13vh;"
+                style="height: 25vh;"
                 *ngFor="let participant of participants; trackBy: trackById; let i = index"
                 >
                 <!-- Remote Participant Video -->
