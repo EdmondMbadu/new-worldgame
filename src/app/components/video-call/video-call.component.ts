@@ -4,6 +4,10 @@ import {
   QueryList,
   ViewChildren,
   ViewChild,
+  OnInit,
+  OnDestroy,
+  AfterViewChecked,
+  AfterViewInit,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as SimplePeer from 'simple-peer';
@@ -21,7 +25,9 @@ interface Participant {
   templateUrl: './video-call.component.html',
   styleUrl: './video-call.component.css',
 })
-export class VideoCallComponent {
+export class VideoCallComponent
+  implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy
+{
   constructor(
     public auth: AuthService,
     private router: Router,
@@ -52,16 +58,13 @@ export class VideoCallComponent {
 
   async ngOnInit() {
     this.userId = this.auth.currentUser.uid; // Get the current user's unique ID
-    console.log('This user is: ', this.users);
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
     console.log('\n\nthis is the id! ', this.solutionId);
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
       this.discussion = this.currentSolution.discussion;
-      // console.log('\n\nthis is the solution!! ', this.currentSolution);
     });
-    // this.applyTheme();
-    // // this.darkModeInitial();
+
     this.dark = true;
     const darkModeInitialized = localStorage.getItem('darkModeInitialized');
 
@@ -72,6 +75,7 @@ export class VideoCallComponent {
       // Mark dark mode as initialized so it doesn't run again
       localStorage.setItem('darkModeInitialized', 'true');
     }
+
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -83,11 +87,11 @@ export class VideoCallComponent {
 
       // Since we're using solutions, no need to create a room
       // await this.signalingService.createRoom(this.solutionId);
-
-      this.setupSignaling();
     } catch (err) {
       console.error('Error accessing media devices.', err);
     }
+    await this.solution.addParticipant(this.solutionId, this.userId);
+    this.setupSignaling();
   }
   ngAfterViewInit() {
     if (this.localStream) {
@@ -98,7 +102,9 @@ export class VideoCallComponent {
     this.remoteVideos.forEach((videoElement, index) => {
       const participant = this.participants[index];
       if (participant && participant.stream) {
-        videoElement.nativeElement.srcObject = participant.stream;
+        if (videoElement.nativeElement.srcObject !== participant.stream) {
+          videoElement.nativeElement.srcObject = participant.stream;
+        }
       }
     });
   }
@@ -113,6 +119,7 @@ export class VideoCallComponent {
       this.localStream.getTracks().forEach((track) => track.stop());
       this.localStream = null;
     }
+    this.solution.removeParticipant(this.solutionId, this.userId);
   }
 
   scrollLeft() {
@@ -129,49 +136,82 @@ export class VideoCallComponent {
     });
   }
   setupSignaling() {
-    this.solution.getSignals(this.solutionId).subscribe((signals) => {
-      signals.forEach((signal) => {
-        const senderId = signal.senderId;
-        if (senderId === this.userId) return; // Ignore own signals
+    // Listen for participants
+    this.solution.getParticipants(this.solutionId).subscribe(
+      (participantIds) => {
+        participantIds.forEach((participantId) => {
+          if (participantId === this.userId) return;
 
-        if (!this.peers[senderId]) {
-          this.peers[senderId] = this.createPeer(false, senderId);
-        }
-        this.peers[senderId].signal(signal.signal);
+          if (!this.peers[participantId]) {
+            this.peers[participantId] = this.createPeer(participantId);
+          }
+        });
+      },
+      (error) => console.error('Error fetching participants:', error)
+    );
+    // Listen for signals intended for us
+    this.solution
+      .getSignals(this.solutionId, this.userId)
+      .subscribe((signals) => {
+        signals.forEach((signal) => {
+          const senderId = signal.senderId;
+
+          if (!this.peers[senderId]) {
+            this.peers[senderId] = this.createPeer(senderId);
+          }
+
+          this.peers[senderId].signal(signal.signal);
+
+          // Clean up the signal
+          this.solution.deleteSignal(this.solutionId, signal.id);
+        });
       });
-    });
-
-    // Start the connection as an initiator
-    Object.keys(this.peers).forEach((peerId) => {
-      if (peerId !== this.userId) {
-        this.peers[peerId].destroy();
-        delete this.peers[peerId];
-      }
-    });
-
-    // Broadcast your own signal
-    this.createPeer(true);
   }
-
-  createPeer(initiator: boolean, remoteUserId?: string): SimplePeer.Instance {
+  createPeer(remoteUserId: string): SimplePeer.Instance {
+    const initiator = this.userId < remoteUserId;
     const peer = new SimplePeer({
       initiator: initiator,
       trickle: false,
       stream: this.localStream!,
+      config: {
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+      },
+      // debug: true, // Enable debug logging
     });
 
     peer.on('signal', (data) => {
       this.solution.sendSignal(this.solutionId, {
         senderId: this.userId,
+        receiverId: remoteUserId,
         signal: data,
       });
     });
 
     peer.on('stream', (stream) => {
-      this.participants.push({
-        id: remoteUserId!,
-        stream: stream,
-      });
+      // Avoid duplicates
+      if (!this.participants.some((p) => p.id === remoteUserId)) {
+        this.participants.push({
+          id: remoteUserId,
+          stream: stream,
+        });
+      }
+    });
+
+    peer.on('connect', () => {
+      console.log('Connected to peer:', remoteUserId);
+    });
+
+    peer.on('error', (err) => {
+      console.error('Peer error with', remoteUserId, err);
+    });
+
+    peer.on('close', () => {
+      console.log('Connection closed with', remoteUserId);
+      // Remove participant
+      this.participants = this.participants.filter(
+        (p) => p.id !== remoteUserId
+      );
+      delete this.peers[remoteUserId];
     });
 
     return peer;
@@ -202,5 +242,8 @@ export class VideoCallComponent {
     }
     // Navigate away or update UI accordingly
     this.router.navigate(['/playground-steps/' + this.solutionId]);
+  }
+  trackById(index: number, participant: Participant) {
+    return participant.id;
   }
 }

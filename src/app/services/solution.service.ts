@@ -418,12 +418,49 @@ export class SolutionService {
     return signalsRef.add(signalData);
   }
 
-  getSignals(solutionId: string): Observable<any[]> {
+  getSignals(solutionId: string, receiverId: string): Observable<any[]> {
     return this.afs
-      .collection(`solutions/${solutionId}/signals`)
-      .valueChanges();
+      .collection(`solutions/${solutionId}/signals`, (ref) =>
+        ref.where('receiverId', '==', receiverId)
+      )
+      .snapshotChanges()
+      .pipe(
+        map((actions) =>
+          actions.map((a) => {
+            const data: any = a.payload.doc.data();
+            const id = a.payload.doc.id;
+            return { id, ...data };
+          })
+        )
+      );
+  }
+  deleteSignal(solutionId: string, signalId: string) {
+    return this.afs.doc(`solutions/${solutionId}/signals/${signalId}`).delete();
+  }
+  addParticipant(solutionId: string, userId: string) {
+    const participantsRef = this.afs.collection(
+      `solutions/${solutionId}/participants`
+    );
+    return participantsRef.doc(userId).set({ userId: userId });
+  }
+
+  removeParticipant(solutionId: string, userId: string) {
+    const participantsRef = this.afs.collection(
+      `solutions/${solutionId}/participants`
+    );
+    return participantsRef.doc(userId).delete();
+  }
+
+  getParticipants(solutionId: string): Observable<string[]> {
+    const participantsRef = this.afs.collection(
+      `solutions/${solutionId}/participants`
+    );
+    return participantsRef
+      .valueChanges()
+      .pipe(map((participants) => participants.map((p: any) => p.userId)));
   }
 }
+
 function collection(afs: AngularFirestore, arg1: string) {
   throw new Error('Function not implemented.');
 }
