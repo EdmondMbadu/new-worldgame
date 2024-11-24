@@ -61,14 +61,28 @@
                     
                         <h5 class="mb-1 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Designers :  {{teamMembers.length}}</h5>
                         <div class="flex flex-row space-x-4">
-                            <svg routerLink="/video-call/{{currentSolution.solutionId}}"   class="w-[36px] h-[36px] text-gray-800 dark:text-white mt-1 cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M14 7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7Zm2 9.387 4.684 1.562A1 1 0 0 0 22 17V7a1 1 0 0 0-1.316-.949L16 7.613v8.774Z" clip-rule="evenodd"/>
-                              </svg>
+                            <button
+                            routerLink="/video-call/{{currentSolution.solutionId}}"
+                            title="Join Video Call"  
+                            >
+
+                           
+                                <svg  class="w-[36px] h-[36px] text-gray-800 dark:text-white -mt-1 cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd" d="M14 7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7Zm2 9.387 4.684 1.562A1 1 0 0 0 22 17V7a1 1 0 0 0-1.316-.949L16 7.613v8.774Z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
                               
-                              <svg class="cursor-pointer  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" (click)="toggleAddTeamMember()"  (mouseenter)="onHoverAddTeamMember()"  (mouseleave)="onHoverAddTeamMember()"  width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <button
+                            (click)="toggleAddTeamMember()"
+                            title="Add Team Members" 
+                            >
+                              <svg class="cursor-pointer  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" 
+                                
+                                 width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="12" cy="12" r="10" stroke="#1C274C" stroke-width="1.5"/>
                                 <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
                                 </svg>
+                            </button>
                                 <!-- <svg  class="w-[36px] h-[36px] text-gray-800 dark:text-white mt-1 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                     <path fill-rule="evenodd" d="M4 3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h1v2a1 1 0 0 0 1.707.707L9.414 13H15a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4Z" clip-rule="evenodd"/>
                                     <path fill-rule="evenodd" d="M8.023 17.215c.033-.03.066-.062.098-.094L10.243 15H15a3 3 0 0 0 3-3V8h2a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-1v2a1 1 0 0 1-1.707.707L14.586 18H9a1 1 0 0 1-.977-.785Z" clip-rule="evenodd"/>

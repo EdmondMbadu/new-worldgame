@@ -480,23 +480,3 @@ export class SolutionService {
     return Date.now().toString(); // Generates a simple session ID based on timestamp
   }
 }
-
-function collection(afs: AngularFirestore, arg1: string) {
-  throw new Error('Function not implemented.');
-}
-
-function query(solutionsRef: any, arg1: any) {
-  throw new Error('Function not implemented.');
-}
-
-function or(arg0: any, arg1: any, arg2: any): any {
-  throw new Error('Function not implemented.');
-}
-
-function where(
-  arg0: string,
-  arg1: string,
-  arg2: { name: string; evaluated: string }
-): any {
-  throw new Error('Function not implemented.');
-}
