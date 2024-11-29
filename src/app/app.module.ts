@@ -93,6 +93,7 @@ import { TemplateThanksComponent } from './blogs/template-thanks/template-thanks
 import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
 import { PrimerComponent } from './blogs/primer/primer.component';
 import { PrimerRegisterComponent } from './blogs/primer-register/primer-register.component';
+import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-packet.component';
 
 @NgModule({
   declarations: [
@@ -162,6 +163,7 @@ import { PrimerRegisterComponent } from './blogs/primer-register/primer-register
     ManagementWorkshopComponent,
     PrimerComponent,
     PrimerRegisterComponent,
+    WorldgamePacketComponent,
   ],
   imports: [
     BrowserModule,

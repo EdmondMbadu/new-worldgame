@@ -58,6 +58,7 @@ export class VideoCallComponent
   >;
 
   async ngOnInit() {
+    // this.cleanup();
     this.userId = this.auth.currentUser.uid; // Get the current user's unique ID
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
     console.log('\n\nthis is the id! ', this.solutionId);
@@ -76,7 +77,6 @@ export class VideoCallComponent
       // Mark dark mode as initialized so it doesn't run again
       localStorage.setItem('darkModeInitialized', 'true');
     }
-
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia({
         video: true,

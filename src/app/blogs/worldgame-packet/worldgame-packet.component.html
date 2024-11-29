@@ -1,0 +1,44 @@
+<div class="dark:bg-slate-900  min-h-screen">
+    <div *ngIf="!isLoggedIn">
+        <app-navbar></app-navbar>
+      </div>
+      <div *ngIf="isLoggedIn">
+        <app-navbar [sideBarSmall]="true" [sideBarBig]="false"  [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
+    
+    <section class="bg-white dark:bg-gray-900 mt-12">
+        <div class="gap-16 items-center py-8 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6">
+            <div class="font-light text-gray-500 sm:text-lg dark:text-gray-400">
+               
+                <h1 class="mb-4 text-2xl font-extrabold text-gray-900 dark:text-white md:text-3xl lg:text-5xl"><span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">WorldGame Packet  </span> - Fuller Statement on World Game</h1>
+               
+                
+                <div class="my-10">
+                    <a target="_blank" href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2FB.%20WORLD%20GAME%20PACKET.pdf?alt=media&token=0a001f0b-84eb-459e-905b-5927a4288c48" class="mx-auto lg:max-w-xs p-5 px-24   text-white border- bg-teal-700 rounded-full hover:bg-teal-800 cursor-pointer"> Download PDF</a>
+                </div>
+               
+                
+                <p class="mb-4"> <strong  class="font-semibold"> "The World Game introduced by Fuller himself.” </strong>
+                   </p> 
+                   
+                   <!-- <p>Printed version available at Amazon <a class="text-blue-400 underline" target="_blank" href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fworldgame-packet.png?alt=media&token=93c88f92-95d1-4a1c-856b-e99988b0f5c5">here</a> .</p>
+                    -->
+                
+               
+               
+            </div>
+            <div class="grid grid-cols-1 gap-4 my-4">
+          
+                
+                  
+                <img class="w-full rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fworldgame-packet.png?alt=media&token=93c88f92-95d1-4a1c-856b-e99988b0f5c5" alt="Design Science Primer">
+                
+               
+            </div>
+           
+           
+        </div>
+    </section>
+    <app-footer></app-footer>
+</div>
+    

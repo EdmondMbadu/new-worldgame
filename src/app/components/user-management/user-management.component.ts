@@ -20,6 +20,7 @@ export class UserManagementComponent implements OnInit {
     private time: TimeService,
     private data: DataService
   ) {}
+  showActionDropDown: boolean = false;
   userDetails: boolean[] = [];
   showSolutions: boolean[] = [];
   userSolutions: Solution[] = [];
@@ -30,13 +31,13 @@ export class UserManagementComponent implements OnInit {
   ngOnInit(): void {
     this.auth.getALlUsers().subscribe((data) => {
       this.allUsers = data;
-      console.log('this is all users', this.allUsers);
+      // console.log('this is all users', this.allUsers);
 
       // Sort the allUsers array by dateJoined in descending order
       this.allUsers = this.allUsers.sort((a, b) => {
         const dateA = this.parseDateMMDDYYYY(a.dateJoined!);
         const dateB = this.parseDateMMDDYYYY(b.dateJoined!);
-        console.log('Parsed dates for sorting:', dateA, dateB);
+        // console.log('Parsed dates for sorting:', dateA, dateB);
         return dateB - dateA; // Sort in descending order
       });
       this.userDetails = Array.from(
@@ -51,7 +52,6 @@ export class UserManagementComponent implements OnInit {
       // Fetch all solutions after sorting users
       this.solution.getAllSolutionsFromAllAccounts().subscribe((solutions) => {
         this.everySolution = solutions;
-        console.log('this is every solution', this.everySolution);
 
         // Iterate through all users
         for (let user of this.allUsers) {
@@ -125,12 +125,58 @@ export class UserManagementComponent implements OnInit {
       return solution.finished !== 'true';
     });
     console.log('this user solutions', this.userSolutions);
-    console.log('user finished solutions', this.userFinishedSolutions);
-    console.log('user unfinished solutions', this.userUnfinishedSolutions);
 
     this.toggleShowSolution(index);
   }
   toggleShowSolution(index: number) {
     this.showSolutions[index] = !this.showSolutions[index];
+  }
+  toggleActionDropDown() {
+    this.showActionDropDown = !this.showActionDropDown;
+  }
+  downloadCSV(): void {
+    // Define the headers for the CSV file
+    const headers = [
+      'First Name',
+      'Last Name',
+      'Email',
+      'Date Joined',
+      'Goal',
+      'Solutions Started',
+      'Solutions Submitted',
+    ];
+
+    // Map user data to match the headers
+    const rows = this.allUsers.map((user) => [
+      user.firstName,
+      user.lastName,
+      user.email,
+      user.dateJoined,
+      user.goal,
+      user.tempSolutionstarted || '0', // Default to '0' if undefined
+      user.tempSolutionSubmitted || '0', // Default to '0' if undefined
+    ]);
+
+    // Combine headers and rows into CSV format
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.join(',')),
+    ].join('\n');
+
+    // Create a Blob for the CSV content
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // Create a temporary link element to trigger the download
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'user_details.csv');
+    link.style.visibility = 'hidden';
+
+    // Append the link, trigger click, and clean up
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 }
