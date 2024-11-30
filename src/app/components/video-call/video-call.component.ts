@@ -8,7 +8,13 @@ import {
   OnDestroy,
   AfterViewChecked,
   AfterViewInit,
+  Directive,
+  Input,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import * as SimplePeer from 'simple-peer';
 import { Comment, Solution } from 'src/app/models/solution';
@@ -18,6 +24,7 @@ import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 interface Participant {
   id: string;
+  sessionId: string;
   stream: MediaStream | null;
 }
 @Component({
@@ -33,15 +40,18 @@ export class VideoCallComponent
     private router: Router,
     private activatedRoute: ActivatedRoute,
     public data: DataService,
-    public solution: SolutionService
+    public solution: SolutionService,
+    private afs: AngularFirestore // not the best idea but to generate new ids
   ) {}
   dark: boolean = false;
 
   currentSolution: Solution = {};
+
   discussion: Comment[] | undefined = [];
   users: User[] = [];
   participants: Participant[] = [];
   solutionId: any = '';
+  sessionId: string = '';
   userId: string = '';
   isAudioMuted = false;
   isVideoMuted = false;
@@ -61,7 +71,8 @@ export class VideoCallComponent
     // this.cleanup();
     this.userId = this.auth.currentUser.uid; // Get the current user's unique ID
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
-    console.log('\n\nthis is the id! ', this.solutionId);
+    this.sessionId = this.afs.createId();
+    window.addEventListener('beforeunload', this.cleanup.bind(this));
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
       this.discussion = this.currentSolution.discussion;
@@ -82,17 +93,19 @@ export class VideoCallComponent
         video: true,
         audio: true,
       });
-      if (this.localStream) {
-        this.localVideo.nativeElement.srcObject = this.localStream;
-      }
+
+      await this.solution.addParticipant(
+        this.solutionId,
+        this.userId,
+        this.sessionId
+      );
+      this.setupSignaling();
 
       // Since we're using solutions, no need to create a room
       // await this.signalingService.createRoom(this.solutionId);
     } catch (err) {
       console.error('Error accessing media devices.', err);
     }
-    await this.solution.addParticipant(this.solutionId, this.userId);
-    this.setupSignaling();
   }
   ngAfterViewInit() {
     if (this.localStream) {
@@ -111,6 +124,7 @@ export class VideoCallComponent
   }
 
   ngOnDestroy() {
+    window.removeEventListener('beforeunload', this.cleanup.bind(this));
     // Close all peer connections
     this.cleanup();
   }
@@ -128,37 +142,44 @@ export class VideoCallComponent
       behavior: 'smooth',
     });
   }
+
   setupSignaling() {
     // Listen for participants
     this.solution.getParticipants(this.solutionId).subscribe(
       (participants) => {
-        participants.forEach((participant) => {
-          const participantId = participant.userId;
+        const participantMap = new Map<string, string>();
+        participants.forEach((p) => {
+          participantMap.set(p.userId, p.sessionId);
+        });
 
+        // Add new participants or participants with new sessions
+        participantMap.forEach((sessionId, participantId) => {
           if (participantId === this.userId) return;
 
-          // Create new peer
-          if (!this.peers[participantId]) {
-            console.log(`Adding participant ${participantId}`);
-            this.peers[participantId] = this.createPeer(participantId);
+          const peerKey = `${participantId}_${sessionId}`;
+
+          if (!this.peers[peerKey]) {
+            console.log(
+              `Adding participant ${participantId} with session ${sessionId}`
+            );
+            this.peers[peerKey] = this.createPeer(participantId, sessionId);
           }
         });
 
-        // Handle removed participants
-        const participantIds = participants.map((p) => p.userId);
-        const currentPeerIds = Object.keys(this.peers);
-        currentPeerIds.forEach((peerId) => {
-          if (!participantIds.includes(peerId)) {
-            console.log(`Participant ${peerId} has left`);
-            // Close the peer connection
-            this.peers[peerId].destroy();
-            delete this.peers[peerId];
-            // Remove from participants list
-            this.participants = this.participants.filter(
-              (p) => p.id !== peerId
+        // Remove participants who have left or restarted their session
+        Object.keys(this.peers).forEach((peerKey) => {
+          const [peerId, peerSessionId] = peerKey.split('_');
+          const currentSessionId = participantMap.get(peerId);
+
+          if (!currentSessionId || currentSessionId !== peerSessionId) {
+            console.log(
+              `Participant ${peerId} with session ${peerSessionId} has left or restarted`
             );
-            // Remove sessionId
-            // delete this.participantSessions[peerId];
+            this.peers[peerKey].destroy();
+            delete this.peers[peerKey];
+            this.participants = this.participants.filter(
+              (p) => p.id !== peerId || p.sessionId !== peerSessionId
+            );
           }
         });
       },
@@ -167,49 +188,46 @@ export class VideoCallComponent
 
     // Listen for signals intended for us
     this.solution
-      .getSignals(this.solutionId, this.userId)
-      .subscribe((signals) => {
-        signals.forEach((signal) => {
-          const senderId = signal.senderId;
-          if (!this.peers[senderId] || this.peers[senderId].destroyed) {
-            console.warn(
-              `Cannot signal destroyed or nonexistent peer: ${senderId}`
-            );
-            // Optionally, delete the signal if the peer no longer exists
+      .getSignals(this.solutionId, this.userId, this.sessionId)
+      .subscribe(
+        (signals) => {
+          signals.forEach((signal) => {
+            const senderId = signal.senderId;
+            const senderSessionId = signal.senderSessionId;
+            const peerKey = `${senderId}_${senderSessionId}`;
+
+            if (!this.peers[peerKey] || this.peers[peerKey].destroyed) {
+              console.warn(
+                `Cannot signal destroyed or nonexistent peer: ${senderId} with session ${senderSessionId}`
+              );
+              this.solution.deleteSignal(this.solutionId, signal.id);
+              return;
+            }
+            try {
+              this.peers[peerKey].signal(signal.signal);
+            } catch (error) {
+              console.error(`Error signaling peer ${senderId}:`, error);
+            }
+
+            // Clean up the signal
             this.solution.deleteSignal(this.solutionId, signal.id);
-            return;
-          }
-          try {
-            this.peers[senderId].signal(signal.signal);
-          } catch (error) {
-            console.error(`Error signaling peer ${senderId}:`, error);
-          }
+          });
+        },
+        (error) => {
+          console.error('Error fetching signals:', error);
+          // Handle the error appropriately
+        }
+      );
+  }
 
-          // Clean up the signal
-          this.solution.deleteSignal(this.solutionId, signal.id);
-        });
-      });
-  }
-  hashCode(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = Math.imul(31, hash) + str.charCodeAt(i);
-    }
-    return hash;
-  }
-  createPeer(remoteUserId: string): SimplePeer.Instance {
-    const myHash = this.hashCode(this.userId);
-    const remoteHash = this.hashCode(remoteUserId);
-    const initiator = myHash > remoteHash;
+  createPeer(
+    remoteUserId: string,
+    remoteSessionId: string
+  ): SimplePeer.Instance {
+    const userIds = [this.userId, remoteUserId].sort();
+    const initiator = this.userId === userIds[1];
 
     console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
-
-    // const initiator = this.userId < remoteUserId;
-    // const initiator = this.userId.localeCompare(remoteUserId) < 0;
-    console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
-    console.log(
-      `User ID: ${this.userId}, Remote User ID: ${remoteUserId}, Initiator: ${initiator}`
-    );
 
     const peer = new SimplePeer({
       initiator: initiator,
@@ -221,21 +239,28 @@ export class VideoCallComponent
     });
 
     peer.on('signal', (data) => {
-      // Sanitize the signal data by removing undefined values
       const sanitizedSignal = this.sanitizeSignal(data);
       this.solution.sendSignal(this.solutionId, {
         senderId: this.userId,
+        senderSessionId: this.sessionId,
         receiverId: remoteUserId,
+        receiverSessionId: remoteSessionId,
         signal: sanitizedSignal,
       });
     });
 
     peer.on('stream', (stream) => {
-      if (!this.participants.some((p) => p.id === remoteUserId)) {
+      const existingParticipant = this.participants.find(
+        (p) => p.id === remoteUserId && p.sessionId === remoteSessionId
+      );
+      if (!existingParticipant) {
         this.participants.push({
           id: remoteUserId,
+          sessionId: remoteSessionId,
           stream: stream,
         });
+      } else {
+        existingParticipant.stream = stream;
       }
     });
 
@@ -251,10 +276,10 @@ export class VideoCallComponent
       console.log('Connection closed with', remoteUserId);
       // Remove participant
       this.participants = this.participants.filter(
-        (p) => p.id !== remoteUserId
+        (p) => p.id !== remoteUserId || p.sessionId !== remoteSessionId
       );
-      delete this.peers[remoteUserId];
-      delete this.participantSessions[remoteUserId];
+      const peerKey = `${remoteUserId}_${remoteSessionId}`;
+      delete this.peers[peerKey];
     });
 
     return peer;
@@ -284,7 +309,7 @@ export class VideoCallComponent
     this.router.navigate(['/playground-steps/' + this.solutionId]);
   }
   trackById(index: number, participant: Participant) {
-    return participant.id;
+    return `${participant.id}_${participant.sessionId}`;
   }
   cleanup() {
     // Close all peer connections
@@ -304,6 +329,10 @@ export class VideoCallComponent
     this.solution.removeParticipant(this.solutionId, this.userId);
 
     // Delete signals sent by this user
-    this.solution.deleteSignalsBySender(this.solutionId, this.userId);
+    this.solution.deleteSignalsBySender(
+      this.solutionId,
+      this.userId,
+      this.sessionId
+    );
   }
 }

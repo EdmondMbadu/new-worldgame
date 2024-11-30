@@ -37,11 +37,11 @@
                 >
                 <!-- Remote Participant Video -->
                 <video
-                #remoteVideo
                 [id]="'remoteVideo' + i"
                 autoplay
                 playsinline
                 class="remote-video"
+                [appSrcObject]="participant.stream"
                 [muted]="false"
                 ></video>
                
@@ -78,11 +78,12 @@
       >
         <!-- Local Video -->
         <video
-          #localVideo
+          
           autoplay
           playsinline
           [muted]="true"
           class="local-video w-full h-full object-cover"
+          [appSrcObject]="localStream"
         ></video>
         <h1 class="m-2">{{this.auth.currentUser.firstName}} {{this.auth.currentUser.lastName}}</h1>
       </div>

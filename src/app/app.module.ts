@@ -94,6 +94,7 @@ import { ManagementWorkshopComponent } from './components/management-workshop/ma
 import { PrimerComponent } from './blogs/primer/primer.component';
 import { PrimerRegisterComponent } from './blogs/primer-register/primer-register.component';
 import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-packet.component';
+import { SrcObjectDirective } from './directives/src-object.directive';
 
 @NgModule({
   declarations: [
@@ -164,6 +165,7 @@ import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-pac
     PrimerComponent,
     PrimerRegisterComponent,
     WorldgamePacketComponent,
+    SrcObjectDirective,
   ],
   imports: [
     BrowserModule,

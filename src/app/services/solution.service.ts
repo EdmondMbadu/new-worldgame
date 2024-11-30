@@ -418,10 +418,16 @@ export class SolutionService {
     return signalsRef.add(signalData);
   }
 
-  getSignals(solutionId: string, receiverId: string): Observable<any[]> {
+  getSignals(
+    solutionId: string,
+    receiverId: string,
+    receiverSessionId: string
+  ): Observable<any[]> {
     return this.afs
       .collection(`solutions/${solutionId}/signals`, (ref) =>
-        ref.where('receiverId', '==', receiverId)
+        ref
+          .where('receiverId', '==', receiverId)
+          .where('receiverSessionId', '==', receiverSessionId)
       )
       .snapshotChanges()
       .pipe(
@@ -434,15 +440,17 @@ export class SolutionService {
         )
       );
   }
+
   deleteSignal(solutionId: string, signalId: string) {
     return this.afs.doc(`solutions/${solutionId}/signals/${signalId}`).delete();
   }
-  addParticipant(solutionId: string, userId: string) {
+  addParticipant(solutionId: string, userId: string, sessionId: string) {
     const participantsRef = this.afs.collection(
       `solutions/${solutionId}/participants`
     );
     return participantsRef.doc(userId).set({
       userId: userId,
+      sessionId: sessionId,
     });
   }
 
@@ -453,7 +461,9 @@ export class SolutionService {
     return participantsRef.doc(userId).delete();
   }
 
-  getParticipants(solutionId: string): Observable<{ userId: string }[]> {
+  getParticipants(
+    solutionId: string
+  ): Observable<{ userId: string; sessionId: string }[]> {
     const participantsRef = this.afs.collection(
       `solutions/${solutionId}/participants`
     );
@@ -461,14 +471,23 @@ export class SolutionService {
       map((participants) =>
         participants.map((p: any) => ({
           userId: p.userId,
+          sessionId: p.sessionId,
         }))
       )
     );
   }
-  deleteSignalsBySender(solutionId: string, senderId: string) {
+
+  deleteSignalsBySender(
+    solutionId: string,
+    senderId: string,
+    senderSessionId: string
+  ) {
     const signalsRef = this.afs.collection(
       `solutions/${solutionId}/signals`,
-      (ref) => ref.where('senderId', '==', senderId)
+      (ref) =>
+        ref
+          .where('senderId', '==', senderId)
+          .where('senderSessionId', '==', senderSessionId)
     );
     signalsRef.get().subscribe((querySnapshot) => {
       querySnapshot.forEach((doc) => {
@@ -476,6 +495,7 @@ export class SolutionService {
       });
     });
   }
+
   private generateSessionId(): string {
     return Date.now().toString(); // Generates a simple session ID based on timestamp
   }
