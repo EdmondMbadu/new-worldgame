@@ -19,7 +19,7 @@ export class WorkshopComponent implements OnInit {
     });
   }
   private initializeCountdown(): void {
-    const eventDate = new Date('December 12, 2024 12:00:00 EST').getTime();
+    const eventDate = new Date('January 16, 2025 12:00:00 EST').getTime();
     const daysElement = document.getElementById('days');
     const hoursElement = document.getElementById('hours');
     const minutesElement = document.getElementById('minutes');
