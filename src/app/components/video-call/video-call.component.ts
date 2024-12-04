@@ -12,6 +12,7 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
@@ -26,6 +27,8 @@ interface Participant {
   id: string;
   sessionId: string;
   stream: MediaStream | null;
+  firstName?: string;
+  lastName?: string;
 }
 @Component({
   selector: 'app-video-call',
@@ -41,7 +44,8 @@ export class VideoCallComponent
     private activatedRoute: ActivatedRoute,
     public data: DataService,
     public solution: SolutionService,
-    private afs: AngularFirestore // not the best idea but to generate new ids
+    private afs: AngularFirestore, // not the best idea but to generate new ids
+    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
   ) {}
   dark: boolean = false;
 
@@ -121,6 +125,7 @@ export class VideoCallComponent
         }
       }
     });
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy() {
@@ -250,16 +255,36 @@ export class VideoCallComponent
     });
 
     peer.on('stream', (stream) => {
+      // Check if participant already exists
       const existingParticipant = this.participants.find(
         (p) => p.id === remoteUserId && p.sessionId === remoteSessionId
       );
+
       if (!existingParticipant) {
-        this.participants.push({
-          id: remoteUserId,
-          sessionId: remoteSessionId,
-          stream: stream,
+        // Fetch user details and add participant
+        this.auth.getAUser(remoteUserId).subscribe((data) => {
+          const currentUser = data;
+
+          // Ensure no duplicate participants are added (double-check before pushing)
+          const alreadyExists = this.participants.some(
+            (p) => p.id === remoteUserId && p.sessionId === remoteSessionId
+          );
+
+          if (!alreadyExists) {
+            this.participants.push({
+              id: remoteUserId,
+              sessionId: remoteSessionId,
+              stream: stream,
+              firstName: currentUser?.firstName,
+              lastName: currentUser?.lastName,
+            });
+
+            // Force UI refresh if needed (Angular Change Detection)
+            this.cdr.detectChanges();
+          }
         });
       } else {
+        // Update the stream for the existing participant
         existingParticipant.stream = stream;
       }
     });
