@@ -1,29 +1,17 @@
-/* .local-video {
-  width: 50%;
-  height: auto;
-}
-
-.remote-video {
-  width: 200px;
-  height: auto;
-  margin: 5px;
-} */
-
-/* video-call.component.css */
-
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(300px, 1fr)
-  ); /* Dynamic layout to fit available space */
-  gap: 1rem; /* Padding between each video */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
   width: 100%;
   height: 100%;
 }
 
 .video-container {
-  border: 1px solid #4b5563; /* Optional: Add a small border between each video (gray color) */
-  overflow: hidden; /* Ensures no overflow */
-  max-height: 100%; /* Keeps videos from overflowing vertically */
+  border: 1px solid #4b5563;
+  overflow: hidden;
+  max-height: 100%;
+}
+
+.participants-bar {
+  background-color: #f9fafb; /* or dark equivalent */
 }

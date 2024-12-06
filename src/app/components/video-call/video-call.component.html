@@ -1,18 +1,11 @@
-<div class="dark:bg-slate-900 min-h-screen flex items-center justify-center">
-  <div class="flex flex-col items-center w-full h-full">
-    <!-- Video Grid Container -->
-    <div
-      class="video-grid mb-4 w-max h-max p-4 grid gap-4"
-      [ngClass]="{
-        'grid-cols-1': participants.length + 1 === 1,
-        'grid-cols-2': participants.length + 1 === 2,
-        'grid-cols-3': participants.length + 1 === 3,
-        'grid-cols-4': participants.length + 1 > 3
-      }"
-    >
-      <!-- Local Video -->
+<div class="dark:bg-slate-900 min-h-screen flex flex-col">
+  <!-- If there is an active screen sharer -->
+  <ng-container *ngIf="activeScreenSharer; else normalGrid">
+    <!-- Top bar with participant videos (including local) -->
+    <div class="participants-bar w-full flex flex-row overflow-x-auto p-4 gap-4 bg-gray-100 dark:bg-gray-800">
+      <!-- Local Video (small thumbnail) -->
       <div
-        class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
+        class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video min-w-[150px] max-w-[200px]"
       >
         <video
           autoplay
@@ -21,15 +14,14 @@
           class="local-video w-full h-full object-cover"
           [appSrcObject]="localStream"
         ></video>
-        <h1 class="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+        <h1 class="absolute bottom-2 left-2 text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
           {{ auth.currentUser.firstName }} {{ auth.currentUser.lastName }}
         </h1>
       </div>
-
-      <!-- Remote Participant Videos -->
+      <!-- Remote Participant Videos (excluding main share) -->
       <div
         *ngFor="let participant of participants; trackBy: trackById"
-        class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
+        class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video min-w-[150px] max-w-[200px]"
       >
         <video
           [id]="'remoteVideo' + participant.id"
@@ -39,25 +31,108 @@
           [appSrcObject]="participant.stream"
           [muted]="false"
         ></video>
-        <h1 class="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-          {{ participant.firstName }}  {{ participant.lastName }}
+        <h1 class="absolute bottom-2 left-2 text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
+          {{ participant.firstName }} {{ participant.lastName }}
         </h1>
       </div>
     </div>
 
-    <!-- Controls -->
-    <div
-      class="flex flex-row justify-center space-x-36 mt-4 dark:bg-gray-700 sm:rounded-lg pt-3 pb-3 pl-10 pr-10"
-    >
-      <!-- Toggle Video Button -->
+    <!-- Main screen sharing area -->
+    <div class="flex-grow flex items-center justify-center p-4">
+      <div
+        class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video w-full max-w-5xl"
+      >
+        <video
+          autoplay
+          playsinline
+          class="shared-screen-video w-full h-full object-cover"
+          [appSrcObject]="activeScreenSharer?.stream"
+        ></video>
+        <h1 class="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+          {{ activeScreenSharer?.firstName }} {{ activeScreenSharer?.lastName }} (Screen Share)
+        </h1>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Normal Grid (if no one is sharing screen) -->
+  <ng-template #normalGrid>
+    <div class="flex flex-col items-center w-full h-full  justify-center">
+      <!-- Video Grid Container -->
+      <div
+        class="video-grid mb-4 w-max h-max p-4 grid gap-4"
+        [ngClass]="{
+          'grid-cols-1': participants.length + 1 === 1,
+          'grid-cols-2': participants.length + 1 === 2,
+          'grid-cols-3': participants.length + 1 === 3,
+          'grid-cols-4': participants.length + 1 > 3
+        }"
+      >
+        <!-- Local Video -->
+        <div
+          class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
+        >
+          <video
+            autoplay
+            playsinline
+            [muted]="true"
+            class="local-video w-full h-full object-cover"
+            [appSrcObject]="localStream"
+          ></video>
+          <h1 class="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+            {{ auth.currentUser.firstName }} {{ auth.currentUser.lastName }}
+          </h1>
+        </div>
+
+        <!-- Remote Participant Videos -->
+        <div
+          *ngFor="let participant of participants; trackBy: trackById"
+          class="video-container relative bg-black shadow-xl ring-1 ring-gray-900/5 text-white sm:rounded-lg aspect-video"
+        >
+          <video
+            [id]="'remoteVideo' + participant.id"
+            autoplay
+            playsinline
+            class="remote-video w-full h-full object-cover"
+            [appSrcObject]="participant.stream"
+            [muted]="false"
+          ></video>
+          <h1 class="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
+            {{ participant.firstName }} {{ participant.lastName }}
+          </h1>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Controls -->
+  <div
+  class="fixed bottom-0 w-full flex flex-row justify-center space-x-36 bg-gray-100 dark:bg-gray-700 sm:rounded-t-lg pt-3 pb-3 pl-5 pr-5 shadow-lg z-50 mx-2"
+>
+  <!-- Toggle Video Button -->
+<!-- Toggle Video Button -->
+<div class="relative group">
+  <button (click)="toggleVideo()">
+    <ng-container *ngIf="isVideoMuted; else unmuteVideo">
+      <!-- Video Off SVG -->
+      <svg width="36px" height="36px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none">
+
+        <g fill="#000000">
+        
+        <path fill-rule="evenodd" d="M2.28 1.22a.75.75 0 00-1.06 1.06l.738.739A2.25 2.25 0 000 5.25v5.5A2.25 2.25 0 002.25 13h6.5a2.25 2.25 0 001.99-1.2l2.98 2.98a.75.75 0 101.06-1.06L2.28 1.22zm7.22 9.34L3.44 4.5H2.25a.75.75 0 00-.75.75v5.5c0 .414.336.75.75.75h6.5a.75.75 0 00.75-.75v-.19z" clip-rule="evenodd"/>
+        
+        <path d="M7.688 3a.75.75 0 000 1.5H8.75a.75.75 0 01.75.75v.733a1.544 1.544 0 002.424 1.27L14.5 5.47v5.54a.75.75 0 001.5 0V4.99c0-1.021-1.157-1.61-1.982-1.013L11.07 6.02a.045.045 0 01-.07-.037V5.25A2.25 2.25 0 008.75 3H7.687z"/>
+        
+        </g>
+        
+        </svg>
+    </ng-container>
+    <ng-template #unmuteVideo>
+      <!-- Video On SVG -->
       <svg
-        (click)="toggleVideo()"
-        [title]="isVideoMuted ? 'Turn On Video' : 'Turn Off Video'"
         class="w-[36px] h-[36px] text-gray-800 dark:text-white cursor-pointer"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -67,16 +142,40 @@
           clip-rule="evenodd"
         />
       </svg>
+    </ng-template>
+  </button>
+  <!-- Custom Tooltip -->
+  <div
+    class="absolute left-1/2 transform -translate-x-1/2 -translate-y-28 bg-black text-white text-sm p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+  >
+    {{ isVideoMuted ? 'Turn On Video' : 'Turn Off Video' }}
+  </div>
+</div>
 
-      <!-- Toggle Audio Button -->
+
+  <!-- Toggle Audio Button -->
+<div class="relative group">
+  <button (click)="toggleAudio()">
+    <ng-container *ngIf="isAudioMuted; else unmuteIcon">
+      <!-- Muted Audio SVG -->
       <svg
-        (click)="toggleAudio()"
-        [title]="isAudioMuted ? 'Unmute Audio' : 'Mute Audio'"
         class="w-[36px] h-[36px] text-gray-800 dark:text-white cursor-pointer"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="m15.506 14.097.994.995A3.989 3.989 0 0 0 17.975 12V9.011a.996.996 0 0 1 1.992 0v2.99a5.981 5.981 0 0 1-2.054 4.503l1.762 1.762a.996.996 0 1 1-1.408 1.408L4.325 5.733a.996.996 0 0 1 1.408-1.408L7.04 5.632a3.984 3.984 0 0 1 3.964-3.59h1.992c2.2 0 3.983 1.783 3.983 3.983v4.98a3.975 3.975 0 0 1-1.473 3.092ZM4.033 10.008a.996.996 0 1 1 1.992 0V12a3.99 3.99 0 0 0 3.984 3.984H12c.55 0 .996.446.996.996v2.988h1.992a.996.996 0 0 1 0 1.992H9.012a.996.996 0 0 1 0-1.992h1.992v-1.992h-.997a5.981 5.981 0 0 1-5.974-5.974v-1.993Z"
+        />
+      </svg>
+    </ng-container>
+    <ng-template #unmuteIcon>
+      <!-- Unmuted Audio SVG -->
+      <svg
+        class="w-[36px] h-[36px] text-gray-800 dark:text-white cursor-pointer"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
         viewBox="0 0 24 24"
       >
@@ -89,15 +188,53 @@
           d="M7 6a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4V6Z"
         />
       </svg>
+    </ng-template>
+  </button>
+  <!-- Custom Tooltip -->
+  <div
+    class="absolute left-1/2 transform -translate-x-1/2 -translate-y-28 bg-black text-white text-sm p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+  >
+    {{ isAudioMuted ? 'Unmute Audio' : 'Mute Audio' }}
+  </div>
+</div>
 
-      <!-- Leave Call Button -->
-      <button
-        (click)="leaveCall()"
-        class="hover:w-12 cursor-pointer"
-        title="Leave Call"
-      >
-        <img src="../../../assets/img/end-call.png" alt="Leave Call" />
-      </button>
+
+  <!-- Screen Share Button -->
+  <div class="relative group">
+    <button
+      *ngIf="!activeScreenSharer || activeScreenSharer.id === userId"
+      (click)="toggleScreenShare()"
+      class="rounded-full bg-gray-200 dark:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+      [disabled]="activeScreenSharer && activeScreenSharer.id !== userId"
+      aria-label="Share Screen"
+    >
+      <img
+        src="../../../assets/img/share-screen.png"
+        class="w-12"
+        alt="Share Screen"
+      />
+    </button>
+    <!-- Custom Tooltip -->
+    <div
+      class="absolute left-1/2 transform -translate-x-1/2 -translate-y-28 bg-black text-white text-sm p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+    >
+      Share Screen
+    </div>
+  </div>
+
+  <!-- Leave Call Button -->
+  <div class="relative group">
+    <button
+      (click)="leaveCall()"
+      class="hover:w-12 cursor-pointer"
+    >
+      <img src="../../../assets/img/end-call.png" alt="Leave Call" />
+    </button>
+    <!-- Custom Tooltip -->
+    <div
+      class="absolute left-1/2 transform -translate-x-1/2 -translate-y-28 bg-black text-white text-sm p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+    >
+      Leave Call
     </div>
   </div>
 </div>

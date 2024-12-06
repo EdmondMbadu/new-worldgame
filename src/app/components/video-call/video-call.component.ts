@@ -64,6 +64,12 @@ export class VideoCallComponent
   localStream: MediaStream | null = null;
   private participantSessions: { [id: string]: string } = {};
 
+  // Screen share related states
+  activeScreenSharer: Participant | null = null;
+  isScreenSharing = false;
+  private originalVideoTrack: MediaStreamTrack | null = null;
+  private screenTrack: MediaStreamTrack | null = null;
+
   @ViewChild('scrollingVideo') scrollingVideo!: ElementRef<HTMLDivElement>;
   @ViewChild('localVideo')
   localVideo!: ElementRef<HTMLVideoElement>;
@@ -80,6 +86,27 @@ export class VideoCallComponent
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
       this.discussion = this.currentSolution.discussion;
+      // Update layout based on activeScreenSharer
+      const sharerId = data.activeScreenSharer || null;
+      if (sharerId) {
+        // Find participant with sharerId
+        const sharerParticipant = this.participants.find(
+          (p) => p.id === sharerId
+        );
+        if (sharerParticipant) {
+          this.activeScreenSharer = sharerParticipant;
+        } else {
+          // If not found yet, will set when participant streams come in
+          this.activeScreenSharer = {
+            id: sharerId,
+            sessionId: '',
+            stream: null,
+          };
+        }
+      } else {
+        this.activeScreenSharer = null;
+      }
+      this.cdr.detectChanges();
     });
 
     this.dark = true;
@@ -259,6 +286,9 @@ export class VideoCallComponent
       const existingParticipant = this.participants.find(
         (p) => p.id === remoteUserId && p.sessionId === remoteSessionId
       );
+      // Determine if this is likely a screen share
+      const track = stream.getVideoTracks()[0];
+      const isRemoteScreenShare = track && track.label.includes('screen');
 
       if (!existingParticipant) {
         // Fetch user details and add participant
@@ -271,14 +301,17 @@ export class VideoCallComponent
           );
 
           if (!alreadyExists) {
-            this.participants.push({
+            const newParticipant: Participant = {
               id: remoteUserId,
               sessionId: remoteSessionId,
               stream: stream,
               firstName: currentUser?.firstName,
               lastName: currentUser?.lastName,
-            });
-
+            };
+            this.participants.push(newParticipant);
+            if (isRemoteScreenShare) {
+              this.activeScreenSharer = newParticipant;
+            }
             // Force UI refresh if needed (Angular Change Detection)
             this.cdr.detectChanges();
           }
@@ -286,6 +319,15 @@ export class VideoCallComponent
       } else {
         // Update the stream for the existing participant
         existingParticipant.stream = stream;
+        if (isRemoteScreenShare) {
+          this.activeScreenSharer = existingParticipant;
+        } else if (
+          this.activeScreenSharer &&
+          this.activeScreenSharer.id === remoteUserId
+        ) {
+          // They were screen sharing before, now replaced with normal video
+          this.activeScreenSharer = null;
+        }
       }
     });
 
@@ -305,6 +347,12 @@ export class VideoCallComponent
       );
       const peerKey = `${remoteUserId}_${remoteSessionId}`;
       delete this.peers[peerKey];
+      if (
+        this.activeScreenSharer &&
+        this.activeScreenSharer.id === remoteUserId
+      ) {
+        this.activeScreenSharer = null;
+      }
     });
 
     return peer;
@@ -325,6 +373,79 @@ export class VideoCallComponent
     this.isVideoMuted = !this.isVideoMuted;
     this.localStream!.getVideoTracks().forEach((track) => {
       track.enabled = !this.isVideoMuted;
+    });
+  }
+  async toggleScreenShare() {
+    if (!this.isScreenSharing) {
+      // Start screen share
+      try {
+        const screenStream = await (
+          navigator.mediaDevices as any
+        ).getDisplayMedia({ video: true });
+        this.screenTrack = screenStream.getVideoTracks()[0];
+
+        if (this.localStream) {
+          this.originalVideoTrack = this.localStream.getVideoTracks()[0];
+          this.localStream.removeTrack(this.originalVideoTrack);
+          this.localStream.addTrack(this.screenTrack!);
+
+          this.replaceTrackInPeers(this.originalVideoTrack, this.screenTrack!);
+          this.isScreenSharing = true;
+
+          // Update Firestore to indicate current sharer
+          await this.afs.doc(`solutions/${this.solutionId}`).update({
+            activeScreenSharer: this.userId,
+          });
+
+          // Handle ending from browser UI
+          this.screenTrack!.onended = () => {
+            this.stopScreenShare();
+          };
+        }
+      } catch (err) {
+        console.error('Error starting screen share', err);
+      }
+    } else {
+      this.stopScreenShare();
+    }
+  }
+
+  async stopScreenShare() {
+    if (!this.isScreenSharing) return;
+
+    if (this.screenTrack && this.localStream && this.originalVideoTrack) {
+      this.localStream.removeTrack(this.screenTrack);
+      this.localStream.addTrack(this.originalVideoTrack);
+
+      this.replaceTrackInPeers(this.screenTrack, this.originalVideoTrack);
+
+      this.screenTrack.stop();
+      this.screenTrack = null;
+      this.originalVideoTrack = null;
+      this.isScreenSharing = false;
+
+      // Update Firestore to clear the active sharer
+      await this.afs.doc(`solutions/${this.solutionId}`).update({
+        activeScreenSharer: null,
+      });
+
+      if (
+        this.activeScreenSharer &&
+        this.activeScreenSharer.id === this.userId
+      ) {
+        this.activeScreenSharer = null;
+      }
+    }
+  }
+
+  replaceTrackInPeers(oldTrack: MediaStreamTrack, newTrack: MediaStreamTrack) {
+    Object.values(this.peers).forEach((peer: any) => {
+      const senders = peer._pc
+        .getSenders()
+        .filter((s: any) => s.track === oldTrack);
+      if (senders.length > 0) {
+        senders[0].replaceTrack(newTrack);
+      }
     });
   }
 
@@ -352,7 +473,10 @@ export class VideoCallComponent
 
     // Remove participant
     this.solution.removeParticipant(this.solutionId, this.userId);
-
+    // If you are the active sharer, stop sharing on cleanup
+    if (this.isScreenSharing) {
+      this.stopScreenShare();
+    }
     // Delete signals sent by this user
     this.solution.deleteSignalsBySender(
       this.solutionId,

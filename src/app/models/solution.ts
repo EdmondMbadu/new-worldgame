@@ -43,6 +43,7 @@ export class Solution {
   audioFile?: string;
   participantsHolder?: Email[];
   evaluatorsHolder?: Email[];
+  activeScreenSharer?: string;
 }
 
 export class Evaluation {
