@@ -46,10 +46,10 @@
           autoplay
           playsinline
           class="shared-screen-video w-full h-full object-cover"
-          [appSrcObject]="activeScreenSharer?.stream"
+          [appSrcObject]="activeScreenSharer.stream"
         ></video>
         <h1 class="absolute bottom-2 left-2 text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-          {{ activeScreenSharer?.firstName }} {{ activeScreenSharer?.lastName }} (Screen Share)
+          {{ activeScreenSharer.firstName }} {{ activeScreenSharer.lastName }} (Screen Share)
         </h1>
       </div>
     </div>
