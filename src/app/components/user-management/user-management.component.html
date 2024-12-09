@@ -65,6 +65,7 @@
                             <th scope="col" class="px-4 py-3">Email</th>
                            
                             <th scope="col" class="px-4 py-3">Goal</th>
+                            <th scope="col" class="px-4 py-3">Location</th>
                             <th scope="col" class="px-4 py-3">Date Joined</th>
                             
                             <th scope="col" class="px-4 py-3"># Solution Started</th>
@@ -83,6 +84,7 @@
                                 <td routerLink="/user-profile/{{user.uid}}" class="px-4 py-3  hover:font-bold cursor-pointer">{{user.email}}</td>
                                 
                                 <td class="px-4 py-3">{{user.goal}}</td>
+                                <td class="px-4 py-3">{{user.location}}</td>
                                 <td class="px-4 py-3">{{user.dateJoined}}</td>
                                 <td class="px-4 py-3">{{user.tempSolutionstarted}}</td>
                                 <td class="px-4 py-3">{{user.tempSolutionSubmitted}}</td>

@@ -39,6 +39,8 @@ export class ProfileComponent implements OnInit {
   showSolutionCompletedBadge: boolean = false;
   showSolutionWithPointsBadge: boolean = false;
 
+  displayPromptLocation: boolean = true;
+
   isHovering?: boolean;
   constructor(
     private router: Router,
@@ -74,10 +76,14 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
     this.user = this.auth.currentUser;
+
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data: any) => {
       this.solutions = data;
       this.findCompletedSolutions();
     });
+    if (this.user.location) {
+      this.displayPromptLocation = false;
+    }
     if (this.user?.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL;
     }
@@ -147,5 +153,8 @@ export class ProfileComponent implements OnInit {
   }
   toggleLocationCredential() {
     this.boxLocation.toggle();
+  }
+  closeDisplayPromptLocation() {
+    this.displayPromptLocation = !this.displayPromptLocation;
   }
 }

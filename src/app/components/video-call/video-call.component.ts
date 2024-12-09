@@ -257,7 +257,8 @@ export class VideoCallComponent
     remoteSessionId: string
   ): SimplePeer.Instance {
     const userIds = [this.userId, remoteUserId].sort();
-    const initiator = this.userId === userIds[1];
+    // const initiator = this.userId === userIds[1];
+    const initiator = this.userId < remoteUserId;
 
     console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
 

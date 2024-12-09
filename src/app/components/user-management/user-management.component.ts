@@ -142,6 +142,7 @@ export class UserManagementComponent implements OnInit {
       'Email',
       'Date Joined',
       'Goal',
+      'Location',
       'Solutions Started',
       'Solutions Submitted',
     ];
@@ -153,6 +154,7 @@ export class UserManagementComponent implements OnInit {
       user.email,
       user.dateJoined,
       user.goal,
+      user.location,
       user.tempSolutionstarted || '0', // Default to '0' if undefined
       user.tempSolutionSubmitted || '0', // Default to '0' if undefined
     ]);
