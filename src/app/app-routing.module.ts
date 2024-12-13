@@ -53,6 +53,7 @@ import { ManagementWorkshopComponent } from './components/management-workshop/ma
 import { PrimerComponent } from './blogs/primer/primer.component';
 import { PrimerRegisterComponent } from './blogs/primer-register/primer-register.component';
 import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-packet.component';
+import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -129,6 +130,12 @@ const routes: Routes = [
   {
     path: 'management-workshop',
     component: ManagementWorkshopComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'management-primer',
+    component: ManagementPrimerComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
