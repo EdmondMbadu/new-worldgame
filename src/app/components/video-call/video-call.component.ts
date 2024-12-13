@@ -485,4 +485,6 @@ export class VideoCallComponent
       this.sessionId
     );
   }
+
+  inviteEveryone() {}
 }

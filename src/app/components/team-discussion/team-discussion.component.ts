@@ -103,8 +103,19 @@ export class TeamDiscussionComponent implements OnInit {
   }
 
   addToDiscussion() {
-    let content = this.prompt;
-    this.comments!.push({
+    // Ensure comments is initialized properly
+    if (!this.comments) {
+      this.comments = [];
+    }
+
+    const content = this.prompt;
+
+    if (!content || content.trim() === '') {
+      console.warn('Prompt content is empty. Skipping addition to discussion.');
+      return;
+    }
+
+    this.comments.push({
       date: this.time.todaysDate(),
       authorId: this.auth.currentUser.uid,
       content: content,
@@ -112,6 +123,7 @@ export class TeamDiscussionComponent implements OnInit {
         this.auth.currentUser.firstName + ' ' + this.auth.currentUser.lastName,
       profilePic: this.profilePic,
     });
+
     this.prompt = '';
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => this.scrollToBottom(), 0);
@@ -123,6 +135,7 @@ export class TeamDiscussionComponent implements OnInit {
     const data = {
       discussion: this.comments,
     };
+
     return discRef.set(data, { merge: true });
   }
 
