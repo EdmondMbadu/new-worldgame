@@ -308,6 +308,7 @@
                     Location (e.g. Philadelphia, PA)
                 </label>
                 <input id="locationInput" 
+                [(ngModel)]="location"
                        type="text" 
                        class="block w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 
                               text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 
@@ -321,7 +322,7 @@
                 </p>
 
                 <div class="mt-4 flex justify-end">
-                    <button type="button" 
+                    <button (click)="submitLocation()" type="button" 
                             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white 
                                    bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none 
                                    focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700">

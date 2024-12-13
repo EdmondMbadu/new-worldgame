@@ -202,6 +202,15 @@ export class DataService implements OnInit {
     };
     return userRef.set(data, { merge: true });
   }
+  updateLocation(uid: string, location: string) {
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
+      `users/${uid}`
+    );
+    const data = {
+      location: location,
+    };
+    return userRef.set(data, { merge: true });
+  }
   workshopSignUp(wid: string, signUps: any) {
     const workshopRef: AngularFirestoreDocument<any> = this.afs.doc(
       `workshop/${wid}`

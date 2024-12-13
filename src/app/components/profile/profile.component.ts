@@ -16,7 +16,7 @@ import {
   AngularFireStorage,
   AngularFireUploadTask,
 } from '@angular/fire/compat/storage';
-import { Observable, finalize, of, tap } from 'rxjs';
+import { Observable, async, finalize, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -38,6 +38,7 @@ export class ProfileComponent implements OnInit {
   points: number = 0;
   showSolutionCompletedBadge: boolean = false;
   showSolutionWithPointsBadge: boolean = false;
+  location: string = '';
 
   displayPromptLocation: boolean = true;
 
@@ -81,7 +82,7 @@ export class ProfileComponent implements OnInit {
       this.solutions = data;
       this.findCompletedSolutions();
     });
-    if (this.user.location) {
+    if (this.user && this.user.location) {
       this.displayPromptLocation = false;
     }
     if (this.user?.profilePicture && this.user.profilePicture.path) {
@@ -156,5 +157,15 @@ export class ProfileComponent implements OnInit {
   }
   closeDisplayPromptLocation() {
     this.displayPromptLocation = !this.displayPromptLocation;
+  }
+  async submitLocation() {
+    try {
+      await this.data.updateLocation(this.user.uid!, this.location);
+      // this.closeDisplayPromptLocation();
+      this.ngOnInit();
+    } catch (error) {
+      console.error('Error updating location:', error);
+      // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
+    }
   }
 }

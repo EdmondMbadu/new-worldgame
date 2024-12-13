@@ -3,6 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
@@ -27,7 +28,12 @@ export class HomeComponent implements OnInit {
   profilePicturePath?: string = '';
   pending: number = 0;
   evaluation: number = 0;
-  constructor(public auth: AuthService, private solution: SolutionService) {
+  location: string = '';
+  constructor(
+    public auth: AuthService,
+    private solution: SolutionService,
+    private data: DataService
+  ) {
     this.user = this.auth.currentUser;
   }
   ngOnInit(): void {
@@ -123,5 +129,16 @@ export class HomeComponent implements OnInit {
 
     this.completedSolutions = sortedSolutions;
     this.toggleSortyByDropDown();
+  }
+  // we might use this part.
+  async submitLocation() {
+    try {
+      await this.data.updateLocation(this.user.uid!, this.location);
+      // this.closeDisplayPromptLocation();
+      this.ngOnInit();
+    } catch (error) {
+      console.error('Error updating location:', error);
+      // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
+    }
   }
 }
