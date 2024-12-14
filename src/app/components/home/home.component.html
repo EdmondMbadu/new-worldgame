@@ -186,12 +186,18 @@
                     and you can always choose what to share.
                 </p>
 
-                <div class="mt-4 flex justify-end">
+                <div class="mt-4 flex justify-end space-x-2">
+                    <button (click)="RejectSubmitLocation()" type="button" 
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white 
+                                   bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none 
+                                   focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-700">
+                        Don't Share
+                    </button>
                     <button (click)="submitLocation()" type="button" 
                             class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white 
                                    bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none 
                                    focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700">
-                        Submit
+                        Share
                     </button>
                 </div>
             </div>

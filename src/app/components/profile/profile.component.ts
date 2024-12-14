@@ -159,10 +159,24 @@ export class ProfileComponent implements OnInit {
     this.displayPromptLocation = !this.displayPromptLocation;
   }
   async submitLocation() {
+    if (this.location === '') {
+      alert('Enter your Location');
+      return;
+    }
     try {
       await this.data.updateLocation(this.user.uid!, this.location);
       // this.closeDisplayPromptLocation();
       this.ngOnInit();
+    } catch (error) {
+      console.error('Error updating location:', error);
+      // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
+    }
+  }
+  async RejectSubmitLocation() {
+    try {
+      await this.data.updateLocation(this.user.uid!, 'NA');
+      this.closeDisplayPromptLocation();
+      // this.ngOnInit();
     } catch (error) {
       console.error('Error updating location:', error);
       // Optionally, you can add more error handling logic here, such as displaying an error message to the user.

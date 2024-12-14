@@ -136,6 +136,10 @@ export class HomeComponent implements OnInit {
   }
   // we might use this part.
   async submitLocation() {
+    if (this.location === '') {
+      alert('Enter your Location');
+      return;
+    }
     try {
       await this.data.updateLocation(this.user.uid!, this.location);
       this.closeDisplayPromptLocation();
@@ -147,5 +151,15 @@ export class HomeComponent implements OnInit {
   }
   closeDisplayPromptLocation() {
     this.displayPromptLocation = !this.displayPromptLocation;
+  }
+  async RejectSubmitLocation() {
+    try {
+      await this.data.updateLocation(this.user.uid!, 'NA');
+      this.closeDisplayPromptLocation();
+      // this.ngOnInit();
+    } catch (error) {
+      console.error('Error updating location:', error);
+      // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
+    }
   }
 }
