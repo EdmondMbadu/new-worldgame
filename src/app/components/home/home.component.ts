@@ -29,6 +29,7 @@ export class HomeComponent implements OnInit {
   pending: number = 0;
   evaluation: number = 0;
   location: string = '';
+  displayPromptLocation: boolean = true;
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -37,6 +38,9 @@ export class HomeComponent implements OnInit {
     this.user = this.auth.currentUser;
   }
   ngOnInit(): void {
+    if (this.user && this.user.location) {
+      this.displayPromptLocation = false;
+    }
     window.scroll(0, 0);
     this.solution.getHomePageSolutions().subscribe((data) => {
       this.allSolutions = data;
@@ -134,11 +138,14 @@ export class HomeComponent implements OnInit {
   async submitLocation() {
     try {
       await this.data.updateLocation(this.user.uid!, this.location);
-      // this.closeDisplayPromptLocation();
-      this.ngOnInit();
+      this.closeDisplayPromptLocation();
+      // this.ngOnInit();
     } catch (error) {
       console.error('Error updating location:', error);
       // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
     }
+  }
+  closeDisplayPromptLocation() {
+    this.displayPromptLocation = !this.displayPromptLocation;
   }
 }

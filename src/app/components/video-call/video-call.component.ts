@@ -59,6 +59,7 @@ export class VideoCallComponent
   userId: string = '';
   isAudioMuted = false;
   isVideoMuted = false;
+  solutionTitle: string = '';
   private negotiationLock: boolean = false;
   private peers: { [id: string]: SimplePeer.Instance } = {};
   localStream: MediaStream | null = null;
@@ -85,6 +86,11 @@ export class VideoCallComponent
     window.addEventListener('beforeunload', this.cleanup.bind(this));
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
+      if (this.currentSolution.title) {
+        this.solutionTitle = this.currentSolution.title;
+        console.log('the solution title is', this.solutionTitle);
+      }
+
       this.discussion = this.currentSolution.discussion;
       // Update layout based on activeScreenSharer
       const sharerId = data.activeScreenSharer || null;

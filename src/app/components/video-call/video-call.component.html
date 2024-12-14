@@ -106,8 +106,27 @@
 
   <!-- Controls -->
   <div
-    class="fixed bottom-0 w-full flex flex-row justify-center space-x-36 bg-gray-100 dark:bg-gray-700 sm:rounded-t-lg pt-3 pb-3 pl-5 pr-5 shadow-lg z-50 mx-2"
-  >
+  class="fixed bottom-0 w-full flex flex-wrap justify-center space-x-4 sm:space-x-36 bg-gray-100 dark:bg-gray-700 opacity-70 sm:rounded-t-lg pt-3 pb-3 pl-5 pr-5 shadow-lg z-50 mx-2"
+>
+
+     <!-- Invite Everyone -->
+     <!-- <div class="relative group">
+      <button
+       
+        class=" cursor-pointer"
+      >
+      <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+        <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+      </svg>
+      
+      </button>
+      
+      <div
+        class="absolute left-1/2 transform -translate-x-1/2 -translate-y-28 bg-black text-white text-sm p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+      >
+       Invite Everyone
+      </div>
+    </div> -->
     <!-- Toggle Video Button -->
     <div class="relative group">
       <button (click)="toggleVideo()">
@@ -231,6 +250,5 @@
   </div>
 </div>
 
+  <app-team-discussion  [comments]="discussion" [solution]="currentSolution"></app-team-discussion>
 
-
-<app-team-discussion  [comments]="discussion" [solution]="currentSolution"></app-team-discussion>

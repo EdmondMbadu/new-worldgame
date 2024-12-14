@@ -146,3 +146,56 @@
 
 <app-chatbot></app-chatbot>
 
+
+<div id="location-modal" class="w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex" *ngIf="displayPromptLocation">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    Enter Location<span class="text-red-600">*</span>
+                </h3>
+                <button (click)="closeDisplayPromptLocation()" type="button" 
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" 
+                         fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" 
+                              stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <label for="locationInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Location (e.g. Philadelphia, PA)
+                </label>
+                <input id="locationInput" 
+                [(ngModel)]="location"
+                       type="text" 
+                       class="block w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 
+                              text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 
+                              dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
+                       placeholder="Philadelphia, PA">
+                
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span class="text-red-600">*</span> We ask for your location so we can recommend people who are nearby 
+                    and to help build a community showing where each solution is developed. Your privacy matters to us, 
+                    and you can always choose what to share.
+                </p>
+
+                <div class="mt-4 flex justify-end">
+                    <button (click)="submitLocation()" type="button" 
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white 
+                                   bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none 
+                                   focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

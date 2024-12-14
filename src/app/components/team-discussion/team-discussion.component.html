@@ -8,13 +8,16 @@
 <div class="bottom-0 left-0 mb-4 ml-4 ">
     <div *ngIf="showChatIcon">
         <div (click)="toggleDiscussion()" class="mx-auto">
-            <img   src="../../../assets/img/team-discussion.png" class="w-28 rounded-full -mb-4" alt="">
+            <img   src="../../../assets/img/team-discussion.png" class="w-28 rounded-full -mb-4 hidden lg:flex" alt="">
         </div>
-            <button id="open-chat" (click)="toggleDiscussion()" class="bg-teal-700 text-white py-2 px-4 rounded-md hover:bg-teal-800 transition duration-300 flex items-center">
+            <button id="open-chat" (click)="toggleDiscussion()" class="bg-teal-700 text-white lg:py-2 lg:px-4 rounded-md hover:bg-teal-800 transition duration-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                Team Discussion
+                <div class="hidden lg:flex">
+                    Team Discussion
+                </div>
+                
             </button>
         </div>
     </div>
