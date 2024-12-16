@@ -76,6 +76,7 @@ const routes: Routes = [
     path: 'playground-steps/:id',
     component: PlaygroundStepsComponent,
     canActivate: [AuthGuard],
+    data: { requireParticipant: true },
   },
   {
     path: 'user-profile/:id',
@@ -244,6 +245,7 @@ const routes: Routes = [
     path: 'video-call/:id',
     component: VideoCallComponent,
     canActivate: [AuthGuard],
+    data: { requireParticipant: true },
   },
   {
     path: 'workshop',
