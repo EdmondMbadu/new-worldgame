@@ -34,10 +34,12 @@ export class PlaygroundStepsComponent implements OnInit {
   showPopUpContributors: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
   showAddTeamMember: boolean = false;
+  showRemoveTeamMember: boolean = false;
   hoverAddTeamMember: boolean = false;
   evaluators: User[] = [];
   etAl: string = '';
   newTeamMember: string = '';
+  teamMemberToDelete: string = '';
 
   hoverChangeReadMe: boolean = false;
   updateReadMeBox: boolean = false;
@@ -88,7 +90,7 @@ export class PlaygroundStepsComponent implements OnInit {
 
   getMembers() {
     this.teamMembers = [];
-
+    console.log('all participants', this.currentSolution.participants);
     for (const key in this.currentSolution.participants) {
       let participant = this.currentSolution.participants[key];
       let email = Object.values(participant)[0];
@@ -396,6 +398,9 @@ export class PlaygroundStepsComponent implements OnInit {
   toggleAddTeamMember() {
     this.showAddTeamMember = !this.showAddTeamMember;
   }
+  toggleRemoveTeamMember() {
+    this.showRemoveTeamMember = !this.showRemoveTeamMember;
+  }
   addParticipantToSolution() {
     let participants: any = [];
     if (this.data.isValidEmail(this.newTeamMember)) {
@@ -408,6 +413,7 @@ export class PlaygroundStepsComponent implements OnInit {
           this.currentSolution.solutionId!
         )
         .then(() => {
+          alert(`Successfully added ${this.newTeamMember} to the solution.`);
           this.getMembers();
           this.sendEmailToParticipant();
           this.newTeamMember = '';
@@ -453,5 +459,37 @@ export class PlaygroundStepsComponent implements OnInit {
     } else {
       alert('Enter a title');
     }
+  }
+  removeParticipantFromSolution(email: string) {
+    // Ensure participants array exists
+    if (
+      !this.currentSolution.participants ||
+      !Array.isArray(this.currentSolution.participants)
+    ) {
+      alert('No participants found!');
+      return;
+    }
+
+    // Filter out the participant to be removed
+    const updatedParticipants = this.currentSolution.participants.filter(
+      (participant: any) => participant.name !== email
+    );
+
+    // Update the solution's participants
+    this.solution
+      .addParticipantsToSolution(
+        updatedParticipants,
+        this.currentSolution.solutionId!
+      )
+      .then(() => {
+        alert(`Successfully removed ${email} from the solution.`);
+        this.getMembers(); // Refresh the members list
+        this.teamMemberToDelete = '';
+        this.toggleRemoveTeamMember();
+      })
+      .catch((error) => {
+        console.error('Error occurred while removing a team member:', error);
+        alert('Error occurred while removing a team member. Try again!');
+      });
   }
 }
