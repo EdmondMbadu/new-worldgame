@@ -4,9 +4,9 @@
 
     <!-- Header -->
     <div class="flex flex-col mx-auto">
-        <div class="flex flex-row">
+        <div class="flex flex-row mx-auto">
            
-            <h1 class="font-bold font-Nunito text-3xl text-worldsecond text-center dark:text-white">{{title}}</h1>
+            <h1 class="font-bold font-Nunito text-3xl text-worldsecond text-center dark:text-white justify-center">{{title}}</h1>
             
             <svg (click)="toggleUpdateTitle()" (mouseenter)="onHoverChangeTitle()" (mouseleave)="onLeaveChangeTitle()"   class=" ml-4 mt-2 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black " width="30px" height="30px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
@@ -26,7 +26,15 @@
         <!-- <h3 *ngIf="step.startsWith('Step II')" class="mt-4 text-xl text-center dark:text-white">{{step}} 
             <span  *ngIf="step.startsWith('Step II')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/sample-preferred-states">(Sample Preferred States)</a> </span> 
         </h3> -->
-
+        <div *ngIf="step.startsWith('Step III:')"class="flex flex-row mt-4 mx-auto">
+            <p class=" max-w-lg text-lg italic text-center  text-gray-400">
+                "You never change things by fighting the existing reality. To change something, build a new model that makes the existing model obsolete."
+               
+                <span class=" px-2 not-italic"> - Buckminster Fuller</span>
+    
+            </p>
+        </div>
+        
         <div *ngIf="step.startsWith('Step V:') && strategyReview!==''" class="flex flex-row mt-4 mx-auto">
             <button (click)="chooseDefaultReview()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-cyan-500 to-blue-500 group-hover:from-cyan-500 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-cyan-200 dark:focus:ring-cyan-800">
                 <span class="{{chosenColorDefault}} dark:{{chosenColorDefault}} relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
@@ -46,6 +54,9 @@
     <div  class="  container flex flex-col mx-auto justify-center mt-4 px-2 lg:px-16 "  *ngFor="let question of questions; let i =index">
 
         <header class="inverted sm:mx-6 lg:mx-0">
+            
+         
+          
             <h2 *ngIf="i==0 && step.startsWith('Step IV:')" class="pt-4 font-bold  text-gray-900 text-2xl dark:text-gray-200">Cost:</h2>
             <h2 class="py-4  text-gray-900 text-xl dark:text-gray-200">{{question}}
                 <span  *ngIf="i==0 && question.startsWith('What is the preferred or ideal ')"> <a class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/sample-preferred-states">(Sample Preferred States)</a> </span> 
