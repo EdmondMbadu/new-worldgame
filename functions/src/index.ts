@@ -36,8 +36,12 @@ const storage = new Storage();
 
 const bucketName = 'new-worldgame.appspot.com'; // replace 'your-bucket-name' with your actual bucket name
 const bucket = storage.bucket(bucketName);
-
 import * as sgMail from '@sendgrid/mail';
+
+// import * as corsLib from 'cors';
+
+// const cors = corsLib({ origin: true });
+const twilio = require('twilio');
 
 const API_KEY = functions.config().sendgrid.key;
 const TEMPLATE_ID = functions.config().sendgrid.template;
@@ -51,6 +55,11 @@ const TEMPLATE_ID_EVALUTION =
 const TEMPLATE_ID_EVALUATION_COMPLETE =
   functions.config().sendgrid.templateevaluationcomplete;
 sgMail.setApiKey(API_KEY);
+
+// Twilio credentials from config
+const accountSid = functions.config().twilio.account_sid;
+const authToken = functions.config().twilio.auth_token;
+const twilioClient = twilio(accountSid, authToken);
 
 export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
   const msg = {
@@ -118,8 +127,7 @@ export const workshopRegistrationEmail = functions.https.onCall(
       dynamic_template_data: {
         subject: data.subject,
         firstname: data.firstName,
-        lastname: data.lastName
-     
+        lastname: data.lastName,
       },
     };
 
@@ -128,7 +136,6 @@ export const workshopRegistrationEmail = functions.https.onCall(
     return { success: true };
   }
 );
-
 
 export const solutionEvaluationInvite = functions.https.onCall(
   async (data: any, context: any) => {
@@ -176,6 +183,19 @@ export const solutionEvaluationComplete = functions.https.onCall(
   }
 );
 
+export const getIceServers = functions.https.onCall(async (data, context) => {
+  try {
+    const tokenResponse = await twilioClient.tokens.create();
+    const iceServers = tokenResponse.iceServers;
+    return { iceServers };
+  } catch (error) {
+    console.error('Error fetching ICE servers from Twilio:', error);
+    throw new functions.https.HttpsError(
+      'internal',
+      'Failed to fetch ICE servers.'
+    );
+  }
+});
 // exports.dailyNews = functions.pubsub
 //   .schedule('every day 04:10')
 //   .timeZone('America/Los_Angeles')

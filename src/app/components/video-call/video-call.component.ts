@@ -15,6 +15,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import * as SimplePeer from 'simple-peer';
@@ -45,7 +46,8 @@ export class VideoCallComponent
     public data: DataService,
     public solution: SolutionService,
     private afs: AngularFirestore, // not the best idea but to generate new ids
-    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
+    private cdr: ChangeDetectorRef, // Inject ChangeDetectorRef // <-- Inject the service
+    private fns: AngularFireFunctions
   ) {}
   dark: boolean = false;
 
@@ -65,11 +67,15 @@ export class VideoCallComponent
   localStream: MediaStream | null = null;
   private participantSessions: { [id: string]: string } = {};
 
+  private maxConnectionRetries: number = 10;
+  private iceServers: RTCIceServer[] = [];
+
   // Screen share related states
   activeScreenSharer: Participant | null = null;
   isScreenSharing = false;
   private originalVideoTrack: MediaStreamTrack | null = null;
   private screenTrack: MediaStreamTrack | null = null;
+  remoteAnswered = false; // Track if we've processed an answer
 
   @ViewChild('scrollingVideo') scrollingVideo!: ElementRef<HTMLDivElement>;
   @ViewChild('localVideo')
@@ -82,6 +88,7 @@ export class VideoCallComponent
     // this.cleanup();
     this.userId = this.auth.currentUser.uid; // Get the current user's unique ID
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
+    this.maxConnectionRetries = 6;
     this.sessionId = this.afs.createId();
     window.addEventListener('beforeunload', this.cleanup.bind(this));
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
@@ -136,10 +143,23 @@ export class VideoCallComponent
         this.userId,
         this.sessionId
       );
-      this.setupSignaling();
 
-      // Since we're using solutions, no need to create a room
-      // await this.signalingService.createRoom(this.solutionId);
+      // Now fetch the ICE servers using the onCall function
+      const getIceServersFunc = this.fns.httpsCallable('getIceServers');
+      getIceServersFunc({}).subscribe(
+        (result: { iceServers: RTCIceServer[] }) => {
+          this.iceServers = result.iceServers;
+          console.log('Fetched ICE servers:', this.iceServers);
+          // After we have iceServers, we can set up signaling
+          this.setupSignaling();
+        },
+        (error: any) => {
+          console.error('Error fetching ICE servers:', error);
+          // fallback to default STUN server if needed
+          this.iceServers = [{ urls: 'stun:stun.l.google.com:19302' }];
+          this.setupSignaling();
+        }
+      );
     } catch (err) {
       console.error('Error accessing media devices.', err);
     }
@@ -200,7 +220,11 @@ export class VideoCallComponent
             console.log(
               `Adding participant ${participantId} with session ${sessionId}`
             );
-            this.peers[peerKey] = this.createPeer(participantId, sessionId);
+            this.peers[peerKey] = this.createPeer(
+              participantId,
+              sessionId,
+              this.maxConnectionRetries
+            );
           }
         });
 
@@ -260,20 +284,23 @@ export class VideoCallComponent
 
   createPeer(
     remoteUserId: string,
-    remoteSessionId: string
+    remoteSessionId: string,
+    maxRetries = this.maxConnectionRetries
   ): SimplePeer.Instance {
     const userIds = [this.userId, remoteUserId].sort();
-    // const initiator = this.userId === userIds[1];
+    // const initiator = this.userId === userIds[0];
     const initiator = this.userId < remoteUserId;
 
-    console.log(`Creating peer with ${remoteUserId}, initiator: ${initiator}`);
+    console.log(
+      `Creating peer with ${remoteUserId}, initiator: ${initiator}, retries left: ${maxRetries}`
+    );
 
     const peer = new SimplePeer({
       initiator: initiator,
       trickle: false,
       stream: this.localStream!,
       config: {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+        iceServers: this.iceServers, // Use the dynamically fetched servers
       },
     });
 
@@ -344,27 +371,32 @@ export class VideoCallComponent
 
     peer.on('error', (err) => {
       console.error('Peer error with', remoteUserId, err);
+      if (maxRetries > 0) {
+        console.warn(
+          `Retrying connection with ${remoteUserId}, attempts left: ${
+            maxRetries - 1
+          }`
+        );
+        peer.destroy();
+        this.peers[`${remoteUserId}_${remoteSessionId}`] = this.createPeer(
+          remoteUserId,
+          remoteSessionId,
+          maxRetries - 1
+        );
+      } else {
+        console.error(`Max retries reached for ${remoteUserId}. Giving up.`);
+        // At this point, you may want to remove the participant from the UI or handle gracefully
+      }
     });
 
     peer.on('close', () => {
       console.log('Connection closed with', remoteUserId);
-      // Remove participant
-      this.participants = this.participants.filter(
-        (p) => p.id !== remoteUserId || p.sessionId !== remoteSessionId
-      );
-      const peerKey = `${remoteUserId}_${remoteSessionId}`;
-      delete this.peers[peerKey];
-      if (
-        this.activeScreenSharer &&
-        this.activeScreenSharer.id === remoteUserId
-      ) {
-        this.activeScreenSharer = null;
-      }
+      // If the connection closes unexpectedly and we still have retries, try again
+      // this.cleanUpPeer(remoteUserId, remoteSessionId, maxRetries);
     });
 
     return peer;
   }
-
   sanitizeSignal(signal: any): any {
     return JSON.parse(JSON.stringify(signal));
   }
