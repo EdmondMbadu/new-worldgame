@@ -33,7 +33,7 @@ interface Participant {
 }
 @Component({
   selector: 'app-video-call',
-  templateUrl: './video-call.component.html',
+  template: '',
   styleUrl: './video-call.component.css',
 })
 export class VideoCallComponent
@@ -88,6 +88,12 @@ export class VideoCallComponent
     // this.cleanup();
     this.userId = this.auth.currentUser.uid; // Get the current user's unique ID
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
+    // redirect user to meeting component:
+    this.router.navigate(['/meeting/' + this.solutionId]);
+    // this.initializeContent();
+  }
+
+  async initializeContent() {
     this.maxConnectionRetries = 6;
     this.sessionId = this.afs.createId();
     window.addEventListener('beforeunload', this.cleanup.bind(this));
