@@ -44,6 +44,7 @@ export class Solution {
   participantsHolder?: Email[];
   evaluatorsHolder?: Email[];
   activeScreenSharer?: string;
+  meetLink?: string;
 }
 
 export class Evaluation {

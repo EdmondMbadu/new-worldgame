@@ -1,0 +1,23 @@
+/* src/app/components/meeting/meeting.component.css */
+
+.meeting-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.meeting-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.meeting-container p {
+  font-size: 16px;
+}
+
+.meeting-container button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}

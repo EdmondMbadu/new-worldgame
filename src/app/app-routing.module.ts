@@ -54,6 +54,7 @@ import { PrimerComponent } from './blogs/primer/primer.component';
 import { PrimerRegisterComponent } from './blogs/primer-register/primer-register.component';
 import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-packet.component';
 import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
+import { MeetingComponent } from './components/meeting/meeting.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -244,6 +245,12 @@ const routes: Routes = [
   {
     path: 'video-call/:id',
     component: VideoCallComponent,
+    canActivate: [AuthGuard],
+    data: { requireParticipant: true },
+  },
+  {
+    path: 'meeting/:id',
+    component: MeetingComponent,
     canActivate: [AuthGuard],
     data: { requireParticipant: true },
   },

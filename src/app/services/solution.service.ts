@@ -152,6 +152,9 @@ export class SolutionService {
   getSolution(solutionId: string) {
     return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
   }
+  updateSolutionMeetLink(solutionId: string, meetLink: string): Promise<void> {
+    return this.afs.doc(`solutions/${solutionId}`).update({ meetLink });
+  }
 
   getSolutionForNonAuthenticatedUser(solutionId: string) {
     return this.afs

@@ -1,0 +1,69 @@
+<!-- src/app/components/meeting/meeting.component.html -->
+<!-- src/app/components/meeting/meeting.component.html -->
+<!-- src/app/components/meeting/meeting.component.html -->
+
+<div class="min-h-screen flex items-center justify-center bg-slate-900 dark:bg-slate-800">
+    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-lg p-8 max-w-md w-full">
+      <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">
+        Meeting for {{ solutionTitle }}
+      </h2>
+  
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex flex-col items-center">
+        <div class="flex items-center justify-center w-24 h-24 border-4 border-blue-500 rounded-full animate-spin">
+          <div class="w-12 h-12 border-t-4 border-b-4 border-transparent border-blue-500 rounded-full"></div>
+        </div>
+        <p class="mt-4 text-gray-700 dark:text-gray-300 text-center">
+          Generating meeting link, please wait...
+        </p>
+      </div>
+  
+      <!-- Redirecting State -->
+      <div *ngIf="!isLoading && meetLink" class="flex flex-col justify-center">
+        <div class="flex items-center justify-center w-24 h-24 border-4 border-green-500 rounded-full">
+          <svg
+            class="w-12 h-12 text-green-500 animate-bounce"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <p class="mt-4 text-gray-700 dark:text-gray-300 text-center">
+          Redirecting to your meeting...
+        </p>
+      </div>
+  
+      <!-- Error State -->
+      <div *ngIf="!isLoading && !meetLink" class="flex flex-col items-center">
+        <div class="flex items-center justify-center w-24 h-24 border-4 border-red-500 rounded-full">
+          <svg
+            class="w-12 h-12 text-red-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
+        <p class="mt-4 text-red-600 dark:text-red-400 text-center">
+          Unable to generate a meeting link at this time. Please try again later.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  

@@ -9,6 +9,7 @@
 // const cors = require('cors');
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { google } from 'googleapis';
 // const axios = require('axios');
 // const cors = require('cors')({ origin: true });
 // const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
@@ -666,3 +667,115 @@ exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
   busboy.end(req.rawBody);
   // });
 });
+
+export const createGoogleMeet = functions.https.onCall(
+  async (data, context) => {
+    try {
+      const { solutionId, title, startTime, endTime } = data;
+
+      // Validate input
+      if (!solutionId || !title) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          'solutionId and title are required.'
+        );
+      }
+
+      // Retrieve the Base64-encoded service account key from Firebase Functions config
+      const base64Encoded = functions.config().googleapi.service_account_key;
+      if (!base64Encoded) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          'Service account key not configured.'
+        );
+      }
+
+      // Decode the Base64 string
+      const jsonString = Buffer.from(base64Encoded, 'base64').toString('utf8');
+
+      // Parse JSON
+      const serviceAccount = JSON.parse(jsonString);
+
+      // Impersonate a user in your Google Workspace domain
+      const userEmail = 'newworld@newworld-game.org'; // Replace with the user to impersonate
+
+      const jwtClient = new google.auth.JWT(
+        serviceAccount.client_email,
+        undefined,
+        serviceAccount.private_key,
+        ['https://www.googleapis.com/auth/calendar'],
+        userEmail // User to impersonate
+      );
+
+      // Authorize the client
+      await jwtClient.authorize();
+
+      // Initialize the Calendar API
+      const calendar = google.calendar({ version: 'v3', auth: jwtClient });
+
+      // Create a unique requestId to prevent duplication
+      const requestId = `meet-${solutionId}-${Date.now()}`;
+
+      // Define event start and end times
+      const eventStartTime = startTime ? new Date(startTime) : new Date();
+      const eventEndTime = endTime
+        ? new Date(endTime)
+        : new Date(eventStartTime.getTime() + 60 * 60 * 1000); // Default +1 hour
+
+      // Create the event with Google Meet link
+      const event = {
+        summary: title || 'Team Meeting',
+        description: `Meeting for solution: ${solutionId}`,
+        start: {
+          dateTime: eventStartTime.toISOString(),
+          timeZone: 'UTC', // Specify your desired time zone
+        },
+        end: {
+          dateTime: eventEndTime.toISOString(),
+          timeZone: 'UTC', // Specify your desired time zone
+        },
+        visibility: 'public', // Set visibility to public
+        conferenceData: {
+          createRequest: {
+            requestId: requestId,
+            conferenceSolutionKey: { type: 'hangoutsMeet' }, // Correct conference type
+          },
+        },
+      };
+
+      // Log the event object for debuggin       g
+      console.log('Creating event with data:', JSON.stringify(event, null, 2));
+
+      // Insert the event into the calendar
+      const response = await calendar.events.insert({
+        calendarId: 'primary', // Use 'primary' or a specific calendar ID if using a shared calendar
+        requestBody: event,
+        conferenceDataVersion: 1,
+      });
+
+      // Log the response for debugging
+      console.log(
+        'Calendar API response:',
+        JSON.stringify(response.data, null, 2)
+      );
+
+      // Extract the Meet link
+      const hangoutLink = response.data.hangoutLink;
+
+      if (!hangoutLink) {
+        throw new functions.https.HttpsError(
+          'internal',
+          'Failed to create Google Meet link.'
+        );
+      }
+
+      return {
+        solutionId,
+        hangoutLink,
+      };
+    } catch (error: any) {
+      console.error('Error creating Google Meet link:', error);
+      throw new functions.https.HttpsError('unknown', error.message, error);
+    }
+  }
+);

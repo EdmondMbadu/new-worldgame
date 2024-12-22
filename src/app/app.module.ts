@@ -96,6 +96,7 @@ import { PrimerRegisterComponent } from './blogs/primer-register/primer-register
 import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-packet.component';
 import { SrcObjectDirective } from './directives/src-object.directive';
 import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
+import { MeetingComponent } from './components/meeting/meeting.component';
 
 @NgModule({
   declarations: [
@@ -168,6 +169,7 @@ import { ManagementPrimerComponent } from './components/management-primer/manage
     WorldgamePacketComponent,
     SrcObjectDirective,
     ManagementPrimerComponent,
+    MeetingComponent,
   ],
   imports: [
     BrowserModule,
