@@ -3,7 +3,7 @@
         <app-navbar></app-navbar>
       </div>
       <div *ngIf="isLoggedIn">
-        <app-navbar [hoveredSolutionTourPath]="'bg-gray-100 dark:bg-gray-700'"[email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+        <app-navbar [hoveredSolutionTourPath]="'bg-gray-100 dark:bg-gray-700'" [showMoreOrLess]="true"[email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
       </div>
 
 

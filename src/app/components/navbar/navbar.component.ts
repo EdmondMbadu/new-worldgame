@@ -1,4 +1,13 @@
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
@@ -13,7 +22,7 @@ import { DataService } from 'src/app/services/data.service';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnChanges {
   @Input() loggedOn: boolean = false;
   dark: boolean = false;
 
@@ -62,6 +71,29 @@ export class NavbarComponent implements OnInit {
   @Input() hoveredOtherAisPath: string = ``;
 
   beta: boolean = true;
+  solutionDropDown = false;
+  guideDropDown = false;
+  @Input() showMoreOrLess!: boolean;
+  moreOrLess: string = 'More';
+  @Output() showMoreOrLessChange = new EventEmitter<boolean>();
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes['showMoreOrLess'] &&
+      changes['showMoreOrLess'].currentValue !== undefined
+    ) {
+      this.updateMoreOrLessLabel(changes['showMoreOrLess'].currentValue);
+    }
+  }
+
+  toggleMoreOrLess() {
+    this.showMoreOrLess = !this.showMoreOrLess;
+    this.updateMoreOrLessLabel(this.showMoreOrLess);
+  }
+
+  private updateMoreOrLessLabel(state: boolean) {
+    this.moreOrLess = state ? 'Less' : 'More';
+  }
 
   ngOnInit(): void {
     // this.applyTheme();
@@ -116,7 +148,7 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  toggle(property: 'beta') {
+  toggle(property: 'beta' | 'solutionDropDown' | 'guideDropDown') {
     this[property] = !this[property];
   }
   toggleAside() {
