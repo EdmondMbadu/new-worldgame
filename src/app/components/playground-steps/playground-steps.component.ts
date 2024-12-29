@@ -52,6 +52,7 @@ export class PlaygroundStepsComponent implements OnInit {
   currentUserIsTeamleader: boolean = false;
   currentUserIsFactChecker: boolean = false;
   currentUserIsFacilitator: boolean = false;
+  isHovering?: boolean;
 
   constructor(
     public auth: AuthService,
@@ -87,7 +88,9 @@ export class PlaygroundStepsComponent implements OnInit {
     this.display[this.currentIndexDisplay] = true;
     this.buttontexts[this.steps.length - 1] = 'Submit';
   }
-
+  toggleHover(event: boolean) {
+    this.isHovering = event;
+  }
   getMembers() {
     this.teamMembers = [];
     console.log('all participants', this.currentSolution.participants);
@@ -491,5 +494,16 @@ export class PlaygroundStepsComponent implements OnInit {
         console.error('Error occurred while removing a team member:', error);
         alert('Error occurred while removing a team member. Try again!');
       });
+  }
+  async startUpload(event: FileList) {
+    try {
+      await this.data.startUpload(
+        event,
+        `solutions/${this.currentSolution.solutionId}`
+      );
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Error occurred while uploading file. Please try again.');
+    }
   }
 }

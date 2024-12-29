@@ -7,13 +7,20 @@ import { AuthService } from './auth.service';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ActiveDescendantKeyManager } from '@angular/cdk/a11y';
 import { Avatar, User } from '../models/user';
-import { Evaluation } from '../models/solution';
+import { Evaluation, Solution } from '../models/solution';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService implements OnInit {
-  constructor(private auth: AuthService, private afs: AngularFirestore) {
+  constructor(
+    private auth: AuthService,
+    private afs: AngularFirestore,
+    private storage: AngularFireStorage,
+    private router: Router
+  ) {
     this.loadInitialTheme();
     window.addEventListener('storage', (event) => {
       if (event.key === 'theme') {
@@ -23,6 +30,13 @@ export class DataService implements OnInit {
     this.sdgs = this.transformSDGs(this.sdgsPaths);
   }
   sdgs: SDG[] = [];
+  allowedMimeTypes: string[] = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'application/webb',
+  ];
+  url: string = '';
   private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
   currentTheme = this.themeSource.asObservable();
 
@@ -177,6 +191,15 @@ export class DataService implements OnInit {
     };
     return userRef.set(data, { merge: true });
   }
+  uploadImageCloudStorage(path: string, url: string) {
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `${path}`
+    );
+    const data = {
+      image: url,
+    };
+    return solutionRef.set(data, { merge: true });
+  }
   getAllUsers() {
     return this.afs.collection<User>(`users`).valueChanges();
   }
@@ -329,6 +352,45 @@ export class DataService implements OnInit {
     }
 
     return true;
+  }
+  async startUpload(event: FileList, currentPath: string) {
+    const file = event?.item(0);
+    console.log(' current file data', file);
+
+    if (file) {
+      if (!this.allowedMimeTypes.includes(file.type)) {
+        console.log('unsupported file type');
+        return;
+      }
+
+      // Proceed with file processing
+      console.log('File is supported:', file);
+      // Your file handling logic here
+      if (file?.size >= 10000000) {
+        console.log('the file is too big');
+        alert('The picture is too big. It should be less than 5MB');
+        return;
+      }
+    }
+    // the file should not be larger than 10MB
+
+    const path = currentPath;
+
+    // the main task
+    console.log('the path', path);
+
+    // this.task = await this.storage.upload(path, file);
+    const uploadTask = await this.storage.upload(path, file);
+    this.url = await uploadTask.ref.getDownloadURL();
+    uploadTask.totalBytes;
+    // console.log('the download url', this.url);
+    const avatar = {
+      path: path,
+      downloadURL: this.url,
+      size: uploadTask.totalBytes.toString(),
+    };
+    this.uploadImageCloudStorage(currentPath, this.url);
+    // this.router.navigate(['/home']);
   }
 
   UnfollowUser() {}
