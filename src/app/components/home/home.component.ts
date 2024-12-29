@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit {
   evaluation: number = 0;
   location: string = '';
   displayPromptLocation: boolean = true;
+  isSidebarOpen: boolean = true;
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -38,6 +39,7 @@ export class HomeComponent implements OnInit {
     this.user = this.auth.currentUser;
   }
   ngOnInit(): void {
+    this.filterSolutions();
     if (this.user && this.user.location) {
       this.displayPromptLocation = false;
     }
@@ -161,5 +163,38 @@ export class HomeComponent implements OnInit {
       console.error('Error updating location:', error);
       // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
     }
+  }
+  categories: string[] = [
+    'All',
+    'Environment',
+    'Education',
+    'Healthcare',
+    'Technology',
+    'Community',
+  ];
+
+  // Define the solutions data
+
+  activeCategory: string = 'All';
+  filteredSolutions: Solution[] = [];
+
+  // Set the active category and filter solutions accordingly
+  setActiveCategory(category: string): void {
+    this.activeCategory = category;
+    this.filterSolutions();
+  }
+
+  // Filter solutions based on the active category
+  filterSolutions(): void {
+    if (this.activeCategory === 'All') {
+      this.filteredSolutions = this.completedSolutions;
+    } else {
+      this.filteredSolutions = this.completedSolutions.filter(
+        (solution) => solution.category === this.activeCategory
+      );
+    }
+  }
+  toggleAside() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 }

@@ -76,6 +76,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() showMoreOrLess!: boolean;
   moreOrLess: string = 'More';
   @Output() showMoreOrLessChange = new EventEmitter<boolean>();
+  @Output() toggleAsideEvent = new EventEmitter<void>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -154,6 +155,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   toggleAside() {
     this.sideBarBig = !this.sideBarBig;
     this.sideBarSmall = !this.sideBarSmall;
+    this.toggleAsideEvent.emit();
   }
 
   logOut() {

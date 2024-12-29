@@ -1,4 +1,26 @@
-.dark body{
-    background-color: #1A202C; /* slate-900 */
+.dark body {
+  background-color: #1a202c; /* slate-900 */
+}
+/* src/app/solutions/solutions.component.css */
+
+/* Fade-Up Animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.5s ease-out forwards;
+  opacity: 0; /* Start hidden, will be shown by animation */
+}
+
+/* Optional: Additional styling for the Hero Section */
+.hero-section {
+  /* Add your custom styles or background images here */
+}

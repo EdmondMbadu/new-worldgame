@@ -45,6 +45,10 @@ export class Solution {
   evaluatorsHolder?: Email[];
   activeScreenSharer?: string;
   meetLink?: string;
+  image?: string;
+  category?: string;
+  impact?: number;
+  supporters?: number;
 }
 
 export class Evaluation {

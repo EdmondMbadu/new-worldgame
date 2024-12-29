@@ -1,8 +1,15 @@
 @keyframes flashBackground {
-    0% { background-color: #48BB78; } /* Tailwind green-500 */
-    100% { background-color: inherit; }
+  0% {
+    background-color: #48bb78;
+  } /* Tailwind green-500 */
+  100% {
+    background-color: inherit;
   }
-  
-  .flash-animation {
-    animation: flashBackground 2s;
-  }
+}
+
+.flash-animation {
+  animation: flashBackground 2s;
+}
+.share {
+  z-index: 1000;
+}

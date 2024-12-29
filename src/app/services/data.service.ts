@@ -334,7 +334,7 @@ export class DataService implements OnInit {
   UnfollowUser() {}
 }
 
-interface SDG {
+export interface SDG {
   name: string;
   fullname: string;
   imagePath: string;

@@ -1,206 +1,57 @@
+<!-- src/app/solutions/solutions.component.html -->
+<div class="min-h-screen   px-4 pb-16 dark:bg-slate-900 ">
+    <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
+    <app-navbar    [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPageHome]="true"  (toggleAsideEvent)="toggleAside()"></app-navbar>
 
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <!-- Replace this div with your actual Hero content -->
+      <div class="text-center py-10 mt-10">
+        <h1 class="text-4xl font-bold text-gray-800 dark:text-white">Solutions for a Better World</h1>
+        <p class="mt-4 text-gray-600 dark:text-gray-300">Discover and support innovative solutions created by our community to address local and global challenges.</p>
+      </div>
+    </section>
 
-<div class="dark:bg-slate-900 min-h-screen min-w-max">
-    <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'"  [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" [currentPageHome]="true"  ></app-navbar>
-    
-    
-    <div class=" container flex flex-col lg:flex-row mx-auto justify-center md:justify-between bg-gray-100 mt-30 dark:bg-slate-900 ">
-     <!-- profile -->
-        <div class=" flex flex-col mx-auto items-center mt-32 mb-4">
-            <!-- <div class=" w-[18rem]  bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800" routerLink="/profile">
-                <div class="">
-                   
-                   
-                        <div  *ngIf="profilePicturePath ==''"  class=" w-20 h-20 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-                   
-                            <svg class=" w-24 h-24 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                        </div>
-                     
-                   
-                    <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-24 mx-auto rounded-full"  alt="">
-                   
-                </div>
-                
-                <h1 class="text-xl font-bold text-center dark:text-gray-200">{{user.firstName}} {{user.lastName}}</h1>
-                 <h2 class="text-center max-w-xs   text-gray-400 my-2 truncate dark:text-gray-400">{{user.email}}</h2>
-                
-                <h2 class="text-center text-gray-500 truncate dark:text-gray-200">{{user.profileCredential}} </h2>
-              
-    
-                <h4  class=" py-2 text-gray-700 font-light text-center text-sm dark:text-gray-400"> {{user.followers}} followers . {{user.following}} following </h4>
-                <h4  class="  text-gray-700 font-light text-center text-sm dark:text-gray-400"> {{user.numberOfPosts}} problems solved </h4>
-                <h4  class=" text-gray-700 font-light text-center text-sm dark:text-gray-400"> {{user.numberOfContributions}} problems participated </h4>
-    
-    
-            </div> -->
-    
-        <div class="  w-[16rem] flex-col mx-auto items-center my-2">
-            <!-- <div class=" w-[15rem] bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800">
-                <div class=" py-2 px-16">
-            <svg xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 438 512.01"><path fill="#26292B" fill-rule="nonzero" d="M12.39 96.25h64.25c-.02-10.18.07-6.99.24-18.07V37.73h282.28v40.49c.08 11.26.06 8.04-.06 18.07h66.54v.03c6.3 0 11.56 4.95 11.85 11.31.9 18.53.73 36.72-1.53 53.67-2.34 17.61-6.92 33.87-14.83 47.78-7.78 13.68-18.77 25.06-33.97 33.19-14.1 7.54-28.08 11.98-50 12.86-7.1 23.94-33.07 45.13-52.79 63.09-23.78 18.17-41.69 31.87-27.77 73.82h6.99c16.62 0 30.19 13.57 30.19 30.19v12.16h16.79c8.17 0 15.62 3.34 21.02 8.73 5.4 5.4 8.74 12.82 8.74 21.02v20.19c0 3.77-3.07 6.84-6.85 6.84H102.6c-3.78 0-6.84-3.07-6.84-6.84v-20.19c0-8.16 3.33-15.58 8.72-20.98l.05-.04c5.4-5.39 12.82-8.73 20.98-8.73h16.78v-12.16c0-16.56 13.64-30.19 30.19-30.19h9.59c12.43-39.58-3.86-52.4-26.37-70.13-26.04-15.62-47.01-47.08-58.74-66.96-22.73-.72-32.29-5.02-46.69-12.78-15.11-8.14-26.01-19.53-33.7-33.21-7.8-13.88-12.31-30.11-14.6-47.71-2.17-16.7-2.35-34.57-1.49-52.77v-.33c0-6.58 5.33-11.9 11.91-11.9zm345.44 43.45c-1.48 29.14-4.12 51.71-7.81 69.62 7.74-1.63 14.11-4.1 19.3-7.34 6.2-3.86 10.82-8.93 14.24-15.02 3.69-6.58 6.01-14.37 7.44-23.13 1.18-7.29 1.73-15.38 1.92-24.11h-34.54l-.55-.02zm-280.16 0h-31.2c.15 8.73.64 16.85 1.74 24.22 1.31 8.83 3.47 16.63 6.96 23.14 3.23 6.05 7.68 11.1 13.77 14.96 4.86 3.1 10.81 5.49 18.05 7.11-5.15-20.25-7.97-43.1-9.32-69.43z"/><path fill="#FFCE6B" fill-rule="nonzero" d="M358.38 127.82h41.77c2.62 0 4.75 2.12 4.75 4.73 0 23.91-2.16 44.51-10.98 60.22-8.77 15.62-26.29 27.68-52.7 29.43-4.19 8.48-5.38 15.44-10.55 21.33 42.32-1.12 66.72-16.71 80.15-40.31 14.18-24.97 16.55-59.21 14.82-95.03h-67.26v19.63z"/><path fill="#fff" fill-rule="nonzero" d="M77.52 108.15H12.39c-1.77 35.82.51 70.03 14.55 95 13.25 23.57 37.45 39.15 79.59 40.34-3.23-5.9-2.53-12.09-8.75-20.46-26.13-2.23-44.66-14.66-53.07-30.39-8.42-15.71-10.21-36.25-10.21-60.1a4.75 4.75 0 014.74-4.74h38.28v-19.65z"/><path fill="#26292B" fill-rule="nonzero" d="M307.59 434.35v.04h2.98c8.16 0 15.63 3.33 21.02 8.73 5.4 5.4 8.74 12.82 8.74 21.02v41.02c0 3.78-3.08 6.85-6.85 6.85H102.6c-3.77 0-6.84-3.07-6.84-6.85v-41.02c0-8.16 3.33-15.58 8.73-20.97l.04-.05c5.4-5.4 12.82-8.73 20.98-8.73h2.98v-.04h179.1z"/><path fill="#fff" fill-rule="nonzero" d="M272.67 454.72h-134.8c-4.56 0-8.69 1.84-11.67 4.83l-.05.04a16.475 16.475 0 00-4.82 11.68v20.37h193.42v-20.37c0-4.52-1.84-8.65-4.87-11.68-2.98-2.98-7.11-4.87-11.67-4.87h-25.54zM195.73 396.8h24.55v-68.76c-85.58-30.43-94.33-134.96-114.74-280.12H86.97v103.34c1.71 39.31 8.3 68.41 17.37 90.7 8.99 22.02 20.54 37.41 32.36 49.37 8.62 8.76 17.64 15.84 25.9 22.35 31.8 24.98 40.98 35.89 33.13 83.12z"/><path fill="#FFCE6B" fill-rule="nonzero" d="M218.9 396.8h24.07c-14.98-49.06 6.5-65.44 34.8-87.05 31.04-23.7 71.39-54.47 71.39-155.74V47.92H104.85c13.18 93.71 21.21 170.49 48.27 221.32 10.75 18.21 22.64 32.75 35.85 43.02 6.41 4.73 13.42 8.82 21.11 12.25 2.79 1.11 5.63 2.07 8.53 2.85v.57l.29.11v68.76z"/><path fill="#fff" d="M289.27 257.78l-.28.37c-3.09-2.23-6.63-3.04-10.61-2.4-3.99.63-7.11 2.51-9.35 5.59l-.38-.27c2.24-3.09 3.04-6.64 2.4-10.63-.64-3.98-2.5-7.1-5.58-9.33.09-.13 9.3 2.28 10.89 2.03 3.99-.64 7.1-2.5 9.35-5.6l.38.28c-2.24 3.08-3.05 6.64-2.4 10.62.62 3.98 2.49 7.1 5.58 9.34zm34.84-62.8l-.28.38c-3.09-2.24-6.63-3.04-10.62-2.41-3.98.64-7.1 2.5-9.34 5.59l-.39-.26c2.25-3.1 3.04-6.64 2.41-10.63-.65-3.99-2.5-7.1-5.58-9.34l.28-.38c3.08 2.24 6.63 3.05 10.61 2.4 3.99-.63 7.11-2.49 9.35-5.58l.38.27c-2.24 3.09-3.05 6.64-2.4 10.62.61 3.99 2.48 7.1 5.58 9.34zm8.22-86.64l-.5.7c-5.65-4.1-12.14-5.57-19.43-4.4-7.29 1.16-12.99 4.57-17.09 10.23l-.7-.5c4.1-5.66 5.58-12.14 4.39-19.44-1.17-7.3-4.58-13-10.22-17.08l.5-.69c5.66 4.09 12.14 5.56 19.44 4.4 7.29-1.17 12.98-4.57 17.08-10.24l.69.5c-4.09 5.65-5.56 12.14-4.4 19.43 1.17 7.3 4.58 13 10.24 17.09z"/><path fill="#252D32" fill-rule="nonzero" d="M67.04 0h317.48c6.52 0 12.46 2.67 16.74 6.96 4.29 4.28 6.96 10.21 6.96 16.74 0 6.53-2.67 12.47-6.96 16.75-4.28 4.29-10.22 6.96-16.74 6.96H67.04c-6.53 0-12.46-2.67-16.74-6.96-4.29-4.28-6.96-10.22-6.96-16.74 0-6.54 2.67-12.47 6.96-16.75C54.58 2.67 60.51 0 67.04 0z"/><path fill="#fff" d="M102.12 37.06l-4.98-26.71h-30.1c-3.67 0-7.02 1.51-9.43 3.93a13.331 13.331 0 00-3.92 9.42c0 3.67 1.51 7.02 3.92 9.44 2.41 2.41 5.76 3.92 9.43 3.92h35.08z"/><path fill="#FFCE6B" d="M102.12 37.06l-4.98-26.71h287.38c3.66 0 7.01 1.51 9.43 3.93 2.41 2.41 3.92 5.76 3.92 9.43 0 3.66-1.51 7.01-3.92 9.43-2.42 2.41-5.77 3.92-9.43 3.92h-282.4z"/><path fill="#252D32" fill-rule="nonzero" d="M254.6 142.83c1.83.98 3.45 2.16 4.84 3.53 2.52 2.48 4.41 5.54 5.65 9.12 1.16 3.33 1.74 7.04 1.74 11.1v22.01c0 15.53-7.4 24.55-22.18 27.06v7.63c0 3.92-3.18 7.1-7.1 7.1h-27.68c-3.92 0-7.1-3.18-7.1-7.1v-7.78c-5.78-1.17-10.46-3.46-14.03-6.86-5.09-4.85-7.64-11.54-7.64-20.05v-12.84c0-3.92 3.17-7.1 7.09-7.1h3.66c-1.52-.95-2.87-2.05-4.06-3.31-2.42-2.58-4.22-5.68-5.39-9.27-1.08-3.33-1.64-7.07-1.64-11.17v-22.01c0-15.41 7.34-24.42 22.01-27.03v-7.83c0-3.92 3.18-7.1 7.1-7.1h27.68c3.92 0 7.1 3.18 7.1 7.1v7.93c5.82 1.17 10.54 3.45 14.14 6.85 5.13 4.85 7.71 11.56 7.71 20.08v12.84c0 3.92-3.18 7.1-7.1 7.1h-4.8z"/><path fill="#fff" fill-rule="nonzero" d="M221.21 146.23h15.68c8.22 0 14.09 1.73 17.59 5.18 3.5 3.44 5.25 8.5 5.25 15.17v22.01c0 13.23-7.39 20.12-22.18 20.68v14.01h-27.68v-14.01c-14.45-.78-21.68-7.67-21.68-20.68v-12.84h29.18v9.01c0 2.44 1.4 3.67 4.18 3.67h4.83c2.78 0 4.17-1.23 4.17-3.67v-15.18c0-2.44-1.39-3.67-4.17-3.67h-16.01c-8.22 0-14.03-1.81-17.43-5.42-3.39-3.62-5.09-8.81-5.09-15.59v-22.01c0-13.12 7.34-20.02 22.02-20.69V88.03h27.68v14.17c14.57.78 21.85 7.68 21.85 20.69v12.84h-29.18v-9.01c0-2.45-1.39-3.67-4.17-3.67h-4.84c-2.78 0-4.17 1.22-4.17 3.67v15.84c0 2.45 1.39 3.67 4.17 3.67z"/></svg>
-                </div>
-                <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                    <a routerLink="/join-tournament" class="text-white"> Join a Tournament</a>
-                </div>
-    
-            </div> -->
-     
-    
-            </div>
+    <div class="mx-auto max-w-7xl">
+      
+      <!-- Solutions Section -->
+      <section id="solutions" class="scroll-mt-16 mt-4">
         
-            <!-- <div class="  w-[20rem]  bg-white p-4 rounded-lg shadow-lg mt-6 dark:bg-slate-800"> -->
-                <!-- <div class=" py-2">
-                <h1 class="text-center hover:underline dark:text-white" routerLink="/problem-list-view">Pending Solutions ({{pending}})</h1>
-                </div>    
-             
-                <app-problem-list [home]="true" [path]="'/playground-steps'"  [solutions]="pendingSolutions"></app-problem-list> -->
-            <!-- </div> -->
-    
-        </div>
-        <!-- start a playground -->
-    
-        <div class=" lg:hidden w-[16rem] flex-col mx-auto items-center my-2">
-            <!-- <div class=" w-[16rem] bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800">
-                <div class=" py-2 px-16">
-            
-    
-                <svg width="100px" height="100px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="dark:fill-white fill:black" preserveAspectRatio="xMidYMid meet"><path d="M32 2C15.432 2 2 15.432 2 32l.001.053l-.001.053C2 48.616 15.357 62 31.835 62l.064-.002L32 62c16.568 0 30-13.432 30-30S48.568 2 32 2m28 30c0 2.394-.302 4.717-.866 6.934c-.261-.18-.951.564-1.121-.422c-.213-1.224-1.593-2.074-2.336-1.489s-2.866 2.286-2.971 3.35c-.107 1.063-1.01 2.339-1.433 1.437c-.426-.904-1.698-3.723-1.646-4.467c.052-.744-.586.266-1.538-1.223c-.956-1.489-2.601-.214-3.928-.958c-1.327-.745-2.813-1.755-3.557-2.073c-.741-.32 1.327 2.977 1.593 2.552c.267-.425 1.327.319 1.646.319s1.167.744.637 1.436s-5.253 3.566-5.731 2.818c-.48-.748-3.29-6.541-3.769-6.186c-.478.355 2.973 6.398 3.557 6.77c.582.373 2.335.054 3.183-.318c.85-.372-1.751 4.148-2.864 4.68c-1.114.531-2.016 2.18-1.54 2.924c.478.744.531 3.563-.476 3.936c-1.01.371-1.381.956-1.063 1.648c.317.69-.742 1.859-1.22 2.604c-.479.744-2.335 2.286-2.495 2.712c-.158.426-2.44.319-3.344.319c-.901 0-.212-1.117-.319-2.073c-.104-.958-.9-1.862-.9-2.34c0-.479-.267-1.596-.637-2.127c-.371-.533-.479-1.543-.107-2.127c.373-.586.637-2.286-.104-3.031c-.744-.744-1.594-2.021-1.009-3.031c.584-1.01-.637-.903-1.645-1.383c-1.009-.479-3.079.16-4.14.32c-1.062.159-2.122-.266-2.441-.799c-.318-.531-1.008-1.86-1.715-2.18c-.705-.318-.301-1.701.123-2.232c.426-.531-.424-1.542 0-1.969c.426-.425.69-1.966 1.539-2.303c.85-.336.69-.567.716-1.365c.027-.798.955-.798 1.113-1.223c.16-.426.637-.638 1.595-.638c.955 0 2.572-.559 3.342-.745s2.097-.452 1.99.293c-.106.744-.079 1.594.424 1.594c.505 0 1.195.293 1.991.789c.796.495.822.09.929-.469s1.22-.346 2.372.186s2.723.159 3.225.107c.505-.055.718-1.569.585-2.074c-.134-.505-.929.239-1.433-.08c-.504-.318-1.195.08-1.698-.373c-.505-.451-.585-1.515 0-1.541c.583-.027.876-.213 1.22-.611c.346-.399 1.646-.638 2.15-.24c.503.399 1.248.665 1.697.213c.451-.451-.9-1.328-1.194-1.568c-.292-.239-.053-1.01-.344-1.01c-.293 0-.532.132-.372.505c.159.372-.849 1.036-1.01.665c-.158-.373-.423-1.09-.821-1.09c-.397 0-.928 1.808-.955 2.1c-.027.293-.717.771-1.273.771c-.556 0-.556.639-.265.932c.292.292.079 1.462-.451 1.529c-.531.068-.717-.12-.796-.573c-.079-.451-.61-.398-.637-1.329s-.611-1.382-.982-1.808s-1.327-1.675-1.698-1.116s1.327 1.755 1.777 2.073c.453.319.373 1.01.134 1.17s-.69 1.463-.955 1.568c-.267.106-.52-.396-.52-.396c-.398-.159.556-.638.716-.877c.158-.239-1.671-1.914-2.001-2.393s-1.74.398-2.376.08c-.637-.318-1.593 1.196-1.671 2.073c-.081.878-1.116 1.116-2.071 1.116c-.954 0-1.592-.717-1.272-1.435c.318-.718-.16-1.914.398-1.994c.557-.079 2.147 0 2.466-.877c.318-.877-1.513-1.675-.795-1.834c.715-.16 1.831-1.275 2.627-1.914c.794-.638.874-1.435 1.59-1.491c.718-.055-.158-1.381.479-1.779c.638-.399.796 1.436 1.274 1.436s1.431-.16 2.228.239s1.035-.399 1.354-1.437c.318-1.036 1.114-1.595 2.705-2.392c1.592-.798-1.829.239-2.467-.559c-.637-.798.239-2.553.638-3.792c.398-1.24-1.274 1.239-2.15 2.516c-.877 1.276.239 1.834.158 2.711c-.079.878-1.51 1.914-1.51 1.914c-.637.08-.558-1.196-.876-1.754c-.319-.558-.877-.319-1.753.319c-.876.638-.955-1.515-1.193-2.393c-.237-.876 1.433-1.994 2.218-2.59c.784-.598 2.079-3.471 3.513-5.703c1.434-2.233 3.503-1.117 4.06-.239c.559.876 1.989.318 3.344 1.914c1.354 1.595-.319 2.312-1.829 1.664c-1.515-.648.317 1.606 1.191 2.244c.876.637 1.354-1.436 1.673-1.914c.318-.479 1.511-.239 2.386-1.516c.877-1.276 2.866-1.036 4.002-.896c1.137.141.854-.699.138-1.386c-.53-.508.554-.063 1.83.56C54.476 12.768 60 21.737 60 32m-39.958-9.528c-.264-.273.267-1.348.505-1.667c.24-.319-.664-.213-.609.24c.053.451-.346 1.143-.903 1.329s-1.192.132-.875-.373c.317-.505.026-.957-.213-1.436c-.238-.479 1.326-.771 1.646-1.063c.318-.292-.503-.479-.478-.93c.027-.453.213-.851.529-.904c.319-.053.617-.257.903-.239c.877.054.609 2.047.929 2.686c.318.637 1.221 1.409 1.141 1.966c-.08.559-.25.878-.9.718c-.653-.16-1.698.824-2.098.638c-.399-.187.69-.692.423-.965m-5.718-11.181c.797.398 1.432-.324 1.988-.479c.659-.182 1.035 2.154.399 2.074c-.637-.08-1.353 1.276-2.273 1.196c-.921-.08-.513-.717-1.548-1.674c-.222-.206-.313-.392-.321-.555c.221-.213.441-.427.67-.632c.358-.095.783-.081 1.085.07m24.902 40.141c.743-.159.6-1.573 1.274-1.648c1.433-.159.053 3.828-.477 4.945c-.531 1.117-.745 1.063-1.25.372c-.507-.69-.343-1.808 0-2.339c.342-.533-.291-1.17.453-1.33" ></path></svg>
-                </div>
-                <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                    <a routerLink="/create-playground" class="text-white"> Start a Solution Lab</a>
-                </div>
-    
-            </div> -->
-     
-    
-    
-    
-        </div>
-    
-     
-    
-        <div class="flex flex-col lg:mt-32 mt-10 mx-auto" >
-            <div class="cursor-pointer flex flex-row items-center mx-auto">
-                <svg (click)="toggleSortyByDropDown()" width="30px" class="stroke-black dark:stroke-white" height="30px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 6H19M5 10H15M5 14H19M5 18H15"  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <h1 (click)="toggleSortyByDropDown()"class="text-gray-800 dark:text-gray-200 font-Nunito m-2 text-lg">Sort By</h1>
-                    <div  *ngIf="showSortByDrowpDown" class="z-10 mt-40 absolute  bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600">
-                        
-                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                          <li>
-                            <a (click)="sortBySubmissionDate('descending')"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Newest First</a>
-                          </li>
-                          <li>
-                            <a (click)="sortBySubmissionDate('ascending')"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white ">Oldest First</a>
-                          </li>
-                          <li>
-                            <a (click)="sortByNumLikes('descending')" class="block px-4 py-1 text-sm  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Most Liked</a>
-                  
-                          </li>
-                   
-                        </ul>
-                      
-                    </div>
+        <!-- Category Filter -->
+        <!-- <div class="flex flex-wrap justify-center gap-4 mb-8">
+          <button
+            *ngFor="let category of categories"
+            (click)="setActiveCategory(category.fullname)"
+            [ngClass]="{
+              'bg-teal-700 text-white': category.fullname === activeCategory,
+              'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200': category.fullname !== activeCategory
+            }"
+            class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
+          >
+            {{ category.fullname }}
+          </button>
+        </div> -->
+        
+        <!-- Solutions Grid -->
+        <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 ">
+          <div
+            *ngFor="let solution of completedSolutions; let i = index"
+            class="animate-fade-up"
+           
+          >
+          <app-solution  [ngStyle]="{'animation-delay': i * 100 + 'ms'}"  [user]="completedSolutionsUsers[i]"   [solution]="solution"></app-solution>
                
+    
             
-            </div>
-            <app-solution *ngFor="let solution of completedSolutions; let i=index" [user]="completedSolutionsUsers[i]"   [solution]="solution"></app-solution>
-               
-            
+          </div>
         </div>
         
-            <!-- start a playground -->
-    
-            <div class="hidden lg:flex flex-col mx-auto items-center mt-32 mb-4">
-                <div class="  w-[16rem]  bg-white p-4 rounded-lg shadow-lg dark:bg-slate-800">
-                    <div class=" py-2 px-16">
-                        
-                
-    
-                        <svg width="100px" height="100px" class="dark:fill-white fill:black" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" preserveAspectRatio="xMidYMid meet"><path d="M32 2C15.432 2 2 15.432 2 32l.001.053l-.001.053C2 48.616 15.357 62 31.835 62l.064-.002L32 62c16.568 0 30-13.432 30-30S48.568 2 32 2m28 30c0 2.394-.302 4.717-.866 6.934c-.261-.18-.951.564-1.121-.422c-.213-1.224-1.593-2.074-2.336-1.489s-2.866 2.286-2.971 3.35c-.107 1.063-1.01 2.339-1.433 1.437c-.426-.904-1.698-3.723-1.646-4.467c.052-.744-.586.266-1.538-1.223c-.956-1.489-2.601-.214-3.928-.958c-1.327-.745-2.813-1.755-3.557-2.073c-.741-.32 1.327 2.977 1.593 2.552c.267-.425 1.327.319 1.646.319s1.167.744.637 1.436s-5.253 3.566-5.731 2.818c-.48-.748-3.29-6.541-3.769-6.186c-.478.355 2.973 6.398 3.557 6.77c.582.373 2.335.054 3.183-.318c.85-.372-1.751 4.148-2.864 4.68c-1.114.531-2.016 2.18-1.54 2.924c.478.744.531 3.563-.476 3.936c-1.01.371-1.381.956-1.063 1.648c.317.69-.742 1.859-1.22 2.604c-.479.744-2.335 2.286-2.495 2.712c-.158.426-2.44.319-3.344.319c-.901 0-.212-1.117-.319-2.073c-.104-.958-.9-1.862-.9-2.34c0-.479-.267-1.596-.637-2.127c-.371-.533-.479-1.543-.107-2.127c.373-.586.637-2.286-.104-3.031c-.744-.744-1.594-2.021-1.009-3.031c.584-1.01-.637-.903-1.645-1.383c-1.009-.479-3.079.16-4.14.32c-1.062.159-2.122-.266-2.441-.799c-.318-.531-1.008-1.86-1.715-2.18c-.705-.318-.301-1.701.123-2.232c.426-.531-.424-1.542 0-1.969c.426-.425.69-1.966 1.539-2.303c.85-.336.69-.567.716-1.365c.027-.798.955-.798 1.113-1.223c.16-.426.637-.638 1.595-.638c.955 0 2.572-.559 3.342-.745s2.097-.452 1.99.293c-.106.744-.079 1.594.424 1.594c.505 0 1.195.293 1.991.789c.796.495.822.09.929-.469s1.22-.346 2.372.186s2.723.159 3.225.107c.505-.055.718-1.569.585-2.074c-.134-.505-.929.239-1.433-.08c-.504-.318-1.195.08-1.698-.373c-.505-.451-.585-1.515 0-1.541c.583-.027.876-.213 1.22-.611c.346-.399 1.646-.638 2.15-.24c.503.399 1.248.665 1.697.213c.451-.451-.9-1.328-1.194-1.568c-.292-.239-.053-1.01-.344-1.01c-.293 0-.532.132-.372.505c.159.372-.849 1.036-1.01.665c-.158-.373-.423-1.09-.821-1.09c-.397 0-.928 1.808-.955 2.1c-.027.293-.717.771-1.273.771c-.556 0-.556.639-.265.932c.292.292.079 1.462-.451 1.529c-.531.068-.717-.12-.796-.573c-.079-.451-.61-.398-.637-1.329s-.611-1.382-.982-1.808s-1.327-1.675-1.698-1.116s1.327 1.755 1.777 2.073c.453.319.373 1.01.134 1.17s-.69 1.463-.955 1.568c-.267.106-.52-.396-.52-.396c-.398-.159.556-.638.716-.877c.158-.239-1.671-1.914-2.001-2.393s-1.74.398-2.376.08c-.637-.318-1.593 1.196-1.671 2.073c-.081.878-1.116 1.116-2.071 1.116c-.954 0-1.592-.717-1.272-1.435c.318-.718-.16-1.914.398-1.994c.557-.079 2.147 0 2.466-.877c.318-.877-1.513-1.675-.795-1.834c.715-.16 1.831-1.275 2.627-1.914c.794-.638.874-1.435 1.59-1.491c.718-.055-.158-1.381.479-1.779c.638-.399.796 1.436 1.274 1.436s1.431-.16 2.228.239s1.035-.399 1.354-1.437c.318-1.036 1.114-1.595 2.705-2.392c1.592-.798-1.829.239-2.467-.559c-.637-.798.239-2.553.638-3.792c.398-1.24-1.274 1.239-2.15 2.516c-.877 1.276.239 1.834.158 2.711c-.079.878-1.51 1.914-1.51 1.914c-.637.08-.558-1.196-.876-1.754c-.319-.558-.877-.319-1.753.319c-.876.638-.955-1.515-1.193-2.393c-.237-.876 1.433-1.994 2.218-2.59c.784-.598 2.079-3.471 3.513-5.703c1.434-2.233 3.503-1.117 4.06-.239c.559.876 1.989.318 3.344 1.914c1.354 1.595-.319 2.312-1.829 1.664c-1.515-.648.317 1.606 1.191 2.244c.876.637 1.354-1.436 1.673-1.914c.318-.479 1.511-.239 2.386-1.516c.877-1.276 2.866-1.036 4.002-.896c1.137.141.854-.699.138-1.386c-.53-.508.554-.063 1.83.56C54.476 12.768 60 21.737 60 32m-39.958-9.528c-.264-.273.267-1.348.505-1.667c.24-.319-.664-.213-.609.24c.053.451-.346 1.143-.903 1.329s-1.192.132-.875-.373c.317-.505.026-.957-.213-1.436c-.238-.479 1.326-.771 1.646-1.063c.318-.292-.503-.479-.478-.93c.027-.453.213-.851.529-.904c.319-.053.617-.257.903-.239c.877.054.609 2.047.929 2.686c.318.637 1.221 1.409 1.141 1.966c-.08.559-.25.878-.9.718c-.653-.16-1.698.824-2.098.638c-.399-.187.69-.692.423-.965m-5.718-11.181c.797.398 1.432-.324 1.988-.479c.659-.182 1.035 2.154.399 2.074c-.637-.08-1.353 1.276-2.273 1.196c-.921-.08-.513-.717-1.548-1.674c-.222-.206-.313-.392-.321-.555c.221-.213.441-.427.67-.632c.358-.095.783-.081 1.085.07m24.902 40.141c.743-.159.6-1.573 1.274-1.648c1.433-.159.053 3.828-.477 4.945c-.531 1.117-.745 1.063-1.25.372c-.507-.69-.343-1.808 0-2.339c.342-.533-.291-1.17.453-1.33" ></path></svg>
-            
-                    </div>
-                    <div class=" border-1 hover:bg-teal-800 bg-teal-700 p-2 rounded-lg text-center">
-                        <a routerLink="/create-solution" class=" text-white"> Start a NewWorld Game Lab <Label></Label> <Label></Label></a>
-                    </div>
-    
-                </div>
-    
-                <!-- <div class="  w-[20rem]   bg-white p-4 rounded-lg shadow-lg mt-6 dark:bg-slate-800">
-                    <div class=" py-2">
-                    <h1 class="text-center hover:underline dark:text-white cursor-pointer" routerLink="/problem-list-feedback">Evaluate a Strategy ({{evaluation}})</h1>
-                    </div>    
-                    
-                    <app-problem-list [path]="'/problem-feedback'" [viewAllPath]="'/problem-list-feedback'" [solutions]="evaluationSolutions"></app-problem-list>
-               
-                </div> -->
-    
-            </div>
-                        
+      </section>
+      
     </div>
     
-    <app-footer class="md:hidden"></app-footer>
-    </div>
-    
-    
-    <app-chatbot></app-chatbot>
-    
-    
-    <div id="location-modal" class="w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex" *ngIf="displayPromptLocation">
-        <div class="relative p-4 w-full max-w-md max-h-full">
-            <!-- Modal content -->
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        Enter Location<span class="text-red-600">*</span>
-                    </h3>
-                    <button (click)="closeDisplayPromptLocation()" type="button" 
-                            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" 
-                             fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" 
-                                  stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                        </svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-    
-                <!-- Modal body -->
-                <div class="p-4 md:p-5">
-                    <label for="locationInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Location (e.g. Philadelphia, PA)
-                    </label>
-                    <input id="locationInput" 
-                    [(ngModel)]="location"
-                           type="text" 
-                           class="block w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900 
-                                  text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 
-                                  dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" 
-                           placeholder="Philadelphia, PA">
-                    
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span class="text-red-600">*</span> We ask for your location so we can recommend people who are nearby 
-                        and to help build a community showing where each solution is developed. Your privacy matters to us, 
-                        and you can always choose what to share.
-                    </p>
-    
-                    <div class="mt-4 flex justify-end space-x-2">
-                        <button (click)="RejectSubmitLocation()" type="button" 
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white 
-                                       bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none 
-                                       focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-700">
-                            Don't Share
-                        </button>
-                        <button (click)="submitLocation()" type="button" 
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white 
-                                       bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none 
-                                       focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700">
-                            Share
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
+</div>
+  <app-chatbot></app-chatbot>
+  
+ 
