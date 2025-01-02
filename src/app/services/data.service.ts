@@ -393,6 +393,11 @@ export class DataService implements OnInit {
     // this.router.navigate(['/home']);
   }
 
+  public parseDateMMDDYYYY(dateString: string): number {
+    const [month, day, year] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day).getTime();
+  }
+
   UnfollowUser() {}
 }
 

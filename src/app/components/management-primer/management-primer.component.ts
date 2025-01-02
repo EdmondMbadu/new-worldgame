@@ -41,6 +41,13 @@ export class ManagementPrimerComponent implements OnInit {
     this.data.getPrimerData().subscribe((data: any) => {
       this.primerpData = data[0].signUps;
       this.wid = data[0].wid;
+      console.log('info ', this.primerpData);
+      this.primerpData = this.primerpData.sort((a, b) => {
+        const dateA = this.data.parseDateMMDDYYYY(a.registerDate!);
+        const dateB = this.data.parseDateMMDDYYYY(b.registerDate!);
+        // console.log('Parsed dates for sorting:', dateA, dateB);
+        return dateB - dateA; // Sort in descending order
+      });
     });
   }
 

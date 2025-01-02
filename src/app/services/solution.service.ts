@@ -10,6 +10,7 @@ import { combineLatest, count, last, map, Observable } from 'rxjs';
 import { Tournament, User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
 import { Email } from '../components/create-playground/create-playground.component';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +27,8 @@ export class SolutionService {
   constructor(
     private auth: AuthService,
     private afs: AngularFirestore,
-    private time: TimeService
+    private time: TimeService,
+    private fns: AngularFireFunctions
   ) {
     this.auth.user$.subscribe((user) => {
       if (user && user.email) {
@@ -60,20 +62,21 @@ export class SolutionService {
     // }
   }
 
-  createdNewSolution(
+  async createdNewSolution(
     title: string,
     solutionArea: string,
     description: string,
     participants: any,
     evaluators: any,
-
     // endDate: string,
-
     sdgs: string[]
   ) {
     console.log('The list of designers', participants);
-    // let formatedDate = this.time.formatDateString(endDate);
+
+    // Generate a unique solution ID
     this.solutionId = this.afs.createId().toString();
+
+    // Prepare the initial data without the meetLink
     const data = {
       solutionId: this.solutionId,
       title: title,
@@ -93,12 +96,37 @@ export class SolutionService {
       likes: [],
       numLike: '0',
       // sdg: sdg,
+      // meetLink will be added later
     };
+
+    // Reference to the Firestore document
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${data.solutionId}`
     );
 
-    return solutionRef.set(data, { merge: true });
+    // Save the initial data to Firestore
+    await solutionRef.set(data, { merge: true });
+
+    // Asynchronously create the meeting link without awaiting
+    this.createMeetLink(this.solutionId, title)
+      .toPromise()
+      .then((dataMeeting) => {
+        const meetLink = dataMeeting.hangoutLink;
+        console.log('Meeting link', meetLink);
+
+        // Update the Firestore document with the meetLink
+        return solutionRef.update({ meetLink });
+      })
+      .catch((error) => {
+        console.error('Error creating meeting link:', error);
+        // Optionally handle the error, e.g., notify the user or retry
+      });
+
+    // Optionally return the solution data or a confirmation
+    return {
+      solutionId: this.solutionId,
+      status: 'Solution created. Meeting link is being generated.',
+    };
   }
 
   addToTournament(contact: Tournament) {
@@ -501,5 +529,9 @@ export class SolutionService {
 
   private generateSessionId(): string {
     return Date.now().toString(); // Generates a simple session ID based on timestamp
+  }
+  createMeetLink(solutionId: string, title: string): Observable<any> {
+    const callable = this.fns.httpsCallable('createGoogleMeet');
+    return callable({ solutionId, title });
   }
 }

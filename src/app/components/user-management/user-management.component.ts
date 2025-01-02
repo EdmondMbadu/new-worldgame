@@ -35,8 +35,8 @@ export class UserManagementComponent implements OnInit {
 
       // Sort the allUsers array by dateJoined in descending order
       this.allUsers = this.allUsers.sort((a, b) => {
-        const dateA = this.parseDateMMDDYYYY(a.dateJoined!);
-        const dateB = this.parseDateMMDDYYYY(b.dateJoined!);
+        const dateA = this.data.parseDateMMDDYYYY(a.dateJoined!);
+        const dateB = this.data.parseDateMMDDYYYY(b.dateJoined!);
         // console.log('Parsed dates for sorting:', dateA, dateB);
         return dateB - dateA; // Sort in descending order
       });
@@ -96,10 +96,6 @@ export class UserManagementComponent implements OnInit {
         }
       });
     });
-  }
-  private parseDateMMDDYYYY(dateString: string): number {
-    const [month, day, year] = dateString.split('-').map(Number);
-    return new Date(year, month - 1, day).getTime();
   }
 
   toggleUserDetails(index: number) {
