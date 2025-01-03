@@ -1,7 +1,7 @@
 <!-- src/app/solutions/solutions.component.html -->
 <div class="min-h-screen   px-4 pb-16 dark:bg-slate-900 ">
     <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
-    <app-navbar    [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPageHome]="true"  (toggleAsideEvent)="toggleAside()"></app-navbar>
+    <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'"    [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPageHome]="true"  (toggleAsideEvent)="toggleAside()"></app-navbar>
 
     <!-- Hero Section -->
     <section class="hero-section">
