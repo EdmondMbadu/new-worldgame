@@ -543,8 +543,14 @@
                       <a routerLink="/user-management"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">User Management</a>
                     </li>
                   </ul>
-                  <div class="">
-                    <a class="block px-4 py-1 text-sm  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white" (click)="logOut()">Log out</a>
+                  <div class="m-4 flex flex-row  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                  
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white pt-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
+                    </svg>
+                    <a class="px-2 py-1 text-sm " (click)="logOut()">
+                     
+                      Log out</a>
                   </div>
               </div>
           

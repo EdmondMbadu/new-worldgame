@@ -105,7 +105,7 @@
                 <h1 class="ml-2"> Edit</h1> 
                 <span class="sr-only">Comment settings</span>
                 </button>
-                <figure><img *ngIf="currentSolution.image" [src]="currentSolution.image" alt=""></figure>
+
                 <div *ngIf="currentSolution.audioFile">
                     <app-audio-player [audioFile]="currentSolution.audioFile"></app-audio-player>
                 </div>
@@ -131,6 +131,7 @@
                         </div>
         
             </header>
+            <figure><img *ngIf="currentSolution.image" [src]="currentSolution.image" class="my-3" alt=""></figure>
            
 
             <p class="text-gray-900 dark:text-white" [innerHTML]="currentSolution.content">
