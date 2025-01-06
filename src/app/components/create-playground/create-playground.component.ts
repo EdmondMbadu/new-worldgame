@@ -295,6 +295,7 @@ export class CreatePlaygroundComponent {
         this.myForm.value.title,
         this.myForm.value.solutionArea,
         this.myForm.value.description,
+        '',
         this.participantsEmails,
         this.evaluatorsEmails,
         // this.myForm.value.date,

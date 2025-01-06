@@ -91,6 +91,8 @@ export const genericEmail = functions.https.onCall(
         description: data.description,
         title: data.title,
         path: data.path,
+        image: data.image,
+        author: data.author,
       },
     };
 

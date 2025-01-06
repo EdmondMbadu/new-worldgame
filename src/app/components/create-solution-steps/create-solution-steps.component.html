@@ -21,7 +21,7 @@
 <div *ngIf="stepNumber==1" class=" space-y-4 mt-10 mx-4">
     <div class="relative z-0 w-full mb-5 group">
         <input [(ngModel)]="solution.newSolution.title"   type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-        <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Project Title</label>
+        <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Solution Title</label>
     </div>
     <div class="container flex mx-auto  justify-center my-10">
         <button *ngIf="solution.newSolution.title!==''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
@@ -46,7 +46,50 @@
   
  
 </div>
-<form [formGroup]="myForm" *ngIf="stepNumber==3" class="mt-10">
+<div *ngIf="stepNumber==3" class=" space-y-4 mt-10 mx-4">
+    <img *ngIf="solution.newSolution.image" [src]="solution.newSolution.image" alt="">
+    <div class="flex items-center justify-center w-full">
+        <label for="getFile" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+           
+            <div class="flex flex-col mx-auto"
+            appDropZone
+            (hovered)="toggleHover($event)"
+            (dropped)="startUpload($event)"
+            [class.hovering]="isHovering">
+            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                </svg>
+                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
+            </div>
+            <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload feature Image</h5>
+
+            <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
+
+
+            </div>
+         
+        </label>
+    </div> 
+    <div class="relative z-0 w-full mb-5 group">
+        
+        <!-- <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Describe your problem focus in a few words</label> -->
+        <!-- <textarea [(ngModel)]="solution.newSolution.description"  id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea> -->
+
+    </div>
+    <div class="container flex mx-auto  justify-center my-10">
+        <button *ngIf="solution.newSolution.image!==''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button [disabled]="true" *ngIf="solution.newSolution.image===''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+    </div>
+
+
+
+
+  
+ 
+</div>
+<form [formGroup]="myForm" *ngIf="stepNumber==4" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <div class="mb-6 mt-4">
             <!-- <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">Team Members</label> -->
@@ -86,7 +129,7 @@
         <button [disabled]="true" *ngIf="emails!.invalid " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
     </div>
 </form>
-<form [formGroup]="myForm" *ngIf="stepNumber==4" class="mt-10">
+<form [formGroup]="myForm" *ngIf="stepNumber==5" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <div class="flex flex-col">
             <div *ngFor="let ev of solution.newSolution.evaluatorsHolder; let i=index">
@@ -132,7 +175,7 @@
         <button [disabled]="true" *ngIf="emails!.invalid " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
     </div>
 </form>
-<section *ngIf="stepNumber==5" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
+<section *ngIf="stepNumber==6" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
       <div  class="mb-4 flex items-center justify-between gap-4 md:mb-8">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Sustainable Development Goals (SDGs)</h2>
@@ -175,7 +218,7 @@
     <div class="container flex mx-auto  justify-center my-10">
     
       
-        <button *ngIf="stepNumber==0 || stepNumber===6" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button *ngIf="stepNumber==0 || stepNumber===7" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
         <div id="confettiContainer"></div>
     </div>
    

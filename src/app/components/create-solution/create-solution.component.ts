@@ -16,8 +16,9 @@ export class CreateSolutionComponent {
     `Welcome to the NewWorld Game!
 My role, as your colleague— your problem-solving partner— is to help us develop a
 solution to a global problem on which you choose to work. Let’s start.`,
-    `What is your NewWorld Game Project Working Title.`,
+    `What is your NewWorld Game Solution Title.`,
     "In a few words, how would you describe the specific problem you're focusing on?",
+    'Upload the feature image for your solution.',
     'Who are the key members of your team? Add their emails below.',
     'Here are some randomly selected evaluators who might be interested in your project. You can add more evaluators below.',
     'Select all Sustainable Development Goals (SDGs) that interest you.',

@@ -26,6 +26,8 @@ import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Observable, of } from 'rxjs';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 @Component({
   selector: 'app-create-solution-steps',
@@ -44,8 +46,15 @@ export class CreateSolutionStepsComponent implements OnInit {
   evaluatorsEmails: Email[] = [];
   announcer = inject(LiveAnnouncer);
   solutionError: Observable<any> = of(null);
+  imageDownloadUrl: string = '';
   readonly separatorKeysCodes = [ENTER, COMMA, SPACE] as const;
   addOnBlur = true;
+  allowedMimeTypes: string[] = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'application/webb',
+  ];
 
   registrationSuccess: boolean = true;
   registrationFailure: boolean = true;
@@ -62,10 +71,13 @@ export class CreateSolutionStepsComponent implements OnInit {
   agree: boolean = false;
   solverEvaluator: boolean = false;
   rePassword: string = '';
+  isHovering?: boolean;
+  path: string = '';
   imagePaths: string[] = [
     '../../../assets/img/nwg-start-solution.png',
     '../../../assets/img/nwg-working-title.png',
     '../../../assets/img/nwg-description.png',
+    '',
     '../../../assets/img/nwg-email.png',
     '../../../assets/img/nwg-email.png',
     '',
@@ -89,7 +101,9 @@ export class CreateSolutionStepsComponent implements OnInit {
     public auth: AuthService,
     public solution: SolutionService,
     private fb: FormBuilder,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private storage: AngularFireStorage,
+    private afs: AngularFirestore
   ) {
     this.auth.newUser = {}; // reinitialize the new user in case it happens.
     let shuffle = (array: User[]) => {
@@ -100,6 +114,8 @@ export class CreateSolutionStepsComponent implements OnInit {
     //     name: this.auth.currentUser.email,
     //   },
     // ];
+    let append = this.afs.createId().toString();
+    this.path = `solutions/${append}`;
     this.auth
       .getAllOtherUsers(this.auth.currentUser.email)
       .subscribe((data) => {
@@ -131,8 +147,10 @@ export class CreateSolutionStepsComponent implements OnInit {
     window.scrollTo(0, 0);
 
     this.sdgs = this.data.sdgs;
-    // this.solution.newSolution.participantsHolder =
-    // this.participantsEmails.push({ name: this.auth.currentUser.email });
+    console.log(
+      'the current user is',
+      `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`
+    );
 
     this.typewriterEffect(this.text, () => {});
   }
@@ -171,6 +189,7 @@ export class CreateSolutionStepsComponent implements OnInit {
             this.solution.newSolution.title!,
             this.solution.newSolution.solutionArea!,
             this.solution.newSolution.description!,
+            this.solution.newSolution.image!,
             this.solution.newSolution.participantsHolder,
             this.solution.newSolution.evaluatorsHolder,
             // this.evaluatorsEmails,
@@ -235,6 +254,7 @@ export class CreateSolutionStepsComponent implements OnInit {
       title: '',
       solutionArea: '',
       description: '',
+      image: '',
       participantsHolder: [{ name: this.auth.currentUser.email }],
       evaluatorsHolder: this.evaluatorsEmails,
     };
@@ -359,6 +379,8 @@ export class CreateSolutionStepsComponent implements OnInit {
         subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
         title: this.solution.newSolution.title,
         description: this.solution.newSolution.description,
+        author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+        image: this.solution.newSolution.image,
         path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
         // Include any other data required by your Cloud Function
       };
@@ -378,5 +400,45 @@ export class CreateSolutionStepsComponent implements OnInit {
   }
   closePopUpError() {
     this.createdSolutionError = false;
+  }
+  async startUpload(event: FileList) {
+    const file = event?.item(0);
+    console.log(' current file data', file);
+
+    if (file) {
+      if (!this.allowedMimeTypes.includes(file.type)) {
+        console.log('unsupported file type');
+        return;
+      }
+
+      // Proceed with file processing
+      console.log('File is supported:', file);
+      // Your file handling logic here
+      if (file?.size >= 10000000) {
+        console.log('the file is too big');
+        alert('The picture is too big. It should be less than 10MB');
+        return;
+      }
+    }
+    // the file should not be larger than 10MB
+
+    // the main task
+    console.log('the path', this.path);
+
+    // this.task = await this.storage.upload(path, file);
+    const uploadTask = await this.storage.upload(this.path, file);
+    let url = await uploadTask.ref.getDownloadURL();
+    this.imageDownloadUrl = url;
+    uploadTask.totalBytes;
+    // console.log('the download url', this.url);
+    this.solution.newSolution.image = url;
+    const avatar = {
+      path: this.path,
+      downloadURL: url,
+      size: uploadTask.totalBytes.toString(),
+    };
+  }
+  toggleHover(event: boolean) {
+    this.isHovering = event;
   }
 }

@@ -389,7 +389,9 @@ export class DataService implements OnInit {
       downloadURL: this.url,
       size: uploadTask.totalBytes.toString(),
     };
+
     this.uploadImageCloudStorage(currentPath, this.url);
+    return this.url;
     // this.router.navigate(['/home']);
   }
 

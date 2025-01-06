@@ -66,6 +66,7 @@ export class SolutionService {
     title: string,
     solutionArea: string,
     description: string,
+    image: string | undefined,
     participants: any,
     evaluators: any,
     // endDate: string,
@@ -76,8 +77,24 @@ export class SolutionService {
     // Generate a unique solution ID
     this.solutionId = this.afs.createId().toString();
 
-    // Prepare the initial data without the meetLink
-    const data = {
+    const data: {
+      solutionId: string;
+      title: string;
+      solutionArea: string;
+      authorAccountId: string;
+      authorName: string;
+      authorEmail: string;
+      description: string;
+      participants: any;
+      evaluators: any;
+      authorProfileCredential: string;
+      creationDate: string;
+      views: string;
+      sdgs: string[];
+      likes: any[];
+      numLike: string;
+      image?: string; // Optional image field
+    } = {
       solutionId: this.solutionId,
       title: title,
       solutionArea: solutionArea,
@@ -87,17 +104,18 @@ export class SolutionService {
       description: description,
       participants: participants,
       evaluators: evaluators,
-      // endDate: endDate,
       authorProfileCredential: this.auth.currentUser.profileCredential,
-      // endDateFormatted: formatedDate,
       creationDate: this.time.todaysDate(),
       views: '1',
       sdgs: sdgs,
       likes: [],
       numLike: '0',
-      // sdg: sdg,
-      // meetLink will be added later
     };
+
+    // Only add the image property if it is defined and not empty
+    if (image) {
+      data.image = image;
+    }
 
     // Reference to the Firestore document
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
