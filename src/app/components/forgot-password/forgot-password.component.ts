@@ -16,6 +16,7 @@ export class ForgotPasswordComponent {
     });
   }
   restorePassword() {
+    console.log('display email to restore', this.myForm.value.email);
     this.auth.forgotPassword(this.myForm.value.email);
   }
   get email() {
