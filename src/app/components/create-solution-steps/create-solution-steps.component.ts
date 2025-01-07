@@ -73,6 +73,7 @@ export class CreateSolutionStepsComponent implements OnInit {
   rePassword: string = '';
   isHovering?: boolean;
   path: string = '';
+  isLoading: boolean = false;
   imagePaths: string[] = [
     '../../../assets/img/nwg-start-solution.png',
     '../../../assets/img/nwg-working-title.png',
@@ -183,6 +184,9 @@ export class CreateSolutionStepsComponent implements OnInit {
         current++;
         this.buttonInfoEvent.emit(current);
       } else if (this.buttonText === 'Submit') {
+        // Set loading to true before starting async operations
+        this.isLoading = true;
+
         // Await the creation of the new solution
         await this.solution.createdNewSolution(
           this.solution.newSolution.title!,
@@ -203,6 +207,10 @@ export class CreateSolutionStepsComponent implements OnInit {
         // Reset the solution and navigate
         this.resetNewSolution();
         this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
+        // Set loading to false after successful operations
+        this.isLoading = false;
+        // Set loading to false in case of error
+        this.isLoading = false;
       }
     } catch (error) {
       // Handle errors appropriately
