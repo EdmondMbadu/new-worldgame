@@ -178,43 +178,37 @@ export class CreateSolutionStepsComponent implements OnInit {
     }, 5); // Adjust typing speed here
   }
   async updatePlayground(current: number) {
-    // console.log('the solution field', this.solution);
-    if (this.buttonText === 'Continue') {
-      current++;
-      this.buttonInfoEvent.emit(current);
-    } else {
-      if (this.buttonText === 'Submit') {
-        this.solution
-          .createdNewSolution(
-            this.solution.newSolution.title!,
-            this.solution.newSolution.solutionArea!,
-            this.solution.newSolution.description!,
-            this.solution.newSolution.image!,
-            this.solution.newSolution.participantsHolder,
-            this.solution.newSolution.evaluatorsHolder,
-            // this.evaluatorsEmails,
+    try {
+      if (this.buttonText === 'Continue') {
+        current++;
+        this.buttonInfoEvent.emit(current);
+      } else if (this.buttonText === 'Submit') {
+        // Await the creation of the new solution
+        await this.solution.createdNewSolution(
+          this.solution.newSolution.title!,
+          this.solution.newSolution.solutionArea!,
+          this.solution.newSolution.description!,
+          this.solution.newSolution.image!,
+          this.solution.newSolution.participantsHolder,
+          this.solution.newSolution.evaluatorsHolder,
+          this.solution.newSolution.sdgs!
+        );
 
-            // this.myForm.value.date,
+        // Indicate success
+        this.createdSolutionSuccess = true;
 
-            this.solution.newSolution.sdgs!
-          )
-          .then(() => {
-            this.createdSolutionSuccess = true;
-            this.sendEmailToParticipants(); // Call the function here
-          })
-          .then(() => {
-            // reinitialize the solution holder
-            this.resetNewSolution();
-            this.router.navigate([
-              '/playground-steps/' + this.solution.solutionId,
-            ]);
-          })
-          .catch((error) => {
-            this.solutionError = of(error);
-            this.createdSolutionError = true;
-            console.log('error now');
-          });
+        // Await the email sending process
+        await this.sendEmailToParticipants();
+
+        // Reset the solution and navigate
+        this.resetNewSolution();
+        this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
       }
+    } catch (error) {
+      // Handle errors appropriately
+      this.solutionError = of(error);
+      this.createdSolutionError = true;
+      console.error('An error occurred:', error);
     }
   }
 
@@ -409,16 +403,17 @@ export class CreateSolutionStepsComponent implements OnInit {
           this.auth.getUserFromEmail(participant.name)
         );
         console.log('extracted user from email', users);
+        console.log('the new solution data', this.solution.newSolution);
 
         if (users && users.length > 0) {
           // Participant is a registered user
           const emailData = {
             email: participant.name, // Ensure this is the correct field
             subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-            title: this.solution.newSolution.title,
-            description: this.solution.newSolution.description,
+            title: `${this.solution.newSolution.title}`,
+            description: `${this.solution.newSolution.description}`,
             author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-            image: this.solution.newSolution.image,
+            image: `${this.solution.newSolution.image}`,
             path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
             user: `${users[0].firstName} ${users[0].lastName}`,
             // Add any other necessary fields
@@ -463,7 +458,9 @@ export class CreateSolutionStepsComponent implements OnInit {
 
     if (file) {
       if (!this.allowedMimeTypes.includes(file.type)) {
+        alert('unsupported file type. User png, jpeg, webp for file types');
         console.log('unsupported file type');
+
         return;
       }
 
