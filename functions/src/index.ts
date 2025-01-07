@@ -47,6 +47,8 @@ const twilio = require('twilio');
 const API_KEY = functions.config().sendgrid.key;
 const TEMPLATE_ID = functions.config().sendgrid.template;
 const TEMPLATE_ID_SOLUTION = functions.config().sendgrid.templatesolutioninvite;
+const TEMPLATE_ID_SOLUTION_NONUSER =
+  functions.config().sendgrid.templatesolutioninvitenonuser;
 const TEMPLATE_ID_COMMENT = functions.config().sendgrid.templatecommentinvite;
 const TEMPLATE_ID_WORKSHOP = functions.config().sendgrid.templateworkshop;
 // const DID_API_KEY = functions.config().did.key;
@@ -86,6 +88,34 @@ export const genericEmail = functions.https.onCall(
       to: data.email,
       from: 'newworld@newworld-game.org',
       templateId: TEMPLATE_ID_SOLUTION,
+      dynamic_template_data: {
+        subject: data.subject,
+        description: data.description,
+        title: data.title,
+        path: data.path,
+        image: data.image,
+        author: data.author,
+        user: data.user,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+export const nonUserEmail = functions.https.onCall(
+  async (data: any, context: any) => {
+    //   if (!context.auth && !context.auth!.token.email) {
+    //     throw new functions.https.HttpsError(
+    //       'failed-precondition',
+    //       'Must be logged with email-address'
+    //     );
+    //   }
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_SOLUTION_NONUSER,
       dynamic_template_data: {
         subject: data.subject,
         description: data.description,

@@ -25,7 +25,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 
@@ -370,30 +370,86 @@ export class CreateSolutionStepsComponent implements OnInit {
     this.registrationFailure = false;
   }
 
-  sendEmailToParticipants() {
+  // sendEmailToParticipants() {
+  //   const genericEmail = this.fns.httpsCallable('genericEmail');
+
+  //   this.solution.newSolution.participantsHolder!.forEach((participant) => {
+  //     const emailData = {
+  //       email: participant.name,
+  //       subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+  //       title: this.solution.newSolution.title,
+  //       description: this.solution.newSolution.description,
+  //       author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+  //       image: this.solution.newSolution.image,
+  //       path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
+  //       // Include any other data required by your Cloud Function
+  //     };
+
+  //     genericEmail(emailData).subscribe(
+  //       (result) => {
+  //         console.log('Email sent:', result);
+  //       },
+  //       (error) => {
+  //         console.error('Error sending email:', error);
+  //       }
+  //     );
+  //   });
+  // }
+  // New method to send emails to participants
+  async sendEmailToParticipants() {
     const genericEmail = this.fns.httpsCallable('genericEmail');
+    const nonUserEmail = this.fns.httpsCallable('nonUserEmail'); // Ensure you have this Cloud Function set up
 
-    this.solution.newSolution.participantsHolder!.forEach((participant) => {
-      const emailData = {
-        email: participant.name,
-        subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-        title: this.solution.newSolution.title,
-        description: this.solution.newSolution.description,
-        author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-        image: this.solution.newSolution.image,
-        path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
-        // Include any other data required by your Cloud Function
-      };
+    const participants = this.solution.newSolution.participantsHolder || [];
 
-      genericEmail(emailData).subscribe(
-        (result) => {
-          console.log('Email sent:', result);
-        },
-        (error) => {
-          console.error('Error sending email:', error);
+    for (const participant of participants) {
+      try {
+        // Fetch the user data
+        const users = await firstValueFrom(
+          this.auth.getUserFromEmail(participant.name)
+        );
+        console.log('extracted user from email', users);
+
+        if (users && users.length > 0) {
+          // Participant is a registered user
+          const emailData = {
+            email: participant.name, // Ensure this is the correct field
+            subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+            title: this.solution.newSolution.title,
+            description: this.solution.newSolution.description,
+            author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+            image: this.solution.newSolution.image,
+            path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
+            user: `${users[0].firstName} ${users[0].lastName}`,
+            // Add any other necessary fields
+          };
+
+          const result = await firstValueFrom(genericEmail(emailData));
+          console.log(`Email sent to ${participant.name}:`, result);
+        } else {
+          // Participant is NOT a registered user
+          // Participant is a registered user
+          const emailData = {
+            email: participant.name, // Ensure this is the correct field
+            subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+            title: this.solution.newSolution.title,
+            description: this.solution.newSolution.description,
+            author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+            image: this.solution.newSolution.image,
+            path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
+            // Add any other necessary fields
+          };
+
+          const result = await firstValueFrom(nonUserEmail(emailData));
+          console.log(`Email sent to ${participant.name}:`, result);
         }
-      );
-    });
+      } catch (error) {
+        console.error(
+          `Error processing participant ${participant.name}:`,
+          error
+        );
+      }
+    }
   }
   closePopUpSucess() {
     this.createdSolutionSuccess = false;

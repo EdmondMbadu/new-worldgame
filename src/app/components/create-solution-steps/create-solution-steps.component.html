@@ -79,8 +79,8 @@
 
     </div>
     <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="solution.newSolution.image!==''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="solution.newSolution.image===''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        <button  (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <!-- <button [disabled]="true" *ngIf="solution.newSolution.image==='' || " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button> -->
     </div>
 
 
