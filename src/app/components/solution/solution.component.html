@@ -1,4 +1,4 @@
-<div class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer">
+<div class="bg-white dark:bg-slate-800 hover:bg-gray-100 hover:dark:bg-slate-700 rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:dark:shadow-2xl  transition-shadow duration-300 cursor-pointer">
     <a routerLink="/solution-view/{{solution.solutionId}}">
         <img *ngIf="solution.image !==undefined" [src]="solution.image" alt="{{ solution.title }}" class="w-full h-48 object-cover">
         <img   *ngIf="solution.image ===undefined"  src="../../../assets/img/photo-gallery.png" alt="{{ solution.title }}" class="w-full h-48 object-cover">
