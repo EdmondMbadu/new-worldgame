@@ -3,6 +3,54 @@
     <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
     <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'"    [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPageHome]="true"  (toggleAsideEvent)="toggleAside()"></app-navbar>
 
+       <!-- Hero Section -->
+       <section class="hero-section">
+        <!-- Replace this div with your actual Hero content -->
+        <div class="text-center py-10 mt-10">
+          <h1 class="text-4xl font-bold text-gray-800 dark:text-white">Solutions Waiting for You!</h1>
+          <p class="mt-4 text-gray-600 dark:text-gray-300">Join our community to tackle real-world forestry challenges and create lasting solutions.</p>
+        </div>
+      </section>
+  
+      <div class="mx-auto max-w-7xl">
+        
+        <!-- Solutions Section -->
+        <section id="solutions" class="scroll-mt-16 mt-4">
+          
+          <!-- Category Filter -->
+          <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button
+              *ngFor="let category of categories"
+              (click)="setActiveCategory(category)"
+              [ngClass]="{
+                'bg-teal-700 text-white': category === activeCategory,
+                'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200': category !== activeCategory
+              }"
+              class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
+            >
+              {{ category}}
+            </button>
+          </div>
+          
+          <!-- Solutions Grid -->
+          <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 ">
+            <div
+              *ngFor="let t of titles; let i = index"
+              class="animate-fade-up"
+             
+            >
+            <app-challenge  [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]"  [description]="descriptions[i]"   [title]="t"></app-challenge>
+                 
+      
+              
+            </div>
+          </div>
+          
+        </section>
+        
+      </div>
+
+
     <!-- Hero Section -->
     <section class="hero-section">
       <!-- Replace this div with your actual Hero content -->

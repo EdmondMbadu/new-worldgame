@@ -13,6 +13,43 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class HomeComponent implements OnInit {
   user: User;
+  titles: string[] = [
+    'Revitalizing Urban Green Spaces in Post-Industrial Cities',
+    'Mitigating Urban Heat Islands through Strategic Tree Planting',
+    'Enhancing Tree Canopy in Underserved Communities',
+    'Developing Urban Forestry Education Programs for Youth',
+    'Implementing Community-Led Tree Inventory and Mapping',
+    'Restoring Urban Riparian Buffers to Improve Water Quality',
+    'Creating Pollinator-Friendly Urban Forest Corridors',
+    'Establishing Urban Orchards to Address Food Insecurity',
+    'Promoting Urban Wood Utilization to Reduce Waste',
+    'Assessing and Managing Urban Tree Health Amid Climate Change',
+  ];
+
+  descriptions: string[] = [
+    'Many post-industrial cities face challenges with vacant lots and deteriorating green spaces. Teams can develop strategies to transform these areas into vibrant urban forests, enhancing community well-being and environmental health.',
+    'Urban heat islands contribute to increased energy consumption and health risks. Implementing targeted tree-planting initiatives in heat-prone neighborhoods can provide cooling effects and improve air quality.',
+    'Equitable distribution of urban tree canopy is essential for environmental justice. Projects can focus on increasing tree coverage in underserved areas to promote health and social benefits.',
+    'Engaging the next generation in urban forestry is crucial for sustainability. Teams can create educational workshops and hands-on planting experiences for local schools.',
+    'Accurate data on urban trees aids in effective management. Organizing community volunteers to conduct tree inventories can foster stewardship and inform future planting efforts.',
+    'Urban waterways often suffer from pollution and erosion. Planting native trees along streams and rivers can stabilize banks and enhance water quality.',
+    'Pollinators are vital for biodiversity. Establishing urban forest corridors with pollinator-friendly species can support local ecosystems and beautify the cityscape.',
+    'Urban orchards can provide fresh produce in food deserts. Teams can plan and plant fruit-bearing trees in accessible community spaces.',
+    'Urban tree removals often result in waste. Developing programs to repurpose urban wood into furniture or art can reduce landfill use and generate community income.',
+    'Climate change poses threats to urban tree health. Conducting assessments and developing management plans can enhance resilience and inform species selection for future plantings.',
+  ];
+  challengeImages: string[] = [
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-1.webp?alt=media&token=967ce44e-2e67-4c91-b293-ac52bb8d79b5',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-2.webp?alt=media&token=05d6dc53-ad65-4fa5-b5d8-8a91bfd90934',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-3.webp?alt=media&token=d98ab804-6860-4f87-8d2b-f0c969be8ea6',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-4.webp?alt=media&token=21e4d21a-b563-4538-a83c-06b7fcf0250c',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-5.webp?alt=media&token=14aca8f9-09b9-41ba-8c5b-3b76d3ae5153',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-6.webp?alt=media&token=fa6b2138-e8d1-43e4-a837-6ae1e70400e7',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-7.webp?alt=media&token=1ca1476c-73b9-4fbe-9dbc-f3584ba0d733',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-8.webp?alt=media&token=57dcf895-4518-4a34-830d-f603a8a72e9a',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-9.webp?alt=media&token=f3fc0267-3eda-4320-a8f0-fa563059fcc0',
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/challenges%2Fchallenge-10.webp?alt=media&token=c32f824c-a7aa-41da-a651-7bce88b2bf81',
+  ];
 
   showSortByDrowpDown: boolean = false;
   allUsers: User[] = [];
@@ -165,17 +202,18 @@ export class HomeComponent implements OnInit {
     }
   }
   categories: string[] = [
-    'All',
-    'Environment',
-    'Education',
-    'Healthcare',
-    'Technology',
-    'Community',
+    'Forestry',
+    // 'Climate',
+    // 'Environment',
+    // 'Education',
+    // 'Healthcare',
+    // 'Technology',
+    // 'Community',
   ];
 
   // Define the solutions data
 
-  activeCategory: string = 'All';
+  activeCategory: string = 'Forestry';
   filteredSolutions: Solution[] = [];
 
   // Set the active category and filter solutions accordingly

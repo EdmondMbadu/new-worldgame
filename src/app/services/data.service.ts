@@ -35,6 +35,7 @@ export class DataService implements OnInit {
     'image/png',
     'image/webp',
     'application/webb',
+    'image/heic',
   ];
   url: string = '';
   private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
