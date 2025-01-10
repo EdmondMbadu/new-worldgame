@@ -11,6 +11,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-playground-steps',
@@ -340,26 +341,57 @@ export class PlaygroundStepsComponent implements OnInit {
       this.timelineDisplay[i] = 'bg-red-500 h-1.5 dark:bg-red-500';
     }
   }
-  sendEmailToParticipant() {
+  async sendEmailToParticipant() {
     const genericEmail = this.fns.httpsCallable('genericEmail');
+    const nonUserEmail = this.fns.httpsCallable('nonUserEmail'); // Ensure you have this Cloud Function set up
 
-    const emailData = {
-      email: this.newTeamMember,
-      subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-      title: this.currentSolution.title,
-      description: this.currentSolution.description,
-      path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
-      // Include any other data required by your Cloud Function
-    };
+    try {
+      // Fetch the user data
+      const users = await firstValueFrom(
+        this.auth.getUserFromEmail(this.newTeamMember)
+      );
+      console.log('extracted user from email', users);
+      console.log('the new solution data', this.solution.newSolution);
 
-    genericEmail(emailData).subscribe(
-      (result) => {
-        console.log('Email sent:', result);
-      },
-      (error) => {
-        console.error('Error sending email:', error);
+      if (users && users.length > 0) {
+        // Participant is a registered user
+        const emailData = {
+          email: this.newTeamMember, // Ensure this is the correct field
+          subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+          title: `${this.currentSolution.title}`,
+          description: `${this.currentSolution.description}`,
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          image: `${this.currentSolution.image}`,
+          path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+          user: `${users[0].firstName} ${users[0].lastName}`,
+          // Add any other necessary fields
+        };
+
+        const result = await firstValueFrom(genericEmail(emailData));
+        console.log(`Email sent to ${this.newTeamMember}:`, result);
+      } else {
+        // Participant is NOT a registered user
+        // Participant is a registered user
+        const emailData = {
+          email: this.newTeamMember, // Ensure this is the correct field
+          subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+          title: this.currentSolution.title,
+          description: this.currentSolution.description,
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          image: this.currentSolution.image,
+          path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+          // Add any other necessary fields
+        };
+
+        const result = await firstValueFrom(nonUserEmail(emailData));
+        console.log(`Email sent to ${this.newTeamMember}:`, result);
       }
-    );
+    } catch (error) {
+      console.error(
+        `Error processing participant ${this.newTeamMember}:`,
+        error
+      );
+    }
   }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
@@ -404,7 +436,7 @@ export class PlaygroundStepsComponent implements OnInit {
   toggleRemoveTeamMember() {
     this.showRemoveTeamMember = !this.showRemoveTeamMember;
   }
-  addParticipantToSolution() {
+  async addParticipantToSolution() {
     let participants: any = [];
     if (this.data.isValidEmail(this.newTeamMember)) {
       participants = this.currentSolution.participants;
@@ -415,16 +447,18 @@ export class PlaygroundStepsComponent implements OnInit {
           participants,
           this.currentSolution.solutionId!
         )
+
         .then(() => {
           alert(`Successfully added ${this.newTeamMember} to the solution.`);
           this.getMembers();
-          this.sendEmailToParticipant();
-          this.newTeamMember = '';
+
           this.toggleAddTeamMember();
         })
         .catch((error) => {
           alert('Error occured while adding a team member. Try Again!');
         });
+      await this.sendEmailToParticipant();
+      this.newTeamMember = '';
     } else {
       alert('Enter a valid email!');
     }
