@@ -203,12 +203,12 @@ export class HomeComponent implements OnInit {
   }
   categories: string[] = [
     'Forestry',
-    'Energy',
-    'Climate',
-    'Environment',
-    'Education',
-    'Healthcare',
-    'Technology',
+    // 'Energy',
+    // 'Climate',
+    // 'Environment',
+    // 'Education',
+    // 'Healthcare',
+    // 'Technology',
     // 'Community',
   ];
 
