@@ -105,7 +105,7 @@ movements that ensure equal access to affordable, healthy food in underserved co
         'Empowering Transportation: Reducing Fossil Fuels on the Road',
         'Waste Not, Want Not: Turning Waste into Energy',
         'Solar Everywhere: Affordable Panels for All',
-        '1Cooling the Planet: Energy Without Warming the World',
+        'Cooling the Planet: Energy Without Warming the World',
         // Add unique titles for Energy if needed...
       ],
       descriptions: [
