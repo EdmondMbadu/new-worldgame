@@ -412,7 +412,7 @@ care, from better treatments to innovative support for aging with dignity at hom
 
   // Define the solutions data
 
-  activeCategory: string = 'Forestry';
+  activeCategory: string = 'Food';
   filteredSolutions: Solution[] = [];
 
   // Set the active category and filter solutions accordingly

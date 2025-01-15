@@ -98,6 +98,7 @@ import { SrcObjectDirective } from './directives/src-object.directive';
 import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
 import { MeetingComponent } from './components/meeting/meeting.component';
 import { ChallengeComponent } from './components/challenge/challenge.component';
+import { ChallengeStarterComponent } from './components/challenge-starter/challenge-starter.component';
 
 @NgModule({
   declarations: [
@@ -172,6 +173,7 @@ import { ChallengeComponent } from './components/challenge/challenge.component';
     ManagementPrimerComponent,
     MeetingComponent,
     ChallengeComponent,
+    ChallengeStarterComponent,
   ],
   imports: [
     BrowserModule,
