@@ -1,10 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Router } from '@angular/router';
 import { map } from 'rxjs/operators';
 
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
@@ -217,7 +219,9 @@ care, from better treatments to innovative support for aging with dignity at hom
     public auth: AuthService,
     private solution: SolutionService,
     private data: DataService,
-    private storage: AngularFireStorage
+    private storage: AngularFireStorage,
+    private challenge: ChallengesService,
+    private router: Router
   ) {
     this.user = this.auth.currentUser;
   }
@@ -274,6 +278,17 @@ care, from better treatments to innovative support for aging with dignity at hom
     } catch (error) {
       console.error(`Error loading images for category ${category}:`, error);
     }
+  }
+  selectChallenge(category: string, index: number) {
+    const selectedChallengeItem = {
+      title: this.challenges[category].titles[index],
+      description: this.challenges[category].descriptions[index],
+      image: this.challenges[category].images[index],
+    };
+
+    this.challenge.setSelectedChallengeItem(selectedChallengeItem);
+
+    this.router.navigate(['/primer-register/']);
   }
   async fetchImages(
     folderPath: string,

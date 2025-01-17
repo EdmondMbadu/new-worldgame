@@ -148,10 +148,6 @@ export class CreateSolutionStepsComponent implements OnInit {
     window.scrollTo(0, 0);
 
     this.sdgs = this.data.sdgs;
-    console.log(
-      'the current user is',
-      `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`
-    );
 
     this.typewriterEffect(this.text, () => {});
   }

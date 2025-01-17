@@ -99,6 +99,7 @@ import { ManagementPrimerComponent } from './components/management-primer/manage
 import { MeetingComponent } from './components/meeting/meeting.component';
 import { ChallengeComponent } from './components/challenge/challenge.component';
 import { ChallengeStarterComponent } from './components/challenge-starter/challenge-starter.component';
+import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
 
 @NgModule({
   declarations: [
@@ -174,6 +175,7 @@ import { ChallengeStarterComponent } from './components/challenge-starter/challe
     MeetingComponent,
     ChallengeComponent,
     ChallengeStarterComponent,
+    StartChallengeComponent,
   ],
   imports: [
     BrowserModule,

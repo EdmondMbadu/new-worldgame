@@ -41,25 +41,17 @@ export class SolutionService {
         };
       }
     });
+  }
 
-    // let shuffle = (array: User[]) => {
-    //   return array.sort(() => Math.random() - 0.5);
-    // };
-    // if (this.auth.currentUser && this.auth.currentUser.email) {
-    //   this.auth
-    //     .getAllOtherUsers(this.auth.currentUser.email)
-    //     .subscribe((data) => {
-    //       data = shuffle(data);
-    //       for (
-    //         let i = 0;
-    //         i < this.numberOfEvaluators &&
-    //         this.evaluatorsEmails.length < this.numberOfEvaluators;
-    //         i++
-    //       ) {
-    //         this.evaluatorsEmails.push({ name: data[i].email! });
-    //       }
-    //     });
-    // }
+  resetNewSolution() {
+    this.newSolution = {
+      title: '',
+      solutionArea: '',
+      description: '',
+      image: '',
+      participantsHolder: [{ name: this.auth.currentUser.email }],
+      evaluatorsHolder: this.evaluatorsEmails,
+    };
   }
 
   async createdNewSolution(

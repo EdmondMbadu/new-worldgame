@@ -55,6 +55,7 @@ import { PrimerRegisterComponent } from './blogs/primer-register/primer-register
 import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-packet.component';
 import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
 import { MeetingComponent } from './components/meeting/meeting.component';
+import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -71,6 +72,11 @@ const routes: Routes = [
   {
     path: 'create-solution',
     component: CreateSolutionComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'start-challenge',
+    component: StartChallengeComponent,
     canActivate: [AuthGuard],
   },
   {

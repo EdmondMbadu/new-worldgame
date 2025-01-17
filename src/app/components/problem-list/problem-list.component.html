@@ -10,7 +10,9 @@
                 <li class="py-3 sm:py-4">
                     <div class="flex items-center space-x-4">
                         <div class="flex space-x-1">
-                            <img [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="">
+                            <img *ngIf="data.sdgsPaths[solution.sdgs![0]]" [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="">
+                            <img *ngIf="!data.sdgsPaths[solution.sdgs![0]]" [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  src= "../../../assets/img/generic.webp" alt="">
+                          
                         </div>
                         <div [routerLink]="[path, solution.solutionId]" class="flex-1 min-w-0">
                             <p class="cursor-pointer text-md font-bold text-worldsecond truncate dark:text-white dark:hover:text-blue-500 hover:text-blue-500">
@@ -33,7 +35,9 @@
                     <li class="py-3 sm:py-4 cursor-pointer">
                         <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
-                                <img class="w-14 h-14 border-white rounded-sm" [src]="data.sdgsPaths[solution.sdgs![0]]"  alt="">
+                                <img *ngIf="data.sdgsPaths[solution.sdgs![0]]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="">
+                                <img *ngIf="!data.sdgsPaths[solution.sdgs![0]]"  class="w-14 h-14 border-white rounded-sm"  src= "../../../assets/img/generic.webp" alt="">
+                              
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-md font-bold text-worldsecond truncate dark:text-white">
