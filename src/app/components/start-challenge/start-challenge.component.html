@@ -27,12 +27,22 @@
         <div class="px-4 py-4 bg-teal-100 dark:bg-slate-800 text-gray-900 dark:text-white rounded-lg shadow-md mx-auto max-w-screen-xl text-center">
             <h2 class="text-xl font-bold mb-2">Ready to Start?</h2>
             <p class="mb-4">Jump right into designing impactful solutions for a brighter future.</p>
-            <button
-              class="px-6 py-3 text-lg font-bold text-white bg-teal-600 rounded-full shadow-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
-              (click)="startChallenge()"
-            >
-              Start Solution
-            </button>
+            <div class="space-x-4">
+                <button
+                class="px-6 py-3 text-lg font-bold text-white bg-teal-700 rounded-full shadow-md hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                (click)="startChallenge()"
+              >
+                Start Solution
+              </button>
+              <button
+              *ngIf="this.auth.currentUser.admin"
+                class="px-6 py-3 text-lg font-bold text-white bg-red-700 rounded-full shadow-md hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                (click)="deleteChallenge()"
+              >
+                Delete Challenge
+              </button>
+            </div>
+            
           </div>
       <!-- Intro Section -->
       <section class="mt-6 text-gray-900 dark:text-white space-y-6">
@@ -55,7 +65,7 @@
       <!-- Call to Action Button -->
       <div class="mt-8 text-center">
         <button
-          class="px-6 py-3 text-lg font-bold text-white bg-teal-600 rounded-full shadow-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+          class="px-6 py-3 text-lg font-bold text-white bg-teal-700 rounded-full shadow-md hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
           (click)="startChallenge()"
         >
           Start Solution

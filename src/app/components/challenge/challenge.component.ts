@@ -16,6 +16,7 @@ export class ChallengeComponent implements OnInit {
   @Input() image: string = '';
   @Input() title: string = '';
   @Input() description: string = '';
+  @Input() id: string = '';
   user?: User = {};
   constructor(
     private time: TimeService,
@@ -27,6 +28,7 @@ export class ChallengeComponent implements OnInit {
   ) {}
   selectChallenge() {
     const selectedChallengeItem = {
+      id: this.id,
       title: this.title,
       description: this.description,
       image: this.image,

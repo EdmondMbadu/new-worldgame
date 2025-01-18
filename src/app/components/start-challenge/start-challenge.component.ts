@@ -38,6 +38,7 @@ export class StartChallengeComponent implements OnInit {
         this.selectedChallengeItem =
           this.challengeService.getSelectedChallengeItemFromStorage();
       }
+      console.log('challenge item', challengeItem);
     });
     this.setUpChallengeInfo();
   }
@@ -106,5 +107,31 @@ export class StartChallengeComponent implements OnInit {
   }
   closePopUpError() {
     this.createdSolutionError = false;
+  }
+  deleteChallenge() {
+    if (!this.selectedChallengeItem || !this.selectedChallengeItem.id) {
+      console.error('No challenge selected for deletion.');
+      alert('Please select a challenge to delete.');
+      return;
+    }
+
+    const challengeId = this.selectedChallengeItem.id;
+
+    this.challengeService
+      .deleteChallenge(challengeId)
+      .then(() => {
+        console.log(
+          'Challenge deleted successfully:',
+          this.selectedChallengeItem
+        );
+        alert('Challenge has been deleted!');
+        this.router.navigate(['/home/']);
+
+        this.selectedChallengeItem = null; // Clear the selected item after deletion
+      })
+      .catch((error) => {
+        console.error('Error deleting challenge:', error);
+        alert('Error occurred while deleting the challenge. Please try again.');
+      });
   }
 }

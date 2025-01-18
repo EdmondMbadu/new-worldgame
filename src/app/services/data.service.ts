@@ -354,7 +354,7 @@ export class DataService implements OnInit {
 
     return true;
   }
-  async startUpload(event: FileList, currentPath: string) {
+  async startUpload(event: FileList, currentPath: string, upload = '') {
     const file = event?.item(0);
     console.log(' current file data', file);
 
@@ -391,7 +391,7 @@ export class DataService implements OnInit {
       size: uploadTask.totalBytes.toString(),
     };
 
-    this.uploadImageCloudStorage(currentPath, this.url);
+    if (upload === '') this.uploadImageCloudStorage(currentPath, this.url);
     return this.url;
     // this.router.navigate(['/home']);
   }
