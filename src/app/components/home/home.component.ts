@@ -255,7 +255,7 @@ export class HomeComponent implements OnInit {
   categories: string[] = [];
   // Define the solutions data
 
-  activeCategory: string = 'Food';
+  activeCategory: string = 'Forestry';
   filteredSolutions: Solution[] = [];
 
   async setActiveCategory(category: string) {
