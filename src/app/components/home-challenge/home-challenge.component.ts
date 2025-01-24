@@ -66,8 +66,9 @@ export class HomeChallengeComponent {
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
         this.image = this.challengePage.imageChallenge!;
+        console.log('challenge page data', this.challengePage);
         this.challenge
-          .getThisUserChallenges()
+          .getThisUserChallenges(this.challengePage.authorId!)
           .subscribe((challenges: any[]) => {
             const uniqueCategories = Array.from(
               new Set(challenges.map((challenge) => challenge.category))

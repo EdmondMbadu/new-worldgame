@@ -42,10 +42,8 @@ export class ChallengesService {
   getAllChallenges() {
     return this.afs.collection('challenges').valueChanges(); // Retrieves all challenges
   }
-  getThisUserChallenges(): Observable<any[]> {
-    const user = this.auth.currentUser;
-    if (user && user.uid) {
-      const userId = user.uid;
+  getThisUserChallenges(userId: string): Observable<any[]> {
+    if (userId) {
       return this.afs
         .collection('user-challenges', (ref) =>
           ref.where('authorId', '==', userId)
