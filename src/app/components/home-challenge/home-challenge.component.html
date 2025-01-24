@@ -1,6 +1,6 @@
 <div class="min-h-screen   px-4 pb-16 dark:bg-slate-900 ">
     <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
-    <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'" [sideBarSmall]="true"   [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" current="''"  (toggleAsideEvent)="toggleAside()"></app-navbar>
+    <app-navbar  [sideBarSmall]="true"   [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" current="''"  (toggleAsideEvent)="toggleAside()"></app-navbar>
 
        <!-- Hero Section -->
        <section class="hero-section">
@@ -44,7 +44,7 @@
       </div>
 
       <!-- Functionality Buttons Section -->
-      <div class="flex flex-wrap justify-center gap-4 mb-8">
+      <div *ngIf="isAuthorPage" class="flex flex-wrap justify-center gap-4 mb-8">
         <!-- Add Challenge Button -->
         <div *ngIf="isAuthorPage" class="relative group cursor-pointer" (click)="toggle('showAddChallenge')">
           <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
