@@ -5,13 +5,17 @@
 
        <!-- Hero Section -->
        <section class="hero-section">
-        <!-- Replace this div with your actual Hero content -->
-        <!-- <div class="text-center py-10 mt-10">
-          <h1 class="text-4xl font-bold text-gray-800 dark:text-white">Challenges That Need You!</h1>
-          <p class="mt-4 text-gray-600 dark:text-gray-100 text-2xl">The future needs architects. Choose one of the challenges below, or create your own custom challenge on the left.</p>
-        </div> -->
+  
         <div class="text-center py-10 mt-10">
           <h1 class="text-4xl font-bold text-gray-800 dark:text-white">Challenges That Need You!</h1>
+          <div class="flex justify-center my-6">
+            <img
+      
+              src="../../../assets/img/earth-triangle-test.png"
+              alt="Logo"
+              class="h-20 w-auto"
+            />
+          </div>
           <p class="mt-4 text-gray-600 dark:text-gray-100 text-2xl font-semibold">
             <span class="bg-blue-500 text-white px-2 py-1 rounded">The future needs architects.</span> Choose one of the challenges below, or create your own custom challenge on the left.
           </p>
@@ -57,7 +61,7 @@
               class="animate-fade-up"
              
             >
-            <app-challenge  [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [id]="ids[i]"  [description]="descriptions[i]"   [title]="t"></app-challenge>
+            <app-challenge  [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [id]="ids[i]"  [description]="descriptions[i]" [restricted]="'false'"   [title]="t"></app-challenge>
                  
       
               

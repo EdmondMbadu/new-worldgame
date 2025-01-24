@@ -56,6 +56,8 @@ import { WorldgamePacketComponent } from './blogs/worldgame-packet/worldgame-pac
 import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
 import { MeetingComponent } from './components/meeting/meeting.component';
 import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
+import { GenerateChallengesComponent } from './components/generate-challenges/generate-challenges.component';
+import { HomeChallengeComponent } from './components/home-challenge/home-challenge.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -285,6 +287,17 @@ const routes: Routes = [
   {
     path: 'blogs/worldgame-packet',
     component: WorldgamePacketComponent,
+  },
+  {
+    path: 'generate-challenges',
+    component: GenerateChallengesComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'home-challenge/:id',
+    component: HomeChallengeComponent,
+    canActivate: [AuthGuard],
   },
   { path: '**', component: PageNotFoundComponent },
 ];

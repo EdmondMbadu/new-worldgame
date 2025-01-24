@@ -20,6 +20,7 @@ export class StartChallengeComponent implements OnInit {
   createdSolutionSuccess: boolean = false;
   createdSolutionError: boolean = false;
   solutionError: Observable<any> = of(null);
+  restricted: string = '';
 
   constructor(
     private challengeService: ChallengesService,
@@ -33,10 +34,13 @@ export class StartChallengeComponent implements OnInit {
     this.challengeService.selectedChallengeItem$.subscribe((challengeItem) => {
       if (challengeItem) {
         this.selectedChallengeItem = challengeItem;
+        this.restricted = this.selectedChallengeItem.restricted;
+        console.log('restricted', this.restricted);
       } else {
         // Fallback to localStorage if BehaviorSubject is empty (e.g., after a page refresh)
         this.selectedChallengeItem =
           this.challengeService.getSelectedChallengeItemFromStorage();
+        this.restricted = this.selectedChallengeItem.restricted;
       }
       console.log('challenge item', challengeItem);
     });
@@ -114,24 +118,53 @@ export class StartChallengeComponent implements OnInit {
       alert('Please select a challenge to delete.');
       return;
     }
+    if (
+      !confirm(
+        'Are you sure you want to delete this challenge page and all associated user challenges?'
+      )
+    ) {
+      return;
+    }
 
     const challengeId = this.selectedChallengeItem.id;
+    if (this.restricted === 'true') {
+      this.challengeService
+        .deleteUserChallenge(challengeId)
+        .then(() => {
+          console.log(
+            'Challenge deleted successfully:',
+            this.selectedChallengeItem
+          );
+          alert('Challenge has been deleted!');
+          this.router.navigate(['/home/']);
 
-    this.challengeService
-      .deleteChallenge(challengeId)
-      .then(() => {
-        console.log(
-          'Challenge deleted successfully:',
-          this.selectedChallengeItem
-        );
-        alert('Challenge has been deleted!');
-        this.router.navigate(['/home/']);
+          this.selectedChallengeItem = null; // Clear the selected item after deletion
+        })
+        .catch((error) => {
+          console.error('Error deleting challenge:', error);
+          alert(
+            'Error occurred while deleting the challenge. Please try again.'
+          );
+        });
+    } else {
+      this.challengeService
+        .deleteChallenge(challengeId)
+        .then(() => {
+          console.log(
+            'Challenge deleted successfully:',
+            this.selectedChallengeItem
+          );
+          alert('Challenge has been deleted!');
+          this.router.navigate(['/home/']);
 
-        this.selectedChallengeItem = null; // Clear the selected item after deletion
-      })
-      .catch((error) => {
-        console.error('Error deleting challenge:', error);
-        alert('Error occurred while deleting the challenge. Please try again.');
-      });
+          this.selectedChallengeItem = null; // Clear the selected item after deletion
+        })
+        .catch((error) => {
+          console.error('Error deleting challenge:', error);
+          alert(
+            'Error occurred while deleting the challenge. Please try again.'
+          );
+        });
+    }
   }
 }

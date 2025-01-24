@@ -185,6 +185,8 @@
             
            </a>
         </li>
+
+  
      
         <li>
            <a routerLink="/join-tournament" class="{{hoveredTournamentPath}} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
@@ -238,6 +240,26 @@
          <span class="flex-1 ms-3 whitespace-nowrap">General Assembly Room</span>
       </a>
    </li>
+      <!-- My Pages Section -->
+      <li class="cursor-pointer" (click)="toggle('showMyPages')" *ngIf="userChallengePages.length > 0">
+        <div  class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+          <svg class="w-[20px] h-[20px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6H20M4 12H20M4 18H20"/>
+          </svg>
+          <span class="flex-1 ms-3 whitespace-nowrap">My Challenge Pages</span>
+        </div>
+        
+        <!-- Nested Challenge Pages -->
+        <ul *ngIf="showMyPages"  class="ml-6 space-y-2">
+          <li *ngFor="let page of userChallengePages">
+            <a [routerLink]="'/home-challenge/' + page.challengePageId"
+              class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <img [src]="page.imageChallenge" alt="{{page.name}}" class="w-6 h-6 rounded-full mr-3" />
+              <span class="flex-1 whitespace-nowrap">{{page.name}}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
         
      </ul>
 
@@ -541,6 +563,9 @@
                     </li>
                     <li *ngIf="this.auth.currentUser.admin">
                       <a routerLink="/user-management"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">User Management</a>
+                    </li>
+                    <li *ngIf="this.auth.currentUser.admin">
+                      <a routerLink="/generate-challenges"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Generate Challenge Page</a>
                     </li>
                   </ul>
                   <div class="m-4 flex flex-row  text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">

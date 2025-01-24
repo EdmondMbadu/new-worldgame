@@ -7,7 +7,7 @@ import { Evaluation, Roles, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import { combineLatest, count, last, map, Observable } from 'rxjs';
-import { Tournament, User } from '../models/user';
+import { ChallengePage, Tournament, User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
 import { Email } from '../components/create-playground/create-playground.component';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';

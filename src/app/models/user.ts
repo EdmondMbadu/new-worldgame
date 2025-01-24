@@ -54,3 +54,16 @@ export class SolutionEnvironment {
   focus?: string;
   sdgInterested?: string[];
 }
+
+export class ChallengePage {
+  name?: string;
+  heading?: string;
+  subHeading?: string;
+  description?: string;
+  imageChallenge?: string;
+  challengePageId?: string;
+  challengeListIds?: string[];
+  authorId?: string;
+  invitedUsers?: string[];
+  restricted?: string;
+}

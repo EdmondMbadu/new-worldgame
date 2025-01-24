@@ -13,9 +13,11 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
-import { User } from 'src/app/models/user';
+import { ChallengePage, User } from 'src/app/models/user';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
+import { ChallengesService } from 'src/app/services/challenges.service';
+import { use } from 'marked';
 
 @Component({
   selector: 'app-navbar',
@@ -58,7 +60,8 @@ export class NavbarComponent implements OnInit, OnChanges {
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
-    private data: DataService
+    private data: DataService,
+    private challenge: ChallengesService
   ) {}
 
   @Input() hoveredHomePath: string = ``;
@@ -77,6 +80,9 @@ export class NavbarComponent implements OnInit, OnChanges {
   moreOrLess: string = 'More';
   @Output() showMoreOrLessChange = new EventEmitter<boolean>();
   @Output() toggleAsideEvent = new EventEmitter<void>();
+
+  userChallengePages: ChallengePage[] = [];
+  showMyPages: boolean = false; // Control visibility of "My Pages"
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -139,6 +145,13 @@ export class NavbarComponent implements OnInit, OnChanges {
       .subscribe((results) => {
         this.filteredItems = results!;
       });
+
+    // these are the challengePages that this user has if they have any.
+
+    this.challenge.getAllChallengePagesByThisUser().subscribe((data) => {
+      this.userChallengePages = data;
+      this.showMyPages = this.userChallengePages.length > 0; // Only show if there are challenge pages
+    });
   }
 
   setThemeModeLogo() {
@@ -149,7 +162,9 @@ export class NavbarComponent implements OnInit, OnChanges {
     }
   }
 
-  toggle(property: 'beta' | 'solutionDropDown' | 'guideDropDown') {
+  toggle(
+    property: 'beta' | 'solutionDropDown' | 'guideDropDown' | 'showMyPages'
+  ) {
     this[property] = !this[property];
   }
   toggleAside() {

@@ -100,6 +100,8 @@ import { MeetingComponent } from './components/meeting/meeting.component';
 import { ChallengeComponent } from './components/challenge/challenge.component';
 import { ChallengeStarterComponent } from './components/challenge-starter/challenge-starter.component';
 import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
+import { GenerateChallengesComponent } from './components/generate-challenges/generate-challenges.component';
+import { HomeChallengeComponent } from './components/home-challenge/home-challenge.component';
 
 @NgModule({
   declarations: [
@@ -176,6 +178,8 @@ import { StartChallengeComponent } from './components/start-challenge/start-chal
     ChallengeComponent,
     ChallengeStarterComponent,
     StartChallengeComponent,
+    GenerateChallengesComponent,
+    HomeChallengeComponent,
   ],
   imports: [
     BrowserModule,

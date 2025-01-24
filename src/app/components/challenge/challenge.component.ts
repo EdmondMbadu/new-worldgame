@@ -17,6 +17,7 @@ export class ChallengeComponent implements OnInit {
   @Input() title: string = '';
   @Input() description: string = '';
   @Input() id: string = '';
+  @Input() restricted: string = '';
   user?: User = {};
   constructor(
     private time: TimeService,
@@ -32,6 +33,7 @@ export class ChallengeComponent implements OnInit {
       title: this.title,
       description: this.description,
       image: this.image,
+      restricted: this.restricted,
     };
 
     this.challenge.setSelectedChallengeItem(selectedChallengeItem);

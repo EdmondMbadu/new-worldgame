@@ -53,7 +53,6 @@ export class HomeComponent implements OnInit {
       this.ids = [];
       return;
     }
-    console.log('Category data:', categoryData);
     this.titles = categoryData.titles;
     this.descriptions = categoryData.descriptions;
     this.challengeImages = categoryData.images;
@@ -376,6 +375,7 @@ export class HomeComponent implements OnInit {
       title: this.titleChallenge,
       description: this.descriptionChallenge,
       image: this.imageChallenge,
+      restricted: 'false',
     };
 
     this.challenge.setSelectedChallengeItem(selectedChallengeItem);

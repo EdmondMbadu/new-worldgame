@@ -3,13 +3,20 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { ChallengePage } from '../models/user';
+import { AuthService } from './auth.service';
+import { TimeService } from './time.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChallengesService {
-  constructor(private afs: AngularFirestore) {}
+  constructor(
+    private afs: AngularFirestore,
+    private auth: AuthService,
+    private time: TimeService
+  ) {}
   private selectedChallengeItemSource = new BehaviorSubject<any>(null);
   selectedChallengeItem$ = this.selectedChallengeItemSource.asObservable();
 
@@ -35,9 +42,35 @@ export class ChallengesService {
   getAllChallenges() {
     return this.afs.collection('challenges').valueChanges(); // Retrieves all challenges
   }
+  getThisUserChallenges(): Observable<any[]> {
+    const user = this.auth.currentUser;
+    if (user && user.uid) {
+      const userId = user.uid;
+      return this.afs
+        .collection('user-challenges', (ref) =>
+          ref.where('authorId', '==', userId)
+        )
+        .valueChanges();
+    } else {
+      // Return an empty array if the user is not authenticated
+      return of([]);
+    }
+  }
+
+  getChallengeById(challengeId: string) {
+    return this.afs.doc(`challenges/${challengeId}`).valueChanges();
+  }
+
   getChallengesByCategory(category: string) {
     return this.afs
       .collection('challenges', (ref) => ref.where('category', '==', category))
+      .valueChanges();
+  }
+  getUserChallengesByCategory(category: string) {
+    return this.afs
+      .collection('user-challenges', (ref) =>
+        ref.where('category', '==', category)
+      )
       .valueChanges();
   }
   extractCategories() {
@@ -52,6 +85,19 @@ export class ChallengesService {
         return uniqueCategories;
       });
   }
+  extractUserCategories() {
+    this.afs
+      .collection('user-challenges')
+      .valueChanges()
+      .subscribe((challenges: any[]) => {
+        // Extract categories and ensure uniqueness
+        const uniqueCategories = Array.from(
+          new Set(challenges.map((challenge) => challenge.category))
+        );
+        return uniqueCategories;
+      });
+  }
+
   addChallenge(challenge: {
     id: string;
     title: string;
@@ -71,7 +117,84 @@ export class ChallengesService {
     };
     return challengeRef.set(data, { merge: true });
   }
+  addUserChallenge(challenge: {
+    id: string;
+    title: string;
+    description: string;
+    category: string;
+    image: string;
+  }): Promise<void> {
+    const user = this.auth.currentUser;
+    if (user && user.uid) {
+      const challengeRef: AngularFirestoreDocument<any> = this.afs.doc(
+        `user-challenges/${challenge.id}`
+      );
+      const data = {
+        id: challenge.id,
+        title: challenge.title,
+        description: challenge.description,
+        category: challenge.category,
+        image: challenge.image,
+        authorId: user.uid,
+      };
+      return challengeRef.set(data, { merge: true });
+    } else {
+      // Reject the promise if the user is not authenticated
+      return Promise.reject('User not authenticated');
+    }
+  }
   deleteChallenge(challengeId: string) {
     return this.afs.doc(`challenges/${challengeId}`).delete();
+  }
+  deleteUserChallenge(challengeId: string) {
+    return this.afs.doc(`user-challenges/${challengeId}`).delete();
+  }
+  createChallengePage(challengePage: ChallengePage): Promise<void> {
+    const user = this.auth.currentUser;
+    if (user && user.uid) {
+      const data = {
+        challengePageId: challengePage.challengePageId,
+        name: challengePage.name,
+        heading: challengePage.heading,
+        subHeading: challengePage.subHeading,
+        description: challengePage.description,
+        imageChallenge: challengePage.imageChallenge,
+        authorId: user.uid,
+        restricted: challengePage.restricted,
+        creationDate: this.time.todaysDate(),
+      };
+
+      const challengePageRef: AngularFirestoreDocument<ChallengePage> =
+        this.afs.doc(`challengePages/${challengePage.challengePageId}`);
+
+      return challengePageRef.set(data, { merge: true });
+    } else {
+      // Reject the promise if the user is not authenticated
+      return Promise.reject('User not authenticated');
+    }
+  }
+  getAllChallengePagesByThisUser(): Observable<ChallengePage[]> {
+    const user = this.auth.currentUser;
+    if (user && user.uid) {
+      const currentUserId = user.uid;
+      return this.afs
+        .collection<ChallengePage>('challengePages', (ref) =>
+          ref.where('authorId', '==', currentUserId)
+        )
+        .valueChanges();
+    } else {
+      // Return an empty array if the user is not authenticated
+      return of([]);
+    }
+  }
+
+  getChallengePageById(challengePageId: string) {
+    return this.afs.doc(`challengePages/${challengePageId}`).valueChanges();
+  }
+  deleteChallengePage(challengePageId: string): Promise<void> {
+    const challengePageRef: AngularFirestoreDocument<ChallengePage> =
+      this.afs.doc(`challengePages/${challengePageId}`);
+
+    return challengePageRef.delete();
   }
 }
