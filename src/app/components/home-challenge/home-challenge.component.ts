@@ -286,4 +286,19 @@ export class HomeChallengeComponent {
 
     this.router.navigate(['/start-challenge/']);
   }
+  // Function to copy the current URL to the clipboard
+  copyUrlToClipboard() {
+    const currentUrl = window.location.href;
+
+    // Use the Clipboard API to copy the URL
+    navigator.clipboard
+      .writeText(currentUrl)
+      .then(() => {
+        alert('URL copied to clipboard!');
+      })
+      .catch((err) => {
+        console.error('Failed to copy URL: ', err);
+        alert('Failed to copy URL. Please try again.');
+      });
+  }
 }
