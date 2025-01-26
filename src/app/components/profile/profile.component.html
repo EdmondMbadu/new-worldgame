@@ -89,10 +89,10 @@
                 <div *ngIf="completedSolutions.length>0" class=" flex flex-col mt-4 text-left text-xl">
                     <h1 class="font-bold dark:text-gray-200">Achievements</h1>
                     <div class="flex flex-row mt-2">
-                        <img (mouseenter)="onHoverImageToggle('solution-completed')" (mouseleave)="onHoverImageToggle('solution-completed')" class="w-24" src="../../../assets/img/solution-completed-badge.png" alt="">
+                        <img (mouseenter)="onHoverImageToggle('solution-completed')" (mouseleave)="onHoverImageToggle('solution-completed')" class="w-24 cursor-pointer" src="../../../assets/img/solution-completed-badge.png" alt="">
                         <div>
                            
-                            <div *ngIf="showSolutionCompletedBadge" class="-mt-4 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 absolute">
+                            <div *ngIf="showSolutionCompletedBadge" class="-mt-4 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 fixed z-50 ">
                                 <a >
                                     <img class="rounded-t-lg w-64" src="../../../assets/img/solution-completed-badge.png" alt="" />
                                 </a>
@@ -111,9 +111,9 @@
                             </div>
                         </div>
                         <div class="flex flex-row ">
-                            <img (mouseenter)="onHoverImageToggle('points')" (mouseleave)="onHoverImageToggle('points')"  *ngIf="points!==0" class="rounded-full w-24" src="../../../assets/img/nwg-solution-badge.png" alt="">
+                            <img (mouseenter)="onHoverImageToggle('points')" (mouseleave)="onHoverImageToggle('points')"  *ngIf="points!==0" class="rounded-full w-24 cursor-pointer" src="../../../assets/img/nwg-solution-badge.png" alt="">
                             
-                            <div *ngIf="showSolutionWithPointsBadge" class="-mt-4 ml-20 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 absolute">
+                            <div *ngIf="showSolutionWithPointsBadge" class="-mt-4 ml-20 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 fixed z-50">
                                 <a >
                                     <img class="rounded-t-lg w-64" src="../../../assets/img/nwg-solution-badge.png" alt="" />
                                 </a>
@@ -262,18 +262,17 @@
 
     </div>
 
-    <div class="container flex flex-col md:flex-row mx-auto justify-center">
+   <div class="container mx-auto px-4">
+    <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200 my-4">
+        Solutions ({{ completedSolutions.length }})
+    </h1>
 
-        <div class=" container flex flex-col max-w-2xl ">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200 my-4">Solutions ({{completedSolutions.length }})</h1>
-            <div  *ngFor="let solution of completedSolutions; let i= index">
-                <app-solution [user]="user"  [solution]="solution"></app-solution>
-            
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div *ngFor="let solution of completedSolutions; let i = index" class="transform transition-transform duration-300 hover:scale-105">
+            <app-solution [user]="user" [solution]="solution"></app-solution>
         </div>
-
-
-
     </div>
+</div>
 
  
     <app-footer class="md:hidden"></app-footer>
@@ -339,5 +338,3 @@
         </div>
     </div>
 </div>
-
-

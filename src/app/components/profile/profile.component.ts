@@ -35,7 +35,8 @@ export class ProfileComponent implements OnInit {
   snapshot?: Observable<any>;
   downloadURL?: Observable<string>;
   url: string = '';
-  points: number = 0;
+  points: number = 100;
+  maxPoints: number = 100;
   showSolutionCompletedBadge: boolean = false;
   showSolutionWithPointsBadge: boolean = false;
   location: string = '';
