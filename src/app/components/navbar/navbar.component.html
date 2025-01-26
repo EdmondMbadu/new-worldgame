@@ -3,11 +3,15 @@
 <nav class=" w-full    p-4 fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 z-50"*ngIf="email===''">
 
   <div class=" container mx-auto flex items-center justify-between dark:text-white px-12">
-          <div class=" pt-2  " routerLink="/{{path}}"  >
-           
-              <img  class="w-20 rounded-lg cursor-pointer"  src="../../../assets/img/earth-triangle-test.png" alt="">
-          
-            </div>
+    <div class="pt-2 flex items-center space-x-4 cursor-pointer hover:scale-105 transition-transform duration-300" routerLink="/{{path}}">
+      <!-- Logo Image -->
+      <img class="w-20 rounded-lg shadow-lg" src="../../../assets/img/earth-triangle-test.png" alt="NewWorld Game Logo">
+  
+      <!-- Logo Text -->
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent drop-shadow-lg dark:from-blue-400 dark:to-purple-400">
+          NewWorld Game
+      </h1>
+    </div>
             <!-- <a href="#" class="sm:hidden lg:inline-flex justify-between items-center py-1 px-1 pe-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
               <span class="text-xs bg-blue-600 rounded-full text-white px-4 py-1.5 me-3">New</span> <span class="text-sm font-medium">Jumbotron component was launched! See what's new</span> 
               <svg class="w-2.5 h-2.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
@@ -113,13 +117,13 @@
         <li>
           <div class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white group">
             <!-- Logo Container -->
-          <div class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center space-x-2">
-            <!-- Logo Image -->
-            <img routerLink="/home" class="w-12 h-12 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700" src="../../../assets/img/earth-triangle-test.png" alt="NewWorld Game Logo">
-            <!-- Logo Text -->
-            <span routerLink="/home" class="text-xl font-bold text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-              NewWorld Game
-            </span>
+            <div class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center space-x-2 hover:scale-105 transition-transform duration-300">
+              <!-- Logo Image -->
+              <img routerLink="/home" class="w-12 h-12 rounded-lg shadow-lg" src="../../../assets/img/earth-triangle-test.png" alt="NewWorld Game Logo">
+              <!-- Logo Text -->
+              <span routerLink="/home" class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent drop-shadow-lg dark:from-blue-400 dark:to-purple-400">
+                  NewWorld Game
+              </span>
           </div>
           <button (click)="toggleAside()" >
             <svg  class="w-[30px] h-[30px] text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
