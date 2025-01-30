@@ -76,7 +76,7 @@
           <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 ">
             <div
               *ngFor="let t of titles; let i = index"
-              class="animate-fade-up"
+              class="transform transition-transform duration-300 hover:scale-105"
              
             >
             <app-challenge  [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [id]="ids[i]"  [description]="descriptions[i]" [restricted]="'true'"   [title]="t"></app-challenge>

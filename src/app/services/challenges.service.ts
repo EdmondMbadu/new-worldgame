@@ -42,11 +42,31 @@ export class ChallengesService {
   getAllChallenges() {
     return this.afs.collection('challenges').valueChanges(); // Retrieves all challenges
   }
-  getThisUserChallenges(userId: string): Observable<any[]> {
+  // getThisUserChallenges(
+  //   userId: string,
+  // ): Observable<any[]> {
+  //   if (userId) {
+  //     return this.afs
+  //       .collection('user-challenges', (ref) =>
+  //         ref.where('authorId', '==', userId)
+  //       )
+  //       .valueChanges();
+  //   } else {
+  //     // Return an empty array if the user is not authenticated
+  //     return of([]);
+  //   }
+  // }
+
+  getThisUserChallenges(
+    userId: string,
+    challengePageId: string
+  ): Observable<any[]> {
     if (userId) {
       return this.afs
         .collection('user-challenges', (ref) =>
-          ref.where('authorId', '==', userId)
+          ref
+            .where('authorId', '==', userId)
+            .where('challengePageId', '==', challengePageId)
         )
         .valueChanges();
     } else {
@@ -121,6 +141,7 @@ export class ChallengesService {
     description: string;
     category: string;
     image: string;
+    challengePageId: any;
   }): Promise<void> {
     const user = this.auth.currentUser;
     if (user && user.uid) {
@@ -134,6 +155,7 @@ export class ChallengesService {
         category: challenge.category,
         image: challenge.image,
         authorId: user.uid,
+        challengePageId: challenge.challengePageId,
       };
       return challengeRef.set(data, { merge: true });
     } else {

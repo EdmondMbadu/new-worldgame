@@ -21,7 +21,7 @@ export class HomeChallengeComponent {
 
   isSidebarOpen = false;
   heading: string = '';
-  subHeading: string = '';
+  subHeading: any = '';
   image: string = '';
   showAddChallenge: boolean = false;
   challengePage: ChallengePage = new ChallengePage();
@@ -57,8 +57,22 @@ export class HomeChallengeComponent {
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
-    this.challengePageId = this.activatedRoute.snapshot.paramMap.get('id');
-    console.log('the current user is ', this.auth.currentUser);
+    this.activatedRoute.paramMap.subscribe((params) => {
+      this.challengePageId = params.get('id');
+      window.scrollTo(0, 0);
+      this.loadChallengePage();
+    });
+  }
+  loadChallengePage(): void {
+    // Reset challenge-related data before fetching new ones
+    this.categories = [];
+    this.challenges = {};
+    this.activeCategory = '';
+    this.titles = [];
+    this.descriptions = [];
+    this.challengeImages = [];
+    this.ids = [];
+
     this.challenge
       .getChallengePageById(this.challengePageId)
       .subscribe((data: any) => {
@@ -66,21 +80,25 @@ export class HomeChallengeComponent {
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
         this.image = this.challengePage.imageChallenge!;
-        console.log('challenge page data', this.challengePage);
+
         this.challenge
-          .getThisUserChallenges(this.challengePage.authorId!)
+          .getThisUserChallenges(
+            this.challengePage.authorId!,
+            this.challengePageId
+          )
           .subscribe((challenges: any[]) => {
+            // Extract unique categories from new challenges
             const uniqueCategories = Array.from(
               new Set(challenges.map((challenge) => challenge.category))
             );
+
             this.categories = uniqueCategories;
-            this.activeCategory = this.categories[0];
+            this.activeCategory = this.categories[0] || ''; // Set to first category if available
             this.fetchChallenges(this.activeCategory);
           });
-
-        console.log('The challenge page is', this.challengePage);
       });
   }
+
   get isAuthorPage(): boolean {
     return this.challengePage.authorId === this.auth.currentUser.uid;
   }
@@ -245,6 +263,7 @@ export class HomeChallengeComponent {
       category: this.categoryCreateChallenge,
       image: this.imageCreateChallenge,
       authordId: this.auth.currentUser.uid,
+      challengePageId: this.challengePageId,
     };
 
     this.challenge

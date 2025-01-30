@@ -249,8 +249,8 @@
       </a>
    </li>
       <!-- My Pages Section -->
-      <li class="cursor-pointer" (click)="toggle('showMyPages')" *ngIf="userChallengePages.length > 0">
-        <div  class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+      <li class="cursor-pointer"  *ngIf="userChallengePages.length > 0">
+        <div (click)="toggle('showMyPages')" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
           <svg class="w-[20px] h-[20px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6H20M4 12H20M4 18H20"/>
           </svg>
