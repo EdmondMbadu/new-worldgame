@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChallengePage } from 'src/app/models/user';
@@ -43,7 +43,14 @@ export class HomeChallengeComponent {
   ids: string[] = [];
 
   isHovering: boolean = false;
+  @ViewChild('solutions') solutionsSection!: ElementRef;
 
+  scrollToSolutions() {
+    this.solutionsSection.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
   activeCategory: string = '';
   constructor(
     private activatedRoute: ActivatedRoute,
