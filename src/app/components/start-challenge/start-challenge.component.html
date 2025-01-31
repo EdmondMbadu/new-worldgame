@@ -8,44 +8,50 @@
 </app-navbar>
 
 <main class="mt-20 pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased min-w-max">
+  <!-- Full-Width Background Image Section -->
   <div
-    class="relative h-[250px] md:h-[400px] bg-cover bg-center"
-    [ngStyle]="{'background-image': 'url(' + (selectedChallengeItem.image === '' || selectedChallengeItem.image === undefined ? '../../../assets/img/generic.webp' : selectedChallengeItem.image) + ')'}"
-  >
-    <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center px-4 text-center text-white">
-      <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold max-w-4xl">
-        {{ selectedChallengeItem.title }}
-      </h1>
-      <p class="mt-4 text-sm md:text-lg lg:text-xl max-w-3xl">
-        {{ selectedChallengeItem.description }}
-      </p>
-    </div>
-  </div>
+  class="relative h-[400px] md:h-[500px] bg-contain bg-center bg-no-repeat"
+  [ngStyle]="{'background-image': 'url(' + (selectedChallengeItem.image === '' || selectedChallengeItem.image === undefined ? '../../../assets/img/generic.webp' : selectedChallengeItem.image) + ')'}"
+>
+  <div class="absolute inset-0 bg-black bg-opacity-10"></div> <!-- Optional overlay -->
+</div>
 
+  <!-- Content Section Below the Image -->
   <div class="px-4 mx-auto max-w-screen-xl">
     <article class="mx-auto w-full max-w-2xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert">
-        <div class="px-4 py-4 bg-teal-100 dark:bg-slate-800 text-gray-900 dark:text-white rounded-lg shadow-md mx-auto max-w-screen-xl text-center">
-            <h2 class="text-xl font-bold mb-2">Ready to Start?</h2>
-            <p class="mb-4">Jump right into designing impactful solutions for a brighter future.</p>
-            <div class="space-x-4">
-                <button
-                class="px-6 py-3 text-lg font-bold text-white bg-teal-700 rounded-full shadow-md hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
-                (click)="startChallenge()"
-              >
-                Start Solution
-              </button>
-              <button
-              *ngIf="this.auth.currentUser.admin"
-                class="px-6 py-3 text-lg font-bold text-white bg-red-700 rounded-full shadow-md hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                (click)="deleteChallenge()"
-              >
-                Delete Challenge
-              </button>
-            </div>
-            
-          </div>
+      <!-- Title and Description -->
+      <div class="text-center mt-8">
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold max-w-4xl mx-auto text-gray-900 dark:text-white">
+          {{ selectedChallengeItem.title }}
+        </h1>
+        <p class="mt-4 text-sm md:text-lg lg:text-xl max-w-3xl mx-auto text-gray-600 dark:text-gray-300">
+          {{ selectedChallengeItem.description }}
+        </p>
+      </div>
+
+      <!-- Ready to Start Section -->
+      <div class="px-4 py-4 bg-teal-100 dark:bg-slate-800 text-gray-900 dark:text-white rounded-lg shadow-md mt-8 text-center">
+        <h2 class="text-xl font-bold mb-2">Ready to Start?</h2>
+        <p class="mb-4">Jump right into designing impactful solutions for a brighter future.</p>
+        <div class="space-x-4">
+          <button
+            class="px-6 py-3 text-lg font-bold text-white bg-teal-700 rounded-full shadow-md hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+            (click)="startChallenge()"
+          >
+            Start Solution
+          </button>
+          <button
+            *ngIf="this.auth.currentUser.admin"
+            class="px-6 py-3 text-lg font-bold text-white bg-red-700 rounded-full shadow-md hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            (click)="deleteChallenge()"
+          >
+            Delete Challenge
+          </button>
+        </div>
+      </div>
+
       <!-- Intro Section -->
-      <section class="mt-6 text-gray-900 dark:text-white space-y-6">
+      <section class="mt-8 text-gray-900 dark:text-white space-y-6">
         <h2 class="text-2xl font-bold">Welcome to Your Challenge</h2>
         <p class="text-lg">
           This challenge is part of the <strong>NewWorld Game</strong>, a platform designed to turn bold ideas into actionable solutions for real-world problems. 
