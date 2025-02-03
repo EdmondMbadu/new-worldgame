@@ -1,13 +1,13 @@
 <div class="bg-white dark:bg-slate-800 hover:bg-gray-100 hover:dark:bg-slate-700 rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:dark:shadow-2xl  transition-shadow duration-300 cursor-pointer">
     <a routerLink="/solution-view/{{solution.solutionId}}">
-        <img *ngIf="solution.image !==undefined" [src]="solution.image" alt="{{ solution.title }}" class="w-full h-48 object-cover">
-        <img   *ngIf="solution.image ===undefined"  src="../../../assets/img/photo-gallery.png" alt="{{ solution.title }}" class="w-full h-48 object-cover">
+        <img *ngIf="solution.image" [src]="solution.image" alt="{{ solution.title }}" class="w-full h-48 object-cover">
+        <img   *ngIf="!solution.image"  src="../../../assets/img/photo-gallery.png" alt="{{ solution.title }}" class="w-full h-48 object-cover">
     </a>  
     <div class="p-4">
         <div routerLink="/solution-view/{{solution.solutionId}}">
             <h3  class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ solution.title }}</h3>
         
-            <p  class="text-gray-600 dark:text-gray-400 mt-2">
+            <p *ngIf="solution.description" class="text-gray-600 dark:text-gray-400 mt-2">
                 {{ solution.description | slice:0:50 }}{{ solution.description!.length > 50 ? '...' : '' }}
             </p>
         </div>
