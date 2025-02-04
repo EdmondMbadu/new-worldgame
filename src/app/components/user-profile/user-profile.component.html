@@ -190,7 +190,19 @@
     
 
     </div>
-
+    <div class="container mx-auto px-24">
+        <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200 my-4">
+            Solutions ({{ completedSolutions.length }})
+        </h1>
+    
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div *ngFor="let solution of completedSolutions; let i = index" class="transform transition-transform duration-300 hover:scale-105">
+                <app-solution [user]="user" [solution]="solution"></app-solution>
+            </div>
+        </div>
+    </div>
+    
+<!-- 
     <div class="container flex flex-col md:flex-row mx-auto justify-center">
 
         <div class=" container flex flex-col max-w-2xl ">
@@ -203,7 +215,7 @@
 
 
 
-    </div>
+    </div> -->
     <app-footer class="md:hidden"></app-footer>
 </div>
 
