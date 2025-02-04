@@ -267,7 +267,7 @@
         Solutions ({{ completedSolutions.length }})
     </h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1  md:grid-cols-3 2xl:grid-cols-4 gap-6">
         <div *ngFor="let solution of completedSolutions; let i = index" class="transform transition-transform duration-300 hover:scale-105">
             <app-solution [user]="user" [solution]="solution"></app-solution>
         </div>
