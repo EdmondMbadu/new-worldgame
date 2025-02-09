@@ -1,141 +1,165 @@
-
-<div 
-(mousedown)="onMouseDown($event)"
+<div
   id="draggable-team-discussion"
-  class="draggable">
-
-
-<div class="bottom-0 left-0 mb-4 ml-4 ">
-    <div *ngIf="showChatIcon">
-        <div (click)="toggleDiscussion()" class="mx-auto">
-            <img   src="../../../assets/img/team-discussion.png" class="w-28 rounded-full -mb-4 hidden lg:flex" alt="">
-        </div>
-            <button id="open-chat" (click)="toggleDiscussion()" class="bg-teal-700 text-white lg:py-2 lg:px-4 rounded-md hover:bg-teal-800 transition duration-300 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                <div class="hidden lg:flex">
-                    Team Discussion
-                </div>
-                
-            </button>
-        </div>
+  class="fixed z-50 shadow-lg"
+  (mousedown)="onMouseDown($event)"
+  style="width: 400px; bottom: 50px; left: 80px;"
+>
+  <!-- Show/hide icon that toggles the discussion -->
+  <div *ngIf="showChatIcon" class="absolute bottom-0 left-0 mb-4 ml-4">
+    <div (click)="toggleDiscussion()" class="flex items-center mb-2 cursor-pointer">
+      <!-- Example round icon -->
+      <img
+        src="../../../assets/img/team-discussion.png"
+        class="w-16 h-16 rounded-full"
+        alt="Discussion Icon"
+      />
     </div>
-  
-    <div id="chat-container" *ngIf="showDiscussion" class=" bottom-16 left-4 w-96">
-        <div class="bg-white shadow-md rounded-lg max-w-lg w-full dark:bg-slate-700">
-            <div class="p-2 border-b shadow-lg bg-teal-700 text-white rounded-t-lg flex justify-between items-center">
-                <!-- <img src="../../../assets/img/bucky-2.png" class="w-14 rounded-full" alt=""> -->
-                <p class="text-lg font-semibold  mx-auto">Team Discussion</p>
-                <button id="close-chat" class="text-white hover:text-white focus:outline-none focus:text-gray-400" (click)="toggleDiscussion()">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+    <button
+      id="open-chat"
+      (click)="toggleDiscussion()"
+      class="bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-md transition duration-300 flex items-center"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-5 h-5 mr-2"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+        />
+      </svg>
+      <!-- <span>Team Discussion</span> -->
+    </button>
+  </div>
 
-                
-
-            </div>
-            <div class="flex flex-row mx-2 my-2" >
-                
-                <!-- <button type="button" class=" mx-2 my-1 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Start a Zoom Call</button> -->
-                <a routerLink="/video-call/{{solution!.solutionId}}" type="button" class=" mx-2  text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 ">Join Video Call</a>
-                
-                <!-- <button (click)="toggleShowOtherVoiceChannels()" id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">GSL Discord Video channels <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                    </svg>
-                    </button> -->
-                
-                <!-- <div *ngIf="displayOtherVoiceChannels" id="dropdown" class="z-10 absolute ml-40 mt-16 bg-white divide-y divide-gray-100 rounded-lg shadow w-48 dark:bg-gray-700">
-                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                      <li>
-                        <a target="_blank" href="https://discord.com/channels/877906745660420096/987701514812407819" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Voice Rm-1-Hunger</a>
-                      </li>
-                      <li>
-                        <a target="_blank" href="https://discord.com/channels/877906745660420096/987701780886474822" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Voice Rm-2-Education</a>
-                      </li>
-                      <li>
-                        <a target="_blank" href="https://discord.com/channels/877906745660420096/987702075880247326" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Voice Rm-3-Energy</a>
-                      </li>
-                      <li>
-                        <a target="_blank" href="https://discord.com/channels/877906745660420096/987702019336847390" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Voice Rm-4-Climate</a>
-                      </li>
-                      <li>
-                        <a target="_blank" href="https://discord.com/channels/877906745660420096/881975033990361158" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Voice Rm-5-Health-Clinics-Africa</a>
-                      </li>
-                     
-                    </ul>
-                </div> -->
-                    
-            </div>
-
-            <div>
-               
-            </div>
-            
-            
-            <body>
-                
-           
-                <div id="chatboxDiscussion" class="p-4 h-80 overflow-y-auto">
-                    
-                <!-- Chat messages will be displayed here -->
-                <section class="responses">
-                    <p class="dark:text-white text-md m-2 mb-3">
-                        {{introMessage}}
-                        <a class="text-blue-500 underline" target="_blank" href="https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt">Advanced Search </a>
-                       - 
-                        <a class="text-blue-500 underline" target="_blank" href="https://chatgpt.com/g/g-BnUlAisOD-story-illustrator"> Image Generator</a>
-                    </p>
-                    <ng-container *ngFor="let comment of comments">
-                    <div>
-                    
-                            <div class="mb-2">
-                                <!-- <img  *ngIf="profilePicturePath !=='' " [src]="profilePicturePath" class="rounded-full w-14 mr-1" alt=""> -->
-                                <div class="flex flex-row ">
-                                    <img  *ngIf="comment.profilePic !=='' " [src]="comment.profilePic" class="rounded-full w-14 " alt="">
-                                    <img *ngIf="comment.profilePic ==='' || comment.profilePic ===undefined"  src="../../../assets/img/user.png"  class="rounded-full w-14 dark:bg-gray-500 " alt="">
-                                    <!-- <svg *ngIf="comment.profilePic ==='' || comment.profilePic ===undefined"  class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> -->
-                                    
-                                    <div class="flex flex-col ml-2">
-                                    <h1 class="text-sm  dark:text-white mt-4">{{comment.authorName}}</h1>
-                                    <!-- <h1 class="dark:text-white text-sm">{{comment.displayTime}}</h1> -->
-                                   </div> 
-                                  
-                                    
-                                </div>
-                              
-                                
-                            
-
-                            
-                                
-                                <p  class="bg-slate-200 text-gray-700  rounded-lg py-2 px-4 items-center dark:bg-slate-500 dark:text-gray-100">{{ comment.content }}</p>
-                            </div>
-
-                
-                            
-                    </div>
-                    </ng-container>
-                   
-                </section>
-
-
-                
-                </div>
-            </body>
-            <div class="p-4 border-t flex">
-           
-                    <textarea [(ngModel)]="prompt" id="user-input" type="text" placeholder="Add to discussion ..." class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>    
-               
-            </div>
-            <div class="flex flex-row mx-auto justify-center space-x-2 pb-4">
-                <button (click)="addToDiscussion()" id="send-button" class="bg-teal-700 flex  text-white  px-10 py-2 rounded-md hover:bg-teal-800 ">Post</button>
-                <button (click)="endChat()" id="end-conversation" class="bg-red-700 flex text-white  px-10 py-2 rounded-md hover:bg-red-800 ">Close </button>
-            </div>
-           
-           
-        </div>
+  <!-- The chat panel -->
+  <div
+    id="chat-container"
+    *ngIf="showDiscussion"
+    class="h-[500px] w-[400px] flex flex-col rounded-lg overflow-hidden bg-[#2F3136] text-white"
+  >
+    <!-- Header / title bar -->
+    <div class="flex items-center justify-between px-3 py-2 bg-[#202225] border-b border-gray-700">
+      <div class="flex items-center space-x-2">
+        <!-- Channel name -->
+        <span class="font-semibold text-base">#team-discussion</span>
+      </div>
+      <!-- Close button (X) -->
+      <button
+        id="close-chat"
+        class="text-gray-200 hover:text-white focus:outline-none"
+        (click)="toggleDiscussion()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
     </div>
-    
+
+    <!-- Video call or other top actions -->
+    <div class="flex px-3 py-2 bg-[#202225] space-x-2">
+      <a
+        routerLink="/video-call/{{ solution!.solutionId }}"
+        class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md text-sm font-medium"
+      >
+        Join Video Call
+      </a>
+    </div>
+
+    <!-- Intro or pinned info -->
+    <div class="px-4 pt-2 text-sm text-gray-300">
+      {{ introMessage }}
+      <a
+        class="text-blue-400 underline"
+        target="_blank"
+        href="https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt"
+        >Advanced Search</a
+      >
+      -
+      <a
+        class="text-blue-400 underline"
+        target="_blank"
+        href="https://chatgpt.com/g/g-BnUlAisOD-story-illustrator"
+        >Image Generator</a
+      >
+    </div>
+
+    <!-- Messages container -->
+    <div
+      id="chatboxDiscussion"
+      class="flex-1 overflow-y-auto px-4 py-2 space-y-4"
+    >
+      <ng-container *ngFor="let comment of comments">
+        <div class="flex items-start space-x-3">
+          <!-- Avatar -->
+          <img
+            *ngIf="comment.profilePic"
+            [src]="comment.profilePic"
+            alt="User Avatar"
+            class="w-10 h-10 rounded-full object-cover"
+          />
+          <img
+            *ngIf="!comment.profilePic"
+            src="../../../assets/img/user.png"
+            alt="Default Avatar"
+            class="w-10 h-10 rounded-full bg-gray-500"
+          />
+
+          <!-- Message text -->
+          <div>
+            <!-- Name + timestamp -->
+            <div class="flex items-center space-x-2 text-sm">
+              <span class="font-semibold text-gray-100">{{ comment.authorName }}</span>
+              <!-- Optional displayTime or date -->
+              <span class="text-xs text-gray-400">{{ comment.displayTime || comment.date }}</span>
+            </div>
+            <!-- Actual message -->
+            <p class="bg-[#36393F] text-gray-100 rounded-md px-3 py-2 mt-1">
+              {{ comment.content }}
+            </p>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Input area -->
+    <div class="p-3 border-t border-gray-700 flex items-center space-x-2">
+      <textarea
+        [(ngModel)]="prompt"
+        id="user-input"
+        placeholder="Message #team-discussion"
+        class="flex-1 resize-none bg-[#40444B] text-gray-200 text-sm rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-[#5865F2]"
+      ></textarea>
+      <button
+        (click)="addToDiscussion()"
+        id="send-button"
+        class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md"
+      >
+        Send
+      </button>
+      <button
+        (click)="endChat()"
+        id="end-conversation"
+        class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md"
+      >
+        Close
+      </button>
+    </div>
+  </div>
 </div>

@@ -1,0 +1,181 @@
+<style>
+    .hover-effect:hover {
+      background-color: rgba(148, 163, 184, 0.2); /* Subtle background change */
+      transform: scale(1.05);
+      transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+  </style>
+  
+  <div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
+      <!-- Navbar -->
+      <app-navbar
+        [sideBarSmall]="true"
+        [sideBarBig]="false"
+        [email]="this.auth.currentUser.email"
+        [firstName]="this.auth.currentUser.firstName"
+        [lastName]="this.auth.currentUser.lastName"
+        path="home"
+        current=""
+      ></app-navbar>
+    
+      <!-- Main content wrapper -->
+      <div class="flex-1 flex flex-col items-center mt-20 px-4">
+        <!-- Project Title -->
+        <h1 class="text-4xl text-gray-900 dark:text-white mb-8">{{ currentSolution.title }}</h1>
+    
+        <!-- Featured Image -->
+        <div class="mb-8" appDropZone
+          (hovered)="toggleHover($event)"
+          (dropped)="startUpload($event)"
+          [class.hovering]="isHovering">
+          
+          <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
+          
+          <!-- Solution Image -->
+          <img *ngIf="currentSolution.image !== ''&& currentSolution.image" [src]="currentSolution.image" alt="Solution Feature"
+            class="rounded-lg w-48 h-48 object-cover mx-auto" />
+  
+          <!-- Placeholder Image -->
+          <img *ngIf="!currentSolution.image " src="../../../assets/img/generic.webp" alt="Placeholder Feature"
+            class="rounded-lg w-48 h-48 object-cover mx-auto" />
+            
+  
+          <button onclick="document.getElementById('getFile').click()"
+            class="flex flex-row items-center justify-center -mt-4 ml-24 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-slate-500 dark:text-gray-200 dark:hover:bg-slate-600 px-2 py-1">
+            <svg class="w-5 h-5 hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black" 
+                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
+                        </svg>
+            <h1 class="ml-1">Edit</h1>
+          </button>
+        </div>
+    
+        <!-- Responsive Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 place-items-center">
+          <!-- Create/Edit Solution -->
+          <div routerLink="/playground-steps/{{currentSolution.solutionId}}" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
+           <!-- Icon (cog icon) -->
+          <svg
+          class="w-12 h-12 mb-2 text-yellow-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M11.049 2.927c.3-1.14 1.952-1.14 
+               2.252 0a1.724 1.724 0 002.591.99c1-.654 
+               2.29.366 1.937 1.463a1.724 1.724 
+               0 001.26 2.256c1.122.264 1.122 1.888 
+               0 2.152a1.724 1.724 0 00-1.26 
+               2.256c.353 1.097-.936 2.117-1.937 
+               1.463a1.724 1.724 0 00-2.59.99c-.301
+               1.14-1.953 1.14-2.254 0a1.724 1.724 
+               0 00-2.59-.99c-1 .654-2.29-.366-1.937-1.463a1.724 
+               1.724 0 00-1.26-2.256c-1.122-.264-1.122-1.888 
+               0-2.152a1.724 1.724 0 001.26-2.256c-.353-1.097.936-2.117 
+               1.937-1.463.95.623 2.218.04 2.59-.99z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <span>Edit solution</span>
+          </div>
+  
+          <!-- Video Call -->
+          <div   routerLink="/meeting/{{currentSolution.solutionId}}" target="_blank" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
+            <svg
+            class="w-12 h-12 mb-2 text-red-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 10.5l4.098-2.357a.75.75 0 
+                 011.152.653v6.408a.75.75 0 01-1.152.653l-4.098-2.357v-3z 
+                 M3 6.75A2.25 2.25 0 015.25 4.5h6a2.25 2.25 0 
+                 012.25 2.25v10.5a2.25 2.25 0 
+                 01-2.25 2.25h-6A2.25 2.25 0 
+                 013 17.25V6.75z"
+            />
+          </svg>
+          <span>Video chat room</span> 
+          </div>
+  
+          <!-- Team Discussion -->
+          <div  routerLink="/full-discussion/{{currentSolution.solutionId}}"  class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
+            <svg
+            class="w-12 h-12 mb-2 text-pink-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M20.25 8.511c.884.74.75 1.972.75 
+                 3.239v4.5A2.25 2.25 0 0118.75 18h-2.772l-3.348 
+                 2.506c-.872.652-2.13.038-2.13-1.044V18c-1.5 
+                 0-3.25-.75-3.25-3.75v-4.5c0-2.214 1.292-3.234 
+                 2.25-3.489"
+            />
+          </svg>
+          <span>Team discussion</span>
+          </div>
+  
+          <!-- Solution Details -->
+          <!-- <div class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect">
+            <svg
+            class="w-12 h-12 mb-2 text-green-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M11.25 9.75h1.5m-.75 3v3m9-3a9 9 0 
+                 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>Solution details</span>
+          </div> -->
+  
+          <!-- Documents & Files -->
+          <!-- <div class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect">
+            <svg
+            class="w-12 h-12 mb-2 text-blue-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 9.75L14.25 4.5H8.25a1.5 1.5 0 
+                 00-1.5 1.5v12.75a1.5 1.5 0 001.5 
+                 1.5h10.5a1.5 1.5 0 001.5-1.5V9.75z"
+            />
+          </svg>
+          <span>Documents & Files</span>
+          </div> -->
+        </div>
+      </div>
+  </div>
+  

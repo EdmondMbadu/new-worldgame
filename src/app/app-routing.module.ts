@@ -58,6 +58,8 @@ import { MeetingComponent } from './components/meeting/meeting.component';
 import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
 import { GenerateChallengesComponent } from './components/generate-challenges/generate-challenges.component';
 import { HomeChallengeComponent } from './components/home-challenge/home-challenge.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -88,6 +90,12 @@ const routes: Routes = [
     data: { requireParticipant: true },
   },
   {
+    path: 'dashboard/:id',
+    component: DashboardComponent,
+    canActivate: [AuthGuard],
+    data: { requireParticipant: true },
+  },
+  {
     path: 'user-profile/:id',
     component: UserProfileComponent,
     canActivate: [AuthGuard],
@@ -95,6 +103,12 @@ const routes: Routes = [
   {
     path: 'solution-view/:id',
     component: SolutionViewComponent,
+    canActivate: [AuthGuard],
+  },
+
+  {
+    path: 'full-discussion/:id',
+    component: FullDiscussionComponent,
     canActivate: [AuthGuard],
   },
   {

@@ -1,0 +1,146 @@
+<div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      path="home"
+      current=""
+    ></app-navbar>
+  
+    <!-- 
+      Main chat container 
+      - “mt-20” pushes it below the navbar. 
+      - “dark:bg-slate-800 bg-white” ensures we have a fallback white in light mode.
+      - “dark:text-white text-slate-800” for text color. 
+    -->
+    <div
+      class=" flex flex-col mx-auto md:rounded-lg shadow-lg overflow-hidden 
+             dark:bg-slate-800 bg-white 
+             dark:text-white text-slate-800 
+             mt-20 w-full max-w-5xl"
+    >
+      <!-- Top bar / header -->
+      <div class="flex items-center justify-between px-4 py-2 
+                  dark:bg-slate-700 bg-slate-200">
+        <!-- Left side: channel name -->
+        <div class="flex items-center space-x-2">
+          <span class="font-semibold text-base">
+            #team-discussion - {{ currentSolution.title }}
+          </span>
+        </div>
+  
+        <!-- Right side: actions (Join call, Close, etc.) -->
+        <div class="flex items-center space-x-2">
+          <a
+            routerLink="/video-call/{{ currentSolution.solutionId }}"
+            class="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md text-sm font-medium text-white"
+          >
+            Join Video Call
+          </a>
+          <button
+            (click)="endChat()"
+            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm text-white"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+  
+      <!-- Optional pinned/intro area -->
+      <div class="px-4 py-2 text-sm 
+                  dark:bg-slate-800 bg-white 
+                  dark:text-gray-300 text-gray-600"
+      >
+        {{ introMessage }}
+        <a
+          class="text-blue-400 underline"
+          target="_blank"
+          href="https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt"
+        >
+          Advanced Search
+        </a>
+        -
+        <a
+          class="text-blue-400 underline"
+          target="_blank"
+          href="https://chatgpt.com/g/g-BnUlAisOD-story-illustrator"
+        >
+          Image Generator
+        </a>
+      </div>
+  
+      <!-- Main chat area. Use flex-1 to occupy remaining space. -->
+      <div
+        id="chatboxDiscussion"
+        class="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+      >
+        <ng-container *ngFor="let comment of comments">
+          <div class="flex items-start space-x-3">
+            <!-- Avatar -->
+            <img
+              *ngIf="comment.profilePic"
+              [src]="comment.profilePic"
+              alt="User Avatar"
+              class="w-10 h-10 rounded-full object-cover"
+            />
+            <img
+              *ngIf="!comment.profilePic"
+              src="../../../assets/img/user.png"
+              alt="Default Avatar"
+              class="w-10 h-10 rounded-full bg-gray-500"
+            />
+  
+            <!-- Message content -->
+            <div>
+              <div class="flex items-center space-x-2 text-sm">
+                <span class="font-semibold dark:text-gray-100 text-slate-800">
+                  {{ comment.authorName }}
+                </span>
+                <!-- Show time/date if needed -->
+                <span class="text-xs dark:text-gray-400 text-gray-500">
+                  {{ comment.displayTime || comment.date }}
+                </span>
+              </div>
+              <p
+                class="mt-1 rounded-md px-3 py-2
+                        dark:text-gray-100
+                        text-slate-800"
+              >
+                {{ comment.content }}
+              </p>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+  
+      <!-- Input area at the bottom -->
+      <div
+        class="p-3 
+               dark:bg-slate-800 bg-white
+               dark:border-slate-700 border-t border-slate-300 
+               flex items-center space-x-2"
+      >
+        <textarea
+          [(ngModel)]="prompt"
+          id="user-input"
+          placeholder="Message #team-discussion"
+          class="flex-1 resize-none 
+                 dark:bg-slate-700 bg-slate-100
+                 dark:text-gray-200 text-slate-800
+                 text-sm rounded-md px-3 py-2 outline-none
+                 focus:ring-2 focus:ring-[#5865F2]"
+        ></textarea>
+        <button
+          (click)="addToDiscussion()"
+          id="send-button"
+          class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+  
