@@ -41,10 +41,10 @@
   <div
     id="chat-container"
     *ngIf="showDiscussion"
-    class="h-[500px] w-[400px] flex flex-col rounded-lg overflow-hidden bg-[#2F3136] text-white"
+    class="h-[500px] w-[400px] flex flex-col rounded-lg overflow-hidden bg-slate-800 text-white"
   >
     <!-- Header / title bar -->
-    <div class="flex items-center justify-between px-3 py-2 bg-[#202225] border-b border-gray-700">
+    <div class="flex items-center justify-between px-3 py-2 bg-slate-700 border-b border-gray-700">
       <div class="flex items-center space-x-2">
         <!-- Channel name -->
         <span class="font-semibold text-base">#team-discussion</span>
@@ -73,7 +73,7 @@
     </div>
 
     <!-- Video call or other top actions -->
-    <div class="flex px-3 py-2 bg-[#202225] space-x-2">
+    <div class="flex px-3 py-2 bg-slate-800 space-x-2">
       <a
         routerLink="/video-call/{{ solution!.solutionId }}"
         class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-md text-sm font-medium"
@@ -130,7 +130,7 @@
               <span class="text-xs text-gray-400">{{ comment.displayTime || comment.date }}</span>
             </div>
             <!-- Actual message -->
-            <p class="bg-[#36393F] text-gray-100 rounded-md px-3 py-2 mt-1">
+            <p class="bg-slate-800 text-gray-100 rounded-md px-3 py-2 mt-1">
               {{ comment.content }}
             </p>
           </div>
@@ -139,12 +139,12 @@
     </div>
 
     <!-- Input area -->
-    <div class="p-3 border-t border-gray-700 flex items-center space-x-2">
+    <div class="p-3 border-t border-slate-700 flex items-center space-x-2">
       <textarea
         [(ngModel)]="prompt"
         id="user-input"
         placeholder="Message #team-discussion"
-        class="flex-1 resize-none bg-[#40444B] text-gray-200 text-sm rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-[#5865F2]"
+        class="flex-1 resize-none bg-slate-700 text-gray-200 text-sm rounded-md px-3 py-2 outline-none focus:ring-2 focus:ring-[#5865F2]"
       ></textarea>
       <button
         (click)="addToDiscussion()"

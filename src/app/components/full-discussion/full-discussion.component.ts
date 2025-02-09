@@ -70,7 +70,7 @@ export class FullDiscussionComponent
       // Convert each comment's date string to your new, prettier format
       this.comments.forEach((comment) => {
         if (comment.date) {
-          comment.date = this.formatDateString(comment.date);
+          comment.date = this.time.formatDateStringComment(comment.date);
         }
       });
 
@@ -135,30 +135,5 @@ export class FullDiscussionComponent
 
   ngOnDestroy(): void {
     // Cleanup if needed
-  }
-  private formatDateString(rawDate: string): string {
-    // rawDate e.g. "1-13-2025-15-54-12"
-    const parts = rawDate.split('-');
-    // parts: [month, day, year, hours, minutes, seconds]
-    const month = parseInt(parts[0], 10);
-    const day = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
-    const hour = parseInt(parts[3], 10);
-    const minute = parseInt(parts[4], 10);
-    const second = parseInt(parts[5], 10);
-
-    // Create a Date object
-    const dateObj = new Date(year, month - 1, day, hour, minute, second);
-
-    // Format using toLocaleString to get "M/D/YY, h:mm AM/PM"
-    // e.g. "1/13/25, 11:10 AM"
-    return dateObj.toLocaleString('en-US', {
-      year: '2-digit',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
   }
 }
