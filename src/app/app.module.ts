@@ -104,6 +104,7 @@ import { GenerateChallengesComponent } from './components/generate-challenges/ge
 import { HomeChallengeComponent } from './components/home-challenge/home-challenge.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
+import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
 
 @NgModule({
   declarations: [
@@ -184,6 +185,7 @@ import { FullDiscussionComponent } from './components/full-discussion/full-discu
     HomeChallengeComponent,
     DashboardComponent,
     FullDiscussionComponent,
+    SolutionDetailsComponent,
   ],
   imports: [
     BrowserModule,

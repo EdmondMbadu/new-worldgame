@@ -60,6 +60,7 @@ import { GenerateChallengesComponent } from './components/generate-challenges/ge
 import { HomeChallengeComponent } from './components/home-challenge/home-challenge.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
+import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -109,6 +110,11 @@ const routes: Routes = [
   {
     path: 'full-discussion/:id',
     component: FullDiscussionComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'solution-details/:id',
+    component: SolutionDetailsComponent,
     canActivate: [AuthGuard],
   },
   {

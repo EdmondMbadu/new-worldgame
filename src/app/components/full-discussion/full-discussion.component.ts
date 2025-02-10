@@ -35,7 +35,7 @@ export class FullDiscussionComponent
   id: any;
   // currentSolution: Solution = {};
   introMessage = `
-    Welcome to the team discussion chat. You can use the following resources for more advanced prompts
+    Welcome to the team discussion chat. You can use the following resource for more advanced prompts
     and insights on collaboration.
   `;
 

@@ -1,0 +1,382 @@
+<div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      path="home"
+      current=""
+    ></app-navbar>
+  
+    <!-- Outer container, sets text color based on mode -->
+    <div class="container mt-20 mx-auto px-6 py-8 
+                text-black dark:text-white">
+      
+      <!-- Titles -->
+      <h1 class="text-4xl font-bold text-center mb-2">
+        Solution Details
+      </h1>
+      <!-- Lighter text in light mode, lighter gray in dark mode -->
+       <div class="flex flexf-row justify-center mt-4">
+              <h2 class="text-2xl text-center font-bold 
+              text-slate-600 dark:text-gray-300 mb-8">
+      {{currentSolution.title}}
+
+      </h2>
+      <svg (click)="toggle('updateTitleBox')"  class="mt-2 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black cursor-pointer" width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
+      </svg>
+       </div>
+    
+    
+      <!-- Main content: 2-column on md+; 1-column on small screens -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Left column: ReadMe panel -->
+        <!-- Light mode: bg-slate-100; Dark mode: bg-slate-800 -->
+        <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
+          <!-- Heading (no explicit color => black in light, white in dark) -->
+          <div class="flex flex-row">   
+                <h3 class="text-2xl font-semibold mb-4">
+                ReadMe
+            </h3>
+            <svg (click)="toggle('updateReadMeBox')"  class="mt-2 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black cursor-pointer" width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
+                </svg>
+
+          </div>
+      
+          <!-- Body text: darker gray in light mode; lighter gray in dark -->
+          <p class="leading-relaxed text-slate-700 dark:text-gray-300">
+           {{currentSolution.description}}
+          </p>
+        </div>
+    
+        <!-- Right column: Designers/Evaluators + SDGs -->
+        <div class="flex flex-col space-y-6">
+          <!-- Designers & Evaluators Panel -->
+          <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
+            <div class="flex flex-row justify-between space-x-4">
+    
+              <!-- Designers block -->
+              <div>
+                <!-- Lighter text in light mode, lighter gray in dark mode -->
+                <div class="font-semibold mb-2 text-lg
+                            text-slate-700 dark:text-gray-300">
+                            Designers :  {{teamMembers.length}}
+                </div>
+    
+                <div class="flex items-center space-x-2">
+                  <!-- Placeholder icons (plus/minus) -->
+                  <button class="cursor-pointer"
+                  (click)="toggle('showAddTeamMember')"
+                  title="Add Team Members" >
+               
+                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                  </svg>
+                  
+                  
+                  <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">+</span> -->
+                </button>
+                <button class="cursor-pointer"
+                (click)="toggle('showRemoveTeamMember')"
+                title="Remove Team Members" >
+            
+                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/>
+                </svg>
+                
+                
+                <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">-</span> -->
+              </button>
+           
+      
+                  
+                  <!-- User avatars (placeholders) -->
+                  <div class="flex flex-wrap -space-x-1 overflow-x-auto" >
+                    <div *ngFor="let user of teamMembers; let i= index" class="cursor-pointer flex-shrink-0" >
+                        <div *ngIf="user.uid === auth.currentUser.uid" >
+                            <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
+                            <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
+    
+                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                            
+                            </div> 
+                            
+                           
+                        </div>
+                        <div *ngIf="user.uid !== auth.currentUser.uid" >
+                            <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                            <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
+                                
+                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                            </div> 
+                            
+                          
+                        </div>
+                        <div class="">
+                            <div *ngIf="showPopUpTeam[i]"  >
+                                <div class=" shadow-lg border-2 border-gray-200 absolute  z-50 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
+                                    <div class="flex items-center justify-between mb-2" >
+                                        <a >
+                                            <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
+                                            
+                                            <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+       
+                                                <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            </div>   
+                                           
+                                        </a>
+                                        <div>
+                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
+                                        <a>{{user.firstName}} {{user.lastName}}</a>
+                                    </p>
+                                    <p class="mb-3 text-sm font-normal">
+                                        <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
+                                    </p>
+                                    <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
+                                    <ul class="flex text-sm">
+                                        <li class="mr-2">
+                                            <a  class="hover:underline">
+                                                <span class="font-semibold text-gray-800 dark:text-gray-200">{{user.following}} </span>
+                                                <span class="dark:text-gray-200">Following</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="hover:underline">
+                                                <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
+                                                <span class="dark:text-gray-200">Followers</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                  
+                    </div>
+           
+                        
+                </div>
+                </div>
+              </div>
+    
+              <!-- Evaluators block -->
+              <div>
+                <div class="font-semibold mb-2 text-lg 
+                            text-slate-700 dark:text-gray-300">
+                            Evaluators :  {{evaluators.length}}
+                </div>
+                <div class="flex items-center space-x-2">
+                 
+          
+                  
+                  <!-- User avatars (placeholders) -->
+                  <div class="flex flex-wrap -space-x-1 overflow-x-auto space-y-1" >
+                    <div *ngFor="let user of evaluators; let i= index" class = "cursor-pointer flex-shrink-0">
+                        <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
+                         
+                        <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)" routerLink="/user-profile/{{user.uid}}"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+           
+                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        </div> 
+                        
+                        <div>
+                            <div *ngIf="showPopUpEvaluators[i]" class="overflow-x-scroll" >
+                                <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
+                                    <div class="flex items-center justify-between mb-2" >
+                                        <a >
+                                            <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
+                                           
+                                            <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
+           
+                                                <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            </div>   
+                                        </a>
+                                        <div>
+                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
+                                        <a>{{user.firstName}} {{user.lastName}}</a>
+                                    </p>
+                                    <p class="mb-3 text-sm font-normal">
+                                        <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
+                                    </p>
+                                    <p class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
+                                    <ul class="flex text-sm">
+                                        <li class="mr-2">
+                                            <a  class="hover:underline">
+                                                <span class="font-semibold text-gray-800  dark:text-gray-200">{{user.following}} </span>
+                                                <span class="dark:text-gray-200">Following</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="hover:underline">
+                                                <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
+                                                <span class="dark:text-gray-200">Followers</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+          <!-- SDGs Panel -->
+          <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
+            <div class="font-semibold mb-2  text-lg
+                        text-slate-700 dark:text-gray-300">
+              SDGs
+            </div>
+            <!-- Example row of SDG placeholders + link icon -->
+            <div class="flex items-center space-x-4">
+              <a  *ngFor="let sd of currentSolution.sdgs"  href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank">
+                            
+                <img  class="object-cover mx-auto  rounded-t-lg h-48 p-2 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[sd]"alt="">
+
+               </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+
+
+                    <!-- Dsiplay update ReadMe-->
+                    <div *ngIf="updateReadMeBox" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
+                        <div class="relative p-2 w-full max-w-md max-h-full">
+                            <!-- Modal content -->
+                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                            
+                            
+                                <!-- Modal body -->
+                                <div class="p-4 md:p-5 min-w-xl">
+                                
+                                    <div class="grid gap-4 mb-4 grid-cols-2">
+                            
+                                        <div class="col-span-2">
+                                            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Update ReadMe</label>
+                                            <textarea [(ngModel)]="newReadMe" id="description" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your updated title here"></textarea>                    
+                                        </div>
+                                    </div>
+                                    <button (click)="toggle('updateReadMeBox')"  class="mr-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                        
+                                        Cancel
+                                    </button>
+                                    <button (click)="updateReadMe()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
+                                    
+                                    Update ReadMe
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                    </div> 
+
+
+
+                      <!-- Main modal -->
+  <div *ngIf="showAddTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex ">
+    <div class="relative p-2 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          
+          
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 min-w-xl">
+              
+                <div class="grid gap-4 mb-4 grid-cols-2">
+         
+                    <div class="col-span-2">
+                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add a new Participant (only one at a time)</label>
+                        <textarea [(ngModel)]="newTeamMember" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
+                    </div>
+                </div>
+                <button (click)="toggle('showAddTeamMember')"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
+                    
+                    Cancel
+                </button>
+                <button  (click)="addParticipantToSolution()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
+                  
+                  Add Participant
+              </button>
+          </div>
+        </div>
+    </div>
+</div> 
+
+<div *ngIf="showRemoveTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex ">
+    <div class="relative p-2 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          
+          
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 min-w-xl">
+              
+                <div class="grid gap-4 mb-4 grid-cols-2">
+         
+                    <div class="col-span-2">
+                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Remove a current pariticpant(only one at a time)</label>
+                        <textarea [(ngModel)]="teamMemberToDelete" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
+                    </div>
+                </div>
+                <button (click)="toggle('showRemoveTeamMember')"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
+                    
+                    Cancel
+                </button>
+                <button  (click)="removeParticipantFromSolution(teamMemberToDelete)" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
+                  
+                  Remove Participant
+              </button>
+          </div>
+        </div>
+    </div>
+</div> 
+
+
+
+
+  
+  <!-- Main modal -->
+  <div *ngIf="updateTitleBox" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
+    <div class="relative p-2 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          
+          
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 min-w-xl">
+              
+                <div class="grid gap-4 mb-4 grid-cols-2">
+         
+                    <div class="col-span-2">
+                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">New Title</label>
+                        <textarea [(ngModel)]="newTitle" id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your updated title here"></textarea>                    
+                    </div>
+                </div>
+                <button (click)="toggle('updateTitleBox')"  class="mr-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    
+                    Cancel
+                </button>
+                <button (click)="updateTitile()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
+                  
+                  Update Title 
+              </button>
+          </div>
+        </div>
+    </div>
+</div> 

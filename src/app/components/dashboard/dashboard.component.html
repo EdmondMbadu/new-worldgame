@@ -51,7 +51,7 @@
         </div>
     
         <!-- Responsive Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 place-items-center">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-8 place-items-center">
           <!-- Create/Edit Solution -->
           <div routerLink="/playground-steps/{{currentSolution.solutionId}}" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
            <!-- Icon (cog icon) -->
@@ -136,7 +136,7 @@
           </div>
   
           <!-- Solution Details -->
-          <!-- <div class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect">
+          <div routerLink="/solution-details/{{currentSolution.solutionId}}"  class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
             <svg
             class="w-12 h-12 mb-2 text-green-400"
             fill="none"
@@ -153,7 +153,7 @@
             />
           </svg>
           <span>Solution details</span>
-          </div> -->
+          </div>
   
           <!-- Documents & Files -->
           <!-- <div class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect">
