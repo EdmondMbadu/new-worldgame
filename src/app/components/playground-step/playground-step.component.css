@@ -44,3 +44,8 @@
 ::ng-deep .ck-content li {
     margin-bottom: 5px; /* Adjust spacing between list items as needed */
 }
+::ng-deep .ck-editor__editable {
+    width: 100% !important;
+    min-width: 600px; /* for example */
+  }
+  

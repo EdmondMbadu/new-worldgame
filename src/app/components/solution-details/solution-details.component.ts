@@ -164,7 +164,7 @@ export class SolutionDetailsComponent implements OnInit {
           alert(`Successfully added ${this.newTeamMember} to the solution.`);
           this.getMembers();
 
-          this.toggle('addTeamMember');
+          this.toggle('showAddTeamMember');
         })
         .catch((error) => {
           alert('Error occured while adding a team member. Try Again!');

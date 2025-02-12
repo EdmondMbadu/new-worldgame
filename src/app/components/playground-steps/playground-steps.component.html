@@ -1,713 +1,101 @@
+<div class="dark:bg-slate-900 min-h-screen min-w-full">
+    <!-- NAVBAR -->
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      path="home"
+      current="">
+    </app-navbar>
+  
+    <!-- TIMELINE / STEPS HEADER (centered) -->
+    <div class="mt-20 container px-32 flex flex-row mx-auto justify-center">
+      <ol class="items-center sm:flex">
+        <li *ngFor="let step of steps; let i = index" class="relative mb-6 sm:mb-0">
+          <div class="flex items-center">
+            <!-- Step Number -->
+            <div  
+              (click)="goBackAndForthTimeLine(i)"
+              
+              class="z-10 flex items-center justify-center w-32 rounded-full shrink-0 cursor-pointer mt-4">
+              
+              <span
+              [ngClass]="{'active': isCurrentStep(i)}"
+                class="flex items-center justify-center w-16 h-16 border border-blue-600
+                       rounded-full font-bold shrink-0 dark:border-blue-500 dark:text-white">
+                {{ i + 1 }}
+              </span>
+              <div 
+            *ngIf="i < steps.length-1 " 
+            class="hidden sm:flex w-32 h-1 bg-gray-300 dark:bg-gray-700">
+           
+          </div>
+          <div 
+          *ngIf="i == steps.length-1 " 
+          class="hidden sm:flex w-32 h-1 bg-white dark:bg-slate-900"></div>
 
-
-
-
-
-<div class="dark:bg-slate-900 min-h-screen min-w-max">
-    <app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"  [path]="'home'" current="''"></app-navbar>
-
-    <div class="mt-20 container px-32 flex flex-row mx-auto lg:justify-between justify-center">
-        
-        <ol class="items-center sm:flex">
-            <li *ngFor="let step of steps; let i = index" class="relative mb-6 sm:mb-0">
-                <div class="flex items-center">
-                    <div  (click)="goBackAndForthTimeLine(i)" 
-                    [ngClass]="{'active': isCurrentStep(i)}"
-                    class="z-10 flex items-center justify-center w-32 bg-blue-100 rounded-full ring-0 ring-white dark:bg-blue-900 sm:ring-8 dark:ring-gray-900 shrink-0">
-                    
-                        <img class="cursor-pointer" src="../../../assets/img/step-{{i+1}}.png" alt="">
-                    </div>
-                    <div class="hidden sm:flex w-full {{timelineDisplay[i]}} dark:bg-gray-700"></div>
-                </div>
-                <div class="mt-3 sm:pe-8 ">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{step}}</h3>
-                    <time *ngIf="AllQuestions[i].length>1" class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">{{subtitles[i]}}</time>
-                    <time *ngIf="AllQuestions[i].length==1" class="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">Final Review and update order of things</time>
-                    <!-- <p class="text-base font-normal text-gray-500 dark:text-gray-400">Get started with dozens of web components and interactive elements.</p> -->
-                </div>
-            </li>
-          
-        </ol>
-        </div>
-    <div class=" container flex flex-col-reverse lg:flex-row mx-auto lg:justify-between justify-center px-10 -">
-        <div class="flex flex-col mx-auto" *ngFor="let item of AllQuestions; let i = index">
-            <app-playground-step 
+            </div>
+  
+            <!-- Progress Bar Between Steps -->
+            <div class="hidden sm:flex w-full {{timelineDisplay[i]}} dark:bg-gray-700"></div>
+          </div>
+  
+          <!-- Optional Step Subtitle/Text -->
+         
+        </li>
+      </ol>
+    </div>
+  
+    <!-- MAIN CONTENT: Questions (left/center) + Image & Text (right) -->
+    <div
+      class="container px-10 mx-auto mt-10 flex flex-col-reverse lg:flex-row 
+             justify-center items-center lg:items-start gap-8">
+  
+      <!-- LEFT/CENTER: Display the current step questions -->
+      <div class="w-full lg:w-2/3">
+        <!-- We only want one step visible at a time -->
+        <ng-container *ngFor="let item of AllQuestions; let i = index">
+          <app-playground-step
+            *ngIf="display[i]"
             (submissionComplete)="sendRequestForEvaluation()"
-            
-            [title]="currentSolution.title" 
-            [step]="steps[i]" 
+            [title]="currentSolution.title"
+            [step]="steps[i]"
             [questions]="AllQuestions[i]"
             [questionsTitles]="questionsTitles[i]"
             [stepNumber]="currentIndexDisplay"
             [buttonText]="buttontexts[i]"
             [solutionId]="id"
-            (buttonInfoEvent)="updatePlayground($event)"
-            *ngIf="display[i]">
-            </app-playground-step>
-
-        </div>
-
-            <div class="flex flex-col mx-auto mt-28 xl:mx-60 lg:mx-20 min-w-[15rem] max-w-lg">
-
-                <a  class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow  md:max-w-xl   p-4 dark:bg-slate-800 dark:border-gray-700">
-              
-
-
-
-                    <div class="flex flex-col ">
-                        <div *ngIf="hoverAddTeamMember" class=" -mt-6  absolute   z-50 p-2 flex text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
-                            <span class="font-medium text-center">Add Team Member</span>
-                          </div>
-                    
-                        <h5 class="mb-1 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Designers :  {{teamMembers.length}}</h5>
-                        <div class="flex flex-row space-x-4">
-                            <button
-                            routerLink="/meeting/{{currentSolution.solutionId}}"
-                            title="Join Video Call"  
-                            >
-
-                           
-                                <svg  class="w-14 h-14 text-gray-800 dark:text-white cursor-pointer  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path fill-rule="evenodd" d="M14 7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7Zm2 9.387 4.684 1.562A1 1 0 0 0 22 17V7a1 1 0 0 0-1.316-.949L16 7.613v8.774Z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
-                              
-                            <button
-                            (click)="toggleAddTeamMember()"
-                            title="Add Team Members" 
-                            >
-                       
-                                <svg class="w-14 h-14 text-gray-800 dark:text-white cursor-pointer  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path fill-rule="evenodd" d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4H7Zm8-1a1 1 0 0 1 1-1h1v-1a1 1 0 1 1 2 0v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
-                                  </svg>
-                                  
-                            </button>
-                            <button
-                            *ngIf="this.auth.currentUser.uid===this.currentSolution.authorAccountId"
-                            (click)="toggleRemoveTeamMember()"
-                            title="Remove Team Members" 
-                            >
-                            <svg class="w-14 h-14 text-gray-800 dark:text-white cursor-pointer  my-1 mb-2 mx-auto  hover:fill-gray-300 dark:hover:fill-slate-400 dark:fill-white stroke-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path fill-rule="evenodd" d="M5 8a4 4 0 1 1 8 0 4 4 0 0 1-8 0Zm-2 9a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1Zm13-6a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-4Z" clip-rule="evenodd"/>
-                              </svg>
-                              
-                                  
-                            </button>
-                          
-                              
-                        </div>
-                        
-                        
-                    </div>
-                    
-                    
-                        <div class="flex flex-wrap -space-x-1 overflow-x-auto" >
-                            <div *ngFor="let user of teamMembers; let i= index" class="cursor-pointer flex-shrink-0" >
-                                <div *ngIf="user.uid === auth.currentUser.uid" >
-                                    <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
-                                    <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
-            
-                                        <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    
-                                    </div> 
-                                    
-                                   
-                                </div>
-                                <div *ngIf="user.uid !== auth.currentUser.uid" >
-                                    <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                                    <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
-                                        
-                                        <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div> 
-                                    
-                                  
-                                </div>
-                                <div class="">
-                                    <div *ngIf="showPopUpTeam[i]"  >
-                                        <div class=" shadow-lg border-2 border-gray-200 absolute  z-50 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                            <div class="flex items-center justify-between mb-2" >
-                                                <a >
-                                                    <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
-                                                    
-                                                    <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-               
-                                                        <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                    </div>   
-                                                   
-                                                </a>
-                                                <div>
-                                                    <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                                </div>
-                                            </div>
-                                            <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                                <a>{{user.firstName}} {{user.lastName}}</a>
-                                            </p>
-                                            <p class="mb-3 text-sm font-normal">
-                                                <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
-                                            </p>
-                                            <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
-                                            <ul class="flex text-sm">
-                                                <li class="mr-2">
-                                                    <a  class="hover:underline">
-                                                        <span class="font-semibold text-gray-800 dark:text-gray-200">{{user.following}} </span>
-                                                        <span class="dark:text-gray-200">Following</span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="hover:underline">
-                                                        <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
-                                                        <span class="dark:text-gray-200">Followers</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                          
-                            </div>
-                   
-                                
-                        </div>
-                        
-                
-
-                    <div class="flex flex-col p-4 ">
-                        <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Evaluators :  {{evaluators.length}}</h5>
-                    </div>
-                    <div class="flex flex-wrap -space-x-1 overflow-x-auto space-y-1" >
-                        <div *ngFor="let user of evaluators; let i= index" class = "cursor-pointer flex-shrink-0">
-                            <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                             
-                            <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)" routerLink="/user-profile/{{user.uid}}"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-               
-                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                            </div> 
-                            
-                            <div>
-                                <div *ngIf="showPopUpEvaluators[i]" class="overflow-x-scroll" >
-                                    <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                        <div class="flex items-center justify-between mb-2" >
-                                            <a >
-                                                <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
-                                               
-                                                <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-               
-                                                    <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                </div>   
-                                            </a>
-                                            <div>
-                                                <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                            </div>
-                                        </div>
-                                        <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                            <a>{{user.firstName}} {{user.lastName}}</a>
-                                        </p>
-                                        <p class="mb-3 text-sm font-normal">
-                                            <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
-                                        </p>
-                                        <p class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
-                                        <ul class="flex text-sm">
-                                            <li class="mr-2">
-                                                <a  class="hover:underline">
-                                                    <span class="font-semibold text-gray-800  dark:text-gray-200">{{user.following}} </span>
-                                                    <span class="dark:text-gray-200">Following</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="hover:underline">
-                                                    <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
-                                                    <span class="dark:text-gray-200">Followers</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col mx-auto"
-                        appDropZone
-                        (hovered)="toggleHover($event)"
-                        (dropped)="startUpload($event)"
-                        [class.hovering]="isHovering">
-                        <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload feature Image</h5>
-
-                        <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
-
-                       
-                            <img  *ngIf="currentSolution.image !=='' " [src]="currentSolution.image"   class="rounded-lg w-fit" alt="">
-                             
-                            <img  *ngIf="!currentSolution.image " src="../../../assets/img/photo-gallery.png"   class="rounded-lg w-fit" alt="">
-                             
-                            <!-- <span *ngIf="user.status==='offline'" class=" ml-3 absolute w-5 h-5 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
-                            <!-- <span *ngIf="user.status==='online'" class=" ml-3 absolute w-5 h-5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
-                           
-                   
-                            <button onclick="document.getElementById('getFile').click()" 
-                            class="flex flex-row items-center justify-center -mt-6 ml-24 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-slate-500 dark:text-gray-200 dark:hover:bg-slate-600 px-2 py-1">
-                        <svg class="w-5 h-5 hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black" 
-                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
-                        </svg>
-                        <h1 class="ml-1">Edit</h1>
-                    </button>
-                    </div>
-
-                    <div  class="flex flex-wrap mt-4">
-                        <!-- <img class="object-cover mx-auto  rounded-t-lg h-48 p-2 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[currentSolution.sdg!]"alt=""> -->
-                            
-                        <a  *ngFor="let sd of currentSolution.sdgs"  href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank">
-                            
-                             <img  class="object-cover mx-auto  rounded-t-lg h-48 p-2 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[sd]"alt="">
-        
-                            </a>
-                    </div>
-                    
-                    <div class="flex flex-col ">
-                        <div class="flex flex-row mx-auto">
-                            <h5 class="mb-2 text-2xl text-center font-bold tracking-tight text-gray-900  dark:text-gray-200">ReadMe</h5>
-                            <svg (click)="toggleUpdateReadMe()" (mouseenter)="onHoverChangeReadMe()" (mouseleave)="onLeaveChangeReadMe()"     class="mt-2 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black " width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
-                                </svg>
-                        </div>
-                        <div *ngIf="hoverChangeReadMe" class="   absolute   z-50 p-2 flex text-sm text-gray-800 rounded-lg bg-gray-200 dark:bg-gray-600 dark:text-gray-300" role="alert">
-                            <span class="font-medium text-center">Update </span>
-                          </div>
-                      
-                        <div  class="mb-2 font-normal text-gray-700 dark:text-gray-200" [innerHTML]="currentSolution.description">
-                           
-                        </div>
-                    </div>
-
-                    <!-- Dsiplay update ReadMe-->
-                    <div *ngIf="updateReadMeBox" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
-                        <div class="relative p-2 w-full max-w-md max-h-full">
-                            <!-- Modal content -->
-                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                            
-                            
-                                <!-- Modal body -->
-                                <div class="p-4 md:p-5 min-w-xl">
-                                
-                                    <div class="grid gap-4 mb-4 grid-cols-2">
-                            
-                                        <div class="col-span-2">
-                                            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Update ReadMe</label>
-                                            <textarea [(ngModel)]="newReadMe" id="description" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your updated title here"></textarea>                    
-                                        </div>
-                                    </div>
-                                    <button (click)="toggleUpdateReadMe()"  class="mr-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                        
-                                        Cancel
-                                    </button>
-                                    <button (click)="updateReadMe()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                                    
-                                    Update ReadMe
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-                    </div> 
-
-                        
-                        
-                    
-                
-                </a>
-
-                <!-- <div class="shadow my-6 dark:bg-slate-800 py-4">
-                    <div class="px-4  text-center md:max-w-screen-md lg:max-w-screen-lg ">
-                        <span class="font-semibold dark:text-gray-200 uppercase m-4 py-3 text-black ">OCCUPIED ROLES</span>
-                        <div class="flex flex-col justify-center items-center mt-8 dark:text-gray-200 text-gray-700 sm:justify-between space-y-3">
-                            <a *ngIf="teamLeader?.firstName!==undefined && teamLeader?.firstName!==''"  class="mx-2 mb-5 lg:mb-0   flex flex-row">
-                               
-                                
-                                    <svg class="fill-black dark:fill-white dark:hover:fill-blue-700 hover:fill-blue-600" height="45px" width="45px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                                    viewBox="0 0 477.13 477.13" xml:space="preserve">
-                                    <g>
-                                    <path d="M254.604,108.371c25.443,0,46.143-20.699,46.143-46.142c0-25.443-20.7-46.144-46.143-46.144
-                                    c-25.437,0-46.131,20.7-46.131,46.144C208.473,87.672,229.167,108.371,254.604,108.371z"/>
-                                    <path d="M368.937,6.477C365.252,2.421,359.736,0,354.178,0c-9.97,0-17.132,7.021-19.164,18.799L325,79.645
-                                    c-0.059,0.411-0.478,1.479-0.755,1.947l-36.277,37.99h-66.716L184.973,81.59c-0.276-0.467-0.697-1.538-0.763-1.996L174.201,18.78
-                                    C172.204,7.196,164.863,0,155.04,0c-5.849,0-11.774,2.686-15.467,7.01c-3.095,3.625-4.408,8.089-3.695,12.583l9.975,60.788
-                                    c0.064,9.399,4.6,20.647,11.071,27.426l41.867,43.844v55.683h-72.559l7.303-30.201c0.982-4.056,4.709-10.28,7.822-13.059
-                                    l6.605-5.896c3.241,2.591,7.342,4.151,11.805,4.151c10.449,0,18.95-8.501,18.95-18.95c0-10.449-8.501-18.95-18.95-18.95
-                                    s-18.95,8.501-18.95,18.95c0,1.182,0.123,2.334,0.331,3.456l-8.447,7.542c-5.115,4.565-10.188,13.034-11.801,19.7l-8.042,33.257
-                                    h-2.85c-1.979,0-3.786,0.827-4.96,2.271c-1.174,1.443-1.615,3.382-1.212,5.319l9.33,44.754c0.76,3.643,4.27,6.496,7.99,6.496
-                                    h12.123l15.468,162.145h-8.036c-7.622,0-13.822,6.2-13.822,13.821v21.17c0,7.621,6.2,13.821,13.822,13.821h182.977
-                                    c7.622,0,13.822-6.2,13.822-13.821v-21.17c0-7.621-6.2-13.821-13.822-13.821h-8.036l15.469-162.145h12.122
-                                    c3.721,0,7.23-2.854,7.99-6.496l9.33-44.754c0.403-1.938-0.038-3.876-1.212-5.319c-1.174-1.443-2.982-2.271-4.96-2.271h-43.962
-                                    v-55.682l41.869-43.846c6.472-6.78,11.005-18.028,11.069-27.425l9.975-60.788l0.022-0.162
-                                    C373.816,14.718,372.244,10.117,368.937,6.477z"/>
-                                    </g>
-                                    </svg>
-                                    <span  class="mt-3">
-                                        Team Leader: 
-                                    </span>
-                                        <div *ngIf="teamLeader!.uid === auth.currentUser.uid" >
-                                            <img *ngIf="teamLeader!.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="teamLeader!.profilePicture!.downloadURL" routerLink="/profile" alt="">
-                                            <div *ngIf="teamLeader!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{teamLeader!.uid}}">
-                       
-                                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                            </div> 
-                                            
-                                           
-                                        </div>
-                                        <div *ngIf="teamLeader!.uid !== auth.currentUser.uid" >
-                                            <img *ngIf="teamLeader!.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="teamLeader!.profilePicture!.downloadURL" routerLink="/user-profile/{{teamLeader!.uid}}" alt="">
-                                            <div *ngIf="teamLeader!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverTeamleader()" (mouseleave)="onLeaveTeamLeader()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{teamLeader!.uid}}">
-                       
-                                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                            </div> 
-                                            
-                                          
-                                        </div>
-                                   
-                                            <div *ngIf="showTeamLeader" >
-                                                <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[10rem] -ml-10 bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                                    <div class="flex items-center justify-between mb-2" >
-                                                        <a >
-                                                            <img *ngIf="teamLeader!.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="teamLeader!.profilePicture!.downloadURL"alt="">
-                                                            
-                                                            <div *ngIf="teamLeader!.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-                       
-                                                                <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                            </div>   
-                                                           
-                                                        </a>
-                                                        <div>
-                                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                                        </div>
-                                                    </div>
-                                                    <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                                        <a>{{teamLeader!.firstName}} {{teamLeader!.lastName}}</a>
-                                                    </p>
-                                                    <p class="mb-3 text-sm font-normal">
-                                                        <a class="hover:underline dark:text-gray-200">{{teamLeader!.email}}</a>
-                                                    </p>
-                                                    <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{teamLeader!.profileCredential}}</p>
-                                                    <ul class="flex text-sm">
-                                                        <li class="mr-2">
-                                                            <a  class="hover:underline">
-                                                                <span class="font-semibold text-gray-800 dark:text-gray-200">{{teamLeader!.following}} </span>
-                                                                <span class="dark:text-gray-200">Following</span>
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="hover:underline">
-                                                                <span class="font-semibold text-gray-900 dark:text-gray-200">{{teamLeader!.followers}} </span>
-                                                                <span class="dark:text-gray-200">Followers</span>
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                     
-                                  
-                                   
-                            </a>
-                            <a *ngIf="factChecker?.firstName!==undefined && factChecker?.firstName!==''" class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
-                                <svg class="fill-black dark:fill-white " width="35px" height="35px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.4 4h17.2A2.4 2.4 0 0 1 23 6.4v11.2a2.4 2.4 0 0 1-2.4 2.4H3.4A2.4 2.4 0 0 1 1 17.6V6.4A2.4 2.4 0 0 1 3.4 4ZM4 9a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm1 2a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm0 3a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm10.707.707 4-4a1 1 0 0 0-1.414-1.414L15 12.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0Z" /></svg>                   
-                                <span class="mx-2 mt-1">
-                                   Fact Checker: 
-                                   
-                                </span>
-                                <div *ngIf="factChecker!.uid === auth.currentUser.uid" >
-                                    <img *ngIf="factChecker!.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="factChecker!.profilePicture!.downloadURL" routerLink="/profile" alt="">
-                                    <div *ngIf="factChecker!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{factChecker!.uid}}">
-               
-                                        <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div> 
-                                    
-                                   
-                                </div>
-                                <div *ngIf="factChecker!.uid !== auth.currentUser.uid" >
-                                    <img *ngIf="factChecker!.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="factChecker!.profilePicture!.downloadURL" routerLink="/user-profile/{{factChecker!.uid}}" alt="">
-                                    <div *ngIf="factChecker!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFactChecker()" (mouseleave)="OnLeaveFactChecker()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{factChecker!.uid}}">
-               
-                                        <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div> 
-                                    
-                                  
-                                </div>
-                           
-                                    <div *ngIf="showFactChecker" >
-                                        <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[10rem] -ml-10 bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                            <div class="flex items-center justify-between mb-2" >
-                                                <a >
-                                                    <img *ngIf="factChecker!.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="factChecker!.profilePicture!.downloadURL"alt="">
-                                                    
-                                                    <div *ngIf="factChecker!.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-               
-                                                        <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                    </div>   
-                                                   
-                                                </a>
-                                                <div>
-                                                    <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                                </div>
-                                            </div>
-                                            <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                                <a>{{factChecker!.firstName}} {{factChecker!.lastName}}</a>
-                                            </p>
-                                            <p class="mb-3 text-sm font-normal">
-                                                <a class="hover:underline dark:text-gray-200">{{factChecker!.email}}</a>
-                                            </p>
-                                            <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{factChecker!.profileCredential}}</p>
-                                            <ul class="flex text-sm">
-                                                <li class="mr-2">
-                                                    <a  class="hover:underline">
-                                                        <span class="font-semibold text-gray-800 dark:text-gray-200">{{factChecker!.following}} </span>
-                                                        <span class="dark:text-gray-200">Following</span>
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="hover:underline">
-                                                        <span class="font-semibold text-gray-900 dark:text-gray-200">{{factChecker!.followers}} </span>
-                                                        <span class="dark:text-gray-200">Followers</span>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                             
-                            </a>
-                            <a *ngIf="facilitator?.firstName!==undefined && facilitator?.firstName!==''"  class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
-                                <svg class="fill-black dark:fill-white"  width="35px" height="35px" viewBox="0 0 128 128" id="Layer_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-                                    <g>
-                                    
-                                    <polygon points="91,45 83,45 83,73 73,73 73,119 61,119 61,73 51,73 51,45 43,45 43,81 53,81 53,127 81,127 81,81 91,81  "/>
-                                    
-                                    <path d="M53,15c0,7.7,6.3,14,14,14s14-6.3,14-14S74.7,1,67,1S53,7.3,53,15z M73,15c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S73,11.7,73,15z"/>
-                                    
-                                    <path d="M19,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S19,17.3,19,25z M39,25c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S39,21.7,39,25z"/>
-                                    
-                                    <polygon points="113,83 103,83 103,119 87,119 87,127 111,127 111,91 121,91 121,51 113,51  "/>
-                                    
-                                    <path d="M87,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S87,17.3,87,25z M101,19c3.3,0,6,2.7,6,6s-2.7,6-6,6s-6-2.7-6-6   S97.7,19,101,19z"/>
-                                    
-                                    <polygon points="31,83 21,83 21,51 13,51 13,91 23,91 23,127 47,127 47,119 31,119  "/>
-                                    
-                                    </g>
-                                    
-                                    </svg>  
-                                    <span class="mx-2 mt-1">
-                                        Facilitator: 
-                                     </span>  
-                                     
-                                     <div *ngIf="facilitator!.uid === auth.currentUser.uid" >
-                                        <img *ngIf="facilitator!.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="facilitator!.profilePicture!.downloadURL" routerLink="/profile" alt="">
-                                        <div *ngIf="teamLeader!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{facilitator!.uid}}">
-                   
-                                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                        </div> 
-                                        
-                                       
-                                    </div>
-                                    <div *ngIf="facilitator!.uid !== auth.currentUser.uid" >
-                                        <img *ngIf="facilitator!.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="facilitator!.profilePicture!.downloadURL" routerLink="/user-profile/{{facilitator!.uid}}" alt="">
-                                        <div *ngIf="facilitator!.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverFacilitator()" (mouseleave)="OnLeaveFacilitator()" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{facilitator!.uid}}">
-                   
-                                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                        </div> 
-                                        
-                                      
-                                    </div>
-                               
-                                        <div *ngIf="showFacilitator" >
-                                            <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[10rem] -ml-10 bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                                <div class="flex items-center justify-between mb-2" >
-                                                    <a >
-                                                        <img *ngIf="facilitator!.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="facilitator!.profilePicture!.downloadURL"alt="">
-                                                        
-                                                        <div *ngIf="facilitator!.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-                   
-                                                            <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                                        </div>   
-                                                       
-                                                    </a>
-                                                    <div>
-                                                        <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                                    </div>
-                                                </div>
-                                                <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                                    <a>{{facilitator!.firstName}} {{facilitator!.lastName}}</a>
-                                                </p>
-                                                <p class="mb-3 text-sm font-normal">
-                                                    <a class="hover:underline dark:text-gray-200">{{facilitator!.email}}</a>
-                                                </p>
-                                                <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{facilitator!.profileCredential}}</p>
-                                                <ul class="flex text-sm">
-                                                    <li class="mr-2">
-                                                        <a  class="hover:underline">
-                                                            <span class="font-semibold text-gray-800 dark:text-gray-200">{{facilitator!.following}} </span>
-                                                            <span class="dark:text-gray-200">Following</span>
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a class="hover:underline">
-                                                            <span class="font-semibold text-gray-900 dark:text-gray-200">{{facilitator!.followers}} </span>
-                                                            <span class="dark:text-gray-200">Followers</span>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                 
-                            </a>         
-                            
-                        </div>
-                    </div> 
-
-                    <div class="px-4  text-center md:max-w-screen-md lg:max-w-screen-lg mt-6 mx-auto ">
-                        <span class="font-semibold dark:text-gray-200 uppercase m-4 py-3 text-black ">UNOCCUPIED ROLES</span>
-                        <div class="flex flex-col justify-center items-center mt-8 dark:text-gray-200 text-gray-700 sm:justify-between space-y-3">
-                            <a *ngIf="teamLeader?.firstName===undefined || teamLeader?.firstName==='' || currentUserIsTeamleader"  class="mx-2 mb-5 lg:mb-0   flex flex-row">
-                               
-                                
-                                    <svg class="fill-black dark:fill-white " height="45px" width="45px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                                    viewBox="0 0 477.13 477.13" xml:space="preserve">
-                                    <g>
-                                    <path d="M254.604,108.371c25.443,0,46.143-20.699,46.143-46.142c0-25.443-20.7-46.144-46.143-46.144
-                                    c-25.437,0-46.131,20.7-46.131,46.144C208.473,87.672,229.167,108.371,254.604,108.371z"/>
-                                    <path d="M368.937,6.477C365.252,2.421,359.736,0,354.178,0c-9.97,0-17.132,7.021-19.164,18.799L325,79.645
-                                    c-0.059,0.411-0.478,1.479-0.755,1.947l-36.277,37.99h-66.716L184.973,81.59c-0.276-0.467-0.697-1.538-0.763-1.996L174.201,18.78
-                                    C172.204,7.196,164.863,0,155.04,0c-5.849,0-11.774,2.686-15.467,7.01c-3.095,3.625-4.408,8.089-3.695,12.583l9.975,60.788
-                                    c0.064,9.399,4.6,20.647,11.071,27.426l41.867,43.844v55.683h-72.559l7.303-30.201c0.982-4.056,4.709-10.28,7.822-13.059
-                                    l6.605-5.896c3.241,2.591,7.342,4.151,11.805,4.151c10.449,0,18.95-8.501,18.95-18.95c0-10.449-8.501-18.95-18.95-18.95
-                                    s-18.95,8.501-18.95,18.95c0,1.182,0.123,2.334,0.331,3.456l-8.447,7.542c-5.115,4.565-10.188,13.034-11.801,19.7l-8.042,33.257
-                                    h-2.85c-1.979,0-3.786,0.827-4.96,2.271c-1.174,1.443-1.615,3.382-1.212,5.319l9.33,44.754c0.76,3.643,4.27,6.496,7.99,6.496
-                                    h12.123l15.468,162.145h-8.036c-7.622,0-13.822,6.2-13.822,13.821v21.17c0,7.621,6.2,13.821,13.822,13.821h182.977
-                                    c7.622,0,13.822-6.2,13.822-13.821v-21.17c0-7.621-6.2-13.821-13.822-13.821h-8.036l15.469-162.145h12.122
-                                    c3.721,0,7.23-2.854,7.99-6.496l9.33-44.754c0.403-1.938-0.038-3.876-1.212-5.319c-1.174-1.443-2.982-2.271-4.96-2.271h-43.962
-                                    v-55.682l41.869-43.846c6.472-6.78,11.005-18.028,11.069-27.425l9.975-60.788l0.022-0.162
-                                    C373.816,14.718,372.244,10.117,368.937,6.477z"/>
-                                    </g>
-                                    </svg>
-                                    <span class="mt-3">
-                                        Team Leader:
-                                        <a *ngIf="!currentUserIsTeamleader" target="_blank" (click)="toggleClaimTeamLeader()" class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-6">Claim</a> 
-                                        <a *ngIf="currentUserIsTeamleader" target="_blank"(click)="toggleClaimTeamLeader()" class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-6">Unclaim</a> 
-                                    </span>
-                                   
-                            </a>
-                            <a *ngIf="factChecker?.firstName===undefined || factChecker?.firstName=='' || currentUserIsFactChecker"  class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
-                                <svg class="fill-black dark:fill-white " width="35px" height="35px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.4 4h17.2A2.4 2.4 0 0 1 23 6.4v11.2a2.4 2.4 0 0 1-2.4 2.4H3.4A2.4 2.4 0 0 1 1 17.6V6.4A2.4 2.4 0 0 1 3.4 4ZM4 9a1 1 0 0 1 1-1h5a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm1 2a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm0 3a1 1 0 1 0 0 2h5a1 1 0 1 0 0-2H5Zm10.707.707 4-4a1 1 0 0 0-1.414-1.414L15 12.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0Z" /></svg>                   
-                                <span class="mx-2 mt-1">
-                                   Fact Checker: 
-                                   <a *ngIf="!currentUserIsFactChecker" target="_blank"(click)="toggleClaimFactChecker()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-8">Claim</a>
-                                   <a *ngIf="currentUserIsFactChecker" target="_blank" (click)="toggleClaimFactChecker()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-8">Unclaim</a>
-                                </span>
-
-                            </a>
-                            <a *ngIf="facilitator?.firstName===undefined || facilitator?.firstName=='' || currentUserIsFacilitator"  class="mx-2 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400 flex flex-row">
-                                <svg class="fill-black dark:fill-white"  width="35px" height="35px" viewBox="0 0 128 128" id="Layer_1" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-
-                                    <g>
-                                    
-                                    <polygon points="91,45 83,45 83,73 73,73 73,119 61,119 61,73 51,73 51,45 43,45 43,81 53,81 53,127 81,127 81,81 91,81  "/>
-                                    
-                                    <path d="M53,15c0,7.7,6.3,14,14,14s14-6.3,14-14S74.7,1,67,1S53,7.3,53,15z M73,15c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S73,11.7,73,15z"/>
-                                    
-                                    <path d="M19,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S19,17.3,19,25z M39,25c0,3.3-2.7,6-6,6s-6-2.7-6-6s2.7-6,6-6   S39,21.7,39,25z"/>
-                                    
-                                    <polygon points="113,83 103,83 103,119 87,119 87,127 111,127 111,91 121,91 121,51 113,51  "/>
-                                    
-                                    <path d="M87,25c0,7.7,6.3,14,14,14s14-6.3,14-14s-6.3-14-14-14S87,17.3,87,25z M101,19c3.3,0,6,2.7,6,6s-2.7,6-6,6s-6-2.7-6-6   S97.7,19,101,19z"/>
-                                    
-                                    <polygon points="31,83 21,83 21,51 13,51 13,91 23,91 23,127 47,127 47,119 31,119  "/>
-                                    
-                                    </g>
-                                    
-                                    </svg>  
-                                    <span class="mx-2 mt-1">
-                                        Facilitator: 
-                                        <a *ngIf="!currentUserIsFacilitator" target="_blank" (click)="toggleClaimFacilitator()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-12">Claim</a>
-                                        <a *ngIf="currentUserIsFacilitator" target="_blank" (click)="toggleClaimFacilitator()"  class="text-white bg-teal-600 hover:bg-teal-700 focus:ring-4 focus:ring-primary-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:text-white  dark:focus:ring-primary-900 ml-12">Unclaim</a>
-                                     
-                                    </span>                                           
-                            </a>         
-                              
-                        </div>
-                    </div> 
-                    
-                </div> -->
-
-            </div>
-
-           
-    </div>
-</div>
-
-
-
-  <!-- Main modal -->
-  <div *ngIf="showAddTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed right-[10rem] bottom-[10rem] z-50 p-4 flex ">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add a new Participant (only one at a time)</label>
-                        <textarea [(ngModel)]="newTeamMember" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggleAddTeamMember()"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button  (click)="addParticipantToSolution()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Add Participant
-              </button>
-          </div>
-        </div>
-    </div>
-</div> 
-
-<div *ngIf="showRemoveTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed right-[10rem] bottom-[10rem] z-50 p-4 flex ">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Remove a current pariticpant(only one at a time)</label>
-                        <textarea [(ngModel)]="teamMemberToDelete" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggleRemoveTeamMember()"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button  (click)="removeParticipantFromSolution(teamMemberToDelete)" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Remove Participant
-              </button>
-          </div>
-        </div>
-    </div>
-</div> 
-
-
-
-
-
-
-
+            (buttonInfoEvent)="updatePlayground($event)">
+          </app-playground-step>
+        </ng-container>
+      </div>
   
-
-
-
+      <!-- RIGHT: Step image + “subtitle” for whichever step is active -->
+      <div class="w-full lg:w-1/3 flex flex-col items-center lg:items-start mt-10">
+        <ng-container *ngFor="let step of steps; let i = index">
+          <div *ngIf="display[i]" class="flex flex-col items-center lg:items-start">
+            <!-- Step Image -->
+            <img
+              [src]="'../../../assets/img/step-' + (i + 1) + '.png'"
+              alt="Step {{ i + 1 }} image"
+              class="w-60 h-auto mb-3" />
+  
+            <!-- Step subtitle or fallback if only one question -->
+            <time
+              *ngIf="AllQuestions[i].length > 1"
+              class="block mb-2 text-xl font-normal leading-none text-gray-500 dark:text-gray-400">
+              {{ subtitles[i] }}
+            </time>
+            <time
+              *ngIf="AllQuestions[i].length == 1"
+              class="block mb-2 text-xl font-normal leading-none text-gray-500 dark:text-gray-400">
+              Final Review and update order of things
+            </time>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+  
