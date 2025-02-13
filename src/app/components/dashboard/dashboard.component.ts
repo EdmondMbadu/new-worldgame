@@ -25,6 +25,7 @@ export class DashboardComponent implements OnInit {
   id: any;
   isHovering: boolean = false;
   ngOnInit(): void {
+    window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;

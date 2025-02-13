@@ -82,6 +82,7 @@ export class PlaygroundStepComponent {
   ngOnInit() {
     window.scrollTo(0, 0);
     // this.initializeContents();
+
     this.solution.getSolution(this.solutionId).subscribe((data: any) => {
       this.currentSolution = data;
       if (this.currentSolution.discussion) {
@@ -176,10 +177,10 @@ export class PlaygroundStepComponent {
   public Editor: any = Editor;
   private saveTimeout: any;
   public onReady(editor: any) {
-    console.log('CKEditor5 Angular Component is ready to use!', editor.state);
+    // console.log('CKEditor5 Angular Component is ready to use!', editor.state);
 
     editor.model.document.on('change:data', () => {
-      console.log('Content changed:', editor.getData());
+      // console.log('Content changed:', editor.getData());
 
       clearTimeout(this.saveTimeout);
 
