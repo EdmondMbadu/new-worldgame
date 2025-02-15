@@ -67,6 +67,9 @@ export class PlaygroundStepComponent {
   elements: any = [];
   @Output() submissionComplete: EventEmitter<any> = new EventEmitter();
   updateTitleBox: boolean = false;
+
+  defaultBgColor: string = 'bg-teal-100';
+  strategyBgColor: string = 'bg-teal-100';
   constructor(
     private router: Router,
     private solution: SolutionService,
@@ -122,6 +125,8 @@ export class PlaygroundStepComponent {
     this.defaultReviewSelected = false;
     this.staticContentArray[0] = this.strategyReview;
     this.contentsArray[0] = this.strategyReview;
+    this.defaultBgColor = 'bg-teal-600';
+    this.strategyBgColor = 'bg-gray-200 dark:bg-gray-600';
   }
 
   chooseDefaultReview() {
@@ -130,6 +135,8 @@ export class PlaygroundStepComponent {
     this.chosenColorReview = '';
     this.strategyReviewSelected = false;
     this.staticContentArray[0] = this.contentsArray[0];
+    this.defaultBgColor = 'bg-gray-200 dark:bg-gray-600';
+    this.strategyBgColor = 'bg-teal-600';
   }
   initializeContents() {
     this.contentsArray = [];
@@ -504,6 +511,9 @@ export class PlaygroundStepComponent {
           // alert('Error launching solution ');
         });
     }
+    // at the end choose the latest strategy review
+    // this.chooseStrategyReview();
+    this.chooseDefaultReview();
   }
   onHoverPopup(index: number) {
     this.displayPopups[index] = true;
