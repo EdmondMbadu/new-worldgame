@@ -189,6 +189,12 @@ export class PlaygroundStepComponent {
           this.saveSolutionStatusDirectly();
         }
       }, 2000);
+
+      this.saveTimeout = setTimeout(() => {
+        if (this.dataInitialized && this.hasStrategyReviewChanged()) {
+          this.saveSolutionStatusDirectly();
+        }
+      }, 2000);
     });
   }
 
@@ -199,6 +205,12 @@ export class PlaygroundStepComponent {
     );
   }
 
+  hasStrategyReviewChanged() {
+    return (
+      this.strategyReview !== this.staticContentArray[0] &&
+      this.strategyReviewSelected
+    );
+  }
   updatePlayground(current: number) {
     // only save data if both are different.
 
@@ -468,7 +480,7 @@ export class PlaygroundStepComponent {
       }
     }
 
-    console.log('result ', result);
+    // console.log('result ', result);
     // Handle the last element
     // result.push(this.currentSolution.status![array[array.length - 1]]);
 
@@ -476,6 +488,22 @@ export class PlaygroundStepComponent {
 
     this.staticContentArray[0] = result.join('\n');
     this.contentsArray[0] = result.join('\n');
+
+    // for the very first time, we need to save the strategy review as the accumulated content
+    // if strategy review has not been set yet previously
+    if (this.strategyReview === '') {
+      console.log('strategy review is empty', this.strategyReview);
+      this.solution
+        .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
+        .then(() => {
+          // this.staticContentArray[0] = this.strategyReview; // Update static content after saving
+          // this.saveSuccess = true;
+        })
+        .catch((error) => {
+          // this.saveError = true;
+          // alert('Error launching solution ');
+        });
+    }
   }
   onHoverPopup(index: number) {
     this.displayPopups[index] = true;
