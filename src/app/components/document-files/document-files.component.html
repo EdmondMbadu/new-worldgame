@@ -1,0 +1,214 @@
+<div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      path="home"
+      current=""
+    ></app-navbar>
+
+<!-- Main Content -->
+<div class="mt-20 px-6 md:px-[5rem] lg:px-[10rem] 2xl:px-[15rem] flex-1">
+
+    <!-- Top controls row -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+      <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-4 md:mb-0">
+        Start a new document
+      </h1>
+      <!-- Right side controls -->
+      <div class="flex items-center space-x-4">
+        <button 
+          class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white 
+                 font-medium transition-colors"
+        >
+          Template gallery
+        </button>
+        <button 
+          class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" 
+                  stroke-width="2" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Template cards (scrollable row, or wrap) -->
+    <div class="flex space-x-4 overflow-x-auto pb-4">
+      <!-- Example: Blank Document -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <div class="text-8xl">
+          <!-- Could be an icon or plus sign; using the colored plus from Google docs is an image or inline SVG -->
+          <span class="text-blue-500">+</span>
+        </div>
+        <p class="mt-2 text-sm text-gray-700 dark:text-gray-200 text-center">
+          Blank
+        </p>
+      </div>
+  
+      <!-- Brochure -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Geometric</p>
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Product Brochure
+        </div>
+      </div>
+  
+      <!-- Report -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Luxe</p>
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Report Title
+        </div>
+      </div>
+  
+      <!-- Resume (Coral) -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Coral</p>
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Resume
+        </div>
+      </div>
+  
+      <!-- Resume (Serif) -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Serif</p>
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Resume
+        </div>
+      </div>
+  
+      <!-- Letter -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Spearmint</p>
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Letter
+        </div>
+      </div>
+  
+      <!-- Project Proposal -->
+      <div 
+        class="w-40 h-52 flex flex-col items-center justify-center border border-gray-200 
+               rounded-md hover:shadow-md dark:border-slate-700 bg-white dark:bg-slate-800 
+               flex-shrink-0"
+      >
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Tropic</p>
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          Project proposal
+        </div>
+      </div>
+    </div>
+  
+    <!-- Recent Documents heading + filter row -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mt-10 mb-4">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+        Recent documents
+      </h2>
+      <div class="flex items-center space-x-3 mt-4 md:mt-0">
+        <div class="text-gray-500 dark:text-gray-400 cursor-pointer">
+          Owned by anyone
+        </div>
+        <!-- Toggle icons or sort icons, if you wish -->
+        <button class="text-gray-600 dark:text-gray-300 hover:text-gray-800 
+                       dark:hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" 
+                  stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+          </svg>
+        </button>
+        <button class="text-gray-600 dark:text-gray-300 hover:text-gray-800 
+                       dark:hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" 
+                  stroke-width="2" d="M4 10h16M4 6h16M4 14h16M4 18h16" />
+          </svg>
+        </button>
+        <button class="text-gray-600 dark:text-gray-300 hover:text-gray-800 
+                       dark:hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" 
+                  stroke-width="2" d="M6 10l4-4m0 0l4 4m-4-4v14" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  
+    <!-- Recent Documents grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
+      <!-- Single doc item -->
+      <div 
+        class="border border-gray-200 dark:border-slate-700 rounded-lg p-4 
+               hover:shadow-md transition-shadow bg-white dark:bg-slate-800"
+      >
+        <h3 class="font-medium text-gray-900 dark:text-white">
+          Graduate School 09/01/2021
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+          A short snippet or preview text goes here...
+        </p>
+      </div>
+      <!-- Repeat for more docs... -->
+      <div 
+        class="border border-gray-200 dark:border-slate-700 rounded-lg p-4 
+               hover:shadow-md transition-shadow bg-white dark:bg-slate-800"
+      >
+        <h3 class="font-medium text-gray-900 dark:text-white">
+          NEEDS A TITLE
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+          Introduction...
+        </p>
+      </div>
+  
+      <div 
+        class="border border-gray-200 dark:border-slate-700 rounded-lg p-4
+               hover:shadow-md transition-shadow bg-white dark:bg-slate-800"
+      >
+        <h3 class="font-medium text-gray-900 dark:text-white">
+          NEWWORLD GAME SUG...
+        </h3>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+          This document contains suggestions...
+        </p>
+      </div>
+  
+      <!-- etc. More items... -->
+    </div>
+  
+  </div>
+  <!-- End Main Content -->
+  
+
+    </div>

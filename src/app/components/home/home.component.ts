@@ -123,7 +123,7 @@ export class HomeComponent implements OnInit {
       const uniqueCategories = Array.from(
         new Set(challenges.map((challenge) => challenge.category))
       );
-      this.categories = uniqueCategories;
+      // this.categories = uniqueCategories;
       this.fetchChallenges(this.activeCategory);
     });
   }
@@ -251,7 +251,15 @@ export class HomeComponent implements OnInit {
       // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
     }
   }
-  categories: string[] = [];
+  categories: string[] = [
+    'UN SDG',
+    'Climate',
+    'Poverty',
+    'Energy',
+    'Food',
+    'Health',
+    'Forestry',
+  ];
   // Define the solutions data
 
   activeCategory: string = 'Forestry';

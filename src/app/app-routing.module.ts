@@ -61,6 +61,7 @@ import { HomeChallengeComponent } from './components/home-challenge/home-challen
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
 import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
+import { DocumentFilesComponent } from './components/document-files/document-files.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -115,6 +116,11 @@ const routes: Routes = [
   {
     path: 'solution-details/:id',
     component: SolutionDetailsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'document-files/:id',
+    component: DocumentFilesComponent,
     canActivate: [AuthGuard],
   },
   {
