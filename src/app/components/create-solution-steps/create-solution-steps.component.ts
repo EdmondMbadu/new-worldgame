@@ -418,7 +418,7 @@ export class CreateSolutionStepsComponent implements OnInit {
             description: `${this.solution.newSolution.description}`,
             author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
             image: `${this.solution.newSolution.image}`,
-            path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
+            path: `https://newworld-game.org/dashboard/${this.solution.solutionId}`,
             user: `${users[0].firstName} ${users[0].lastName}`,
             // Add any other necessary fields
           };
@@ -435,7 +435,7 @@ export class CreateSolutionStepsComponent implements OnInit {
             description: this.solution.newSolution.description,
             author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
             image: this.solution.newSolution.image,
-            path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
+            path: `https://newworld-game.org/dashboard/${this.solution.solutionId}`,
             // Add any other necessary fields
           };
 
