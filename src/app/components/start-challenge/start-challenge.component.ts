@@ -75,7 +75,7 @@ export class StartChallengeComponent implements OnInit {
 
       // Reset the solution and navigate
       this.solution.resetNewSolution();
-      this.router.navigate(['/playground-steps/' + this.solution.solutionId]);
+      this.router.navigate(['/dashboard/' + this.solution.solutionId]);
       // Set loading to false after successful operations
       this.isLoading = false;
       // Set loading to false in case of error
