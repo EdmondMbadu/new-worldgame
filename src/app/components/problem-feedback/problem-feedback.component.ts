@@ -247,4 +247,18 @@ export class ProblemFeedbackComponent implements OnInit {
   onLeavePopup(index: number) {
     this.displayTableEvaluator[index] = !this.displayTableEvaluator[index];
   }
+  showWelcomeModal = true;
+
+  closeModal() {
+    this.showWelcomeModal = false;
+  }
+
+  openEvaluationGuide() {
+    // e.g. open link in new tab
+    // windoow open router evaluation guide
+    // windown open a local path
+    window.open('/evaluators', '_blank');
+    // window.open('https://yourGuideUrl...', '_blank');
+    this.closeModal();
+  }
 }

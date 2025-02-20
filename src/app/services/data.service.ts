@@ -372,7 +372,7 @@ export class DataService implements OnInit {
       // Your file handling logic here
       if (file?.size >= 10000000) {
         console.log('the file is too big');
-        alert('The picture is too big. It should be less than 5MB');
+        alert('The document is too big. It should be less than 10MB');
         return;
       }
     }

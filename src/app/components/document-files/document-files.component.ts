@@ -85,7 +85,7 @@ export class DocumentFilesComponent implements OnInit {
   }
   addDocument() {
     if (!this.documentName || !this.documentType || !this.documentDownloadUrl) {
-      alert('Please fill in all required fields before adding the challenge.');
+      alert('Please fill in all required fields before adding the document.');
       return;
     }
 

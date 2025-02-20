@@ -15,7 +15,7 @@
                 <div class="flex flex-col mx-auto items-center bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow md:flex-row   p-4 dark:bg-slate-800">
                   
                     <div class="flex flex-col ">
-                        <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900  text-center dark:text-gray-200">Evaluation ( <a class="hover:text-blue-600 dark:hover:text-blue-600 underline " routerLink="/evaluators" target="_blank">Guide Link</a> ) </h5>
+                        <!-- <h5 class="mb-4 text-2xl font-bold tracking-tight text-gray-900  text-center dark:text-gray-200">Evaluation </h5> -->
                         <div class="flex flex-col justify-center items-center">
                                 <div class="flex flex-row space-x-10  " *ngFor="let ev of evaluationArray; let i=index">
                         
@@ -160,5 +160,60 @@
 
 
 </body>
+
+
+
+<!-- Your normal page content up here, e.g. <app-navbar> and the main content... -->
+
+<!-- Welcome Modal -->
+<!-- Welcome Modal (light & dark mode) -->
+<div
+  *ngIf="showWelcomeModal"
+  class="fixed inset-0 z-50 flex items-center justify-center"
+>
+  <!-- Dim/blur overlay for background, remains the same in light or dark -->
+  <div
+    class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+    (click)="closeModal()"
+  >
+  </div>
+
+  <!-- Modal container: use combined classes to support both modes -->
+  <div
+    class="relative max-w-lg mx-auto p-6 
+           bg-white dark:bg-slate-800
+           text-gray-900 dark:text-white
+           rounded-md shadow-lg"
+  >
+    <h2 class="text-2xl font-bold mb-4 text-center">
+      Welcome to the NewWorld Game solution evaluation page.
+    </h2>
+    <p class="text-center mb-4">
+      Before you begin, please read the evaluation guide, available here:
+    </p>
+    <div class="flex justify-center mb-6">
+      <button
+        (click)="openEvaluationGuide()"
+        class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded"
+      >
+        Evaluation Guide
+      </button>
+    </div>
+    <p class="text-center mb-4">
+      Feel free to keep this open in another tab to reference while completing
+      the evaluation.
+    </p>
+    <div class="flex justify-center">
+      <button
+        class="bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded text-white"
+        (click)="closeModal()"
+      >
+        Got it
+      </button>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- <app-chatbot></app-chatbot> -->
