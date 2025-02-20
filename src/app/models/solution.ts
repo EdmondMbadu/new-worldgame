@@ -1,5 +1,5 @@
 import { Email } from '../components/create-playground/create-playground.component';
-import { User } from '../models/user';
+import { Avatar, User } from '../models/user';
 
 export class Solution {
   solutionId?: string;
@@ -49,6 +49,7 @@ export class Solution {
   category?: string;
   impact?: number;
   supporters?: number;
+  documents?: Avatar[];
 }
 
 export class Evaluation {

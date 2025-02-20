@@ -36,6 +36,9 @@ export class DataService implements OnInit {
     'image/webp',
     'application/webb',
     'image/heic',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.ms-powerpoint',
   ];
   url: string = '';
   private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
@@ -399,6 +402,15 @@ export class DataService implements OnInit {
   public parseDateMMDDYYYY(dateString: string): number {
     const [month, day, year] = dateString.split('-').map(Number);
     return new Date(year, month - 1, day).getTime();
+  }
+  addDocument(documents: Avatar[], solutionId: string) {
+    const solutioneRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+    const data = {
+      documents: documents,
+    };
+    return solutioneRef.set(data, { merge: true });
   }
 
   UnfollowUser() {}

@@ -31,6 +31,12 @@ export class Avatar {
   path?: string;
   size?: string;
   downloadURL?: string;
+  name?: string;
+  type?: string;
+  description?: string;
+  dateCreated?: string;
+  dateSorted?: number;
+  formattedDateCreated?: string;
 }
 export class Tournament {
   solutionId?: string;
