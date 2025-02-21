@@ -159,6 +159,45 @@ export class DocumentFilesComponent implements OnInit {
       }
     );
   }
+  copyEmbedCodeHtml(url: string | undefined) {
+    if (!url) {
+      alert('No URL found for this document.');
+      return;
+    }
+
+    // For example, your snippet can wrap an <img> in a <figure>:
+    const figureHtml = `
+  <figure class="image">
+    <img 
+      src="${url}" 
+      style="aspect-ratio:1164/904;" 
+      width="1164" 
+      height="904"
+    >
+  </figure>`;
+
+    // Put HTML onto the clipboard as 'text/html' so CKEditor treats it as HTML:
+    const clipboardData = [
+      new ClipboardItem({
+        // We provide both text/html and text/plain so there's a fallback
+        'text/html': new Blob([figureHtml], { type: 'text/html' }),
+        'text/plain': new Blob([figureHtml], { type: 'text/plain' }),
+      }),
+    ];
+
+    navigator.clipboard
+      .write(clipboardData)
+      .then(() => {
+        alert(
+          'Image snippet copied as HTML. Paste in CKEditor to see the image!'
+        );
+        this.openDocIndex = null;
+      })
+      .catch((err) => {
+        console.error('Clipboard write failed: ', err);
+        alert('Could not copy as HTML. Check browser permissions.');
+      });
+  }
 
   // Delete the doc from our local array, then push the updated array to Firestore
   deleteDocument(index: number) {

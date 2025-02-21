@@ -213,6 +213,13 @@
                border-gray-200 dark:border-slate-700 rounded shadow-lg py-2 w-36"
       >
         <ul class="flex flex-col">
+          <li     class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 
+          dark:hover:bg-slate-700 cursor-pointer"
+          *ngIf="['png','jpg','jpeg','gif','webp'].includes(doc.type!)"
+          (click)="copyEmbedCodeHtml(doc.downloadURL)"
+        >
+          Copy Image Tag
+        </li>
           <li
             class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 
                    dark:hover:bg-slate-700 cursor-pointer"

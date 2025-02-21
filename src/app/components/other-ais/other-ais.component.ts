@@ -24,7 +24,7 @@ export class OtherAisComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       window.scrollTo(0, 0); // Ensure the scroll happens after the content is loaded
-    }, 0);
+    }, 1000);
     this.checkLoginStatus();
     this.deleteAllDocuments();
   }
