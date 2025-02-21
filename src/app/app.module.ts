@@ -106,6 +106,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
 import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
 import { DocumentFilesComponent } from './components/document-files/document-files.component';
+import { SolutionEvaluationComponent } from './components/solution-evaluation/solution-evaluation.component';
 
 @NgModule({
   declarations: [
@@ -188,6 +189,7 @@ import { DocumentFilesComponent } from './components/document-files/document-fil
     FullDiscussionComponent,
     SolutionDetailsComponent,
     DocumentFilesComponent,
+    SolutionEvaluationComponent,
   ],
   imports: [
     BrowserModule,

@@ -267,6 +267,7 @@ const routes: Routes = [
     component: EvaluationSummaryComponent,
     canActivate: [AuthGuard],
   },
+
   { path: 'verify-email', component: VerifyEmailComponent },
   {
     path: 'welcome',
