@@ -46,6 +46,13 @@
 }
 ::ng-deep .ck-editor__editable {
     width: 100% !important;
-    min-width: 600px; /* for example */
+    max-width: 100% !important;
+    box-sizing: border-box; /* Good practice to avoid overflow issues */
   }
   
+  /* When screen is at least 768px, enforce a larger min-width */
+  @media (min-width: 768px) {
+    ::ng-deep .ck-editor__editable {
+      min-width: 600px !important;
+    }
+  }

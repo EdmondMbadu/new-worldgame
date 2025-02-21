@@ -13,6 +13,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { environment } from 'environments/environments';
+import { take } from 'rxjs';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -86,28 +87,31 @@ export class PlaygroundStepComponent {
     window.scrollTo(0, 0);
     // this.initializeContents();
 
-    this.solution.getSolution(this.solutionId).subscribe((data: any) => {
-      this.currentSolution = data;
-      if (this.currentSolution.discussion) {
-        this.discussion = this.currentSolution.discussion;
-        this.displayTimeDiscussion();
-      }
-      this.strategyReview =
-        this.currentSolution.strategyReview !== undefined
-          ? this.currentSolution.strategyReview
-          : '';
-      // console.log('strategy review saved :', this.strategyReview);
-      // fill the evaluator class
-      this.currentSolution.evaluators?.forEach((ev: any) => {
-        this.evaluators.push(ev);
+    this.solution
+      .getSolution(this.solutionId)
+      .pipe(take(1))
+      .subscribe((data: any) => {
+        this.currentSolution = data;
+        if (this.currentSolution.discussion) {
+          this.discussion = this.currentSolution.discussion;
+          this.displayTimeDiscussion();
+        }
+        this.strategyReview =
+          this.currentSolution.strategyReview !== undefined
+            ? this.currentSolution.strategyReview
+            : '';
+        // console.log('strategy review saved :', this.strategyReview);
+        // fill the evaluator class
+        this.currentSolution.evaluators?.forEach((ev: any) => {
+          this.evaluators.push(ev);
+        });
+        this.etAl =
+          Object.keys(this.currentSolution.participants!).length > 1
+            ? 'Et al'
+            : '';
+        this.initializeContents();
+        this.dataInitialized = true; // Set flag to true
       });
-      this.etAl =
-        Object.keys(this.currentSolution.participants!).length > 1
-          ? 'Et al'
-          : '';
-      this.initializeContents();
-      this.dataInitialized = true; // Set flag to true
-    });
 
     this.displayPopups = new Array(this.questions.length).fill(false);
     this.clickedDisplayPopups = new Array(this.questions.length).fill(false);
@@ -185,18 +189,14 @@ export class PlaygroundStepComponent {
   private saveTimeout: any;
   public onReady(editor: any) {
     // console.log('CKEditor5 Angular Component is ready to use!', editor.state);
-
     editor.model.document.on('change:data', () => {
       // console.log('Content changed:', editor.getData());
-
       clearTimeout(this.saveTimeout);
-
       this.saveTimeout = setTimeout(() => {
         if (this.dataInitialized && !this.areContentsSame()) {
           this.saveSolutionStatusDirectly();
         }
       }, 2000);
-
       this.saveTimeout = setTimeout(() => {
         if (this.dataInitialized && this.hasStrategyReviewChanged()) {
           this.saveSolutionStatusDirectly();
