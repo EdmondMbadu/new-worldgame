@@ -45,7 +45,7 @@ export class DataService implements OnInit {
   currentTheme = this.themeSource.asObservable();
 
   sdgsPaths: { [key: string]: string } = {
-    None: '../../../assets/img/global-network.png',
+    None: '../../../assets/img/global-network.webp',
     'SDG1   No Poverty': '../../../assets/img/sdg1.png',
     'SDG1   No Poverty-link': 'https://sdgs.un.org/goals/goal1',
     'SDG2   Zero Hunger': '../../../assets/img/sdg2.png',
@@ -91,11 +91,29 @@ export class DataService implements OnInit {
     'SDG17  Partnership For The Goals': '../../../assets/img/sdg17.png',
     'SDG17  Partnership For The Goals-link': 'https://sdgs.un.org/goals/goal17',
   };
+  // transformSDGs(sdgsPaths: { [key: string]: string }): SDG[] {
+  //   const sdgs: SDG[] = [];
+  //   const sdgNames = Object.keys(sdgsPaths).filter(
+  //     (key) => !key.includes('-link')
+  //   );
+  //   for (const sdgName of sdgNames) {
+  //     const name = sdgName.split(' ')[0];
+  //     const fullname = sdgName.substring(name.length).trim();
+  //     const imagePath = sdgsPaths[sdgName];
+  //     const linkKey = `${sdgName}-link`;
+  //     const backgroundSelected = '';
+  //     const link = sdgsPaths[linkKey] || '';
+  //     if (name !== 'None')
+  //       sdgs.push({ name, fullname, imagePath, link, backgroundSelected });
+  //   }
+  //   return sdgs;
+  // }
   transformSDGs(sdgsPaths: { [key: string]: string }): SDG[] {
     const sdgs: SDG[] = [];
     const sdgNames = Object.keys(sdgsPaths).filter(
       (key) => !key.includes('-link')
     );
+
     for (const sdgName of sdgNames) {
       const name = sdgName.split(' ')[0];
       const fullname = sdgName.substring(name.length).trim();
@@ -103,11 +121,24 @@ export class DataService implements OnInit {
       const linkKey = `${sdgName}-link`;
       const backgroundSelected = '';
       const link = sdgsPaths[linkKey] || '';
-      if (name !== 'None')
+
+      // Include "None" option
+      if (name === 'None') {
+        sdgs.unshift({
+          name,
+          fullname: 'None',
+          imagePath,
+          link,
+          backgroundSelected,
+        });
+      } else {
         sdgs.push({ name, fullname, imagePath, link, backgroundSelected });
+      }
     }
+
     return sdgs;
   }
+
   darkModeInitial() {
     localStorage['theme'] = 'dark'; // Save to localStorage
     // Save to localStorage

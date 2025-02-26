@@ -216,22 +216,68 @@ export class CreateSolutionStepsComponent implements OnInit {
     }
   }
 
+  // chooseSDG(index: number) {
+  //   // Check if the item is already selected
+  //   if (this.sdgSelected[index] >= 0) {
+  //     // Item is already selected, so unselect it
+  //     this.sdgs[index].backgroundSelected = '';
+  //     this.sdgSelected[index] = -1;
+  //   } else {
+  //     // Item is not selected, so select it
+  //     this.sdgs[index].backgroundSelected =
+  //       'bg-teal-100   dark:border-gray-100 dark:border-4';
+  //     this.sdgSelected[index] = 1;
+  //   }
+  //   this.sdgInterest = this.getSelectedSDGStrings();
+  //   // console.log('sdgs selected', this.sdgInterest);
+  //   this.solution.newSolution.sdgs = this.sdgInterest;
+  // }
   chooseSDG(index: number) {
-    // Check if the item is already selected
-    if (this.sdgSelected[index] >= 0) {
-      // Item is already selected, so unselect it
-      this.sdgs[index].backgroundSelected = '';
-      this.sdgSelected[index] = -1;
+    if (index === 0) {
+      // If "None" is selected
+      // Unselect all SDGs
+      this.sdgs.forEach((sdg: any, i: any) => {
+        sdg.backgroundSelected = '';
+        this.sdgSelected[i] = -1;
+      });
+
+      // Toggle "None"
+      if (this.sdgSelected[0] >= 0) {
+        this.sdgs[0].backgroundSelected = '';
+        this.sdgSelected[0] = -1;
+      } else {
+        this.sdgs[0].backgroundSelected =
+          'bg-teal-100 dark:border-gray-100 dark:border-4';
+        this.sdgSelected[0] = 1;
+      }
     } else {
-      // Item is not selected, so select it
-      this.sdgs[index].backgroundSelected =
-        'bg-teal-100   dark:border-gray-100 dark:border-4';
-      this.sdgSelected[index] = 1;
+      // Unselect "None" if another SDG is selected
+      this.sdgs[0].backgroundSelected = '';
+      this.sdgSelected[0] = -1;
+
+      // Toggle selection of the chosen SDG
+      if (this.sdgSelected[index] >= 0) {
+        this.sdgs[index].backgroundSelected = '';
+        this.sdgSelected[index] = -1;
+      } else {
+        this.sdgs[index].backgroundSelected =
+          'bg-teal-100 dark:border-gray-100 dark:border-4';
+        this.sdgSelected[index] = 1;
+      }
     }
+
+    // Update selected SDGs array
     this.sdgInterest = this.getSelectedSDGStrings();
-    // console.log('sdgs selected', this.sdgInterest);
+
+    // Ensure "None" is the only selection if chosen
+    if (this.sdgSelected[0] === 1) {
+      this.sdgInterest = ['None'];
+    }
+
+    // Store the selected SDGs in the solution object
     this.solution.newSolution.sdgs = this.sdgInterest;
   }
+
   delay(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
