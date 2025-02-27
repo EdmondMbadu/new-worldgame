@@ -107,6 +107,8 @@ import { FullDiscussionComponent } from './components/full-discussion/full-discu
 import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
 import { DocumentFilesComponent } from './components/document-files/document-files.component';
 import { SolutionEvaluationComponent } from './components/solution-evaluation/solution-evaluation.component';
+import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
+import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
 
 @NgModule({
   declarations: [
@@ -190,6 +192,8 @@ import { SolutionEvaluationComponent } from './components/solution-evaluation/so
     SolutionDetailsComponent,
     DocumentFilesComponent,
     SolutionEvaluationComponent,
+    GlobalLabComponent,
+    GlobalRegisterComponent,
   ],
   imports: [
     BrowserModule,

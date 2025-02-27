@@ -62,6 +62,8 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
 import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
 import { DocumentFilesComponent } from './components/document-files/document-files.component';
+import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
+import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -272,6 +274,14 @@ const routes: Routes = [
   {
     path: 'welcome',
     component: WelcomeComponent,
+  },
+  {
+    path: 'global-lab',
+    component: GlobalLabComponent,
+  },
+  {
+    path: 'global-register',
+    component: GlobalRegisterComponent,
   },
   {
     path: 'blogs/new-features',
