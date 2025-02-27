@@ -566,6 +566,6 @@ export class PlaygroundStepComponent {
   }
   toggleCongratsAndDone() {
     this.displayCongrats = !this.displayCongrats;
-    this.router.navigate(['/home']);
+    this.router.navigate(['/solution-view', this.solutionId]);
   }
 }

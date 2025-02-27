@@ -298,7 +298,7 @@ export class SolutionViewComponent implements OnInit {
       this.currentSolution
     );
     this.toggleConfirmationEditSolution();
-    this.router.navigate(['/home']);
+    this.router.navigate(['/dashboard', this.currentSolution.solutionId]);
   }
 
   updateEvaluationToNotEvaluated() {
