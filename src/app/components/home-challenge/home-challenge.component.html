@@ -1,169 +1,629 @@
-<div class="min-h-screen   px-4 pb-16 dark:bg-slate-900 ">
-    <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
-    <app-navbar  [sideBarSmall]="true"   [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" current="''"  (toggleAsideEvent)="toggleAside()"></app-navbar>
+<div class="min-h-screen px-4 pb-16 dark:bg-slate-900">
+  <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
+    <!-- Navbar (unchanged, except perhaps removing margin/padding if needed) -->
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="isSidebarOpen"
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      [path]="'home'"
+      current=""
+      (toggleAsideEvent)="toggleAside()"
+    ></app-navbar>
 
-    <section class="bg-white py-8 antialiased dark:bg-gray-900 mt-14">
-      <div class="mx-auto grid max-w-screen-xl px-4 pb-8 md:grid-cols-12 lg:gap-12 lg:pb-16 xl:gap-0">
-        <div class="content-center justify-self-start md:col-span-7 md:text-start">
-          <h1 class="mb-4 text-5xl font-bold leading-tight tracking-tighter dark:text-white md:text-6xl xl:text-7xl">{{heading}}<br /></h1>
-          <p class="mb-6 max-w-2xl text-gray-600 dark:text-gray-300 md:text-lg lg:text-xl">{{subHeading}}</p>
-          <a (click)="scrollToSolutions()"  class="inline-block rounded-lg bg-teal-700 px-6 py-3.5 text-center font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-teal-300 dark:bg-primary-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800 cursor-pointer">Start Solving</a>
+    <!-- Header / Hero Section -->
+    <section class="relative w-full bg-white dark:bg-gray-900 mt-14">
+      <div class="mx-auto max-w-screen-xl py-8 px-4 grid md:grid-cols-12 gap-8 items-center">
+        
+        <!-- Logo (if present) + Heading & Subheading -->
+        <div class="md:col-span-6 space-y-6">
+          <div class="flex items-center mb-4">
+            <img
+            
+              *ngIf="logoImage"
+              [src]="logoImage"
+              alt="Logo"
+              class="h-24 lg:h-28 w-auto mr-3 rounded object-contain border dark:border-gray-700"
+            />
+            <!-- Heading -->
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {{ heading }}
+            </h1>
+          </div>
+
+          <!-- Subheading -->
+          <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300">
+            {{ subHeading }}
+          </p>
+
+          <!-- Call to Action Button -->
+          <a
+            (click)="scrollToSolutions()"
+            class="inline-block mt-4 rounded-lg bg-teal-700 px-6 py-3.5 text-center font-medium text-white hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 cursor-pointer"
+            >Start Solving</a
+          >
         </div>
-        <div class="hidden md:col-span-5 md:mt-0 md:flex">
-          <img *ngIf="image" [src]="image" alt="Logo" class="h-auto w-full rounded-lg shadow-lg border-2 border-white dark:border-gray-700" />
-         
+
+        <!-- Hero / Feature Image -->
+        <div class="md:col-span-6 flex justify-center md:justify-end">
+          <img
+            *ngIf="image"
+            [src]="image"
+            alt="Feature Image"
+            class="h-auto w-full max-w-md rounded-xl shadow-lg border-2 border-white dark:border-gray-700"
+          />
         </div>
       </div>
-   
     </section>
-   
-      <div class="mx-auto max-w-7xl">
-        
-        <!-- Solutions Section -->
-  <section #solutions id="solutions" class="scroll-mt-16 mt-4">
+
+    <!-- Participants & Author Tools Section -->
+    <section
+      class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
+      *ngIf="participants?.length || isAuthorPage"
+    >
+      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+
+        <!-- Participants List -->
+        <div class="w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Participants
+          </h2>
           
-          <!-- Category Filter -->
-    <!-- Categories Section -->
+          <div *ngIf="participants.length > 0; else noParticipants">
+            <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+              <li
+                class="py-2 flex items-center space-x-2"
+                *ngFor="let participant of participants"
+              >
+                <svg
+                  class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5.121 17.804A3 3 0 017 17h10a3 3 0 012.584 1.418M12 13a4 4 0 100-8 4 4 0 000 8z"
+                  ></path>
+                </svg>
+                <span class="text-gray-700 dark:text-gray-200">
+                  {{ participant }}
+                </span>
+              </li>
+            </ul>
+          </div>
+          <ng-template #noParticipants>
+            <p class="text-gray-500 dark:text-gray-400">
+              No participants have been added yet.
+            </p>
+          </ng-template>
+        </div>
+
+        <!-- Author Tools (Only visible if isAuthorPage) -->
+        <div
+          class="w-full lg:w-1/2 flex flex-col items-start lg:items-end gap-4"
+          *ngIf="isAuthorPage"
+        >
+          <div
+            class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow w-full lg:w-auto"
+          >
+            <h3
+              class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2"
+            >
+              Author Tools
+            </h3>
+            <div class="flex flex-wrap gap-3">
+              <!-- Add Challenge -->
+              <button
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded hover:bg-teal-700"
+                (click)="toggle('showAddChallenge')"
+              >
+                <svg
+                  class="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 7.757v8.486M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                  />
+                </svg>
+                Add Challenge
+              </button>
+
+              <!-- Add Participant -->
+              <button
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700"
+                (click)="toggle('showAddTeamMember')"
+              >
+                <svg
+                  class="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 7.757v8.486M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                  />
+                </svg>
+                Add Participant
+              </button>
+
+              <!-- Remove Participant -->
+              <button
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded hover:bg-orange-700"
+                (click)="toggle('showRemoveTeamMember')"
+              >
+                <svg
+                  class="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                  />
+                </svg>
+                Remove Participant
+              </button>
+
+              <!-- Copy URL -->
+              <button
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600"
+                (click)="copyUrlToClipboard()"
+              >
+                <svg
+                  class="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                Copy URL
+              </button>
+
+              <!-- Delete Page -->
+              <button
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                (click)="deleteChallengePage()"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="w-4 h-4 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000
+                        2v10a2 2 0 002 2h8a2 2 0
+                        002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1
+                        1 0 0011 2H9zM7 8a1 1 0 012
+                        0v6a1 1 0 11-2 0V8zm5-1a1
+                        1 0 00-1 1v6a1 1 0 102
+                        0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                Delete Page
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<!-- Some wrapping section, e.g. after Participants & Author Tools -->
+<section
+  class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
+>
+  <!-- Possibly other content like participants list / author tools here -->
+
+  <!-- Always-Open Google Meet Link (for everyone) -->
+  <div
+    *ngIf="googleMeetLink"
+    class="mt-8 p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow"
+  >
+    <h2 class="text-lg font-semibold text-green-900 dark:text-green-100">
+      Always-Open Video Chat
+    </h2>
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      Join the ongoing Google Meet room for this challenge.
+    </p>
+    <a
+      [href]="googleMeetLink"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center mt-4 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 transition"
+    >
+      <svg
+        class="w-5 h-5 mr-2"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M15 10l4.553-2.276A1 1 0 0121
+             8.618v6.764a1 1 0 01-1.447.894L15
+             14M4 6h8a2 2 0 012 2v8a2 2 0
+             01-2 2H4a2 2 0 01-2-2V8a2 2
+             0 012-2z"
+        />
+      </svg>
+      Join Live Chat
+    </a>
+  </div>
+</section>
+
+    <!-- Solutions & Category Filter Section -->
+    <section
+      #solutions
+      id="solutions"
+      class="scroll-mt-16 mt-8 mx-auto max-w-screen-xl px-4 pb-8 dark:bg-gray-900"
+    >
+      <!-- Category Filter -->
       <div class="flex flex-wrap justify-center gap-4 mb-8">
         <button
           *ngFor="let category of categories"
           (click)="setActiveCategory(category)"
           [ngClass]="{
             'bg-teal-700 text-white': category === activeCategory,
-            'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200': category !== activeCategory
+            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200':
+              category !== activeCategory
           }"
-          class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
+          class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 hover:text-white transition"
         >
           {{ category }}
         </button>
       </div>
 
-      <!-- Functionality Buttons Section -->
-      <div *ngIf="isAuthorPage" class="flex flex-wrap justify-center gap-4 mb-8">
-        <!-- Add Challenge Button -->
-        <div *ngIf="isAuthorPage" class="relative group cursor-pointer" (click)="toggle('showAddChallenge')">
-          <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
-          <span class="absolute left-1/2 -translate-x-1/2 -top-12 bg-gray-800 text-white text-sm rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            Add challenge
-          </span>
+      <!-- Challenges Grid -->
+      <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          *ngFor="let t of titles; let i = index"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 hover:shadow-lg transform transition duration-300 hover:scale-105"
+        >
+          <app-challenge
+            [ngStyle]="{'animation-delay': i * 100 + 'ms'}"
+            [image]="challengeImages[i]"
+            [id]="ids[i]"
+            [description]="descriptions[i]"
+            [restricted]="'true'"
+            [title]="t"
+          >
+          </app-challenge>
         </div>
-
-        <!-- Delete Page Button -->
-        <button *ngIf="isAuthorPage" (click)="deleteChallengePage()" type="button" class="inline-flex items-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-900">
-          <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-          </svg>
-          Delete Page
-        </button>
-
-        <!-- Copy URL Button -->
-        <button *ngIf="isAuthorPage" (click)="copyUrlToClipboard()" class="px-4 py-2 rounded-full text-sm font-medium bg-blue-500 text-white hover:bg-blue-600 transition inline-flex items-center">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-          </svg>
-          Copy URL
-        </button>
       </div>
-          
-          <!-- Solutions Grid -->
-          <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 ">
-            <div
-              *ngFor="let t of titles; let i = index"
-              class="transform transition-transform duration-300 hover:scale-105"
-             
-            >
-            <app-challenge  [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [id]="ids[i]"  [description]="descriptions[i]" [restricted]="'true'"   [title]="t"></app-challenge>
-                 
-      
-              
-            </div>
-          </div>
-          
     </section>
-        
-      </div>
-
-    </div>
+  </div>
 </div>
 
-  <!-- Main modal -->
-  <div *ngIf="showAddChallenge" id="updateProductModal" tabindex="-1" aria-hidden="true" class="fixed top-14 md:top-20 lg:top-10 left-0 w-full h-full flex justify-center items-center overflow-y-auto overflow-x-hidden z">
-    <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
-        <!-- Modal content -->
-        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
-            <!-- Modal header -->
-            <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Add Challenge
-                </h3>
-                <button (click)="toggle('showAddChallenge')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="updateProductModal">
-                    <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div action="#">
-                <div class="grid gap-4 mb-4 sm:grid-cols-2">
-                    <div class="sm:col-span-2">
-                        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
-                        <input [(ngModel)]="titleCreateChallenge" type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Bridging the Wealth Gap: Fighting Inequality">
-                    </div>
-               
-                
-                    <div>
-                      <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                        Category
-                      </label>
-                      <select [(ngModel)]="categoryCreateChallenge" id="category" 
-                              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                        <option value="" disabled selected>Choose</option>
-                        <option *ngFor="let c of categories" [value]="c">{{c}}</option>
-                      </select>
-                    </div>
-                    <div class="">
-                      <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add Category if not listed</label>
-                      <input  [(ngModel)]="categoryCreateChallenge" type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Human Rights">
-                  </div>
-                    <div class="sm:col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-                        <textarea [(ngModel)]="descriptionCreateChallenge"  id="description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Write a description...">Standard glass, 3.8GHz 8-core 10th-generation Intel Core i7 processor, Turbo Boost up to 5.0GHz, 16GB 2666MHz DDR4 memory, Radeon Pro 5500 XT with 8GB of GDDR6 memory, 256GB SSD storage, Gigabit Ethernet, Magic Mouse 2, Magic Keyboard - US</textarea>                    
-                    </div>
-                    <div class="sm:col-span-2 bg-gray-200 dark:bg-gray-700"
-                    appDropZone
-                    (hovered)="toggleHover($event)"
-                    (dropped)="startUpload($event)"
-                    [class.hovering]="isHovering">
-                   
-                      <div *ngIf="!imageCreateChallenge" onclick="document.getElementById('getFile').click()"  class="flex flex-col items-center justify-center pt-5 pb-6 cursor-pointer">
-                          <svg  class="w-4 h-4 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                          </svg>
-                          <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                          <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
-                      </div>
-                      <img *ngIf="imageCreateChallenge" [src]="imageCreateChallenge" alt="">
-                     
-                      <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload feature Image</h5>
-                      <input   type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
-          
-                  
-                          
-                    
-                 
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button (click)="addCreateChallenge()" type="submit" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800">
-                       Add Challenge
-                    </button>
-                    <button (click)="toggle('showAddChallenge')" type="button" class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900">
-               
-                        Cancel
-                    </button>
-                </div>
-              </div>
+
+<!-- ADD CHALLENGE MODAL -->
+<div
+  *ngIf="showAddChallenge"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+>
+  <div class="relative w-full max-w-2xl px-4 py-8">
+    <div
+      class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
+    >
+      <!-- Header -->
+      <div
+        class="flex justify-between items-center pb-4 mb-4 rounded-t border-b dark:border-gray-600"
+      >
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          Add Challenge
+        </h3>
+        <button
+          (click)="toggle('showAddChallenge')"
+          type="button"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center 
+                dark:hover:bg-gray-600 dark:hover:text-white"
+        >
+          <svg
+            aria-hidden="true"
+            class="w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414
+            0L10 8.586l4.293-4.293a1 1 0
+            111.414 1.414L11.414 10l4.293
+            4.293a1 1 0 01-1.414 1.414L10
+            11.414l-4.293 4.293a1 1 0
+            01-1.414-1.414L8.586 10
+            4.293 5.707a1 1 0
+            010-1.414z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <!-- Body -->
+      <div class="grid gap-4 mb-4 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label
+            for="name"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Title</label
+          >
+          <input
+            [(ngModel)]="titleCreateChallenge"
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Bridging the Wealth Gap..."
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                  focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5
+                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          />
         </div>
+        <div>
+          <label
+            for="category"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Category</label
+          >
+          <select
+            [(ngModel)]="categoryCreateChallenge"
+            id="category"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                  focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5
+                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          >
+            <option value="" disabled selected>Choose</option>
+            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+        <div>
+          <label
+            for="name"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Add Category if not listed</label
+          >
+          <input
+            [(ngModel)]="categoryCreateChallenge"
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Human Rights"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
+                  focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 
+                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          />
+        </div>
+        <div class="sm:col-span-2">
+          <label
+            for="description"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Description</label
+          >
+          <textarea
+            [(ngModel)]="descriptionCreateChallenge"
+            id="description"
+            rows="3"
+            placeholder="Write a description..."
+            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg 
+                  border border-gray-300 focus:ring-primary-500 focus:border-primary-500 
+                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
+                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          ></textarea>
+        </div>
+
+        <!-- Image Upload (Drop Zone) -->
+        <div
+          class="sm:col-span-2 bg-gray-100 dark:bg-gray-700 rounded-md p-4 flex flex-col items-center justify-center relative"
+          appDropZone
+          (hovered)="toggleHover($event)"
+          (dropped)="startUpload($event)"
+          [class.hovering]="isHovering"
+        >
+          <div
+            *ngIf="!imageCreateChallenge"
+            onclick="document.getElementById('getFile').click()"
+            class="flex flex-col items-center justify-center cursor-pointer"
+          >
+            <svg
+              class="w-6 h-6 mb-2 text-gray-500 dark:text-gray-400"
+              fill="none"
+              viewBox="0 0 20 16"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 13h3a3 3 0 0 0
+                   0-6h-.025A5.56 5.56 0 0 0
+                   16 6.5 5.5 5.5 0 0 0
+                   5.207 5.021C5.137 5.017
+                   5.071 5 5 5a4 4 0 0 0
+                   0 8h2.167M10 15V6m0 0L8
+                   8m2-2 2 2"
+              />
+            </svg>
+            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="font-semibold">Click to upload</span> or drag &amp;
+              drop
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              SVG, PNG, JPG or GIF (MAX. 10MB)
+            </p>
+          </div>
+          <img
+            *ngIf="imageCreateChallenge"
+            [src]="imageCreateChallenge"
+            alt="Challenge Preview"
+            class="w-full h-auto rounded-md shadow mt-2"
+          />
+          <input
+            type="file"
+            id="getFile"
+            style="display:none"
+            (change)="startUpload($any($event.target).files)"
+          />
+        </div>
+      </div>
+      <!-- Footer -->
+      <div class="flex items-center space-x-4">
+        <button
+          (click)="addCreateChallenge()"
+          type="submit"
+          class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none
+                 focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 
+                 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+        >
+          Add Challenge
+        </button>
+        <button
+          (click)="toggle('showAddChallenge')"
+          type="button"
+          class="text-red-600 inline-flex items-center hover:text-white border border-red-600 
+                 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 
+                 font-medium rounded-lg text-sm px-5 py-2.5 text-center 
+                 dark:border-red-500 dark:text-red-500 dark:hover:text-white 
+                 dark:hover:bg-red-600 dark:focus:ring-red-900"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- ADD TEAM MEMBER MODAL -->
+<div
+  *ngIf="showAddTeamMember"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+>
+  <div class="relative w-full max-w-md px-4 py-8">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <div class="p-4 md:p-5 min-w-xl">
+        <h2
+          class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
+        >
+          Add a new Participant
+        </h2>
+        <div class="grid gap-4 mb-4 grid-cols-2">
+          <div class="col-span-2">
+            <textarea
+              [(ngModel)]="newParticipant"
+              rows="1"
+              placeholder="email@gmail.com"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg 
+                     border border-gray-300 focus:ring-blue-500 focus:border-blue-500 
+                     dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 
+                     dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            ></textarea>
+          </div>
+        </div>
+        <div>
+          <button
+            (click)="toggle('showAddTeamMember')"
+            class="mr-4 text-white inline-flex items-center bg-gray-600 
+                   hover:bg-gray-700 focus:ring-4 focus:outline-none
+                   focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 
+                   text-center dark:bg-gray-500 dark:hover:bg-gray-600 
+                   dark:focus:ring-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="addParticipant()"
+            class="text-white inline-flex items-center bg-teal-700 
+                   hover:bg-teal-800 focus:ring-4 focus:outline-none 
+                   focus:ring-teal-300 font-medium rounded-lg text-sm 
+                   px-5 py-2.5 text-center dark:bg-teal-600 
+                   dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+          >
+            Add Participant
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REMOVE TEAM MEMBER MODAL -->
+<div
+  *ngIf="showRemoveTeamMember"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+>
+  <div class="relative w-full max-w-md px-4 py-8">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+      <div class="p-4 md:p-5 min-w-xl">
+        <h2
+          class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
+        >
+          Remove Participant
+        </h2>
+        <div class="grid gap-4 mb-4 grid-cols-2">
+          <div class="col-span-2">
+            <textarea
+              [(ngModel)]="teamMemberToDelete"
+              rows="1"
+              placeholder="email@gmail.com"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 
+                     rounded-lg border border-gray-300 focus:ring-blue-500 
+                     focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 
+                     dark:placeholder-gray-400 dark:text-white 
+                     dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            ></textarea>
+          </div>
+        </div>
+        <div>
+          <button
+            (click)="toggle('showRemoveTeamMember')"
+            class="mr-4 text-white inline-flex items-center bg-gray-600 
+                   hover:bg-gray-700 focus:ring-4 focus:outline-none
+                   focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 
+                   text-center dark:bg-gray-500 dark:hover:bg-gray-600 
+                   dark:focus:ring-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="removeParticipant(teamMemberToDelete)"
+            class="text-white inline-flex items-center bg-red-700 
+                   hover:bg-red-800 focus:ring-4 focus:outline-none 
+                   focus:ring-red-300 font-medium rounded-lg text-sm 
+                   px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 
+                   dark:focus:ring-red-800"
+          >
+            Remove Participant
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

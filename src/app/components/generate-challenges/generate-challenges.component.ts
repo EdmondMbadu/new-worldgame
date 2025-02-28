@@ -20,6 +20,7 @@ export class GenerateChallengesComponent implements OnInit {
   description: string = '';
   isHovering: boolean = false;
   imageChallenge: string = '';
+  logoImage: string = '';
   challengePageId: string = '';
   challengePage: ChallengePage = new ChallengePage();
   constructor(
@@ -36,18 +37,29 @@ export class GenerateChallengesComponent implements OnInit {
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
-  async startUpload(event: FileList) {
+
+  async startUpload(event: FileList, imageType = '') {
     if (!this.challengePageId) {
       this.challengePageId = this.afs.createId(); // Generate ID only if not already generated
     }
 
+    let subFolder = 'feature'; // Default subfolder
+    if (imageType === 'logo') {
+      subFolder = 'logo';
+    }
+
     try {
-      const url = await this.data.startUpload(
-        event,
-        `challenge-page/${this.challengePageId}`,
-        'false'
-      );
-      this.imageChallenge = url!;
+      // example: `challenge-page/<challengePageId>/logo/`
+      // or      `challenge-page/<challengePageId>/feature/`
+      const filePath = `challenge-page/${this.challengePageId}/${subFolder}`;
+
+      const url = await this.data.startUpload(event, filePath, 'false');
+
+      if (imageType === 'logo') {
+        this.logoImage = url!;
+      } else {
+        this.imageChallenge = url!;
+      }
       console.log('The URL is', url);
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -62,6 +74,7 @@ export class GenerateChallengesComponent implements OnInit {
       this.subHeading === '' || // Add a check for empty subtitle
       this.description === '' || // Add a check for empty description
       this.imageChallenge === '' || // Add a check for empty imageChallenge
+      this.logoImage === '' || // Add a check for empty logoImage
       this.challengePageId === '' // Add a check for empty challengePageId
     ) {
       alert('Please fill in all fields');
@@ -73,6 +86,8 @@ export class GenerateChallengesComponent implements OnInit {
         subHeading: this.subHeading,
         description: this.description,
         imageChallenge: this.imageChallenge,
+        logoImage: this.logoImage,
+        participants: [this.auth.currentUser.email],
         challengePageId: this.challengePageId,
         restricted: 'true',
       };
@@ -90,5 +105,6 @@ export class GenerateChallengesComponent implements OnInit {
     this.description = '';
     this.imageChallenge = '';
     this.challengePageId = '';
+    this.logoImage = '';
   }
 }

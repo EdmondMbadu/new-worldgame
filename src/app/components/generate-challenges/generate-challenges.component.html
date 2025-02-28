@@ -3,7 +3,7 @@
   
     <section class="bg-white dark:bg-gray-900 mt-20">
         <div class="max-w-2xl px-4 py-4 mx-auto lg:py-8 bg-gray-200 dark:bg-gray-800">
-            <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Challenge Page Details</h2>
+            <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Create A Challenge Page</h2>
             <div action="#">
                 <div class="grid gap-4 mb-4 sm:grid-cols-2 sm:gap-6 sm:mb-5">
                     <div class="sm:col-span-2">
@@ -23,31 +23,56 @@
                         <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
                         <textarea id="description" [(ngModel)]="description" rows="8" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Describe in few words the purpose of the page you are creating">Standard glass, 3.8GHz 8-core 10th-generation Intel Core i7 processor, Turbo Boost up to 5.0GHz, 16GB 2666MHz DDR4 memory, Radeon Pro 5500 XT with 8GB of GDDR6 memory, 256GB SSD storage, Gigabit Ethernet, Magic Mouse 2, Magic Keyboard - US</textarea>
                     </div>
-                    <div class="sm:col-span-2 bg-gray-200 dark:bg-gray-700"
+                <div class="sm:col-span-2 bg-gray-200 dark:bg-gray-700"
                     appDropZone
                     (hovered)="toggleHover($event)"
                     (dropped)="startUpload($event)"
                     [class.hovering]="isHovering">
                    
-                      <div *ngIf="!imageChallenge" onclick="document.getElementById('getFile').click()"  class="flex flex-col items-center justify-center pt-5 pb-6 cursor-pointer">
+                      <div *ngIf="!logoImage" onclick="document.getElementById('getLogo').click()"  class="flex flex-col items-center justify-center pt-5 pb-6 cursor-pointer">
                           <svg  class="w-4 h-4 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                           </svg>
                           <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
                           <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
                       </div>
-                      <img *ngIf="imageChallenge" [src]="imageChallenge" alt="">
+                      <img *ngIf="logoImage" [src]="logoImage" alt="">
                      
                       <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload Logo for your Page</h5>
-                      <input   type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
+                      <input   type="file" id="getLogo" style="display:none" (change)="startUpload($any($event.target).files,'logo')">
           
                   
                           
                     
                  
                     
+                    
                 </div>
+                <div class="sm:col-span-2 bg-gray-200 dark:bg-gray-700"
+                appDropZone
+                (hovered)="toggleHover($event)"
+                (dropped)="startUpload($event)"
+                [class.hovering]="isHovering">
+               
+                  <div *ngIf="!imageChallenge" onclick="document.getElementById('getFile').click()"  class="flex flex-col items-center justify-center pt-5 pb-6 cursor-pointer">
+                      <svg  class="w-4 h-4 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                      </svg>
+                      <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
+                  </div>
+                  <img *ngIf="imageChallenge" [src]="imageChallenge" alt="">
+                 
+                  <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload Main Image for your Page</h5>
+                  <input   type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files,'feature')">
+      
+              
+                      
+                
+             
+                
                 </div>
+            </div>
                 <div class="flex items-center space-x-4">
                     <button (click)="createChallengePage()" type="submit" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800">
                         Create Page

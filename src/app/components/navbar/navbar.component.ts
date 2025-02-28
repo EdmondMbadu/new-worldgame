@@ -11,7 +11,13 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  of,
+  switchMap,
+} from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { ChallengePage, User } from 'src/app/models/user';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -148,9 +154,28 @@ export class NavbarComponent implements OnInit, OnChanges {
 
     // these are the challengePages that this user has if they have any.
 
-    this.challenge.getAllChallengePagesByThisUser().subscribe((data) => {
-      this.userChallengePages = data;
-      this.showMyPages = this.userChallengePages.length > 0; // Only show if there are challenge pages
+    // Combine challenges (authored + participant) without duplicates
+    combineLatest([
+      this.challenge.getAllChallengePagesByThisUser(),
+      this.challenge.getAllChallengesWhereUserIsParticipant(),
+    ]).subscribe(([authoredChallenges, participantChallenges]) => {
+      // Merge the two arrays
+      const merged = [...authoredChallenges, ...participantChallenges];
+
+      // Remove duplicates (assuming ChallengePage has an 'id' property)
+      // Option 1: Using Map
+      const uniqueChallenges = [
+        ...new Map(
+          merged.map((challenge) => [challenge.challengePageId, challenge])
+        ).values(),
+      ];
+
+      // Option 2: Using a Set (if 'id' is guaranteed unique)
+      // const uniqueChallenges = Array.from(new Set(merged.map(ch => ch.id)))
+      //   .map(id => merged.find(ch => ch.id === id)!);
+
+      this.userChallengePages = uniqueChallenges;
+      this.showMyPages = this.userChallengePages.length > 0;
     });
   }
 

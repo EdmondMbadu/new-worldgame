@@ -216,22 +216,6 @@ export class CreateSolutionStepsComponent implements OnInit {
     }
   }
 
-  // chooseSDG(index: number) {
-  //   // Check if the item is already selected
-  //   if (this.sdgSelected[index] >= 0) {
-  //     // Item is already selected, so unselect it
-  //     this.sdgs[index].backgroundSelected = '';
-  //     this.sdgSelected[index] = -1;
-  //   } else {
-  //     // Item is not selected, so select it
-  //     this.sdgs[index].backgroundSelected =
-  //       'bg-teal-100   dark:border-gray-100 dark:border-4';
-  //     this.sdgSelected[index] = 1;
-  //   }
-  //   this.sdgInterest = this.getSelectedSDGStrings();
-  //   // console.log('sdgs selected', this.sdgInterest);
-  //   this.solution.newSolution.sdgs = this.sdgInterest;
-  // }
   chooseSDG(index: number) {
     if (index === 0) {
       // If "None" is selected

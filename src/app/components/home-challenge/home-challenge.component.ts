@@ -23,7 +23,10 @@ export class HomeChallengeComponent {
   heading: string = '';
   subHeading: any = '';
   image: string = '';
+  logoImage: string = '';
   showAddChallenge: boolean = false;
+  showAddTeamMember: boolean = false;
+  showRemoveTeamMember: boolean = false;
   challengePage: ChallengePage = new ChallengePage();
   challengePageId?: any = '';
   categories: string[] = [];
@@ -41,6 +44,10 @@ export class HomeChallengeComponent {
   descriptions: string[] = [];
   challengeImages: string[] = [];
   ids: string[] = [];
+  participants: string[] = [];
+  googleMeetLink: string = '';
+  newParticipant: string = '';
+  teamMemberToDelete: string = '';
 
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
@@ -86,7 +93,23 @@ export class HomeChallengeComponent {
         this.challengePage = data;
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
-        this.image = this.challengePage.imageChallenge!;
+
+        // test first if the logo image is available
+        if (this.challengePage.logoImage) {
+          this.logoImage = this.challengePage.logoImage;
+        }
+        if (this.challengePage.imageChallenge) {
+          this.image = this.challengePage.imageChallenge;
+        }
+        // test if participants array is there
+        if (this.challengePage.participants) {
+          this.participants = this.challengePage.participants;
+          console.log('Participants:', this.participants);
+        }
+        if (this.challengePage.meetLink) {
+          this.googleMeetLink = this.challengePage.meetLink;
+          console.log('Google Meet Link:', this.googleMeetLink);
+        }
 
         this.challenge
           .getThisUserChallenges(
@@ -144,6 +167,7 @@ export class HomeChallengeComponent {
         this.updateChallenges(); // Update the active challenge display
       });
   }
+
   updateChallenges(): void {
     const categoryData = this.challenges[this.activeCategory];
     if (!categoryData) {
@@ -159,27 +183,66 @@ export class HomeChallengeComponent {
     this.challengeImages = categoryData.images;
     this.ids = categoryData.ids!;
   }
-  toggle(property: 'isSidebarOpen' | 'showAddChallenge') {
+  toggle(
+    property:
+      | 'isSidebarOpen'
+      | 'showAddChallenge'
+      | 'showAddTeamMember'
+      | 'showRemoveTeamMember'
+  ) {
     this[property] = !this[property];
   }
+  addParticipant() {
+    if (!this.newParticipant && this.data.isValidEmail(this.newParticipant)) {
+      alert('Please enter a valid email address to add a participant.');
+      return;
+    }
+    if (this.participants.includes(this.newParticipant)) {
+      alert('This participant has already been added.');
+      return;
+    }
 
-  // deleteChallengePage() {
-  //   if (!confirm('Are you sure you want to delete this challenge page?')) {
-  //     return;
-  //   }
-  //   this.challenge
-  //     .deleteChallengePage(this.challengePageId)
-  //     .then(() => {
-  //       console.log('Challenge page deleted successfully.');
-  //       this.router.navigate(['/home']);
-  //     })
-  //     .catch((error) => {
-  //       console.error('Error deleting challenge page:', error);
-  //       alert(
-  //         'There was an error while deleting the challenge page. Try again.'
-  //       );
-  //     });
-  // }
+    this.participants.push(this.newParticipant);
+
+    try {
+      this.challenge.addParticipantToChallengePage(
+        this.challengePageId,
+        this.participants
+      );
+
+      console.log('Participant added successfully:', this.newParticipant);
+      alert('Participant added successfully!');
+      this.toggle('showAddTeamMember');
+    } catch (error) {
+      console.error('Error adding participant:', error);
+    }
+    this.newParticipant = '';
+  }
+
+  removeParticipant(email: string) {
+    if (!email) {
+      console.error('No email provided to remove participant.');
+      return; // Exit early
+    } else if (!this.participants.includes(email)) {
+      console.error('Participant not found in the list.');
+      return; // Exit early
+    }
+    const index = this.participants.indexOf(email);
+    this.participants.splice(index, 1); // Remove the participant from the list
+
+    try {
+      this.challenge.addParticipantToChallengePage(
+        this.challengePageId,
+        this.participants
+      );
+
+      console.log('Participant removed successfully:', email);
+      alert('Participant removed successfully!');
+      this.toggle('showRemoveTeamMember');
+    } catch (error) {
+      console.error('Error removing participant from challenge:', error);
+    }
+  }
   deleteChallengePage() {
     if (
       !confirm(

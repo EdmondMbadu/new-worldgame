@@ -7,6 +7,7 @@ import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ChallengePage } from '../models/user';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
+import { SolutionService } from './solution.service';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,8 @@ export class ChallengesService {
   constructor(
     private afs: AngularFirestore,
     private auth: AuthService,
-    private time: TimeService
+    private time: TimeService,
+    private solution: SolutionService
   ) {}
   private selectedChallengeItemSource = new BehaviorSubject<any>(null);
   selectedChallengeItem$ = this.selectedChallengeItemSource.asObservable();
@@ -163,13 +165,23 @@ export class ChallengesService {
       return Promise.reject('User not authenticated');
     }
   }
+
+  addParticipantToChallengePage(challengeId: string, participants: string[]) {
+    const challengeRef: AngularFirestoreDocument<any> = this.afs.doc(
+      `challengePages/${challengeId}`
+    );
+    const data = {
+      participants: participants,
+    };
+    return challengeRef.set(data, { merge: true });
+  }
   deleteChallenge(challengeId: string) {
     return this.afs.doc(`challenges/${challengeId}`).delete();
   }
   deleteUserChallenge(challengeId: string) {
     return this.afs.doc(`user-challenges/${challengeId}`).delete();
   }
-  createChallengePage(challengePage: ChallengePage): Promise<void> {
+  async createChallengePage(challengePage: ChallengePage): Promise<void> {
     const user = this.auth.currentUser;
     if (user && user.uid) {
       const data = {
@@ -179,15 +191,37 @@ export class ChallengesService {
         subHeading: challengePage.subHeading,
         description: challengePage.description,
         imageChallenge: challengePage.imageChallenge,
+        logoImage: challengePage.logoImage,
         authorId: user.uid,
         restricted: challengePage.restricted,
+        participants: challengePage.participants,
         creationDate: this.time.todaysDate(),
       };
 
       const challengePageRef: AngularFirestoreDocument<ChallengePage> =
         this.afs.doc(`challengePages/${challengePage.challengePageId}`);
 
-      return challengePageRef.set(data, { merge: true });
+      await challengePageRef.set(data, { merge: true });
+      // Asynchronously create the meeting link without awaiting
+      this.solution
+        .createMeetLink(challengePage.challengePageId!, challengePage.name!)
+        .toPromise()
+        .then((dataMeeting) => {
+          const meetLink = dataMeeting.hangoutLink;
+          console.log('Meeting link', meetLink);
+
+          // Update the Firestore document with the meetLink
+          return challengePageRef.update({ meetLink });
+        })
+        .catch((error) => {
+          console.error('Error creating meeting link:', error);
+          // Optionally handle the error, e.g., notify the user or retry
+        });
+
+      // Optionally return the solution data or a confirmation
+      // return {
+      //   status: 'Solution created. Meeting link is being generated.',
+      // };
     } else {
       // Reject the promise if the user is not authenticated
       return Promise.reject('User not authenticated');
@@ -204,6 +238,22 @@ export class ChallengesService {
         .valueChanges();
     } else {
       // Return an empty array if the user is not authenticated
+      return of([]);
+    }
+  }
+
+  // Get all challengePages where this user is participant
+  getAllChallengesWhereUserIsParticipant(): Observable<ChallengePage[]> {
+    const user = this.auth.currentUser;
+    if (user && user.email) {
+      const currentUserEmail = user.email;
+      return this.afs
+        .collection<ChallengePage>('challengePages', (ref) =>
+          ref.where('participants', 'array-contains', currentUserEmail)
+        )
+        .valueChanges();
+    } else {
+      // Return an empty array if the user is not authenticated or no email
       return of([]);
     }
   }

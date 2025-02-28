@@ -67,6 +67,9 @@ export class ChallengePage {
   subHeading?: string;
   description?: string;
   imageChallenge?: string;
+  logoImage?: string;
+  participants?: string[];
+  meetLink?: string;
   challengePageId?: string;
   challengeListIds?: string[];
   authorId?: string;
