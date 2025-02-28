@@ -1,40 +1,84 @@
-<app-navbar ></app-navbar>
-<div class="dark:bg-slate-900 min-h-screen min-w-max">
+<app-navbar></app-navbar>
 
-
-
-    <div class="flex  container mx-auto mt-20 ">
-        <div class=" max-w-lg md:max-w-max mx-auto">
-            <h1 class="my-10 font-bold text-3xl dark:text-gray-200 text-gray-900  text-center justify-center ">GSL ARCHIVE PICTURES</h1>
-            <p class="text-gray-900 dark:text-white mb-6 px-2 ">
-               <span class="font-bold">  Previous Lab participants have come from:</span> 
-                Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania, Ukraine, 
-                Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Senegal, Ivory Coast, Kenya, Uganda, Zimbabwe, South Africa, DR Congo, Congo, Mozambique, Gabon, Togo,
-                Haiti, Canada, Mexico, Honduras, Venezuela, 
-                China, Hong Kong, Vietnam, Singapore, Thailand, Japan, New Zealand, Australia, India, Pakistan, Bangladesh, 
-                Palestine, United Arab Emirates, Saudi Arabia, Nepal, Turkey, and all over the U.S.
-            </p>
-        
-            
-        </div>
-      
-        
-    </div>'
-    <div class="container mx-auto ">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 px-4 max-w-lg md:max-w-max mx-auto">
-            <div *ngFor="let im of imageList">
-                <img class="max-h-96 md:max-w-full w-52 rounded-lg max-w-md md:w-auto" [src]="im" alt="">
-            </div>
-    
-    
-        </div>
+<div class="dark:bg-slate-900 min-h-screen flex flex-col">
+  <!-- Content Container -->
+  <div class="container mx-auto mt-32 px-4 flex-grow">
+    <div class="max-w-xl md:max-w-3xl mx-auto text-center mb-10">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-200 mb-4">
+        GSL ARCHIVE PICTURES
+      </h1>
+      <p class="text-gray-900 dark:text-white">
+        <span class="font-bold">Previous Lab participants have come from:</span>
+        Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania,
+        Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Senegal,
+        Ivory Coast, Kenya, Uganda, Zimbabwe, South Africa, DR Congo, Congo,
+        Mozambique, Gabon, Togo, Haiti, Canada, Mexico, Honduras, Venezuela,
+        China, Hong Kong, Vietnam, Singapore, Thailand, Japan, New Zealand,
+        Australia, India, Pakistan, Bangladesh, Palestine, United Arab Emirates,
+        Saudi Arabia, Nepal, Turkey, and all over the U.S.
+      </p>
     </div>
-    
 
-   
-    
+    <!-- Carousel Wrapper -->
+    <div class="relative w-full max-w-3xl mx-auto overflow-hidden">
+      <!-- Slides Container -->
+      <div
+        class="flex"
+        (transitionend)="onTransitionEnd()"
+        [ngClass]="
+          transitioning
+            ? 'transition-transform duration-700 ease-in-out'
+            : ''
+        "
+        [style.transform]="
+          'translateX(-' + currentIndex * 100 + '%)'
+        "
+      >
+        <!-- Single Slide -->
+        <div
+          class="w-full flex-shrink-0"
+          *ngFor="let slide of slides; let i = index"
+        >
+          <img
+            [src]="slide"
+            alt="participant"
+            class="w-full max-h-[500px] object-cover"
+            loading="lazy"
+          />
+        </div>
+      </div>
 
-    <app-footer></app-footer>
+      <!-- Previous Button -->
+      <button
+        class="absolute top-1/2 left-2 transform -translate-y-1/2 p-2 bg-gray-700 
+               text-white rounded-full hover:bg-gray-800 focus:outline-none"
+        (click)="prevSlide()"
+      >
+        &larr;
+      </button>
+
+      <!-- Next Button -->
+      <button
+        class="absolute top-1/2 right-2 transform -translate-y-1/2 p-2 bg-gray-700 
+               text-white rounded-full hover:bg-gray-800 focus:outline-none"
+        (click)="nextSlide()"
+      >
+        &rarr;
+      </button>
+
+      <!-- Optional Dots (if you want direct navigation) -->
+      <div
+        class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2"
+      >
+        <div
+          *ngFor="let img of imageList; let i = index"
+          class="w-3 h-3 rounded-full cursor-pointer"
+       
+          (click)="goToSlide(i + 1)"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <app-footer></app-footer>
 </div>
-
-
