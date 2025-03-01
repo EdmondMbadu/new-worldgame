@@ -6,4 +6,8 @@ import { Component } from '@angular/core';
   templateUrl: './global-register.component.html',
   styleUrl: './global-register.component.css',
 })
-export class GlobalRegisterComponent {}
+export class GlobalRegisterComponent {
+  ngOnInit(): void {
+    window.scroll(0, 0);
+  }
+}
