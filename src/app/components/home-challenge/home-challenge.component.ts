@@ -1,6 +1,9 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { nonUserchallengePageInvite } from 'functions/src';
+import { firstValueFrom } from 'rxjs';
 import { ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
@@ -18,6 +21,7 @@ export class HomeChallengeComponent {
   imageCreateChallenge: string = '';
   descriptionCreateChallenge: string = '';
   categoryCreateChallenge: string = '';
+  isLoading: boolean = false;
 
   isSidebarOpen = false;
   heading: string = '';
@@ -67,7 +71,8 @@ export class HomeChallengeComponent {
     private data: DataService,
     private time: TimeService,
     private afs: AngularFirestore,
-    private challenge: ChallengesService
+    private challenge: ChallengesService,
+    private fns: AngularFireFunctions
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -192,7 +197,7 @@ export class HomeChallengeComponent {
   ) {
     this[property] = !this[property];
   }
-  addParticipant() {
+  async addParticipant() {
     if (!this.newParticipant && this.data.isValidEmail(this.newParticipant)) {
       alert('Please enter a valid email address to add a participant.');
       return;
@@ -203,16 +208,19 @@ export class HomeChallengeComponent {
     }
 
     this.participants.push(this.newParticipant);
+    this.isLoading = true;
 
     try {
       this.challenge.addParticipantToChallengePage(
         this.challengePageId,
         this.participants
-      );
+      ); // then send email to participant
+      await this.sendEmailToParticipant(this.newParticipant);
 
       console.log('Participant added successfully:', this.newParticipant);
       alert('Participant added successfully!');
       this.toggle('showAddTeamMember');
+      this.isLoading = false;
     } catch (error) {
       console.error('Error adding participant:', error);
     }
@@ -389,5 +397,66 @@ export class HomeChallengeComponent {
         console.error('Failed to copy URL: ', err);
         alert('Failed to copy URL. Please try again.');
       });
+  }
+
+  // New method to send emails to participants
+  async sendEmailToParticipant(participant: string) {
+    console.log('sending email invite to ', participant);
+    const challengePageInvite = this.fns.httpsCallable('challengePageInvite');
+    const nonUserchallengePageInvite = this.fns.httpsCallable(
+      'nonUserchallengePageInvite'
+    ); // Ensure you have this Cloud Function set up
+
+    // for (const participant of participants) {
+    try {
+      // Fetch the user data
+      const users = await firstValueFrom(
+        this.auth.getUserFromEmail(participant)
+      );
+      console.log('extracted user from email', users);
+      console.log('the new solution data', this.solution.newSolution);
+
+      if (users && users.length > 0) {
+        // Participant is a registered user
+        console.log('Participant is a registered user');
+
+        const emailData = {
+          email: participant, // Ensure this is the correct field
+          subject: `You Have Been Invited to Join a Challenge Workspace @ NewWorld Game`,
+          title: `${this.challengePage.name}`,
+          description: `${this.challengePage.description}`,
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          image: `${this.challengePage.imageChallenge}`,
+          path: `https://newworld-game.org/home-challenge/${this.challengePageId}`,
+          user: `${users[0].firstName} ${users[0].lastName}`,
+          // Add any other necessary fields
+        };
+
+        const result = await firstValueFrom(challengePageInvite(emailData));
+        console.log(`Email sent to ${participant}:`, result);
+      } else {
+        console.log('Participant is NOT a registered user');
+        // Participant is NOT a registered user
+        // Participant is a registered user
+        const emailData = {
+          email: participant, // Ensure this is the correct field
+          subject: `You Have Been Invited to Join a Challenge Workspace @ NewWorld Game`,
+          title: `${this.challengePage.name}`,
+          description: `${this.challengePage.description}`,
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          image: `${this.challengePage.imageChallenge}`,
+          path: `https://newworld-game.org/home-challenge/${this.challengePageId}`,
+          // Add any other necessary fields
+        };
+
+        const result = await firstValueFrom(
+          nonUserchallengePageInvite(emailData)
+        );
+        console.log(`Email sent to ${participant}:`, result);
+      }
+    } catch (error) {
+      console.error(`Error processing participant ${participant}:`, error);
+    }
+    // }
   }
 }

@@ -44,24 +44,30 @@ import * as sgMail from '@sendgrid/mail';
 // const cors = corsLib({ origin: true });
 const twilio = require('twilio');
 
-const API_KEY = functions.config().sendgrid.key;
-const TEMPLATE_ID = functions.config().sendgrid.template;
-const TEMPLATE_ID_SOLUTION = functions.config().sendgrid.templatesolutioninvite;
+const API_KEY = functions.config()['sendgrid'].key;
+const TEMPLATE_ID = functions.config()['sendgrid'].template;
+const TEMPLATE_ID_SOLUTION =
+  functions.config()['sendgrid'].templatesolutioninvite;
 const TEMPLATE_ID_SOLUTION_NONUSER =
-  functions.config().sendgrid.templatesolutioninvitenonuser;
-const TEMPLATE_ID_COMMENT = functions.config().sendgrid.templatecommentinvite;
-const TEMPLATE_ID_WORKSHOP = functions.config().sendgrid.templateworkshop;
+  functions.config()['sendgrid'].templatesolutioninvitenonuser;
+const TEMPLATE_ID_CHALLENGE_PAGE =
+  functions.config()['sendgrid'].templatechallengepageinvite;
+const TEMPLATE_ID_CHALLENGE_PAGE_NONUSER =
+  functions.config()['sendgrid'].templatenonuserchallengepage;
+const TEMPLATE_ID_COMMENT =
+  functions.config()['sendgrid'].templatecommentinvite;
+const TEMPLATE_ID_WORKSHOP = functions.config()['sendgrid'].templateworkshop;
 // const DID_API_KEY = functions.config().did.key;
 
 const TEMPLATE_ID_EVALUTION =
-  functions.config().sendgrid.templatesolutionevaluationinvite;
+  functions.config()['sendgrid'].templatesolutionevaluationinvite;
 const TEMPLATE_ID_EVALUATION_COMPLETE =
-  functions.config().sendgrid.templateevaluationcomplete;
+  functions.config()['sendgrid'].templateevaluationcomplete;
 sgMail.setApiKey(API_KEY);
 
 // Twilio credentials from config
-const accountSid = functions.config().twilio.account_sid;
-const authToken = functions.config().twilio.auth_token;
+const accountSid = functions.config()['twilio'].account_sid;
+const authToken = functions.config()['twilio'].auth_token;
 const twilioClient = twilio(accountSid, authToken);
 
 export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
@@ -116,6 +122,63 @@ export const nonUserEmail = functions.https.onCall(
       to: data.email,
       from: 'newworld@newworld-game.org',
       templateId: TEMPLATE_ID_SOLUTION_NONUSER,
+      dynamic_template_data: {
+        subject: data.subject,
+        description: data.description,
+        title: data.title,
+        path: data.path,
+        image: data.image,
+        author: data.author,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+
+export const challengePageInvite = functions.https.onCall(
+  async (data: any, context: any) => {
+    //   if (!context.auth && !context.auth!.token.email) {
+    //     throw new functions.https.HttpsError(
+    //       'failed-precondition',
+    //       'Must be logged with email-address'
+    //     );
+    //   }
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_CHALLENGE_PAGE,
+      dynamic_template_data: {
+        subject: data.subject,
+        description: data.description,
+        title: data.title,
+        path: data.path,
+        image: data.image,
+        author: data.author,
+        user: data.user,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+
+export const nonUserchallengePageInvite = functions.https.onCall(
+  async (data: any, context: any) => {
+    //   if (!context.auth && !context.auth!.token.email) {
+    //     throw new functions.https.HttpsError(
+    //       'failed-precondition',
+    //       'Must be logged with email-address'
+    //     );
+    //   }
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_ID_CHALLENGE_PAGE_NONUSER,
       dynamic_template_data: {
         subject: data.subject,
         description: data.description,
@@ -714,7 +777,7 @@ export const createGoogleMeet = functions.https.onCall(
       }
 
       // Retrieve the Base64-encoded service account key from Firebase Functions config
-      const base64Encoded = functions.config().googleapi.service_account_key;
+      const base64Encoded = functions.config()['googleapi'].service_account_key;
       if (!base64Encoded) {
         throw new functions.https.HttpsError(
           'invalid-argument',
