@@ -1,280 +1,135 @@
 <div class="dark:bg-slate-900 min-h-screen flex flex-col">
-    <!-- NAVBAR -->
-    <app-navbar></app-navbar>
-    
-    <!-- HERO / PAGE TITLE with Background Image -->
-    <section 
-      class="relative pt-32 pb-16 bg-cover bg-center bg-no-repeat"
-      style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d');"
-    >
-      <!-- Overlay to darken the background image -->
-      <div class="absolute inset-0 bg-black/40"></div>
-      
-      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-        <h1 class="text-3xl md:text-5xl font-extrabold mb-4">2025 Global Solutions Lab Registration</h1>
-        <p class="text-lg md:text-xl font-semibold mb-2">
-          Secure your spot today!
-        </p>
-      </div>
-    </section>
-    
-    <!-- MAIN CONTENT: Registration Process & Form -->
-    <main class="bg-white dark:bg-gray-900 flex-grow">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid gap-10 md:grid-cols-2">
-          
-          <!-- Left Column: Instructions -->
-          <div>
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">REGISTRATION PROCESS</h2>
-            <p class="text-gray-700 dark:text-gray-300 mb-4">
-              It is simple to sign up for the 2025 Global Solutions Lab:
-            </p>
-            <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
-              <li class="mb-2">Fill out the registration form on this page.</li>
-              <li class="mb-2">When we receive your form, we will send you a response email plus a PayPal invoice for your tuition—$250 for online or $500 for in-person. Tuition is due by June 1, 2025.</li>
-              <li>You will receive further information about program specifics and this year’s Lab starting in April 2025.</li>
-            </ul>
-            
+  <!-- NAVBAR -->
+  <app-navbar></app-navbar>
+
+  <!-- HERO / PAGE TITLE with Background Image -->
+  <section 
+    class="relative pt-32 pb-16 bg-cover bg-center bg-no-repeat"
+    style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d');"
+  >
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+      <h1 class="text-3xl md:text-5xl font-extrabold mb-4">2025 Global Solutions Lab Registration</h1>
+      <p class="text-lg md:text-xl font-semibold mb-2">Secure your spot today!</p>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT: Registration Process & Form -->
+  <main class="bg-white dark:bg-gray-900 flex-grow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid gap-10 md:grid-cols-2">
+        <!-- Left Column: Instructions -->
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">REGISTRATION PROCESS</h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-4">It is simple to sign up for the 2025 Global Solutions Lab:</p>
+          <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
+            <li class="mb-2">Fill out the registration form on this page.</li>
+            <li class="mb-2">We will send you a response email plus a PayPal invoice for your tuition. Tuition is due by June 1, 2025.</li>
+            <li>You will receive further information about program specifics starting in April 2025.</li>
+          </ul>
+          <div class="text-gray-700 dark:text-gray-300 mb-4">
             <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">TUITION</h3>
-            <p class="text-gray-700 dark:text-gray-300 mb-4">
-              • The full tuition is $250 for the 2025 online Global Solutions Lab, or $500 for the in-person Lab.<br />
-              • The site for the in-person Lab will be announced soon.
-            </p>
-  
-            <div class="mt-6">
-              <img 
-                src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/archive-pictures-gsl%2FIMG-20190624-WA0007.jpg?alt=media&token=e41c8e91-0ba2-43ec-a9aa-4e5b778aa762g" 
-                alt="2016 Global Solutions Lab Members" 
-                class="w-full rounded-md shadow"
-              />
-            </div>
+            <ul class="list-disc pl-5">
+              <li>$399 for professionals</li>
+              <li>$149 for students and seniors</li>
+              <li>Scholarships available for players from developing countries*</li>
+            </ul>
           </div>
-          
-          <!-- Right Column: Registration Form -->
-          <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-md shadow">
-            <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">2025 GSL Registration Form</h2>
-            
-            <!-- Form Start -->
-            <form class="space-y-6">
-              <!-- Name -->
-              <div>
-                <label for="firstName" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Name (Required)</label>
-                <div class="flex gap-4">
-                  <input 
-                    type="text" 
-                    id="firstName" 
-                    placeholder="First" 
-                    class="w-1/2 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                    required
-                  />
-                  <input 
-                    type="text" 
-                    id="lastName" 
-                    placeholder="Last" 
-                    class="w-1/2 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                    required
-                  />
-                </div>
-              </div>
-  
-              <!-- Email -->
-              <div>
-                <label for="email" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Email (Required)</label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  placeholder="you@example.com"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700" 
-                  required
-                />
-              </div>
-  
-              <!-- Gender -->
-              <!-- <div>
-                <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Gender (Required)</label>
-                <div class="flex items-center space-x-4">
-                  <label class="inline-flex items-center">
-                    <input 
-                      type="radio" 
-                      name="gender" 
-                      value="Male" 
-                      class="text-teal-600 focus:ring-teal-500 dark:bg-gray-900 dark:border-gray-700" 
-                      required
-                    />
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">Male</span>
-                  </label>
-                  <label class="inline-flex items-center">
-                    <input 
-                      type="radio" 
-                      name="gender" 
-                      value="Female" 
-                      class="text-teal-600 focus:ring-teal-500 dark:bg-gray-900 dark:border-gray-700" 
-                      required
-                    />
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">Female</span>
-                  </label>
-                </div>
-              </div> -->
-  
-              <!-- Phone -->
-              <div>
-                <label for="phone" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Phone</label>
-                <input 
-                  type="tel" 
-                  id="phone"
-                  placeholder="(123) 456-7890"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                />
-              </div>
-  
-              <!-- Address -->
-              <div>
-                <label for="address" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Address (Required)</label>
-                <input 
-                  type="text" 
-                  id="address" 
-                  placeholder="Street Address"
-                  class="w-full mb-3 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                />
-                <input 
-                  type="text" 
-                  id="address2" 
-                  placeholder="Address Line 2"
-                  class="w-full mb-3 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                />
-                <div class="flex gap-4 mb-3">
-                  <input 
-                    type="text" 
-                    placeholder="City"
-                    class="w-1/2 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="State / Province"
-                    class="w-1/2 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  />
-                </div>
-                <div class="flex gap-4">
-                  <input 
-                    type="text" 
-                    placeholder="ZIP / Postal Code"
-                    class="w-1/2 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="Country"
-                    class="w-1/2 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  />
-                </div>
-              </div>
-  
-              <!-- Age -->
-              <div>
-                <label for="age" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Age (Required)</label>
-                <input 
-                  type="number" 
-                  id="age" 
-                  min="1" 
-                  max="120"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                />
-              </div>
-  
-              <!-- Organization, School, Employer -->
-              <div>
-                <label for="organization" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Organization, School or Employer (Required)</label>
-                <input 
-                  type="text" 
-                  id="organization"
-                  placeholder="Your institution / employer"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                />
-              </div>
-  
-              <!-- Emergency Contact Name/Number -->
-              <!-- <div>
-                <label for="emergencyName" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Emergency Contact Name (Required)</label>
-                <input 
-                  type="text" 
-                  id="emergencyName"
-                  class="w-full mb-3 p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                />
-                
-                <label for="emergencyPhone" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Emergency Contact Number (Required)</label>
-                <input 
-                  type="tel" 
-                  id="emergencyPhone"
-                  placeholder="(123) 456-7890"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                />
-              </div> -->
-  
-              <!-- "What do you do?" -->
-              <div>
-                <label for="occupation" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
-                  What do you do? (If in school, what are you studying/interested in? If working, what's your job?) (Required)
-                </label>
-                <textarea 
-                  id="occupation" 
-                  rows="3"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                ></textarea>
-              </div>
-          
-  
-              <!-- Why you want to attend the Lab? -->
-              <div>
-                <label for="whyAttend" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
-                  Why do you want to attend the Lab? (Just a sentence or two) (Required)
-                </label>
-                <textarea 
-                  id="whyAttend" 
-                  rows="2"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                ></textarea>
-              </div>
-                <!-- Topics of interest  -->
-              <div>
-                <label for="occupation" class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
-                  What one specific topic do you want to focus on at the Lab this year? (Required)
-                </label>
-                <textarea 
-                  id="occupation" 
-                  rows="3"
-                  class="w-full p-3 border border-gray-300 rounded-md focus:ring focus:ring-teal-200 dark:bg-gray-900 dark:text-gray-100 dark:border-gray-700"
-                  required
-                ></textarea>
-              </div>
-  
-              <!-- CAPTCHA Placeholder -->
-              <!-- <div class="bg-gray-200 dark:bg-gray-700 p-4 rounded-md text-center text-gray-700 dark:text-gray-300">
-                <p class="italic">[CAPTCHA goes here]</p>
-              </div> -->
-  
-              <!-- Submit Button -->
-              <div>
-                <button 
-                  type="submit" 
-                  class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-            <!-- End Form -->
+          <div class="mt-6">
+            <img 
+              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/archive-pictures-gsl%2FIMG-20190624-WA0007.jpg?alt=media&token=e41c8e91-0ba2-43ec-a9aa-4e5b778aa762g" 
+              alt="2016 Global Solutions Lab Members" 
+              class="w-full rounded-md shadow"
+            />
           </div>
         </div>
+
+        <!-- Right Column: Registration Form -->
+        <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-md shadow">
+          <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">2025 GSL Registration Form</h2>
+
+          <!-- Form Start -->
+          <form class="space-y-6" (submit)="submitGlobalLabRegistration()">
+            <!-- Name -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Name (Required)</label>
+              <div class="flex gap-4">
+                <input type="text" placeholder="First" [(ngModel)]="firstName" name="firstName" required 
+                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+                <input type="text" placeholder="Last" [(ngModel)]="lastName" name="lastName" required 
+                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Email (Required)</label>
+              <input type="email" placeholder="you@example.com" [(ngModel)]="email" name="email" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Phone</label>
+              <input type="tel" placeholder="(123) 456-7890" [(ngModel)]="phone" name="phone"
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+            </div>
+
+            <!-- Address -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Address (Required)</label>
+              <input type="text" placeholder="Street Address" [(ngModel)]="address" name="address" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+            </div>
+
+            <!-- Age -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Age (Required)</label>
+              <input type="number" min="1" max="120" [(ngModel)]="age" name="age" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+            </div>
+
+            <!-- Organization -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Organization, School, or Employer (Required)</label>
+              <input type="text" placeholder="Your institution/employer" [(ngModel)]="organization" name="organization" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+            </div>
+
+            <!-- Occupation -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">What do you do? (Required)</label>
+              <textarea rows="3" [(ngModel)]="occupation" name="occupation" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"></textarea>
+            </div>
+
+            <!-- Why Attend -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Why do you want to attend the Lab? (Required)</label>
+              <textarea rows="2" [(ngModel)]="whyAttend" name="whyAttend" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"></textarea>
+            </div>
+
+            <!-- Focus Topic -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">What one specific topic do you want to focus on at the Lab this year? (Required)</label>
+              <textarea rows="2" [(ngModel)]="focusTopic" name="focusTopic" required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+              <button type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow">
+                Submit
+              </button>
+            </div>
+          </form>
+          <!-- End Form -->
+        </div>
       </div>
-    </main>
-    
-    <!-- FOOTER -->
-    <app-footer></app-footer>
-  </div>
-  
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <app-footer></app-footer>
+</div>

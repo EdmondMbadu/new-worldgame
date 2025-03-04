@@ -64,6 +64,7 @@ import { SolutionDetailsComponent } from './components/solution-details/solution
 import { DocumentFilesComponent } from './components/document-files/document-files.component';
 import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
 import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
+import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -168,6 +169,12 @@ const routes: Routes = [
   {
     path: 'management-workshop',
     component: ManagementWorkshopComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'management-gsl-2025',
+    component: ManagementGsl2025Component,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },

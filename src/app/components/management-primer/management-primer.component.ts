@@ -50,33 +50,4 @@ export class ManagementPrimerComponent implements OnInit {
       });
     });
   }
-
-  async submitWorkshopRegistration() {
-    if (this.firstName === '' || this.lastName === '') {
-      alert('Enter your first and last name to register for the event.');
-      return;
-    } else if (!this.data.isValidEmail(this.email)) {
-      alert('Enter a valid email');
-      return;
-    } else {
-      try {
-        const wData = {
-          firstName: this.firstName,
-          lastName: this.lastName,
-          email: this.email,
-          registerDate: this.time.todaysDate(),
-        };
-        this.primerpData.push(wData);
-        let workshop = await this.data.workshopSignUp(
-          this.wid,
-          this.primerpData
-        );
-      } catch (error) {
-        alert(
-          'There was an error during the  registration process. Please tryagain. '
-        );
-        return;
-      }
-    }
-  }
 }

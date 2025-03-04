@@ -1,0 +1,95 @@
+<app-navbar [sideBarSmall]="true" [sideBarBig]="false" 
+  [email]="this.auth.currentUser.email" 
+  [firstName]="this.auth.currentUser.firstName" 
+  [lastName]="this.auth.currentUser.lastName" 
+  [path]="'home'" 
+  current="''">
+</app-navbar>
+
+<div class="dark:bg-slate-900 min-h-screen min-w-max">
+    <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
+        <div class="container flex flex-row rounded-md shadow-sm mx-auto justify-center my-4 " role="group">
+            <button routerLink="/user-management" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+            SignUp
+            </button>
+            <button routerLink="/management-primer" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+               Primer
+                </button>
+            <button routerLink="/management-workshop" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                Workshop
+            </button>
+            <button routerLink="/management-gsl-2025" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                GSL-2025
+            </button>
+            
+          </div>
+        <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+            <h3 class="text-3xl font-bold dark:text-white text-center mb-4">Global Lab 2025 Registrations</h3>
+
+            <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
+                    <div class="w-full md:w-1/2">
+                        <form class="flex items-center">
+                            <label for="search" class="sr-only">Search</label>
+                            <div class="relative w-full">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <input type="text" id="search" [(ngModel)]="searchQuery" (input)="filterData()"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                                    placeholder="Search by name, email, or organization">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
+                        <h2 class="font-bold dark:text-white">{{ filteredData.length }} Registrations</h2>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Name</th>
+                                <th scope="col" class="px-4 py-3">Email</th>
+                                <th scope="col" class="px-4 py-3">Organization</th>
+                                <th scope="col" class="px-4 py-3">Register Date</th>
+                                <th scope="col" class="px-4 py-3 text-center">More</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-container *ngFor="let user of filteredData; let i = index">
+                                <tr class="border-b dark:border-gray-700">
+                                    <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        {{ i + 1 }}. {{ user.firstName }} {{ user.lastName }}
+                                    </th>
+                                    <td class="px-4 py-3">{{ user.email }}</td>
+                                    <td class="px-4 py-3">{{ user.organization }}</td>
+                                    <td class="px-4 py-3">{{ user.registerDate.split('-').slice(0, 3).join('-') }}</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <button (click)="toggleExpand(i)" class="text-blue-500 hover:underline">
+                                            {{ expandedRows[i] ? "Hide" : "Show" }}
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr *ngIf="expandedRows[i]" class="bg-gray-50 dark:bg-gray-800">
+                                    <td colspan="5" class="p-4 text-gray-700 dark:text-gray-300">
+                                        <strong>Phone:</strong> {{ user.phone }} <br>
+                                        <strong>Address:</strong> {{ user.address }}, {{ user.city }}, {{ user.stateProvince }}, {{ user.country }} <br>
+                                        <strong>Age:</strong> {{ user.age }} <br>
+                                        <strong>Occupation:</strong> {{ user.occupation }} <br>
+                                        <strong>Why Attend:</strong> {{ user.whyAttend }} <br>
+                                        <strong>Focus Topic:</strong> {{ user.focusTopic }}
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

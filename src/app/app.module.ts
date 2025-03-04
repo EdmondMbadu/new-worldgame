@@ -109,6 +109,7 @@ import { DocumentFilesComponent } from './components/document-files/document-fil
 import { SolutionEvaluationComponent } from './components/solution-evaluation/solution-evaluation.component';
 import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
 import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
+import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 
 @NgModule({
   declarations: [
@@ -194,6 +195,7 @@ import { GlobalRegisterComponent } from './blogs/global-register/global-register
     SolutionEvaluationComponent,
     GlobalLabComponent,
     GlobalRegisterComponent,
+    ManagementGsl2025Component,
   ],
   imports: [
     BrowserModule,

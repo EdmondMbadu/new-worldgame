@@ -287,11 +287,25 @@ export class DataService implements OnInit {
     };
     return primerRef.set(data, { merge: true });
   }
+  globalLabSignUp(pid: string, registrations: any) {
+    const globalLabRef: AngularFirestoreDocument<any> = this.afs.doc(
+      `global-lab-2025/${pid}`
+    );
+    const data = {
+      registrations: registrations,
+    };
+    return globalLabRef.set(data, { merge: true });
+  }
+
   getWorkshopData() {
     return this.afs.collection<any>(`workshop`).valueChanges();
   }
   getPrimerData() {
     return this.afs.collection<any>(`primer`).valueChanges();
+  }
+
+  getGlobalLab2025Data() {
+    return this.afs.collection<any>(`global-lab-2025`).valueChanges();
   }
   mapEvaluationToNumeric(evaluation: Evaluation) {
     let user: any = {};
