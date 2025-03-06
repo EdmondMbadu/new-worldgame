@@ -322,9 +322,9 @@ export const createCheckoutSession = functions.https.onCall(
       } = data;
 
       // Decide the amount based on targetGroup
-      let amount = 39900; // in cents => $399
+      let amount = 29900; // in cents => $399
       if (targetGroup === 'student' || targetGroup === 'senior') {
-        amount = 14900; // $149
+        amount = 9900; // $99
       }
 
       // 2) Create a Checkout Session

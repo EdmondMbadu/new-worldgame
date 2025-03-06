@@ -24,7 +24,7 @@
           <p class="text-gray-700 dark:text-gray-300 mb-4">It is simple to sign up for the 2025 Global Solutions Lab:</p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
             <li class="mb-2">Fill out the registration form on this page.</li>
-            <li class="mb-2">We will send you a response email plus a PayPal invoice for your tuition. Tuition is due by June 1, 2025.</li>
+            <li class="mb-2">We will send you a response. Tuition is due by June 1, 2025.</li>
             <li>You will receive further information about program specifics starting in April 2025.</li>
           </ul>
           <div class="text-gray-700 dark:text-gray-300 mb-4">
@@ -147,21 +147,41 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
 
-            <option value="professional">Professional ($399)</option>
-            <option value="student">Student ($149)</option>
-            <option value="senior">Senior ($149)</option>
+            <option value="professional">Professional ($299)</option>
+            <option value="student">Student ($99)</option>
+            <option value="senior">Senior ($99)</option>
             </select>
             </div>
+            <!-- Payment Notice -->
+          <div class="my-4 text-gray-700 dark:text-gray-300">
+            <p>If you prefer to register now and pay later, click the button below.</p>
+          </div>
                <!-- Notice -->
           <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
             * For players from developing countries, email us at <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
             to request partial to full scholarship depending on the case.
           </h1>
+          <div class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
+            You will pay: ${{ getPrice() }}
+          </div>
             <!-- Submit Button -->
             <div>
-              <button (click)="submitGlobalLabRegistration()" type="submit" type="submit" class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow">
-                Submit
+                    <!-- Pay & Register Button -->
+              <button
+              class="w-full md:w-1/2 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+              (click)="submitGlobalLabRegistration()"
+              >
+              Pay ${{ getPrice() }} & Register
               </button>
+
+              <!-- Register Without Paying Button -->
+              <button
+              class="w-full md:w-1/2 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md shadow"
+              (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+              Register Now (Pay Later)
+              </button>
+                  
             </div>
           </div>
           <!-- End Form -->
