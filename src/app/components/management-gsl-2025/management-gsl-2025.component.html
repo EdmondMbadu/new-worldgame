@@ -56,6 +56,7 @@
                                 <th scope="col" class="px-4 py-3">Email</th>
                                 <th scope="col" class="px-4 py-3">Organization</th>
                                 <th scope="col" class="px-4 py-3">Register Date</th>
+                                <th scope="col" class="px-4 py-3">Target Group</th>
                                 <th scope="col" class="px-4 py-3 text-center">More</th>
                             </tr>
                         </thead>
@@ -68,6 +69,7 @@
                                     <td class="px-4 py-3">{{ user.email }}</td>
                                     <td class="px-4 py-3">{{ user.organization }}</td>
                                     <td class="px-4 py-3">{{ user.registerDate.split('-').slice(0, 3).join('-') }}</td>
+                                    <td class="px-4 py-3">{{ user.targetGroup}} - ${{user.amountPaid/100}}</td>
                                     <td class="px-4 py-3 text-center">
                                         <button (click)="toggleExpand(i)" class="text-blue-500 hover:underline">
                                             {{ expandedRows[i] ? "Hide" : "Show" }}
@@ -80,6 +82,7 @@
                                         <strong>Phone:</strong> {{ user.phone }} <br>
                                         <strong>Address:</strong> {{ user.address }}, {{ user.city }}, {{ user.stateProvince }}, {{ user.country }} <br>
                                         <strong>Age:</strong> {{ user.age }} <br>
+                                        <strong>Paid :</strong> ${{ user.amountPaid /100 }} <br>
                                         <strong>Occupation:</strong> {{ user.occupation }} <br>
                                         <strong>Why Attend:</strong> {{ user.whyAttend }} <br>
                                         <strong>Focus Topic:</strong> {{ user.focusTopic }}

@@ -32,6 +32,10 @@ export class GlobalRegisterComponent implements OnInit {
   isLoggedIn: boolean = false;
   globalLabData: any[] = [];
   pid: string = '';
+  targetGroup: string = 'professional';
+  reachOutEmail: string = 'newworld@newworld-game.org';
+
+  isLoading: boolean = false;
 
   constructor(
     public auth: AuthService,
@@ -67,11 +71,31 @@ export class GlobalRegisterComponent implements OnInit {
     } else if (!this.data.isValidEmail(this.email)) {
       alert('Enter a valid email.');
       return;
-    } else if (this.age === null || this.age <= 0) {
+    } else if (this.age === null || this.age <= 0 || this.age > 120) {
       alert('Enter a valid age.');
       return;
     } else if (this.organization.trim() === '') {
       alert('Enter your organization, school, or employer.');
+      return;
+    } else if (this.phone.trim() === '') {
+      alert('Enter your phone number.');
+      return;
+    } else if (this.address.trim() === '') {
+      alert('Enter your address.');
+      return;
+    } else if (this.city.trim() === '') {
+      alert('Enter your city.');
+      return;
+    } else if (this.stateProvince.trim() === '') {
+      alert('Enter your state or province.');
+      return;
+    }
+    // else if (this.postalCode.trim() === '') {
+    //   alert('Enter your postal code.');
+    //   return;
+    // }
+    else if (this.country.trim() === '') {
+      alert('Enter your country.');
       return;
     } else if (this.occupation.trim() === '') {
       alert('Enter what you do.');
@@ -82,9 +106,14 @@ export class GlobalRegisterComponent implements OnInit {
     } else if (this.focusTopic.trim() === '') {
       alert('Enter a specific topic you want to focus on.');
       return;
+    } else if (this.targetGroup.trim() === '') {
+      console.log('target group', this.targetGroup);
+      alert('Enter your target group. (Professionals, Students, etc.)');
+      return;
     } else {
       try {
         this.loading = true;
+        console.log('target group', this.targetGroup);
 
         const registrationData = {
           firstName: this.firstName,
@@ -101,15 +130,35 @@ export class GlobalRegisterComponent implements OnInit {
           occupation: this.occupation,
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
+          targetGroup: this.targetGroup,
           registerDate: this.time.todaysDate(),
+          pid: this.pid,
         };
 
+        this.isLoading = true;
         this.globalLabData.push(registrationData);
-        await this.data.globalLabSignUp(this.pid, this.globalLabData);
-
+        this.isLoading = true;
+        // 2) Call the Cloud Function to create a checkout session
+        await this.fns
+          .httpsCallable('createCheckoutSession')(registrationData)
+          .subscribe({
+            next: (result: any) => {
+              console.log('Got session URL', result.url);
+              // 3) Redirect the user to the Stripe Checkout
+              window.location.href = result.url;
+            },
+            error: (err) => {
+              console.error('Error creating checkout session:', err);
+              // handle error, show user an error message
+            },
+          });
+        // await this.data.globalLabSignUp(this.pid, this.globalLabData);
+        console.log('registration data', registrationData);
         this.success = true;
-        alert('Registration successful! We will contact you soon.');
-        this.router.navigate(['/thank-you']);
+        this.isLoading = false;
+        this.resetFields();
+        // alert('Registration successful! We will contact you soon.');
+        // this.router.navigate(['/thank-you']);
       } catch (error) {
         alert(
           'There was an error during the registration process. Please try again.'
@@ -119,5 +168,28 @@ export class GlobalRegisterComponent implements OnInit {
         this.loading = false;
       }
     }
+  }
+
+  resetFields() {
+    this.email = '';
+    this.firstName = '';
+    this.lastName = '';
+    this.phone = '';
+    this.address = '';
+    this.city = '';
+    this.stateProvince = '';
+    this.postalCode = '';
+    this.country = '';
+    this.age = null;
+    this.organization = '';
+    this.occupation = '';
+    this.whyAttend = '';
+    this.focusTopic = '';
+    this.readyToSubmit = false;
+    this.loading = false;
+    this.success = false;
+
+    this.targetGroup = 'professional';
+    this.reachOutEmail = 'newworld@newworld-game.org';
   }
 }

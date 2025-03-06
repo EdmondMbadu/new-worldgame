@@ -1,16 +1,45 @@
-<div class="dark:bg-slate-900 min-h-screen  ">
-    <div *ngIf="!isLoggedIn">
-        <app-navbar></app-navbar>
+<div class="dark:bg-slate-900 min-h-screen">
+  <!-- NAVBAR -->
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      [path]="'home'"
+    ></app-navbar>
+  </div>
+
+  <!-- MAIN CONTENT SECTION -->
+  <section class="bg-white dark:bg-gray-900 mt-20">
+    <div class="py-8 lg:py-16 px-4 mx-auto max-w-md md:max-w-screen-md text-center">
+      <!-- Title -->
+      <h2 class="mb-4 text-4xl font-extrabold text-gray-900 dark:text-white">
+        {{ title }}
+      </h2>
+      <!-- Paragraph -->
+      <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl">
+        {{ paragraph }}
+        Stay tuned—more details will be sent your way soon! In the meantime, if you have any questions, feel free to reach out at <a target="_blank" href="mailto:{{ourEmail}}"class="text-blue-400"> {{ourEmail}}</a>.
+      </p>
+
+      <!-- Optional Button for Non-members -->
+      <div class="mt-8">
+        <button
+          class="py-4 px-6 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-semibold"
+          *ngIf="!isLoggedIn"
+          (click)="goToSignUp()"
+        >
+          Not a member yet? Get Started
+        </button>
       </div>
-      <div *ngIf="isLoggedIn">
-        <app-navbar [sideBarSmall]="true" [sideBarBig]="false"  [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
-      </div>
-    <section class="bg-white dark:bg-gray-900 mt-24">
-        <div class="py-8 lg:py-16 px-4 mx-auto md:max-w-screen-md max-w-md ">
-            <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-center text-gray-900 dark:text-white">{{title}}</h2>
-            <p class="mb-8 lg:mb-16 font-light text-center text-gray-500 dark:text-gray-400 sm:text-xl">{{paragraph}}</p>
-           
-        </div>
-      </section>  
-<app-footer></app-footer>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <app-footer></app-footer>
 </div>

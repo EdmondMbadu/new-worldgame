@@ -10,6 +10,8 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
+// At the top, with your other imports
+import Stripe from 'stripe';
 // const axios = require('axios');
 // const cors = require('cors')({ origin: true });
 // const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
@@ -27,6 +29,9 @@ const Busboy = require('busboy');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
+const stripe = new Stripe(functions.config()['stripe'].secret_key, {
+  apiVersion: '2025-02-24.acacia', // or whichever is current
+});
 
 admin.initializeApp();
 // const db = admin.firestore();
@@ -292,6 +297,171 @@ export const getIceServers = functions.https.onCall(async (data, context) => {
     );
   }
 });
+
+export const createCheckoutSession = functions.https.onCall(
+  async (data: any, context: any) => {
+    try {
+      // 1) Gather form fields from the `data` object
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        city,
+        stateProvince,
+        country,
+        age,
+        organization,
+        targetGroup,
+        occupation,
+        whyAttend,
+        focusTopic,
+        pid,
+        registerDate,
+      } = data;
+
+      // Decide the amount based on targetGroup
+      let amount = 39900; // in cents => $399
+      if (targetGroup === 'student' || targetGroup === 'senior') {
+        amount = 14900; // $149
+      }
+
+      // 2) Create a Checkout Session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: '2025 Global Solutions Lab Tuition',
+              },
+              unit_amount: amount,
+            },
+            quantity: 1,
+          },
+        ],
+        // success and cancel URLs => change to your actual domain
+        success_url: 'https://newworld-game.org/thank-you',
+        cancel_url: 'https://newworld-game.org/global-lab',
+
+        // 3) You can store minimal metadata here, used by your webhook later
+        metadata: {
+          firstName,
+          lastName,
+          email,
+          phone,
+          address,
+          city,
+          stateProvince,
+          country,
+          age: String(age),
+          organization,
+          targetGroup,
+          occupation,
+          whyAttend,
+          focusTopic,
+          registerDate,
+          pid, // add the pid from your form data or your component
+        },
+      });
+
+      // Return the session URL for redirection
+      return { url: session.url };
+    } catch (err) {
+      console.error('Error creating Stripe Checkout Session', err);
+      throw new functions.https.HttpsError(
+        'internal',
+        'Unable to create session'
+      );
+    }
+  }
+);
+
+export const stripeWebhook = functions.https.onRequest(
+  async (req: any, res: any) => {
+    let event;
+
+    try {
+      const sig = req.headers['stripe-signature'] as string;
+      event = stripe.webhooks.constructEvent(
+        req.rawBody,
+        sig,
+        functions.config()['stripe'].webhook_secret
+      );
+    } catch (err) {
+      console.error('❌ Error verifying Stripe Webhook signature:', err);
+      return res.status(400).send(`Webhook Error: ${err}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      // This is in cents (e.g. 39900 means $399.00)
+      const amountPaid = session.amount_total;
+      console.log('✅ Payment complete for session:', session.id);
+
+      // 1) Retrieve metadata
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        city,
+        stateProvince,
+        country,
+        age,
+        organization,
+        targetGroup,
+        occupation,
+        whyAttend,
+        focusTopic,
+        registerDate,
+        pid, // we passed this in metadata
+      } = session.metadata || {};
+
+      // 2) Prepare the registration object to add
+      const registrationData = {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        city,
+        stateProvince,
+        country,
+        age: Number(age),
+        organization,
+        targetGroup,
+        occupation,
+        whyAttend,
+        focusTopic,
+        paid: true,
+        amountPaid, // e.g. 39900
+        paymentIntent: session.payment_intent,
+        registerDate,
+      };
+
+      // 3) Append to the registrations array in Firestore
+      const docRef = admin.firestore().collection('global-lab-2025').doc(pid);
+
+      await docRef.set(
+        {
+          registrations:
+            admin.firestore.FieldValue.arrayUnion(registrationData),
+        },
+        { merge: true }
+      );
+
+      console.log('Successfully added registration to array in Firestore');
+    }
+
+    res.json({ received: true });
+  }
+);
+
 // exports.dailyNews = functions.pubsub
 //   .schedule('every day 04:10')
 //   .timeZone('America/Los_Angeles')

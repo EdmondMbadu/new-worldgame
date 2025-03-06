@@ -21,6 +21,7 @@
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^4.3.1",
     "googleapis": "^144.0.0",
+    "stripe": "^17.7.0",
     "twilio": "^5.4.0"
   },
   "devDependencies": {

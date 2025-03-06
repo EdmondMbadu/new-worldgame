@@ -37,6 +37,7 @@ export class ManagementGsl2025Component implements OnInit {
       if (data.length > 0 && data[0].registrations) {
         this.globalLabData = data[0].registrations;
         this.gid = data[0].id;
+        console.log('registrations', this.globalLabData);
 
         // Sort by registration date (most recent first)
         this.globalLabData.sort((a, b) => {
