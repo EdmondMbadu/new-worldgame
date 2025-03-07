@@ -1,7 +1,5 @@
-import { Component, Input, OnInit, Pipe } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
-import * as marked from 'marked';
-
 import {
   AngularFirestore,
   AngularFirestoreDocument,
@@ -21,94 +19,68 @@ interface DisplayMessage {
   styleUrls: ['./chatbot.component.css'],
 })
 export class ChatbotComponent implements OnInit {
-  showBot: boolean = false;
-  profilePicturePath: string = '';
+  showBot = false; // toggles visibility
+  isEnlarged = false; // toggles small vs. big
+  copyButtonText = 'Copy'; // button text that changes briefly to "Copied!"
+
+  // Track single-message copy states; index-based, e.g. 'Copy' or 'Copied!'
+  singleCopyStates: string[] = [];
 
   user: User = {};
-  @Input() botHeight: string = 'h-10';
-  collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
+  profilePicturePath = '';
+
   status = '';
   errorMsg = '';
   prompt = '';
-  botWidth: string = '96';
-  temp = '';
+
+  collectionPath: string;
+
+  introMessage: DisplayMessage = {
+    text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. 
+           To learn how to interact with me or other LLMs efficiently see `,
+    link: { text: 'here.', url: '/blogs/nwg-ai' },
+    type: 'RESPONSE',
+  };
+
+  responses: DisplayMessage[] = [];
+
   constructor(
     private afs: AngularFirestore,
     private auth: AuthService,
     private cdRef: ChangeDetectorRef
   ) {
     this.user = this.auth.currentUser;
-    // this.deleteAllDocuments();
+    this.collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
   }
-  introMessage: DisplayMessage = {
-    text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. To learn how to interact with me or other LLMs efficiently see `,
-    link: { text: 'here.', url: '/blogs/nwg-ai' },
-    type: 'RESPONSE',
-  };
 
-  responses: DisplayMessage[] = [];
   ngOnInit(): void {
-    if (this.user?.profilePicture && this.user.profilePicture.path) {
+    if (this.user?.profilePicture?.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
     }
-    this.deleteAllDocuments();
-  }
-  scrollToBottom(): void {
-    const chatbox = document.getElementById('chatbox');
-    if (chatbox) {
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
+    this.deleteAllDocuments(); // optional, clearing old docs
   }
 
   toggleBot() {
-    if (this.showBot) {
-      this.showBot = false;
-      this.botHeight = 'h-10';
-    } else {
-      this.showBot = true;
-      this.botHeight = 'h-96';
-    }
+    this.showBot = !this.showBot;
   }
-  // submitPrompt() {
-  //   this.responses.push({
-  //     text: this.prompt,
-  //     type: 'PROMPT',
-  //   });
-  //   this.prompt = '';
-  // }
 
-  endChat() {
-    // this.responses = [
-    //   {
-    //     text: `I'm Bucky, a chatbot that will be assisting you on your journey tackling world problems. `,
-    //     link: { text: 'here', url: '/blogs/nwg-ai' },
-    //     type: 'RESPONSE',
-    //   },
-    // ];
-
-    this.deleteAllDocuments();
-    this.toggleBot();
+  toggleChatSize() {
+    this.isEnlarged = !this.isEnlarged;
   }
 
   async submitPrompt() {
-    // event.preventDefault();
-    // I create this variable to clear the screen right after the question is asked
-    let currentPrompt = this.prompt;
-    if (!this.prompt) return;
+    const trimmed = this.prompt.trim();
+    if (!trimmed) return;
 
-    this.responses.push({
-      text: currentPrompt,
-      type: 'PROMPT',
-    });
+    this.responses.push({ text: trimmed, type: 'PROMPT' });
     this.prompt = '';
-
     this.status = 'sure, one sec';
-    let id = this.afs.createId();
 
+    const id = this.afs.createId();
     const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
-      `users/${this.auth.currentUser.uid}/discussions/${id}`
+      `${this.collectionPath}/${id}`
     );
-    await discussionRef.set({ prompt: currentPrompt });
+    await discussionRef.set({ prompt: trimmed });
 
     const destroyFn = discussionRef.valueChanges().subscribe({
       next: (conversation) => {
@@ -119,32 +91,19 @@ export class ChatbotComponent implements OnInit {
           switch (state) {
             case 'COMPLETED':
               this.status = '';
-              currentPrompt = '';
-              // this.prompt = '';
               this.responses.push({
                 text: conversation['response'],
                 type: 'RESPONSE',
               });
-              console.log(
-                ' the response date and format',
-                conversation['response']
-              );
-              this.cdRef.detectChanges(); // Detect changes to update the view
-
-              // Use setTimeout to allow time for the DOM to update
+              this.cdRef.detectChanges();
               setTimeout(() => this.scrollToBottom(), 0);
-
               destroyFn.unsubscribe();
               break;
             case 'PROCESSING':
-              currentPrompt = '';
-              // this.prompt = '';
               this.status = 'preparing your answer...';
               break;
             case 'ERRORED':
-              currentPrompt = '';
-              // this.prompt = '';
-              this.status = 'Oh no! Something went wrong. Please try again.';
+              this.status = 'Oh no! Something went wrong.';
               destroyFn.unsubscribe();
               break;
           }
@@ -156,74 +115,106 @@ export class ChatbotComponent implements OnInit {
         destroyFn.unsubscribe();
       },
     });
+
     this.scrollToBottom();
   }
 
-  toggleChatSize() {
-    if (this.botWidth === '96') {
-      this.botWidth = 'max';
-    } else {
-      this.botWidth = '96';
+  endChat() {
+    this.deleteAllDocuments();
+    this.toggleBot();
+  }
+
+  scrollToBottom(): void {
+    const chatbox = document.getElementById('chatbox');
+    if (chatbox) {
+      chatbox.scrollTop = chatbox.scrollHeight;
     }
   }
 
-  formatText(value: string): string {
-    if (!value) {
-      return '';
+  // Copies the entire conversation
+  copyChat() {
+    let result = `Bucky: ${this.introMessage.text}`;
+    if (this.introMessage.link) {
+      result +=
+        ' ' +
+        this.introMessage.link.text +
+        ' (' +
+        this.introMessage.link.url +
+        ')';
     }
 
-    // Replace single # headers with <h1> headers
-    let formattedText = value.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+    for (const msg of this.responses) {
+      if (msg.type === 'PROMPT') {
+        result += `\n\nYou: ${msg.text}`;
+      } else {
+        result += `\n\nBucky: ${msg.text}`;
+      }
+    }
 
-    // Replace double ## headers with <h2> headers
-    formattedText = formattedText.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
-
-    // Replace triple ### headers with <h3> headers
-    formattedText = formattedText.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
-
-    // Replace **bold** with <strong>bold</strong>
-    formattedText = formattedText.replace(
-      /\*\*(.*?)\*\*/g,
-      '<strong>$1</strong>'
+    navigator.clipboard.writeText(result).then(
+      () => {
+        this.copyButtonText = 'Copied!';
+        setTimeout(() => {
+          this.copyButtonText = 'Copy';
+        }, 2000);
+      },
+      (err) => {
+        console.error('Failed to copy chat:', err);
+      }
     );
+  }
 
-    // Replace *italic* with <em>italic</em>
-    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  // Copies only one message
+  copySingleMessage(text: string, index: number) {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        // Temporarily show "Copied!"
+        this.singleCopyStates[index] = 'Copied!';
+        setTimeout(() => {
+          this.singleCopyStates[index] = 'Copy';
+        }, 2000);
+      },
+      (err) => {
+        console.error('Failed to copy single message:', err);
+      }
+    );
+  }
 
-    // Ensure bullet points start on a new line
-    formattedText = formattedText.replace(/ \* /g, '\n* ');
+  formatText(value: string): string {
+    if (!value) return '';
 
-    // Replace * bullet points with <li> items inside <ul>
-    formattedText = formattedText.replace(/^\* (.*?)(?=\n|$)/gm, '<li>$1</li>');
-    formattedText = formattedText.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
+    let formatted = value;
+    // Very simple markdown-like rules:
+    formatted = formatted.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+    formatted = formatted.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+    formatted = formatted.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
 
-    // Replace single-line breaks with HTML line breaks
-    formattedText = formattedText.replace(/\n/g, '<br>');
+    // Bold and italic
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
-    // Replace [link text](URL) with <a href="URL">link text</a>
-    formattedText = formattedText.replace(
+    // Bullet points
+    formatted = formatted.replace(/^\* (.*?)(?=\n|$)/gm, '<li>$1</li>');
+    formatted = formatted.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
+
+    // Line breaks => <br>
+    formatted = formatted.replace(/\n/g, '<br>');
+
+    // Links: [text](URL)
+    formatted = formatted.replace(
       /\[(.*?)\]\((.*?)\)/g,
       '<a class="text-blue-500 underline" target="_blank" href="$2">$1</a>'
     );
 
-    // Replace text (URL) with <a href="URL">text</a>
-    formattedText = formattedText.replace(
-      /(\b[\w\s]+\b)\s*\((https?:\/\/[^\s]+)\)/g,
-      '<a class="text-blue-500 underline" target="_blank" href="$2">$1</a>'
-    );
-
-    return formattedText;
+    return formatted;
   }
+
   async deleteAllDocuments(): Promise<void> {
     const batch = this.afs.firestore.batch();
-
-    const querySnapshot = await this.afs
-      .collection(this.collectionPath)
-      .ref.get();
-    querySnapshot.forEach((doc) => {
+    const snapshot = await this.afs.collection(this.collectionPath).ref.get();
+    snapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
-
     await batch.commit();
   }
 }

@@ -80,6 +80,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() hoveredOtherAisPath: string = ``;
 
   beta: boolean = true;
+  lab: boolean = true;
   solutionDropDown = false;
   guideDropDown = false;
   @Input() showMoreOrLess!: boolean;
@@ -188,7 +189,12 @@ export class NavbarComponent implements OnInit, OnChanges {
   }
 
   toggle(
-    property: 'beta' | 'solutionDropDown' | 'guideDropDown' | 'showMyPages'
+    property:
+      | 'beta'
+      | 'solutionDropDown'
+      | 'guideDropDown'
+      | 'showMyPages'
+      | 'lab'
   ) {
     this[property] = !this[property];
   }
