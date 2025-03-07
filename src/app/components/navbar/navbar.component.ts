@@ -180,11 +180,23 @@ export class NavbarComponent implements OnInit, OnChanges {
     });
   }
 
+  // setThemeModeLogo() {
+  //   if (localStorage['theme'] === 'light') {
+  //     this.dark = false;
+  //   } else {
+  //     this.dark = true;
+  //   }
+  // }
   setThemeModeLogo() {
-    if (localStorage['theme'] === 'light') {
-      this.dark = false;
-    } else {
-      this.dark = true;
+    try {
+      if (localStorage.getItem('theme') === 'light') {
+        this.dark = false;
+      } else {
+        this.dark = true;
+      }
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+      this.dark = true; // Default to dark mode if localStorage is unavailable
     }
   }
 
@@ -245,37 +257,108 @@ export class NavbarComponent implements OnInit, OnChanges {
     }
   }
 
+  // lightMode() {
+  //   localStorage['theme'] = 'light'; // Save to localStorage
+  //   this.applyTheme();
+  //   this.dark = false;
+  //   // this.showThemeDropDown = !this.showThemeDropDown;
+  // }
+  // darkModeInitial() {
+  //   localStorage['theme'] = 'dark'; // Save to localStorage
+  //   // Save to localStorage
+
+  //   this.applyTheme();
+  //   this.dark = true;
+  // }
+  // darkMode() {
+  //   localStorage['theme'] = 'dark'; // Save to localStorage
+  //   // Save to localStorage
+
+  //   this.applyTheme();
+  //   this.dark = true;
+  //   // this.showThemeDropDown = !this.showThemeDropDown;
+  // }
   lightMode() {
-    localStorage['theme'] = 'light'; // Save to localStorage
+    try {
+      localStorage.setItem('theme', 'light');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
     this.applyTheme();
     this.dark = false;
-    // this.showThemeDropDown = !this.showThemeDropDown;
   }
-  darkModeInitial() {
-    localStorage['theme'] = 'dark'; // Save to localStorage
-    // Save to localStorage
 
-    this.applyTheme();
-    this.dark = true;
-  }
   darkMode() {
-    localStorage['theme'] = 'dark'; // Save to localStorage
-    // Save to localStorage
-
+    try {
+      localStorage.setItem('theme', 'dark');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
     this.applyTheme();
     this.dark = true;
-    // this.showThemeDropDown = !this.showThemeDropDown;
   }
+
+  darkModeInitial() {
+    try {
+      localStorage.setItem('theme', 'dark');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
+    this.applyTheme();
+    this.dark = true;
+  }
+
+  // systemMode() {
+  //   localStorage.removeItem('theme');
+  //   this.applyTheme(); // This will now apply the OS preference
+  //   this.showThemeDropDown = !this.showThemeDropDown;
+  // }
   systemMode() {
-    localStorage.removeItem('theme');
-    this.applyTheme(); // This will now apply the OS preference
+    try {
+      localStorage.removeItem('theme');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
+    this.applyTheme();
     this.showThemeDropDown = !this.showThemeDropDown;
   }
+
+  // applyTheme() {
+  //   const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
+  //   console.log('theme ', userTheme);
+  //   this.data.setTheme(userTheme);
+  //   // Explicitly check for 'light' and 'dark' settings
+
+  //   if (userTheme === 'dark') {
+  //     this.dark = true;
+  //     document.documentElement.classList.add('dark');
+  //   } else if (userTheme === 'light') {
+  //     this.dark = false;
+  //     document.documentElement.classList.remove('dark');
+  //   } else {
+  //     // Apply OS preference only if no user preference is set
+  //     const osPrefersDark = window.matchMedia(
+  //       '(prefers-color-scheme: dark)'
+  //     ).matches;
+  //     if (osPrefersDark) {
+  //       document.documentElement.classList.add('dark');
+  //     } else {
+  //       document.documentElement.classList.remove('dark');
+  //       document.documentElement.classList.add('light');
+  //     }
+  //   }
+  // }
+
   applyTheme() {
-    const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
+    let userTheme = null;
+    try {
+      userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
+
     console.log('theme ', userTheme);
     this.data.setTheme(userTheme);
-    // Explicitly check for 'light' and 'dark' settings
 
     if (userTheme === 'dark') {
       this.dark = true;

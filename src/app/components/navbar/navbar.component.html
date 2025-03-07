@@ -21,44 +21,7 @@
       </a> -->
   
    
-            <!-- <a href="#" class="sm:hidden lg:inline-flex justify-between items-center py-1 px-1 pe-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
-              <span class="text-xs bg-blue-600 rounded-full text-white px-4 py-1.5 me-3">New</span> <span class="text-sm font-medium">Jumbotron component was launched! See what's new</span> 
-              <svg class="w-2.5 h-2.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-              </svg>
-            </a> -->
-      
-          <!-- <div class="hidden lg:flex space-x-6  font-medium" >
-             
-              <h1 *ngIf="currentPageJoinNow" class=" text-center  border-teal-700 {{current}}">Join Now</h1>
-              <h1 *ngIf="!currentPageJoinNow" class="hover:text-teal-700" routerLink="/signup">Join Now </h1>
-              <h1 *ngIf="currentPageSignIn" class=" text-center  border-teal-700 {{current}}">Sign in </h1>
-              <h1 *ngIf="!currentPageSignIn" class="hover:text-teal-700" routerLink="/login">Sign in </h1> 
-              <button (click)="toggleCompanyDropDown()" id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar" class="flex items-center justify-between w-full mb-2 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent">Resources<svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-              </svg>
-
-              <div  *ngIf="companyDropDown" class="z-10 text-left  mt-48 absolute   bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600">
-               
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                  <li>
-                    <a routerLink="/overview"class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">About</a>
-                  </li>
-                  <li>
-                    <a routerLink="/operating-manual" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Operating Manual</a>
-                  </li>
-                  <li>
-                    <a routerLink="/plans"class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Support NewWorld Game</a>
-                  </li>
-                  <li>
-                    <a routerLink="/archive-pictures"class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">GSL Archive Pictures</a>
-                  </li>
-              
-                </ul>
-               
-            </div>
-            </button>
-          </div> -->
+          
 
           <div class="flex flex-row space-x-6 ">
               <a  class="mt-2 cursor-pointer" >
@@ -91,25 +54,7 @@
 
           </div>
          
-          <!-- <div class="lg:hidden flex items-center">
-                <a  (click)="toggleHamburger()" class="" >
-                 
-                  <svg class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"   *ngIf="displayHamburgerMenu" width="35px" height="35px" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6.5 11.75C6.08579 11.75 5.75 12.0858 5.75 12.5C5.75 12.9142 6.08579 13.25 6.5 13.25V11.75ZM18.5 13.25C18.9142 13.25 19.25 12.9142 19.25 12.5C19.25 12.0858 18.9142 11.75 18.5 11.75V13.25ZM6.5 15.75C6.08579 15.75 5.75 16.0858 5.75 16.5C5.75 16.9142 6.08579 17.25 6.5 17.25V15.75ZM18.5 17.25C18.9142 17.25 19.25 16.9142 19.25 16.5C19.25 16.0858 18.9142 15.75 18.5 15.75V17.25ZM6.5 7.75C6.08579 7.75 5.75 8.08579 5.75 8.5C5.75 8.91421 6.08579 9.25 6.5 9.25V7.75ZM18.5 9.25C18.9142 9.25 19.25 8.91421 19.25 8.5C19.25 8.08579 18.9142 7.75 18.5 7.75V9.25ZM6.5 13.25H18.5V11.75H6.5V13.25ZM6.5 17.25H18.5V15.75H6.5V17.25ZM6.5 9.25H18.5V7.75H6.5V9.25Z" fill="#000000"/>
-                    </svg>
-                </a>
-
-
-                <div (click)="toggleHamburger()" *ngIf="displayHamburgerMenuClose" class="">
-                  <svg width="35px" class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"  height="35px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    
-                    <path d="M7 17L16.8995 7.10051"  stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M7 7.00001L16.8995 16.8995"  stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-
-            
-            </div> -->
+          
 
           
   </div>

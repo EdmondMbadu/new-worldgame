@@ -91,23 +91,6 @@ export class DataService implements OnInit {
     'SDG17  Partnership For The Goals': '../../../assets/img/sdg17.png',
     'SDG17  Partnership For The Goals-link': 'https://sdgs.un.org/goals/goal17',
   };
-  // transformSDGs(sdgsPaths: { [key: string]: string }): SDG[] {
-  //   const sdgs: SDG[] = [];
-  //   const sdgNames = Object.keys(sdgsPaths).filter(
-  //     (key) => !key.includes('-link')
-  //   );
-  //   for (const sdgName of sdgNames) {
-  //     const name = sdgName.split(' ')[0];
-  //     const fullname = sdgName.substring(name.length).trim();
-  //     const imagePath = sdgsPaths[sdgName];
-  //     const linkKey = `${sdgName}-link`;
-  //     const backgroundSelected = '';
-  //     const link = sdgsPaths[linkKey] || '';
-  //     if (name !== 'None')
-  //       sdgs.push({ name, fullname, imagePath, link, backgroundSelected });
-  //   }
-  //   return sdgs;
-  // }
   transformSDGs(sdgsPaths: { [key: string]: string }): SDG[] {
     const sdgs: SDG[] = [];
     const sdgNames = Object.keys(sdgsPaths).filter(
@@ -138,26 +121,55 @@ export class DataService implements OnInit {
 
     return sdgs;
   }
-
   darkModeInitial() {
-    localStorage['theme'] = 'dark'; // Save to localStorage
-    // Save to localStorage
+    try {
+      localStorage.setItem('theme', 'dark');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
 
     this.applyTheme();
   }
 
+  // applyTheme() {
+  //   const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
+  //   // console.log('theme ', userTheme);
+  //   this.setTheme(userTheme);
+  //   // Explicitly check for 'light' and 'dark' settings
+
+  //   if (userTheme === 'dark') {
+  //     document.documentElement.classList.add('dark');
+  //   } else if (userTheme === 'light') {
+  //     document.documentElement.classList.remove('dark');
+  //   } else {
+  //     // Apply OS preference only if no user preference is set
+  //     const osPrefersDark = window.matchMedia(
+  //       '(prefers-color-scheme: dark)'
+  //     ).matches;
+  //     if (osPrefersDark) {
+  //       document.documentElement.classList.add('dark');
+  //     } else {
+  //       document.documentElement.classList.remove('dark');
+  //       document.documentElement.classList.add('light');
+  //     }
+  //   }
+  // }
+
   applyTheme() {
-    const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
-    // console.log('theme ', userTheme);
+    let userTheme = null;
+    try {
+      userTheme = localStorage.getItem('theme');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
+
     this.setTheme(userTheme);
-    // Explicitly check for 'light' and 'dark' settings
 
     if (userTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else if (userTheme === 'light') {
       document.documentElement.classList.remove('dark');
     } else {
-      // Apply OS preference only if no user preference is set
       const osPrefersDark = window.matchMedia(
         '(prefers-color-scheme: dark)'
       ).matches;
@@ -184,8 +196,14 @@ export class DataService implements OnInit {
   }
   ngOnInit(): void {}
   private getInitialTheme(): string {
-    return localStorage.getItem('theme') || 'light';
+    try {
+      return localStorage.getItem('theme') || 'light';
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+      return 'light'; // Default to light mode if storage is inaccessible
+    }
   }
+
   getSdgLabel(sdgCode: string) {
     for (let key in this.sdgsPaths) {
       if (key.startsWith(sdgCode) && !key.includes('-link')) {
@@ -194,9 +212,14 @@ export class DataService implements OnInit {
     }
     return '';
   }
-
   private loadInitialTheme(): void {
-    const storedTheme = localStorage.getItem('theme');
+    let storedTheme: string | null = null;
+    try {
+      storedTheme = localStorage.getItem('theme');
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
+
     this.setTheme(storedTheme);
   }
 
@@ -207,7 +230,6 @@ export class DataService implements OnInit {
       ? 'dark'
       : 'light';
   }
-
   setTheme(theme: string | null): void {
     const effectiveTheme = theme || this.getSystemTheme();
     this.themeSource.next(effectiveTheme);
@@ -215,8 +237,14 @@ export class DataService implements OnInit {
       'dark',
       effectiveTheme === 'dark'
     );
-    localStorage.setItem('theme', effectiveTheme);
+
+    try {
+      localStorage.setItem('theme', effectiveTheme);
+    } catch (error) {
+      console.warn('Access to localStorage denied:', error);
+    }
   }
+
   uploadPictureToCloudStorage(user: User, avatar: Avatar) {
     const userRef: AngularFirestoreDocument<User> = this.afs.doc(
       `users/${user.uid}`
