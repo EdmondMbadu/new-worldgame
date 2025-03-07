@@ -165,8 +165,37 @@ export class ChatbotComponent implements OnInit {
   }
 
   // Copies only one message
+  // copySingleMessage(text: string, index: number) {
+  //   navigator.clipboard.writeText(text).then(
+  //     () => {
+  //       // Temporarily show "Copied!"
+  //       this.singleCopyStates[index] = 'Copied!';
+  //       setTimeout(() => {
+  //         this.singleCopyStates[index] = 'Copy';
+  //       }, 2000);
+  //     },
+  //     (err) => {
+  //       console.error('Failed to copy single message:', err);
+  //     }
+  //   );
+  // }
+  // Copies only one message as real HTML data
   copySingleMessage(text: string, index: number) {
-    navigator.clipboard.writeText(text).then(
+    // 1) Convert your markdown/shortcode to HTML:
+    const formattedMessage = this.formatText(text);
+
+    // 2) Create Blob objects for both plain text and HTML (for maximum compatibility)
+    const blobPlain = new Blob([formattedMessage], { type: 'text/plain' });
+    const blobHtml = new Blob([formattedMessage], { type: 'text/html' });
+
+    // 3) Build a ClipboardItem containing both
+    const clipboardItem = new ClipboardItem({
+      'text/plain': blobPlain,
+      'text/html': blobHtml,
+    });
+
+    // 4) Write to the clipboard
+    navigator.clipboard.write([clipboardItem]).then(
       () => {
         // Temporarily show "Copied!"
         this.singleCopyStates[index] = 'Copied!';
