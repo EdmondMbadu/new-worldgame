@@ -155,7 +155,7 @@ export class GlobalRegisterComponent implements OnInit {
         // await this.data.globalLabSignUp(this.pid, this.globalLabData);
         console.log('registration data', registrationData);
         this.success = true;
-        this.isLoading = false;
+
         // this.resetFields();
         // alert('Registration successful! We will contact you soon.');
         // this.router.navigate(['/thank-you']);
@@ -164,6 +164,7 @@ export class GlobalRegisterComponent implements OnInit {
           'There was an error during the registration process. Please try again.'
         );
         console.log('Error while entering Global Lab registration data', error);
+        this.isLoading = false;
       }
     }
   }
@@ -245,7 +246,7 @@ export class GlobalRegisterComponent implements OnInit {
         await this.data.globalLabSignUp(this.pid, this.globalLabData);
         console.log('registration data', registrationData);
         this.success = true;
-        this.isLoading = false;
+
         // this.resetFields();
         // alert('Registration successful! We will contact you soon.');
         this.router.navigate(['/thank-you']);
@@ -254,6 +255,7 @@ export class GlobalRegisterComponent implements OnInit {
           'There was an error during the registration process. Please try again.'
         );
         console.log('Error while entering Global Lab registration data', error);
+        this.isLoading = false;
       }
     }
   }

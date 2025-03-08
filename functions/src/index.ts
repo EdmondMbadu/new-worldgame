@@ -29,7 +29,7 @@ const Busboy = require('busboy');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
-const stripe = new Stripe(functions.config()['stripe'].secret_key, {
+const stripe = new Stripe(functions.config()['stripe'].secret_key_earthgame, {
   apiVersion: '2025-02-24.acacia', // or whichever is current
 });
 
@@ -322,7 +322,7 @@ export const createCheckoutSession = functions.https.onCall(
       } = data;
 
       // Decide the amount based on targetGroup
-      let amount = 29900; // in cents => $399
+      let amount = 29900; // in cents => $299
       if (targetGroup === 'student' || targetGroup === 'senior') {
         amount = 9900; // $99
       }
@@ -389,7 +389,7 @@ export const stripeWebhook = functions.https.onRequest(
       event = stripe.webhooks.constructEvent(
         req.rawBody,
         sig,
-        functions.config()['stripe'].webhook_secret
+        functions.config()['stripe'].webhook_secret_earthgame
       );
     } catch (err) {
       console.error('❌ Error verifying Stripe Webhook signature:', err);
