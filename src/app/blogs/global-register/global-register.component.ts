@@ -244,6 +244,41 @@ export class GlobalRegisterComponent implements OnInit {
         this.globalLabData.push(registrationData);
 
         await this.data.globalLabSignUp(this.pid, this.globalLabData);
+        // Then do a separate function call to your cloud function
+        this.fns
+          .httpsCallable('gslRegistrationEmail')({
+            email: this.email,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            subject: 'Thanks for registering for GSL 2025 (Pay Later)',
+          })
+          .subscribe(() => {
+            console.log('User email sent');
+          });
+
+        // For admins, do the same with `gslAdminNotificationEmail`
+        const emails = [
+          'mbadungoma@gmail.com',
+          // 'enm58@drexel.edu',
+          'medard@1earthgame.org',
+          'jimwalker@mindpalace.com',
+          'newworld@newworld-game.org',
+        ];
+
+        emails.forEach((email) => {
+          this.fns
+            .httpsCallable('gslAdminNotificationEmail')({
+              emailAdmin: email, // Dynamically assign the email
+              subject: 'New GSL 2025 Registration (Pay Later)',
+              ...registrationData, // Ensure this object contains the needed fields
+            })
+            .subscribe({
+              next: () => console.log(`Admin email sent to ${email}`),
+              error: (err) =>
+                console.error(`Error sending email to ${email}:`, err),
+            });
+        });
+
         console.log('registration data', registrationData);
         this.success = true;
 

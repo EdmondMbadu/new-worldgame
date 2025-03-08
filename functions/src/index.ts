@@ -456,11 +456,156 @@ export const stripeWebhook = functions.https.onRequest(
       );
 
       console.log('Successfully added registration to array in Firestore');
+      // 4) Send emails
+      try {
+        // A) Email the participant
+        await runGslRegistrationEmail({
+          firstName,
+          lastName,
+          email,
+          // any dynamic data the template might require
+          subject: 'Thanks for registering & paying for the GSL 2025!',
+        });
+
+        // B) Email the admins
+        const adminData = {
+          firstName,
+          lastName,
+          email,
+          organization,
+          registrationDate: registerDate,
+          phone,
+          address,
+          age,
+          paidAmount: amountPaid! / 100, // convert cents => dollars
+          occupation,
+          whyAttend,
+          focusTopic,
+          targetGroup,
+        };
+        // Admins: you said you want to email 4 addresses. We can just call
+        // the function 4 times with a different "to" each time, or you can
+        // modify your Cloud Function to accept an array of emails.
+        await runGslAdminNotificationEmail({
+          ...adminData,
+          emailAdmin: 'mbadungoma@gmail.com',
+        });
+
+        await runGslAdminNotificationEmail({
+          ...adminData,
+          emailAdmin: 'medard@1earthgame.org',
+        });
+        await runGslAdminNotificationEmail({
+          ...adminData,
+          emailAdmin: 'jimwalker@mindpalace.com',
+        });
+        await runGslAdminNotificationEmail({
+          ...adminData,
+          emailAdmin: 'newworld@newworld-game.org',
+        });
+
+        console.log('✅ Successfully sent emails to user + admins');
+      } catch (emailErr) {
+        console.error('❌ Error sending GSL registration emails:', emailErr);
+      }
     }
 
     res.json({ received: true });
   }
 );
+
+export const gslRegistrationEmail = functions.https.onCall(
+  async (data: any, context: any) => {
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: functions.config()['sendgrid'].template_gsl_registration,
+      dynamic_template_data: {
+        subject: data.subject,
+        username: `${data.firstName} ${data.lastName}`,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error sending user email:', error);
+      return { success: false, error: error.message };
+    }
+  }
+);
+
+export const gslAdminNotificationEmail = functions.https.onCall(
+  async (data: any, context: any) => {
+    const msg = {
+      to: data.emailAdmin, // Replace with the actual admin email
+      from: 'newworld@newworld-game.org',
+      templateId: functions.config()['sendgrid'].template_gsl_admin,
+      dynamic_template_data: {
+        subject: data.subject,
+        username: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        organization: data.organization || 'N/A',
+        registration_date: data.registrationDate || new Date().toISOString(),
+        phone: data.phone || 'N/A',
+        address: data.address || 'N/A',
+        age: data.age || 'N/A',
+        paid_amount: data.paidAmount || 0,
+        occupation: data.occupation || 'N/A',
+        why_attend: data.whyAttend || 'N/A',
+        focus_topic: data.focusTopic || 'N/A',
+        target_group: data.targetGroup || 'N/A',
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error sending admin email:', error);
+      return { success: false, error: error.message };
+    }
+  }
+);
+
+async function runGslRegistrationEmail(data: any) {
+  // same data structure you used in your "gslRegistrationEmail" function
+  const msg = {
+    to: data.email,
+    from: 'newworld@newworld-game.org',
+    templateId: functions.config()['sendgrid'].template_gsl_registration,
+    dynamic_template_data: {
+      subject: data.subject || 'GSL Registration Confirmation',
+      username: `${data.firstName} ${data.lastName}`,
+    },
+  };
+  await sgMail.send(msg);
+}
+async function runGslAdminNotificationEmail(data: any) {
+  // Notice we pass in `data.email` as the `to`, which is the admin address
+  const msg = {
+    to: data.emailAdmin,
+    from: 'newworld@newworld-game.org',
+    templateId: functions.config()['sendgrid'].template_gsl_admin,
+    dynamic_template_data: {
+      subject: 'New GSL 2025 Registration (Paid)',
+      username: `${data.firstName} ${data.lastName}`,
+      email: data.email, // or data.participantEmail if you want
+      organization: data.organization || 'N/A',
+      registration_date: data.registrationDate || new Date().toISOString(),
+      phone: data.phone || 'N/A',
+      address: data.address || 'N/A',
+      age: data.age || 'N/A',
+      paid_amount: data.paidAmount || 0,
+      occupation: data.occupation || 'N/A',
+      why_attend: data.whyAttend || 'N/A',
+      focus_topic: data.focusTopic || 'N/A',
+      target_group: data.targetGroup || 'N/A',
+    },
+  };
+  await sgMail.send(msg);
+}
 
 // exports.dailyNews = functions.pubsub
 //   .schedule('every day 04:10')
