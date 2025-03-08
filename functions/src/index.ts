@@ -481,7 +481,7 @@ export const stripeWebhook = functions.https.onRequest(
           occupation,
           whyAttend,
           focusTopic,
-          targetGroup,
+          targetGroup: targetGroup,
         };
         // Admins: you said you want to email 4 addresses. We can just call
         // the function 4 times with a different "to" each time, or you can
