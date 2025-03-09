@@ -1,5 +1,5 @@
 <div class="dark:bg-slate-900 min-h-screen flex flex-col">
-    <app-navbar></app-navbar>
+    <app-navbar [currenPageLabBanner]="false"></app-navbar>
   
     <!-- HERO / TOP SECTION -->
 <!-- HERO / TOP SECTION with Background Image -->
@@ -76,35 +76,40 @@ style="background-image: url('https://designsciencelab.com/wordpress/wp-content/
     </div>
 
   <!-- Side Info / Quote or Video -->
-<div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow">
-    <!-- Embedded YouTube Video -->
-    <div class="aspect-w-16 aspect-h-9 mb-6">
-        <iframe 
-          class="w-full h-full" 
-          src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGlobal_Solutions_Lab_2025.mp4?alt=media&token=d9056e60-63e6-44ba-93ac-31a28c8ea2d1" 
-          title="YouTube video" 
-          frameborder="0" 
-          allowfullscreen
-        ></iframe>
-      </div>
-    <h3 class="text-xl md:text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-      AI & Sustainable Development Goals
-    </h3>
-    <p class="text-gray-700 dark:text-gray-300 mb-4">
-      “Make the world work for 100% of humanity 
-      in the shortest possible time 
-      through spontaneous cooperation 
-      without ecological offense 
-      or disadvantage of anyone.”
-      <br />
-      — Buckminster Fuller
-    </p>
-    <p class="text-gray-700 dark:text-gray-300 mb-4">
-      The Global Solutions Lab is for researching and developing the means to achieve this vision. 
-      Join us and harness AI-driven research, planning, and design to accelerate solutions for the UN SDGs.
-    </p>
-    
-  </div>
+  <div class="bg-white dark:bg-gray-800 h-screen flex flex-col">
+    <!-- Video Section (Takes Full Top Half) -->
+    <div class="w-full h-1/2">
+        <iframe class="w-full h-full" 
+            src="https://www.youtube.com/embed/en_rMNv6uQw" 
+            title="GSL 2025" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            referrerpolicy="strict-origin-when-cross-origin" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <!-- Text Section (Takes Full Bottom Half) -->
+    <div class="w-full h-1/2 flex flex-col justify-center p-8">
+        <h3 class="text-xl md:text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+            AI & Sustainable Development Goals
+        </h3>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+            “Make the world work for 100% of humanity 
+            in the shortest possible time 
+            through spontaneous cooperation 
+            without ecological offense 
+            or disadvantage of anyone.”
+            <br />
+            — Buckminster Fuller
+        </p>
+        <p class="text-gray-700 dark:text-gray-300">
+            The Global Solutions Lab is for researching and developing the means to achieve this vision. 
+            Join us and harness AI-driven research, planning, and design to accelerate solutions for the UN SDGs.
+        </p>
+    </div>
+</div>
+
   
   </div>
 </div>
@@ -194,10 +199,12 @@ style="background-image: url('https://designsciencelab.com/wordpress/wp-content/
           <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
             AI & Sustainable Development Goals
           </h2>
+          <blockquote class="mx-auto max-w-xl italic text-white text-lg sm:text-xl mb-6 pt-10">
+            "As we stand on the brink of technological revolutions, it is imperative to approach AI and other advances as architects, actively shaping our future rather than passively enduring it."
+          </blockquote>
+          <p class="text-lg text-gray-200 mb-4">—Buckminster Fuller</p>
           <p class="text-gray-700 dark:text-gray-200 mb-4">
-            The powerful quote from Buckminster Fuller encapsulates the ethos of the Global Solutions Lab: 
-            as we stand on the brink of technological revolutions, it is imperative to approach AI and other advances 
-            as architects, actively shaping our future rather than passively enduring it.
+            The powerful quote above from Buckminster Fuller encapsulates the ethos of the Global Solutions Lab. 
           </p>
           <p class="text-gray-700 dark:text-gray-200 mb-4">
             You will gain hands-on experience using AI as a powerful engine for addressing the UN SDGs. 

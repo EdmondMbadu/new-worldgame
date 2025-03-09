@@ -62,6 +62,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() currentPageSignIn: boolean = false;
   @Input() currentPageNews: boolean = false;
   @Input() currentPageTournament: boolean = false;
+  @Input() currenPageLabBanner: boolean = true;
   profilePicturePath: string = '';
   constructor(
     public auth: AuthService,

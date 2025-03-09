@@ -19,29 +19,27 @@ export class NwgNewsComponent implements OnInit {
     });
   }
   gAfterViewInit(): void {
-    const video: HTMLVideoElement | null = document.getElementById(
-      'myVideo'
-    ) as HTMLVideoElement;
-
-    if (video) {
-      video
-        .play()
-        .then(() => {
-          // If autoplay works, try unmuting (Safari may block this)
-          video.muted = false;
-        })
-        .catch((error) => {
-          console.log(
-            'Autoplay blocked on Safari. Waiting for user interaction.'
-          );
-        });
-
-      // Unmute and play on first user interaction (Safari Fix)
-      document.addEventListener('click', function once() {
-        video.muted = false;
-        video.play();
-        document.removeEventListener('click', once);
-      });
-    }
+    // const video: HTMLVideoElement | null = document.getElementById(
+    //   'myVideo'
+    // ) as HTMLVideoElement;
+    // if (video) {
+    //   video
+    //     .play()
+    //     .then(() => {
+    //       // If autoplay works, try unmuting (Safari may block this)
+    //       video.muted = false;
+    //     })
+    //     .catch((error) => {
+    //       console.log(
+    //         'Autoplay blocked on Safari. Waiting for user interaction.'
+    //       );
+    //     });
+    //   // Unmute and play on first user interaction (Safari Fix)
+    //   document.addEventListener('click', function once() {
+    //     video.muted = false;
+    //     video.play();
+    //     document.removeEventListener('click', once);
+    //   });
+    // }
   }
 }

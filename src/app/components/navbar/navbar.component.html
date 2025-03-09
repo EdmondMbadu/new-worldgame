@@ -12,7 +12,7 @@
           NewWorld Game
       </h1>
     </div>
-      <a routerLink="/global-lab" class="hidden md:inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-teal-900 bg-teal-100 rounded-full dark:bg-teal-900 dark:text-white hover:bg-teal-200 dark:hover:bg-teal-800" role="alert">
+      <a *ngIf="currenPageLabBanner" routerLink="/global-lab" class="hidden md:inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-teal-900 bg-teal-100 rounded-full dark:bg-teal-900 dark:text-white hover:bg-teal-200 dark:hover:bg-teal-800" role="alert">
         <span class="text-xs bg-emerald-600 rounded-full text-white px-4 py-1.5 mr-3">Event</span> 
         <span class="text-sm font-medium">🌍 Join the Global Solutions Lab – June 17-21, 2025</span> 
         <svg class="ml-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
