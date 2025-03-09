@@ -68,10 +68,6 @@ export class TeamDiscussionComponent implements OnInit {
     // this.deleteAllDocuments();
   }
 
-  toggleShowOtherVoiceChannels() {
-    this.displayOtherVoiceChannels = !this.displayOtherVoiceChannels;
-  }
-
   responses: DisplayMessage[] = [];
   ngOnInit(): void {
     this.collectionPath = `solutions/${this.solution!.solutionId}`;

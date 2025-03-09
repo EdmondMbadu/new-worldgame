@@ -30,6 +30,7 @@ export class SolutionViewExternalComponent {
   commentUserNames: string[] = [];
 
   teamMembers: User[] = [];
+  isLoggedIn: boolean = false;
 
   constructor(
     public auth: AuthService,
@@ -43,6 +44,9 @@ export class SolutionViewExternalComponent {
       this.solutionId = params.get('id');
       window.scroll(0, 0);
       this.loadSolutionData(this.solutionId);
+    });
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
     });
   }
 

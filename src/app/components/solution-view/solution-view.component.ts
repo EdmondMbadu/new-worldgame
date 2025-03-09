@@ -57,12 +57,16 @@ export class SolutionViewComponent implements OnInit {
     private router: Router,
     private fns: AngularFireFunctions
   ) {}
+  isLoggedIn: boolean = false;
   ngOnInit(): void {
     this.activatedRoute.paramMap.subscribe((params) => {
       this.solutionId = params.get('id');
       window.scroll(0, 0);
 
       this.loadSolutionData(this.solutionId);
+    });
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
     });
   }
 

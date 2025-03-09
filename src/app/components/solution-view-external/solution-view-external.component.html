@@ -12,7 +12,7 @@
                 <address class="flex items-center mb-6 not-italic">
 
                     <div class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white overflow-x-auto">
-                        <div class="flex flex-wrap -space-x-1 flex-shrink-0"*ngFor="let user of teamMembers; let i= index" >
+                        <div class="flex flex-wrap -space-x-1 flex-shrink-0 cursor-pointer"*ngFor="let user of teamMembers; let i= index" >
                             <div  *ngIf="user.profilePicture?.downloadURL!==undefined" >
                                 <img *ngIf="auth.currentUser!==null && user.uid === auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2  dark:border-gray-700 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/profile" alt="">
                                 <img *ngIf="auth.currentUser!==null && user.uid !== auth.currentUser.uid"    (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16  dark:border-gray-700 border-2 border-white rounded-full " [src]="user.profilePicture?.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
@@ -98,18 +98,18 @@
                     <h2  *ngIf="comments"class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Discussion ({{comments.length}})</h2>
                     <h2  *ngIf="!comments"class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Discussion (0)</h2>
                 </div>
-                <form class="mb-6">
+                <div class="mb-6">
                     <div class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                         <label for="comment" class="sr-only">Your comment</label>
                         <textarea id="comment" rows="6"
                             class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
                             placeholder="Write a comment..." required></textarea>
                     </div>
-                    <button type="submit"
+                    <a [routerLink]="'/login'" 
                         class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-blue-800">
                         Post comment
-                    </button>
-                </form>
+                    </a>
+                </div>
             </section>
             <article *ngFor="let comment of comments ; let i =index" class="p-6 mb-6 text-base bg-white rounded-lg dark:bg-gray-900">
                 <footer class="flex justify-between items-center mb-2">
