@@ -13,19 +13,7 @@ export class WelcomeComponent {
   text: string = `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`;
   result: string = '';
   steps: string[] = [
-    `Hi, I am Bucky, your NewWorld Game AI colleague. NewWorld Game is a Challenge like you have never seen before.
-It’s a challenge that needs boldness, creativity, collaboration, openness to fun, a sense
-of humor and persistence. It’s where your vision and experience build the future you
-want. Where you are not the victim but the challenger. That it leads to rewards for you
-and the rest of the world is a nice spin-off.
-The Challenge is where you compete with the so-called leaders of the world – the
-politicians, billionaires, bureaucrats and self-anointed— to solve the real problems
-facing the world. The ones you care about.
-It’s not a fantasy game. It’s real.
-You don’t need luck to win.
-You need an idea of what the world should be, and the boldness and persistence to
-make it real. NewWorld Game will show you how.
-And you will show the world what you can do. To start the NewWorld Game, let's build a solution environment just for you.`,
+    `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`,
     `What is your focus for using NewWorld Game?`,
     '',
     'Select all Sustainable Development Goals (SDGs) that interest you.',
