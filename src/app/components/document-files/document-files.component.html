@@ -185,9 +185,13 @@
       </p>
     
       <!-- Optional Preview Image -->
-      <a *ngIf="doc.downloadURL" [href]="doc.downloadURL" target="_blank" class="my-2 block">
+      <a *ngIf="doc.downloadURL && isImage(doc.type!)" [href]="doc.downloadURL" target="_blank" class="my-2 block">
         <img [src]="doc.downloadURL" alt="Preview" class="max-h-32 object-contain" />
       </a>
+      <a *ngIf="doc.downloadURL  && !isImage(doc.type!)" [href]="doc.downloadURL" target="_blank" class="my-2 block">
+        <img  src="../../../assets/img/generic.webp" alt="Preview" class="max-h-32 object-contain" />
+      </a>
+     
     
       <!-- 3-Dot Menu Trigger -->
       <button
@@ -215,7 +219,7 @@
         <ul class="flex flex-col">
           <li     class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 
           dark:hover:bg-slate-700 cursor-pointer"
-          *ngIf="['png','jpg','jpeg','gif','webp'].includes(doc.type!)"
+          *ngIf="isImage(doc.type!)"
           (click)="copyEmbedCodeHtml(doc.downloadURL)"
         >
           Copy Image Tag
@@ -278,7 +282,7 @@
                       </div>
                  
                   
-                      <div>
+                      <!-- <div>
                         <label for="category" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                          Type
                         </label>
@@ -287,7 +291,7 @@
                           <option value="" disabled selected>Choose</option>
                           <option *ngFor="let c of documentFileTypes" [value]="c">{{c}}</option>
                         </select>
-                      </div>
+                      </div> -->
                       
                       <div class="sm:col-span-2">
                           <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
@@ -306,16 +310,36 @@
                             <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
                         </div>
-                        <img *ngIf="documentDownloadUrl" [src]="documentDownloadUrl" alt="">
+                        <!-- <img *ngIf="documentDownloadUrl" [src]="documentDownloadUrl" alt=""> -->
                        
                         <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload feature Image</h5>
                         <input   type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
             
-                    
+                         <!-- Once the file is uploaded, show a preview section -->
+                         <div class="max-w-sm mx-auto">
+                          <div *ngIf="documentDownloadUrl">
+                            <!-- Image Preview -->
+                            <div *ngIf="isImage(documentType)">
+                            <img [src]="documentDownloadUrl" alt="Preview" />
+                            </div>
+      
+                            <!-- PDF Preview (iframe) -->
+                            <div *ngIf="isPDF(documentType)">
+                            <img src="../../../assets/img/generic.webp" />
+                           
+                            </div>
+      
+                            <!-- Fallback for other doc types (DOC, PPT, etc.) -->
+                            <div *ngIf="!isImage(documentType) && !isPDF(documentType)">
+                            <p>Preview not available. <a [href]="documentDownloadUrl" target="_blank">Open/Download</a></p>
+                            </div>
+                         </div>
+                         
                             
                       
                    
                       </div>
+                 
                   </div>
                   <div class="flex items-center space-x-4">
                       <button (click)="addDocument()" type="submit" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800">

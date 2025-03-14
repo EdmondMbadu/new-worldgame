@@ -87,7 +87,7 @@ export class PlaygroundStepsComponent implements OnInit {
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.display[this.currentIndexDisplay] = true;
-    this.buttontexts[this.steps.length - 1] = 'Submit';
+    this.buttontexts[this.steps.length - 1] = 'Preview Solution';
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -285,7 +285,7 @@ export class PlaygroundStepsComponent implements OnInit {
       'What would we do with $5000 to advance the strategy towards implementation?',
       'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
     ],
-    ['Review Your Entire Strategy and Submit'],
+    ['Review Your Entire Strategy and Preview it'],
   ];
   popupStyles: any = [];
 

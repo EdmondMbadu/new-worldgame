@@ -50,6 +50,7 @@ export class Solution {
   impact?: number;
   supporters?: number;
   documents?: Avatar[];
+  preview?: string;
 }
 
 export class Evaluation {

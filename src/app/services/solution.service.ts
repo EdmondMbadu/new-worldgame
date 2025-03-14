@@ -373,11 +373,22 @@ export class SolutionService {
     );
     return solutionRef.set(data, { merge: true });
   }
-  submitSolution(solutionId: string, content: string) {
+  submitSolution(solutionId: string) {
     const data = {
-      content: content,
+      // content: content,
       finished: 'true',
       submissionDate: this.time.todaysDate(),
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
+  submitPreviewSolution(solutionId: string, content: string) {
+    const data = {
+      content: content,
+      preview: 'true',
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
@@ -446,6 +457,16 @@ export class SolutionService {
   addParticipantsToSolution(participants: any, solutionId: string) {
     const data = {
       participants: participants,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
+  addEvaluatorsToSolution(evaluators: any, solutionId: string) {
+    const data = {
+      evaluators: evaluators,
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`

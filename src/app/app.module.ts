@@ -110,6 +110,7 @@ import { SolutionEvaluationComponent } from './components/solution-evaluation/so
 import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
 import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
 import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
+import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
 
 @NgModule({
   declarations: [
@@ -196,6 +197,7 @@ import { ManagementGsl2025Component } from './components/management-gsl-2025/man
     GlobalLabComponent,
     GlobalRegisterComponent,
     ManagementGsl2025Component,
+    SolutionPreviewComponent,
   ],
   imports: [
     BrowserModule,

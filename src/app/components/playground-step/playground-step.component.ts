@@ -69,6 +69,8 @@ export class PlaygroundStepComponent {
   @Output() submissionComplete: EventEmitter<any> = new EventEmitter();
   updateTitleBox: boolean = false;
 
+  isLoading: boolean = false;
+
   defaultBgColor: string = 'bg-teal-100';
   strategyBgColor: string = 'bg-teal-100';
   constructor(
@@ -239,23 +241,62 @@ export class PlaygroundStepComponent {
     this.submitDisplay = false;
     this.submiResponse = true;
     this.saveSolutionStatus();
-    this.finallySubmitSolution();
+    this.SubmitPreviewSolution();
     // Reset submission response to allow future submissions, but only after current process is complete
     this.submiResponse = false;
   }
 
-  finallySubmitSolution() {
+  // finallySubmitSolution() {
+  //   // check if one is submitting what was previously saved
+  //   if (this.strategyReviewSelected) {
+  //     try {
+  //       this.solution
+  //         .submitSolution(this.solutionId, this.strategyReview)
+  //         .then(() => {
+  //           console.log(
+  //             'Submission successful, sending request for evaluation.'
+  //           );
+  //           this.submissionComplete.emit(); // Emit event to parent
+  //           this.toggleCongrats();
+  //           // Additional logic on successful submission
+  //         });
+  //     } catch (error) {
+  //       alert('An error occured while submitting the solution. Try again');
+  //       console.log(error);
+  //     }
+  //   } else {
+  //     try {
+  //       this.solution
+  //         .submitSolution(this.solutionId, this.contentsArray[0])
+  //         .then(() => {
+  //           console.log(
+  //             'Submission successful, sending request for evaluation.'
+  //           );
+  //           this.submissionComplete.emit(); // Emit event to parent
+  //           this.toggleCongrats();
+  //           // Additional logic on successful submission
+  //         });
+  //     } catch (error) {
+  //       alert('An error occured while submitting the solution. Try again');
+  //       console.log(error);
+  //     }
+  //   }
+  // }
+
+  SubmitPreviewSolution() {
+    this.isLoading = true;
     // check if one is submitting what was previously saved
     if (this.strategyReviewSelected) {
       try {
         this.solution
-          .submitSolution(this.solutionId, this.strategyReview)
+          .submitPreviewSolution(this.solutionId, this.strategyReview)
           .then(() => {
             console.log(
               'Submission successful, sending request for evaluation.'
             );
-            this.submissionComplete.emit(); // Emit event to parent
-            this.toggleCongrats();
+            // this.submissionComplete.emit(); // Emit event to parent
+            this.router.navigate(['/solution-preview', this.solutionId]);
+            // this.toggleCongrats();
             // Additional logic on successful submission
           });
       } catch (error) {
@@ -265,13 +306,14 @@ export class PlaygroundStepComponent {
     } else {
       try {
         this.solution
-          .submitSolution(this.solutionId, this.contentsArray[0])
+          .submitPreviewSolution(this.solutionId, this.contentsArray[0])
           .then(() => {
             console.log(
               'Submission successful, sending request for evaluation.'
             );
-            this.submissionComplete.emit(); // Emit event to parent
-            this.toggleCongrats();
+            // this.submissionComplete.emit(); // Emit event to parent
+            this.router.navigate(['/solution-preview', this.solutionId]);
+            // this.toggleCongrats();
             // Additional logic on successful submission
           });
       } catch (error) {
@@ -280,7 +322,6 @@ export class PlaygroundStepComponent {
       }
     }
   }
-
   isNotEmpty(content: string) {
     if (content === '') {
       return true;

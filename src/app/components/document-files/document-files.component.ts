@@ -61,19 +61,71 @@ export class DocumentFilesComponent implements OnInit {
   toggle(property: 'showAddDocument') {
     this[property] = !this[property];
   }
+  // async startUpload(event: FileList) {
+  //   if (!this.documentId) {
+  //     this.documentId = this.afs.createId(); // Generate ID only if not already generated
+  //   }
+
+  //   try {
+  //     const url = await this.data.startUpload(
+  //       event,
+  //       `documents/${this.documentId}`,
+  //       'false'
+  //     );
+  //     this.documentDownloadUrl = url!;
+  //     console.log('The URL is', url);
+  //     console.log('The ID is', this.documentId);
+  //   } catch (error) {
+  //     console.error('Error uploading file:', error);
+  //     alert('Error occurred while uploading file. Please try again.');
+  //   }
+  // }
+  /**
+   * Called when user selects a file OR drops a file in the drop zone.
+   * We'll reject if >10MB or if it's a video file.
+   * Otherwise, we'll store the MIME type, upload to Firestore, and get a download URL.
+   */
   async startUpload(event: FileList) {
+    if (!event || event.length === 0) {
+      return;
+    }
+
+    // Only dealing with single-file upload
+    const file = event[0];
+    if (!file) return;
+
+    // 1. Enforce max size of 10MB
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > MAX_SIZE) {
+      alert('File exceeds 10MB limit.');
+      return;
+    }
+
+    // 2. Exclude video files
+    if (file.type.startsWith('video/')) {
+      alert('Video files are not allowed.');
+      return;
+    }
+
+    // 3. Set documentType automatically from the MIME type
+    this.documentType = file.type;
+
+    // If we haven't created a docId, do so now
     if (!this.documentId) {
-      this.documentId = this.afs.createId(); // Generate ID only if not already generated
+      this.documentId = this.afs.createId();
     }
 
     try {
+      // This is your custom method that handles the actual upload to Firebase Storage
+      // and returns the download URL. If needed, adapt it with the same checks above
+      // or pass the file object directly.
       const url = await this.data.startUpload(
         event,
         `documents/${this.documentId}`,
         'false'
       );
-      this.documentDownloadUrl = url!;
-      console.log('The URL is', url);
+      this.documentDownloadUrl = url || '';
+      console.log('The URL is', this.documentDownloadUrl);
       console.log('The ID is', this.documentId);
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -83,9 +135,65 @@ export class DocumentFilesComponent implements OnInit {
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
+  // addDocument() {
+  //   if (!this.documentName || !this.documentType || !this.documentDownloadUrl) {
+  //     alert('Please fill in all required fields before adding the document.');
+  //     return;
+  //   }
+
+  //   if (!this.currentSolution?.solutionId) {
+  //     console.error('Error: solutionId is undefined.');
+  //     return;
+  //   }
+  //   // Current time
+  //   const now = new Date();
+  //   const options: Intl.DateTimeFormatOptions = {
+  //     year: '2-digit',
+  //     month: 'numeric',
+  //     day: 'numeric',
+  //     hour: 'numeric',
+  //     minute: '2-digit',
+  //     hour12: true, // ensures AM/PM in US locale
+  //   };
+  //   const formattedDate = now.toLocaleString('en-US', options);
+
+  //   const newDocument: Avatar = {
+  //     downloadURL: this.documentDownloadUrl,
+  //     name: this.documentName,
+  //     description: this.documentDescription,
+  //     type: this.documentType,
+  //     dateSorted: now.getTime(), // numeric timestamp for sorting
+  //     dateCreated: this.time.todaysDate(), // numeric timestamp for sorting
+  //     formattedDateCreated: formattedDate, // e.g. "1/13/25, 3:54 PM"
+  //   };
+
+  //   this.documents.push(newDocument);
+  //   // Sort so newest is first (descending by dateCreated)
+  //   this.documents.sort(
+  //     (a: any, b: any) => (b.dateCreated ?? 0) - (a.dateCreated ?? 0)
+  //   );
+  //   this.data
+  //     .addDocument(this.documents, this.currentSolution.solutionId)
+  //     .then((data: any) => {
+  //       console.log('Document added successfully:', newDocument);
+  //       this.documentName = '';
+  //       this.documentDescription = '';
+  //       this.documentType = '';
+  //       this.documentDownloadUrl = '';
+  //       this.toggle('showAddDocument');
+  //     })
+  //     .catch((error: any) => {
+  //       console.error('Error adding challenge:', error);
+  //     });
+  // }
+
+  // Toggle the dropdown for a given doc index
   addDocument() {
-    if (!this.documentName || !this.documentType || !this.documentDownloadUrl) {
-      alert('Please fill in all required fields before adding the document.');
+    // Ensure we have minimal fields
+    if (!this.documentName || !this.documentDownloadUrl) {
+      alert(
+        'Please fill in all required fields (Name, File) before adding the document.'
+      );
       return;
     }
 
@@ -93,7 +201,8 @@ export class DocumentFilesComponent implements OnInit {
       console.error('Error: solutionId is undefined.');
       return;
     }
-    // Current time
+
+    // Get current time for sorting/formatting
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = {
       year: '2-digit',
@@ -101,7 +210,7 @@ export class DocumentFilesComponent implements OnInit {
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true, // ensures AM/PM in US locale
+      hour12: true,
     };
     const formattedDate = now.toLocaleString('en-US', options);
 
@@ -109,33 +218,39 @@ export class DocumentFilesComponent implements OnInit {
       downloadURL: this.documentDownloadUrl,
       name: this.documentName,
       description: this.documentDescription,
-      type: this.documentType,
-      dateSorted: now.getTime(), // numeric timestamp for sorting
-      dateCreated: this.time.todaysDate(), // numeric timestamp for sorting
-      formattedDateCreated: formattedDate, // e.g. "1/13/25, 3:54 PM"
+      type: this.documentType, // e.g. "application/pdf" or "image/png", etc.
+      dateSorted: now.getTime(),
+      dateCreated: this.time.todaysDate(),
+      formattedDateCreated: formattedDate,
     };
 
+    // Add to local array
     this.documents.push(newDocument);
-    // Sort so newest is first (descending by dateCreated)
+    // Sort descending by dateCreated
     this.documents.sort(
       (a: any, b: any) => (b.dateCreated ?? 0) - (a.dateCreated ?? 0)
     );
+
+    // Update in Firestore
     this.data
       .addDocument(this.documents, this.currentSolution.solutionId)
-      .then((data: any) => {
+      .then(() => {
         console.log('Document added successfully:', newDocument);
+
+        // Reset form fields
         this.documentName = '';
         this.documentDescription = '';
         this.documentType = '';
         this.documentDownloadUrl = '';
+        this.documentId = '';
+
+        // Close the modal
         this.toggle('showAddDocument');
       })
       .catch((error: any) => {
-        console.error('Error adding challenge:', error);
+        console.error('Error adding document:', error);
       });
   }
-
-  // Toggle the dropdown for a given doc index
   toggleDocMenu(index: number) {
     // If this doc’s menu is already open, close it; otherwise open it
     this.openDocIndex = this.openDocIndex === index ? null : index;
@@ -200,16 +315,40 @@ export class DocumentFilesComponent implements OnInit {
   }
 
   // Delete the doc from our local array, then push the updated array to Firestore
+  // deleteDocument(index: number) {
+  //   if (!this.currentSolution?.solutionId) {
+  //     console.error('No solutionId found; cannot delete doc.');
+  //     return;
+  //   }
+
+  //   // Remove from local array
+  //   this.documents.splice(index, 1);
+
+  //   // Update Firestore with new array
+  //   this.data
+  //     .addDocument(this.documents, this.currentSolution.solutionId)
+  //     .then(() => {
+  //       console.log('Document deleted.');
+  //       // Optionally close the menu
+  //       this.openDocIndex = null;
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error deleting document:', error);
+  //     });
+  // }
+  /**
+   * Delete a doc from local array and push the updated array to Firestore
+   */
   deleteDocument(index: number) {
     if (!this.currentSolution?.solutionId) {
       console.error('No solutionId found; cannot delete doc.');
       return;
     }
 
-    // Remove from local array
+    // Remove it locally
     this.documents.splice(index, 1);
 
-    // Update Firestore with new array
+    // Persist in Firestore
     this.data
       .addDocument(this.documents, this.currentSolution.solutionId)
       .then(() => {
@@ -220,5 +359,14 @@ export class DocumentFilesComponent implements OnInit {
       .catch((error) => {
         console.error('Error deleting document:', error);
       });
+  }
+
+  // --- Optional Helpers to show previews in HTML ---
+  isImage(mimeType: string): boolean {
+    return mimeType?.startsWith('image/');
+  }
+
+  isPDF(mimeType: string): boolean {
+    return mimeType === 'application/pdf';
   }
 }

@@ -35,6 +35,10 @@ export class SolutionDetailsComponent implements OnInit {
   title: string = '';
   showAddTeamMember: boolean = false;
   showRemoveTeamMember: boolean = false;
+  showAddEvaluator: boolean = false;
+  showRemoveEvaluator: boolean = false;
+  newEvaluator: string = '';
+  evaluatorToDelete: string = '';
   isHovering: boolean = false;
   teamMembers: User[] = [];
   showPopUpTeam: boolean[] = [];
@@ -74,6 +78,8 @@ export class SolutionDetailsComponent implements OnInit {
       | 'showAddTeamMember'
       | 'showRemoveTeamMember'
       | 'updateTitleBox'
+      | 'showAddEvaluator'
+      | 'showRemoveEvaluator'
   ) {
     this[property] = !this[property];
   }
@@ -175,6 +181,61 @@ export class SolutionDetailsComponent implements OnInit {
       alert('Enter a valid email!');
     }
   }
+
+  addEvaluatorToSolution() {
+    let evaluators: any = [];
+    if (this.data.isValidEmail(this.newEvaluator)) {
+      evaluators = this.currentSolution.evaluators;
+      evaluators.push({ name: this.newEvaluator });
+
+      this.solution
+        .addEvaluatorsToSolution(evaluators, this.currentSolution.solutionId!)
+        .then(() => {
+          alert(`Successfully added ${this.newEvaluator} as an evaluator.`);
+          this.getEvaluators();
+          this.toggle('showAddEvaluator');
+        })
+        .catch((error) => {
+          alert('Error occured while adding an evaluator. Try Again!');
+        });
+      this.newEvaluator = '';
+    } else {
+      alert('Enter a valid email!');
+    }
+  }
+
+  removeEvaluatorFromSolution(email: string) {
+    // Ensure evaluators array exists
+    if (
+      !this.currentSolution.evaluators ||
+      !Array.isArray(this.currentSolution.evaluators)
+    ) {
+      alert('No evaluators found!');
+      return;
+    } else {
+      // Filter out the evaluator to be removed
+      const updatedEvaluators = this.currentSolution.evaluators.filter(
+        (evaluator: any) => evaluator.name !== email
+      );
+      // Update the solution's evaluators
+      this.solution
+        .addEvaluatorsToSolution(
+          updatedEvaluators,
+          this.currentSolution.solutionId!
+        )
+        .then(() => {
+          alert(`Successfully removed ${email} from the evaluators.`);
+          this.getEvaluators(); // Refresh the evaluators list
+          this.evaluatorToDelete = '';
+          this.toggle('showRemoveEvaluator');
+        })
+        .catch((error) => {
+          console.error('Error occurred while removing an evaluator:', error);
+          alert('Error occurred while removing an evaluator. Try again!');
+        });
+    }
+  }
+
   async sendEmailToParticipant() {
     const genericEmail = this.fns.httpsCallable('genericEmail');
     const nonUserEmail = this.fns.httpsCallable('nonUserEmail'); // Ensure you have this Cloud Function set up

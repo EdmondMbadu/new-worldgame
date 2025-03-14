@@ -65,6 +65,7 @@ import { DocumentFilesComponent } from './components/document-files/document-fil
 import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
 import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
 import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
+import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -108,6 +109,11 @@ const routes: Routes = [
   {
     path: 'solution-view/:id',
     component: SolutionViewComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'solution-preview/:id',
+    component: SolutionPreviewComponent,
     canActivate: [AuthGuard],
   },
 
