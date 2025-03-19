@@ -16,6 +16,15 @@ export class ManagementGsl2025Component implements OnInit {
   searchQuery: string = '';
   expandedRows: { [key: number]: boolean } = {}; // Track expanded rows
   gid: string = '';
+  private readonly AGE_GROUP_ORDER = [
+    'Under 18',
+    '18-24',
+    '25-34',
+    '35-44',
+    '45-54',
+    '55-64',
+    '65+',
+  ];
 
   // Summaries
   summaryByAgeGroup: { [key: string]: number } = {};
@@ -150,6 +159,15 @@ export class ManagementGsl2025Component implements OnInit {
       // ... more mappings
     };
     return countryToContinentMap[country] || 'Other';
+  }
+  /**
+   * Return age group keys in the desired order,
+   * skipping any group that doesn't actually appear in the data.
+   */
+  getAgeGroupKeys(): string[] {
+    const allKeys = Object.keys(this.summaryByAgeGroup);
+    // Filter AGE_GROUP_ORDER by those that appear in summaryByAgeGroup
+    return this.AGE_GROUP_ORDER.filter((group) => allKeys.includes(group));
   }
 
   getKeys(obj: any): string[] {

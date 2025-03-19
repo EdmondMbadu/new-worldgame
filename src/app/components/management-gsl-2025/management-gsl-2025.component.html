@@ -114,9 +114,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let group of getKeys(summaryByAgeGroup)">
-              <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">{{ group }}</td>
-              <td class="px-4 py-2">{{ summaryByAgeGroup[group] }}</td>
+                <!-- IMPORTANT: call getAgeGroupKeys() rather than getKeys(summaryByAgeGroup) -->
+            <tr *ngFor="let group of getAgeGroupKeys()">
+            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">
+                {{ group }}
+            </td>
+            <td class="px-4 py-2">
+                {{ summaryByAgeGroup[group] }}
+            </td>
             </tr>
           </tbody>
         </table>
