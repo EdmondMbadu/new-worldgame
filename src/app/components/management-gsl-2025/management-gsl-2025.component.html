@@ -95,5 +95,98 @@
                 </div>
             </div>
         </div>
+
+        <!-- ========== SUMMARY SECTION ========== -->
+<div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden my-10 p-4 mx-auto max-w-screen-xl px-4 lg:px-12">
+    <h4 class="text-lg font-bold mb-2 text-gray-700 dark:text-gray-300">Summary</h4>
+  
+    <!--  Grid with 2 columns on medium screens and above -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  
+      <!-- 1) Age Group Distribution -->
+      <div>
+        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Age Group Distribution</h5>
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-4">
+          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" class="px-4 py-2">Age Group</th>
+              <th scope="col" class="px-4 py-2">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let group of getKeys(summaryByAgeGroup)">
+              <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">{{ group }}</td>
+              <td class="px-4 py-2">{{ summaryByAgeGroup[group] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+      <!-- 2) Continent Distribution -->
+      <div>
+        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Continent Distribution</h5>
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-4">
+          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" class="px-4 py-2">Continent</th>
+              <th scope="col" class="px-4 py-2">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let continent of getKeys(summaryByContinent)">
+              <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">{{ continent }}</td>
+              <td class="px-4 py-2">{{ summaryByContinent[continent] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- Payment Summary + Occupation Summary in a new row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+  
+      <!-- 3) Payment Summary -->
+      <div>
+        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Payment Summary</h5>
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="mb-1">
+            <strong>Total Paid:</strong>
+            ${{ paymentSummary.totalPaid / 100 | number:'1.2-2' }}
+            <!-- '1.2-2' in pipe = show at least 2 decimal places, up to 2 -->
+          </p>
+          <p>
+            <strong>Average Paid:</strong>
+            ${{ paymentSummary.averagePaid / 100 | number:'1.2-2' }}
+          </p>
+        </div>
+      </div>
+  
+      <!-- 4) Occupation Summary -->
+      <div>
+        <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Occupation Summary</h5>
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-4">
+          <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" class="px-4 py-2">Occupation</th>
+              <th scope="col" class="px-4 py-2">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let occupation of getKeys(summaryByOccupation)">
+              <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">{{ occupation }}</td>
+              <td class="px-4 py-2">{{ summaryByOccupation[occupation] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  
+    </div>
+  </div>
     </section>
 </div>
+
+
+
+
+
+  

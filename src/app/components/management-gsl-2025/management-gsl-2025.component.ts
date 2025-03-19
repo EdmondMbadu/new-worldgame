@@ -17,6 +17,11 @@ export class ManagementGsl2025Component implements OnInit {
   expandedRows: { [key: number]: boolean } = {}; // Track expanded rows
   gid: string = '';
 
+  // Summaries
+  summaryByAgeGroup: { [key: string]: number } = {};
+  summaryByContinent: { [key: string]: number } = {};
+  paymentSummary = { totalPaid: 0, averagePaid: 0 };
+  summaryByOccupation: { [key: string]: number } = {};
   constructor(
     public auth: AuthService,
     private data: DataService,
@@ -47,6 +52,8 @@ export class ManagementGsl2025Component implements OnInit {
         });
 
         this.filteredData = [...this.globalLabData];
+
+        this.generateSummary(); // Generate summaries after data load
       }
     });
   }
@@ -66,5 +73,86 @@ export class ManagementGsl2025Component implements OnInit {
   // Toggle row expansion
   toggleExpand(index: number) {
     this.expandedRows[index] = !this.expandedRows[index];
+  }
+
+  /* -------------------------
+   *   SUMMARY GENERATION
+   * ------------------------*/
+  private generateSummary() {
+    // Reset summary objects
+    this.summaryByAgeGroup = {};
+    this.summaryByContinent = {};
+    this.summaryByOccupation = {};
+
+    let totalPaidInCents = 0;
+
+    for (const user of this.globalLabData) {
+      // 1. Age Group
+      const ageGroup = this.getAgeGroup(user.age);
+      if (!this.summaryByAgeGroup[ageGroup]) {
+        this.summaryByAgeGroup[ageGroup] = 0;
+      }
+      this.summaryByAgeGroup[ageGroup]++;
+
+      // 2. Continent
+      const continent = this.getContinent(user.country);
+      if (!this.summaryByContinent[continent]) {
+        this.summaryByContinent[continent] = 0;
+      }
+      this.summaryByContinent[continent]++;
+
+      // 3. Payment Summaries
+      const paidCents = user.amountPaid || 0;
+      totalPaidInCents += paidCents;
+
+      // 4. Occupation Summaries
+      const occupation = user.occupation ? user.occupation : 'Unknown';
+      if (!this.summaryByOccupation[occupation]) {
+        this.summaryByOccupation[occupation] = 0;
+      }
+      this.summaryByOccupation[occupation]++;
+    }
+
+    // Calculate Payment Summaries
+    const count = this.globalLabData.length;
+    this.paymentSummary.totalPaid = totalPaidInCents;
+    this.paymentSummary.averagePaid = count > 0 ? totalPaidInCents / count : 0;
+  }
+
+  private getAgeGroup(age: number): string {
+    if (age < 18) return 'Under 18';
+    if (age < 25) return '18-24';
+    if (age < 35) return '25-34';
+    if (age < 45) return '35-44';
+    if (age < 55) return '45-54';
+    if (age < 65) return '55-64';
+    return '65+';
+  }
+
+  private getContinent(country: string): string {
+    // Basic country -> continent lookup (expand as needed)
+    const countryToContinentMap: { [key: string]: string } = {
+      Canada: 'North America',
+      'United States': 'North America',
+      Mexico: 'North America',
+      Brazil: 'South America',
+      Argentina: 'South America',
+      Germany: 'Europe',
+      France: 'Europe',
+      Spain: 'Europe',
+      Nigeria: 'Africa',
+      Egypt: 'Africa',
+      'South Africa': 'Africa',
+      China: 'Asia',
+      Japan: 'Asia',
+      India: 'Asia',
+      Australia: 'Australia',
+      // ... more mappings
+    };
+    return countryToContinentMap[country] || 'Other';
+  }
+
+  getKeys(obj: any): string[] {
+    return Object.keys(obj);
   }
 }
