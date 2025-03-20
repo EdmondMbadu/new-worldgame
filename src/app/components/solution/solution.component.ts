@@ -256,7 +256,7 @@ export class PostComponent implements OnInit {
     const listener = (e: ClipboardEvent) => {
       e.clipboardData!.setData(
         'text/plain',
-        `https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`
+        `https://newworld-game.org/solution-view-external/${this.solution.solutionId}`
       );
       e.preventDefault();
     };
