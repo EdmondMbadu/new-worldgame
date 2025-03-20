@@ -254,19 +254,21 @@
     
           <!-- SDGs Panel -->
           <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
-            <div class="font-semibold mb-2  text-lg
-                        text-slate-700 dark:text-gray-300">
-              SDGs
+            <div class="font-semibold mb-4 text-lg text-slate-700 dark:text-gray-300">
+              SDGs ({{currentSolution.sdgs!.length}})
             </div>
-            <!-- Example row of SDG placeholders + link icon -->
-            <div class="flex items-center space-x-4">
-              <a  *ngFor="let sd of currentSolution.sdgs"  href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank">
-                            
-                <img  class="object-cover mx-auto  rounded-t-lg h-48 p-2 md:h-auto md:w-24 md:rounded-none md:rounded-l-lg mb-4" [src]="data.sdgsPaths[sd]"alt="">
-
-               </a>
+            
+            <!-- SDGs Grid Layout -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <a *ngFor="let sd of currentSolution.sdgs" href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"
+                 class="flex flex-col items-center">
+                
+                <img class="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain rounded-lg shadow-md"
+                     [src]="data.sdgsPaths[sd]" alt="SDG">
+              </a>
             </div>
           </div>
+          
         </div>
       </div>
     </div>
