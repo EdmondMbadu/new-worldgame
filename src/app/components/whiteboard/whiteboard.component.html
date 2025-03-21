@@ -1,0 +1,87 @@
+<!-- Example usage with a dark background and a large whiteboard -->
+
+<!-- Navbar (you can keep your existing code) -->
+<app-navbar 
+  [sideBarSmall]="true" 
+  [sideBarBig]="false" 
+  [email]="this.auth.currentUser.email"
+  [firstName]="this.auth.currentUser.firstName" 
+  [lastName]="this.auth.currentUser.lastName" 
+  path="home" 
+  current=""
+></app-navbar>
+
+<!-- Dark background container -->
+<div class="dark:bg-slate-900 min-h-screen min-w-max">
+
+  <!-- Centered content -->
+  <div class="flex flex-col items-center p-4 mt-20">
+
+    <!-- Toolbar -->
+    <div class="flex flex-wrap justify-center gap-4 mb-4 text-gray-800 dark:text-gray-200">
+      <!-- Color Picker -->
+      <div class="flex items-center gap-2">
+        <label for="colorPicker" class="text-sm font-medium">Color:</label>
+        <input
+          id="colorPicker"
+          type="color"
+          [value]="currentColor"
+          (input)="changeColor($any($event.target).value)"
+          class="w-10 h-10 p-0 border-none cursor-pointer"
+        />
+      </div>
+
+      <!-- Brush Size -->
+      <div class="flex items-center gap-2">
+        <label for="brushSize" class="text-sm font-medium">Size:</label>
+        <input
+          id="brushSize"
+          type="range"
+          min="1"
+          max="20"
+          [value]="brushSize"
+          (input)="changeSize($any($event.target).value)"
+          class="cursor-pointer"
+        />
+        <span class="text-sm">{{ brushSize }}</span>
+      </div>
+
+      <!-- Eraser Toggle -->
+      <button
+        class="px-4 py-2 rounded-md text-white"
+        [ngClass]="eraserMode ? 'bg-red-600' : 'bg-blue-600'"
+        (click)="toggleEraser()"
+      >
+        {{ eraserMode ? 'Eraser On' : 'Eraser Off' }}
+      </button>
+
+      <!-- Clear -->
+      <button
+        class="px-4 py-2 rounded-md bg-gray-500 text-white"
+        (click)="clearCanvas()"
+      >
+        Clear
+      </button>
+
+      <!-- Save -->
+      <button
+        class="px-4 py-2 rounded-md bg-green-600 text-white"
+        (click)="saveCanvas()"
+      >
+        Save
+      </button>
+    </div>
+
+    <!-- Canvas -->
+    <canvas
+      #canvas
+      class="border border-gray-300 rounded shadow bg-white"
+      (mousedown)="startDrawing($event)"
+      (mousemove)="draw($event)"
+      (mouseup)="endDrawing()"
+      (mouseleave)="endDrawing()"
+    >
+      Your browser does not support HTML canvas.
+    </canvas>
+  </div>
+</div>

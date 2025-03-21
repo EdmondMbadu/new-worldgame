@@ -111,6 +111,7 @@ import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
 import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
 import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
+import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
 
 @NgModule({
   declarations: [
@@ -198,6 +199,7 @@ import { SolutionPreviewComponent } from './components/solution-preview/solution
     GlobalRegisterComponent,
     ManagementGsl2025Component,
     SolutionPreviewComponent,
+    WhiteboardComponent,
   ],
   imports: [
     BrowserModule,

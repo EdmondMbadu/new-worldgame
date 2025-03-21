@@ -66,6 +66,7 @@ import { GlobalLabComponent } from './blogs/global-lab/global-lab.component';
 import { GlobalRegisterComponent } from './blogs/global-register/global-register.component';
 import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
+import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -100,6 +101,12 @@ const routes: Routes = [
     component: DashboardComponent,
     canActivate: [AuthGuard],
     data: { requireParticipant: true },
+  },
+  {
+    path: 'whiteboard',
+    component: WhiteboardComponent,
+    canActivate: [AuthGuard],
+    // data: { requireParticipant: true },
   },
   {
     path: 'user-profile/:id',
