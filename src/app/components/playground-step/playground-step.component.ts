@@ -395,6 +395,8 @@ export class PlaygroundStepComponent {
           // alert('Error launching solution ');
         });
     }
+    // just mark that things were saved
+    this.saveSuccess = true;
   }
 
   saveSolutionStatusDirectly() {
