@@ -259,7 +259,7 @@ export class PlaygroundStepsComponent implements OnInit {
       'S4-H',
       'S4-I',
       'S4-J',
-      'S4-K',
+      // 'S4-K',
     ],
     ['S5'],
   ];
@@ -287,17 +287,35 @@ export class PlaygroundStepsComponent implements OnInit {
       'How is our solution part of a circular, regenerative, more equitable economy?',
     ],
     [
+      // i = 0
       `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where
-      we will test and first implement the solution?`,
+we will test and first implement the solution?`,
+
+      // i = 1
       'Cost 2. How much will our strategy cost to implement at scale?',
+
+      // i = 2
       'Where will we get the resources and funding needed to implement our solution, to do the above?',
+
+      // i = 3
       'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
-      'What are the results of implementing our strategy?',
-      `1) "What would be the results of providing everyone in a community ____________ (insert description of your strategy) on the local economy, jobs, environment, human health, and other social factors?`,
-      `2) What would be the results of providing everyone in the world  ____________ (insert description of your strategy) on the global economy, additional jobs, environment, human health, and other social factors?`,
-      'What does our implemented strategy look like, in more detail? (For this task ask one of our Ai colleagues to draw a picture of what the strategy will look like when implemented)',
+
+      // i = 4
       'What actions are needed in the next 6-12 months to get our solution implemented? Who will do what, when, where?',
+
+      // i = 5
+      'What does our implemented strategy look like, in more detail? (For this task ask one of our Ai colleagues to draw a picture of what the strategy will look like when implemented).',
+
+      // i = 6
+      'Results 1. What are the results of implementing our strategy? What would be the results of providing everyone in a community ____________ (insert description of your strategy) on the local economy, jobs, environment, human health, and other social factors?',
+
+      // i = 7
+      'Results 2. What would be the results of providing everyone in the world ____________ (insert description of your strategy) on the global economy, additional jobs, environment, human health, and other social factors?',
+
+      // i = 8
       'What would we do with $5000 to advance the strategy towards implementation?',
+
+      // i = 9
       'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
     ],
     ['Review Your Entire Strategy and Preview it'],
