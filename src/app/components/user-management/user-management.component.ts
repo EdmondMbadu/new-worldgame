@@ -20,6 +20,7 @@ export class UserManagementComponent implements OnInit {
     private time: TimeService,
     private data: DataService
   ) {}
+  searchTerm: string = '';
   showActionDropDown: boolean = false;
   userDetails: boolean[] = [];
   showSolutions: boolean[] = [];
@@ -30,16 +31,12 @@ export class UserManagementComponent implements OnInit {
   everySolution: Solution[] = [];
   ngOnInit(): void {
     this.auth.getALlUsers().subscribe((data) => {
-      this.allUsers = data;
-      // console.log('this is all users', this.allUsers);
-
-      // Sort the allUsers array by dateJoined in descending order
-      this.allUsers = this.allUsers.sort((a, b) => {
+      this.allUsers = data.sort((a, b) => {
         const dateA = this.data.parseDateMMDDYYYY(a.dateJoined!);
         const dateB = this.data.parseDateMMDDYYYY(b.dateJoined!);
-        // console.log('Parsed dates for sorting:', dateA, dateB);
-        return dateB - dateA; // Sort in descending order
+        return dateB - dateA; // descending
       });
+
       this.userDetails = Array.from(
         { length: this.allUsers.length },
         () => false
@@ -49,48 +46,29 @@ export class UserManagementComponent implements OnInit {
         () => false
       );
 
-      // Fetch all solutions after sorting users
+      // fetch solutions
       this.solution.getAllSolutionsFromAllAccounts().subscribe((solutions) => {
         this.everySolution = solutions;
-
-        // Iterate through all users
+        // do your existing logic for counting solutions, etc.
         for (let user of this.allUsers) {
           let solutionCount = 0;
           let solutionSubmittedCount = 0;
-
-          // Normalize the user's email by trimming spaces and converting to lowercase
           const normalizedUserEmail = user.email!.trim().toLowerCase();
 
-          // Iterate through all solutions to check if the user is a participant
-          for (let solution of this.everySolution) {
-            if (solution.participants && Array.isArray(solution.participants)) {
-              // Check if the user's email is in the participants array
-              const isParticipant = solution.participants.some(
-                (participant: { name: string }) =>
-                  participant.name.trim().toLowerCase() === normalizedUserEmail
+          for (let sol of this.everySolution) {
+            if (sol.participants && Array.isArray(sol.participants)) {
+              const isParticipant = sol.participants.some(
+                (p: { name: string }) =>
+                  p.name.trim().toLowerCase() === normalizedUserEmail
               );
-
               if (isParticipant) {
-                solutionCount++; // Increment the count if the user is a participant
-
-                // Check if the solution is submitted (finished is 'true')
-                if (solution.finished === 'true') {
-                  solutionSubmittedCount++; // Increment the count if the solution is submitted
+                solutionCount++;
+                if (sol.finished === 'true') {
+                  solutionSubmittedCount++;
                 }
               }
             }
           }
-
-          // Log the user details along with the number of solutions started and submitted
-          console.log(
-            user.firstName,
-            user.lastName,
-            user.email,
-            user.dateJoined,
-            user.goal,
-            solutionCount,
-            solutionSubmittedCount
-          );
           user.tempSolutionstarted = solutionCount.toString();
           user.tempSolutionSubmitted = solutionSubmittedCount.toString();
         }
@@ -98,13 +76,30 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
+  // A simple computed property that filters users by the search term.
+  get filteredUsers(): User[] {
+    if (!this.searchTerm.trim()) {
+      return this.allUsers;
+    }
+    const lowerTerm = this.searchTerm.toLowerCase();
+    return this.allUsers.filter((user) => {
+      const first = user.firstName?.toLowerCase() || '';
+      const last = user.lastName?.toLowerCase() || '';
+      const email = user.email?.toLowerCase() || '';
+      return (
+        first.includes(lowerTerm) ||
+        last.includes(lowerTerm) ||
+        email.includes(lowerTerm)
+      );
+    });
+  }
+
   toggleUserDetails(index: number) {
     this.userDetails[index] = !this.userDetails[index];
   }
+
   public findSolutionsByEmail(email: string, index: number) {
     const normalizedEmail = email.trim().toLowerCase();
-
-    // Filter everySolution to find solutions where the email is included in participants
     this.userSolutions = this.everySolution.filter(
       (solution) =>
         solution.participants &&
@@ -114,16 +109,15 @@ export class UserManagementComponent implements OnInit {
             participant.name.trim().toLowerCase() === normalizedEmail
         )
     );
-    this.userFinishedSolutions = this.userSolutions.filter((solution) => {
-      return solution.finished === 'true';
-    });
-    this.userUnfinishedSolutions = this.userSolutions.filter((solution) => {
-      return solution.finished !== 'true';
-    });
-    console.log('this user solutions', this.userSolutions);
-
+    this.userFinishedSolutions = this.userSolutions.filter(
+      (solution) => solution.finished === 'true'
+    );
+    this.userUnfinishedSolutions = this.userSolutions.filter(
+      (solution) => solution.finished !== 'true'
+    );
     this.toggleShowSolution(index);
   }
+
   toggleShowSolution(index: number) {
     this.showSolutions[index] = !this.showSolutions[index];
   }
