@@ -112,6 +112,7 @@ import { GlobalRegisterComponent } from './blogs/global-register/global-register
 import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
 import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
+import { ListFinishedSolutionsComponent } from './components/list-finished-solutions/list-finished-solutions.component';
 
 @NgModule({
   declarations: [
@@ -200,6 +201,7 @@ import { WhiteboardComponent } from './components/whiteboard/whiteboard.componen
     ManagementGsl2025Component,
     SolutionPreviewComponent,
     WhiteboardComponent,
+    ListFinishedSolutionsComponent,
   ],
   imports: [
     BrowserModule,

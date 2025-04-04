@@ -1,3 +1,4 @@
+
 <app-navbar [hoveredPendingPath]="'bg-gray-100 dark:bg-gray-700'"  [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPagePending]="true"></app-navbar>
 <div class="dark:bg-slate-900 min-h-screen">
     <div class="container flex flex-row rounded-md shadow-sm mx-auto justify-center my-4 mt-20" role="group">
@@ -5,18 +6,18 @@
        Pending Solutions
         </button>
         <button routerLink="/list-finished-solutions" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-            Submitted Solutions
+          Submitted Solutions
             </button>
    
         
       </div>
     <div class="flex flex-col mx-auto justify-center ">
         <div class=" flex flex-col mx-auto justify-center mb-6 dark:text-white">
-            <h1 class="text-center text-xl font-bold font-Nunito">{{title}} ({{pending}})</h1>
+            <h1 class="text-center text-xl font-bold font-Nunito">{{title}} ({{completed}})</h1>
         </div> 
             <div class="flex flex-col justify-center mx-auto ">
                 <app-problem-list  (deleteSolutionEvent)="receiveConfirmationDelete($event)"
-                (leaveSolutionEvent)="receiveLeaveSolution($event)" [path]="'/dashboard'"  [solutions]="pendingSolutions" [margin]="'md:mx-16 p-4'"></app-problem-list>
+                (leaveSolutionEvent)="receiveLeaveSolution($event)" [path]="'/dashboard'"  [solutions]="completedSolutions" [margin]="'md:mx-16 p-4'"></app-problem-list>
             
               
                 

@@ -67,6 +67,7 @@ import { GlobalRegisterComponent } from './blogs/global-register/global-register
 import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
 import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
+import { ListFinishedSolutionsComponent } from './components/list-finished-solutions/list-finished-solutions.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -147,6 +148,11 @@ const routes: Routes = [
   {
     path: 'problem-list-view',
     component: ProblemListViewComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'list-finished-solutions',
+    component: ListFinishedSolutionsComponent,
     canActivate: [AuthGuard],
   },
   {

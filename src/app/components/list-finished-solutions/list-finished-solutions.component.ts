@@ -1,24 +1,24 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
-import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-problem-list-view',
-  templateUrl: './problem-list-view.component.html',
-  styleUrls: ['./problem-list-view.component.css'],
+  selector: 'app-list-finished-solutions',
+
+  templateUrl: './list-finished-solutions.component.html',
+  styleUrl: './list-finished-solutions.component.css',
 })
-export class ProblemListViewComponent implements OnInit {
+export class ListFinishedSolutionsComponent implements OnInit {
   solutions: Solution[] = [];
   pendingSolutions: Solution[] = [];
-
+  completedSolutions: Solution[] = [];
   confirmationDeleteSolution: boolean = false;
   confirmationLeaveSolution: boolean = false;
   currentSolution?: Solution;
-  pending: number = 0;
 
+  completed: number = 0;
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -26,25 +26,27 @@ export class ProblemListViewComponent implements OnInit {
   ) {
     solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       this.solutions = data;
-      console.log('all solutions I am in', this.solutions);
-      this.findPendingSolutions();
+
+      this.findCompletedSolutions();
     });
   }
   ngOnInit(): void {
     window.scroll(0, 0);
   }
-  @Input() title: string = `Pending Solutions`;
+  @Input() title: string = `Submitted Solutions`;
 
-  async findPendingSolutions() {
-    this.pendingSolutions = [];
+  async findCompletedSolutions() {
+    this.completedSolutions = [];
 
     for (let s of this.solutions) {
-      if (s.finished === undefined || s.finished !== 'true') {
-        this.pendingSolutions.push(s);
+      if (s.finished === 'true') {
+        console.log('completed solution', s);
+        this.completedSolutions.push(s);
       }
     }
-    this.pending = this.pendingSolutions.length;
+    this.completed = this.completedSolutions.length;
   }
+
   toggleConfirmationDeleteSolution() {
     console.log('button clicked ');
     this.confirmationDeleteSolution = !this.confirmationDeleteSolution;
