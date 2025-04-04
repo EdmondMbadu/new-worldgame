@@ -7,6 +7,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-solution-preview',
@@ -464,5 +466,309 @@ export class SolutionPreviewComponent implements OnInit {
 
     this.finallySubmitSolution();
     // Reset submission response to allow future submissions, but only after current process is complete
+  }
+
+  // generatePdfFromHtml(): void {
+  //   let htmlContent = this.currentSolution.content!;
+  //   console.log('html content', htmlContent);
+  //   // 1. Create a new jsPDF instance
+  //   const doc = new jsPDF({
+  //     unit: 'pt', // 'pt' for points, 'px' for pixels, etc.
+  //     format: 'letter', // or 'a4', 'legal', etc.
+  //   });
+
+  //   // 2. Use the .html(...) function to parse and render HTML
+  //   doc.html(htmlContent, {
+  //     x: 20, // left margin
+  //     y: 20, // top margin
+  //     width: 560, // rendering width (approx. 8.5in - margins for letter)
+  //     // You can adjust "windowWidth" if your HTML is wide and you want scaling
+  //     // windowWidth: 800,
+
+  //     // 3. Callback runs once HTML rendering finishes
+  //     callback: function (doc) {
+  //       // 4. Save the PDF
+  //       doc.save('StrategyReview.pdf');
+  //     },
+  //   });
+  // }
+
+  // async generatePdfFromHtml() {
+  //   // 1. Create a hidden container in the DOM
+  //   const container = document.createElement('div');
+  //   container.style.position = 'absolute';
+  //   container.style.left = '-9999px'; // hide offscreen
+  //   // Force a narrower width so text wraps nicely
+  //   container.style.width = '600px';
+  //   // Add padding if desired
+  //   container.style.padding = '20px';
+  //   // Ensure long text wraps
+  //   container.style.whiteSpace = 'normal';
+  //   container.style.wordWrap = 'break-word';
+
+  //   container.innerHTML = this.currentSolution.content ?? '';
+  //   document.body.appendChild(container);
+
+  //   // 2. Use html2canvas to make a higher-resolution screenshot
+  //   const canvas = await html2canvas(container, {
+  //     scale: 3, // Increase if still too small; 3 or 4 often looks good
+  //   });
+
+  //   // 3. Convert canvas to image data
+  //   const imgData = canvas.toDataURL('image/png');
+
+  //   // 4. Create jsPDF (Letter in pts: 612 x 792)
+  //   const pdf = new jsPDF('p', 'pt', 'letter');
+  //   const pdfWidth = pdf.internal.pageSize.getWidth();
+  //   const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  //   // Keep aspect ratio of the rendered canvas
+  //   const imgWidth = canvas.width;
+  //   const imgHeight = canvas.height;
+  //   const ratio = imgHeight / imgWidth;
+
+  //   // Add margins so it doesn't run edge to edge
+  //   const marginLeft = 40;
+  //   const marginTop = 40;
+  //   const usableWidth = pdfWidth - marginLeft * 2; // room for left+right margins
+  //   const usableHeight = usableWidth * ratio;
+
+  //   // 5. Add the image to the PDF
+  //   pdf.addImage(
+  //     imgData,
+  //     'PNG',
+  //     marginLeft,
+  //     marginTop,
+  //     usableWidth,
+  //     usableHeight
+  //   );
+
+  //   // 6. Save
+  //   pdf.save('StrategyReview.pdf');
+
+  //   // 7. Cleanup
+  //   document.body.removeChild(container);
+  // }
+  // async generatePdfFromHtml() {
+  //   let htmlContent = this.currentSolution.content!;
+  //   // 1) Create a hidden container so we can render the HTML
+  //   const container = document.createElement('div');
+  //   container.style.position = 'absolute';
+  //   container.style.left = '-9999px';
+  //   // Force a narrower width so text wraps and doesn't become too wide
+  //   container.style.width = '600px';
+  //   container.style.padding = '20px';
+  //   container.style.whiteSpace = 'normal';
+  //   container.style.wordWrap = 'break-word';
+
+  //   container.innerHTML = htmlContent;
+  //   document.body.appendChild(container);
+
+  //   // 2) Use html2canvas at a decent scale for better text quality
+  //   const canvas = await html2canvas(container, {
+  //     scale: 2,
+  //   });
+
+  //   // Cleanup the DOM element
+  //   document.body.removeChild(container);
+
+  //   // 3) Prepare jsPDF (Letter size in points: 612 x 792)
+  //   const pdf = new jsPDF('p', 'pt', 'letter');
+
+  //   // We’ll define margins in points
+  //   const marginLeft = 40;
+  //   const marginTop = 40;
+  //   const pageWidth = pdf.internal.pageSize.getWidth();
+  //   const pageHeight = pdf.internal.pageSize.getHeight();
+
+  //   // 4) Calculate how to scale the canvas to fit page width inside margins
+  //   const usableWidth = pageWidth - marginLeft * 2;
+  //   const pdfHeightUsable = pageHeight - marginTop * 2;
+  //   const scaleFactor = usableWidth / canvas.width;
+  //   // If we scale the full canvas width to fit the PDF, its height in PDF points is:
+  //   const scaledCanvasHeight = canvas.height * scaleFactor;
+
+  //   // 5) Figure out how many pages we need
+  //   const totalPages = Math.ceil(scaledCanvasHeight / pdfHeightUsable);
+
+  //   // 6) Slice the original canvas into chunks, one per page
+  //   let pageCanvas: HTMLCanvasElement;
+  //   let pageCtx: CanvasRenderingContext2D | null;
+  //   let yOffset = 0; // how far we've drawn so far (in *canvas* coords)
+
+  //   for (let page = 0; page < totalPages; page++) {
+  //     // Create a "pageCanvas" to hold one chunk of the original
+  //     pageCanvas = document.createElement('canvas');
+  //     pageCanvas.width = canvas.width;
+  //     // Height of one page worth of canvas:
+  //     const pageCanvasHeight = Math.min(
+  //       canvas.height - yOffset,
+  //       pdfHeightUsable / scaleFactor
+  //     );
+  //     pageCanvas.height = pageCanvasHeight;
+
+  //     pageCtx = pageCanvas.getContext('2d');
+  //     if (!pageCtx) {
+  //       continue;
+  //     }
+
+  //     // Draw a slice of the full canvas onto this page canvas
+  //     pageCtx.drawImage(
+  //       canvas,
+  //       0, // source x
+  //       yOffset, // source y
+  //       canvas.width, // source width
+  //       pageCanvasHeight, // source height
+  //       0,
+  //       0, // destination x, y
+  //       canvas.width,
+  //       pageCanvasHeight
+  //     );
+
+  //     // Convert that slice to an image
+  //     const pageImgData = pageCanvas.toDataURL('image/png');
+
+  //     // 7) Add to PDF
+  //     if (page > 0) {
+  //       pdf.addPage();
+  //     }
+
+  //     // The chunk's height in the PDF after scaling
+  //     const chunkPdfHeight = pageCanvasHeight * scaleFactor;
+
+  //     pdf.addImage(
+  //       pageImgData,
+  //       'PNG',
+  //       marginLeft,
+  //       marginTop,
+  //       usableWidth,
+  //       chunkPdfHeight
+  //     );
+
+  //     // Increment the yOffset for the next slice
+  //     yOffset += pageCanvasHeight;
+  //   }
+
+  //   // 8) Save the PDF
+  //   pdf.save(`${this.currentSolution.title}.pdf`);
+  // }
+
+  async generatePdfFromHtml() {
+    let htmlContent = this.currentSolution.content!;
+    // 1) Create a hidden container so we can render the HTML
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.width = '600px';
+    container.style.padding = '20px';
+    container.style.whiteSpace = 'normal';
+    container.style.wordWrap = 'break-word';
+
+    container.innerHTML = htmlContent;
+    document.body.appendChild(container);
+
+    // --- Wait for all images to load ---
+    const images = Array.from(container.getElementsByTagName('img'));
+    // Create an array of Promises that resolve when each image loads
+    const loadPromises = images.map((img) => {
+      return new Promise<void>((resolve, reject) => {
+        // If the image is from a different origin, may need crossOrigin
+        img.crossOrigin = 'anonymous';
+
+        // If already loaded (cached), onload might not fire. So check:
+        if (img.complete) {
+          resolve();
+        } else {
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+        }
+      });
+    });
+
+    // Wait for all image Promises
+    await Promise.allSettled(loadPromises);
+
+    // 2) Use html2canvas at a decent scale for better text/image quality
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      // Use CORS if needed for external images
+      useCORS: true,
+    });
+
+    // Cleanup the DOM element
+    document.body.removeChild(container);
+
+    // 3) Prepare jsPDF (Letter size in points: 612 x 792)
+    const pdf = new jsPDF('p', 'pt', 'letter');
+
+    // We'll define margins in points
+    const marginLeft = 40;
+    const marginTop = 40;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    // 4) Calculate how to scale the canvas to fit page width inside margins
+    const usableWidth = pageWidth - marginLeft * 2;
+    const pdfHeightUsable = pageHeight - marginTop * 2;
+    const scaleFactor = usableWidth / canvas.width;
+    const scaledCanvasHeight = canvas.height * scaleFactor;
+
+    // 5) Figure out how many pages we need
+    const totalPages = Math.ceil(scaledCanvasHeight / pdfHeightUsable);
+
+    // 6) Slice the original canvas into chunks, one per page
+    let yOffset = 0; // how far we've drawn so far (canvas coords)
+    for (let page = 0; page < totalPages; page++) {
+      // Create a temporary canvas for one "page" slice
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      const pageCanvasHeight = Math.min(
+        canvas.height - yOffset,
+        pdfHeightUsable / scaleFactor
+      );
+      pageCanvas.height = pageCanvasHeight;
+
+      const pageCtx = pageCanvas.getContext('2d');
+      if (!pageCtx) continue;
+
+      // Draw a slice of the full canvas onto this page canvas
+      pageCtx.drawImage(
+        canvas,
+        0,
+        yOffset,
+        canvas.width,
+        pageCanvasHeight,
+        0,
+        0,
+        canvas.width,
+        pageCanvasHeight
+      );
+
+      // Convert slice to image
+      const pageImgData = pageCanvas.toDataURL('image/png');
+
+      // Add to PDF
+      if (page > 0) {
+        pdf.addPage();
+      }
+
+      const chunkPdfHeight = pageCanvasHeight * scaleFactor;
+      pdf.addImage(
+        pageImgData,
+        'PNG',
+        marginLeft,
+        marginTop,
+        usableWidth,
+        chunkPdfHeight
+      );
+
+      yOffset += pageCanvasHeight;
+    }
+
+    const pdfUrl = pdf.output('bloburl');
+    window.open(pdfUrl, '_blank');
+    // 7) Save the PDF
+
+    // pdf.save(`${this.currentSolution.title}.pdf`);
   }
 }

@@ -109,21 +109,104 @@
 
                     </div>
                     <!-- TOP BUTTONS -->
-                    <div class="flex justify-between px-4 mx-auto max-w-screen-xl mt-4 space-x-4">
+                    <!-- <div class="flex justify-between px-4 mx-auto max-w-screen-xl mt-4 space-x-4"> -->
                     <!-- Go Back to Edit -->
-                    <button 
+                    <!-- <button 
                     (click)="router.navigate(['/playground-steps', solutionId])" 
                     class="text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-lg text-sm px-4 py-2">
                     Go Back to Edit
-                    </button>
+                    </button> -->
+                    <!-- <svg (click)="router.navigate(['/playground-steps', solutionId])"  xmlns="http://www.w3.org/2000/svg" class="cursor-pointer fill-black-500 hover:cursor-pointer dark:fill-gray-200 hover:fill-red-400 dark:hover:fill-red-500" height="36px" viewBox="0 -960 960 960" width="36px" ><path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/></svg>
 
+                    <svg  (click)="generatePdfFromHtml()"  class="cursor-pointer fill-black-500 hover:cursor-pointer dark:fill-gray-200 hover:fill-red-400 dark:hover:fill-red-500" xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" ><path d="M360-460h40v-80h40q17 0 28.5-11.5T480-580v-40q0-17-11.5-28.5T440-660h-80v200Zm40-120v-40h40v40h-40Zm120 120h80q17 0 28.5-11.5T640-500v-120q0-17-11.5-28.5T600-660h-80v200Zm40-40v-120h40v120h-40Zm120 40h40v-80h40v-40h-40v-40h40v-40h-80v200ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/></svg>
+                    <svg class="cursor-pointer fill-black-500 hover:cursor-pointer dark:fill-gray-200 hover:fill-red-400 dark:hover:fill-red-500" xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#1f1f1f"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/></svg> -->
+                    <!-- <button 
+                    (click)="generatePdfFromHtml()" 
+                    class="text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-lg text-sm px-4 py-2">
+                   Generate PDF
+                    </button> -->
                     <!-- Submit -->
-                    <button 
+                    <!-- <button 
                     (click)="toggleSubmission()" 
                     class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2">
                     Submit
-                    </button>
-                    </div>
+                    </button> -->
+                    <!-- </div> -->
+
+                    <div class="flex justify-between px-4 mx-auto max-w-screen-xl mt-4 space-x-4">
+
+                        <!-- Go Back to Edit -->
+                        <div class="relative group">
+                          <svg 
+                            (click)="router.navigate(['/playground-steps', solutionId])"
+                            xmlns="http://www.w3.org/2000/svg" 
+                            class="cursor-pointer fill-black-500 dark:fill-gray-200
+                                   hover:fill-red-400 dark:hover:fill-red-500"
+                            height="36px" 
+                            viewBox="0 -960 960 960" 
+                            width="36px"
+                          >
+                            <path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/>
+                          </svg>
+                          <!-- Tooltip -->
+                          <span 
+                            class="absolute bottom-[-2.5rem] left-1/2 -translate-x-1/2 
+                                   bg-black text-white text-xs px-2 py-1 rounded 
+                                   hidden group-hover:block whitespace-nowrap"
+                          >
+                            Go Back to Edit
+                          </span>
+                        </div>
+                      
+                        <!-- Generate PDF -->
+                        <div class="relative group">
+                          <svg 
+                            (click)="generatePdfFromHtml()"  
+                            class="cursor-pointer fill-black-500 dark:fill-gray-200
+                                   hover:fill-red-400 dark:hover:fill-red-500"
+                            xmlns="http://www.w3.org/2000/svg" 
+                            height="36px" 
+                            viewBox="0 -960 960 960" 
+                            width="36px"
+                          >
+                            <path d="M360-460h40v-80h40q17 0 28.5-11.5T480-580v-40q0-17-11.5-28.5T440-660h-80v200Zm40-120v-40h40v40h-40Zm120 120h80q17 0 28.5-11.5T640-500v-120q0-17-11.5-28.5T600-660h-80v200Zm40-40v-120h40v120h-40Zm120 40h40v-80h40v-40h-40v-40h40v-40h-80v200ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/>
+                          </svg>
+                          <!-- Tooltip -->
+                          <span 
+                            class="absolute bottom-[-2.5rem] left-1/2 -translate-x-1/2 
+                                   bg-black text-white text-xs px-2 py-1 rounded 
+                                   hidden group-hover:block whitespace-nowrap"
+                          >
+                            Generate PDF
+                          </span>
+                        </div>
+                      
+                        <!-- Submit Solution -->
+                        <div class="relative group">
+                          <svg 
+                          (click)="toggleSubmission()" 
+                            class="cursor-pointer fill-black-500 dark:fill-gray-200
+                                   hover:fill-red-400 dark:hover:fill-red-500" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            height="36px" 
+                            viewBox="0 -960 960 960" 
+                            width="36px" 
+                            fill="#1f1f1f"
+                          >
+                            <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
+                          </svg>
+                          <!-- Tooltip -->
+                          <span 
+                            class="absolute bottom-[-2.5rem] left-1/2 -translate-x-1/2 
+                                   bg-black text-white text-xs px-2 py-1 rounded 
+                                   hidden group-hover:block whitespace-nowrap"
+                          >
+                            Submit Solution
+                          </span>
+                        </div>
+                      
+                      </div>
+                      
                   
                 </address>
                 <!-- <h1 class="mb-4 text-3xl font-extrabold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white ">{{currentSolution.title}}</h1>
@@ -350,21 +433,96 @@
                 <p class ="text-gray-500 dark:text-gray-400">{{comment.content}}</p>
                 
             </article>
-            <div class="flex justify-center items-center space-x-4 my-8">
-                <!-- Go Back to Edit -->
+            <!-- <div class="flex justify-center items-center space-x-4 my-8">
+               
                 <button 
                   (click)="router.navigate(['/playground-steps', solutionId])" 
                   class="text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-lg text-sm px-4 py-2">
                   Go Back to Edit
                 </button>
         
-                <!-- Submit -->
+             
                 <button 
                   (click)="toggleSubmission()" 
                   class="text-white bg-red-700 hover:bg-red-800 font-medium rounded-lg text-sm px-4 py-2">
                   Submit
                 </button>
+              </div> -->
+              <div class="flex justify-between px-4 mx-auto max-w-screen-xl mt-4 space-x-4">
+
+                <!-- Go Back to Edit -->
+                <div class="relative group">
+                  <svg 
+                    (click)="router.navigate(['/playground-steps', solutionId])"
+                    xmlns="http://www.w3.org/2000/svg" 
+                    class="cursor-pointer fill-black-500 dark:fill-gray-200
+                           hover:fill-red-400 dark:hover:fill-red-500"
+                    height="36px" 
+                    viewBox="0 -960 960 960" 
+                    width="36px"
+                  >
+                    <path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/>
+                  </svg>
+                  <!-- Tooltip -->
+                  <span 
+                    class="absolute bottom-[-2.5rem] left-1/2 -translate-x-1/2 
+                           bg-black text-white text-xs px-2 py-1 rounded 
+                           hidden group-hover:block whitespace-nowrap"
+                  >
+                    Go Back to Edit
+                  </span>
+                </div>
+              
+                <!-- Generate PDF -->
+                <div class="relative group">
+                  <svg 
+                    (click)="generatePdfFromHtml()"  
+                    class="cursor-pointer fill-black-500 dark:fill-gray-200
+                           hover:fill-red-400 dark:hover:fill-red-500"
+                    xmlns="http://www.w3.org/2000/svg" 
+                    height="36px" 
+                    viewBox="0 -960 960 960" 
+                    width="36px"
+                  >
+                    <path d="M360-460h40v-80h40q17 0 28.5-11.5T480-580v-40q0-17-11.5-28.5T440-660h-80v200Zm40-120v-40h40v40h-40Zm120 120h80q17 0 28.5-11.5T640-500v-120q0-17-11.5-28.5T600-660h-80v200Zm40-40v-120h40v120h-40Zm120 40h40v-80h40v-40h-40v-40h40v-40h-80v200ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z"/>
+                  </svg>
+                  <!-- Tooltip -->
+                  <span 
+                    class="absolute bottom-[-2.5rem] left-1/2 -translate-x-1/2 
+                           bg-black text-white text-xs px-2 py-1 rounded 
+                           hidden group-hover:block whitespace-nowrap"
+                  >
+                    Generate PDF
+                  </span>
+                </div>
+              
+                <!-- Submit Solution -->
+                <div class="relative group">
+                  <svg 
+                  (click)="toggleSubmission()" 
+                    class="cursor-pointer fill-black-500 dark:fill-gray-200
+                           hover:fill-red-400 dark:hover:fill-red-500" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    height="36px" 
+                    viewBox="0 -960 960 960" 
+                    width="36px" 
+                    fill="#1f1f1f"
+                  >
+                    <path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/>
+                  </svg>
+                  <!-- Tooltip -->
+                  <span 
+                    class="absolute bottom-[-2.5rem] left-1/2 -translate-x-1/2 
+                           bg-black text-white text-xs px-2 py-1 rounded 
+                           hidden group-hover:block whitespace-nowrap"
+                  >
+                    Submit Solution
+                  </span>
+                </div>
+              
               </div>
+              
+              
 
         </article>
     </div>
