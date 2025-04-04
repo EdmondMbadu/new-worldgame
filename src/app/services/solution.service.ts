@@ -6,7 +6,17 @@ import {
 import { Evaluation, Roles, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
-import { combineLatest, count, last, map, Observable } from 'rxjs';
+import {
+  combineLatest,
+  count,
+  from,
+  last,
+  map,
+  Observable,
+  of,
+  switchMap,
+  take,
+} from 'rxjs';
 import { ChallengePage, Tournament, User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
 import { Email } from '../components/create-playground/create-playground.component';
@@ -422,6 +432,7 @@ export class SolutionService {
     );
     return solutionRef.delete();
   }
+
   updateSolutionTitle(solutionId: string, title: string) {
     const data = {
       title: title,

@@ -203,6 +203,13 @@ export class SolutionDetailsComponent implements OnInit {
       alert('Enter a valid email!');
     }
   }
+  get isAuthorOfSolution(): boolean {
+    if (this.currentSolution && this.auth.currentUser) {
+      return this.currentSolution.authorAccountId === this.auth.currentUser.uid;
+    }
+    return false;
+    // return this.challengePage.authorId === this.auth.currentUser.uid;
+  }
 
   removeEvaluatorFromSolution(email: string) {
     // Ensure evaluators array exists

@@ -40,10 +40,22 @@ export class ProblemListComponent {
     'medardgabel@gmail.com',
     'bucky@gmail.com',
   ];
-  @Output() notify: EventEmitter<Solution> = new EventEmitter();
+  @Output() deleteSolutionEvent = new EventEmitter<Solution>();
+  @Output() leaveSolutionEvent = new EventEmitter<Solution>();
 
   sendDeleteConfirmation(currentSolution: Solution) {
-    this.notify.emit(currentSolution);
+    this.deleteSolutionEvent.emit(currentSolution);
+  }
+
+  sendLeaveSolutionConfirmation(currentSolution: Solution) {
+    this.leaveSolutionEvent.emit(currentSolution);
   }
   imagesPath: string = '../../../assets/img/user.png';
+
+  isAuthorOfSolution(solution: Solution): boolean {
+    if (this.currentUser && solution) {
+      return solution.authorAccountId === this.auth.currentUser.uid;
+    }
+    return false;
+  }
 }
