@@ -104,7 +104,7 @@ const routes: Routes = [
     data: { requireParticipant: true },
   },
   {
-    path: 'whiteboard',
+    path: 'whiteboard/:id',
     component: WhiteboardComponent,
     canActivate: [AuthGuard],
     // data: { requireParticipant: true },
