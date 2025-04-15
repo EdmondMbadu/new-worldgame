@@ -51,6 +51,7 @@ export class Solution {
   supporters?: number;
   documents?: Avatar[];
   preview?: string;
+  board?: string;
 }
 
 export class Evaluation {

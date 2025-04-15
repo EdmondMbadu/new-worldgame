@@ -129,35 +129,44 @@ export class TimeService {
     return formatted;
   }
   formatDate(dateString: string): string {
-    // Split the dateString into its components
-    const parts = dateString.split('-');
-    // Construct a new Date object using the parts
-    // Note: Month is 0-indexed in JavaScript Date, so subtract 1 from the month part
-    const date = new Date(
-      parseInt(parts[2], 10), // Year
-      parseInt(parts[0], 10) - 1, // Month (0-indexed)
-      parseInt(parts[1], 10), // Day
-      parseInt(parts[3], 10), // Hours
-      parseInt(parts[4], 10), // Minutes
-      parseInt(parts[5], 10) // Seconds
-    );
+    // If the input is empty or null, return a fallback
+    if (!dateString) {
+      return '';
+    }
 
-    // Use Intl.DateTimeFormat to format the date part
+    const parts = dateString.split('-');
+    // Ensure we have exactly 6 parts (month, day, year, hour, minute, second)
+    if (parts.length < 6) {
+      return '';
+    }
+
+    const year = parseInt(parts[2], 10);
+    const month = parseInt(parts[0], 10) - 1; // JS months are zero-indexed
+    const day = parseInt(parts[1], 10);
+    const hour = parseInt(parts[3], 10);
+    const minute = parseInt(parts[4], 10);
+    const second = parseInt(parts[5], 10);
+
+    const date = new Date(year, month, day, hour, minute, second);
+
+    // Check if date is invalid
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+
     const formattedDate = new Intl.DateTimeFormat('en-US', {
-      weekday: 'short', // "Sun" for Sunday
-      month: 'long', // "March" for 3
-      day: 'numeric', // "24"
+      weekday: 'short',
+      month: 'long',
+      day: 'numeric',
     }).format(date);
 
-    // Use Intl.DateTimeFormat to format the time part
     const formattedTime = new Intl.DateTimeFormat('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       second: '2-digit',
-      hour12: true, // Use AM/PM
+      hour12: true,
     }).format(date);
 
-    // Combine the formatted date and time parts
     return `${formattedDate}, ${formattedTime}`;
   }
 

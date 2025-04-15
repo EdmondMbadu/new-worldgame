@@ -56,6 +56,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() sideBarBig: boolean = true;
   @Input() sideBarSmall: boolean = false;
   @Input() currentPageEvaluation: boolean = false;
+  @Input() currentPageDiscover: boolean = false;
   @Input() currentPagePending: boolean = false;
   @Input() currentPageAbout: boolean = false;
   @Input() currentPageJoinNow: boolean = false;
@@ -79,6 +80,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() hoveredStartLabPath: string = ``;
   @Input() hoveredSolutionTourPath: string = ``;
   @Input() hoveredOtherAisPath: string = ``;
+  @Input() hoveredDiscoverPath: string = ``;
 
   beta: boolean = true;
   lab: boolean = true;

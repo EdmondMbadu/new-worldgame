@@ -497,389 +497,8 @@ export class SolutionPreviewComponent implements OnInit {
   //   });
   // }
 
-  // async generatePdfFromHtml() {
-  //   // 1. Create a hidden container in the DOM
-  //   const container = document.createElement('div');
-  //   container.style.position = 'absolute';
-  //   container.style.left = '-9999px'; // hide offscreen
-  //   // Force a narrower width so text wraps nicely
-  //   container.style.width = '600px';
-  //   // Add padding if desired
-  //   container.style.padding = '20px';
-  //   // Ensure long text wraps
-  //   container.style.whiteSpace = 'normal';
-  //   container.style.wordWrap = 'break-word';
-
-  //   container.innerHTML = this.currentSolution.content ?? '';
-  //   document.body.appendChild(container);
-
-  //   // 2. Use html2canvas to make a higher-resolution screenshot
-  //   const canvas = await html2canvas(container, {
-  //     scale: 3, // Increase if still too small; 3 or 4 often looks good
-  //   });
-
-  //   // 3. Convert canvas to image data
-  //   const imgData = canvas.toDataURL('image/png');
-
-  //   // 4. Create jsPDF (Letter in pts: 612 x 792)
-  //   const pdf = new jsPDF('p', 'pt', 'letter');
-  //   const pdfWidth = pdf.internal.pageSize.getWidth();
-  //   const pdfHeight = pdf.internal.pageSize.getHeight();
-
-  //   // Keep aspect ratio of the rendered canvas
-  //   const imgWidth = canvas.width;
-  //   const imgHeight = canvas.height;
-  //   const ratio = imgHeight / imgWidth;
-
-  //   // Add margins so it doesn't run edge to edge
-  //   const marginLeft = 40;
-  //   const marginTop = 40;
-  //   const usableWidth = pdfWidth - marginLeft * 2; // room for left+right margins
-  //   const usableHeight = usableWidth * ratio;
-
-  //   // 5. Add the image to the PDF
-  //   pdf.addImage(
-  //     imgData,
-  //     'PNG',
-  //     marginLeft,
-  //     marginTop,
-  //     usableWidth,
-  //     usableHeight
-  //   );
-
-  //   // 6. Save
-  //   pdf.save('StrategyReview.pdf');
-
-  //   // 7. Cleanup
-  //   document.body.removeChild(container);
-  // }
-
-  // async generatePdfFromHtml() {
-  //   // --- 1) Build a new container with the logo, title, team members, and content ---
-  //   const container = document.createElement('div');
-  //   // Basic styling to ensure it stays off-screen and doesn't affect the layout
-  //   container.style.position = 'absolute';
-  //   container.style.left = '-9999px';
-  //   container.style.width = '600px';
-  //   container.style.padding = '20px';
-  //   container.style.whiteSpace = 'normal';
-  //   container.style.wordWrap = 'break-word';
-  //   container.style.fontFamily = 'Arial, sans-serif'; // Example of custom font
-
-  //   // -- (A) Insert the logo at the top --
-  //   const logoImg = document.createElement('img');
-  //   logoImg.src = '../../../assets/img/earth-triangle-test.png';
-  //   // Adjust as you see fit
-  //   logoImg.style.display = 'block';
-  //   logoImg.style.margin = '0 auto 20px';
-  //   logoImg.style.width = '80px';
-  //   container.appendChild(logoImg);
-
-  //   // -- (B) Add the Solution Title --
-  //   const titleElement: any = document.createElement('h2');
-  //   titleElement.textContent = this.currentSolution.title;
-  //   titleElement.style.textAlign = 'center';
-  //   titleElement.style.marginBottom = '20px';
-  //   container.appendChild(titleElement);
-
-  //   // -- (C) Add a "Contributors" heading (optional) --
-  //   const contributorsHeader = document.createElement('h3');
-  //   contributorsHeader.textContent = 'Contributors';
-  //   contributorsHeader.style.textDecoration = 'underline';
-  //   contributorsHeader.style.marginBottom = '10px';
-  //   container.appendChild(contributorsHeader);
-
-  //   // -- (D) Display the team members in a nice list --
-  //   const teamList = document.createElement('ul');
-  //   teamList.style.listStyleType = 'circle';
-  //   teamList.style.paddingLeft = '20px';
-
-  //   this.teamMembers.forEach((member) => {
-  //     const li = document.createElement('li');
-  //     li.textContent = `${member.firstName} ${member.lastName}`;
-  //     li.style.marginBottom = '6px';
-  //     teamList.appendChild(li);
-  //   });
-
-  //   container.appendChild(teamList);
-
-  //   // -- (E) Add a small separator or spacing after the list --
-  //   const hrElement = document.createElement('hr');
-  //   hrElement.style.margin = '20px 0';
-  //   container.appendChild(hrElement);
-
-  //   // -- (F) Finally, add the existing solution content below everything else --
-  //   const contentDiv = document.createElement('div');
-  //   contentDiv.innerHTML = this.currentSolution.content!;
-  //   container.appendChild(contentDiv);
-
-  //   // -- Add the container to DOM (so images, etc., can load properly) --
-  //   document.body.appendChild(container);
-
-  //   // --- 2) Wait for all images within the container to load ---
-  //   const images = Array.from(container.getElementsByTagName('img'));
-  //   const loadPromises = images.map((img) => {
-  //     return new Promise<void>((resolve, reject) => {
-  //       img.crossOrigin = 'anonymous';
-  //       if (img.complete) {
-  //         resolve();
-  //       } else {
-  //         img.onload = () => resolve();
-  //         img.onerror = () => reject();
-  //       }
-  //     });
-  //   });
-  //   await Promise.allSettled(loadPromises);
-
-  //   // --- 3) Render to canvas with html2canvas ---
-  //   const canvas = await html2canvas(container, {
-  //     scale: 2,
-  //     useCORS: true, // In case of external images
-  //   });
-
-  //   // Cleanup the DOM element
-  //   document.body.removeChild(container);
-
-  //   // --- 4) Prepare jsPDF (Letter size: 612 x 792 points) ---
-  //   const pdf = new jsPDF('p', 'pt', 'letter');
-  //   const marginLeft = 40;
-  //   const marginTop = 40;
-  //   const pageWidth = pdf.internal.pageSize.getWidth();
-  //   const pageHeight = pdf.internal.pageSize.getHeight();
-
-  //   // Scale canvas to fit page width inside margins
-  //   const usableWidth = pageWidth - marginLeft * 2;
-  //   const pdfHeightUsable = pageHeight - marginTop * 2;
-  //   const scaleFactor = usableWidth / canvas.width;
-  //   const scaledCanvasHeight = canvas.height * scaleFactor;
-
-  //   // Calculate total pages needed
-  //   const totalPages = Math.ceil(scaledCanvasHeight / pdfHeightUsable);
-
-  //   // --- 5) Slice the canvas into PDF pages ---
-  //   let yOffset = 0;
-  //   for (let page = 0; page < totalPages; page++) {
-  //     // Create a temp canvas for one "page" slice
-  //     const pageCanvas = document.createElement('canvas');
-  //     pageCanvas.width = canvas.width;
-  //     const pageCanvasHeight = Math.min(
-  //       canvas.height - yOffset,
-  //       pdfHeightUsable / scaleFactor
-  //     );
-  //     pageCanvas.height = pageCanvasHeight;
-
-  //     const pageCtx = pageCanvas.getContext('2d');
-  //     if (!pageCtx) continue;
-
-  //     pageCtx.drawImage(
-  //       canvas,
-  //       0,
-  //       yOffset,
-  //       canvas.width,
-  //       pageCanvasHeight,
-  //       0,
-  //       0,
-  //       canvas.width,
-  //       pageCanvasHeight
-  //     );
-
-  //     const pageImgData = pageCanvas.toDataURL('image/png');
-
-  //     if (page > 0) {
-  //       pdf.addPage();
-  //     }
-
-  //     const chunkPdfHeight = pageCanvasHeight * scaleFactor;
-  //     pdf.addImage(
-  //       pageImgData,
-  //       'PNG',
-  //       marginLeft,
-  //       marginTop,
-  //       usableWidth,
-  //       chunkPdfHeight
-  //     );
-
-  //     yOffset += pageCanvasHeight;
-  //   }
-
-  //   // If you want to open a preview in a new tab:
-  //   const pdfUrl = pdf.output('bloburl');
-  //   window.open(pdfUrl, '_blank');
-
-  //   // Or directly save:
-  //   // pdf.save(`${this.currentSolution.title}.pdf`);
-  // }
-  // async generatePdfFromHtml() {
-  //   this.toggle('isLoading');
-  //   // --- 1) Build a new container with the logo, title, contributors, content ---
-  //   const container = document.createElement('div');
-  //   // Using Roboto Mono as requested
-  //   container.style.position = 'absolute';
-  //   container.style.left = '-9999px';
-  //   container.style.width = '600px';
-  //   container.style.padding = '20px';
-  //   container.style.whiteSpace = 'normal';
-  //   container.style.wordWrap = 'break-word';
-  //   container.style.fontFamily = 'Roboto, monospace';
-  //   container.style.lineHeight = '1.5';
-
-  //   // -- (A) Insert the logo at the top --
-  //   const logoImg = document.createElement('img');
-  //   logoImg.src = '../../../assets/img/earth-triangle-test.png';
-  //   logoImg.style.display = 'block';
-  //   logoImg.style.margin = '0 auto 20px';
-  //   logoImg.style.width = '80px';
-  //   container.appendChild(logoImg);
-
-  //   // -- (B) Add the Solution Title (big & bold) --
-  //   const titleElement: any = document.createElement('h1');
-  //   titleElement.textContent = this.currentSolution.title;
-  //   titleElement.style.textAlign = 'center';
-  //   titleElement.style.fontWeight = 'bold';
-  //   titleElement.style.fontSize = '32px';
-  //   titleElement.style.marginBottom = '20px';
-  //   container.appendChild(titleElement);
-
-  //   // -- (C) Display the contributors horizontally in bold italics --
-  //   if (this.teamMembers && this.teamMembers.length > 0) {
-  //     const contributorsContainer = document.createElement('div');
-  //     contributorsContainer.style.textAlign = 'center';
-  //     contributorsContainer.style.marginBottom = '20px';
-
-  //     // Build the list of contributor names as bold+italic, separated by commas
-  //     const contributorNames = this.teamMembers.map((member) => {
-  //       return `<strong><em>${member.firstName} ${member.lastName}</em></strong>`;
-  //     });
-  //     contributorsContainer.innerHTML = `
-  //       <span style="font-size: 16px;">
-  //         Designers:
-  //         ${contributorNames.join(', ')}
-  //       </span>
-  //     `;
-  //     container.appendChild(contributorsContainer);
-  //   }
-  //   const dateOptions: Intl.DateTimeFormatOptions = {
-  //     year: 'numeric',
-  //     month: 'short',
-  //     day: 'numeric',
-  //   };
-
-  //   const dateElement = document.createElement('div');
-  //   dateElement.style.textAlign = 'center';
-  //   dateElement.style.marginBottom = '20px';
-  //   const dateStr = new Date().toLocaleDateString('en-US', dateOptions);
-  //   dateElement.innerHTML = `<strong>${dateStr}</strong>`;
-  //   container.appendChild(dateElement);
-
-  //   // -- (D) Add a small horizontal rule (like a LaTeX section break) --
-  //   const hrElement = document.createElement('hr');
-  //   hrElement.style.margin = '20px 0';
-  //   container.appendChild(hrElement);
-
-  //   // -- (E) Add the existing solution content --
-  //   const contentDiv = document.createElement('div');
-  //   contentDiv.innerHTML = this.currentSolution.content!;
-  //   container.appendChild(contentDiv);
-
-  //   // -- Add the container to the DOM (off-screen) for rendering --
-  //   document.body.appendChild(container);
-
-  //   // --- 2) Wait for all images to load ---
-  //   const images = Array.from(container.getElementsByTagName('img'));
-  //   const loadPromises = images.map((img) => {
-  //     return new Promise<void>((resolve, reject) => {
-  //       img.crossOrigin = 'anonymous';
-  //       if (img.complete) {
-  //         resolve();
-  //       } else {
-  //         img.onload = () => resolve();
-  //         img.onerror = () => reject();
-  //       }
-  //     });
-  //   });
-  //   await Promise.allSettled(loadPromises);
-
-  //   // --- 3) Render container to canvas using html2canvas ---
-  //   const canvas = await html2canvas(container, {
-  //     scale: 2,
-  //     useCORS: true,
-  //   });
-
-  //   // Cleanup the DOM element
-  //   document.body.removeChild(container);
-
-  //   // --- 4) Prepare jsPDF (Letter size: 612 x 792 points) ---
-  //   const pdf = new jsPDF('p', 'pt', 'letter');
-  //   const marginLeft = 40;
-  //   const marginTop = 40;
-  //   const pageWidth = pdf.internal.pageSize.getWidth();
-  //   const pageHeight = pdf.internal.pageSize.getHeight();
-
-  //   // Scale canvas to fit page width inside margins
-  //   const usableWidth = pageWidth - marginLeft * 2;
-  //   const pdfHeightUsable = pageHeight - marginTop * 2;
-  //   const scaleFactor = usableWidth / canvas.width;
-  //   const scaledCanvasHeight = canvas.height * scaleFactor;
-
-  //   // Calculate total pages
-  //   const totalPages = Math.ceil(scaledCanvasHeight / pdfHeightUsable);
-
-  //   // --- 5) Slice the canvas into PDF pages ---
-  //   let yOffset = 0;
-  //   for (let page = 0; page < totalPages; page++) {
-  //     const pageCanvas = document.createElement('canvas');
-  //     pageCanvas.width = canvas.width;
-  //     const pageCanvasHeight = Math.min(
-  //       canvas.height - yOffset,
-  //       pdfHeightUsable / scaleFactor
-  //     );
-  //     pageCanvas.height = pageCanvasHeight;
-
-  //     const pageCtx = pageCanvas.getContext('2d');
-  //     if (!pageCtx) continue;
-
-  //     pageCtx.drawImage(
-  //       canvas,
-  //       0,
-  //       yOffset,
-  //       canvas.width,
-  //       pageCanvasHeight,
-  //       0,
-  //       0,
-  //       canvas.width,
-  //       pageCanvasHeight
-  //     );
-
-  //     const pageImgData = pageCanvas.toDataURL('image/png');
-
-  //     if (page > 0) {
-  //       pdf.addPage();
-  //     }
-
-  //     const chunkPdfHeight = pageCanvasHeight * scaleFactor;
-  //     pdf.addImage(
-  //       pageImgData,
-  //       'PNG',
-  //       marginLeft,
-  //       marginTop,
-  //       usableWidth,
-  //       chunkPdfHeight
-  //     );
-
-  //     yOffset += pageCanvasHeight;
-  //   }
-
-  //   // If you want to open a preview:
-  //   const pdfUrl = pdf.output('bloburl');
-  //   window.open(pdfUrl, '_blank');
-  //   this.toggle('isLoading');
-
-  //   // Or directly save:
-  //   // pdf.save(`${this.currentSolution.title}.pdf`);
-  // }
   async generatePdfFromHtml() {
     this.toggle('isLoading');
-
     // --- 1) Build a new container with the logo, title, contributors, content ---
     const container = document.createElement('div');
     // Using Roboto Mono as requested
@@ -953,26 +572,8 @@ export class SolutionPreviewComponent implements OnInit {
     // -- Add the container to the DOM (off-screen) for rendering --
     document.body.appendChild(container);
 
-    // --- 2) Convert external images to base64 (if needed) ---
+    // --- 2) Wait for all images to load ---
     const images = Array.from(container.getElementsByTagName('img'));
-
-    for (const img of images) {
-      const src = img.src;
-      // A simple way to check if it's an absolute URL (http or https).
-      // You might refine this check if you have other conditions:
-      if (/^https?:\/\//i.test(src)) {
-        try {
-          // Convert to base64
-          const base64Data = await this.fetchAsBase64(src);
-          // Replace the image src with base64
-          img.src = base64Data;
-        } catch (error) {
-          console.error('Failed to fetch image as base64:', src, error);
-        }
-      }
-    }
-
-    // --- 3) Wait for images (now base64 or local) to load ---
     const loadPromises = images.map((img) => {
       return new Promise<void>((resolve, reject) => {
         img.crossOrigin = 'anonymous';
@@ -986,24 +587,32 @@ export class SolutionPreviewComponent implements OnInit {
     });
     await Promise.allSettled(loadPromises);
 
-    // --- 4) Use html2canvas and jsPDF exactly as before ---
+    // --- 3) Render container to canvas using html2canvas ---
     const canvas = await html2canvas(container, {
       scale: 2,
       useCORS: true,
     });
+
+    // Cleanup the DOM element
     document.body.removeChild(container);
 
+    // --- 4) Prepare jsPDF (Letter size: 612 x 792 points) ---
     const pdf = new jsPDF('p', 'pt', 'letter');
     const marginLeft = 40;
     const marginTop = 40;
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
+
+    // Scale canvas to fit page width inside margins
     const usableWidth = pageWidth - marginLeft * 2;
     const pdfHeightUsable = pageHeight - marginTop * 2;
     const scaleFactor = usableWidth / canvas.width;
     const scaledCanvasHeight = canvas.height * scaleFactor;
+
+    // Calculate total pages
     const totalPages = Math.ceil(scaledCanvasHeight / pdfHeightUsable);
 
+    // --- 5) Slice the canvas into PDF pages ---
     let yOffset = 0;
     for (let page = 0; page < totalPages; page++) {
       const pageCanvas = document.createElement('canvas');
@@ -1048,33 +657,212 @@ export class SolutionPreviewComponent implements OnInit {
       yOffset += pageCanvasHeight;
     }
 
+    // If you want to open a preview:
     const pdfUrl = pdf.output('bloburl');
     window.open(pdfUrl, '_blank');
     this.toggle('isLoading');
 
+    // Or directly save:
     // pdf.save(`${this.currentSolution.title}.pdf`);
   }
+  // async generatePdfFromHtml() {
+  //   this.toggle('isLoading');
+
+  //   // --- 1) Build a new container with the logo, title, contributors, content ---
+  //   const container = document.createElement('div');
+  //   // Using Roboto Mono as requested
+  //   container.style.position = 'absolute';
+  //   container.style.left = '-9999px';
+  //   container.style.width = '600px';
+  //   container.style.padding = '20px';
+  //   container.style.whiteSpace = 'normal';
+  //   container.style.wordWrap = 'break-word';
+  //   container.style.fontFamily = 'Roboto, monospace';
+  //   container.style.lineHeight = '1.5';
+
+  //   // -- (A) Insert the logo at the top --
+  //   const logoImg = document.createElement('img');
+  //   logoImg.src = '../../../assets/img/earth-triangle-test.png';
+  //   logoImg.style.display = 'block';
+  //   logoImg.style.margin = '0 auto 20px';
+  //   logoImg.style.width = '80px';
+  //   container.appendChild(logoImg);
+
+  //   // -- (B) Add the Solution Title (big & bold) --
+  //   const titleElement: any = document.createElement('h1');
+  //   titleElement.textContent = this.currentSolution.title;
+  //   titleElement.style.textAlign = 'center';
+  //   titleElement.style.fontWeight = 'bold';
+  //   titleElement.style.fontSize = '32px';
+  //   titleElement.style.marginBottom = '20px';
+  //   container.appendChild(titleElement);
+
+  //   // -- (C) Display the contributors horizontally in bold italics --
+  //   if (this.teamMembers && this.teamMembers.length > 0) {
+  //     const contributorsContainer = document.createElement('div');
+  //     contributorsContainer.style.textAlign = 'center';
+  //     contributorsContainer.style.marginBottom = '20px';
+
+  //     // Build the list of contributor names as bold+italic, separated by commas
+  //     const contributorNames = this.teamMembers.map((member) => {
+  //       return `<strong><em>${member.firstName} ${member.lastName}</em></strong>`;
+  //     });
+  //     contributorsContainer.innerHTML = `
+  //       <span style="font-size: 16px;">
+  //         Designers:
+  //         ${contributorNames.join(', ')}
+  //       </span>
+  //     `;
+  //     container.appendChild(contributorsContainer);
+  //   }
+  //   const dateOptions: Intl.DateTimeFormatOptions = {
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric',
+  //   };
+
+  //   const dateElement = document.createElement('div');
+  //   dateElement.style.textAlign = 'center';
+  //   dateElement.style.marginBottom = '20px';
+  //   const dateStr = new Date().toLocaleDateString('en-US', dateOptions);
+  //   dateElement.innerHTML = `<strong>${dateStr}</strong>`;
+  //   container.appendChild(dateElement);
+
+  //   // -- (D) Add a small horizontal rule (like a LaTeX section break) --
+  //   const hrElement = document.createElement('hr');
+  //   hrElement.style.margin = '20px 0';
+  //   container.appendChild(hrElement);
+
+  //   // -- (E) Add the existing solution content --
+  //   const contentDiv = document.createElement('div');
+  //   contentDiv.innerHTML = this.currentSolution.content!;
+  //   container.appendChild(contentDiv);
+
+  //   // -- Add the container to the DOM (off-screen) for rendering --
+  //   document.body.appendChild(container);
+
+  //   // --- 2) Convert external images to base64 (if needed) ---
+  //   const images = Array.from(container.getElementsByTagName('img'));
+
+  //   for (const img of images) {
+  //     const src = img.src;
+  //     // A simple way to check if it's an absolute URL (http or https).
+  //     // You might refine this check if you have other conditions:
+  //     if (/^https?:\/\//i.test(src)) {
+  //       try {
+  //         // Convert to base64
+  //         const base64Data = await this.fetchAsBase64(src);
+  //         // Replace the image src with base64
+  //         img.src = base64Data;
+  //       } catch (error) {
+  //         console.error('Failed to fetch image as base64:', src, error);
+  //       }
+  //     }
+  //   }
+
+  //   // --- 3) Wait for images (now base64 or local) to load ---
+  //   const loadPromises = images.map((img) => {
+  //     return new Promise<void>((resolve, reject) => {
+  //       img.crossOrigin = 'anonymous';
+  //       if (img.complete) {
+  //         resolve();
+  //       } else {
+  //         img.onload = () => resolve();
+  //         img.onerror = () => reject();
+  //       }
+  //     });
+  //   });
+  //   await Promise.allSettled(loadPromises);
+
+  //   // --- 4) Use html2canvas and jsPDF exactly as before ---
+  //   const canvas = await html2canvas(container, {
+  //     scale: 2,
+  //     useCORS: true,
+  //   });
+  //   document.body.removeChild(container);
+
+  //   const pdf = new jsPDF('p', 'pt', 'letter');
+  //   const marginLeft = 40;
+  //   const marginTop = 40;
+  //   const pageWidth = pdf.internal.pageSize.getWidth();
+  //   const pageHeight = pdf.internal.pageSize.getHeight();
+  //   const usableWidth = pageWidth - marginLeft * 2;
+  //   const pdfHeightUsable = pageHeight - marginTop * 2;
+  //   const scaleFactor = usableWidth / canvas.width;
+  //   const scaledCanvasHeight = canvas.height * scaleFactor;
+  //   const totalPages = Math.ceil(scaledCanvasHeight / pdfHeightUsable);
+
+  //   let yOffset = 0;
+  //   for (let page = 0; page < totalPages; page++) {
+  //     const pageCanvas = document.createElement('canvas');
+  //     pageCanvas.width = canvas.width;
+  //     const pageCanvasHeight = Math.min(
+  //       canvas.height - yOffset,
+  //       pdfHeightUsable / scaleFactor
+  //     );
+  //     pageCanvas.height = pageCanvasHeight;
+
+  //     const pageCtx = pageCanvas.getContext('2d');
+  //     if (!pageCtx) continue;
+
+  //     pageCtx.drawImage(
+  //       canvas,
+  //       0,
+  //       yOffset,
+  //       canvas.width,
+  //       pageCanvasHeight,
+  //       0,
+  //       0,
+  //       canvas.width,
+  //       pageCanvasHeight
+  //     );
+
+  //     const pageImgData = pageCanvas.toDataURL('image/png');
+
+  //     if (page > 0) {
+  //       pdf.addPage();
+  //     }
+
+  //     const chunkPdfHeight = pageCanvasHeight * scaleFactor;
+  //     pdf.addImage(
+  //       pageImgData,
+  //       'PNG',
+  //       marginLeft,
+  //       marginTop,
+  //       usableWidth,
+  //       chunkPdfHeight
+  //     );
+
+  //     yOffset += pageCanvasHeight;
+  //   }
+
+  //   const pdfUrl = pdf.output('bloburl');
+  //   window.open(pdfUrl, '_blank');
+  //   this.toggle('isLoading');
+
+  //   // pdf.save(`${this.currentSolution.title}.pdf`);
+  // }
 
   /**
    * Helper to fetch an image URL and return base64 data string.
    */
-  private async fetchAsBase64(url: string): Promise<string> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch: ${response.status} ${response.statusText}`
-      );
-    }
+  // private async fetchAsBase64(url: string): Promise<string> {
+  //   const response = await fetch(url);
+  //   if (!response.ok) {
+  //     throw new Error(
+  //       `Failed to fetch: ${response.status} ${response.statusText}`
+  //     );
+  //   }
 
-    const blob = await response.blob();
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onloadend = () => {
-        // result includes base64 prefix like "data:image/png;base64,..."
-        resolve(reader.result as string);
-      };
-      reader.readAsDataURL(blob);
-    });
-  }
+  //   const blob = await response.blob();
+  //   return new Promise<string>((resolve, reject) => {
+  //     const reader = new FileReader();
+  //     reader.onerror = reject;
+  //     reader.onloadend = () => {
+  //       // result includes base64 prefix like "data:image/png;base64,..."
+  //       resolve(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(blob);
+  //   });
+  // }
 }

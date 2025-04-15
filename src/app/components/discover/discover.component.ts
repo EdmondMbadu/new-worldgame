@@ -1,9 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
-import { map } from 'rxjs/operators';
-
+import { map } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -13,11 +12,11 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+  selector: 'app-discover',
+  templateUrl: './discover.component.html',
+  styleUrl: './discover.component.css',
 })
-export class HomeComponent implements OnInit {
+export class DiscoverComponent implements OnInit {
   user: User;
   // Centralized data for all challenges
   challenges: {
@@ -43,24 +42,6 @@ export class HomeComponent implements OnInit {
   isHovering: boolean = false;
   showAddChallenge: boolean = false;
 
-  updateChallenges(): void {
-    const categoryData = this.challenges[this.activeCategory];
-    if (!categoryData) {
-      console.warn(`No challenges found for category: ${this.activeCategory}`);
-      this.titles = [];
-      this.descriptions = [];
-      this.challengeImages = [];
-      this.ids = [];
-      return;
-    }
-    this.titles = categoryData.titles;
-    this.descriptions = categoryData.descriptions;
-    this.challengeImages = categoryData.images;
-    this.ids = categoryData.ids!;
-  }
-
-  categoryImages: { [key: string]: string[] } = {};
-
   showSortByDrowpDown: boolean = false;
   allUsers: User[] = [];
   evaluationSolutions: Solution[] = [];
@@ -84,7 +65,6 @@ export class HomeComponent implements OnInit {
     private solution: SolutionService,
     private data: DataService,
     private storage: AngularFireStorage,
-    private challenge: ChallengesService,
     private router: Router,
     private time: TimeService,
     private afs: AngularFirestore
@@ -92,7 +72,6 @@ export class HomeComponent implements OnInit {
     this.user = this.auth.currentUser;
   }
   async ngOnInit() {
-    this.filterSolutions();
     if (this.user && this.user.location) {
       this.displayPromptLocation = false;
     }
@@ -119,35 +98,6 @@ export class HomeComponent implements OnInit {
     if (this.user!.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL;
     }
-    this.challenge.getAllChallenges().subscribe((challenges: any[]) => {
-      const uniqueCategories = Array.from(
-        new Set(challenges.map((challenge) => challenge.category))
-      );
-      // this.categories = uniqueCategories;
-      this.fetchChallenges(this.activeCategory);
-    });
-  }
-
-  fetchChallenges(category: string) {
-    this.challenge
-      .getChallengesByCategory(category)
-      .subscribe((data: any[]) => {
-        // Transform the array into the expected format
-        const transformedData = {
-          ids: data.map((challenge) => challenge.id),
-          titles: data.map((challenge) => challenge.title),
-          descriptions: data.map((challenge) => challenge.description),
-          images: data.map(
-            (challenge) => challenge.image || 'No image available'
-          ),
-        };
-        this.challenges[category] = transformedData; // Assign to the challenges object
-        // console.log(
-        //   `Challenges for category ${category}:`,
-        //   this.challenges[category]
-        // );
-        this.updateChallenges(); // Update the active challenge display
-      });
   }
 
   extractNumber(filename: string, prefix: string): number {
@@ -249,37 +199,7 @@ export class HomeComponent implements OnInit {
       // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
     }
   }
-  categories: string[] = [
-    'UN SDG',
-    'Climate',
-    'Poverty',
-    'Energy',
-    'Food',
-    'Health',
-    'Forestry',
-  ];
-  // Define the solutions data
 
-  activeCategory: string = 'Forestry';
-  filteredSolutions: Solution[] = [];
-
-  async setActiveCategory(category: string) {
-    this.activeCategory = category;
-    // await this.loadCategoryImages(category);
-    this.fetchChallenges(category);
-    // this.updateChallenges();
-  }
-
-  // Filter solutions based on the active category
-  filterSolutions(): void {
-    if (this.activeCategory === 'All') {
-      this.filteredSolutions = this.completedSolutions;
-    } else {
-      this.filteredSolutions = this.completedSolutions.filter(
-        (solution) => solution.category === this.activeCategory
-      );
-    }
-  }
   toggleAside() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
@@ -330,62 +250,5 @@ export class HomeComponent implements OnInit {
       console.error('Error uploading file:', error);
       alert('Error occurred while uploading file. Please try again.');
     }
-  }
-
-  addChallenge() {
-    if (
-      !this.titleChallenge ||
-      !this.descriptionChallenge ||
-      !this.categoryChallenge ||
-      !this.imageChallenge
-    ) {
-      alert('Please fill in all required fields before adding the challenge.');
-      return;
-    }
-
-    const newChallenge = {
-      id: this.challengeId,
-      title: this.titleChallenge,
-      description: this.descriptionChallenge,
-      category: this.categoryChallenge,
-      image: this.imageChallenge,
-    };
-
-    this.challenge
-      .addChallenge(newChallenge)
-      .then(() => {
-        console.log('Challenge added successfully:', newChallenge);
-
-        // Automatically select the added challenge and navigate
-        this.selectChallenge();
-
-        // Clear the form fields
-        this.challengeId = '';
-        this.titleChallenge = '';
-        this.descriptionChallenge = '';
-        this.categoryChallenge = '';
-        this.imageChallenge = '';
-      })
-      .catch((error) => {
-        console.error('Error adding challenge:', error);
-      });
-  }
-
-  selectChallenge() {
-    if (!this.challengeId) {
-      console.error('No challenge ID available to select.');
-      return;
-    }
-    const selectedChallengeItem = {
-      id: this.challengeId,
-      title: this.titleChallenge,
-      description: this.descriptionChallenge,
-      image: this.imageChallenge,
-      restricted: 'false',
-    };
-
-    this.challenge.setSelectedChallengeItem(selectedChallengeItem);
-
-    this.router.navigate(['/start-challenge/']);
   }
 }

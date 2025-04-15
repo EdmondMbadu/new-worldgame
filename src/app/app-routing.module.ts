@@ -68,6 +68,7 @@ import { ManagementGsl2025Component } from './components/management-gsl-2025/man
 import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
 import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
 import { ListFinishedSolutionsComponent } from './components/list-finished-solutions/list-finished-solutions.component';
+import { DiscoverComponent } from './components/discover/discover.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -75,6 +76,7 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'discover', component: DiscoverComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   {
     path: 'create-playground',
