@@ -443,6 +443,13 @@ export class SolutionService {
 
     return solutionRef.set(data, { merge: true });
   }
+  updateSolutionBoard(solutionId: string, boardDataUrl: string): Promise<void> {
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+    return solutionRef.update({ board: boardDataUrl });
+  }
+
   updateSolutionRoles(roles: Roles, solutionId: string) {
     const data = {
       roles: roles,
