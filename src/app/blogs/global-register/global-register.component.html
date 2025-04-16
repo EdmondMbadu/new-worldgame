@@ -2,17 +2,54 @@
   <!-- NAVBAR -->
   <app-navbar [currenPageLabBanner]="false"></app-navbar>
 
-  <!-- HERO / PAGE TITLE with Background Image -->
-  <section 
-    class="relative pt-32 pb-16 bg-cover bg-center bg-no-repeat"
-    style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d');"
-  >
-    <div class="absolute inset-0 bg-black/40"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-      <h1 class="text-3xl md:text-5xl font-extrabold mb-4">2025 Global Solutions Lab Registration</h1>
-      <p class="text-lg md:text-xl font-semibold mb-2">Secure your spot today!</p>
+<section 
+  class="relative pt-32 pb-16 bg-cover bg-center bg-no-repeat"
+  style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d');"
+>
+  <div class="absolute inset-0 bg-black/40"></div>
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+    <h1 class="text-3xl md:text-5xl font-extrabold mb-4">
+      2025 Global Solutions Lab Registration
+    </h1>
+    <p class="text-lg md:text-xl font-semibold mb-6">
+      Secure your spot today!
+    </p>
+
+    <!-- COUNTDOWN HEADING (no box) -->
+    <h2 class="text-2xl md:text-3xl font-bold mb-8">
+      Let the countdown begin
+    </h2>
+
+    <!-- COUNTDOWN ROW: each time unit in its own box -->
+    <div id="countdown" 
+         class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8"
+    >
+      <!-- Days box -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg p-6 text-center shadow">
+        <div class="text-4xl font-extrabold text-teal-600" id="days">00</div>
+        <div class="mt-2 text-gray-600 font-semibold dark:text-gray-100">Days</div>
+      </div>
+      <!-- Hours box -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg p-6 text-center shadow">
+        <div class="text-4xl font-extrabold text-teal-600" id="hours">00</div>
+        <div class="mt-2 text-gray-600 font-semibold dark:text-gray-100">Hours</div>
+      </div>
+      <!-- Minutes box -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg p-6 text-center shadow">
+        <div class="text-4xl font-extrabold text-teal-600" id="minutes">00</div>
+        <div class="mt-2 text-gray-600 font-semibold dark:text-gray-100">Minutes</div>
+      </div>
+      <!-- Seconds box -->
+      <div class="bg-white dark:bg-slate-800 rounded-lg p-6 text-center shadow">
+        <div class="text-4xl font-extrabold text-teal-600" id="seconds">00</div>
+        <div class="mt-2 text-gray-600 font-semibold dark:text-gray-100">Seconds</div>
+      </div>
     </div>
-  </section>
+    <!-- END COUNTDOWN ROW -->
+  </div>
+</section>
+
+
 
   <!-- TOGGLE: In Person / Online (just below the Hero) -->
   <div class="my-8 flex justify-center">
