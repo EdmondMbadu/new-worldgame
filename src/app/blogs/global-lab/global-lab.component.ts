@@ -9,4 +9,5 @@ export class GlobalLabComponent implements OnInit {
   ngOnInit(): void {
     window.scrollTo(0, 0);
   }
+  reachOutVisa: string = 'info@1earthgame.org';
 }
