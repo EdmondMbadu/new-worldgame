@@ -319,12 +319,27 @@ export const createCheckoutSession = functions.https.onCall(
         focusTopic,
         pid,
         registerDate,
+        labMode, // <-- NEW
+        letterOfInvitation, // <-- NEW if you want to store it
       } = data;
 
-      // Decide the amount based on targetGroup
-      let amount = 29900; // in cents => $299
-      if (targetGroup === 'student' || targetGroup === 'senior') {
-        amount = 9900; // $99
+      // 2) Decide the amount based on BOTH labMode AND targetGroup
+      let amount = 0; // in cents
+
+      if (labMode === 'inPerson') {
+        // In-Person Lab
+        if (targetGroup === 'professional') {
+          amount = 85000; // $850
+        } else if (targetGroup === 'student' || targetGroup === 'senior') {
+          amount = 45000; // $450
+        }
+      } else {
+        // Online Lab
+        if (targetGroup === 'professional') {
+          amount = 24900; // $249
+        } else if (targetGroup === 'student' || targetGroup === 'senior') {
+          amount = 9900; // $99
+        }
       }
 
       // 2) Create a Checkout Session
@@ -365,6 +380,8 @@ export const createCheckoutSession = functions.https.onCall(
           focusTopic,
           registerDate,
           pid, // add the pid from your form data or your component
+          labMode, // store the new field
+          letterOfInvitation, // store whether they need a visa letter
         },
       });
 
@@ -420,6 +437,8 @@ export const stripeWebhook = functions.https.onRequest(
         focusTopic,
         registerDate,
         pid, // we passed this in metadata
+        labMode, // read new field
+        letterOfInvitation, // read new field
       } = session.metadata || {};
 
       // 2) Prepare the registration object to add
@@ -442,6 +461,8 @@ export const stripeWebhook = functions.https.onRequest(
         amountPaid, // e.g. 39900
         paymentIntent: session.payment_intent,
         registerDate,
+        labMode, // store the new field in Firestore
+        letterOfInvitation, // store the new field in Firestore
       };
 
       // 3) Append to the registrations array in Firestore
@@ -482,6 +503,8 @@ export const stripeWebhook = functions.https.onRequest(
           whyAttend,
           focusTopic,
           targetGroup: targetGroup,
+          labMode,
+          letterOfInvitation,
         };
         // Admins: you said you want to email 4 addresses. We can just call
         // the function 4 times with a different "to" each time, or you can
@@ -556,6 +579,8 @@ export const gslAdminNotificationEmail = functions.https.onCall(
         why_attend: data.whyAttend || 'N/A',
         focus_topic: data.focusTopic || 'N/A',
         target_group: data.targetGroup || 'N/A',
+        lab_mode: data.labMode || 'N/A',
+        letter_of_invitation: data.letterOfInvitation || 'N/A',
       },
     };
 
@@ -602,6 +627,8 @@ async function runGslAdminNotificationEmail(data: any) {
       why_attend: data.whyAttend || 'N/A',
       focus_topic: data.focusTopic || 'N/A',
       target_group: data.targetGroup || 'N/A',
+      lab_mode: data.labMode || 'N/A',
+      letter_of_invitation: data.letterOfInvitation || 'N/A',
     },
   };
   await sgMail.send(msg);

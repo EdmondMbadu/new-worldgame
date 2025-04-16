@@ -32,7 +32,10 @@ export class GlobalRegisterComponent implements OnInit {
   globalLabData: any[] = [];
   pid: string = '';
   targetGroup: string = 'professional';
+  labMode: string = 'inPerson'; // NEW: 'inPerson' or 'online'
+  letterOfInvitation: boolean = false; // NEW: visa invitation needed?
   reachOutEmail: string = 'info@newworld-game.org';
+  reachOutVisa: string = 'info@1earthgame.org';
 
   isLoading: boolean = false;
 
@@ -132,6 +135,8 @@ export class GlobalRegisterComponent implements OnInit {
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
           targetGroup: this.targetGroup,
+          labMode: this.labMode, // pass the new field
+          letterOfInvitation: this.letterOfInvitation, // pass the new field
           registerDate: this.time.todaysDate(),
           pid: this.pid,
         };
@@ -237,6 +242,8 @@ export class GlobalRegisterComponent implements OnInit {
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
           targetGroup: this.targetGroup,
+          labMode: this.labMode,
+          letterOfInvitation: this.letterOfInvitation,
           registerDate: this.time.todaysDate(),
           pid: this.pid,
         };
@@ -295,18 +302,21 @@ export class GlobalRegisterComponent implements OnInit {
     }
   }
   // Method to figure out the cost
+  // UPDATED to factor in labMode
   getPrice(): number {
-    switch (this.targetGroup) {
-      case 'professional':
-        return 299;
-      case 'student':
-      case 'senior':
+    if (this.labMode === 'inPerson') {
+      // In-person
+      if (this.targetGroup === 'professional') return 850;
+      if (this.targetGroup === 'student' || this.targetGroup === 'senior')
+        return 450;
+    } else {
+      // Online
+      if (this.targetGroup === 'professional') return 249;
+      if (this.targetGroup === 'student' || this.targetGroup === 'senior')
         return 99;
-      default:
-        return 0; // or 399 as default
     }
+    return 0; // fallback
   }
-
   resetFields() {
     this.email = '';
     this.firstName = '';
@@ -324,6 +334,8 @@ export class GlobalRegisterComponent implements OnInit {
     this.focusTopic = '';
     this.readyToSubmit = false;
     this.success = false;
+    this.labMode = 'inPerson';
+    this.letterOfInvitation = false;
 
     this.targetGroup = 'professional';
     this.reachOutEmail = 'newworld@newworld-game.org';

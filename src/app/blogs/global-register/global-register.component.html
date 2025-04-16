@@ -14,42 +14,74 @@
     </div>
   </section>
 
+  <!-- TOGGLE: In Person / Online (just below the Hero) -->
+  <div class="my-8 flex justify-center">
+    <div class="inline-flex items-center border border-gray-300 rounded-full overflow-hidden">
+      <!-- In Person Button -->
+      <button
+        (click)="labMode = 'inPerson'"
+        [ngClass]="{
+          'bg-teal-600 text-white': labMode === 'inPerson',
+          'bg-gray-100  dark:bg-slate-700 dark:text-gray-100 text-gray-700': labMode !== 'inPerson'
+        }"
+        class="px-6 py-2 focus:outline-none"
+      >
+        In Person
+      </button>
+      <!-- Online Button -->
+      <button
+        (click)="labMode = 'online'"
+        [ngClass]="{
+          'bg-teal-600 text-white': labMode === 'online',
+          'bg-gray-100  dark:bg-slate-700 dark:text-gray-100 text-gray-700': labMode !== 'online'
+        }"
+        class="px-6 py-2 focus:outline-none"
+      >
+        Online
+      </button>
+    </div>
+  </div>
+
   <!-- MAIN CONTENT: Registration Process & Form -->
   <main class="bg-white dark:bg-gray-900 flex-grow">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid gap-10 md:grid-cols-2">
-        <!-- Left Column: Instructions -->
+
+      <!-- IF labMode === 'online' THEN show your EXISTING instructions -->
+      <div *ngIf="labMode === 'online'" class="grid gap-10 md:grid-cols-2">
+        <!-- Left Column: Instructions (ONLINE VERSION) -->
         <div>
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">REGISTRATION PROCESS</h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">It is simple to sign up for the 2025 Global Solutions Lab:</p>
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">REGISTRATION PROCESS (Online)</h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-4">
+            It is simple to sign up for the <strong>2025 Global Solutions Lab (Online)</strong>:
+          </p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
             <li class="mb-2">Fill out the registration form on this page.</li>
             <li class="mb-2">We will send you a response. Tuition is due by June 1, 2025.</li>
             <li>You will receive further information about program specifics starting in April 2025.</li>
           </ul>
           <div class="text-gray-700 dark:text-gray-300 mb-4">
-            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">TUITION</h3>
+            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">TUITION (Online)</h3>
             <ul class="list-disc pl-5">
               <li>$299 for professionals</li>
               <li>$99 for students and seniors</li>
               <li>Scholarships available for players from developing countries*</li>
             </ul>
             <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
-              * For players from developing countries, email us at <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
+              * For players from developing countries, email us at 
+              <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
               to request partial to full scholarship depending on the case.
             </h1>
-
             <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
               EarthGame is a 501(c)(3) nonprofit organization. Donations are tax-deductible. ©2025 EarthGame. All rights reserved.
             </h1>
           </div>
           <div class="mt-8 mx-auto">
-            <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" 
-
+            <a 
+              target="_blank" 
+              href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
               class="py-4 px-6 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-semibold"
-              
             >
-             Donate To EarthGame
+              Donate To EarthGame
             </a>
           </div>
           <div class="mt-6">
@@ -63,146 +95,616 @@
 
         <!-- Right Column: Registration Form -->
         <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-md shadow">
-          <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">2025 GSL Registration Form</h2>
-
+          <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+            2025 GSL (Online) Registration Form
+          </h2>
           <!-- Form Start -->
-          <div class="space-y-6" >
+          <div class="space-y-6">
             <!-- Name -->
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Name (Required)</label>
               <div class="flex gap-4">
-                <input type="text" placeholder="First" [(ngModel)]="firstName" name="firstName" required 
-                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
-                <input type="text" placeholder="Last" [(ngModel)]="lastName" name="lastName" required 
-                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+                <input
+                  type="text"
+                  placeholder="First"
+                  [(ngModel)]="firstName"
+                  name="firstName"
+                  required 
+                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+                />
+                <input
+                  type="text"
+                  placeholder="Last"
+                  [(ngModel)]="lastName"
+                  name="lastName"
+                  required 
+                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+                />
               </div>
             </div>
 
             <!-- Email -->
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Email (Required)</label>
-              <input type="email" placeholder="you@example.com" [(ngModel)]="email" name="email" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                [(ngModel)]="email"
+                name="email"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <!-- Phone -->
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Phone</label>
-              <input type="tel" placeholder="(123) 456-7890" [(ngModel)]="phone" name="phone"
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <input
+                type="tel"
+                placeholder="(123) 456-7890"
+                [(ngModel)]="phone"
+                name="phone"
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <!-- Address -->
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Address (Required)</label>
-              <input type="text" placeholder="Street Address" [(ngModel)]="address" name="address" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <input
+                type="text"
+                placeholder="Street Address"
+                [(ngModel)]="address"
+                name="address"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
-            <!-- City, State Zip -->
 
             <!-- City -->
-            
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">City (Required)</label>
-              <input type="text" placeholder="Philadelphia" [(ngModel)]="city" name="address" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <input
+                type="text"
+                placeholder="Philadelphia"
+                [(ngModel)]="city"
+                name="city"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
 
+            <!-- State/Province -->
             <div>
-              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">State/Province (Required)</label>
-              <input type="text" placeholder="PA" [(ngModel)]="stateProvince" name="address" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                State/Province (Required)
+              </label>
+              <input
+                type="text"
+                placeholder="PA"
+                [(ngModel)]="stateProvince"
+                name="stateProvince"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
+
+            <!-- Country -->
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Country (Required)</label>
-              <input type="text" placeholder="United States" [(ngModel)]="country" name="address" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <input
+                type="text"
+                placeholder="United States"
+                [(ngModel)]="country"
+                name="country"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <!-- Age -->
             <div>
               <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Age (Required)</label>
-              <input type="number" min="1" max="120" [(ngModel)]="age" name="age" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <input
+                type="number"
+                min="1"
+                max="120"
+                [(ngModel)]="age"
+                name="age"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <!-- Organization -->
             <div>
-              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Organization, School, or Employer (Required)</label>
-              <input type="text" placeholder="Your institution/employer" [(ngModel)]="organization" name="organization" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100" />
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                Organization, School, or Employer (Required)
+              </label>
+              <input
+                type="text"
+                placeholder="Your institution/employer"
+                [(ngModel)]="organization"
+                name="organization"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
             </div>
 
             <!-- Occupation -->
             <div>
-              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">What do you do? (Required)</label>
-              <textarea rows="2" [(ngModel)]="occupation" name="occupation" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"></textarea>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                What do you do? (Required)
+              </label>
+              <textarea
+                rows="2"
+                [(ngModel)]="occupation"
+                name="occupation"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              ></textarea>
             </div>
 
             <!-- Why Attend -->
             <div>
-              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Why do you want to attend the Lab? (Required)</label>
-              <textarea rows="2" [(ngModel)]="whyAttend" name="whyAttend" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"></textarea>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                Why do you want to attend the Lab? (Required)
+              </label>
+              <textarea
+                rows="2"
+                [(ngModel)]="whyAttend"
+                name="whyAttend"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              ></textarea>
             </div>
 
             <!-- Focus Topic -->
             <div>
-              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">What specific topic(s) do you want to focus on at the Lab this year? (Required)</label>
-              <textarea rows="2" [(ngModel)]="focusTopic" name="focusTopic" required
-                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"></textarea>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                What specific topic(s) do you want to focus on at the Lab this year? (Required)
+              </label>
+              <textarea
+                rows="2"
+                [(ngModel)]="focusTopic"
+                name="focusTopic"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              ></textarea>
             </div>
-            <!-- Select Option -->
-            <div>
-            <label for="countries" class="block mb-2  font-medium text-gray-900 dark:text-white">
-            You are? (Required)
-            </label>
-            <select
-            [(ngModel)]="targetGroup"
-            id="countries"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+
+            <!-- Letter of Invitation (Visa) -->
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="letterVisaOnline"
+                [(ngModel)]="letterOfInvitation"
+                class="mr-2"
+              />
+              <label for="letterVisaOnline" class="text-gray-700 dark:text-gray-200">
+                Letter of Invitation needed for Visa?
+              </label>
+            </div>
+            <div
+              *ngIf="letterOfInvitation"
+              class="mt-2 p-3 border border-yellow-200 bg-yellow-50 dark:bg-gray-700 dark:border-gray-600"
             >
-
-            <option value="professional">Professional ($299)</option>
-            <option value="student">Student ($99)</option>
-            <option value="senior">Senior ($99)</option>
-            </select>
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Those seeking a letter of invitation for obtaining a visa to the US
+                to participate in the Lab need to send the following information to 
+                <a class="text-blue-600 underline" href="mailto:info@1earthgame.org">
+                  {{reachOutVisa}}
+                </a>:
+              </p>
+              <ul class="list-disc ml-4 mt-2 text-sm text-gray-700 dark:text-gray-300">
+                <li>Participant Name: _____________</li>
+                <li>Resident of: __________________</li>
+                <li>Date of Birth: _________________</li>
+                <li>Passport Number: _____________</li>
+                <li>Issued: _______________________</li>
+                <li>Valid until: ____________________</li>
+              </ul>
             </div>
-            <!-- Payment Notice -->
-          <div class="my-4 text-gray-700 dark:text-gray-300">
-            <p>If you prefer to register now and pay later, click the button below.</p>
-          </div>
-               <!-- Notice -->
-          <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-            * If you need partial tuition asistance email us at <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
-            to request a scholarship.
-          </h1>
-          <h1 class="text-xl font-medium text-gray-700 dark:text-gray-300">
-            * Discount available for  teams. Contact us if you have 3 or more people to register or to become a sponsor. Email us at <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
-           .
-          </h1>
-          <div class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
-            You will pay: ${{ getPrice() }}
-          </div>
-            <!-- Submit Button -->
-            <div class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
-                    <!-- Pay & Register Button -->
-              <button
-              class="w-full md:w-1/2 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
-              (click)="submitGlobalLabRegistration()"
-              >
-              Pay ${{ getPrice() }} & Register
-              </button>
 
-              <!-- Register Without Paying Button -->
-              <button
-              class="w-full md:w-1/2 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md shadow"
-              (click)="submitGlobalLabRegistrationWithoutPaying()"
+            <!-- Select Option for Pricing (ONLINE) -->
+            <div *ngIf="labMode === 'online'">
+              <label for="targetGroupOnline" class="block mb-2 font-medium text-gray-900 dark:text-white">
+                You are? (Required)
+              </label>
+              <select
+                [(ngModel)]="targetGroup"
+                id="targetGroupOnline"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm 
+                       rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
+                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
+                       dark:focus:ring-blue-500 dark:focus:border-blue-500"
               >
-              Register Now (Pay Later)
+                <option value="professional">Professional ($249)</option>
+                <option value="student">Student ($99)</option>
+                <option value="senior">Senior ($99)</option>
+              </select>
+            </div>
+
+            <!-- Payment Notice -->
+            <div class="my-4 text-gray-700 dark:text-gray-300">
+              <p>If you prefer to register now and pay later, click the button below.</p>
+            </div>
+
+            <!-- Notice -->
+            <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              * If you need partial tuition assistance email us at 
+              <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
+                {{reachOutEmail}}
+              </a>
+              to request a scholarship.
+            </h1>
+            <h1 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+              * Discount available for teams. Contact us if you have 3 or more people to register
+              or to become a sponsor. Email us at 
+              <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
+                {{reachOutEmail}}
+              </a>.
+            </h1>
+
+            <!-- Price Display (ONLINE) -->
+            <div class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
+              You will pay: ${{ getPrice() }}
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
+              <!-- Pay & Register -->
+              <button
+                class="w-full md:w-1/2 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+                (click)="submitGlobalLabRegistration()"
+              >
+                Pay ${{ getPrice() }} & Register
               </button>
-                  
+              <!-- Register Without Paying -->
+              <button
+                class="w-full md:w-1/2 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md shadow"
+                (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+                Register Now (Pay Later)
+              </button>
+            </div>
+          </div>
+          <!-- End Form -->
+        </div>
+      </div>
+
+      <!-- IF labMode === 'inPerson' THEN show your IN-PERSON instructions -->
+      <div *ngIf="labMode === 'inPerson'" class="grid gap-10 md:grid-cols-2">
+        <!-- Left Column: Instructions (IN-PERSON VERSION) -->
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            REGISTRATION PROCESS (In-Person)
+          </h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-4">
+            Join us <strong>in person</strong> at the Charles D. Close School of Entrepreneurship,
+            Drexel University, Philadelphia, PA USA.
+          </p>
+          <p class="text-gray-700 dark:text-gray-300 mb-4">
+            Age range: 18 and above (no upper limit). We have found that inter-generational, 
+            international, cross-cultural, multi-disciplinary teams work exceptionally well.
+          </p>
+          <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+            TUITION (In Person)
+          </h3>
+          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
+            <li>$850 for professionals</li>
+            <li>$450 for students and seniors</li>
+            <li>Scholarships available for players from developing countries*</li>
+          </ul>
+          <p class="text-gray-700 dark:text-gray-300 mb-2">
+            Housing for in-person Lab:
+          </p>
+          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
+            <li>$61 per night for single room</li>
+            <li>$48 per night for double</li>
+          </ul>
+          <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            * For players from developing countries, email us at
+            <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a>
+            to request partial to full scholarship depending on the case.
+          </h1>
+          <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
+            EarthGame is a 501(c)(3) nonprofit organization. Donations are tax-deductible. 
+            ©2025 EarthGame. All rights reserved.
+          </h1>
+
+          <div class="mt-8 mx-auto">
+            <a 
+              target="_blank" 
+              href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
+              class="py-4 px-6 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-semibold"
+            >
+              Donate To EarthGame
+            </a>
+          </div>
+
+          <div class="mt-6">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/presentations%2Fimage.png?alt=media&token=17801439-7094-486f-b0e1-7aa2835418f2"
+              alt="GSL 2025 Registration"
+              class="w-full rounded-md shadow"
+            />
+          </div>
+        </div>
+
+        <!-- Right Column: Registration Form (In-Person) -->
+        <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-md shadow">
+          <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+            2025 GSL (In-Person) Registration Form
+          </h2>
+          <!-- Form Start -->
+          <div class="space-y-6">
+            <!-- Name -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Name (Required)</label>
+              <div class="flex gap-4">
+                <input
+                  type="text"
+                  placeholder="First"
+                  [(ngModel)]="firstName"
+                  name="firstName"
+                  required 
+                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+                />
+                <input
+                  type="text"
+                  placeholder="Last"
+                  [(ngModel)]="lastName"
+                  name="lastName"
+                  required 
+                  class="w-1/2 p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+                />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Email (Required)</label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                [(ngModel)]="email"
+                name="email"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Phone</label>
+              <input
+                type="tel"
+                placeholder="(123) 456-7890"
+                [(ngModel)]="phone"
+                name="phone"
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Address -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Address (Required)</label>
+              <input
+                type="text"
+                placeholder="Street Address"
+                [(ngModel)]="address"
+                name="address"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- City -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">City (Required)</label>
+              <input
+                type="text"
+                placeholder="Philadelphia"
+                [(ngModel)]="city"
+                name="city"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- State/Province -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                State/Province (Required)
+              </label>
+              <input
+                type="text"
+                placeholder="PA"
+                [(ngModel)]="stateProvince"
+                name="stateProvince"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Country -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Country (Required)</label>
+              <input
+                type="text"
+                placeholder="United States"
+                [(ngModel)]="country"
+                name="country"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Age -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">Age (Required)</label>
+              <input
+                type="number"
+                min="1"
+                max="120"
+                [(ngModel)]="age"
+                name="age"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Organization -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                Organization, School, or Employer (Required)
+              </label>
+              <input
+                type="text"
+                placeholder="Your institution/employer"
+                [(ngModel)]="organization"
+                name="organization"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              />
+            </div>
+
+            <!-- Occupation -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                What do you do? (Required)
+              </label>
+              <textarea
+                rows="2"
+                [(ngModel)]="occupation"
+                name="occupation"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              ></textarea>
+            </div>
+
+            <!-- Why Attend -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                Why do you want to attend the Lab? (Required)
+              </label>
+              <textarea
+                rows="2"
+                [(ngModel)]="whyAttend"
+                name="whyAttend"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              ></textarea>
+            </div>
+
+            <!-- Focus Topic -->
+            <div>
+              <label class="block mb-2 text-gray-700 dark:text-gray-200 font-medium">
+                What specific topic(s) do you want to focus on at the Lab this year? (Required)
+              </label>
+              <textarea
+                rows="2"
+                [(ngModel)]="focusTopic"
+                name="focusTopic"
+                required
+                class="w-full p-3 border border-gray-300 rounded-md dark:bg-gray-900 dark:text-gray-100"
+              ></textarea>
+            </div>
+
+            <!-- Letter of Invitation (Visa) -->
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                id="letterVisaInPerson"
+                [(ngModel)]="letterOfInvitation"
+                class="mr-2"
+              />
+              <label for="letterVisaInPerson" class="text-gray-700 dark:text-gray-200">
+                Letter of Invitation needed for Visa?
+              </label>
+            </div>
+            <div
+              *ngIf="letterOfInvitation"
+              class="mt-2 p-3 border border-yellow-200 bg-yellow-50 dark:bg-gray-700 dark:border-gray-600"
+            >
+              <p class="text-sm text-gray-700 dark:text-gray-300">
+                Those seeking a letter of invitation for obtaining a visa to the US
+                to participate in the Lab need to send the following information to
+                <a class="text-blue-600 underline" href="mailto:info@1earthgame.org">
+                 {{reachOutEmail}}
+                </a>:
+              </p>
+              <ul class="list-disc ml-4 mt-2 text-sm text-gray-700 dark:text-gray-300">
+                <li>Participant Name: _____________</li>
+                <li>Resident of: __________________</li>
+                <li>Date of Birth: _________________</li>
+                <li>Passport Number: _____________</li>
+                <li>Issued: _______________________</li>
+                <li>Valid until: ____________________</li>
+              </ul>
+            </div>
+
+            <!-- Select Option for Pricing (IN PERSON) -->
+            <div *ngIf="labMode === 'inPerson'">
+              <label for="targetGroupInPerson" class="block mb-2 font-medium text-gray-900 dark:text-white">
+                You are? (Required)
+              </label>
+              <select
+                [(ngModel)]="targetGroup"
+                id="targetGroupInPerson"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm 
+                       rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
+                       dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white 
+                       dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              >
+                <option value="professional">Professional ($850)</option>
+                <option value="student">Student ($450)</option>
+                <option value="senior">Senior ($450)</option>
+              </select>
+            </div>
+
+            <!-- Payment Notice -->
+            <div class="my-4 text-gray-700 dark:text-gray-300">
+              <p>If you prefer to register now and pay later, click the button below.</p>
+            </div>
+
+            <!-- Notice -->
+            <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              * If you need partial tuition assistance email us at 
+              <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
+                {{reachOutEmail}}
+              </a> to request a scholarship.
+            </h1>
+            <h1 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+              * Discount available for teams. Contact us if you have 3 or more people to register
+              or to become a sponsor. Email us at
+              <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
+                {{reachOutEmail}}
+              </a>.
+            </h1>
+
+            <!-- Price Display (IN PERSON) -->
+            <div class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
+              You will pay: ${{ getPrice() }}
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
+              <!-- Pay & Register -->
+              <button
+                class="w-full md:w-1/2 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+                (click)="submitGlobalLabRegistration()"
+              >
+                Pay ${{ getPrice() }} & Register
+              </button>
+              <!-- Register Without Paying -->
+              <button
+                class="w-full md:w-1/2 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-md shadow"
+                (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+                Register Now (Pay Later)
+              </button>
             </div>
           </div>
           <!-- End Form -->
@@ -210,161 +712,75 @@
       </div>
     </div>
   </main>
+
   <!-- SECTION: What You Will Get -->
-<section class="bg-gray-50 dark:bg-gray-900 py-16">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h2 class="text-3xl md:text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-12">
-      What You Will Get
-    </h2>
-    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-2">
-      
-      <!-- Bullet 1 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📖</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Your Work Published in a Global Book
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Be featured in a professionally published book shared with UN agencies, NGOs, universities, and global networks—putting your solution in front of global decision-makers.
-          </p>
-        </div>
+  <section class="bg-gray-50 dark:bg-gray-900 py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-12">
+        What You Will Get
+      </h2>
+      <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-2">
+        <!-- ...existing bullet items... -->
       </div>
-
-      <!-- Bullet 2 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🎓</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Certificate of Achievement
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Receive a formal certificate recognizing you as a <strong>Global Solution Solver</strong>—a credential to showcase your contribution to real-world problem solving.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 3 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🌍</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            A Truly Global Network
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Connect with participants from Africa, Asia, Europe, the Americas, and more—forming an international community of collaboration, diversity, and purpose.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 4 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🤖</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Hands-On AI Experience
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Learn to harness advanced AIs and global datasets to develop real, scalable strategies aligned with the UN Sustainable Development Goals.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 5 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">💡</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Mentorship & Expert Feedback
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Work alongside UN professionals, researchers, and global experts who will provide valuable guidance and review to shape your ideas.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 6 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🏆</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Eligibility for a Cash Prize
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Submit your project to the <strong>NewWorld Tournament</strong> and compete for a cash award to help bring your idea to life.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 7 -->
-      <!-- <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🎤</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Present to Global Leaders
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Share your final proposal with a high-level audience of UN officials, philanthropists, corporate innovators, and academic experts.
-          </p>
-        </div>
-      </div> -->
-
-      <!-- Bullet 8 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🚀</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            A Transformative Experience
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Engage in an immersive, high-impact program that will challenge your thinking, expand your skills, and connect your passion to purpose.
-          </p>
-        </div>
-      </div>
-          <!-- Bullet 9 -->
-          <div class="flex items-start">
-            <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📘</div>
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Free Copy of the <em>Tools for Changing the World</em> -A Design Science Primer
-              </h3>
-              <p class="text-gray-700 dark:text-gray-300">
-                Receive a digital copy of our exclusive handbook filled with insights to drive impactful solutions locally and globally.
-              </p>
-            </div>
-            </div>
-      
-            <!-- Bullet 10 -->
-            <div class="flex items-start">
-            <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🕹️</div>
-            <div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                Access to the NewWorld Game Platform
-              </h3>
-              <p class="text-gray-700 dark:text-gray-300">
-                Join an interactive platform where you’ll take on global missions, collaborate with changemakers, and unlock new levels of innovation, strategy, and social impact.
-              </p>
-            </div>
-            </div>
-
     </div>
-  </div>
-</section>
-
+  </section>
 
   <!-- FOOTER -->
   <app-footer></app-footer>
 </div>
 
-
-    <!-- Spinner -->
-    <div *ngIf="isLoading" class="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-gray-800">
-      <div role="status" class="flex flex-col items-center">
-        <svg aria-hidden="true" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-          <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-        </svg>
-        <span class="sr-only">Loading...</span>
-        <div class="mt-2 text-white">Processing your request...</div>
-      </div>
-    </div>
+<!-- Spinner -->
+<div 
+  *ngIf="isLoading"
+  class="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-gray-800"
+>
+  <div role="status" class="flex flex-col items-center">
+    <svg
+      aria-hidden="true"
+      class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+      viewBox="0 0 100 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M100 50.5908C100 78.2051 77.6142 
+           100.591 50 100.591C22.3858 100.591 
+           0 78.2051 0 50.5908C0 22.9766 22.3858 
+           0.59082 50 0.59082C77.6142 0.59082 
+           100 22.9766 100 50.5908ZM9.08144 
+           50.5908C9.08144 73.1895 27.4013 
+           91.5094 50 91.5094C72.5987 91.5094 
+           90.9186 73.1895 90.9186 
+           50.5908C90.9186 27.9921 72.5987 
+           9.67226 50 9.67226C27.4013 9.67226 
+           9.08144 27.9921 9.08144 
+           50.5908Z"
+        fill="currentColor"
+      />
+      <path
+        d="M93.9676 39.0409C96.393 
+           38.4038 97.8624 35.9116 97.0079 
+           33.5539C95.2932 28.8227 92.871 
+           24.3692 89.8167 20.348C85.8452 
+           15.1192 80.8826 10.7238 75.2124 
+           7.41289C69.5422 4.10194 63.2754 
+           1.94025 56.7698 1.05124C51.7666 
+           0.367541 46.6976 0.446843 41.7345 
+           1.27873C39.2613 1.69328 37.813 
+           4.19778 38.4501 6.62326C39.0873 
+           9.04874 41.5694 10.4717 44.0505 
+           10.1071C47.8511 9.54855 51.7191 
+           9.52689 55.5402 10.0491C60.8642 
+           10.7766 65.9928 12.5457 70.6331 
+           15.2552C75.2735 17.9648 79.3347 
+           21.5619 82.5849 25.841C84.9175 
+           28.9121 86.7997 32.2913 88.1811 
+           35.8758C89.083 38.2158 91.5421 
+           39.6781 93.9676 39.0409Z"
+        fill="currentFill"
+      />
+    </svg>
+    <span class="sr-only">Loading...</span>
+    <div class="mt-2 text-white">Processing your request...</div>
+  </div>
+</div>
