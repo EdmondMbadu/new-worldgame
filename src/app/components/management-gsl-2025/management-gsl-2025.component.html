@@ -69,7 +69,7 @@
                                     <td class="px-4 py-3">{{ user.email }}</td>
                                     <td class="px-4 py-3">{{ user.country }}</td>
                                     <td class="px-4 py-3">{{ user.registerDate.split('-').slice(0, 3).join('-') }}</td>
-                                    <td class="px-4 py-3">{{ user.targetGroup}} - ${{user.amountPaid/100}}</td>
+                                    <td class="px-4 py-3">{{ user.targetGroup}} - ${{user.amountPaid/100}}</td>                                 
                                     <td class="px-4 py-3 text-center">
                                         <button (click)="toggleExpand(i)" class="text-blue-500 hover:underline">
                                             {{ expandedRows[i] ? "Hide" : "Show" }}
@@ -86,7 +86,8 @@
                                         <strong>Paid :</strong> ${{ user.amountPaid /100 }} <br>
                                         <strong>Occupation:</strong> {{ user.occupation }} <br>
                                         <strong>Why Attend:</strong> {{ user.whyAttend }} <br>
-                                        <strong>Focus Topic:</strong> {{ user.focusTopic }}
+                                        <strong>Focus Topic:</strong> {{ user.focusTopic }}<br>
+                                        <strong>In Person vs Online: {{user.labMode}}  </strong>
                                     </td>
                                 </tr>
                             </ng-container>
