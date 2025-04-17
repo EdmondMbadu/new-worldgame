@@ -59,6 +59,34 @@ import * as sgMail from '@sendgrid/mail';
 // const cors = corsLib({ origin: true });
 const twilio = require('twilio');
 
+// === Your new Bucky persona prompt ===
+// const systemPrompt = `
+// You are “Bucky,” the AI embodiment of architect–futurist Buckminster Fuller.
+// Your mission is to turn pressing local and global challenges into actionable, systemic solutions.
+
+// Mindset & Voice:
+// - Anticipatory design science, big‑picture patterns, rigorous analysis, playful optimism.
+// - Clear, humble language; always bias toward “doable next steps.”
+// - Use concise metaphors (tensegrity, synergy, spaceship Earth) when they illuminate.
+
+// Knowledge Base:
+// - Cite authoritative data (UN SDG, World Bank, FAO, WHO, IPCC, IMF, IEA) with institution + year.
+// - When sources conflict, note the range and briefly explain.
+// - Default to metric units (honor user preference if specified).
+
+// Answer Style:
+// 1. **Insight**: One‑sentence framing in a systems context.
+// 2. **Data**: Bullet‑point or short‑paragraph, fact‑backed details.
+// 3. **Leverage points**: Concrete actions or design pathways to pursue.
+
+// Boundaries:
+// - Provide general legal/medical/financial info only; recommend professional advice.
+// - If data is unavailable, state so and suggest nearest proxy.
+
+// When asked about your identity, say:
+// “I’m Bucky, here to help you design comprehensive solutions using the world’s best data.”
+// `.trim();
+
 const API_KEY = functions.config()['sendgrid'].key;
 const TEMPLATE_ID = functions.config()['sendgrid'].template;
 const TEMPLATE_ID_SOLUTION =
@@ -142,53 +170,128 @@ export const genericEmail = functions.https.onCall(
 //   return BUCKY_SYSTEM_PROMPT + '\n\nUSER:\n' + userPrompt;
 // }
 
+// export const onChatPrompt = functions.firestore
+//   .document('users/{uid}/discussions/{docId}')
+//   .onCreate(async (snap) => {
+//     const prompt = (snap.data()?.['prompt'] || '').trim();
+//     if (!prompt) return;
+
+//     await snap.ref.update({ status: { state: 'PROCESSING' } });
+
+//     /* ---------- 1. Build the model (with output‑image flag) ---------- */
+//     const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+//     const model = genAI.getGenerativeModel({
+//       model: 'gemini-2.0-flash-exp-image-generation',
+//       generationConfig: { responseModalities: ['text', 'image'] } as any,
+//     });
+//     /*  Combine system‑style context + user question  */
+//     // const fullPrompt = buildPrompt(prompt);
+
+//     /* ---------- 2. Ask Gemini ---------- */
+//     const resp = await model.generateContent(prompt);
+
+//     let answer = '';
+//     let imgB64 = '';
+
+//     for (const part of resp.response.candidates?.[0]?.content?.parts || []) {
+//       if (part.text) answer += part.text;
+//       if (part.inlineData) imgB64 = part.inlineData.data; // PNG base‑64
+//     }
+
+//     /* ---------- 3. Save image (if any) ---------- */
+//     let imageUrl: string | undefined;
+//     if (imgB64) {
+//       const filePath = `generated/${randomUUID()}.png`;
+//       await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
+//         contentType: 'image/png',
+//         resumable: false,
+//         public: true, // or use signed URLs
+//       });
+//       imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+//     }
+
+//     /* ---------- 4. Final doc update ---------- */
+//     const updateData: any = {
+//       status: { state: 'COMPLETED' },
+//       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+//     };
+
+//     if (answer) updateData.response = answer; // only if not empty
+//     if (imageUrl) updateData.imageUrl = imageUrl;
+
+//     await snap.ref.update(updateData);
+//   });
+
 export const onChatPrompt = functions.firestore
   .document('users/{uid}/discussions/{docId}')
-  .onCreate(async (snap) => {
+  .onCreate(async (snap, context) => {
     const prompt = (snap.data()?.['prompt'] || '').trim();
     if (!prompt) return;
 
+    // Mark as processing
     await snap.ref.update({ status: { state: 'PROCESSING' } });
 
-    /* ---------- 1. Build the model (with output‑image flag) ---------- */
+    // 1) Retrieve full conversation history
+    const colRef = snap.ref.parent!;
+    const allDocs = await colRef.get();
+    const sorted = allDocs.docs.sort(
+      (a, b) => a.createTime!.toMillis() - b.createTime!.toMillis()
+    );
+
+    // Build a simple “User:” / “Assistant:” transcript
+    let historyText = '';
+    for (const doc of sorted) {
+      if (doc.id === snap.id) break; // stop before the new prompt
+      const data = doc.data();
+      if (data['prompt']) {
+        historyText += `User: ${data['prompt']}\n`;
+      }
+      if (data['response']) {
+        historyText += `Assistant: ${data['response']}\n`;
+      }
+    }
+    historyText += `User: ${prompt}\nAssistant:`;
+
+    // 2) Prepare Gemini model
     const genAI = new GoogleGenerativeAI(GEMINI_KEY);
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.0-flash-exp-image-generation',
-      generationConfig: { responseModalities: ['text', 'image'] } as any,
+      generationConfig: {
+        responseModalities: ['text', 'image'],
+      } as any,
     });
-    /*  Combine system‑style context + user question  */
-    // const fullPrompt = buildPrompt(prompt);
 
-    /* ---------- 2. Ask Gemini ---------- */
-    const resp = await model.generateContent(prompt);
+    // 3) Send the combined prompt (with history)
+    const systemPrompt = `You are Bucky, an AI assistant who remembers prior conversation and answers user questions fully.`;
+    const fullPrompt = `${systemPrompt}\n${historyText}`;
+    const resp = await model.generateContent(fullPrompt);
 
+    // 4) Extract text + image
     let answer = '';
     let imgB64 = '';
-
     for (const part of resp.response.candidates?.[0]?.content?.parts || []) {
       if (part.text) answer += part.text;
-      if (part.inlineData) imgB64 = part.inlineData.data; // PNG base‑64
+      if (part.inlineData) imgB64 = part.inlineData.data;
     }
 
-    /* ---------- 3. Save image (if any) ---------- */
+    // 5) Upload image if present
     let imageUrl: string | undefined;
     if (imgB64) {
       const filePath = `generated/${randomUUID()}.png`;
       await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
         contentType: 'image/png',
         resumable: false,
-        public: true, // or use signed URLs
+        public: true,
       });
       imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
     }
 
-    /* ---------- 4. Final doc update ---------- */
+    // 6) Final update
     const updateData: any = {
       status: { state: 'COMPLETED' },
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-
-    if (answer) updateData.response = answer; // only if not empty
+    if (answer) updateData.response = answer;
     if (imageUrl) updateData.imageUrl = imageUrl;
 
     await snap.ref.update(updateData);
