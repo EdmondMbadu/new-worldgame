@@ -91,15 +91,6 @@ export class ChatbotComponent implements OnInit {
 
           switch (state) {
             case 'COMPLETED':
-              // this.status = '';
-              // this.responses.push({
-              //   text: conversation['response'],
-              //   type: 'RESPONSE',
-              // });
-              // this.cdRef.detectChanges();
-              // setTimeout(() => this.scrollToBottom(), 0);
-              // destroyFn.unsubscribe();
-              // break;
               this.status = '';
               if (conversation['response']) {
                 this.responses.push({
@@ -182,22 +173,6 @@ export class ChatbotComponent implements OnInit {
     );
   }
 
-  // Copies only one message
-  // copySingleMessage(text: string, index: number) {
-  //   navigator.clipboard.writeText(text).then(
-  //     () => {
-  //       // Temporarily show "Copied!"
-  //       this.singleCopyStates[index] = 'Copied!';
-  //       setTimeout(() => {
-  //         this.singleCopyStates[index] = 'Copy';
-  //       }, 2000);
-  //     },
-  //     (err) => {
-  //       console.error('Failed to copy single message:', err);
-  //     }
-  //   );
-  // }
-  // Copies only one message as real HTML data
   copySingleMessage(text: string, index: number) {
     // 1) Convert your markdown/shortcode to HTML:
     const formattedMessage = this.formatText(text);
@@ -263,5 +238,35 @@ export class ChatbotComponent implements OnInit {
       batch.delete(doc.ref);
     });
     await batch.commit();
+  }
+
+  async downloadImage(src: string) {
+    // Derive a sensible filename
+    const urlParts = src.split('/');
+    let filename = urlParts[urlParts.length - 1].split('?')[0];
+    if (!filename.match(/\.(png|jpe?g|gif)$/i)) {
+      filename = `image-${Date.now()}.png`;
+    }
+
+    try {
+      // Try to fetch the image and download via blob (no navigation)
+      const response = await fetch(src, { mode: 'cors' });
+      if (!response.ok) throw new Error('Network response was not ok');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Free up memory
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      // Fallback: open in a new tab (won’t disturb current page)
+      window.open(src, '_blank', 'noopener');
+    }
   }
 }
