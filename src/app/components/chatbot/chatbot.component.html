@@ -163,7 +163,7 @@
                           text-gray-700 dark:text-slate-100
                           rounded hover:bg-gray-300 dark:hover:bg-slate-500
                           transition flex flex-row items-center"
-                   (click)="copySingleMessage(resp.text, i)"
+                   (click)="copySingleMessage(resp.text!, i)"
                  >
                  <svg 
                  xmlns="http://www.w3.org/2000/svg" 
@@ -196,6 +196,15 @@
            </div>
          </div>
 
+         <!-- !-- If Bucky returns an image  -->
+          <div *ngIf="resp.type === 'IMAGE'" class="flex items-start space-x-2">
+              <img src="../../../assets/img/bucky-1.png"
+                  class="w-10 h-10 rounded-full" alt="Bucky" />
+
+              <img [src]="resp.src"
+                  class="max-w-[250px] md:max-w-sm rounded-lg shadow-sm"
+                  alt="AI generated image" />
+          </div>
          <!-- If Bucky's response -->
          <div
            *ngIf="resp.type === 'RESPONSE'"
@@ -212,7 +221,7 @@
                class="bg-white dark:bg-slate-700 
                       text-gray-900 dark:text-slate-200
                       py-2 px-4 rounded-lg shadow-sm"
-               [innerHTML]="formatText(resp.text)"
+               [innerHTML]="formatText(resp.text!)"
              ></p>
 
              <!-- Single-message copy button, placed under the bubble -->
@@ -222,7 +231,7 @@
                         text-gray-700 dark:text-slate-100
                         rounded hover:bg-gray-300 dark:hover:bg-slate-500
                         transition flex flex-row items-center"
-                 (click)="copySingleMessage(resp.text, i)"
+                 (click)="copySingleMessage(resp.text!, i)"
                >
                <svg 
                xmlns="http://www.w3.org/2000/svg" 

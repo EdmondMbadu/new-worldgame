@@ -7,10 +7,11 @@ import {
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 
-interface DisplayMessage {
-  text: string;
+export interface DisplayMessage {
+  text?: string; // present for PROMPT / RESPONSE
+  src?: string; // present for IMAGE
   link?: { text?: string; url?: string };
-  type: 'PROMPT' | 'RESPONSE';
+  type: 'PROMPT' | 'RESPONSE' | 'IMAGE';
 }
 
 @Component({
@@ -90,11 +91,28 @@ export class ChatbotComponent implements OnInit {
 
           switch (state) {
             case 'COMPLETED':
+              // this.status = '';
+              // this.responses.push({
+              //   text: conversation['response'],
+              //   type: 'RESPONSE',
+              // });
+              // this.cdRef.detectChanges();
+              // setTimeout(() => this.scrollToBottom(), 0);
+              // destroyFn.unsubscribe();
+              // break;
               this.status = '';
-              this.responses.push({
-                text: conversation['response'],
-                type: 'RESPONSE',
-              });
+              if (conversation['response']) {
+                this.responses.push({
+                  text: conversation['response'],
+                  type: 'RESPONSE',
+                });
+              }
+              if (conversation['imageUrl']) {
+                this.responses.push({
+                  src: conversation['imageUrl'],
+                  type: 'IMAGE',
+                });
+              }
               this.cdRef.detectChanges();
               setTimeout(() => this.scrollToBottom(), 0);
               destroyFn.unsubscribe();

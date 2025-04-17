@@ -12,6 +12,12 @@ import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
 // At the top, with your other imports
 import Stripe from 'stripe';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
+
+// read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
+const GEMINI_KEY = functions.config()['gemini'].key;
+// const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
 // const axios = require('axios');
 // const cors = require('cors')({ origin: true });
 // const corsOptions = cors({ origin: true, optionsSuccessStatus: 200 });
@@ -115,6 +121,56 @@ export const genericEmail = functions.https.onCall(
     return { success: true };
   }
 );
+export const onChatPrompt = functions.firestore
+  .document('users/{uid}/discussions/{docId}')
+  .onCreate(async (snap) => {
+    const prompt = (snap.data()?.['prompt'] || '').trim();
+    if (!prompt) return;
+
+    await snap.ref.update({ status: { state: 'PROCESSING' } });
+
+    /* ---------- 1. Build the model (with output‑image flag) ---------- */
+    const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp-image-generation',
+      generationConfig: { responseModalities: ['text', 'image'] } as any,
+    });
+
+    /* ---------- 2. Ask Gemini ---------- */
+    const resp = await model.generateContent(prompt);
+
+    let answer = '';
+    let imgB64 = '';
+
+    for (const part of resp.response.candidates?.[0]?.content?.parts || []) {
+      if (part.text) answer += part.text;
+      if (part.inlineData) imgB64 = part.inlineData.data; // PNG base‑64
+    }
+
+    /* ---------- 3. Save image (if any) ---------- */
+    let imageUrl: string | undefined;
+    if (imgB64) {
+      const filePath = `generated/${randomUUID()}.png`;
+      await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
+        contentType: 'image/png',
+        resumable: false,
+        public: true, // or use signed URLs
+      });
+      imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+    }
+
+    /* ---------- 4. Final doc update ---------- */
+    const updateData: any = {
+      status: { state: 'COMPLETED' },
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (answer) updateData.response = answer; // only if not empty
+    if (imageUrl) updateData.imageUrl = imageUrl;
+
+    await snap.ref.update(updateData);
+  });
+
 export const nonUserEmail = functions.https.onCall(
   async (data: any, context: any) => {
     //   if (!context.auth && !context.auth!.token.email) {
