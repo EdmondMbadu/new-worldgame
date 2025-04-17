@@ -33,7 +33,7 @@
         overflow-hidden shadow-xl rounded-lg 
         bg-white dark:bg-slate-800"
  [ngClass]="isEnlarged 
-   ? 'w-[90vw] h-[80vh] md:w-[60vw] md:h-[80vh]' 
+   ? ' top-20 bottom-0 right-0 left-64'
    : 'w-96 h-96'"
 >
  <!-- Main “box” -->
@@ -45,53 +45,74 @@
             rounded-t-lg flex justify-between items-center"
    >
      <p class="text-lg font-semibold mx-auto">Bucky</p>
-     <div class="flex space-x-3">
-       <!-- Enlarge/shrink button -->
-       <button
-         (click)="toggleChatSize()"
-         class="hover:opacity-80 focus:outline-none"
-         title="Enlarge / Shrink"
-       >
-         <svg
-           xmlns="http://www.w3.org/2000/svg"
-           class="w-6 h-6 text-white"
-           fill="none"
-           viewBox="0 0 24 24"
-           stroke="currentColor"
-         >
-           <path
-             stroke-linecap="round"
-             stroke-linejoin="round"
-             stroke-width="2"
-             d="M8 4H4m0 0v4m0-4 5 5
-                m7-5h4m0 0v4m0-4-5 5
-                M8 20H4m0 0v-4m0 4 5-5
-                m7 5h4m0 0v-4m0 4-5-5"
-           />
-         </svg>
-       </button>
-       <!-- Close chat -->
-       <button
-         (click)="toggleBot()"
-         class="hover:opacity-80 focus:outline-none"
-         title="Close"
-       >
-         <svg
-           xmlns="http://www.w3.org/2000/svg"
-           class="w-6 h-6 text-white"
-           fill="none"
-           viewBox="0 0 24 24"
-           stroke="currentColor"
-         >
-           <path 
-             stroke-linecap="round" 
-             stroke-linejoin="round" 
-             stroke-width="2" 
-             d="M6 18L18 6M6 6l12 12" 
-           />
-         </svg>
-       </button>
-     </div>
+     <div class="flex space-x-3 overflow-visible">
+      <!-- Enlarge/shrink button -->
+      <button
+        (click)="toggleChatSize()"
+        class="relative group hover:opacity-80 focus:outline-none"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-6 h-6 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 4H4m0 0v4m0-4 5 5
+               m7-5h4m0 0v4m0-4-5 5
+               M8 20H4m0 0v-4m0 4 5-5
+               m7 5h4m0 0v-4m0 4-5-5"
+          />
+        </svg>
+        <!-- Tooltip -->
+        <span
+          class="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50
+                 px-2 py-1 text-xs rounded whitespace-nowrap
+                 bg-gray-800 text-white
+                 dark:bg-white dark:text-black
+                 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          Enlarge
+        </span>
+      </button>
+    
+      <!-- Close chat -->
+      <button
+        (click)="toggleBot()"
+        class="relative group hover:opacity-80 focus:outline-none"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-6 h-6 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+        <!-- Tooltip -->
+        <span
+          class="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50
+                 px-2 py-1 text-xs rounded whitespace-nowrap
+                 bg-gray-800 text-white
+                 dark:bg-white dark:text-black
+                 opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          Close
+        </span>
+      </button>
+    </div>
+    
+    
    </div>
 
    <!-- Chat messages area (relative, so we can absolutely-position the copy button) -->
