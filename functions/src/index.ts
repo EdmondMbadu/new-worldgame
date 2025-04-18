@@ -262,7 +262,8 @@ export const onChatPrompt = functions.firestore
     });
 
     // 3) Send the combined prompt (with history)
-    const systemPrompt = `You are Bucky, an AI assistant who remembers prior conversation and answers user questions fully.`;
+    // const systemPrompt = `You are Bucky, an AI assistant who remembers prior conversation and answers user questions fully.`;
+    const systemPrompt = '';
     const fullPrompt = `${systemPrompt}\n${historyText}`;
     const resp = await model.generateContent(fullPrompt);
 

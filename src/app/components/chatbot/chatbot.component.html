@@ -30,7 +30,7 @@
 <div
  *ngIf="showBot"
  class="fixed bottom-16 right-4 z-50 transition-all duration-300 
-        overflow-hidden shadow-xl rounded-lg 
+        overflow-visible shadow-xl rounded-lg 
         bg-white dark:bg-slate-800"
  [ngClass]="isEnlarged 
    ? ' top-20 bottom-0 right-0 left-64'
@@ -72,8 +72,8 @@
         <span
           class="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50
                  px-2 py-1 text-xs rounded whitespace-nowrap
-                 bg-gray-800 text-white
-                 dark:bg-white dark:text-black
+                 bg-slate-900 text-white
+                
                  opacity-0 group-hover:opacity-100 transition-opacity"
         >
           {{ isEnlarged ? 'Shrink' : 'Enlarge' }}
@@ -104,7 +104,7 @@
           class="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50
                  px-2 py-1 text-xs rounded whitespace-nowrap
                  bg-gray-800 text-white
-                 dark:bg-white dark:text-black
+                 
                  opacity-0 group-hover:opacity-100 transition-opacity"
         >
           Close
