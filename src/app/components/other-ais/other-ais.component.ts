@@ -51,13 +51,13 @@ export class OtherAisComponent implements OnInit {
     {
       avatarPath: '../../../assets/img/albert.png',
       name: 'Albert Einstein',
-      intro: `${name} German-born physicist who developed the special and general theories of relativity`,
+      intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
     },
     {
       avatarPath: '../../../assets/img/mandela.png',
       name: 'Nelson Mandela',
-      intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa`,
+      intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
     // waiting for approval to get jane goodall
