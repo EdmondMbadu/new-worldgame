@@ -1,33 +1,29 @@
+// -----------------------------------------------------------------------------
+// game.component.ts — emoji‑based World‑Game mini‑loop (Angular 17+ / strict TS)
+// Paste this entire file into src/app/…/game.component.ts
+// -----------------------------------------------------------------------------
+
 import {
   AfterViewInit,
   Component,
   ElementRef,
-  HostListener,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
 
-interface Obstacle {
-  x: number;
-  y: number;
-  size: number;
-  vy: number;
-  emoji: string; // 🔥 ⚔️ ☣️
-}
-
-interface PowerUp {
-  x: number;
-  y: number;
-  size: number;
-  vy: number;
-  type: 'shield' | 'blaster';
-}
-
+/* ════════════  Simple models  ════════════ */
 interface Bullet {
   x: number;
   y: number;
+  r: number;
   vy: number;
+}
+interface Problem {
+  x: number;
+  y: number;
   size: number;
+  vy: number;
+  char: string; // rendered as an emoji on canvas
 }
 
 @Component({
@@ -36,353 +32,213 @@ interface Bullet {
   styleUrls: ['./game.component.css'],
 })
 export class GameComponent implements AfterViewInit, OnDestroy {
-  /* ---------- Canvas ---------- */
+  /* ───────────── canvas refs ───────────── */
   @ViewChild('gameCanvas', { static: true })
   canvasRef!: ElementRef<HTMLCanvasElement>;
   private ctx!: CanvasRenderingContext2D;
-  private cw = 0;
-  private ch = 0;
-  private dpr = window.devicePixelRatio || 1;
-  private groundY = 0;
+  private raf = 0;
 
-  /* ---------- Player ---------- */
-  private runnerX = 100;
-  private runnerY = 0;
-  private runnerW = 40;
-  private runnerH = 60;
-  private runnerV = 0;
-  private gravity = 0.6;
-  private jumpStrength = -13;
-  private moveLeft = false;
-  private moveRight = false;
-  private readonly runnerSpeed = 6;
+  /* ───────────── public state ───────────── */
+  score = 0;
+  running = false;
+  gameOver = false;
 
-  /* ---------- Game objects ---------- */
-  private obstacles: Obstacle[] = [];
-  private powerUps: PowerUp[] = [];
+  /* ───────────── entities ───────────── */
+  private player = {
+    char: '🧑‍🚀', // Bucky placeholder
+    x: 0,
+    y: 0,
+    size: 64,
+    speed: 320, // px/s
+  };
   private bullets: Bullet[] = [];
-  private hasShield = false;
-  private blasterLevel = 1;
+  private problems: Problem[] = [];
 
-  /* ---------- Timing ---------- */
-  private frame = 0;
-  private animationId = 0;
-  private lastShot = 0;
-  private difficulty = 1;
+  /* ───────────── constants ───────────── */
+  private readonly BULLET_SPEED = 540; // px/s
+  private readonly PROBLEM_BASE_SPEED = 70; // px/s
+  private readonly PROBLEM_ACCEL = 15; // per 10 s
+  private readonly SPAWN_INTERVAL = 1100; // ms
 
-  /* ---------- Public (bound) ---------- */
-  public score = 0;
-  public running = false;
-  public gameOver = false;
+  /* ───────────── time helpers ───────────── */
+  private lastFrame = 0;
+  private spawnTimer = 0;
+  private elapsedTotal = 0;
 
-  /* ---------- Lifecycle ---------- */
+  /* ════════════ lifecycle ════════════ */
   ngAfterViewInit() {
     this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
-    this.resizeCanvas();
-    this.reset(false); // wait for Play
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    this.bindControls();
   }
 
   ngOnDestroy() {
-    cancelAnimationFrame(this.animationId);
+    cancelAnimationFrame(this.raf);
   }
 
-  /* ---------- Resize & Hi‑DPI fix ---------- */
-  @HostListener('window:resize')
-  onResize() {
-    this.resizeCanvas();
-  }
-
-  private resizeCanvas() {
-    const canvas = this.canvasRef.nativeElement;
-    // logical CSS pixels
-    this.cw = canvas.clientWidth;
-    this.ch = canvas.clientHeight;
-
-    // match device pixels to avoid blur
-    canvas.width = this.cw * this.dpr;
-    canvas.height = this.ch * this.dpr;
-    this.ctx.scale(this.dpr, this.dpr);
-
-    this.groundY = this.ch - 40;
-  }
-
-  /* ---------- Input ---------- */
-  @HostListener('window:keydown', ['$event'])
-  handleKeyDown(e: KeyboardEvent) {
-    if (!this.running) return;
-    switch (e.code) {
-      case 'Space':
-      case 'ArrowUp':
-        this.jump();
-        break;
-      case 'ArrowLeft':
-      case 'KeyA':
-        this.moveLeft = true;
-        break;
-      case 'ArrowRight':
-      case 'KeyD':
-        this.moveRight = true;
-        break;
-      case 'KeyF':
-        this.fire();
-        break;
-    }
-  }
-
-  @HostListener('window:keyup', ['$event'])
-  handleKeyUp(e: KeyboardEvent) {
-    if (!this.running) return;
-    if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.moveLeft = false;
-    if (e.code === 'ArrowRight' || e.code === 'KeyD') this.moveRight = false;
-  }
-
-  /* ---------- Controls ---------- */
+  /* ════════════ public method called by template ════════════ */
   start() {
-    this.reset(true);
-    this.loop();
+    this.score = 0;
+    this.elapsedTotal = 0;
+    this.spawnTimer = 0;
+    this.running = true;
+    this.gameOver = false;
+    this.bullets = [];
+    this.problems = [];
+
+    const c = this.canvasRef.nativeElement;
+    this.player.x = c.clientWidth / 2;
+    this.player.y = c.clientHeight - this.player.size - 20;
+
+    // kick off loop
+    this.lastFrame = performance.now();
+    this.raf = requestAnimationFrame(this.loop);
   }
 
-  /* ---------- Main loop ---------- */
-  private loop = () => {
-    this.update();
-    this.draw();
-    if (this.running) this.animationId = requestAnimationFrame(this.loop);
+  /* ════════════ main loop ════════════ */
+  private loop = (now: number) => {
+    const dt = (now - this.lastFrame) / 1000; // seconds since previous frame
+    this.lastFrame = now;
+
+    if (this.running) {
+      this.update(dt);
+      this.render();
+      this.raf = requestAnimationFrame(this.loop);
+    }
   };
 
-  /* ---------- Update ---------- */
-  private update() {
-    this.frame++;
+  /* ════════════ update step ════════════ */
+  private update(dt: number) {
+    this.elapsedTotal += dt;
 
-    // increase difficulty every 7 s
-    if (this.frame % 420 === 0) this.difficulty += 0.25;
-
-    // player movement
-    if (this.moveLeft) this.runnerX -= this.runnerSpeed;
-    if (this.moveRight) this.runnerX += this.runnerSpeed;
-    this.runnerX = Math.max(0, Math.min(this.cw - this.runnerW, this.runnerX));
-
-    // gravity
-    this.runnerV += this.gravity;
-    this.runnerY += this.runnerV;
-    if (this.runnerY > this.groundY - this.runnerH) {
-      this.runnerY = this.groundY - this.runnerH;
-      this.runnerV = 0;
+    // ── spawn new problems ──
+    this.spawnTimer += dt * 1000; // ms
+    if (this.spawnTimer >= this.SPAWN_INTERVAL) {
+      this.spawnTimer = 0;
+      const EMOJIS = ['🔥', '🪖', '🦠', '🌡️'];
+      const size = 48 + Math.random() * 32;
+      const xMax = this.canvasRef.nativeElement.clientWidth - size;
+      this.problems.push({
+        x: Math.random() * xMax,
+        y: -size,
+        size,
+        vy: this.currentProblemSpeed(),
+        char: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+      });
     }
 
-    // spawn stuff
-    if (this.frame % 40 === 0) this.spawnObstacle();
-    if (this.frame % 600 === 0) this.spawnPowerUp();
+    // ── move bullets ──
+    this.bullets.forEach((b) => (b.y -= b.vy * dt));
+    this.bullets = this.bullets.filter((b) => b.y + b.r > 0);
 
-    // move world
-    const speedFactor = this.difficulty;
-    this.obstacles.forEach((o) => (o.y += o.vy * speedFactor));
-    this.powerUps.forEach((p) => (p.y += p.vy * speedFactor));
-    this.bullets.forEach((b) => (b.y -= b.vy));
+    // ── move problems ──
+    this.problems.forEach((p) => (p.y += p.vy * dt));
 
-    // cull
-    this.obstacles = this.obstacles.filter((o) => o.y - o.size < this.ch);
-    this.powerUps = this.powerUps.filter((p) => p.y - p.size < this.ch);
-    this.bullets = this.bullets.filter((b) => b.y + b.size > 0);
-
-    // bullet vs obstacle
+    // ── handle bullet ↔ problem collisions ──
     this.bullets.forEach((b) => {
-      this.obstacles = this.obstacles.filter((o) => {
-        const hit =
-          b.x + b.size > o.x &&
-          b.x < o.x + o.size &&
-          b.y + b.size > o.y &&
-          b.y < o.y + o.size;
-        if (hit) this.score += 10;
-        return !hit;
+      this.problems.forEach((p) => {
+        const dx = p.x + p.size / 2 - b.x;
+        const dy = p.y + p.size / 2 - b.y;
+        if (Math.hypot(dx, dy) < p.size / 2 + b.r) {
+          this.score += 100;
+          p.size = 0; // mark for deletion
+          b.r = 0;
+        }
       });
     });
+    this.problems = this.problems.filter(
+      (p) => p.size > 0 && p.y < this.canvasRef.nativeElement.clientHeight
+    );
+    this.bullets = this.bullets.filter((b) => b.r > 0);
 
-    // player vs power‑up
-    this.powerUps = this.powerUps.filter((p) => {
-      const hit =
-        this.runnerX < p.x + p.size &&
-        this.runnerX + this.runnerW > p.x &&
-        this.runnerY < p.y + p.size &&
-        this.runnerY + this.runnerH > p.y;
-      if (hit) this.collectPowerUp(p.type);
-      return !hit;
-    });
-
-    // player vs obstacle
-    for (const o of this.obstacles) {
-      const crash =
-        this.runnerX < o.x + o.size &&
-        this.runnerX + this.runnerW > o.x &&
-        this.runnerY < o.y + o.size &&
-        this.runnerY + this.runnerH > o.y;
-      if (crash) {
-        if (this.hasShield) {
-          this.hasShield = false;
-          this.obstacles = this.obstacles.filter((ob) => ob !== o);
-        } else {
-          this.endGame();
-        }
+    // ── check player collision ──
+    for (const p of this.problems) {
+      if (
+        p.y + p.size > this.player.y &&
+        p.x < this.player.x + this.player.size / 2 &&
+        p.x + p.size > this.player.x - this.player.size / 2
+      ) {
+        this.running = false;
+        this.gameOver = true;
+        cancelAnimationFrame(this.raf);
         break;
       }
     }
   }
 
-  /* ---------- Draw ---------- */
-  private draw() {
-    this.ctx.clearRect(0, 0, this.cw, this.ch);
-
-    // ground
-    this.ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    this.ctx.fillRect(0, this.groundY, this.cw, this.ch - this.groundY);
-
-    // player – simple stick figure
-    this.drawStickFigure(
-      this.runnerX,
-      this.runnerY,
-      this.runnerW,
-      this.runnerH,
-      this.hasShield
+  private currentProblemSpeed(): number {
+    return (
+      this.PROBLEM_BASE_SPEED +
+      this.PROBLEM_ACCEL * Math.floor(this.elapsedTotal / 10)
     );
+  }
 
-    // obstacles
-    this.ctx.font = '36px serif';
+  /* ════════════ render step ════════════ */
+  private render() {
+    const c = this.canvasRef.nativeElement;
+    this.ctx.clearRect(0, 0, c.clientWidth, c.clientHeight);
+
+    // player
+    this.ctx.font = `${this.player.size}px "Apple Color Emoji","Segoe UI Emoji"`;
+    this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'top';
-    this.obstacles.forEach((o) => this.ctx.fillText(o.emoji, o.x, o.y));
+    this.ctx.fillText(this.player.char, this.player.x, this.player.y);
 
-    // power‑ups
-    this.powerUps.forEach((p) => {
-      this.ctx.fillStyle = p.type === 'shield' ? '#FDE047' : '#4ADE80';
-      this.ctx.fillRect(p.x, p.y, p.size, p.size);
+    // bullets
+    this.ctx.fillStyle = '#14b8a6';
+    this.bullets.forEach((b) => {
+      this.ctx.beginPath();
+      this.ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      this.ctx.fill();
     });
 
-    // bullets – fiery emoji
-    this.ctx.font = '28px serif';
-    this.bullets.forEach((b) => this.ctx.fillText('🔥', b.x, b.y));
+    // problems (emojis)
+    this.problems.forEach((p) => {
+      this.ctx.font = `${p.size}px "Apple Color Emoji","Segoe UI Emoji"`;
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText(p.char, p.x, p.y);
+    });
   }
 
-  /* ---------- Drawing helper ---------- */
-  private drawStickFigure(
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-    shield: boolean
-  ) {
-    const ctx = this.ctx;
-    const headR = w * 0.3;
-    const bodyLen = h - headR * 2;
+  /* ════════════ helpers ════════════ */
+  private bindControls() {
+    // keyboard
+    window.addEventListener('keydown', (e) => {
+      if (!this.running) return;
+      if (e.code === 'ArrowLeft') this.player.x -= this.player.speed / 12;
+      if (e.code === 'ArrowRight') this.player.x += this.player.speed / 12;
+      if (e.code === 'Space') this.fire();
+    });
 
-    ctx.save();
-    ctx.strokeStyle = shield ? '#81E6D9' : '#0D9488';
-    ctx.lineWidth = 3;
-
-    // head
-    ctx.beginPath();
-    ctx.arc(x + w / 2, y + headR, headR, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // body
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y + headR * 2);
-    ctx.lineTo(x + w / 2, y + headR * 2 + bodyLen * 0.5);
-    ctx.stroke();
-
-    // arms
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y + headR * 2 + bodyLen * 0.25);
-    ctx.lineTo(x, y + headR * 2 + bodyLen * 0.3);
-    ctx.moveTo(x + w / 2, y + headR * 2 + bodyLen * 0.25);
-    ctx.lineTo(x + w, y + headR * 2 + bodyLen * 0.3);
-    ctx.stroke();
-
-    // legs
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, y + headR * 2 + bodyLen * 0.5);
-    ctx.lineTo(x + w * 0.2, y + h);
-    ctx.moveTo(x + w / 2, y + headR * 2 + bodyLen * 0.5);
-    ctx.lineTo(x + w * 0.8, y + h);
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  /* ---------- Helpers ---------- */
-  private jump() {
-    if (this.runnerY >= this.groundY - this.runnerH)
-      this.runnerV = this.jumpStrength;
+    // touch move & shoot
+    const onTouchMove = (e: Event) => {
+      if (!this.running) return;
+      const t = (e as TouchEvent).touches[0];
+      if (t) this.player.x = t.clientX;
+    };
+    (['touchstart', 'touchmove'] as const).forEach((evt) =>
+      window.addEventListener(evt as keyof WindowEventMap, onTouchMove, {
+        passive: true,
+      })
+    );
+    window.addEventListener('touchend', () => this.fire(), { passive: true });
   }
 
   private fire() {
-    const now = performance.now();
-    const delay = 250 / this.blasterLevel;
-    if (now - this.lastShot > delay) {
-      this.bullets.push({
-        x: this.runnerX + this.runnerW / 2 - 14,
-        y: this.runnerY - 32,
-        vy: 10,
-        size: 28,
-      });
-      this.lastShot = now;
-    }
-  }
-
-  private spawnObstacle() {
-    const emojis = ['🔥', '⚔️', '☣️'];
-    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-    const size = 36;
-    const vy = 2 + Math.random() * 3;
-
-    const drops = Math.random() < 0.3 ? 2 : 1;
-    for (let i = 0; i < drops; i++) {
-      this.obstacles.push({
-        x: Math.random() * (this.cw - size),
-        y: -size - i * 40,
-        size,
-        vy,
-        emoji,
-      });
-    }
-  }
-
-  private spawnPowerUp() {
-    const type: PowerUp['type'] = Math.random() < 0.5 ? 'shield' : 'blaster';
-    const size = 28;
-    const vy = 2;
-    this.powerUps.push({
-      x: Math.random() * (this.cw - size),
-      y: -size,
-      size,
-      vy,
-      type,
+    if (!this.running) return;
+    this.bullets.push({
+      x: this.player.x,
+      y: this.player.y,
+      r: 6,
+      vy: this.BULLET_SPEED,
     });
   }
 
-  private collectPowerUp(kind: PowerUp['type']) {
-    if (kind === 'shield') this.hasShield = true;
-    else this.blasterLevel = Math.min(this.blasterLevel + 1, 3);
-    this.score += 20;
-  }
-
-  private endGame() {
-    this.running = false;
-    this.gameOver = true;
-    cancelAnimationFrame(this.animationId);
-  }
-
-  private reset(autoRun = false) {
-    this.score = 0;
-    this.runnerX = 100;
-    this.runnerY = this.groundY - this.runnerH;
-    this.runnerV = 0;
-    this.moveLeft = this.moveRight = false;
-    this.hasShield = false;
-    this.blasterLevel = 1;
-    this.obstacles = [];
-    this.powerUps = [];
-    this.bullets = [];
-    this.frame = 0;
-    this.difficulty = 1;
-    this.gameOver = false;
-    this.running = autoRun;
+  private resize() {
+    const canvas = this.canvasRef.nativeElement;
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+    this.ctx.scale(devicePixelRatio, devicePixelRatio);
   }
 }
