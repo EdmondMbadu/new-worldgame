@@ -1,0 +1,26 @@
+<div
+  class="game-container relative w-full h-[85vh] px-4  /* ← side padding */ 
+             bg-gradient-to-b from-blue-100 to-blue-300 overflow-hidden"
+>
+  <!-- Score -->
+  <div class="absolute top-4 right-6 text-white font-mono text-xl z-10">
+    Score: {{ score }}
+  </div>
+
+  <!-- Canvas -->
+  <canvas #gameCanvas class="w-full h-full"></canvas>
+
+  <!-- Overlay -->
+  <div
+    *ngIf="!running"
+    class="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center text-white space-y-4"
+  >
+    <div *ngIf="gameOver" class="text-3xl font-bold">Game Over</div>
+    <button
+      (click)="start()"
+      class="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-lg text-lg"
+    >
+      {{ gameOver ? 'Restart' : 'Play' }}
+    </button>
+  </div>
+</div>
