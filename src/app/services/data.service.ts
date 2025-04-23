@@ -4,7 +4,7 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AuthService } from './auth.service';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, Observable, of } from 'rxjs';
 import { ActiveDescendantKeyManager } from '@angular/cdk/a11y';
 import { Avatar, User } from '../models/user';
 import { Evaluation, Solution } from '../models/solution';
@@ -484,6 +484,43 @@ export class DataService implements OnInit {
       documents: documents,
     };
     return solutioneRef.set(data, { merge: true });
+  }
+
+  /** Factory that CKEditor will call for every pasted/dropped file */
+  createCkeditorUploadAdapter(loader: any) {
+    return {
+      /** Uploads the file and resolves with { default : downloadURL } */
+      upload: async () => {
+        const file: File = await loader.file;
+
+        // ---- client-side guards ------------------------------------------
+        if (!this.allowedMimeTypes.includes(file.type))
+          return Promise.reject('Unsupported file type');
+        if (file.size > 2_000_000 /* 1 MB */)
+          return Promise.reject('Image > 2 MB – please shrink it');
+        // ------------------------------------------------------------------
+
+        const path = `ckeditor/${Date.now()}_${file.name}`;
+        const ref = this.storage.ref(path);
+        const task = ref.put(file); // start upload
+
+        // wire progress to the CKEditor loader (optional but nice)
+        task.percentageChanges().subscribe((p) => {
+          loader.uploadTotal = file.size;
+          loader.uploaded = Math.floor(((p ?? 0) / 100) * file.size);
+        });
+
+        await lastValueFrom(task.snapshotChanges()); // wait for finish
+        const url = await lastValueFrom(ref.getDownloadURL());
+        return { default: url }; // CKEditor inserts <img src="url">
+      },
+
+      /** Cancels an in-flight upload */
+      abort: () => {
+        // @ts-ignore – putTasks have a cancel method
+        if ((this as any).task?.cancel) (this as any).task.cancel();
+      },
+    };
   }
 
   UnfollowUser() {}

@@ -113,12 +113,12 @@ class Editor extends ClassicEditor {
     Style,
     Subscript,
     Superscript,
-    // SimpleUploadAdapter,
+    SimpleUploadAdapter,
     Table,
     TableToolbar,
     TextTransformation,
     WordCount,
-    Base64UploadAdapter,
+    // Base64UploadAdapter,
   ];
 
   public static override defaultConfig: EditorConfig = {

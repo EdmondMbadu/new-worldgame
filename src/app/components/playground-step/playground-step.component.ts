@@ -14,6 +14,7 @@ import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { environment } from 'environments/environments';
 import { take } from 'rxjs';
+import { DataService } from 'src/app/services/data.service';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -79,7 +80,8 @@ export class PlaygroundStepComponent {
     private auth: AuthService,
     private fns: AngularFireFunctions,
     private time: TimeService,
-    private storage: AngularFireStorage
+    private storage: AngularFireStorage,
+    private dataService: DataService
   ) {}
   data: string = '';
   discussion: Comment[] = [];
@@ -190,6 +192,8 @@ export class PlaygroundStepComponent {
   public Editor: any = Editor;
   private saveTimeout: any;
   public onReady(editor: any) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) =>
+      this.dataService.createCkeditorUploadAdapter(loader);
     // console.log('CKEditor5 Angular Component is ready to use!', editor.state);
     editor.model.document.on('change:data', () => {
       // console.log('Content changed:', editor.getData());
