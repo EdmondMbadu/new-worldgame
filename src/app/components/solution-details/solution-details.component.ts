@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
-import { Solution } from 'src/app/models/solution';
+import { firstValueFrom, take } from 'rxjs';
+import { Admin, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -44,11 +44,21 @@ export class SolutionDetailsComponent implements OnInit {
   showPopUpTeam: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
   evaluators: User[] = [];
+
+  /* ––– NEW STATE ––– */
+  admins: Admin[] = [];
+  newAdminEmail = '';
+  adminToDelete = '';
+  showAddAdmin = false;
+  showRemoveAdmin = false;
+
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
       // edge case if the solution has no description
+      /* ––– load admins once solution arrives ––– */
+      this.admins = this.currentSolution.chosenAdmins ?? [];
 
       this.newReadMe = this.currentSolution.description || '';
       this.title = this.currentSolution.title || '';
@@ -80,6 +90,8 @@ export class SolutionDetailsComponent implements OnInit {
       | 'updateTitleBox'
       | 'showAddEvaluator'
       | 'showRemoveEvaluator'
+      | 'showAddAdmin'
+      | 'showRemoveAdmin'
   ) {
     this[property] = !this[property];
   }
@@ -203,12 +215,24 @@ export class SolutionDetailsComponent implements OnInit {
       alert('Enter a valid email!');
     }
   }
-  get isAuthorOfSolution(): boolean {
-    if (this.currentSolution && this.auth.currentUser) {
-      return this.currentSolution.authorAccountId === this.auth.currentUser.uid;
-    }
-    return false;
-    // return this.challengePage.authorId === this.auth.currentUser.uid;
+  // get isAuthorOfSolution(): boolean {
+  //   if (this.currentSolution && this.auth.currentUser) {
+  //     return this.currentSolution.authorAccountId === this.auth.currentUser.uid;
+  //   }
+  //   return false;
+  //   // return this.challengePage.authorId === this.auth.currentUser.uid;
+  // }
+
+  /* ––– replace old author-only check ––– */
+  get isAdminOfSolution(): boolean {
+    if (!this.currentSolution || !this.auth.currentUser) return false;
+    const uid = this.auth.currentUser.uid;
+    return (
+      this.currentSolution.authorAccountId === uid ||
+      (this.currentSolution.chosenAdmins ?? []).some(
+        (a) => a.authorAccountId === uid
+      )
+    );
   }
 
   removeEvaluatorFromSolution(email: string) {
@@ -343,5 +367,74 @@ export class SolutionDetailsComponent implements OnInit {
     } else {
       alert('Enter a title');
     }
+  }
+  /* ––– add helper methods ––– */
+  addAdminToSolution() {
+    if (!this.data.isValidEmail(this.newAdminEmail)) {
+      alert('Enter a valid email');
+      return;
+    }
+    this.auth
+      .getUserFromEmail(this.newAdminEmail)
+      .pipe(take(1)) //  ⬅ grab the first snapshot then complete
+      .subscribe((users) => {
+        if (!users || !users[0]) {
+          alert('No such user');
+          return;
+        }
+
+        const u = users[0];
+        const already = (this.currentSolution.chosenAdmins ?? []).some(
+          (a) => a.authorAccountId === u.uid
+        );
+        if (already) {
+          alert('Already admin');
+          return;
+        }
+        const newAdmin: Admin = {
+          authorAccountId: u.uid!, //  ← the `!` tells TS “this is non-null”
+          authorName: `${u.firstName!} ${u.lastName!}`,
+          authorEmail: u.email!, //  ← same here
+          authorProfilePicture: u.profilePicture,
+        };
+        const updated: Admin[] = [
+          ...(this.currentSolution.chosenAdmins ?? []),
+          newAdmin,
+        ];
+        this.persistAdmins(updated, () => {
+          this.admins = updated;
+          this.newAdminEmail = '';
+          this.toggle('showAddAdmin');
+        });
+      });
+  }
+
+  removeAdminFromSolution(email: string) {
+    const updated = (this.currentSolution.chosenAdmins ?? []).filter(
+      (a) =>
+        a.authorEmail !== email &&
+        a.authorAccountId !== this.currentSolution.authorAccountId // original author is protected
+    );
+    if (updated.length === (this.currentSolution.chosenAdmins ?? []).length) {
+      alert('Cannot remove this admin');
+      return;
+    }
+    this.persistAdmins(updated, () => {
+      this.admins = updated;
+      this.adminToDelete = '';
+      this.toggle('showRemoveAdmin');
+    });
+  }
+
+  /* ––– tiny DRY helper ––– */
+  private persistAdmins(list: Admin[], onOk: () => void) {
+    this.solution
+      .updateSolutionField(
+        this.currentSolution.solutionId!,
+        'chosenAdmins',
+        list
+      )
+      .then(onOk)
+      .catch(() => alert('Error while updating admins – try again'));
   }
 }

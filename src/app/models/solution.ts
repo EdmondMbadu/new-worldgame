@@ -52,6 +52,7 @@ export class Solution {
   documents?: Avatar[];
   preview?: string;
   board?: string;
+  chosenAdmins?: Admin[] = []; //  NEW
 }
 
 export class Evaluation {
@@ -73,6 +74,12 @@ export class Evaluator {
   user?: User;
 }
 
+export interface Admin {
+  authorAccountId: string;
+  authorName: string;
+  authorEmail: string;
+  authorProfilePicture?: Avatar;
+}
 export class Comment {
   authorId?: string;
   authorName?: string;

@@ -9,6 +9,21 @@
       path="home"
       current=""
     ></app-navbar>
+
+    <!-- put once (e.g. right after your <app-navbar>) -->
+<ng-template #iconPlus>
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <path d="M5 12h14M12 5v14" />
+    </svg>
+  </ng-template>
+  <ng-template #iconMinus>
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+      <path d="M5 12h14" />
+    </svg>
+  </ng-template>
+  
   
     <!-- Outer container, sets text color based on mode -->
     <div class="container mt-20 mx-auto px-[8rem] py-8 
@@ -69,7 +84,7 @@
     
                 <div class="flex items-center space-x-2">
                   <!-- Placeholder icons (plus/minus) -->
-                  <button *ngIf="isAuthorOfSolution" class="cursor-pointer"
+                  <button *ngIf="isAdminOfSolution" class="cursor-pointer"
                   (click)="toggle('showAddTeamMember')"
                   title="Add Team Members" >
                
@@ -80,7 +95,7 @@
                   
                   <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">+</span> -->
                 </button>
-                <button *ngIf="isAuthorOfSolution" class="cursor-pointer"
+                <button *ngIf="isAdminOfSolution" class="cursor-pointer"
                 (click)="toggle('showRemoveTeamMember')"
                 title="Remove Team Members" >
             
@@ -174,9 +189,9 @@
                 <div class="flex items-center space-x-2">
                  
                      <!-- Placeholder icons (plus/minus) -->
-                  <button *ngIf="isAuthorOfSolution" class="cursor-pointer"
+                  <button *ngIf="isAdminOfSolution" class="cursor-pointer"
                   (click)="toggle('showAddEvaluator')"
-                  title="Add Team Members" >
+                  title="Add Evaluators" >
                
                   <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
@@ -185,7 +200,7 @@
                   
                   <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">+</span> -->
                 </button>
-                <button *ngIf="isAuthorOfSolution" class="cursor-pointer"
+                <button *ngIf="isAdminOfSolution" class="cursor-pointer"
                 (click)="toggle('showRemoveEvaluator')"
                 title="Remove Team Members" >
             
@@ -249,12 +264,45 @@
                 </div>
                 </div>
               </div>
+
+              <!-- --- Admins block (place in the flex column that already contains Designers/Evaluators) --- -->
+
+    <div *ngIf="isAdminOfSolution" class="flex flex-row justify-between space-x-4">
+      <div>
+        <div class="font-semibold mb-2 text-lg text-slate-700 dark:text-gray-300">
+          Admins : {{ admins.length }}
+        </div>
+  
+        <!-- add/remove buttons – only visible for an admin -->
+        <div class="flex items-center space-x-2" *ngIf="isAdminOfSolution">
+          <button (click)="toggle('showAddAdmin')" title="Add Admin">
+            <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
+          </button>
+          <button (click)="toggle('showRemoveAdmin')" title="Remove Admin">
+            <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
+          </button>
+        </div>
+  
+        <!-- avatar list -->
+        <div class="flex flex-wrap -space-x-1 overflow-x-auto">
+          <ng-container *ngFor="let admin of admins">
+            <img *ngIf="admin.authorProfilePicture?.downloadURL !==undefined"   class="w-16 h-16 border-2 rounded-full"
+                 [src]="admin.authorProfilePicture?.downloadURL"
+                 [title]="admin.authorName" />
+            <svg  *ngIf="admin.authorProfilePicture?.downloadURL ===undefined" class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  
+
             </div>
           </div>
     
           <!-- SDGs Panel -->
           <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
-            <div class="font-semibold mb-4 text-lg text-slate-700 dark:text-gray-300">
+            <div *ngIf="currentSolution.sdgs" class="font-semibold mb-4 text-lg text-slate-700 dark:text-gray-300">
               SDGs ({{currentSolution.sdgs!.length}})
             </div>
             
@@ -460,3 +508,97 @@
         </div>
     </div>
 </div> 
+
+
+<!-- ADD ADMIN MODAL -->
+<div *ngIf="showAddAdmin"
+     id="crud-modal"
+     class="fixed inset-x-0 top-[10rem] z-50 flex w-full max-w-md mx-auto p-4">
+
+  <div class="relative w-full max-w-md">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+
+      <!-- body -->
+      <div class="p-4 md:p-5 min-w-xl">
+        <div class="grid gap-4 mb-4 grid-cols-2">
+          <div class="col-span-2">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Add a new Admin (one at a time)
+            </label>
+
+            <textarea [(ngModel)]="newAdminEmail"
+                      rows="1"
+                      placeholder="email@gmail.com"
+                      class="block w-full p-2.5 text-sm text-gray-900 bg-gray-50
+                             border border-gray-300 rounded-lg
+                             focus:ring-blue-500 focus:border-blue-500
+                             dark:bg-gray-600 dark:border-gray-500
+                             dark:text-white dark:focus:ring-blue-500"></textarea>
+          </div>
+        </div>
+
+        <button (click)="toggle('showAddAdmin')"
+                class="mr-4 px-5 py-2.5 text-sm font-medium text-white rounded-lg
+                       bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4
+                       focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700">
+          Cancel
+        </button>
+
+        <button (click)="addAdminToSolution()"
+                class="px-5 py-2.5 text-sm font-medium text-white rounded-lg
+                       bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4
+                       focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700">
+          Add Admin
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- REMOVE ADMIN MODAL -->
+<div *ngIf="showRemoveAdmin"
+     id="crud-modal"
+     class="fixed inset-x-0 top-[10rem] z-50 flex w-full max-w-md mx-auto p-4">
+
+  <div class="relative w-full max-w-md">
+    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+
+      <!-- body -->
+      <div class="p-4 md:p-5 min-w-xl">
+        <div class="grid gap-4 mb-4 grid-cols-2">
+          <div class="col-span-2">
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Remove an Admin
+            </label>
+
+            <textarea [(ngModel)]="adminToDelete"
+                      rows="1"
+                      placeholder="email@gmail.com"
+                      class="block w-full p-2.5 text-sm text-gray-900 bg-gray-50
+                             border border-gray-300 rounded-lg
+                             focus:ring-blue-500 focus:border-blue-500
+                             dark:bg-gray-600 dark:border-gray-500
+                             dark:text-white dark:focus:ring-blue-500"></textarea>
+          </div>
+        </div>
+
+        <button (click)="toggle('showRemoveAdmin')"
+                class="mr-4 px-5 py-2.5 text-sm font-medium text-white rounded-lg
+                       bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4
+                       focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700">
+          Cancel
+        </button>
+
+        <button (click)="removeAdminFromSolution(adminToDelete)"
+                class="px-5 py-2.5 text-sm font-medium text-white rounded-lg
+                       bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4
+                       focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700">
+          Remove Admin
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  

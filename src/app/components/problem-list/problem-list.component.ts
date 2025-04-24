@@ -58,4 +58,14 @@ export class ProblemListComponent {
     }
     return false;
   }
+  // get isAdminOfSolution(currentSolution: Solution): boolean {
+  //   if (currentSolution || !this.auth.currentUser) return false;
+  //   const uid = this.auth.currentUser.uid;
+  //   return (
+  //   currentSolution.authorAccountId === uid ||
+  //     (currentSolution.chosenAdmins ?? []).some(
+  //       (a:any) => a.authorAccountId === uid
+  //     )
+  //   );
+  // }
 }

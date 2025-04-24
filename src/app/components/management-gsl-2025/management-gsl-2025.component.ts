@@ -31,6 +31,7 @@ export class ManagementGsl2025Component implements OnInit {
   summaryByContinent: { [key: string]: number } = {};
   paymentSummary = { totalPaid: 0, averagePaid: 0 };
   summaryByOccupation: { [key: string]: number } = {};
+  dropdownOpen = false;
   constructor(
     public auth: AuthService,
     private data: DataService,
@@ -172,5 +173,50 @@ export class ManagementGsl2025Component implements OnInit {
 
   getKeys(obj: any): string[] {
     return Object.keys(obj);
+  }
+
+  downloadCSV() {
+    // 1) Prepare header row
+    const headers = [
+      'Name',
+      'Email',
+      'Country',
+      'Register Date',
+      'Target Group',
+    ];
+
+    // 2) Map your filteredData into CSV rows
+    const rows = this.filteredData.map((user) => {
+      const name = `${user.firstName} ${user.lastName}`;
+      const email = user.email;
+      const country = user.country;
+      // match your displayed format
+      const registerDate = user.registerDate.split('-').slice(0, 3).join('-');
+      const targetGroup = `${user.targetGroup} - $${(
+        user.amountPaid / 100
+      ).toFixed(2)}`;
+      // Escape any commas in fields by wrapping in quotes
+      return [name, email, country, registerDate, targetGroup]
+        .map((field) => `"${field.replace(/"/g, '""')}"`)
+        .join(',');
+    });
+
+    // 3) Combine header + rows
+    const csvContent = [headers.join(','), ...rows].join('\r\n');
+
+    // 4) Create Blob and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    // name it however you like; e.g. include date
+    a.setAttribute('download', `gsl-2025-registrations.csv`);
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // close dropdown
+    this.dropdownOpen = false;
   }
 }

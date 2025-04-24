@@ -321,6 +321,16 @@ export class SolutionService {
     );
     return solutionRef.set(data, { merge: true });
   }
+  updateSolutionField(id: string, key: string, value: any) {
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${id}`
+    );
+    const data = {
+      [key]: value,
+    };
+    return solutionRef.set(data, { merge: true });
+  }
+
   updateSolutionForTournament(solution: Solution) {
     const data = {
       tournament: 'true',
