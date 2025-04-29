@@ -1,4 +1,9 @@
-<div class="bg-white dark:bg-slate-800 hover:bg-gray-100 hover:dark:bg-slate-700 rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:dark:shadow-2xl  transition-shadow duration-300 cursor-pointer">
+<div  class="flex flex-col h-full bg-white dark:bg-slate-800
+      hover:bg-gray-100 hover:dark:bg-slate-700
+       rounded-lg shadow-md overflow-hidden
+       hover:shadow-xl hover:dark:shadow-2xl
+       transition-shadow duration-300
+         cursor-pointer">
     <a (click)="selectChallenge()" class="cursor-pointer"  >
         <img *ngIf="image !==undefined && image!==''" [src]="image" alt="Challenge" class="w-full h-48 object-cover">
         <img   *ngIf="image ===undefined || image===''"  src="../../../assets/img/generic.webp" alt="Challenge" class="w-full h-48 object-cover">

@@ -1,4 +1,4 @@
-<div class="bg-white dark:bg-slate-800 
+<div class="flex flex-col h-full bg-white dark:bg-slate-800 
      border border-gray-200 dark:border-gray-700 
      rounded-sm shadow hover:shadow-lg
      transition-shadow duration-300 cursor-pointer">
@@ -12,7 +12,7 @@
              [alt]="solution.title"
              class="w-full h-48 object-cover">
       </a>
-      <div class="p-4 leading-snug">
+      <div class="flex-1 p-4 leading-snug flex flex-col justify-between">
         <div class="mb-2">
           <h3 class="font-bold text-xl text-gray-800 dark:text-gray-100">
             {{ solution.title }}

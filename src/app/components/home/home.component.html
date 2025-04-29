@@ -48,13 +48,13 @@
           </div>
           
           <!-- Solutions Grid -->
-          <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 ">
+          <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 "  style="grid-auto-rows: 1fr;">
             <div
               *ngFor="let t of titles; let i = index"
-              class="transform transition-transform duration-300 hover:scale-105"
+              class="transform transition-transform duration-300 hover:scale-105 flex flex-col h-full"
              
             >
-            <app-challenge  [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [id]="ids[i]"  [description]="descriptions[i]" [restricted]="'false'"   [title]="t"></app-challenge>
+            <app-challenge  class="flex-1 flex flex-col" [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [id]="ids[i]"  [description]="descriptions[i]" [restricted]="'false'"   [title]="t"></app-challenge>
                  
       
               
@@ -80,29 +80,16 @@
       <!-- Solutions Section -->
       <section id="solutions" class="scroll-mt-16 mt-4">
         
-        <!-- Category Filter -->
-        <!-- <div class="flex flex-wrap justify-center gap-4 mb-8">
-          <button
-            *ngFor="let category of categories"
-            (click)="setActiveCategory(category.fullname)"
-            [ngClass]="{
-              'bg-teal-700 text-white': category.fullname === activeCategory,
-              'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200': category.fullname !== activeCategory
-            }"
-            class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
-          >
-            {{ category.fullname }}
-          </button>
-        </div> -->
         
         <!-- Solutions Grid -->
-        <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 ">
+        <div class="grid gap-6 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3 "
+        style="grid-auto-rows: 1fr;">
           <div
             *ngFor="let solution of completedSolutions; let i = index"
-            class="transform transition-transform duration-300 hover:scale-105"
+            class="transform transition-transform duration-300 hover:scale-105 flex flex-col h-full"
            
           >
-          <app-solution  [ngStyle]="{'animation-delay': i * 100 + 'ms'}"  [user]="completedSolutionsUsers[i]"   [solution]="solution"></app-solution>
+          <app-solution class="flex-1 flex flex-col" [ngStyle]="{'animation-delay': i * 100 + 'ms'}"  [user]="completedSolutionsUsers[i]"   [solution]="solution"></app-solution>
                
     
             
