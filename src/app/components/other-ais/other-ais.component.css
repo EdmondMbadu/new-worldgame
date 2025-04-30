@@ -1,85 +1,66 @@
+/* --------- layout ---------- */
 
-#chatbox {
-    display: flex;
-    flex-direction: column-reverse;
-    overflow-y: auto;
-  
-  }
-.prompt-controls {
-    display: flex;
-  
-  }
-  header > h1 {
-    font-size: 20pt;
-  }
-  header {
-    margin-bottom: 15px;
-  }
-  .prompt, .response {
-    padding: 20px;
-    max-width: 80%;
-    border-radius: 10px;
-    border: solid 5px white;
-    margin-bottom: 10px;
-    line-height: 1.5;
-  }
-  .prompt {
-    margin-left: auto;
-  }
-  .response {
-    background: white;
-    display: flex;
+.conversation-window {
+  height: calc(100vh - 150px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #f3f6fc;
+  padding: 20px;
+  border-radius: 10px;
+}
 
-    flex-wrap: nowrap;
-    align-items: center;
-  }
-  .responses {
-    border-radius: 10px;
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-y: scroll;
-  }
-  .prompt-area {
-    border-radius: 10px;
-  }
-  .prompt-form {
-    display: flex;
-    flex-flow: row nowrap;
-  }
-  .prompt-input {
-    flex-grow: 9;
-    margin-right: 20px;
-    padding: 20px;
-    border-radius: 10px;
-    border: none;
-  }
-  .prompt-send-button {
-    flex-grow: 0;
-    flex-shrink: 0;
-    border-radius: 50%;
-    height: 56px;
-    width: 56px;
-    border: 2px solid black;
-  }
-  .conversation-window {
-    padding: 20px;
-    background: #f3f6fc;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: calc(100vh - 150px);
-  }
-  .chatbot-logo {
-    height: 56px;
-    width: 56px;
-    margin-right: 20px;
-  }
-  .status-indicator {
-    padding: 20px;
-    display: flex;
-    justify-content: space-evenly
-  }
+/* only messages scroll */
+.responses {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.prompt-area {
+  flex: 0 0 auto;
+}
+
+/* --------- existing styles (kept) ---------- */
+
+.prompt-controls { display: flex; }
+
+header > h1 { font-size: 20pt; }
+header       { margin-bottom: 15px; }
+
+.prompt,
+.response {
+  padding: 20px;
+  max-width: 80%;
+  border-radius: 10px;
+  border: solid 5px white;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.prompt  { margin-left: auto; }
+.response{
+  background: white;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.prompt-form  { display: flex; flex-flow: row nowrap; }
+.prompt-input {
+  flex-grow: 9;
+  margin-right: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  border: none;
+}
+
+.chatbot-logo { height: 56px; width: 56px; margin-right: 20px; }
+
+.status-indicator {
+  padding: 20px;
+  display: flex;
+  justify-content: space-evenly;
+}

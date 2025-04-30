@@ -21,6 +21,8 @@ import { SolutionService } from 'src/app/services/solution.service';
   styleUrl: './other-ais.component.css',
 })
 export class OtherAisComponent implements OnInit {
+  @ViewChild('bottomAnchor') private bottomAnchor!: ElementRef<HTMLDivElement>;
+
   ngOnInit(): void {
     setTimeout(() => {
       window.scrollTo(0, 0); // Ensure the scroll happens after the content is loaded
@@ -28,13 +30,7 @@ export class OtherAisComponent implements OnInit {
     this.checkLoginStatus();
     this.deleteAllDocuments();
   }
-  // ngAfterViewInit() {
-  //   this.scrollToBottom();
-  // }
-  // ngAfterViewChecked() {
-  //   this.scrollToBottom();
-  // }
-  // @ViewChild('chatbox') private chatbox?: ElementRef;
+
   allAIOptions: boolean = false;
   title = 'palm-api-app';
   collectionPath = `users/${this.auth.currentUser.uid}/bucky`;
@@ -119,115 +115,97 @@ export class OtherAisComponent implements OnInit {
   toggleAiOptions() {
     this.allAIOptions = !this.allAIOptions;
   }
-  async submitPrompt(event: Event, promptText: HTMLInputElement) {
-    event.preventDefault();
 
+  ngAfterViewInit(): void {
+    this.scrollToBottom('auto'); // first render
+  }
+
+  /* ---------------- utilities ---------------- */
+
+  private scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
+    this.bottomAnchor?.nativeElement.scrollIntoView({ behavior });
+  }
+
+  async submitPrompt(
+    event: Event,
+    promptText: HTMLInputElement
+  ): Promise<void> {
+    event.preventDefault();
     if (!promptText.value) return;
+
+    /* user prompt */
     this.prompt = promptText.value;
     promptText.value = '';
-    this.responses.push({
-      text: this.prompt,
-      type: 'PROMPT',
-    });
+    this.responses.push({ text: this.prompt, type: 'PROMPT' });
+    this.scrollToBottom();
 
-    this.status = 'sure, one sec';
-    let id = this.afs.createId();
-    const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
+    /* firestore write */
+    const id = this.afs.createId();
+    const discussionRef = this.afs.doc(
       `${this.aiSelected.collectionPath}${id}`
-    );
+    ) as AngularFirestoreDocument<any>;
     await discussionRef.set({ prompt: this.prompt });
+
     const destroyFn = discussionRef.valueChanges().subscribe({
       next: (conversation) => {
-        if (conversation && conversation['status']) {
+        if (!conversation || !conversation.status) return;
+
+        const state = conversation.status.state;
+        if (state === 'PROCESSING') {
           this.status = 'thinking...';
-          const state = conversation['status']['state'];
+        }
+        if (state === 'COMPLETED') {
+          this.status = '';
 
-          switch (state) {
-            case 'COMPLETED':
-              this.status = '';
+          /* ---- create ONE placeholder message ---- */
+          const msg: DisplayMessage = { text: '', type: 'RESPONSE' };
+          this.responses.push(msg);
 
-              // this.prompt = '';
-              this.responses.push({
-                text: conversation['response'],
-                type: 'RESPONSE',
-              });
-              console.log(
-                ' the response date and format',
-                conversation['response']
-              );
-              // this.cdRef.detectChanges(); // Detect changes to update the view
-
-              // // Use setTimeout to allow time for the DOM to update
-              // setTimeout(() => this.scrollToBottom(), 0);
-              this.typewriterEffect(conversation['response'], () => {
-                this.cdRef.detectChanges(); // Detect changes to update the view
-                setTimeout(() => this.scrollToBottom(), 0);
-                destroyFn.unsubscribe();
-              });
-
-              destroyFn.unsubscribe();
-              break;
-            case 'PROCESSING':
-              // currentPrompt = '';
-              // this.prompt = '';
-              this.status = 'preparing your answer...';
-              break;
-            case 'ERRORED':
-              // currentPrompt = '';
-              // this.prompt = '';
-              this.status = 'Oh no! Something went wrong. Please try again.';
-              destroyFn.unsubscribe();
-              break;
-          }
+          this.typewriterEffect(conversation.response, msg, () => {
+            destroyFn.unsubscribe();
+          });
+        }
+        if (state === 'ERRORED') {
+          this.status = 'Oh no! Something went wrong. Please try again.';
+          destroyFn.unsubscribe();
         }
       },
       error: (err) => {
-        console.log(err);
         this.errorMsg = err.message;
         destroyFn.unsubscribe();
       },
     });
-    this.scrollToBottom();
   }
-  scrollToBottom(): void {
-    const chatbox = document.getElementById('chatbox');
-    if (chatbox) {
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
-    // try {
-    //   this.chatbox!.nativeElement.scrollTop =
-    //     this.chatbox!.nativeElement.scrollHeight;
-    // } catch (err) {
-    //   console.error('Scroll to bottom failed:', err);
-    // }
-  }
-  typewriterEffect(text: string, callback: () => void) {
-    let index = 0;
-    this.responses[this.responses.length - 1].text = '';
 
-    const interval = setInterval(() => {
-      this.responses[this.responses.length - 1].text += text[index];
-      index++;
+  /* -------------------------------- typewriter effect --------------------------- */
 
-      if (index === text.length) {
-        clearInterval(interval);
-        callback();
-      }
-
+  /** Animates text into `msg.text` one character at a time. */
+  private typewriterEffect(
+    fullText: string,
+    msg: DisplayMessage,
+    done: () => void
+  ): void {
+    let i = 0;
+    const id = setInterval(() => {
+      msg.text += fullText[i++];
       this.cdRef.detectChanges();
-      this.scrollToBottom();
-    }, 1); // Adjust typing speed here
+      this.scrollToBottom('auto');
+
+      if (i === fullText.length) {
+        clearInterval(id);
+        this.scrollToBottom(); // smooth final scroll
+        done();
+      }
+    }, 1); // typing speed
   }
+  /* ---------------- housekeeping ---------------- */
+
   async deleteAllDocuments(): Promise<void> {
     const batch = this.afs.firestore.batch();
-
-    const querySnapshot = await this.afs
-      .collection(this.collectionPath)
+    const snapshot = await this.afs
+      .collection(`users/${this.auth.currentUser.uid}/bucky`)
       .ref.get();
-    querySnapshot.forEach((doc) => {
-      batch.delete(doc.ref);
-    });
-
+    snapshot.forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
   }
 }
