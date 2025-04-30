@@ -1,29 +1,84 @@
-<div class="dark:bg-slate-900  min-h-screen">
+<div class="dark:bg-slate-900 min-h-screen">
+    <!-- navbar logic unchanged -->
     <div *ngIf="!isLoggedIn">
-        <app-navbar></app-navbar>
-      </div>
-      <div *ngIf="isLoggedIn">
-        <app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
-      </div>
-    
+      <app-navbar></app-navbar>
+    </div>
+    <div *ngIf="isLoggedIn">
+      <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+        [email]="auth.currentUser.email"
+        [firstName]="auth.currentUser.firstName"
+        [lastName]="auth.currentUser.lastName"
+        [path]="'home'">
+      </app-navbar>
+    </div>
+  
+    <!-- MAIN VIDEO -->
     <section class="bg-white dark:bg-gray-900 mt-12">
-        <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-            <div class="mx-auto max-w-screen-md sm:text-center">
-                <h2 class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white">NewWorld Game News</h2>
-                <p class="mx-auto mb-2 max-w-2xl font-light text-gray-500 md:mb-4 sm:text-xl dark:text-gray-400">Stay up to date with solutions being developed in real time</p>
-                
-                <!-- <video class="w-full h-[50rem] max-w-full mx-auto " src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGlobal%20Solutions%20Lab%20Welcome%20AI_1.mp4?alt=media&token=66be6bb7-8cd6-4ab4-a78e-85ed3c35fa2e"controls autoplay loop muted></video> -->
-                <!-- <video id="myVideo" class="w-full h-[30rem] max-w-full mx-auto" autoplay loop controls>
-                    <source src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGlobal%20Solutions%20Lab%20Welcome%20AI_1.mp4?alt=media&token=66be6bb7-8cd6-4ab4-a78e-85ed3c35fa2e" type="video/mp4">
-                </video> -->
-                 <video id="myVideo" class="w-full h-[30rem] max-w-full mx-auto" autoplay loop controls>
-                    <source src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FWelcome%20GSL%202025v2.mp4?alt=media&token=37dab895-9458-4865-a7bf-cc7ad853cf80" type="video/mp4">
-                </video>
-
-                
-            </div>
+      <div class="py-4 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+        <div class="mx-auto max-w-screen-md sm:text-center">
+          <h2
+            class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white"
+          >
+            {{ mainVideo.title }}
+          </h2>
+          <p
+            class="mx-auto mb-2 max-w-2xl font-light text-gray-500 md:mb-2 sm:text-xl dark:text-gray-400"
+          >
+            Stay up to date with solutions being developed in real time
+          </p>
+          <video
+            class="w-full h-[30rem] max-w-full mx-auto"
+            [src]="mainVideo.url"
+            autoplay
+            loop
+            controls
+          ></video>
         </div>
+      </div>
     </section>
-
+  
+    <!-- PREVIOUS AI NEWS -->
+    <section class="bg-white dark:bg-gray-900 mt-2">
+        <div class="py-4 px-4 mx-auto max-w-screen-xl lg:py-8 lg:px-6">
+          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center ">
+            Previous AI News
+          </h3>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
+          >
+            <ng-container *ngFor="let vid of previousVideos">
+              <div
+                (click)="selectVideo(vid)"
+                class="cursor-pointer w-full max-w-xs bg-white dark:bg-slate-800 rounded-lg shadow-md 
+                       hover:shadow-lg transition-shadow duration-200 transform hover:scale-105 overflow-hidden"
+              >
+                <!-- PLAY BUTTON PLACEHOLDER -->
+                <div
+                  class="relative w-full h-48 bg-gray-200 dark:bg-slate-700 flex items-center justify-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-12 w-12 text-gray-500 dark:text-gray-200"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <div class="p-4">
+                  <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    {{ vid.title }}
+                  </h4>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </section>
+      
+  
     <app-footer></app-footer>
-</div>
+  </div>
+  
