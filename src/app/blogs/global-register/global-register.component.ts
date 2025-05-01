@@ -76,12 +76,15 @@ export class GlobalRegisterComponent implements OnInit {
     } else if (!this.data.isValidEmail(this.email)) {
       alert('Enter a valid email.');
       return;
-    }
-    // else if (this.age === null || this.age <= 0 || this.age > 120) {
-    //   alert('Enter a valid age.');
-    //   return;
-    // }
-    else if (this.organization.trim() === '') {
+    } else if (
+      (this.age === null || this.age <= 17) &&
+      this.labMode === 'inPerson'
+    ) {
+      alert(
+        'You should be at least 18 years old to participate to the In Person Lab.'
+      );
+      return;
+    } else if (this.organization.trim() === '') {
       alert('Enter your organization, school, or employer.');
       return;
     } else if (this.phone.trim() === '') {
@@ -183,12 +186,15 @@ export class GlobalRegisterComponent implements OnInit {
     } else if (!this.data.isValidEmail(this.email)) {
       alert('Enter a valid email.');
       return;
-    }
-    // else if (this.age === null || this.age <= 0 || this.age > 120) {
-    //   alert('Enter a valid age.');
-    //   return;
-    // }
-    else if (this.organization.trim() === '') {
+    } else if (
+      (this.age === null || this.age <= 17) &&
+      this.labMode === 'inPerson'
+    ) {
+      alert(
+        'You should be at least 18 years old to participate to the In Person Lab.'
+      );
+      return;
+    } else if (this.organization.trim() === '') {
       alert('Enter your organization, school, or employer.');
       return;
     } else if (this.phone.trim() === '') {
