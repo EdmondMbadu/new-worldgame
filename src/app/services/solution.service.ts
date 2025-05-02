@@ -397,6 +397,7 @@ export class SolutionService {
     const data = {
       // content: content,
       finished: 'true',
+      stqtusForPublication: '', // every submition will need to be seen for publication
       submissionDate: this.time.todaysDate(),
     };
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
