@@ -21,6 +21,7 @@ export class SolutionViewComponent implements OnInit {
   displayDeleteSolution: boolean = false;
   confirmationEditSolution: boolean = false;
   confirmationDeleteSolution: boolean = false;
+  confirmPublishSolution: boolean = false;
   currentSolution: Solution = {};
   otherSolutions: Solution[] = [];
   showPopUpTeam: boolean[] = [];
@@ -283,6 +284,17 @@ export class SolutionViewComponent implements OnInit {
   toggleConfirmationEditSolution() {
     this.confirmationEditSolution = !this.confirmationEditSolution;
   }
+  toggle(
+    property:
+      | 'displayEditSolution'
+      | 'displayAddCommentPermission'
+      | 'displayDeleteSolution'
+      | 'confirmationEditSolution'
+      | 'confirmationDeleteSolution'
+      | 'confirmPublishSolution'
+  ) {
+    this[property] = !this[property];
+  }
   toggleConfirmationDeleteSolution() {
     this.confirmationDeleteSolution = !this.confirmationDeleteSolution;
   }
@@ -302,6 +314,21 @@ export class SolutionViewComponent implements OnInit {
       this.currentSolution
     );
     this.toggleConfirmationEditSolution();
+    this.router.navigate(['/dashboard', this.currentSolution.solutionId]);
+  }
+  submitForPublication() {
+    this.currentSolution.statusForPublication = 'pending';
+    // add admin as evaluator first to approve this solution
+    this.currentSolution.evaluators?.push({
+      name: 'mbadungoma@gmail.com',
+      // evaluated: 'true',
+    });
+    this.solution.submitSolutionForPublication(
+      this.currentSolution.solutionId!,
+      this.currentSolution
+    );
+    this.toggle('confirmPublishSolution');
+
     this.router.navigate(['/dashboard', this.currentSolution.solutionId]);
   }
 

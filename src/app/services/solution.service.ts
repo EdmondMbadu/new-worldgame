@@ -436,6 +436,17 @@ export class SolutionService {
 
     return solutionRef.set(data, { merge: true });
   }
+  submitSolutionForPublication(solutionId: string, currentSolution: Solution) {
+    const data = {
+      statusForPublication: currentSolution.statusForPublication,
+      evaluators: currentSolution.evaluators,
+    };
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${solutionId}`
+    );
+
+    return solutionRef.set(data, { merge: true });
+  }
   deleteSolution(solutionId: string) {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`

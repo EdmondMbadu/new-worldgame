@@ -53,6 +53,7 @@ export class Solution {
   preview?: string;
   board?: string;
   chosenAdmins?: Admin[] = []; //  NEW
+  statusForPublication?: string;
 }
 
 export class Evaluation {

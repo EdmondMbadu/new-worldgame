@@ -70,6 +70,7 @@ import { WhiteboardComponent } from './components/whiteboard/whiteboard.componen
 import { ListFinishedSolutionsComponent } from './components/list-finished-solutions/list-finished-solutions.component';
 import { DiscoverComponent } from './components/discover/discover.component';
 import { GameComponent } from './game/game/game.component';
+import { SolutionPublicationComponent } from './components/solution-publication/solution-publication.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -358,6 +359,12 @@ const routes: Routes = [
   {
     path: 'generate-challenges',
     component: GenerateChallengesComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'solution-publication',
+    component: SolutionPublicationComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },

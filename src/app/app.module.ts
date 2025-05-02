@@ -115,6 +115,7 @@ import { WhiteboardComponent } from './components/whiteboard/whiteboard.componen
 import { ListFinishedSolutionsComponent } from './components/list-finished-solutions/list-finished-solutions.component';
 import { DiscoverComponent } from './components/discover/discover.component';
 import { GameComponent } from './game/game/game.component';
+import { SolutionPublicationComponent } from './components/solution-publication/solution-publication.component';
 
 @NgModule({
   declarations: [
@@ -206,6 +207,7 @@ import { GameComponent } from './game/game/game.component';
     ListFinishedSolutionsComponent,
     DiscoverComponent,
     GameComponent,
+    SolutionPublicationComponent,
   ],
   imports: [
     BrowserModule,
