@@ -112,6 +112,22 @@
                 </address>
                 <!-- <h1 class="mb-4 text-3xl font-extrabold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white ">{{currentSolution.title}}</h1>
                  -->
+                 <div *ngIf="currentSolution.statusForPublication === 'approved'" class="flex justify-between my-4">
+                    <!-- <div *ngIf="currentSolution.statusForPublication === 'pending'" class="flex items-center bg-yellow-100 text-yellow-800 text-sm font-semibold px-4 py-2 rounded-full dark:bg-yellow-900 dark:text-yellow-300">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M18 10c0 4.418-3.582 8-8 8S2 14.418 2 10 5.582 2 10 2s8 3.582 8 8zm-8 3a1 1 0 100-2 1 1 0 000 2zm-.707-6.707a1 1 0 00-1.414 1.414L9.586 10l-1.707 1.707a1 1 0 001.414 1.414L11 11.414l1.707 1.707a1 1 0 001.414-1.414L12.414 10l1.707-1.707a1 1 0 00-1.414-1.414L11 8.586 9.293 6.879z" clip-rule="evenodd"/>
+                      </svg>
+                      Pending Publication
+                    </div> -->
+                  
+                    <div *ngIf="currentSolution.statusForPublication === 'approved'" class="flex items-center bg-green-100 text-green-800 text-sm font-semibold px-4 py-2 rounded-full dark:bg-green-900 dark:text-green-300">
+                      <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                      Published
+                    </div>
+                  </div>
+                  
                 <button (click)="toggleEditSolution()" *ngIf="isContributorOfThisSolution" id="dropdownComment1Button" 
                 class="mx-4 inline-flex items-center p-2 text-sm font-medium text-center text-gray-500 dark:text-gray-400 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                 type="button">
@@ -139,7 +155,7 @@
                                     (click)="toggleConfirmationDeleteSolution()" 
                                         class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Delete Solution</a>
                                 </li>
-                                <li>
+                                <li *ngIf="this.currentSolution.statusForPublication !== 'pending' && this.currentSolution.statusForPublication !== 'approved'">
                                     <a  (click)="toggle('confirmPublishSolution')"
                                         class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Submit For Publication</a>
                                 </li>

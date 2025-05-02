@@ -28,6 +28,9 @@ export class SolutionPublicationComponent {
   ngOnInit(): void {
     this.solution.getAllSolutionsFromAllAccounts().subscribe((sols) => {
       this.allSolutions = sols;
+      this.allSolutions = this.allSolutions.filter(
+        (s) => s.finished === 'true'
+      );
     });
   }
 
@@ -40,8 +43,7 @@ export class SolutionPublicationComponent {
 
   /** List actually shown in the template */
   get filteredSolutions(): Solution[] {
-    if (this.statusFilter === 'all')
-      return this.allSolutions.filter((s) => s.finished === 'true');
+    if (this.statusFilter === 'all') return this.allSolutions;
     // strictly match 'pending' or 'approved' only
     return this.allSolutions.filter(
       (s) => s.statusForPublication === this.statusFilter

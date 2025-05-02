@@ -40,6 +40,7 @@ export class SolutionViewComponent implements OnInit {
   comment: string = '';
   commentUserNames: string[] = [];
   hoverTournament: boolean = false;
+  evaluatorsAdmin: any = {};
 
   hoverWinner: boolean = false;
 
@@ -319,17 +320,65 @@ export class SolutionViewComponent implements OnInit {
   submitForPublication() {
     this.currentSolution.statusForPublication = 'pending';
     // add admin as evaluator first to approve this solution
-    this.currentSolution.evaluators?.push({
-      name: 'mbadungoma@gmail.com',
-      // evaluated: 'true',
-    });
+    this.addAdminToValidateSolutionForPublication();
     this.solution.submitSolutionForPublication(
       this.currentSolution.solutionId!,
       this.currentSolution
     );
+    // send email to admin
+    this.sendRequestForEvaluation();
     this.toggle('confirmPublishSolution');
 
-    this.router.navigate(['/dashboard', this.currentSolution.solutionId]);
+    alert('Solution successfully submitted for evaluation!');
+    return;
+    // this.router.navigate(['/dashboard', this.currentSolution.solutionId]);
+  }
+
+  addAdminToValidateSolutionForPublication() {
+    const adminsToAdd = [
+      { name: 'mbadungoma@gmail.com' },
+      { name: 'medard@1earthgame.org' },
+      { name: 'jimwalker@mindpalace.com' },
+      { name: 'newworld@newworld-game.org' },
+      { name: 'globalsollab@gmail.com' },
+    ];
+
+    if (!this.currentSolution.evaluators) {
+      this.currentSolution.evaluators = [];
+    }
+
+    const existingNames = new Set(
+      this.currentSolution.evaluators.map((e) => e.name)
+    );
+
+    adminsToAdd.forEach((admin) => {
+      if (!existingNames.has(admin.name)) {
+        this.currentSolution.evaluators?.push(admin);
+      }
+    });
+  }
+  sendRequestForEvaluation() {
+    const solutionEvaluationInvite = this.fns.httpsCallable(
+      'solutionEvaluationInvite'
+    );
+
+    const emailData = {
+      email: 'newworld@newworld-game.org',
+      // email: this.auth.currentUser.email,
+      subject: `Call for Publication: Evaluation of NewWorld Game Solution: ...`,
+      title: this.currentSolution.title,
+      description: `${this.currentSolution.title} by ${this.currentSolution.authorName}`,
+      path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
+    };
+
+    solutionEvaluationInvite(emailData).subscribe(
+      (result) => {
+        console.log('Email sent:', result);
+      },
+      (error) => {
+        console.error('Error sending email:', error);
+      }
+    );
   }
 
   updateEvaluationToNotEvaluated() {
