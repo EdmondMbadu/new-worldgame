@@ -25,13 +25,63 @@ export class SolutionPublicationComponent {
     private fns: AngularFireFunctions
   ) {}
 
+  /* existing fields … */
+
+  /* ➊ NEW – master list of categories */
+  categories: string[] = [
+    'UN SDG',
+    'Climate',
+    'Poverty',
+    'Energy',
+    'Food',
+    'Health',
+    'Forestry',
+  ];
+
   ngOnInit(): void {
     this.solution.getAllSolutionsFromAllAccounts().subscribe((sols) => {
       this.allSolutions = sols;
       this.allSolutions = this.allSolutions.filter(
-        (s) => s.finished === 'true'
+        (sol) => sol.finished === 'true'
       );
+
+      /* ➋ NEW – enrich category list from existing data */
+      const extras = new Set(
+        sols
+          .map((s) => s.category?.trim())
+          .filter((c) => c && !this.categories.includes(c!))
+      );
+      this.categories.push(...(extras as any));
     });
+  }
+
+  /* existing helpers (btnClass, filteredSolutions, setStatus) remain unchanged */
+
+  /* ➌ NEW – toggle the inline category editor */
+  toggleCategoryEditor(sol: Solution): void {
+    (sol as any).editingCategory = !(sol as any).editingCategory;
+    (sol as any).tempCategory = sol.category || '';
+  }
+
+  /* ➍ NEW – save category, extend list if needed, persist */
+  saveCategory(sol: Solution): void {
+    const cat = ((sol as any).tempCategory || '').trim();
+    (sol as any).editingCategory = false;
+
+    if (!cat) return;
+
+    if (!this.categories.includes(cat)) {
+      this.categories.push(cat); // make it selectable for next time
+    }
+
+    sol.category = cat; // optimistic UI
+
+    this.solution
+      .setSolutionCategoryForPublication(sol.solutionId!, {
+        ...sol,
+        category: cat,
+      }) // merge update
+      .catch((err) => console.error('Category update failed', err));
   }
 
   /** UI helper for button coloring */

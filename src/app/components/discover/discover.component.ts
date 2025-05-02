@@ -27,6 +27,18 @@ export class DiscoverComponent implements OnInit {
       images: string[];
     };
   } = {};
+  // add near the other class fields
+  categories: string[] = [
+    'All', // ➊ will show everything
+    'UN SDG',
+    'Climate',
+    'Poverty',
+    'Energy',
+    'Food',
+    'Health',
+    'Forestry',
+  ];
+  activeCategory = 'All'; // ➋ currently‑selected category
 
   titleChallenge: string = '';
   descriptionChallenge: string = '';
@@ -79,6 +91,12 @@ export class DiscoverComponent implements OnInit {
     this.solution.getHomePageSolutions().subscribe((data) => {
       this.allSolutions = data;
       this.findCompletedSolutions();
+      /* ➌ enrich the category list with any new categories found in data */
+      for (const s of this.allSolutions) {
+        if (s.category && !this.categories.includes(s.category)) {
+          this.categories.push(s.category);
+        }
+      }
     });
 
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
@@ -103,6 +121,20 @@ export class DiscoverComponent implements OnInit {
   extractNumber(filename: string, prefix: string): number {
     const match = filename.match(new RegExp(`${prefix}-(\\d+)`)); // Extract number based on the prefix
     return match ? parseInt(match[1], 10) : 0;
+  }
+  /* ➍ called by the buttons */
+  setActiveCategory(cat: string) {
+    this.activeCategory = cat;
+    window.scroll(0, 0); // optional UX touch
+  }
+
+  /* ➎ helper used by the template */
+  get filteredCompletedSolutions(): Solution[] {
+    if (this.activeCategory === 'All') return this.completedSolutions;
+    return this.completedSolutions.filter(
+      (s) =>
+        (s.category || '').toLowerCase() === this.activeCategory.toLowerCase()
+    );
   }
 
   findPendingSolutions() {

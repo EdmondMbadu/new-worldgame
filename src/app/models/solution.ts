@@ -54,6 +54,9 @@ export class Solution {
   board?: string;
   chosenAdmins?: Admin[] = []; //  NEW
   statusForPublication?: string;
+  /* ---- UI‑only helper fields (optional) ---- */
+  editingCategory?: boolean;
+  tempCategory?: string;
 }
 
 export class Evaluation {

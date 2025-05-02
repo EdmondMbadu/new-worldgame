@@ -32,10 +32,10 @@
     </div>
     
     <!-- Nav Bar (simple top menu) -->
-    <nav class="bg-gray-100 dark:bg-slate-800 ">
+    <!-- <nav class="bg-gray-100 dark:bg-slate-800 ">
       <div class="md:max-w-7xl max-w-3xl mx-auto px-4">
         <ul class="flex flex-wrap  space-x-6 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200 mx-auto items-center justify-center">
-          <!-- Replace these with your own route links if needed -->
+         
           <li><a href="#" class="hover:underline">Health</a></li>
           <li><a href="#" class="hover:underline">Energy</a></li>
           <li><a href="#" class="hover:underline">Climate</a></li>
@@ -44,7 +44,24 @@
           <li><a href="#" class="hover:underline">More</a></li>
         </ul>
       </div>
-    </nav>
+    </nav> -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8">
+      <button
+        *ngFor="let category of categories"
+        (click)="setActiveCategory(category)"
+        [ngClass]="{
+          'bg-teal-700 text-white': category === activeCategory,
+          'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200': category !== activeCategory
+        }"
+        class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
+      >
+        {{ category}}
+      </button>
+      
+      
+    
+      
+    </div>
   </header>
   
 
@@ -70,7 +87,7 @@
         <!-- Solutions Grid -->
       
         <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          <div *ngFor="let solution of completedSolutions; let i = index"
+          <div *ngFor="let solution of filteredCompletedSolutions; let i = index"
                class="transform transition-transform duration-300 hover:scale-105">
             <app-solution 
               [ngStyle]="{'animation-delay': i * 100 + 'ms'}"
