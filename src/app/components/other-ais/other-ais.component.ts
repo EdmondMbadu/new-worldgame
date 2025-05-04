@@ -247,6 +247,23 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     snapshot.forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
   }
+  copyToClipboard(source: string): void {
+    // Strip any HTML so the clipboard receives plain text
+    const tmp = document.createElement('div');
+    tmp.innerHTML = source;
+    const plain = tmp.textContent ?? tmp.innerText ?? '';
+
+    navigator.clipboard
+      .writeText(plain)
+      .then(() => {
+        this.status = 'Copied!';
+        setTimeout(() => (this.status = ''), 1200);
+      })
+      .catch(() => {
+        this.status = 'Copy failed';
+        setTimeout(() => (this.status = ''), 1200);
+      });
+  }
 }
 interface DisplayMessage {
   text: string;

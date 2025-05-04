@@ -74,19 +74,51 @@
             <!-- scrollable messages -->
             <section class="responses" #chatMessages>
               <ng-container *ngFor="let resp of responses; let i = index">
-                <div [ngClass]="resp.type === 'PROMPT' ? 'prompt' : 'response'">
+                <div
+                  [ngClass]="resp.type === 'PROMPT' ? 'prompt' : 'response'"
+                  class="relative group">
+              
+                  <!-- Avatar for AI responses -->
                   <img
                     *ngIf="resp.type !== 'PROMPT'"
                     class="chatbot-logo"
                     [src]="aiSelected.avatarPath" />
-  
+              
+                  <!-- Copy button (only on AI responses) -->
+                  <button
+                    *ngIf="resp.type === 'RESPONSE'"
+                    (click)="copyToClipboard(resp.text)"
+                    aria-label="Copy answer"
+                    class="absolute top-1 right-1 p-1 rounded
+                           invisible group-hover:visible
+                           hover:bg-gray-200 dark:hover:bg-gray-700
+                           transition">
+              
+                    <!-- Heroicons-outline clipboard icon -->
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         viewBox="0 0 24 24">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4
+                               c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    
+                  </button>
+              
+                  <!-- Text blocks -->
                   <p *ngIf="i === 0">
                     <span class="font-bold">{{ aiSelected.name }}</span><br />
                     {{ aiSelected.intro }}
                   </p>
-                  <p *ngIf="i !== 0" [innerHTML]="chat.formatText(resp.text)"></p>
+              
+                  <p *ngIf="i !== 0"
+                     class="select-text"           
+                     [innerHTML]="chat.formatText(resp.text)">
+                  </p>
                 </div>
               </ng-container>
+              
   
               <!-- sentinel element -->
               <div #bottomAnchor></div>
