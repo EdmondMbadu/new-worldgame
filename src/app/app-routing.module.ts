@@ -71,6 +71,9 @@ import { ListFinishedSolutionsComponent } from './components/list-finished-solut
 import { DiscoverComponent } from './components/discover/discover.component';
 import { GameComponent } from './game/game/game.component';
 import { SolutionPublicationComponent } from './components/solution-publication/solution-publication.component';
+import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
+import { TournamentDetailsComponent } from './components/tournament-details/tournament-details.component';
+import { ActiveTournamentsComponent } from './components/active-tournaments/active-tournaments.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -168,6 +171,21 @@ const routes: Routes = [
   {
     path: 'join-tournament',
     component: JoinTournamentComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'create-tournament',
+    component: CreateTournamentComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'tournament-details',
+    component: TournamentDetailsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'active-tournaments',
+    component: ActiveTournamentsComponent,
     canActivate: [AuthGuard],
   },
   {

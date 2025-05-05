@@ -1,0 +1,89 @@
+<div class="dark:bg-slate-900 bg-gray-100 min-h-screen min-w-max">
+    <app-navbar 
+      [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'" 
+      [showMoreOrLess]="true" 
+      [sideBarSmall]="true" 
+      [sideBarBig]="false" 
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      [path]="'home'" 
+      [currentPageTournament]="true">
+    </app-navbar>
+  
+    <!-- Active Tournaments Section -->
+    <section class="py-8 mt-14">
+      <div class="max-w-7xl mx-auto px-4 lg:px-8">
+  
+        <!-- Title -->
+        <div class="text-center mb-10">
+          <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white">Your Tournaments</h1>
+          <p class="mt-2 text-gray-500 dark:text-gray-400 italic">click on a tournament to view the current submissions and provide feedback</p>
+        </div>
+  
+        <!-- Tournaments List -->
+        <div class="space-y-6">
+  
+          <!-- Tournament Card -->
+          <div routerLink="/tournament-details" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
+            <img src='../../../assets/img/generic.webp' alt="Tournament Image" class="w-full md:w-1/3 object-cover">
+            <div class="p-6 flex flex-col justify-between w-full">
+              <div>
+                <h2 class="text-2xl font-semibold italic text-gray-900 dark:text-white">Generic Tournament Name</h2>
+                <p class="mt-2 text-gray-700 dark:text-gray-300 text-base">
+                  The description of the tournament will go here, so that potential participants can understand the goal and scope of the tournament. 
+                  This will be written by the tournament creator, including details like guidelines for solutions and the goal this tournament intends to solve.
+                </p>
+              </div>
+              <div class="mt-4 flex flex-wrap justify-start gap-8 text-gray-700 dark:text-gray-300 text-sm">
+                <div>Participants: <span class="font-semibold">2</span></div>
+                <div>Deadline: <span class="font-semibold">April 16</span></div>
+                <div>Prize: <span class="font-semibold">$2000 USD</span></div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Another Tournament Card -->
+          <div routerLink="/tournament-details" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
+            <img src='../../../assets/img/generic.webp' alt="Tournament Image" class="w-full md:w-1/3 object-cover">
+            <div class="p-6 flex flex-col justify-between w-full">
+              <div>
+                <h2 class="text-2xl font-semibold italic text-gray-900 dark:text-white">Really Cool Tournament</h2>
+                <p class="mt-2 text-gray-700 dark:text-gray-300 text-base">
+                  The description of the tournament will go here, so that potential participants can understand the goal and scope of the tournament. 
+                  This will be written by the tournament creator, including details like guidelines for solutions and the goal this tournament intends to solve.
+                </p>
+              </div>
+              <div class="mt-4 flex flex-wrap justify-start gap-8 text-gray-700 dark:text-gray-300 text-sm">
+                <div>Participants: <span class="font-semibold">4</span></div>
+                <div>Deadline: <span class="font-semibold">August 10</span></div>
+                <div>Prize: <span class="font-semibold">$75 USD</span></div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Yet Another Tournament Card -->
+          <div routerLink="/tournament-details" class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition cursor-pointer">
+            <img src='../../../assets/img/generic.webp' alt="Tournament Image" class="w-full md:w-1/3 object-cover">
+            <div class="p-6 flex flex-col justify-between w-full">
+              <div>
+                <h2 class="text-2xl font-semibold italic text-gray-900 dark:text-white">Another Excellent Tournament</h2>
+                <p class="mt-2 text-gray-700 dark:text-gray-300 text-base">
+                  The description of the tournament will go here, so that potential participants can understand the goal and scope of the tournament. 
+                  This will be written by the tournament creator, including details like guidelines for solutions and the goal this tournament intends to solve.
+                </p>
+              </div>
+              <div class="mt-4 flex flex-wrap justify-start gap-8 text-gray-700 dark:text-gray-300 text-sm">
+                <div>Participants: <span class="font-semibold">6</span></div>
+                <div>Deadline: <span class="font-semibold">September 5</span></div>
+                <div>Prize: <span class="font-semibold">$500 USD</span></div>
+              </div>
+            </div>
+          </div>
+  
+        </div>
+  
+      </div>
+    </section>
+  </div>
+  

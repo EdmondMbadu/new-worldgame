@@ -3,21 +3,6 @@
     <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
     <app-navbar [hoveredDiscoverPath]="'bg-gray-100 dark:bg-gray-700'"    [sideBarBig]="isSidebarOpen" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPageDiscover]="true"  (toggleAsideEvent)="toggleAside()"></app-navbar>
 
-
-
-   <!-- Hero or Top Story Section -->
-   <!-- <section class="hero-section max-w-7xl mx-auto py-10 mt-20">
-    <div class="text-center">
-
-      <h2 class="font-serif text-3xl md:text-4xl font-black text-gray-800 dark:text-white">
-        Solutions for a Better World
-      </h2>
-      <p class="mt-4 text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-        Discover and support innovative solutions already developed by our community 
-        to address local and global challenges.
-      </p>
-    </div>
-  </section> -->
   <!-- Example masthead + nav -->
 <header class="container bg-white my-8 dark:bg-slate-900 mt-20 border-b border-gray-300 dark:border-gray-700 mx-auto max-w-7xl">
     <div class="max-w-7xl px-4 py-4 ">
@@ -31,20 +16,7 @@
       </p>
     </div>
     
-    <!-- Nav Bar (simple top menu) -->
-    <!-- <nav class="bg-gray-100 dark:bg-slate-800 ">
-      <div class="md:max-w-7xl max-w-3xl mx-auto px-4">
-        <ul class="flex flex-wrap  space-x-6 py-2 text-sm font-semibold text-gray-800 dark:text-gray-200 mx-auto items-center justify-center">
-         
-          <li><a href="#" class="hover:underline">Health</a></li>
-          <li><a href="#" class="hover:underline">Energy</a></li>
-          <li><a href="#" class="hover:underline">Climate</a></li>
-          <li><a href="#" class="hover:underline">Forestry</a></li>
-          <li><a href="#" class="hover:underline">Education</a></li>
-          <li><a href="#" class="hover:underline">More</a></li>
-        </ul>
-      </div>
-    </nav> -->
+ 
     <div class="flex flex-wrap justify-center gap-4 mb-8">
       <button
         *ngFor="let category of categories"
@@ -68,22 +40,6 @@
    <!-- Main Content - Solutions section -->
    <div class="max-w-7xl mx-auto">
     <section id="solutions" class="scroll-mt-16 mt-4">
-        
-        <!-- Category Filter -->
-        <!-- <div class="flex flex-wrap justify-center gap-4 mb-8">
-          <button
-            *ngFor="let category of categories"
-            (click)="setActiveCategory(category.fullname)"
-            [ngClass]="{
-              'bg-teal-700 text-white': category.fullname === activeCategory,
-              'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200': category.fullname !== activeCategory
-            }"
-            class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
-          >
-            {{ category.fullname }}
-          </button>
-        </div> -->
-        
         <!-- Solutions Grid -->
       
         <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -100,7 +56,6 @@
       </section>
       
     </div>
-    <!-- <button class="bg-red-500" (click)="addChallengesToFirebase()">ADD TO Firebase</button> -->
     
   </div>
 </div>

@@ -116,6 +116,9 @@ import { ListFinishedSolutionsComponent } from './components/list-finished-solut
 import { DiscoverComponent } from './components/discover/discover.component';
 import { GameComponent } from './game/game/game.component';
 import { SolutionPublicationComponent } from './components/solution-publication/solution-publication.component';
+import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
+import { TournamentDetailsComponent } from './components/tournament-details/tournament-details.component';
+import { ActiveTournamentsComponent } from './components/active-tournaments/active-tournaments.component';
 
 @NgModule({
   declarations: [
@@ -208,6 +211,9 @@ import { SolutionPublicationComponent } from './components/solution-publication/
     DiscoverComponent,
     GameComponent,
     SolutionPublicationComponent,
+    CreateTournamentComponent,
+    TournamentDetailsComponent,
+    ActiveTournamentsComponent,
   ],
   imports: [
     BrowserModule,
