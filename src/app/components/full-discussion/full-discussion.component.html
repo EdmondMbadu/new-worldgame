@@ -94,7 +94,7 @@
                 </span>
                 <!-- Show time/date if needed -->
                 <span class="text-xs dark:text-gray-400 text-gray-500">
-                  {{ comment.displayTime || comment.date }}
+                  {{ comment.displayTime || comment.date | date:'M/d/yy, h:mm a'  }}
                 </span>
               </div>
               <p 

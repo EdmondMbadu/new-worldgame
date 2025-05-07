@@ -66,13 +66,13 @@ export class FullDiscussionComponent
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
-      this.comments = data?.discussion || [];
-      // Convert each comment's date string to your new, prettier format
-      // Only add a displayTime – don’t touch `date`
-      this.comments.forEach((c) => {
-        if (c.date) {
-          c.displayTime = this.time.formatDateStringComment(c.date);
+      this.comments = (data?.discussion || []).map((c: any) => {
+        // if the original field is garbage we drop it
+        if (!c.date || isNaN(Date.parse(c.date as string))) {
+          return { ...c, date: undefined }; // renders nothing
         }
+        // keep the ISO string so the pipe works
+        return c;
       });
 
       // Once data is loaded, scroll to bottom
