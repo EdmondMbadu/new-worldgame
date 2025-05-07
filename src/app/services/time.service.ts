@@ -170,25 +170,44 @@ export class TimeService {
     return `${formattedDate}, ${formattedTime}`;
   }
 
-  public formatDateStringComment(rawDate: string): string {
-    // rawDate e.g. "1-13-2025-15-54-12"
-    const parts = rawDate.split('-');
-    // parts: [month, day, year, hours, minutes, seconds]
-    const month = parseInt(parts[0], 10);
-    const day = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
-    const hour = parseInt(parts[3], 10);
-    const minute = parseInt(parts[4], 10);
-    const second = parseInt(parts[5], 10);
+  // public formatDateStringComment(rawDate: string): string {
+  //   // rawDate e.g. "1-13-2025-15-54-12"
+  //   const parts = rawDate.split('-');
+  //   // parts: [month, day, year, hours, minutes, seconds]
+  //   const month = parseInt(parts[0], 10);
+  //   const day = parseInt(parts[1], 10);
+  //   const year = parseInt(parts[2], 10);
+  //   const hour = parseInt(parts[3], 10);
+  //   const minute = parseInt(parts[4], 10);
+  //   const second = parseInt(parts[5], 10);
 
-    // Create a Date object
-    const dateObj = new Date(year, month - 1, day, hour, minute, second);
+  //   // Create a Date object
+  //   const dateObj = new Date(year, month - 1, day, hour, minute, second);
 
-    // Format using toLocaleString to get "M/D/YY, h:mm AM/PM"
-    // e.g. "1/13/25, 11:10 AM"
-    return dateObj.toLocaleString('en-US', {
-      year: '2-digit',
-      month: 'numeric',
+  //   // Format using toLocaleString to get "M/D/YY, h:mm AM/PM"
+  //   // e.g. "1/13/25, 11:10 AM"
+  //   return dateObj.toLocaleString('en-US', {
+  //     year: '2-digit',
+  //     month: 'numeric',
+  //     day: 'numeric',
+  //     hour: 'numeric',
+  //     minute: '2-digit',
+  //     hour12: true,
+  //   });
+  // }
+  // time.service.ts
+  formatDateStringComment(raw: string): string {
+    // raw is now ISO, so let the Date constructor do the work
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) {
+      // still fall back gracefully if something is really broken
+      return '';
+    }
+
+    // “Tue, May 6, 9:09 PM”
+    return d.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'long',
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',

@@ -68,9 +68,10 @@ export class FullDiscussionComponent
       this.currentSolution = data;
       this.comments = data?.discussion || [];
       // Convert each comment's date string to your new, prettier format
-      this.comments.forEach((comment) => {
-        if (comment.date) {
-          comment.date = this.time.formatDateStringComment(comment.date);
+      // Only add a displayTime – don’t touch `date`
+      this.comments.forEach((c) => {
+        if (c.date) {
+          c.displayTime = this.time.formatDateStringComment(c.date);
         }
       });
 
@@ -104,13 +105,16 @@ export class FullDiscussionComponent
     }
     const content = this.prompt.trim();
     if (!content) return;
-
+    const nowIso = new Date().toISOString();
     this.comments.push({
-      date: this.time.todaysDate(),
+      date: nowIso,
+
       authorId: this.auth.currentUser.uid,
       content,
       authorName: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
       profilePic: this.profilePic,
+      // helper visible immediately in the UI
+      displayTime: this.time.formatDateStringComment(nowIso),
     });
 
     // Clear the prompt & scroll
@@ -120,10 +124,10 @@ export class FullDiscussionComponent
     });
 
     // Save to Firestore
-    const discRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `solutions/${this.currentSolution?.solutionId}`
-    );
-    discRef.set({ discussion: this.comments }, { merge: true });
+    const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
+    this.afs
+      .doc<Solution>(`solutions/${this.currentSolution!.solutionId}`)
+      .set({ discussion: toSave }, { merge: true });
   }
 
   // “Close” might navigate away or handle a different route
