@@ -221,82 +221,201 @@ export const genericEmail = functions.https.onCall(
 
 //     await snap.ref.update(updateData);
 //   });
+export const onChatPrompt = functions
+  // deploy in a US region where the image model is available
+  .region('us-central1')
+  .firestore.document('users/{uid}/discussions/{docId}')
+  .onCreate(async (snap) => {
+    try {
+      const prompt: string = (snap.data()?.['prompt'] || '').trim();
+      if (!prompt) return;
 
-export const onChatPrompt = functions.firestore
-  .document('users/{uid}/discussions/{docId}')
-  .onCreate(async (snap, context) => {
-    const prompt = (snap.data()?.['prompt'] || '').trim();
-    if (!prompt) return;
-
-    // Mark as processing
-    await snap.ref.update({ status: { state: 'PROCESSING' } });
-
-    // 1) Retrieve full conversation history
-    const colRef = snap.ref.parent!;
-    const allDocs = await colRef.get();
-    const sorted = allDocs.docs.sort(
-      (a, b) => a.createTime!.toMillis() - b.createTime!.toMillis()
-    );
-
-    // Build a simple “User:” / “Assistant:” transcript
-    let historyText = '';
-    for (const doc of sorted) {
-      if (doc.id === snap.id) break; // stop before the new prompt
-      const data = doc.data();
-      if (data['prompt']) {
-        historyText += `User: ${data['prompt']}\n`;
-      }
-      if (data['response']) {
-        historyText += `Assistant: ${data['response']}\n`;
-      }
-    }
-    historyText += `User: ${prompt}\nAssistant:`;
-
-    // 2) Prepare Gemini model
-    const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp-image-generation',
-      generationConfig: {
-        responseModalities: ['text', 'image'],
-      } as any,
-    });
-
-    // 3) Send the combined prompt (with history)
-    // const systemPrompt = `You are Bucky, an AI assistant who remembers prior conversation and answers user questions fully.`;
-    const systemPrompt = '';
-    const fullPrompt = `${systemPrompt}\n${historyText}`;
-    const resp = await model.generateContent(fullPrompt);
-
-    // 4) Extract text + image
-    let answer = '';
-    let imgB64 = '';
-    for (const part of resp.response.candidates?.[0]?.content?.parts || []) {
-      if (part.text) answer += part.text;
-      if (part.inlineData) imgB64 = part.inlineData.data;
-    }
-
-    // 5) Upload image if present
-    let imageUrl: string | undefined;
-    if (imgB64) {
-      const filePath = `generated/${randomUUID()}.png`;
-      await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
-        contentType: 'image/png',
-        resumable: false,
-        public: true,
+      await snap.ref.update({
+        status: { state: 'PROCESSING' },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-      imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+
+      // ────────────────────────────────────────────────────────────
+      // Build conversation history
+      // ────────────────────────────────────────────────────────────
+      const colRef = snap.ref.parent!;
+      const allDocs = await colRef.get();
+      const sorted = allDocs.docs
+        .filter((d) => d.id !== snap.id)
+        .sort(
+          (a, b) =>
+            (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
+            (b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0)
+        );
+
+      let history = '';
+      for (const d of sorted) {
+        const data = d.data();
+        if (data['prompt']) history += `User: ${data['prompt']}\n`;
+        if (data['response']) history += `Assistant: ${data['response']}\n`;
+      }
+      history += `User: ${prompt}\nAssistant:`;
+
+      // ────────────────────────────────────────────────────────────
+      // Pick model: text‑only vs text‑and‑image
+      // ────────────────────────────────────────────────────────────
+      const wantsImage =
+        /\b(image|picture|photo|illustration|draw|generate).*?\b/i.test(prompt);
+      const modelName = wantsImage
+        ? 'gemini-2.0-flash-exp-image-generation'
+        : 'gemini-2.0-flash';
+
+      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: wantsImage
+          ? { responseModalities: ['TEXT', 'IMAGE'] } // NOTE the caps
+          : {},
+      } as any);
+
+      // ────────────────────────────────────────────────────────────
+      // Generate
+      // ────────────────────────────────────────────────────────────
+      const response = await model.generateContent(history);
+
+      let answer = '';
+      let imgB64 = '';
+      for (const part of response.response.candidates?.[0]?.content?.parts ||
+        []) {
+        if (part.text) answer += part.text;
+        else if (part.inlineData) imgB64 = part.inlineData.data;
+      }
+
+      // ────────────────────────────────────────────────────────────
+      // Store image if any
+      // ────────────────────────────────────────────────────────────
+      let imageUrl: string | undefined;
+      if (imgB64) {
+        const filePath = `generated/${randomUUID()}.png`;
+        await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
+          contentType: 'image/png',
+          resumable: false,
+          public: true,
+        });
+        imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+      }
+
+      // ────────────────────────────────────────────────────────────
+      // Final update
+      // ────────────────────────────────────────────────────────────
+      await snap.ref.update({
+        status: { state: 'COMPLETED' },
+        response: answer || null,
+        imageUrl: imageUrl || null,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (err) {
+      console.error('onChatPrompt error:', err);
+      await snap.ref.update({
+        status: {
+          state: 'ERRORED',
+          error: err instanceof Error ? err.message : String(err),
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
-
-    // 6) Final update
-    const updateData: any = {
-      status: { state: 'COMPLETED' },
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    };
-    if (answer) updateData.response = answer;
-    if (imageUrl) updateData.imageUrl = imageUrl;
-
-    await snap.ref.update(updateData);
   });
+// export const onChatPrompt = functions.firestore
+//   .document('users/{uid}/discussions/{docId}')
+//   .onCreate(async (snap, context) => {
+//     try {
+//       //--------------------------------------------------------------------
+//       // 0) Validation / mark as PROCESSING
+//       //--------------------------------------------------------------------
+//       const prompt: string = (snap.data()?.['prompt'] || '').trim();
+//       if (!prompt) return;
+
+//       await snap.ref.update({
+//         status: { state: 'PROCESSING' },
+//         createdAt: admin.firestore.FieldValue.serverTimestamp(), // add once
+//       });
+
+//       //--------------------------------------------------------------------
+//       // 1) Retrieve full conversation history (oldest → newest)
+//       //--------------------------------------------------------------------
+//       const colRef = snap.ref.parent!;
+//       const allDocs = await colRef.get();
+
+//       const sorted = allDocs.docs
+//         .filter((d) => d.id !== snap.id) // current doc handled separately
+//         .sort((a, b) => {
+//           // prefer explicit createdAt, fall back to createTime
+//           const ta =
+//             a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0;
+//           const tb =
+//             b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0;
+//           return ta - tb;
+//         });
+
+//       let historyText = '';
+//       for (const doc of sorted) {
+//         const data = doc.data();
+//         if (data['prompt']) historyText += `User: ${data['prompt']}\n`;
+//         if (data['response']) historyText += `Assistant: ${data['response']}\n`;
+//       }
+//       historyText += `User: ${prompt}\nAssistant:`;
+
+//       //--------------------------------------------------------------------
+//       // 2) Ask Gemini
+//       //--------------------------------------------------------------------
+//       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+//       const model = genAI.getGenerativeModel({
+//         model: 'gemini-2.0-flash-exp-image-generation',
+//       });
+
+//       const geminiResp = await model.generateContent(historyText);
+
+//       //--------------------------------------------------------------------
+//       // 3) Extract text / image (if any)
+//       //--------------------------------------------------------------------
+//       let answer = '';
+//       let imgB64 = '';
+//       for (const part of geminiResp.response.candidates?.[0]?.content?.parts ||
+//         []) {
+//         if ('text' in part && part.text) answer += part.text;
+//         if ('inlineData' in part && part.inlineData)
+//           imgB64 = part.inlineData.data;
+//       }
+
+//       //--------------------------------------------------------------------
+//       // 4) Upload image if needed
+//       //--------------------------------------------------------------------
+//       let imageUrl: string | undefined;
+//       if (imgB64) {
+//         const filePath = `generated/${randomUUID()}.png`;
+//         await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
+//           contentType: 'image/png',
+//           resumable: false,
+//           public: true,
+//         });
+//         imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+//       }
+
+//       //--------------------------------------------------------------------
+//       // 5) Final update
+//       //--------------------------------------------------------------------
+//       await snap.ref.update({
+//         status: { state: 'COMPLETED' },
+//         response: answer || null,
+//         imageUrl: imageUrl || null,
+//         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+//       });
+//     } catch (err) {
+//       console.error('onChatPrompt error:', err);
+//       await snap.ref.update({
+//         status: {
+//           state: 'ERRORED',
+//           error: err instanceof Error ? err.message : String(err),
+//         },
+//         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+//       });
+//     }
+//   });
 
 export const nonUserEmail = functions.https.onCall(
   async (data: any, context: any) => {
