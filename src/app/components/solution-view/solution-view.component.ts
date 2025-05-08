@@ -50,6 +50,8 @@ export class SolutionViewComponent implements OnInit {
   displayEvaluationSummary: boolean = false;
   displaySharePost: boolean = false;
 
+  confirmSubmitComment: boolean = false;
+
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -392,43 +394,15 @@ export class SolutionViewComponent implements OnInit {
       this.displayAddCommentPermission = true;
       return;
     }
-    if (this.comments) {
-      this.comments.push({
-        authorId: this.auth.currentUser.uid,
-        date: this.time.todaysDate(),
-        content: this.comment,
-        likes: '0',
-        dislikes: '0',
-      });
-    } else {
-      this.comments = [
-        {
-          authorId: this.auth.currentUser.uid,
-          date: this.time.todaysDate(),
-          content: this.comment,
-          likes: '0',
-          dislikes: '0',
-        },
-      ];
+    if (!this.comment || this.comment.trim() === '') {
+      alert('Please enter a comment before submitting.');
+      return;
     }
-    // Update time elapsed for the new comment directly
-    let newCommentDate = this.time.todaysDate(); // Ensure this is compatible with your timeAgo method
-    // Calculate time elapsed for the new comment
-    let timeElapsedForNewComment = this.time.timeAgo(newCommentDate);
-    this.commentTimeElapsed.push(timeElapsedForNewComment);
-    try {
-      this.solution.addCommentToSolution(this.currentSolution, this.comments);
-      // .then(() => {
-      //   this.initializeComments();
-      // });
-      this.comment = '';
-      this.sendEmailForCommentNotification();
-    } catch (error) {
-      alert('An error occured while submitting the comment. Try Again.');
-      console.log(error);
-      console.log('an error ocurred. try again.');
-    }
+
+    // Ask for confirmation before really submitting
+    this.confirmSubmitComment = true;
   }
+
   sendEmailForCommentNotification() {
     const commentNotificationEmail = this.fns.httpsCallable(
       'commentNotificationEmail'
@@ -453,5 +427,38 @@ export class SolutionViewComponent implements OnInit {
         }
       );
     });
+  }
+  submitComment() {
+    if (this.comments) {
+      this.comments.push({
+        authorId: this.auth.currentUser.uid,
+        date: this.time.todaysDate(),
+        content: this.comment,
+        likes: '0',
+        dislikes: '0',
+      });
+    } else {
+      this.comments = [
+        {
+          authorId: this.auth.currentUser.uid,
+          date: this.time.todaysDate(),
+          content: this.comment,
+          likes: '0',
+          dislikes: '0',
+        },
+      ];
+    }
+    let newCommentDate = this.time.todaysDate();
+    let timeElapsedForNewComment = this.time.timeAgo(newCommentDate);
+    this.commentTimeElapsed.push(timeElapsedForNewComment);
+    try {
+      this.solution.addCommentToSolution(this.currentSolution, this.comments);
+      this.comment = '';
+      this.sendEmailForCommentNotification();
+    } catch (error) {
+      alert('An error occurred while submitting the comment. Try Again.');
+      console.log(error);
+    }
+    this.confirmSubmitComment = false;
   }
 }
