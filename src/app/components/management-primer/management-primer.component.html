@@ -37,6 +37,19 @@
                         </div>
                     </form>
                 </div>
+                <h2 class="font-bold dark:text-white">{{ primerpData.length }} Downloads</h2>
+
+            <!-- NEW: export‑csv button -->
+                    <button
+                    type="button"
+                    (click)="downloadCsv()"
+                    class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border
+                        border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700
+                        focus:z-10 focus:ring-2 focus:ring-blue-700 dark:bg-gray-600
+                        dark:border-gray-700 dark:text-white dark:hover:bg-gray-700
+                        dark:focus:ring-blue-500">
+                    Export CSV
+                    </button>
                 <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
                     <h2 class="font-bold dark:text-white">{{primerpData.length}} Downloads </h2>
                    

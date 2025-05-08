@@ -50,4 +50,33 @@ export class ManagementPrimerComponent implements OnInit {
       });
     });
   }
+  /* ---------- NEW: export CSV ---------- */
+  downloadCsv(): void {
+    // 1) Deduplicate by e‑mail (first occurrence wins)
+    const seen = new Set<string>();
+    const unique = this.primerpData.filter(
+      (u) => !seen.has(u.email) && seen.add(u.email)
+    );
+
+    // 2) Build CSV header + rows (same order & date format as UI)
+    const rows = unique.map((u, i) => {
+      const name = `${u.firstName} ${u.lastName}`.trim();
+      const date = (u.registerDate || '').split('-').slice(0, 3).join('-'); // keep YYYY‑MM‑DD
+      return `"${i + 1}. ${name}","${u.email}","${date}"`;
+    });
+
+    const csv = ['Name,Email,Register Date', ...rows].join('\r\n');
+
+    // 3) Trigger client‑side download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `primer_downloads_${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+  /* ------------------------------------- */
 }
