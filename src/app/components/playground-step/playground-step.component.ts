@@ -178,8 +178,16 @@ export class PlaygroundStepComponent {
   public Editor: any = Editor;
   private saveTimeout: any;
   public onReady(editor: any) {
+    // e.g. solutionId comes from the route or @Input()
+
+    const solutionId = this.solutionId; // already have it
+    const basePath = `solutions/${solutionId}/ckeditor`;
     editor.plugins.get('FileRepository').createUploadAdapter = (loader: any) =>
-      this.dataService.createCkeditorUploadAdapter(loader);
+      this.dataService.createCkeditorUploadAdapter(
+        loader,
+        solutionId,
+        basePath
+      );
     // console.log('CKEditor5 Angular Component is ready to use!', editor.state);
     editor.model.document.on('change:data', () => {
       // console.log('Content changed:', editor.getData());
@@ -235,43 +243,6 @@ export class PlaygroundStepComponent {
     // Reset submission response to allow future submissions, but only after current process is complete
     this.submiResponse = false;
   }
-
-  // finallySubmitSolution() {
-  //   // check if one is submitting what was previously saved
-  //   if (this.strategyReviewSelected) {
-  //     try {
-  //       this.solution
-  //         .submitSolution(this.solutionId, this.strategyReview)
-  //         .then(() => {
-  //           console.log(
-  //             'Submission successful, sending request for evaluation.'
-  //           );
-  //           this.submissionComplete.emit(); // Emit event to parent
-  //           this.toggleCongrats();
-  //           // Additional logic on successful submission
-  //         });
-  //     } catch (error) {
-  //       alert('An error occured while submitting the solution. Try again');
-  //       console.log(error);
-  //     }
-  //   } else {
-  //     try {
-  //       this.solution
-  //         .submitSolution(this.solutionId, this.contentsArray[0])
-  //         .then(() => {
-  //           console.log(
-  //             'Submission successful, sending request for evaluation.'
-  //           );
-  //           this.submissionComplete.emit(); // Emit event to parent
-  //           this.toggleCongrats();
-  //           // Additional logic on successful submission
-  //         });
-  //     } catch (error) {
-  //       alert('An error occured while submitting the solution. Try again');
-  //       console.log(error);
-  //     }
-  //   }
-  // }
 
   SubmitPreviewSolution() {
     this.isLoading = true;

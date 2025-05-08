@@ -61,25 +61,7 @@ export class DocumentFilesComponent implements OnInit {
   toggle(property: 'showAddDocument') {
     this[property] = !this[property];
   }
-  // async startUpload(event: FileList) {
-  //   if (!this.documentId) {
-  //     this.documentId = this.afs.createId(); // Generate ID only if not already generated
-  //   }
 
-  //   try {
-  //     const url = await this.data.startUpload(
-  //       event,
-  //       `documents/${this.documentId}`,
-  //       'false'
-  //     );
-  //     this.documentDownloadUrl = url!;
-  //     console.log('The URL is', url);
-  //     console.log('The ID is', this.documentId);
-  //   } catch (error) {
-  //     console.error('Error uploading file:', error);
-  //     alert('Error occurred while uploading file. Please try again.');
-  //   }
-  // }
   /**
    * Called when user selects a file OR drops a file in the drop zone.
    * We'll reject if >10MB or if it's a video file.
@@ -135,57 +117,6 @@ export class DocumentFilesComponent implements OnInit {
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
-  // addDocument() {
-  //   if (!this.documentName || !this.documentType || !this.documentDownloadUrl) {
-  //     alert('Please fill in all required fields before adding the document.');
-  //     return;
-  //   }
-
-  //   if (!this.currentSolution?.solutionId) {
-  //     console.error('Error: solutionId is undefined.');
-  //     return;
-  //   }
-  //   // Current time
-  //   const now = new Date();
-  //   const options: Intl.DateTimeFormatOptions = {
-  //     year: '2-digit',
-  //     month: 'numeric',
-  //     day: 'numeric',
-  //     hour: 'numeric',
-  //     minute: '2-digit',
-  //     hour12: true, // ensures AM/PM in US locale
-  //   };
-  //   const formattedDate = now.toLocaleString('en-US', options);
-
-  //   const newDocument: Avatar = {
-  //     downloadURL: this.documentDownloadUrl,
-  //     name: this.documentName,
-  //     description: this.documentDescription,
-  //     type: this.documentType,
-  //     dateSorted: now.getTime(), // numeric timestamp for sorting
-  //     dateCreated: this.time.todaysDate(), // numeric timestamp for sorting
-  //     formattedDateCreated: formattedDate, // e.g. "1/13/25, 3:54 PM"
-  //   };
-
-  //   this.documents.push(newDocument);
-  //   // Sort so newest is first (descending by dateCreated)
-  //   this.documents.sort(
-  //     (a: any, b: any) => (b.dateCreated ?? 0) - (a.dateCreated ?? 0)
-  //   );
-  //   this.data
-  //     .addDocument(this.documents, this.currentSolution.solutionId)
-  //     .then((data: any) => {
-  //       console.log('Document added successfully:', newDocument);
-  //       this.documentName = '';
-  //       this.documentDescription = '';
-  //       this.documentType = '';
-  //       this.documentDownloadUrl = '';
-  //       this.toggle('showAddDocument');
-  //     })
-  //     .catch((error: any) => {
-  //       console.error('Error adding challenge:', error);
-  //     });
-  // }
 
   // Toggle the dropdown for a given doc index
   addDocument() {

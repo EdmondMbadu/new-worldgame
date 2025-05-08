@@ -1,4 +1,6 @@
 import { Injectable, OnInit } from '@angular/core';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 import {
   AngularFirestore,
   AngularFirestoreDocument,
@@ -487,7 +489,11 @@ export class DataService implements OnInit {
   }
 
   /** Factory that CKEditor will call for every pasted/dropped file */
-  createCkeditorUploadAdapter(loader: any) {
+  createCkeditorUploadAdapter(
+    loader: any,
+    solutionId: string,
+    basePath: string = 'ckeditor'
+  ) {
     return {
       /** Uploads the file and resolves with { default : downloadURL } */
       upload: async () => {
@@ -500,9 +506,9 @@ export class DataService implements OnInit {
           return Promise.reject('Image > 2 MB – please shrink it');
         // ------------------------------------------------------------------
 
-        const path = `ckeditor/${Date.now()}_${file.name}`;
+        const path = `${basePath}/${Date.now()}_${file.name}`;
         const ref = this.storage.ref(path);
-        const task = ref.put(file); // start upload
+        const task = ref.put(file);
 
         // wire progress to the CKEditor loader (optional but nice)
         task.percentageChanges().subscribe((p) => {
@@ -512,7 +518,21 @@ export class DataService implements OnInit {
 
         await lastValueFrom(task.snapshotChanges()); // wait for finish
         const url = await lastValueFrom(ref.getDownloadURL());
-        return { default: url }; // CKEditor inserts <img src="url">
+        // ── NEW: push to `documents` array so DocumentFilesComponent sees it
+        const now = new Date();
+        const avatar = {
+          downloadURL: url,
+          name: file.name,
+          type: file.type,
+          dateSorted: now.getTime(),
+          dateCreated: now.getTime(), // use numeric; component formats later
+        };
+
+        await this.afs.doc(`solutions/${solutionId}`).update({
+          documents: firebase.firestore.FieldValue.arrayUnion(avatar),
+        });
+
+        return { default: url }; // CKEditor inserts <img src="…">
       },
 
       /** Cancels an in-flight upload */
