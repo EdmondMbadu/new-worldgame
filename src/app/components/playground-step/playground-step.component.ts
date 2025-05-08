@@ -165,23 +165,9 @@ export class PlaygroundStepComponent {
       this.contentsArray = [];
       this.staticContentArray = [];
       for (let i = 0; i < this.questionsTitles.length; i++) {
-        // this.contentsArray.push(
-        //   this.currentSolution.status![this.questionsTitles[i]]
-        // );
-        // this.staticContentArray.push(
-        //   this.currentSolution.status![this.questionsTitles[i]]
-        // );
         const content = this.currentSolution.status![this.questionsTitles[i]];
         this.contentsArray.push(content);
         this.staticContentArray.push(content); // Sync both arrays initially
-        // for (let i = 0; i < this.questionsTitles.length; i++) {
-        //   const questionTitle = this.questionsTitles[i];
-        //   const newContent = this.currentSolution.status[questionTitle];
-        //   if (this.contentsArray[i] !== newContent) {
-        //     this.isUpdatingContent = true;
-        //     this.contentsArray[i] = newContent;
-        //     this.isUpdatingContent = false;
-        //   }
       }
     }
 
@@ -364,11 +350,14 @@ export class PlaygroundStepComponent {
       // check if something has been changed on the strategy review
       else if (this.contentsArray[0] !== this.staticContentArray[0]) {
         // this.saveSuccess = true;
-        this.staticContentArray[0] = this.contentsArray[0];
+        // this.staticContentArray[0] = this.contentsArray[0];
         // if (this.strategyReview === '') {
+        const draft = this.contentsArray[0];
         this.solution
           .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
           .then(() => {
+            this.staticContentArray[0] = draft;
+            this.strategyReview = draft; // <‑‑ keep in sync
             this.saveSuccess = true;
           })
           .catch((error) => {
@@ -640,15 +629,22 @@ export class PlaygroundStepComponent {
     this.contentsArray[0] = finalContent;
 
     // If it's the first time strategyReview is empty, save it
-    if (this.strategyReview === '') {
+    // if (this.strategyReview === '') {
+    //   this.solution
+    //     .saveSolutionStrategyReview(this.solutionId, finalContent)
+    //     .then(() => {
+    //       // ...
+    //     })
+    //     .catch((error) => {
+    //       // ...
+    //     });
+    // }
+    /*  NEW — keep the local state in sync  */
+    if (!this.strategyReview || this.strategyReview.trim() === '') {
+      this.strategyReview = finalContent; // <‑‑ add this line
       this.solution
         .saveSolutionStrategyReview(this.solutionId, finalContent)
-        .then(() => {
-          // ...
-        })
-        .catch((error) => {
-          // ...
-        });
+        .catch(console.error);
     }
 
     // Finally, choose the default review
