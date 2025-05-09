@@ -63,6 +63,24 @@ export class SolutionService {
       evaluatorsHolder: this.evaluatorsEmails,
     };
   }
+  async joinSolution(solution: Solution, email: string) {
+    /* --- 1. normalise participants --- */
+    const raw = solution.participants ?? [];
+    const participants: { name: string }[] = Array.isArray(raw)
+      ? [...raw]
+      : Object.values(raw as Record<string, string>).map((e) => ({ name: e }));
+
+    /* --- 2. add user if missing --- */
+    if (!participants.some((p) => p.name.trim().toLowerCase() === email)) {
+      participants.push({ name: email });
+
+      await this.afs
+        .doc(`solutions/${solution.solutionId}`)
+        .update({ participants });
+    }
+
+    return participants; // in case caller needs it
+  }
 
   async createdNewSolution(
     title: string,
@@ -72,12 +90,14 @@ export class SolutionService {
     participants: any,
     evaluators: any,
     // endDate: string,
-    sdgs: string[]
+    sdgs: string[],
+    solutionId: string = ''
   ) {
     console.log('The list of designers', participants);
 
     // Generate a unique solution ID
-    this.solutionId = this.afs.createId().toString();
+    this.solutionId =
+      solutionId !== '' ? solutionId : this.afs.createId().toString();
 
     const data: {
       solutionId: string;

@@ -323,7 +323,44 @@ export class HomeChallengeComponent {
       alert('Error occurred while uploading file. Please try again.');
     }
   }
-  addCreateChallenge() {
+  // addCreateChallenge() {
+  //   if (
+  //     !this.titleCreateChallenge ||
+  //     !this.descriptionCreateChallenge ||
+  //     !this.categoryCreateChallenge ||
+  //     !this.imageCreateChallenge
+  //   ) {
+  //     alert('Please fill in all required fields before adding the challenge.');
+  //     return;
+  //   }
+
+  //   const newChallenge = {
+  //     id: this.challengeId,
+  //     title: this.titleCreateChallenge,
+  //     description: this.descriptionCreateChallenge,
+  //     category: this.categoryCreateChallenge,
+  //     image: this.imageCreateChallenge,
+  //     authordId: this.auth.currentUser.uid,
+  //     challengePageId: this.challengePageId,
+  //   };
+
+  //   this.challenge
+  //     .addUserChallenge(newChallenge)
+  //     .then(() => {
+  //       console.log('Challenge added successfully:', newChallenge);
+
+  //       // Automatically select the added challenge and navigate
+  //       this.selectChallenge();
+
+  //       // Clear the form fields
+  //       this.resetCreateChallengeInfo();
+  //     })
+  //     .catch((error) => {
+  //       console.error('Error adding challenge:', error);
+  //     });
+  // }
+
+  async addCreateChallenge() {
     if (
       !this.titleCreateChallenge ||
       !this.descriptionCreateChallenge ||
@@ -344,20 +381,38 @@ export class HomeChallengeComponent {
       challengePageId: this.challengePageId,
     };
 
-    this.challenge
-      .addUserChallenge(newChallenge)
-      .then(() => {
-        console.log('Challenge added successfully:', newChallenge);
+    try {
+      this.isLoading = true;
+      await this.challenge.addUserChallenge(newChallenge);
+      console.log('Challenge added successfully:', newChallenge);
+      // this.selectChallenge();
+      // 2️⃣ create the linked Solution
 
-        // Automatically select the added challenge and navigate
-        this.selectChallenge();
+      await this.solution.createdNewSolution(
+        newChallenge.title,
+        '',
+        newChallenge.description,
+        newChallenge.image,
 
-        // Clear the form fields
-        this.resetCreateChallengeInfo();
-      })
-      .catch((error) => {
-        console.error('Error adding challenge:', error);
-      });
+        this.solution.newSolution.participantsHolder, // Assuming 'any' means an array of participants
+        [], // Assuming 'any' means an array of evaluators
+        // endDate: "", // This was commented out in your request, so I've kept it out
+        [],
+        this.challengeId
+      );
+      // Clear the form fields
+
+      // 4️⃣ housekeeping
+      // this.resetCreateChallengeInfo();
+      // this.toggle('showAddChallenge');
+      this.isLoading = false;
+      this.router.navigate(['/dashboard', this.challengeId]);
+    } catch (err) {
+      console.error('Error creating challenge & solution:', err);
+      alert('There was a problem creating the challenge.');
+    }
+
+    // Automatically select the added challenge and navigate
   }
 
   resetCreateChallengeInfo() {

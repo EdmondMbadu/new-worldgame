@@ -4,10 +4,16 @@
        hover:shadow-xl hover:dark:shadow-2xl
        transition-shadow duration-300
          cursor-pointer">
-    <a (click)="selectChallenge()" class="cursor-pointer"  >
-        <img *ngIf="image !==undefined && image!==''" [src]="image" alt="Challenge" class="w-full h-48 object-cover">
-        <img   *ngIf="image ===undefined || image===''"  src="../../../assets/img/generic.webp" alt="Challenge" class="w-full h-48 object-cover">
-    </a>  
+       
+
+
+    <a   (click)="selectChallenge()" class="cursor-pointer"  >   
+      <img *ngIf="image !==undefined && image!==''" [src]="image" alt="Challenge" class="w-full h-48 object-cover">
+      <img   *ngIf="image ===undefined || image===''"  src="../../../assets/img/generic.webp" alt="Challenge" class="w-full h-48 object-cover">
+   
+      </a>  
+    
+      
     <div class="p-4">
         <div >
             <h3  class="text-xl font-semibold text-gray-800 dark:text-gray-200">{{ title }}</h3>
@@ -21,7 +27,8 @@
    
       <div class="flex flex-nowrap items-center text-gray-600 dark:text-gray-400 mt-4" >
 
-        <button (click)="selectChallenge()" type="button" class="p-3 px-6  text-white  bg-teal-700 rounded-full hover:bg-teal-800">Start Solution</button>
+        <button *ngIf="!fromChallengeSpace" (click)="selectChallenge()" type="button" class="p-3 px-6  text-white  bg-teal-700 rounded-full hover:bg-teal-800">Start Solution</button>
+        <button *ngIf="fromChallengeSpace" (click)="selectChallengeSolution()" type="button" class="p-3 px-6  text-white  bg-teal-700 rounded-full hover:bg-teal-800">Join Solution</button>
 
        
 
