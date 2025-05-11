@@ -36,6 +36,7 @@ export class WhiteboardComponent implements OnInit {
   lastPos = { x: 0, y: 0 };
   solutionId: any = '';
   ngOnInit(): void {
+    window.scroll(0, 0);
     this.setupCanvas();
     this.solutionId = this.activatedRoute.snapshot.paramMap.get('id');
 
