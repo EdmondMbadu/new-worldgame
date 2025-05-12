@@ -11,11 +11,11 @@
     </app-navbar>
   
     <!-- TIMELINE / STEPS HEADER (centered) -->
-    <div class="mt-20 container px-32 flex flex-row mx-auto justify-center">
+    <!-- <div class="mt-20 container px-32 flex flex-row mx-auto justify-center">
       <ol class="items-center sm:flex">
         <li *ngFor="let step of steps; let i = index" class="relative mb-6 sm:mb-0">
           <div class="flex items-center">
-            <!-- Step Number -->
+            
             <div  
               (click)="goBackAndForthTimeLine(i)"
               
@@ -38,15 +38,60 @@
 
             </div>
   
-            <!-- Progress Bar Between Steps -->
+            
             <div class="hidden sm:flex w-full {{timelineDisplay[i]}} dark:bg-gray-700"></div>
           </div>
   
-          <!-- Optional Step Subtitle/Text -->
+         
          
         </li>
       </ol>
-    </div>
+    </div> -->
+    <!-- TIMELINE / STEPS HEADER (centered) -->
+<div class="mt-20 container px-32 flex flex-row mx-auto justify-center">
+  <ol class="flex items-center space-x-0">
+    <li *ngFor="let step of steps; let i = index" class="flex items-center relative">
+
+      <!-- Line BEFORE image (touches image directly) -->
+      <div 
+        *ngIf="i !== 0"
+        class="w-6 sm:w-24 h-1 transition-all duration-300"
+        [ngClass]="isCurrentStep(i) ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-700'">
+      </div>
+
+      <!-- Step container (image + title, vertically stacked) -->
+      <div class="flex flex-col items-center text-center">
+
+        <!-- Image with red glow if current -->
+        <div 
+          (click)="goBackAndForthTimeLine(i)"
+          class="z-10 flex items-center justify-center cursor-pointer transition-all duration-300"
+          [ngClass]="isCurrentStep(i) ? 'ring-4 ring-red-500 rounded-full shadow-lg shadow-red-500/40' : ''">
+          
+          <img
+            [src]="'../../../assets/img/step-' + (i + 1) + '.png'"
+            alt="Step {{ i + 1 }} image"
+            class="w-36 h-auto" />
+        </div>
+
+        <!-- Step title -->
+        <div class="mt-2">
+          <h1 class="text-lg font-semibold text-gray-800 dark:text-white">
+            Step {{ i + 1 }}: {{ step }}
+          </h1>
+        </div>
+
+      </div>
+
+    </li>
+  </ol>
+</div>
+
+
+
+
+
+
   
     <!-- MAIN CONTENT: Questions (left/center) + Image & Text (right) -->
     <div

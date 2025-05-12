@@ -74,6 +74,7 @@ import { SolutionPublicationComponent } from './components/solution-publication/
 import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
 import { TournamentDetailsComponent } from './components/tournament-details/tournament-details.component';
 import { ActiveTournamentsComponent } from './components/active-tournaments/active-tournaments.component';
+import { TournamentWinComponent } from './components/tournament-win/tournament-win.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -171,6 +172,11 @@ const routes: Routes = [
   {
     path: 'join-tournament',
     component: JoinTournamentComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'tournament-win',
+    component: TournamentWinComponent,
     canActivate: [AuthGuard],
   },
   {

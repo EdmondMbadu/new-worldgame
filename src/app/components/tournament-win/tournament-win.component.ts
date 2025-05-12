@@ -6,11 +6,11 @@ import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-tournament-details',
-  templateUrl: './tournament-details.component.html',
-  styleUrl: './tournament-details.component.css',
+  selector: 'app-tournament-win',
+  templateUrl: './tournament-win.component.html',
+  styleUrl: './tournament-win.component.css',
 })
-export class TournamentDetailsComponent implements OnInit {
+export class TournamentWinComponent implements OnInit {
   constructor(
     private solution: SolutionService,
     public auth: AuthService,
@@ -18,8 +18,10 @@ export class TournamentDetailsComponent implements OnInit {
     public router: Router
   ) {}
   allSolutions: Solution[] = [];
+  showDetails: boolean = false;
   completedSolutions: Solution[] = [];
   isPostDeadline: boolean = false;
+  winningSolution: Solution = {};
   ngOnInit(): void {
     this.solution.getHomePageSolutions().subscribe((data) => {
       this.allSolutions = data;
@@ -37,12 +39,6 @@ export class TournamentDetailsComponent implements OnInit {
         this.completedSolutions.push(s);
       }
     }
-  }
-  submitFinishedSolution() {
-    this.router.navigate(['/submit-solution']);
-  }
-
-  createNewSolution() {
-    this.router.navigate(['/create-solution']);
+    this.winningSolution = this.completedSolutions[0];
   }
 }
