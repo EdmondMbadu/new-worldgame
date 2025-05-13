@@ -260,7 +260,7 @@ export class HomeComponent implements OnInit {
   ];
   // Define the solutions data
 
-  activeCategory: string = 'Forestry';
+  activeCategory: string = 'Climate';
   filteredSolutions: Solution[] = [];
 
   async setActiveCategory(category: string) {

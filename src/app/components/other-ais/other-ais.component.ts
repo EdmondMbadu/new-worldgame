@@ -38,29 +38,11 @@ export class OtherAisComponent implements OnInit {
   status = '';
 
   aiOptions = [
-    // {
-    //   avatarPath: '../../../assets/img/fuller.jpg',
-    //   name: 'Buckminster Fuller',
-    //   intro: `${name} American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.`,
-    //   collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
-    // },
-    // {
-    //   avatarPath: '../../../assets/img/albert.png',
-    //   name: 'Albert Einstein',
-    //   intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
-    //   collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
-    // },
-    // {
-    //   avatarPath: '../../../assets/img/mandela.png',
-    //   name: 'Nelson Mandela',
-    //   intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
-    //   collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
-    // },
     {
       avatarPath: '../../../assets/img/zara-agent.png',
       name: 'Zara Nkosi',
       intro: `${name}  a vibrant AI agent inspired by South African ubuntu
-philosophy. I believes that “I am because we are.”. i have  a knack for
+philosophy. I believes that “I am because we are”. i have  a knack for
 weaving compelling narratives, and help players understand
 complex social issues like poverty (SDG 1) and inequality (SDG
 10) through human-centered stories. `,
@@ -101,6 +83,24 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       name: 'Tane Kahu',
       intro: `I’m Tane, grounded in Māori knowledge and New Zealand’s deep respect for nature. I take a holistic view of every challenge, helping players design solutions that protect ecosystems—on land (SDG 15) and under water (SDG 14). `,
       collectionPath: `users/${this.auth.currentUser.uid}/tane/`,
+    },
+    {
+      avatarPath: '../../../assets/img/fuller.jpg',
+      name: 'Buckminster Fuller',
+      intro: `${name} American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.`,
+      collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
+    },
+    {
+      avatarPath: '../../../assets/img/albert.png',
+      name: 'Albert Einstein',
+      intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
+      collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
+    },
+    {
+      avatarPath: '../../../assets/img/mandela.png',
+      name: 'Nelson Mandela',
+      intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
+      collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
   ];
 
