@@ -407,7 +407,7 @@ style="background-image: url('https://designsciencelab.com/wordpress/wp-content/
             AI & Sustainable Development Goals
           </h2>
           <blockquote class="mx-auto max-w-xl italic text-gray-900 dark:text-white text-lg sm:text-xl mb-6 pt-10">
-            "As we stand on the brink of technological revolutions, it is imperative to approach AI and other advances as architects, actively shaping our future rather than passively enduring it."
+          "Make the world work for 100% of humanity in the shortest possible time through spontaneous cooperation without ecological offense or disadvantage of anyone."
           </blockquote>
           <p class="text-lg text-gray-900 dark:text-white mb-4">—Buckminster Fuller</p>
           <p class="text-gray-700 dark:text-gray-200 mb-4">
@@ -443,9 +443,7 @@ style="background-image: url('https://designsciencelab.com/wordpress/wp-content/
             What It Is: More About the Lab
           </h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
-            Students and young professionals from around the world will be coming to the 2025 Lab. They will be briefed by UN experts 
-            (from WHO, UNDP, UNEP, UNESCO, and other agencies), research and develop comprehensive strategies for dealing with 
-            critical global problems, and propose paths for reaching the UN’s SDGs — then present their work to peer review 
+            Students and young professionals from around the world will be coming to the 2025 Lab. UN presenters in previous years have included representatives from WHO, UNDP, UNEP, UNESCO, and more.
             and a committee of experts.
           </p>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
@@ -465,6 +463,39 @@ style="background-image: url('https://designsciencelab.com/wordpress/wp-content/
           </p>
         </div>
       </div>
+    </section>
+        <section id="ai-team" class="py-10  mt-20">
+        <div class="max-w-sm md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center ">
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Latest Additions</h2>
+                <p class="mt-4 text-lg leading-6 text-gray-500 dark:text-gray-300">
+                    The AI Team from NewWorld Game 
+                </p>
+            </div>
+
+            <div class="mt-10 mx-auto justify-center grid grid-cols-1 sm:grid-cols-1 2xl:grid-cols-4 2xl:gap-2 md:grid-cols-3 lg:grid-cols-3 gap-10">
+                <!-- Team Member 1 -->
+                <div *ngFor="let t of aiOptions" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-sm">
+                    <img class="w-full h-1/2   px-4 py-8 mx-auto  object-cover" src={{t.profilePicPath}} alt="Person Image">
+                    <div class="p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">{{t.name}}</h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-300 font-semibold">{{t.title}}</p>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-300">{{t.description}}</p>
+                        
+                    </div>
+                </div>
+
+                  
+
+          
+               
+            </div>
+            <div class="mt-12 flex justify-center">
+                <a routerLink="/other-ais" class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300">
+                  Chat with the AIs
+                </a>
+              </div>
+        </div>
     </section>
 
   
