@@ -110,87 +110,106 @@
           </div>
         </div>
   
-        <!--  CHAT AREA  -->
-        <div class="flex flex-col mx-auto items-center mt-4 mb-4 max-w-4xl">
-          <section class="conversation-window">
-            <!-- scrollable messages -->
-            <section class="responses" #chatMessages>
-              <ng-container *ngFor="let resp of responses; let i = index">
-                <div
-                  [ngClass]="resp.type === 'PROMPT' ? 'prompt' : 'response'"
-                  class="relative group">
-              
-                  <!-- Avatar for AI responses -->
-                  <img
-                    *ngIf="resp.type !== 'PROMPT'"
-                    class="chatbot-logo"
-                    [src]="aiSelected.avatarPath" />
-              
-                  <!-- Copy button (only on AI responses) -->
-                  <button
-                    *ngIf="resp.type === 'RESPONSE'"
+ <!--  CHAT AREA  -->
+<div class="flex flex-col mx-auto items-center w-full max-w-4xl">
+  <section
+    class="conversation-window h-[70vh] w-full flex flex-col
+           rounded-3xl bg-white/70 dark:bg-slate-800/60 backdrop-blur-md
+           shadow-lg overflow-hidden">
+
+    <!-- scrollable messages -->
+    <section #chatMessages
+             class="responses flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <ng-container *ngFor="let resp of responses; let i = index">
+        <!-- Wrap to align bubbles left/right -->
+        <div class="flex"
+             [ngClass]="resp.type === 'PROMPT' ? 'justify-end' : 'justify-start'">
+          
+          <!-- Avatar on AI side -->
+          <img *ngIf="resp.type !== 'PROMPT'"
+               class="h-16 w-16 mr-2 rounded-full self-end"
+               [src]="aiSelected.avatarPath" />
+
+          <div class="relative group">
+            <!-- Bubble -->
+            <div
+              [ngClass]="resp.type === 'PROMPT'
+                           ? 'bg-indigo-600 text-white ml-auto'
+                           : 'bg-slate-200 dark:bg-slate-700 text-gray-900 dark:text-gray-100 mr-auto'"
+              class="prompt-or-response rounded-2xl px-4 py-2 max-w-[75vw] text-sm leading-relaxed
+                     shadow-sm">
+
+              <!-- First message shows intro -->
+              <p *ngIf="i === 0">
+                <span class="font-bold">{{ aiSelected.name }}</span><br />
+                {{ aiSelected.intro }}
+              </p>
+
+              <!-- Subsequent messages -->
+              <p *ngIf="i !== 0" class="select-text"
+                 [innerHTML]="chat.formatText(resp.text)">
+              </p>
+            </div>
+
+            <!-- Copy button (AI responses only) -->
+            <button *ngIf="resp.type === 'RESPONSE'"
                     (click)="copyToClipboard(resp.text)"
                     aria-label="Copy answer"
-                    class="absolute top-1 right-1 p-1 rounded
-                           invisible group-hover:visible
-                           hover:bg-gray-200 dark:hover:bg-gray-700
-                           transition">
-              
-                    <!-- Heroicons-outline clipboard icon -->
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300"
-                         fill="none" stroke="currentColor" stroke-width="2"
-                         stroke-linecap="round" stroke-linejoin="round"
-                         viewBox="0 0 24 24">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4
-                               c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
-                    
-                  </button>
-              
-                  <!-- Text blocks -->
-                  <p *ngIf="i === 0">
-                    <span class="font-bold">{{ aiSelected.name }}</span><br />
-                    {{ aiSelected.intro }}
-                  </p>
-              
-                  <p *ngIf="i !== 0"
-                     class="select-text"           
-                     [innerHTML]="chat.formatText(resp.text)">
-                  </p>
-                </div>
-              </ng-container>
-              
-  
-              <!-- sentinel element -->
-              <div #bottomAnchor></div>
-            </section>
-  
-            <!-- prompt area fixed at the bottom -->
-            <section class="prompt-area">
-              <form *ngIf="!status" class="prompt-form">
-                <input
-                  class="prompt-input"
-                  type="text"
-                  #promptText
-                  placeholder="Enter a prompt here"
-                  autofocus />
-  
-                <button type="button" (click)="submitPrompt($event, promptText)">
-                  <svg class="w-[36px] h-[36px] text-gray-800 hover:fill-green-400"
-                       xmlns="http://www.w3.org/2000/svg" fill="none"
-                       viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round"
-                          stroke-linejoin="round" stroke-width="2"
-                          d="m12 18-7 3 7-18 7 18-7-3Zm0 0v-5"/>
-                  </svg>
-                </button>
-              </form>
-  
-              <div *ngIf="status" class="status-indicator">{{ status }}</div>
-            </section>
-          </section>
+                    class="absolute -top-2 -right-2 hidden group-hover:flex
+                           items-center justify-center h-6 w-6 rounded-full
+                           bg-gray-100 dark:bg-slate-600 shadow
+                           hover:bg-gray-200 dark:hover:bg-slate-500">
+              <svg class="h-4 w-4 text-gray-600 dark:text-gray-300"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4
+                         c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+            </button>
+          </div>
         </div>
+      </ng-container>
+
+      <!-- sentinel -->
+      <div #bottomAnchor></div>
+    </section>
+
+    <!-- prompt area fixed at the bottom -->
+    <section class="prompt-area border-t border-slate-200 dark:border-slate-700 p-4">
+      <form *ngIf="!status" class="prompt-form flex items-center gap-3">
+        <input
+          #promptText
+          type="text"
+          placeholder="Enter a prompt here"
+          class="prompt-input flex-1 px-4 py-2 rounded-full
+                 bg-slate-100 dark:bg-slate-700
+                 text-sm md:text-base text-gray-900 dark:text-gray-100
+                 placeholder-gray-500 dark:placeholder-gray-400
+                 focus:outline-none focus:ring-2
+                 focus:ring-indigo-500 dark:focus:ring-indigo-400" />
+
+        <button type="button" (click)="submitPrompt($event, promptText)"
+                class="shrink-0 p-2 rounded-full bg-indigo-600
+                       hover:bg-indigo-700 transition text-white">
+          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg"
+               fill="none" viewBox="0 0 24 24"
+               stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="m12 18-7 3 7-18 7 18-7-3Zm0 0v-5"/>
+          </svg>
+        </button>
+      </form>
+
+      <!-- simple status text -->
+      <div *ngIf="status" class="text-center text-sm text-gray-500 dark:text-gray-300">
+        {{ status }}
+      </div>
+    </section>
+  </section>
+</div>
+
       </div>
     </div>
   </div>
