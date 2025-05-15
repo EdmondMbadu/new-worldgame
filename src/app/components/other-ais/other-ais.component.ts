@@ -23,12 +23,16 @@ import { SolutionService } from 'src/app/services/solution.service';
 export class OtherAisComponent implements OnInit {
   @ViewChild('bottomAnchor') private bottomAnchor!: ElementRef<HTMLDivElement>;
 
+  colleagues: any[] = [];
+  elders: any[] = [];
+
   ngOnInit(): void {
     setTimeout(() => {
       window.scrollTo(0, 0); // Ensure the scroll happens after the content is loaded
     }, 1000);
     this.checkLoginStatus();
     this.deleteAllDocuments();
+    this.splitGroups();
   }
 
   allAIOptions: boolean = false;
@@ -41,6 +45,7 @@ export class OtherAisComponent implements OnInit {
     {
       avatarPath: '../../../assets/img/zara-agent.png',
       name: 'Zara Nkosi',
+      group: 'colleague',
       intro: `${name}  a vibrant AI agent inspired by South African ubuntu
 philosophy. I believes that “I am because we are”. i have  a knack for
 weaving compelling narratives, and help players understand
@@ -51,54 +56,63 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     {
       avatarPath: '../../../assets/img/arjun-agent.png',
       name: 'Arjun Patel',
+      group: 'colleague',
       intro: ` I am ${name} an AI agent inspired by India’s vibrant tech and social entrepreneurship scene. I thrive on finding smart solutions with limited resources. My strength lies in data analysis—I help players crunch numbers to tackle challenges like clean water access (SDG 6) or education gaps (SDG 4). I bring a knack for jugaad—that’s frugal innovation—finding creative, low-cost ways to repurpose local materials for sustainable infrastructure.  `,
       collectionPath: `users/${this.auth.currentUser.uid}/arjun/`,
     },
     {
       avatarPath: '../../../assets/img/sofia-agent.png',
       name: 'Sofia Morales',
+      group: 'colleague',
       intro: ` I’m Sofia, shaped by Colombia’s peacebuilding efforts and rich biodiversity. I’m a fierce advocate for sustainable development and social justice. My strength lies in conflict resolution—I help players navigate group tensions and stakeholder conflicts, which is key when working on issues like peace and justice (SDG 16).`,
       collectionPath: `users/${this.auth.currentUser.uid}/sofia/`,
     },
     {
       avatarPath: '../../../assets/img/li-agent.png',
       name: 'Li Wei',
+      group: 'colleague',
       intro: ` I’m Li Wei, an AI rooted in East Asia’s strategic mindset and China’s rapid urban and tech evolution. I specialize in urban planning, tech integration, and long-term thinking. I help players design scalable solutions for sustainable cities (SDG 11) and innovative industries (SDG 9).`,
       collectionPath: `users/${this.auth.currentUser.uid}/li/`,
     },
     {
       avatarPath: '../../../assets/img/amina-agent.png',
       name: 'Amina Al-Sayed',
+      group: 'colleague',
       intro: `I’m Amina, and I draw wisdom from Morocco’s cultural richness and diversity. I focus on inclusion, equity, and cultural sensitivity in every solution. My expertise in cross-cultural communication helps players navigate different worldviews—especially critical when tackling gender equality (SDG 5).`,
       collectionPath: `users/${this.auth.currentUser.uid}/amina/`,
     },
     {
       avatarPath: '../../../assets/img/elena-agent.png',
       name: 'Elena Volkov',
+      group: 'colleague',
       intro: `I’m Elena, forged in the fire of Ukraine’s resilience and innovation. I excel in crisis management—helping players stay calm and act fast in emergencies like food insecurity (SDG 2) or health crises (SDG 3). I bring deep knowledge in renewable energy, guiding players to build smart, sustainable solutions like microgrids for off-grid communities (SDG 7). `,
       collectionPath: `users/${this.auth.currentUser.uid}/elena/`,
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',
       name: 'Tane Kahu',
+      group: 'colleague',
       intro: `I’m Tane, grounded in Māori knowledge and New Zealand’s deep respect for nature. I take a holistic view of every challenge, helping players design solutions that protect ecosystems—on land (SDG 15) and under water (SDG 14). `,
       collectionPath: `users/${this.auth.currentUser.uid}/tane/`,
     },
     {
       avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
+      group: 'elder',
       intro: `${name} American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
     },
     {
       avatarPath: '../../../assets/img/albert.png',
       name: 'Albert Einstein',
+      group: 'elder',
       intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
     },
     {
       avatarPath: '../../../assets/img/mandela.png',
       name: 'Nelson Mandela',
+      group: 'elder',
       intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
@@ -150,6 +164,11 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       },
     ];
     this.deleteAllDocuments();
+  }
+  /** Call this again if aiOptions is ever updated */
+  private splitGroups(): void {
+    this.colleagues = this.aiOptions.filter((a) => a.group === 'colleague');
+    this.elders = this.aiOptions.filter((a) => a.group === 'elder');
   }
   toggleAiOptions() {
     this.allAIOptions = !this.allAIOptions;
