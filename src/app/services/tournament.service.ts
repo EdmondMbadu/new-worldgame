@@ -139,4 +139,24 @@ export class TournamentService {
       winningSolution: solutionId ?? '',
     });
   }
+  /** update status field (pending, approved, rejected) */
+  updateTournamentStatus(
+    id: string,
+    status: 'pending' | 'approved' | 'rejected'
+  ) {
+    return this.afs.doc(`tournaments/${id}`).update({ status });
+  }
+  getAllTournaments() {
+    return this.afs.collection<Tournament>('tournaments').valueChanges();
+  }
+
+  /** patch one or more tournament fields */
+  updateTournament(id: string, payload: Partial<Tournament>) {
+    return this.afs.doc(`tournaments/${id}`).update(payload);
+  }
+
+  /** delete the whole tournament document */
+  deleteTournament(id: string) {
+    return this.afs.doc(`tournaments/${id}`).delete();
+  }
 }

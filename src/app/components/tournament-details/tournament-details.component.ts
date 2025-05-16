@@ -26,6 +26,12 @@ export class TournamentDetailsComponent implements OnInit {
   pickerOpen = false;
   submitBusy = false;
 
+  editing = false;
+  tempTitle = '';
+  tempInstr = '';
+  tempPrizeOther = '';
+  tempDeadline = '';
+  tempPrizeAmount = '';
   currentWinnerId?: string;
   constructor(
     private route: ActivatedRoute,
@@ -64,6 +70,43 @@ export class TournamentDetailsComponent implements OnInit {
           });
         }
       });
+  }
+
+  get canEdit(): boolean {
+    return this.isAuthor && this.t?.status === 'pending';
+  }
+  startEdit() {
+    if (!this.canEdit) return;
+    this.editing = true;
+    this.tempTitle = this.t!.title!;
+    this.tempInstr = this.t!.instruction!;
+    this.tempPrizeOther = this.t!.prizeOther ?? '';
+    this.tempDeadline = this.t!.deadline!; // YYYY-MM-DD
+    this.tempPrizeAmount = this.t!.prizeAmount ?? '';
+  }
+  async saveEdit() {
+    if (!this.canEdit) return;
+    this.editing = false;
+    Object.assign(this.t!, {
+      title: this.tempTitle.trim(),
+      instruction: this.tempInstr.trim(),
+      prizeOther: this.tempPrizeOther.trim(),
+      deadline: this.tempDeadline, // ISO-date from <input type="date">
+      prizeAmount: this.tempPrizeAmount.trim(),
+    });
+
+    /* 2️⃣ persist to Firestore  */
+    await this.tourneySvc.updateTournament(this.t!.tournamentId!, {
+      title: this.t!.title,
+      instruction: this.t!.instruction,
+      prizeOther: this.t!.prizeOther,
+      deadline: this.t!.deadline,
+      prizeAmount: this.t!.prizeAmount,
+    });
+  }
+
+  cancelEdit() {
+    this.editing = false;
   }
   /* UI toggle */
   openSolutionPicker() {
@@ -194,5 +237,12 @@ export class TournamentDetailsComponent implements OnInit {
 
     await this.tourneySvc.setWinningSolution(this.t!.tournamentId!, null);
     this.currentWinnerId = undefined;
+  }
+  async deleteTournament() {
+    if (!this.canEdit) return;
+    if (!confirm('Delete this tournament? This cannot be undone.')) return;
+
+    await this.tourneySvc.deleteTournament(this.t!.tournamentId!);
+    this.router.navigate(['/your-tournaments']);
   }
 }

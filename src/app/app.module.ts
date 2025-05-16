@@ -122,6 +122,7 @@ import { ActiveTournamentsComponent } from './components/active-tournaments/acti
 import { TournamentWinComponent } from './components/tournament-win/tournament-win.component';
 import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
 import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
+import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
 
 @NgModule({
   declarations: [
@@ -219,7 +220,8 @@ import { PastTournamentsComponent } from './components/past-tournaments/past-tou
     ActiveTournamentsComponent,
     TournamentWinComponent,
     YourTournamentsComponent,
-    PastTournamentsComponent
+    PastTournamentsComponent,
+    TournamentManagementComponent,
   ],
   imports: [
     BrowserModule,

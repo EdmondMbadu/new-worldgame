@@ -77,6 +77,7 @@ import { ActiveTournamentsComponent } from './components/active-tournaments/acti
 import { TournamentWinComponent } from './components/tournament-win/tournament-win.component';
 import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
 import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
+import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -235,6 +236,12 @@ const routes: Routes = [
   {
     path: 'management-gsl-2025',
     component: ManagementGsl2025Component,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'tournament-management',
+    component: TournamentManagementComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
