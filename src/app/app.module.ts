@@ -120,6 +120,8 @@ import { CreateTournamentComponent } from './components/create-tournament/create
 import { TournamentDetailsComponent } from './components/tournament-details/tournament-details.component';
 import { ActiveTournamentsComponent } from './components/active-tournaments/active-tournaments.component';
 import { TournamentWinComponent } from './components/tournament-win/tournament-win.component';
+import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
+import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
 
 @NgModule({
   declarations: [
@@ -216,6 +218,8 @@ import { TournamentWinComponent } from './components/tournament-win/tournament-w
     TournamentDetailsComponent,
     ActiveTournamentsComponent,
     TournamentWinComponent,
+    YourTournamentsComponent,
+    PastTournamentsComponent
   ],
   imports: [
     BrowserModule,

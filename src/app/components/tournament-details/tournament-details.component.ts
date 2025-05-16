@@ -1,48 +1,89 @@
+// tournament-details.component.ts
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { switchMap, filter } from 'rxjs/operators';
+import { Tournament } from 'src/app/models/tournament';
 import { Solution } from 'src/app/models/solution';
-import { AuthService } from 'src/app/services/auth.service';
-import { DataService } from 'src/app/services/data.service';
+import { TournamentService } from 'src/app/services/tournament.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { AuthService } from 'src/app/services/auth.service';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-tournament-details',
   templateUrl: './tournament-details.component.html',
-  styleUrl: './tournament-details.component.css',
+  styleUrls: ['./tournament-details.component.css'],
 })
 export class TournamentDetailsComponent implements OnInit {
-  constructor(
-    private solution: SolutionService,
-    public auth: AuthService,
-    public data: DataService,
-    public router: Router
-  ) {}
-  allSolutions: Solution[] = [];
+  t?: Tournament;
   completedSolutions: Solution[] = [];
-  isPostDeadline: boolean = false;
+  isAuthor = false;
+  isPostDeadline = false;
+  uploadBusy = false;
+
+  constructor(
+    private route: ActivatedRoute,
+    private tourneySvc: TournamentService,
+    private solSvc: SolutionService,
+    private storage: AngularFireStorage,
+    public auth: AuthService,
+    private router: Router
+  ) {}
+
   ngOnInit(): void {
-    this.solution.getHomePageSolutions().subscribe((data) => {
-      this.allSolutions = data;
-      this.findCompletedSolutions();
-      /* ➌ enrich the category list with any new categories found in data */
-    });
+    window.scrollTo(0, 0);
 
-    window.scroll(0, 0);
+    this.route.paramMap
+      .pipe(switchMap((p) => this.tourneySvc.getById(p.get('id')!)))
+      .subscribe((t) => {
+        if (!t) {
+          this.router.navigate(['/active-tournaments']);
+          return;
+        }
+        this.t = t;
+
+        /* is the logged-in user the author? */
+        this.isAuthor = t.authorId === this.auth.currentUser.uid;
+
+        /* is deadline in the past? */
+        this.isPostDeadline = new Date() > new Date(t.deadline ?? '');
+
+        /* load solutions if any */
+        if (t.submittedSolutions?.length) {
+          this.solSvc.getMany(t.submittedSolutions).subscribe((sols) => {
+            this.completedSolutions = sols;
+          });
+        }
+      });
   }
-  findCompletedSolutions() {
-    this.completedSolutions = [];
 
-    for (let s of this.allSolutions) {
-      if (s.finished === 'true') {
-        this.completedSolutions.push(s);
-      }
+  /** AUTHOR-ONLY – upload extra reference file */
+  async addReferenceFile(fileList: FileList | null) {
+    const file = fileList?.item(0);
+    if (!file || file.size > 20_000_000) {
+      return;
     }
-  }
-  submitFinishedSolution() {
-    this.router.navigate(['/submit-solution']);
+
+    this.uploadBusy = true;
+    const path = `tournament_refs/${Date.now()}_${file.name}`;
+    const task = await this.storage.upload(path, file);
+    const url = await task.ref.getDownloadURL();
+
+    const files = this.t?.files ?? [];
+    files.push(url);
+    await this.tourneySvc.updateFiles(this.t!.tournamentId!, files);
+
+    /* refresh local state */
+    this.t!.files = files;
+    this.uploadBusy = false;
   }
 
+  /** NAV */
+  submitFinishedSolution() {
+    this.router.navigate(['/submit-solution', this.t!.tournamentId]);
+  }
   createNewSolution() {
-    this.router.navigate(['/create-solution']);
+    this.router.navigate(['/create-solution', this.t!.tournamentId]);
   }
 }

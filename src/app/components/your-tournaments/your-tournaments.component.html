@@ -1,5 +1,6 @@
-<div class="dark:bg-slate-900 bg-gray-100 min-h-screen min-w-max">
-    <app-navbar 
+<!-- your-tournaments.component.html -->
+<div class="dark:bg-slate-900 bg-gray-100 min-h-screen ">
+      <app-navbar 
       [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'" 
       [showMoreOrLess]="true" 
       [sideBarSmall]="true" 
@@ -8,51 +9,52 @@
       [firstName]="this.auth.currentUser.firstName"
       [lastName]="this.auth.currentUser.lastName"
       [path]="'home'" 
-      [currentPageTournament]="true">
+      >
     </app-navbar>
-  
-    <!-- Active Tournaments Section -->
-  
-<section class="py-8 mt-14">
+
+  <section class="py-8 mt-14">
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
 
       <!-- Title -->
       <div class="text-center mb-10">
         <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white">
-          Active Tournaments
+          Your Tournaments
         </h1>
         <p class="mt-2 text-gray-500 dark:text-gray-400 italic">
-          Submit your solution before the deadline to compete!
+          Click a tournament to view submissions and provide feedback
         </p>
       </div>
 
-      <!-- Loading spinner -->
-      <div *ngIf="isLoading" class="flex justify-center py-12">
-        <svg class="w-10 h-10 text-gray-400 animate-spin" viewBox="0 0 24 24">
+      <!-- LOADING -->
+      <div *ngIf="isLoading"
+           class="flex justify-center items-center py-12">
+        <svg class="w-10 h-10 text-gray-400 animate-spin"
+             viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10"
-                  stroke="currentColor" stroke-width="4" class="opacity-25"/>
+                  stroke="currentColor" stroke-width="4"
+                  class="opacity-25"/>
           <path d="M4 12a8 8 0 018-8"
                 stroke="currentColor" stroke-width="4"
                 stroke-linecap="round" class="opacity-75"/>
         </svg>
       </div>
 
-      <!-- Empty state -->
+      <!-- EMPTY STATE -->
       <p *ngIf="!isLoading && tournaments.length === 0"
          class="text-center text-gray-600 dark:text-gray-400">
-        No active tournaments at the moment.
+        You haven’t created any tournaments yet.
       </p>
 
-      <!-- List -->
+      <!-- LIST -->
       <div class="space-y-6" *ngIf="tournaments.length">
 
         <div *ngFor="let t of tournaments"
              [routerLink]="['/tournament-details', t.tournamentId]"
              class="flex flex-col md:flex-row bg-white dark:bg-gray-800
-                    rounded-lg overflow-hidden shadow-md hover:shadow-lg
-                    transition cursor-pointer">
+                    rounded-lg overflow-hidden shadow-md
+                    hover:shadow-lg transition cursor-pointer">
 
-          <img [src]="coverImage(t)" alt="cover"
+          <img [src]="coverImage(t)" alt="tournament cover"
                class="w-full md:w-1/3 object-cover">
 
           <div class="p-6 flex flex-col justify-between w-full">
@@ -61,6 +63,11 @@
                          text-gray-900 dark:text-white">
                 {{ t.title }}
               </h2>
+            <span [ngClass]="statusClass(t)"
+                class="inline-block ml-2 px-2 py-0.5 rounded-full
+                        text-xs font-semibold uppercase tracking-wide">
+            {{ statusLabel(t) }}
+            </span>
 
               <p class="mt-2 text-gray-700 dark:text-gray-300 text-base
                         line-clamp-3">
@@ -71,7 +78,9 @@
             <div class="mt-4 flex flex-wrap gap-8 text-sm
                         text-gray-700 dark:text-gray-300">
               <div>Participants:
-                <span class="font-semibold">{{ participantsCount(t) }}</span>
+                <span class="font-semibold">
+                  {{ participantsCount(t) }}
+                </span>
               </div>
               <div>Deadline:
                 <span class="font-semibold">
@@ -90,5 +99,4 @@
       </div>
     </div>
   </section>
-  </div>
-  
+</div>

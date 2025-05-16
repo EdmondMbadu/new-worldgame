@@ -638,4 +638,11 @@ export class SolutionService {
     const callable = this.fns.httpsCallable('createGoogleMeet');
     return callable({ solutionId, title });
   }
+  getMany(ids: string[]) {
+    return this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref.where('solutionId', 'in', ids).limit(30)
+      )
+      .valueChanges();
+  }
 }

@@ -75,6 +75,8 @@ import { CreateTournamentComponent } from './components/create-tournament/create
 import { TournamentDetailsComponent } from './components/tournament-details/tournament-details.component';
 import { ActiveTournamentsComponent } from './components/active-tournaments/active-tournaments.component';
 import { TournamentWinComponent } from './components/tournament-win/tournament-win.component';
+import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
+import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -185,13 +187,23 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'tournament-details',
+    path: 'tournament-details/:id',
     component: TournamentDetailsComponent,
     canActivate: [AuthGuard],
   },
   {
     path: 'active-tournaments',
     component: ActiveTournamentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'your-tournaments',
+    component: YourTournamentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'past-tournaments',
+    component: PastTournamentsComponent,
     canActivate: [AuthGuard],
   },
   {

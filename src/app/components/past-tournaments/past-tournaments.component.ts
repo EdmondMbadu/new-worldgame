@@ -1,16 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Tournament } from 'src/app/models/tournament';
 import { AuthService } from 'src/app/services/auth.service';
-import { DataService } from 'src/app/services/data.service';
-import { SolutionService } from 'src/app/services/solution.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-active-tournaments',
-  templateUrl: './active-tournaments.component.html',
-  styleUrl: './active-tournaments.component.css',
+  selector: 'app-past-tournaments',
+  templateUrl: './past-tournaments.component.html',
+  styleUrl: './past-tournaments.component.css',
 })
-export class ActiveTournamentsComponent implements OnInit {
+export class PastTournamentsComponent implements OnInit {
   tournaments: Tournament[] = [];
   isLoading = true;
 
@@ -22,16 +20,13 @@ export class ActiveTournamentsComponent implements OnInit {
   ngOnInit(): void {
     window.scrollTo(0, 0);
 
-    // today as YYYY-MM-DD (same format your deadline input stores)
-    const today = new Date().toISOString().substring(0, 10);
-
-    this.tourneySvc.getActive(today).subscribe((list) => {
+    const today = new Date().toISOString().substring(0, 10); // YYYY-MM-DD
+    this.tourneySvc.getPast(today).subscribe((list) => {
       this.tournaments = list;
       this.isLoading = false;
     });
   }
 
-  /* helpers for template */
   coverImage(t: Tournament) {
     return t.image || '../../../assets/img/generic.webp';
   }

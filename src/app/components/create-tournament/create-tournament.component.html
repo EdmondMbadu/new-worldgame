@@ -1,89 +1,215 @@
-<div class="dark:bg-slate-900 bg-gray-100 min-h-screen min-w-max">
-    <app-navbar 
-      [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'" 
-      [showMoreOrLess]="true" 
-      [sideBarSmall]="true" 
-      [sideBarBig]="false" 
+<div class="dark:bg-slate-900 bg-gray-100 min-h-screen">
+  <!-- ▸ NAVBAR (unchanged) -->
+  <app-navbar
+      [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
+      [showMoreOrLess]="true"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
       [email]="this.auth.currentUser.email"
       [firstName]="this.auth.currentUser.firstName"
       [lastName]="this.auth.currentUser.lastName"
-      [path]="'home'" 
+      [path]="'home'"
       [currentPageTournament]="true">
-    </app-navbar>
-  
-    <section class="bg-white dark:bg-gray-900 mt-20">
-      <div class="py-4 px-4 mx-auto max-w-screen-xl text-center lg:px-12">
-        <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-          Create a NewWorld Tournament
-        </h1>
-        <p class="mb-4 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
-          NewWorld Game is thrilled to announce the winner of the 2024 NewWorld Tournament. 
-          <span class="italic">Electrifying Health Clinics in Democratic Republic of Congo</span> 
-          developed by Nicholson Thamba Vuadi, Yves Thamba, Augustin Phambu, Blessing Nguama, Peter Kamango, Clayton Nzau, Isaac Tembo, and Mysterdie Nzinga is the winner of the first NewWorld Tournament.
+  </app-navbar>
+
+  <!-- ▸ HERO SECTION -->
+  <section class="bg-white dark:bg-gray-900 mt-20">
+    <div class="py-4 px-4 mx-auto max-w-screen-xl text-center lg:px-12">
+      <h1 class="mb-4 text-4xl md:text-5xl lg:text-6xl font-extrabold
+                 tracking-tight leading-none text-gray-900 dark:text-white">
+        Create a NewWorld Tournament
+      </h1>
+
+      <p class="mb-4 text-lg lg:text-xl text-gray-500 dark:text-gray-400
+                sm:px-16 xl:px-48">
+        NewWorld Game is thrilled to announce the winner of the 2024 NewWorld
+        Tournament.
+        <span class="italic">Electrifying Health Clinics in Democratic
+        Republic of Congo</span> developed by Nicholson Thamba Vuadi, Yves
+        Thamba, Augustin Phambu, Blessing Nguama, Peter Kamango, Clayton Nzau,
+        Isaac Tembo and Mysterdie Nzinga is the winner of the first NewWorld
+        Tournament.
+      </p>
+
+      <div class="flex flex-col lg:flex-row justify-center space-y-4
+                  sm:space-y-0 sm:space-x-4 mb-2 lg:mb-4">
+        <a routerLink="/active-tournaments"
+           class="inline-flex items-center justify-center
+                  py-3 px-5 text-base font-medium rounded-lg
+                  text-gray-900 dark:text-white
+                  border border-gray-300 dark:border-gray-700
+                  hover:bg-gray-100 dark:hover:bg-gray-700
+                  focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-800">
+          Active Tournaments
+          <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor"
+               viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                  clip-rule="evenodd"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- ▸ TOURNAMENT FORM -->
+    <form
+        [formGroup]="tournamentForm"
+        (ngSubmit)="createTournament()"
+        novalidate
+        class="py-8 px-6 mx-auto max-w-screen-md
+               bg-white dark:bg-gray-800 rounded-lg shadow-md">
+
+      <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+        Enter Tournament Details
+      </h2>
+
+      <!-- TITLE -->
+      <div class="mb-4">
+        <label for="title"
+               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          New Title
+        </label>
+        <input id="title" type="text" formControlName="title"
+               placeholder="Enter a descriptive title"
+               class="block w-full p-2.5 rounded-lg shadow-sm
+                      bg-gray-50 dark:bg-gray-700
+                      border border-gray-300 dark:border-gray-600
+                      text-gray-900 dark:text-gray-100
+                      focus:ring-blue-500 focus:border-blue-500">
+        <p *ngIf="title.invalid && title.touched"
+           class="mt-2 text-sm text-red-600">Title is required</p>
+        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
+          Shown as the tournament headline
         </p>
-        <div class="flex flex-col mb-2 lg:mb-4 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
-          <a routerLink="/active-tournaments" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-           Active Tournaments
-            <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-            </svg>
-          </a>
-        </div>
       </div>
-  
-      <!-- TOURNAMENT FORM -->
-      <div class="py-8 px-6 mx-auto max-w-screen-md bg-white dark:bg-gray-800 rounded-lg text-left shadow-md">
-        <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Enter Tournament Details</h2>
-  
-        <!-- Title -->
-        <div class="mb-4">
-          <label for="title" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">New Title</label>
-          <input type="text" id="title" class="shadow-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter a descriptive title" required>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">the title of the tournament, as viewed on the tournaments page</p>
-        </div>
-  
-        <!-- Subtitle -->
-        <div class="mb-4">
-          <label for="subtitle" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
-          <input type="text" id="subtitle" class="shadow-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter a subtitle explaining the tournament">
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">the tournament description, when viewed on the tournaments page</p>
-        </div>
-  
-        <!-- Instructions -->
-        <div class="mb-4">
-          <label for="instructions" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Instructions</label>
-          <textarea id="instructions" rows="4" class="block p-2.5 w-full text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Enter the instructions and guidelines for tournament submissions"></textarea>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">the tournament guidelines. please be sure to include the criteria which will be used for evaluating submissions</p>
-        </div>
-  
-        <!-- Prize -->
-        <div class="mb-4">
-          <label for="prize" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Prize</label>
-          <input type="text" id="prize" class="shadow-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg block w-full p-2.5 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter the prize in $USD">
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">the prize the winning submission will receive</p>
-        </div>
-  
-        <!-- Deadline -->
-        <div class="mb-6">
-          <label for="deadline" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Deadline</label>
-          <div class="relative">
-            <input type="text" id="deadline" class="shadow-sm bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 text-sm rounded-lg block w-full p-2.5 pr-12 focus:ring-blue-500 focus:border-blue-500" placeholder="MM/DD/YYYY">
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 8h12v8H4V8z" clip-rule="evenodd" />
-              </svg>
-            </div>
-          </div>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">the deadline for new submissions, please allow at least 2 weeks for submissions</p>
-        </div>
-  
-        <!-- Create Button -->
-        <div class="flex justify-center">
-          <button routerLink="/tournament-details" type="submit" class="text-white bg-teal-700 hover:bg-teal-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-            CREATE
-          </button>
-        </div>
+
+      <!-- SUBTITLE -->
+      <div class="mb-4">
+        <label for="subtitle"
+               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Subtitle
+        </label>
+        <input id="subtitle" type="text" formControlName="subtitle"
+               placeholder="Enter a subtitle explaining the tournament"
+               class="block w-full p-2.5 rounded-lg shadow-sm
+                      bg-gray-50 dark:bg-gray-700
+                      border border-gray-300 dark:border-gray-600
+                      text-gray-900 dark:text-gray-100
+                      focus:ring-blue-500 focus:border-blue-500">
+        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
+          Short teaser visible on the tournament card
+        </p>
       </div>
-    </section>
-  </div>
-  
+
+      <!-- INSTRUCTIONS -->
+      <div class="mb-4">
+        <label for="instructions"
+               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Instructions
+        </label>
+        <textarea id="instructions" rows="6" formControlName="instructions"
+                  placeholder="Enter the instructions and guidelines…"
+                  class="block w-full p-2.5 rounded-lg
+                         bg-gray-50 dark:bg-gray-700
+                         border border-gray-300 dark:border-gray-600
+                         text-gray-900 dark:text-gray-100
+                         focus:ring-blue-500 focus:border-blue-500"></textarea>
+        <p *ngIf="instructions.invalid && instructions.touched"
+           class="mt-2 text-sm text-red-600">Instructions are required</p>
+        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
+          Include evaluation criteria, file types, team size, etc.
+        </p>
+      </div>
+
+      <!-- PRIZE -->
+      <div class="mb-4">
+        <label for="prizeAmount"
+               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Prize
+        </label>
+        <input id="prizeAmount" type="text" formControlName="prizeAmount"
+               placeholder="$1 500"
+               class="block w-full p-2.5 rounded-lg shadow-sm
+                      bg-gray-50 dark:bg-gray-700
+                      border border-gray-300 dark:border-gray-600
+                      text-gray-900 dark:text-gray-100
+                      focus:ring-blue-500 focus:border-blue-500">
+        <p *ngIf="prizeAmount.invalid && prizeAmount.touched"
+           class="mt-2 text-sm text-red-600">Prize amount required</p>
+      </div>
+
+      <!-- OTHER PRIZES -->
+      <div class="mb-4">
+        <label for="prizeOther"
+               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Other Prizes
+        </label>
+        <input id="prizeOther" type="text" formControlName="prizeOther"
+               placeholder="Recognition, pilot opportunity, mentorship…"
+               class="block w-full p-2.5 rounded-lg shadow-sm
+                      bg-gray-50 dark:bg-gray-700
+                      border border-gray-300 dark:border-gray-600
+                      text-gray-900 dark:text-gray-100
+                      focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      <!-- --- COVER IMAGE --- -->
+<div class="mb-4">
+  <label for="coverImage"
+         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+    Cover Image
+  </label>
+
+  <!-- file selector -->
+  <input  type="file"
+          id="coverImage"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="startUpload($any($event.target).files)"
+          class="block w-full text-sm text-gray-900 dark:text-gray-100
+                 border border-gray-300 dark:border-gray-600 rounded-lg
+                 cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none">
+
+  <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
+    Landscape (3 : 2) PNG/JPEG/WebP · &lt; 10 MB
+  </p>
+
+  <!-- live preview -->
+  <img *ngIf="imageDownloadUrl"
+       [src]="imageDownloadUrl"
+       alt="Cover preview"
+       class="mt-4 rounded-lg w-full object-cover max-h-60
+              border border-gray-300 dark:border-gray-600">
+</div>
+
+      <!-- DEADLINE -->
+      <div class="mb-6">
+        <label for="deadline"
+               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Deadline
+        </label>
+        <input id="deadline" type="date" formControlName="deadline"
+               class="block w-full p-2.5 rounded-lg shadow-sm
+                      bg-gray-50 dark:bg-gray-700
+                      border border-gray-300 dark:border-gray-600
+                      text-gray-900 dark:text-gray-100
+                      focus:ring-blue-500 focus:border-blue-500">
+        <p *ngIf="deadline.invalid && deadline.touched"
+           class="mt-2 text-sm text-red-600">Deadline required</p>
+      </div>
+
+      <!-- COVER IMAGE uploader + preview block stays where you inserted it -->
+
+      <!-- SUBMIT -->
+      <div class="flex justify-center">
+        <button type="submit"
+                [disabled]="tournamentForm.invalid || isLoading"
+                class="px-5 py-2.5 text-sm font-medium
+                       text-white bg-teal-700 rounded-lg
+                       hover:bg-teal-800 focus:ring-4 focus:ring-teal-300
+                       disabled:opacity-60 disabled:cursor-not-allowed
+                       dark:focus:ring-teal-800">
+          CREATE
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

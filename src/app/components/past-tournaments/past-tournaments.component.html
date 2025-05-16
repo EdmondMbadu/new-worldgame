@@ -1,5 +1,6 @@
-<div class="dark:bg-slate-900 bg-gray-100 min-h-screen min-w-max">
-    <app-navbar 
+<!-- your-tournaments.component.html -->
+<div class="dark:bg-slate-900 bg-gray-100 min-h-screen ">
+      <app-navbar 
       [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'" 
       [showMoreOrLess]="true" 
       [sideBarSmall]="true" 
@@ -8,25 +9,22 @@
       [firstName]="this.auth.currentUser.firstName"
       [lastName]="this.auth.currentUser.lastName"
       [path]="'home'" 
-      [currentPageTournament]="true">
+      >
     </app-navbar>
-  
-    <!-- Active Tournaments Section -->
-  
-<section class="py-8 mt-14">
+    <section class="py-8 mt-14">
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
 
       <!-- Title -->
       <div class="text-center mb-10">
         <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white">
-          Active Tournaments
+          Past Tournaments
         </h1>
         <p class="mt-2 text-gray-500 dark:text-gray-400 italic">
-          Submit your solution before the deadline to compete!
+          Explore completed challenges and winning ideas
         </p>
       </div>
 
-      <!-- Loading spinner -->
+      <!-- Loading -->
       <div *ngIf="isLoading" class="flex justify-center py-12">
         <svg class="w-10 h-10 text-gray-400 animate-spin" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"
@@ -40,7 +38,7 @@
       <!-- Empty state -->
       <p *ngIf="!isLoading && tournaments.length === 0"
          class="text-center text-gray-600 dark:text-gray-400">
-        No active tournaments at the moment.
+        No past tournaments found.
       </p>
 
       <!-- List -->
@@ -90,5 +88,7 @@
       </div>
     </div>
   </section>
-  </div>
-  
+</div>
+
+
+
