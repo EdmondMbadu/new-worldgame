@@ -8,7 +8,7 @@ import { TournamentService } from 'src/app/services/tournament.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 
 @Component({
   selector: 'app-tournament-details',
@@ -21,7 +21,12 @@ export class TournamentDetailsComponent implements OnInit {
   isAuthor = false;
   isPostDeadline = false;
   uploadBusy = false;
+  /* NEW state */
+  solutions: Solution[] = [];
+  pickerOpen = false;
+  submitBusy = false;
 
+  currentWinnerId?: string;
   constructor(
     private route: ActivatedRoute,
     private tourneySvc: TournamentService,
@@ -42,13 +47,16 @@ export class TournamentDetailsComponent implements OnInit {
           return;
         }
         this.t = t;
+        this.currentWinnerId = t.winningSolution || undefined;
 
         /* is the logged-in user the author? */
         this.isAuthor = t.authorId === this.auth.currentUser.uid;
 
         /* is deadline in the past? */
         this.isPostDeadline = new Date() > new Date(t.deadline ?? '');
-
+        this.solSvc.getAuthenticatedUserAllSolutions().subscribe((sols) => {
+          this.solutions = sols.filter((s) => s.finished === 'true');
+        });
         /* load solutions if any */
         if (t.submittedSolutions?.length) {
           this.solSvc.getMany(t.submittedSolutions).subscribe((sols) => {
@@ -57,7 +65,10 @@ export class TournamentDetailsComponent implements OnInit {
         }
       });
   }
-
+  /* UI toggle */
+  openSolutionPicker() {
+    this.pickerOpen = !this.pickerOpen;
+  }
   /** AUTHOR-ONLY – upload extra reference file */
   async addReferenceFile(fileList: FileList | null) {
     const file = fileList?.item(0);
@@ -78,12 +89,110 @@ export class TournamentDetailsComponent implements OnInit {
     this.t!.files = files;
     this.uploadBusy = false;
   }
+  /* user clicked a solution chip */
+  async attachSolution(sol: Solution) {
+    if (this.submitBusy) {
+      return;
+    }
+    this.submitBusy = true;
+
+    try {
+      await this.tourneySvc.addSubmittedSolution(
+        this.t!.tournamentId!,
+        sol.solutionId!
+      );
+      const authorEmail = this.t!.authorEmail
+        ? this.t!.authorEmail
+        : (await firstValueFrom(this.auth.getAUser(this.t!.authorId!)))?.email;
+      let evaluators = sol.evaluators ?? [];
+      const alreadyThere = evaluators.some(
+        (e: any) => e.name?.toLowerCase() === authorEmail!.toLowerCase()
+      );
+
+      if (!alreadyThere) {
+        evaluators = [...evaluators, { name: authorEmail }];
+
+        await this.solSvc.addEvaluatorsToSolution(evaluators, sol.solutionId!);
+      }
+
+      /* update local list immediately */
+      this.completedSolutions.push(sol);
+      this.pickerOpen = false;
+    } finally {
+      this.submitBusy = false;
+    }
+  }
 
   /** NAV */
   submitFinishedSolution() {
     this.router.navigate(['/submit-solution', this.t!.tournamentId]);
   }
   createNewSolution() {
-    this.router.navigate(['/create-solution', this.t!.tournamentId]);
+    this.router.navigate(['/create-solution']);
+  }
+
+  async unsubmitSolution(sol: Solution) {
+    if (this.submitBusy) {
+      return;
+    }
+    this.submitBusy = true;
+
+    try {
+      await this.tourneySvc.removeSubmittedSolution(
+        this.t!.tournamentId!,
+        sol.solutionId!
+      );
+      const authorEmail = this.t!.authorEmail
+        ? this.t!.authorEmail
+        : (await firstValueFrom(this.auth.getAUser(this.t!.authorId!)))?.email;
+      if (authorEmail && sol.evaluators?.length) {
+        const updated = sol.evaluators.filter(
+          (e: any) => e.name?.toLowerCase() !== authorEmail.toLowerCase()
+        );
+
+        // Only write if something actually changed
+        if (updated.length !== sol.evaluators.length) {
+          await this.solSvc.addEvaluatorsToSolution(updated, sol.solutionId!);
+        }
+      }
+      // remove locally
+      this.completedSolutions = this.completedSolutions.filter(
+        (s) => s.solutionId !== sol.solutionId
+      );
+    } finally {
+      this.submitBusy = false;
+    }
+  }
+  /* Replace the helper with this */
+  canUnsubmit(sol: Solution): boolean {
+    return (
+      !this.isPostDeadline && // ⬅️ must still be open
+      (this.isAuthor || // tournament owner
+        sol.authorAccountId === this.auth.currentUser.uid) // solution owner
+    );
+  }
+  /*  New: choose / clear winner  */
+  async chooseWinner(sol: Solution) {
+    if (!this.isAuthor || !this.isPostDeadline) {
+      alert('You are not the author or the deadline is not yet set');
+      return;
+    }
+
+    const newId = sol.solutionId!;
+    if (this.currentWinnerId === newId) {
+      return;
+    } // already set
+
+    await this.tourneySvc.setWinningSolution(this.t!.tournamentId!, newId);
+    this.currentWinnerId = newId;
+  }
+
+  async clearWinner() {
+    if (!this.isAuthor || !this.isPostDeadline) {
+      return;
+    }
+
+    await this.tourneySvc.setWinningSolution(this.t!.tournamentId!, null);
+    this.currentWinnerId = undefined;
   }
 }

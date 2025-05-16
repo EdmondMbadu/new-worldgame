@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import { Tournament } from '../models/tournament';
 import { map, Observable } from 'rxjs';
-
+import firebase from 'firebase/compat/app';
 @Injectable({
   providedIn: 'root',
 })
@@ -41,6 +41,7 @@ export class TournamentService {
       submittedSolutions: [],
       winningSolution: '',
       authorId: this.auth.currentUser.uid,
+      authorEmail: this.auth.currentUser.email,
       status: 'pending',
       /** NEW ↓ — ISO string keeps sorting simple */
       creationDate: new Date().toISOString(),
@@ -119,5 +120,23 @@ export class TournamentService {
   }
   updateFiles(id: string, files: string[]) {
     return this.afs.doc(`tournaments/${id}`).update({ files });
+  }
+  // tournament.service.ts
+  addSubmittedSolution(tournamentId: string, solutionId: string) {
+    const ref = this.afs.doc(`tournaments/${tournamentId}`);
+    return ref.update({
+      submittedSolutions: firebase.firestore.FieldValue.arrayUnion(solutionId),
+    });
+  }
+  removeSubmittedSolution(tournamentId: string, solutionId: string) {
+    return this.afs.doc(`tournaments/${tournamentId}`).update({
+      submittedSolutions: firebase.firestore.FieldValue.arrayRemove(solutionId),
+    });
+  }
+  // tournament.service.ts
+  setWinningSolution(tournamentId: string, solutionId: string | null) {
+    return this.afs.doc(`tournaments/${tournamentId}`).update({
+      winningSolution: solutionId ?? '',
+    });
   }
 }

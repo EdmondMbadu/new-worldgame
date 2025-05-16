@@ -71,15 +71,15 @@
         </div>
 
         <!-- Pre-deadline buttons -->
-        <div *ngIf="!isPostDeadline" class="mt-10 flex flex-col md:flex-row
+        <div *ngIf="!isPostDeadline" class="relative mt-10 flex flex-col md:flex-row
                                             justify-center items-center gap-6">
-          <button (click)="submitFinishedSolution()"
-                  class="px-6 py-3 bg-white text-gray-900 border
-                         border-gray-300 dark:bg-transparent dark:text-white
-                         dark:border-white rounded-md text-lg font-medium
-                         italic shadow hover:scale-105 transition">
-            submit a finished solution
-          </button>
+          
+                <button (click)="openSolutionPicker()"  class="px-6 py-3 bg-white text-gray-900 border
+                                border-gray-300 dark:bg-transparent dark:text-white
+                                dark:border-white rounded-md text-lg font-medium
+                                italic shadow hover:scale-105 transition">
+        submit a finished solution
+        </button>
 
           <span class="text-gray-600 dark:text-gray-400 text-lg italic">or</span>
 
@@ -90,6 +90,64 @@
                          italic shadow hover:scale-105 transition">
             create a new solution
           </button>
+          <!-- Solution picker tooltip -->
+            <div *ngIf="pickerOpen"
+                class="fixed inset-0 z-50 flex items-start justify-center
+                      pt-24 md:pt-32 lg:pt-40
+                      bg-black/40 backdrop-blur-sm"
+                (click)="openSolutionPicker()">  <!-- click backdrop to close -->
+
+            <!-- Dialog card -->
+            <div (click)="$event.stopPropagation()"  
+                  class="w-[22rem] md:w-[26rem] max-h-[26rem] overflow-y-auto
+                        bg-white dark:bg-slate-800
+                        text-gray-800 dark:text-gray-100
+                        shadow-2xl rounded-2xl ring-1 ring-slate-200
+                        dark:ring-slate-700 animate-fade-in">
+              
+              <!-- Header -->
+              <div class="flex items-center justify-between px-5 py-4 border-b
+                          border-slate-200 dark:border-slate-700">
+                <h3 class="text-lg font-semibold">
+                  Select a finished solution
+                </h3>
+                <button (click)="openSolutionPicker()"
+                        class="text-slate-500 dark:text-slate-400 hover:text-red-500
+                                rounded-full p-1 transition">
+                  <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586
+                              l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clip-rule="evenodd"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Content -->
+              <div class="px-5 py-4">
+                <!-- Empty state -->
+                <p *ngIf="solutions.length === 0"
+                    class="text-sm italic text-slate-600 dark:text-slate-400">
+                  You don’t have any completed solutions yet.
+                </p>
+
+                <!-- List -->
+                <button *ngFor="let s of solutions"
+                        (click)="attachSolution(s)"
+                        class="block w-full text-left mt-2 first:mt-0
+                                px-4 py-2 rounded-lg
+                                border border-slate-200 dark:border-slate-600
+                                bg-white/80 dark:bg-slate-700/70
+                                hover:bg-teal-600 hover:text-white
+                                dark:hover:bg-teal-600 transition">
+                  {{ s.title || 'Untitled solution' }}
+                </button>
+              </div>
+            </div>
+            </div>
+
+
+
         </div>
       </div>
 
@@ -98,17 +156,7 @@
         <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">
           It's time to choose a winner!
         </h2>
-        <a [routerLink]="['/tournament-submissions', t.tournamentId]"
-           class="inline-flex items-center justify-center px-6 py-3
-                  text-base font-medium text-white bg-teal-600
-                  hover:bg-teal-700 rounded-lg transition">
-          View Submissions
-          <svg class="ml-2 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                  clip-rule="evenodd"></path>
-          </svg>
-        </a>
+        
       </div>
 
       <!-- Solutions grid -->
@@ -121,10 +169,41 @@
       <div class="max-w-7xl mx-auto mt-4">
         <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <div *ngFor="let sol of completedSolutions; let i = index"
-               class="transform hover:scale-105 transition duration-300">
-            <app-solution [solution]="sol"
-                          [ngStyle]="{'animation-delay': i * 100 + 'ms'}">
-            </app-solution>
+               class="relative transform hover:scale-105 transition duration-300">
+           <!-- Unsubmit pill (only if allowed) -->
+          <!-- Winner ribbon -->
+  <div *ngIf="currentWinnerId === sol.solutionId"
+       class="absolute -top-2 -left-2 rotate-[-45deg]
+              bg-amber-500 text-white text-xs font-bold
+              px-8 py-1 shadow-lg">
+    WINNER
+  </div>
+
+  <!-- Set/Clear buttons (author only, after deadline) -->
+  <button *ngIf="isAuthor && isPostDeadline"
+          (click)="currentWinnerId === sol.solutionId
+                   ? clearWinner() : chooseWinner(sol)"
+          class="absolute top-2 right-2 z-10
+                 px-2 py-0.5 rounded-full text-xs font-medium
+                 bg-emerald-600 text-white hover:bg-emerald-700
+                 shadow">
+    {{ currentWinnerId === sol.solutionId ? 'Clear' : 'Pick as winner' }}
+  </button>
+
+  <!-- Unsubmit pill (kept) -->
+  <button *ngIf="canUnsubmit(sol)"
+          (click)="unsubmitSolution(sol)"
+          class="absolute bottom-2 right-2 z-10
+                 px-2 py-0.5 rounded-full text-xs font-medium
+                 bg-rose-600 text-white hover:bg-rose-700 shadow
+                 hidden md:block">
+    × Unsubmit
+  </button>
+
+  <!-- Solution card -->
+  <app-solution [solution]="sol"
+                [ngStyle]="{'animation-delay': i * 100 + 'ms'}">
+  </app-solution>
           </div>
         </div>
       </div>
@@ -133,3 +212,5 @@
   </section>
   </div>
   
+
+

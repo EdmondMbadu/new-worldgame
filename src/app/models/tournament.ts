@@ -11,6 +11,8 @@ export class Tournament {
   submittedSolutions?: string[];
   winningSolution?: string;
   authorId?: string;
+  authorEmail?: string;
+  authorProfileCredential?: string;
   status?: string;
   creationDate?: string;
 }
