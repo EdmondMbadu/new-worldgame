@@ -22,7 +22,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class OtherAisComponent implements OnInit {
   @ViewChild('bottomAnchor') private bottomAnchor!: ElementRef<HTMLDivElement>;
-
+  @ViewChild('chatWindow') chatWindow!: ElementRef;
   colleagues: any[] = [];
   elders: any[] = [];
 
@@ -145,6 +145,13 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   }
   selectAi(ai: any) {
     this.aiSelected = ai;
+    // scroll to chat window
+    setTimeout(() => {
+      this.chatWindow.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 0);
     // this.toggleAiOptions();
     this.responses = [
       {
