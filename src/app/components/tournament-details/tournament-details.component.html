@@ -131,17 +131,44 @@ div class="mt-4">
 </div>
 
 
-        <!-- File previews -->
-        <div class="flex flex-wrap justify-center gap-4 mt-6"
-             *ngIf="t.files?.length">
-             <h1 class="text-xl font-bold dark:text-white text-gray-900">Other Resources</h1>
-          <a *ngFor="let f of t.files" [href]="f" target="_blank"
-             class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700
-                    text-sm font-medium text-gray-900 dark:text-white
-                    hover:underline">
-            {{ f | slice:-20 }}<!-- last 20 chars -->
-          </a>
-        </div>
+<div *ngIf="t.files?.length" class="mt-8 flex flex-col items-center">
+  <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white text-center">
+    Other&nbsp;Resources
+  </h2>
+
+  <div class="grid gap-4 justity-center mx-auto
+              grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+
+    <a *ngFor="let f of t.files"
+       [href]="f" target="_blank"
+       class="group ">
+      <div class="aspect-square flex flex-col justify-center items-center
+                  rounded-lg bg-slate-100 dark:bg-slate-700
+                  shadow-sm group-hover:shadow-lg transition">
+
+        <span
+          class="absolute top-2 right-2 px-1.5 py-0.5 rounded
+                 text-[10px] font-semibold tracking-wide
+                 text-white"
+          [ngClass]="fileBadgeColour(f)">
+          {{ fileExt(f) | uppercase }}
+        </span>
+
+        <svg class="w-10 h-10 text-gray-500 group-hover:text-teal-600
+                    dark:text-gray-300 transition"
+             fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+
+        <p class="mt-3 w-24 px-2 py-1 text-center text-xs font-medium
+                   text-gray-800 dark:text-gray-100 truncate">
+          {{ fileName(f) }}
+        </p>
+      </div>
+    </a>
+  </div>
+</div>
 
         <!-- AUTHOR-ONLY upload -->
         <div *ngIf="isAuthor" class="mt-6">

@@ -245,4 +245,33 @@ export class TournamentDetailsComponent implements OnInit {
     await this.tourneySvc.deleteTournament(this.t!.tournamentId!);
     this.router.navigate(['/your-tournaments']);
   }
+  /* +++ utility to strip full URL/path → just “report.pdf” */
+  fileName(path: string): string {
+    return path.split('/').pop() ?? path;
+  }
+
+  /* +++ extension for badge / icon hint */
+  fileExt(path: string): string {
+    return (this.fileName(path).split('.').pop() ?? '').toLowerCase();
+  }
+
+  /* +++ dynamic Tailwind colour by extension */
+  fileBadgeColour(path: string): string {
+    switch (this.fileExt(path)) {
+      case 'pdf':
+        return 'bg-red-600';
+      case 'doc':
+      case 'docx':
+        return 'bg-blue-600';
+      case 'xls':
+      case 'xlsx':
+        return 'bg-emerald-600';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return 'bg-indigo-600';
+      default:
+        return 'bg-gray-500';
+    }
+  }
 }
