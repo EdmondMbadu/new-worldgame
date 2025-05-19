@@ -178,7 +178,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'tournament-win',
+    path: 'tournament-winner/:id',
     component: TournamentWinComponent,
     canActivate: [AuthGuard],
   },

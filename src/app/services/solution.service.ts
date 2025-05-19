@@ -645,4 +645,21 @@ export class SolutionService {
       )
       .valueChanges();
   }
+  // solution.service.ts
+  getSolutionsByIds(ids: string[]) {
+    if (!ids.length) return of([]);
+    /* Firestore ‘in’ supports ≤30 values – chunk if needed */
+    const chunks: string[][] = [];
+    for (let i = 0; i < ids.length; i += 30) chunks.push(ids.slice(i, i + 30));
+
+    return combineLatest(
+      chunks.map((chunk) =>
+        this.afs
+          .collection<Solution>('solutions', (ref) =>
+            ref.where('solutionId', 'in', chunk)
+          )
+          .valueChanges({ idField: 'solutionId' })
+      )
+    ).pipe(map((arr) => arr.flat()));
+  }
 }

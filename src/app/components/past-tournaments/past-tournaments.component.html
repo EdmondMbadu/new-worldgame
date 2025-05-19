@@ -45,7 +45,7 @@
       <div class="space-y-6" *ngIf="tournaments.length">
 
         <div *ngFor="let t of tournaments"
-             [routerLink]="['/tournament-details', t.tournamentId]"
+             [routerLink]="['/tournament-winner', t.tournamentId]"
              class="flex flex-col md:flex-row bg-white dark:bg-gray-800
                     rounded-lg overflow-hidden shadow-md hover:shadow-lg
                     transition cursor-pointer">
