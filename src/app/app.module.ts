@@ -123,6 +123,7 @@ import { TournamentWinComponent } from './components/tournament-win/tournament-w
 import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
 import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
 import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
+import { FeaturesComponent } from './blogs/features/features.component';
 
 @NgModule({
   declarations: [
@@ -222,6 +223,7 @@ import { TournamentManagementComponent } from './components/tournament-managemen
     YourTournamentsComponent,
     PastTournamentsComponent,
     TournamentManagementComponent,
+    FeaturesComponent,
   ],
   imports: [
     BrowserModule,

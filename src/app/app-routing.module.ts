@@ -78,6 +78,7 @@ import { TournamentWinComponent } from './components/tournament-win/tournament-w
 import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
 import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
 import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
+import { FeaturesComponent } from './blogs/features/features.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -259,10 +260,10 @@ const routes: Routes = [
     path: 'privacy',
     component: PrivacyComponent,
   },
-  // {
-  //   path: 'blogs',
-  //   component: BlogsComponent,
-  // },
+  {
+    path: 'blogs/features',
+    component: FeaturesComponent,
+  },
 
   {
     path: 'blogs/tournament',

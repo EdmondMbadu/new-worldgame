@@ -42,6 +42,9 @@ export class PlaygroundStepComponent {
   displayCongrats: boolean = false;
   etAl: string = '';
   strategyReview: string = '';
+  // Tooltip for Step-1 video
+  showVideoTooltip = false;
+  showVideoModal = false;
 
   displayPopups: boolean[] = [];
   newTitle: string = '';
@@ -217,6 +220,16 @@ export class PlaygroundStepComponent {
       this.strategyReview !== this.staticContentArray[0] &&
       this.strategyReviewSelected
     );
+  }
+
+  openVideo() {
+    this.showVideoModal = true;
+    document.body.style.overflow = 'hidden'; // prevent page scroll
+  }
+
+  closeVideo() {
+    this.showVideoModal = false;
+    document.body.style.overflow = ''; // restore scroll
   }
   updatePlayground(current: number) {
     // only save data if both are different.
