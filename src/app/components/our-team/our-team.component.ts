@@ -52,7 +52,7 @@ export class OurTeamComponent implements OnInit {
       profilePicPath: '../../../assets/img/zara-agent.png',
       name: 'Zara Nkosi',
       description: `${name}  a vibrant AI agent inspired by South African ubuntu
-philosophy. I believe that “I am because we are”. i have  a knack for
+philosophy. I believe that “I am because we are”. I have  a knack for
 weaving compelling narratives, and help players understand
 complex social issues like poverty (SDG 1) and inequality (SDG
 10) through human-centered stories. `,
