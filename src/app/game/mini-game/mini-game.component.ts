@@ -34,6 +34,7 @@ export class MiniGameComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    window.scrollTo(0, 0);
     this.scenarios = this.gameService.loadScenarios();
     this.currentScenario = this.scenarios[0];
   }
@@ -70,6 +71,7 @@ export class MiniGameComponent implements OnInit {
   }
 
   nextScenario() {
+    window.scrollTo(0, 0);
     this.currentStep++;
     if (this.currentStep < this.scenarios.length) {
       this.currentScenario = this.scenarios[this.currentStep];
