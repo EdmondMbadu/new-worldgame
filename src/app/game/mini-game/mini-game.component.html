@@ -1,8 +1,8 @@
 <!-- 🌑🌕 full-page wrapper -->
-<div class="min-h-screen px-4 pb-20 lg:px-8 dark:bg-slate-900 flex flex-col items-center font-inter">
+<div class="min-h-screen px-4 pb-8 lg:px-8 dark:bg-slate-900 flex flex-col items-center font-inter">
 
   <!-- ─── Progress ─── -->
-  <div class="w-full max-w-3xl mt-24" *ngIf="!gameOver">
+  <div class="w-full max-w-3xl mt-8" *ngIf="!gameOver">
     <div class="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-3 overflow-hidden">
       <!-- animated gradient bar -->
       <div
@@ -18,7 +18,7 @@
   <!-- ─── ACTIVE SCENARIO ─── -->
   <div
     *ngIf="!gameOver && currentScenario"
-    class="mt-8 w-full max-w-3xl backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl shadow-black/10 dark:shadow-black/40 px-6 py-8 sm:p-10 space-y-6 transition-all"
+    class="mt-4 w-full max-w-3xl backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl shadow-black/10 dark:shadow-black/40 px-6 py-8 sm:p-10 space-y-6 transition-all"
   >
     <h2 class="text-3xl md:text-4xl font-extrabold text-center text-teal-600 dark:text-teal-400">
       {{ currentScenario.title }}
