@@ -79,6 +79,7 @@ import { YourTournamentsComponent } from './components/your-tournaments/your-tou
 import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
 import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
 import { FeaturesComponent } from './blogs/features/features.component';
+import { MiniGameComponent } from './game/mini-game/mini-game.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -86,6 +87,7 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'signup', component: SignupComponent },
   { path: 'game', component: GameComponent },
+  { path: 'mini-game', component: MiniGameComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
   { path: 'discover', component: DiscoverComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
