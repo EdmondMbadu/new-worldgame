@@ -26,6 +26,9 @@ export class MiniGameComponent implements OnInit {
   userEmail = '';
   /* record totalSteps separately so it can be reset after filtering */
   totalSteps: number = 0;
+  // 🔽 add near other fields
+  feedbackText = '';
+  feedbackSent = false;
 
   emailSaved = false;
   leaderboard: LeaderRow[] = [];
@@ -39,25 +42,11 @@ export class MiniGameComponent implements OnInit {
   startChallenge() {
     this.showIntro = false;
   }
-  /* shrink to 5 scenarios */
+  /* ------------ lifecycle ------------ */
   ngOnInit() {
-    const all = this.gameService.loadScenarios(); // full library (17)
-
-    // randomly pick any 5 distinct scenarios
-    this.scenarios = this.randomPick(all, 5);
-
+    this.scenarios = this.gameService.loadScenarios(); // exactly the 4
     this.currentScenario = this.scenarios[0];
     this.totalSteps = this.scenarios.length;
-  }
-
-  /** Fisher–Yates shuffle, then grab first k */
-  private randomPick<T>(arr: T[], k: number): T[] {
-    const copy = [...arr]; // keep original intact
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]]; // swap
-    }
-    return copy.slice(0, k);
   }
 
   /* star helper used in template */
@@ -79,6 +68,17 @@ export class MiniGameComponent implements OnInit {
       this.score.equity +
       this.score.innovation
     );
+  }
+  // 🔽 new method
+  async submitFeedback() {
+    if (!this.feedbackText.trim()) return;
+    await this.gameService.saveFeedback({
+      email: this.userEmail || 'anon',
+      uid: this.auth.currentUser?.uid ?? null,
+      text: this.feedbackText.trim(),
+      sentAt: new Date().toISOString(),
+    });
+    this.feedbackSent = true;
   }
 
   chooseOption(i: number) {
