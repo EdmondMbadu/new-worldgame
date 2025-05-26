@@ -41,12 +41,25 @@ export class MiniGameComponent implements OnInit {
   }
   /* shrink to 5 scenarios */
   ngOnInit() {
-    this.scenarios = this.gameService.loadScenarios().filter(
-      (s) => ['sdg6', 'sdg1', 'sdg3', 'sdg7', 'sdg13'].includes(s.id) // Water, Poverty, Health, Energy, Climate
-    );
+    const all = this.gameService.loadScenarios(); // full library (17)
+
+    // randomly pick any 5 distinct scenarios
+    this.scenarios = this.randomPick(all, 5);
+
     this.currentScenario = this.scenarios[0];
     this.totalSteps = this.scenarios.length;
   }
+
+  /** Fisher–Yates shuffle, then grab first k */
+  private randomPick<T>(arr: T[], k: number): T[] {
+    const copy = [...arr]; // keep original intact
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]]; // swap
+    }
+    return copy.slice(0, k);
+  }
+
   /* star helper used in template */
   stars(n: number) {
     return '★'.repeat(n) + '☆'.repeat(5 - n);
