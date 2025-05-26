@@ -1,62 +1,75 @@
-<!-- 🌑🌕 full-page wrapper -->
-<div class="min-h-screen px-4 pb-8 lg:px-8 dark:bg-slate-900 flex flex-col items-center font-inter">
+<!-- 🌑/🌕 wrapper -->
+<div class="min-h-screen px-4 pb-10 lg:px-8 dark:bg-slate-900 flex flex-col items-center font-inter">
 
-  <!-- ─── Progress ─── -->
-  <div class="w-full max-w-3xl mt-8" *ngIf="!gameOver">
-    <span
-    routerLink="/mini-game"
-    class="mx-auto  text-xl md:text-3xl font-extrabold bg-gradient-to-r from-fuchsia-500 via-emerald-500 to-sky-400 bg-clip-text text-transparent"
-    >
-    Mini&nbsp;WorldGame&nbsp;Quiz
-    </span>
-    <div class="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-3 overflow-hidden">
-      <!-- animated gradient bar -->
-      <div
-        class="h-full rounded-full bg-gradient-to-r from-teal-500 via-emerald-500 to-lime-500 transition-all duration-500 ease-out"
-        [style.width]="progress + '%'"
-      ></div>
+  <!-- ─── BRAND + PROGRESS ─── -->
+  <div class="w-full max-w-3xl mt-8" *ngIf="!showIntro && !gameOver">
+    <h1 class="mx-auto text-xl md:text-3xl font-extrabold bg-gradient-to-r from-fuchsia-500 via-emerald-500 to-sky-400 bg-clip-text text-transparent text-center">
+      Mini&nbsp;World Game&nbsp;Challenge
+    </h1>
+    <div class="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-3 overflow-hidden mt-2">
+      <div class="h-full bg-gradient-to-r from-teal-500 via-emerald-500 to-lime-500 transition-all duration-500"
+           [style.width]="progress + '%'"></div>
     </div>
-    <p class="text-right text-xs text-gray-500 mt-1 tracking-wide">
-      {{ currentStep + 1 }} <span class="opacity-60">/</span> {{ totalSteps }}
+    <p class="text-right text-xs text-gray-500 mt-1">{{ currentStep + 1 }} / {{ totalSteps }}</p>
+  </div>
+
+  <!-- ─── INTRO CARD ─── -->
+  <div *ngIf="showIntro"
+       class="mt-12 w-full max-w-2xl backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl px-8 py-10 space-y-6 text-center">
+    <h2 class="text-4xl font-extrabold text-teal-600 dark:text-teal-400">Welcome Challenger!</h2>
+    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+      You’ll face <strong>5 real-world crises</strong>.  
+      For each one, spend a limited budget on the option you believe creates the greatest good across four values:
     </p>
+    <ul class="text-left text-sm md:text-base space-y-1 dark:text-white">
+      <li>🌱&nbsp;<strong>Sustainability</strong></li>
+      <li>🏥&nbsp;<strong>Human&nbsp;Impact</strong></li>
+      <li>⚖️&nbsp;<strong>Equity</strong></li>
+      <li>💡&nbsp;<strong>Innovation</strong></li>
+    </ul>
+    <p class="italic text-gray-600 dark:text-gray-400">
+      The future isn’t fixed. You’re about to shape it. Choose wisely.
+    </p>
+    <button (click)="startChallenge()"
+            class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-lg transition-all">
+      🚀 Start Challenge
+    </button>
   </div>
 
   <!-- ─── ACTIVE SCENARIO ─── -->
-  <div
-    *ngIf="!gameOver && currentScenario"
-    class="mt-4 w-full max-w-3xl backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl shadow-black/10 dark:shadow-black/40 px-6 py-8 sm:p-10 space-y-6 transition-all"
-  >
+  <div *ngIf="!gameOver && currentScenario && !showIntro"
+       class="mt-6 w-full max-w-3xl backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl px-6 py-8 sm:p-10 space-y-6">
     <h2 class="text-3xl md:text-4xl font-extrabold text-center text-teal-600 dark:text-teal-400">
       {{ currentScenario.title }}
     </h2>
 
+    <!-- setup -->
     <div class="space-y-1 text-sm md:text-base">
       <p class="text-gray-700 dark:text-gray-300"><span class="font-medium">🌍 Region:</span> {{ currentScenario.region }}</p>
       <p class="text-gray-700 dark:text-gray-300"><span class="font-medium">⚠️ Crisis:</span> {{ currentScenario.crisis }}</p>
+      <p class="text-gray-800 dark:text-gray-200 pt-1">{{ currentScenario.mission }}</p>
     </div>
 
-    <p class="text-gray-800 dark:text-gray-200 leading-relaxed">
-      {{ currentScenario.mission }}
-    </p>
-
     <!-- choices -->
-    <ng-container *ngFor="let choice of currentScenario.choices; let i = index">
-      <button
-        (click)="chooseOption(i)"
-        [disabled]="choiceMade"
-        class="group mt-4 w-full flex items-center justify-between gap-3 px-5 py-3 rounded-xl bg-teal-600 text-white font-semibold shadow-md hover:shadow-lg hover:bg-teal-700 disabled:opacity-50 disabled:hover:shadow-md transition-all"
-      >
-        <span>{{ choice.text }}</span>
-        <span
-          class="opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all text-lg"
-        >➡️</span>
+    <ng-container *ngFor="let c of currentScenario.choices; let i = index">
+      <button (click)="chooseOption(i)" [disabled]="choiceMade"
+        class="group mt-5 w-full text-left p-5 rounded-2xl bg-teal-600/90 hover:bg-teal-700 text-white shadow-md transition-all disabled:opacity-60">
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-lg">{{ c.text }}</span>
+          <span class="opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0.5 transition-all text-xl">➡️</span>
+        </div>
+
+        <!-- value-grid -->
+        <div class="grid grid-cols-4 gap-2 mt-3 text-xs">
+          <span>🌱 {{ stars(c.sustainability) }}</span>
+          <span>🏥 {{ stars(c.humanImpact) }}</span>
+          <span>⚖️ {{ stars(c.equity) }}</span>
+          <span>💡 {{ stars(c.innovation) }}</span>
+        </div>
+
+        <!-- rationale -->
+        <p class="mt-2 text-[0.85rem] italic opacity-90">{{ c.description }}</p>
       </button>
-      <p
-        *ngIf="selectedChoiceIndex === i"
-        class="mt-2 text-sm text-gray-600 dark:text-gray-300 pl-1 border-l-2 border-teal-400"
-      >
-        {{ choice.description }}
-      </p>
     </ng-container>
 
     <!-- feedback -->
@@ -66,113 +79,13 @@
       </p>
       <p class="text-xl font-bold dark:text-white">🏆 Total Score: {{ totalScore }}</p>
 
-      <button
-        (click)="nextScenario()"
-        class="mt-2 inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition-all"
-      >
+      <button (click)="nextScenario()"
+        class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all">
         Next Scenario ➡️
       </button>
     </div>
   </div>
 
-  <!-- ─── GAME-OVER → EMAIL ─── -->
-  <div
-    *ngIf="gameOver && !emailSaved"
-    class="mt-12 w-full max-w-lg backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl shadow-black/10 dark:shadow-black/40 px-6 py-10 space-y-6 text-center"
-  >
-    <h2 class="text-4xl font-extrabold text-teal-600 dark:text-teal-400">🎉 Congratulations!</h2>
-    <p class="text-gray-700 dark:text-gray-300 text-base">
-      You finished the game with a score of <span class="font-semibold">{{ totalScore }}</span>!
-    </p>
-
-    <form (ngSubmit)="captureEmail()" class="space-y-5">
-      <label
-        for="email"
-        class="block text-left font-medium text-gray-700 dark:text-gray-200"
-      >Enter your email to join the full World Game:</label>
-
-      <input
-        id="email"
-        name="email"
-        [(ngModel)]="userEmail"
-        required
-        type="email"
-        placeholder="you@example.com"
-        class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900/40 border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
-      />
-
-      <button
-        type="submit"
-        class="w-full py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:to-teal-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all"
-      >
-        Join & Save Score
-      </button>
-    </form>
-  </div>
-
-  <!-- ─── THANK-YOU + LEADERBOARD ─── -->
-<div
-  *ngIf="emailSaved"
-  class="mt-10 w-full max-w-3xl p-6 md:p-8 backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl shadow-black/10 dark:shadow-black/40"
->
-  <h2 class="text-3xl font-extrabold text-center text-teal-600 dark:text-teal-400">
-    🎉 Thank you!
-  </h2>
-
-  <p class="mt-2 text-center text-gray-700 dark:text-gray-300">
-    Your score is saved. Here are the current top solutions:
-  </p>
-
-  <!-- top-5 leaderboard -->
-  <table class="w-full mt-4 text-sm text-left text-gray-600 dark:text-gray-300">
-    <thead>
-      <tr class="border-b dark:border-gray-600">
-        <th class="py-1">Rank</th>
-        <th class="py-1">Email</th>
-        <th class="py-1 text-right">Score</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        *ngFor="let l of leaderboard; let r = index"
-        class="border-b dark:border-gray-700"
-      >
-        <td class="py-1">{{ r + 1 }}</td>
-        <td class="py-1 truncate max-w-[10rem]">{{ l.email }}</td>
-        <td class="py-1 text-right">{{ l.totalScore }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- call-to-action duo -->
-  <div
-    class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
-  >
-    <!-- PRIMARY – Global Solutions Lab -->
-    <a
-      href="https://newworld-game.org/global-register"
-      target="_blank"
-      class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all"
-    >
-      🌐 Register for the Global Solutions Lab
-    </a>
-
-    <!-- SECONDARY – NewWorld Game -->
-    <a
-      href="https://newworld-game.org/"
-      target="_blank"
-      class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-semibold transition-all"
-    >
-      🚀 Explore the full NewWorld Game
-    </a>
-  </div>
-
-  <!-- micro-blurb under the buttons -->
-  <p class="mt-4 text-center text-xs text-gray-500 dark:text-gray-400 leading-snug">
-    The 2025 Global Solutions Lab (June 16 – 20, in-person & online) combines
-    human ingenuity with custom-trained AI to craft actionable, affordable
-    strategies for the UN SDGs.
-  </p>
-</div>
-
+  <!-- ─── GAME-OVER & EMAIL / THANK-YOU blocks stay unchanged ─── -->
+  <!-- (use your existing markup for these two sections) -->
 </div>

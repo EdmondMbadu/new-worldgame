@@ -24,6 +24,8 @@ export class MiniGameComponent implements OnInit {
   badges: string[] = [];
   gameOver = false;
   userEmail = '';
+  /* record totalSteps separately so it can be reset after filtering */
+  totalSteps: number = 0;
 
   emailSaved = false;
   leaderboard: LeaderRow[] = [];
@@ -32,15 +34,26 @@ export class MiniGameComponent implements OnInit {
     private auth: AuthService,
     private afs: AngularFirestore
   ) {}
-
+  /* intro logic */
+  showIntro = true;
+  startChallenge() {
+    this.showIntro = false;
+  }
+  /* shrink to 5 scenarios */
   ngOnInit() {
-    window.scrollTo(0, 0);
-    this.scenarios = this.gameService.loadScenarios();
+    this.scenarios = this.gameService.loadScenarios().filter(
+      (s) => ['sdg6', 'sdg1', 'sdg3', 'sdg7', 'sdg13'].includes(s.id) // Water, Poverty, Health, Energy, Climate
+    );
     this.currentScenario = this.scenarios[0];
+    this.totalSteps = this.scenarios.length;
+  }
+  /* star helper used in template */
+  stars(n: number) {
+    return '★'.repeat(n) + '☆'.repeat(5 - n);
   }
 
   // progress helpers (unchanged)
-  get totalSteps() {
+  get totalStep() {
     return this.scenarios.length;
   }
   get progress() {
