@@ -3,6 +3,14 @@ import { Injectable } from '@angular/core';
 import { GameScenario } from '../models/tournament';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AuthService } from './auth.service';
+
+export interface FeedbackEntry {
+  feedbackId: string;
+  email: string;
+  uid: string | null;
+  text: string;
+  sentAt: string; // ISO
+}
 export interface GameResult {
   resultId: string;
   email: string;
@@ -15,14 +23,12 @@ export interface GameResult {
     innovation: number;
   };
   badges: string[];
-  completedAt: string; // ISO
+  completedAt: string;
 }
-export interface FeedbackEntry {
-  feedbackId: string;
-  email: string;
-  uid: string | null;
-  text: string;
-  sentAt: string; // ISO
+
+/* ── extend model locally with quote ── */
+export interface WGScenario extends GameScenario {
+  quote: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -48,8 +54,8 @@ export class GameService {
     return id;
   }
 
-  /** === FOUR OFFICIAL SCENARIOS === */
-  loadScenarios(): GameScenario[] {
+  /** OFFICIAL 4-scenario set (with exact wording) */
+  loadScenarios(): WGScenario[] {
     return [
       /* ───────── SDG 6 ───────── */
       {
@@ -58,9 +64,11 @@ export class GameService {
         title: 'Water Wars or Water Wins?',
         region: 'Sub-Saharan Africa',
         crisis:
-          '28 million people hit by historic drought; rivers trigger regional tension.',
+          'A massive drought has hit three nations, affecting 28 million people. Access to safe drinking water is dropping fast, and tensions are rising over shared river systems.',
         mission:
-          'Spend $10 million to deliver lasting water security and peace.',
+          'Your Mission: Choose how to spend $10 million in international aid to improve the water situation. You’re aiming for long-term impact, sustainability, and regional peace.',
+        quote:
+          'The future isn’t fixed. You’re about to shape it. Choose wisely.',
         postChoiceInsight: 'Water equity prevents conflict.',
         badges: ['Local Hero'],
         choices: [
@@ -71,8 +79,7 @@ export class GameService {
             humanImpact: 3,
             equity: 1,
             innovation: 1,
-            insight:
-              'Great for irrigation, but displaces 8 000 villagers and angers neighbours.',
+            insight: 'Control the river, control the drought.',
             badge: 'Infrastructure Strategist',
           },
           {
@@ -82,30 +89,27 @@ export class GameService {
             humanImpact: 4,
             equity: 4,
             innovation: 3,
-            insight:
-              'Clean water for 400 000 people; girls gain 3 hours/day for school.',
+            insight: 'Clean water, where it’s needed most.',
             badge: 'Water Warrior',
           },
           {
-            text: 'Run a global social-media awareness campaign.',
+            text: 'Run a global social media campaign to raise awareness.',
             description: '📢 Influence move.',
             sustainability: 1,
             humanImpact: 1,
             equity: 2,
             innovation: 3,
-            insight:
-              'Raised $2 M in donations, but water still missing on the ground.',
+            insight: 'Get the world talking—and donating.',
             badge: 'Awareness Advocate',
           },
           {
-            text: 'Launch a cross-border water-sharing agreement with citizen oversight.',
+            text: 'Launch a cross-border water-sharing agreement with citizen-led oversight.',
             description: '🕊️ Peace-building diplomacy.',
             sustainability: 3,
             humanImpact: 3,
             equity: 4,
             innovation: 4,
-            insight:
-              'Reduced conflict risk; transparent data sharing optimises flows for all.',
+            insight: 'Water isn’t a weapon. It’s a right.',
             badge: 'Diplomatic Innovator',
           },
         ],
@@ -118,15 +122,17 @@ export class GameService {
         title: 'Feeding the Future',
         region: 'South Asia',
         crisis:
-          'Rising heat & erratic rains drive crop failure and child malnutrition.',
+          'Farmers are facing record crop failures due to rising temperatures and erratic rainfall. Food prices are spiking, and malnutrition is rising, especially among children.',
         mission:
-          'Invest $8 million to cut hunger and strengthen local food systems.',
+          'Your Mission: Use $8 million to reduce hunger and support local food systems.',
+        quote:
+          'A full plate for one should never mean an empty plate for another.',
         postChoiceInsight: 'Healthy soils feed healthy futures.',
         badges: ['Food Justice Fighter'],
         choices: [
           {
-            text: 'Subsidize industrial farming & GMOs for high-yield crops.',
-            description: '“Go big or go home.”',
+            text: 'Subsidize industrial farming and GMOs for high-yield crops.',
+            description: 'Go big or go home. Feed more, faster.',
             sustainability: 2,
             humanImpact: 3,
             equity: 1,
@@ -136,25 +142,25 @@ export class GameService {
             badge: 'Yield Maximiser',
           },
           {
-            text: 'Launch permaculture training for 10 000 smallholder farmers.',
-            description: 'Grow smart. Heal the soil.',
+            text: 'Launch permaculture training for 10,000 smallholder farmers.',
+            description: 'Grow smart. Feed many. Heal the soil.',
             sustainability: 5,
             humanImpact: 4,
             equity: 4,
             innovation: 3,
             insight:
-              'Yields doubled; water use down 40 %. Community seed banks thrive.',
+              'Farmers adopting regenerative techniques doubled yields within two seasons.',
             badge: 'Regeneration Guru',
           },
           {
-            text: 'Create a school-lunch program using local crops.',
+            text: 'Create a school lunch program using local crops.',
             description: 'Nutrition today, brighter future tomorrow.',
             sustainability: 3,
             humanImpact: 4,
             equity: 4,
             innovation: 2,
             insight:
-              'Child malnutrition falls 18 %; demand jumpstarts village markets.',
+              'Child malnutrition falls; demand jump-starts village markets.',
             badge: 'Lunch Lifesaver',
           },
           {
@@ -178,35 +184,37 @@ export class GameService {
         title: 'Power Shift',
         region: 'Caribbean Islands',
         crisis:
-          'Hurricanes wreck diesel grids; blackouts and high prices plague residents.',
-        mission: 'Design energy systems that survive storms and cut carbon.',
+          'Hurricanes are destroying aging diesel power grids. Blackouts are common. Energy costs are soaring, especially for rural families.',
+        mission:
+          'Your Mission: Design a regional energy solution that works during disasters and reduces emissions.',
+        quote: 'What powers your world? Oil or sunlight?',
         postChoiceInsight: 'Resilience runs on renewables.',
         badges: ['Sunlight Strategist'],
         choices: [
           {
-            text: 'Rebuild diesel-powered grids with upgrades.',
+            text: 'Rebuild diesel-powered energy infrastructure with upgrades.',
             description: 'Familiar tech, reliable fuel.',
             sustainability: 1,
             humanImpact: 2,
             equity: 1,
             innovation: 1,
             insight:
-              'Power returns fast but locks islands into fossil imports.',
+              'Power returns quickly but locks islands into fossil imports.',
             badge: 'Diesel Defender',
           },
           {
-            text: 'Deploy micro-grid solar systems to 150 rural communities.',
-            description: 'Power to the people—literally.',
+            text: 'Deploy microgrid solar systems to 150 rural communities.',
+            description: 'Power to the people. Literally.',
             sustainability: 5,
             humanImpact: 4,
             equity: 4,
             innovation: 4,
             insight:
-              '300 000 residents keep lights on post-storm; bills drop 35 %.',
+              'Solar microgrids restored power to 300 000 residents—even after storms.',
             badge: 'Grid Guardian',
           },
           {
-            text: 'Public-private partnership for offshore wind + green jobs.',
+            text: 'Launch a public-private partnership for wind farms + jobs.',
             description: 'Clean energy, green jobs.',
             sustainability: 4,
             humanImpact: 3,
@@ -234,26 +242,28 @@ export class GameService {
         id: 'sdg13',
         sdg: 'SDG 13',
         title: 'Hot City, Cool Solutions',
-        region: 'Latin-American Mega-city',
+        region: 'Latin American Mega-city',
         crisis:
-          'Record heatwave kills dozens; poorest districts bake in concrete.',
-        mission: 'Cool the city, save lives, and prep for future extremes.',
+          'A record heatwave is causing deaths and shutting down schools. Concrete-heavy city design traps heat, and low-income neighborhoods are hit hardest.',
+        mission:
+          'Your Mission: Help city leaders cool the city, save lives, and prepare for more climate extremes.',
+        quote: 'This city is cooking. Can you turn down the heat?',
         postChoiceInsight: 'Shade saves lives.',
         badges: ['Climate Coolmaker'],
         choices: [
           {
-            text: 'Install air-conditioning in all public buildings.',
+            text: 'Install air conditioning in all public buildings.',
             description: 'Cool the buildings, cool the people.',
             sustainability: 1,
             humanImpact: 3,
             equity: 2,
             innovation: 1,
             insight:
-              'Temp relief but energy demand spikes; grid strains under load.',
+              'Immediate relief, but energy demand spikes and grids strain.',
             badge: 'AC Aficionado',
           },
           {
-            text: '“Green Roofs for All” grant program.',
+            text: 'Launch a ‘Green Roofs for All’ program.',
             description: 'Plants fight heat—and poverty.',
             sustainability: 4,
             humanImpact: 3,
@@ -263,7 +273,7 @@ export class GameService {
             badge: 'Roof Reviver',
           },
           {
-            text: 'Turn 50 blocks into shaded, car-free green corridors.',
+            text: 'Turn 50 city blocks into shaded, car-free green corridors.',
             description: 'Less asphalt. More life.',
             sustainability: 5,
             humanImpact: 4,
@@ -273,7 +283,7 @@ export class GameService {
             badge: 'Shade Shaper',
           },
           {
-            text: 'Build underground cooling centres for heat emergencies.',
+            text: 'Build underground cooling centers for heat emergencies.',
             description: 'Hide from the heat—but only if you’re nearby.',
             sustainability: 2,
             humanImpact: 3,

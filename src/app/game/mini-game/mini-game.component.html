@@ -44,11 +44,20 @@
     </h2>
 
     <!-- setup -->
-    <div class="space-y-1 text-sm md:text-base">
-      <p class="text-gray-700 dark:text-gray-300"><span class="font-medium">🌍 Region:</span> {{ currentScenario.region }}</p>
-      <p class="text-gray-700 dark:text-gray-300"><span class="font-medium">⚠️ Crisis:</span> {{ currentScenario.crisis }}</p>
-      <p class="text-gray-800 dark:text-gray-200 pt-1">{{ currentScenario.mission }}</p>
-    </div>
+<!-- ─── setup ─── -->
+      <div class="space-y-3 text-sm md:text-base">
+        <p class="text-gray-700 dark:text-gray-300">
+          <span class="font-medium">🌍 Region:</span> {{ currentScenario.region }}
+        </p>
+        <p class="text-gray-700 dark:text-gray-300">
+          <span class="font-medium">⚠️ Crisis:</span> {{ currentScenario.crisis }}
+        </p>
+        <p class="text-gray-800 dark:text-gray-200">{{ currentScenario.mission }}</p>
+        <p class="italic text-teal-600 dark:text-teal-300">
+          “{{ currentScenario.quote }}”
+        </p>
+      </div>
+
 
     <!-- choices -->
     <ng-container *ngFor="let c of currentScenario.choices; let i = index">

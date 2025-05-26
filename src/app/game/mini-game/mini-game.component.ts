@@ -1,6 +1,6 @@
 // mini-game.component.ts
 import { Component, OnInit } from '@angular/core';
-import { GameService } from 'src/app/services/game.service';
+import { GameService, WGScenario } from 'src/app/services/game.service';
 
 import { AuthService } from 'src/app/services/auth.service';
 import { GameScenario } from 'src/app/models/tournament';
@@ -14,8 +14,8 @@ export interface LeaderRow {
   templateUrl: './mini-game.component.html', // retains big template from prior message
 })
 export class MiniGameComponent implements OnInit {
-  scenarios: GameScenario[] = [];
-  currentScenario!: GameScenario;
+  scenarios: WGScenario[] = [];
+  currentScenario!: WGScenario;
   currentStep = 0;
   score = { sustainability: 0, humanImpact: 0, equity: 0, innovation: 0 };
   choiceMade = false;
