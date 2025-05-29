@@ -227,7 +227,7 @@ export class AuthService {
           if (res.user?.emailVerified == true) {
             // this is the redirect flow here.
             if (this.redirectUrl) {
-              this.router.navigate([this.redirectUrl]);
+              this.router.navigateByUrl(this.redirectUrl); // ← replace navigate()
               this.redirectUrl = '';
             } else {
               this.router.navigate(['/home']);

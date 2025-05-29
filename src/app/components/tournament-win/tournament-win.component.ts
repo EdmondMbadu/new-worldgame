@@ -19,6 +19,7 @@ export class TournamentWinComponent implements OnInit {
   otherSolutions: Solution[] = [];
   completedSolutions: Solution[] = [];
   showDetails = false;
+  isLoggedIn = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -30,6 +31,10 @@ export class TournamentWinComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigate(['/']);

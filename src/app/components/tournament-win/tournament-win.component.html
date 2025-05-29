@@ -1,14 +1,19 @@
 <div class="dark:bg-slate-900 bg-gray-100 min-h-screen ">
-  <app-navbar 
-    [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'" 
-    [showMoreOrLess]="true" 
-    [sideBarSmall]="true" 
-    [sideBarBig]="false" 
-    [email]="this.auth.currentUser.email"
-    [firstName]="this.auth.currentUser.firstName"
-    [lastName]="this.auth.currentUser.lastName"
-    [path]="'home'" 
-    [currentPageTournament]="true">
+  <!-- anonymous visitor -->
+  <app-navbar *ngIf="!isLoggedIn"></app-navbar>
+
+  <!-- authenticated visitor -->
+  <app-navbar
+      *ngIf="isLoggedIn"
+      [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
+      [showMoreOrLess]="true"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser?.email"
+      [firstName]="auth.currentUser?.firstName"
+      [lastName]="auth.currentUser?.lastName"
+      [path]="'home'"
+      [currentPageTournament]="true">
   </app-navbar>
 
   <section class="mt-20" *ngIf="tournament">

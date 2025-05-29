@@ -183,7 +183,7 @@ const routes: Routes = [
   {
     path: 'tournament-winner/:id',
     component: TournamentWinComponent,
-    canActivate: [AuthGuard],
+    // canActivate: [AuthGuard],
   },
   {
     path: 'create-tournament',
@@ -423,7 +423,12 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [
+    RouterModule.forRoot(routes, {
+      anchorScrolling: 'enabled', //  ← NEW
+      scrollPositionRestoration: 'enabled', //  (nice to have)
+    }),
+  ],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

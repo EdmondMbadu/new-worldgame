@@ -1,7 +1,12 @@
-<app-navbar [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'"  [sideBarSmall]="true" [sideBarBig]="false" ></app-navbar>
+  <app-navbar *ngIf="!isLoggedIn"></app-navbar>
 
-
-
+  <app-navbar *ngIf="isLoggedIn"
+              [sideBarSmall]="true" [sideBarBig]="false"
+              [email]="auth.currentUser?.email"
+              [firstName]="auth.currentUser?.firstName"
+              [lastName]="auth.currentUser?.lastName"
+              [path]="'home'">
+  </app-navbar>
 
 <main class="mt-20 pt-8 pb-16 lg:pt-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased">
     <div
@@ -296,7 +301,7 @@
                 </a>
             </div>
 
-            <section class="mt-6 not-format">
+            <section id="comments" class="mt-6 not-format">
                 <div class="flex justify-between items-center mb-6">
                     <h2  *ngIf="comments"class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Discussion ({{comments.length}})</h2>
                     <h2  *ngIf="!comments"class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Discussion (0)</h2>
@@ -568,4 +573,4 @@
 
 
 
-<app-chatbot></app-chatbot>
+<app-chatbot *ngIf="isLoggedIn"></app-chatbot>
