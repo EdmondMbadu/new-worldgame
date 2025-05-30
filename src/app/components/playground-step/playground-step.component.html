@@ -23,17 +23,41 @@
              <!-- <span  *ngIf="step.startsWith('Step III')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/solution-libraries">(Solutions Libraries)</a> </span>
             <span  *ngIf="step.startsWith('Step II:')"> <a target="_blank" class="text-blue-500 underline hover:text-blue-600" routerLink="/blogs/sample-preferred-states">(Sample Preferred States)</a> </span>  -->
         </h3>
-        <!-- Watch-video pill – only for Step I -->
-<!-- Watch-video trigger (Step I only) -->
-<!-- <div *ngIf="step.startsWith('Step I:')" class="inline-block mt-2">
-  <button
-    type="button"
-    (click)="openVideo()"
-    class="text-blue-500 underline hover:text-blue-600"
+  
+<!-- Single-avatar helper tile -->
+<div *ngIf="activeHelper as ai" class="mt-4">
+  <div
+    class="rounded-3xl p-6
+           bg-gradient-to-r
+           from-indigo-500/20 via-sky-500/15 to-emerald-500/20
+           shadow-lg flex flex-col items-center gap-4"
   >
-    Watch&nbsp;Step&nbsp;1&nbsp;Video
-  </button>
-</div> -->
+    <button
+      type="button"
+      (click)="openVideo()"
+      class="group flex flex-col items-center focus:outline-none"
+      aria-label="Play helper video"
+    >
+      <img
+        [src]="ai.avatarPath"
+        [alt]="ai.name"
+        class="h-32 w-32 rounded-full
+               ring-4 ring-indigo-300 dark:ring-indigo-500
+               group-hover:scale-110 transition-transform"
+      />
+      <span
+        class="mt-3 text-sm font-semibold
+               text-gray-900 dark:text-gray-100"
+      >
+      Step {{ stepIndex + 1 }} – Quick Video Guide
+     
+      </span>
+    </button>
+  </div>
+</div>
+
+
+
 
 <!-- Full-screen video modal -->
 <div
@@ -56,12 +80,13 @@
     </button>
 
     <!-- the video -->
-    <video
-      controls
-      autoplay
-      class="w-full h-auto rounded-lg shadow-lg"
-      src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2Fsofia-step-1.mp4?alt=media&token=26a466d1-7ae3-491e-9250-cdd388b4c7d0"
-    ></video>
+   <video
+  *ngIf="currentVideo"
+  controls
+  autoplay
+  class="w-full h-auto rounded-lg shadow-lg"
+  [src]="currentVideo"
+></video>
   </div>
 </div>
 
