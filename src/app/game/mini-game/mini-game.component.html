@@ -3,8 +3,9 @@
 
   <!-- ─── BRAND + PROGRESS ─── -->
   <div class="w-full max-w-3xl mt-8" *ngIf="!showIntro && !gameOver">
-    <h1 class="mx-auto text-xl md:text-3xl font-extrabold bg-gradient-to-r from-fuchsia-500 via-emerald-500 to-sky-400 bg-clip-text text-transparent text-center">
-      Mini&nbsp;World Game&nbsp;Challenge
+   <h1
+      class="mx-auto text-xl md:text-3xl font-extrabold bg-gradient-to-r from-fuchsia-500 via-emerald-500 to-sky-400 bg-clip-text text-transparent text-center">
+      Mini&nbsp;NewWorld&nbsp;Game&nbsp;Challenge
     </h1>
     <div class="w-full bg-gray-200/60 dark:bg-gray-700/60 rounded-full h-3 overflow-hidden mt-2">
       <div class="h-full bg-gradient-to-r from-teal-500 via-emerald-500 to-lime-500 transition-all duration-500"
@@ -16,10 +17,14 @@
   <!-- ─── INTRO CARD ─── -->
   <div *ngIf="showIntro"
        class="mt-12 w-full max-w-2xl backdrop-blur-xl bg-white/80 dark:bg-white/5 border border-white/30 dark:border-white/10 rounded-3xl shadow-xl px-8 py-10 space-y-6 text-center">
-    <h2 class="text-4xl font-extrabold text-teal-600 dark:text-teal-400">Welcome Challenger!</h2>
-    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+     <h2
+      class="text-3xl sm:text-4xl font-extrabold leading-tight text-teal-600 dark:text-teal-400">
+      Welcome <span class="whitespace-nowrap">NewWorld Game</span> Challenger!
+    </h2>
+     <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
       You’ll face <strong>5 real-world crises</strong>.  
-      For each one, spend a limited budget on the option you believe creates the greatest good across four values:
+      For each one, <strong>you will have a limited budget to spend</strong> on the option you believe
+      creates the greatest good across four values:
     </p>
     <ul class="text-left text-sm md:text-base space-y-1 dark:text-white">
       <li>🌱&nbsp;<strong>Sustainability</strong></li>
@@ -60,24 +65,37 @@
 
 
     <!-- choices -->
+  <!-- choices -->
     <ng-container *ngFor="let c of currentScenario.choices; let i = index">
       <button (click)="chooseOption(i)" [disabled]="choiceMade"
         class="group mt-5 w-full text-left p-5 rounded-2xl bg-teal-600/90 hover:bg-teal-700 text-white shadow-md transition-all disabled:opacity-60">
+
         <div class="flex justify-between items-center">
           <span class="font-semibold text-lg">{{ c.text }}</span>
           <span class="opacity-0 group-hover:opacity-100 transform group-hover:translate-x-0.5 transition-all text-xl">➡️</span>
         </div>
 
-        <!-- value-grid -->
-        <div class="grid grid-cols-4 gap-2 mt-3 text-xs">
-          <span>🌱 {{ stars(c.sustainability) }}</span>
-          <span>🏥 {{ stars(c.humanImpact) }}</span>
-          <span>⚖️ {{ stars(c.equity) }}</span>
-          <span>💡 {{ stars(c.innovation) }}</span>
+        <!-- value-grid with explicit labels -->
+        <div class="grid grid-cols-4 gap-2 mt-4 text-center">
+          <div class="flex flex-col items-center text-[0.7rem]">
+            <span class="font-semibold">Sustainable</span>
+            <span class="mt-0.5 text-xs">{{ stars(c.sustainability) }}</span>
+          </div>
+          <div class="flex flex-col items-center text-[0.7rem]">
+            <span class="font-semibold">Human&nbsp;Impact</span>
+            <span class="mt-0.5 text-xs">{{ stars(c.humanImpact) }}</span>
+          </div>
+          <div class="flex flex-col items-center text-[0.7rem]">
+            <span class="font-semibold">Equity</span>
+            <span class="mt-0.5 text-xs">{{ stars(c.equity) }}</span>
+          </div>
+          <div class="flex flex-col items-center text-[0.7rem]">
+            <span class="font-semibold">Resilient</span>
+            <span class="mt-0.5 text-xs">{{ stars(c.innovation) }}</span>
+          </div>
         </div>
 
-        <!-- rationale -->
-        <p class="mt-2 text-[0.85rem] italic opacity-90">{{ c.description }}</p>
+        <p class="mt-3 text-[0.85rem] italic opacity-90">{{ c.description }}</p>
       </button>
     </ng-container>
 
@@ -88,9 +106,10 @@
       </p>
       <p class="text-xl font-bold dark:text-white">🏆 Total Score: {{ totalScore }}</p>
 
-      <button (click)="nextScenario()"
+        <button
+        (click)="nextScenario()"
         class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all">
-        Next Scenario ➡️
+        {{ isLastScenario ? 'See how you did!' : 'Next&nbsp;Scenario&nbsp;➡️' }}
       </button>
     </div>
   </div>
@@ -106,20 +125,25 @@
     </p>
 
     <form (ngSubmit)="captureEmail()" class="space-y-5">
-      <label
-        for="email"
-        class="block text-left font-medium text-gray-700 dark:text-gray-200"
-      >Enter your email to join the full World Game:</label>
+     <label for="email" class="block text-left font-medium text-gray-700 dark:text-gray-200">
+        Enter your email to join the full&nbsp;NewWorld&nbsp;Game:
+      </label>
 
       <input
-        id="email"
-        name="email"
-        [(ngModel)]="userEmail"
-        required
-        type="email"
-        placeholder="you@example.com"
-        class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900/40 border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
-      />
+  id="email"
+  name="email"
+  [(ngModel)]="userEmail"
+  required
+  type="email"
+  placeholder="you@example.com"
+  class="w-full px-4 py-3 rounded-xl
+         bg-white dark:bg-slate-900/40
+         text-gray-900 dark:text-white
+         border border-gray-300 dark:border-slate-700
+         focus:ring-2 focus:ring-teal-500 focus:outline-none
+         placeholder-gray-400 dark:placeholder-gray-500"
+/>
+
 
       <button
         type="submit"
@@ -164,6 +188,9 @@
     </tbody>
   </table>
 
+  <p class="mt-6 text-center text-base font-medium text-teal-600 dark:text-teal-400">
+      Now it’s time to go from making a difference in a game to doing it in the real world. Pick one of the options below:
+    </p>
   <!-- call-to-action duo -->
   <div
     class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
@@ -203,23 +230,32 @@
     💡 Help Us Build the Next Challenge
   </h3>
 
-  <p class="text-gray-700 dark:text-gray-300 text-center text-sm md:text-base">
-    What global problem—or awesome idea—should we turn into a future Mini World Game scenario?
-    Drop a quick note below. 📝
-  </p>
+    <p class="text-gray-700 dark:text-gray-300 text-center text-sm md:text-base">
+      What global problem—or awesome idea—should we turn into a future Mini&nbsp;World&nbsp;Game scenario?
+      What <em>modifications</em> would you like to see in the present game?  
+      What additional options should be added to the Challenge?  
+      Drop a quick note below.
+    </p>
 
   <textarea
-    [(ngModel)]="feedbackText"
-    rows="4"
-    placeholder="e.g. Plastic-free oceans, AI for elder care, circular fashion..."
-    class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900/40 border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-teal-500 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500 resize-y"
-  ></textarea>
+  [(ngModel)]="feedbackText"
+  rows="4"
+  placeholder="e.g. Plastic-free oceans, AI for elder care, circular fashion…"
+  class="w-full px-4 py-3 rounded-xl
+         bg-white dark:bg-slate-900/40
+         text-gray-900 dark:text-white
+         border border-gray-300 dark:border-slate-700
+         focus:ring-2 focus:ring-teal-500 focus:outline-none
+         placeholder-gray-400 dark:placeholder-gray-500
+         resize-y">
+</textarea>
 
-  <button (click)="submitFeedback()"
-          class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-60"
-          [disabled]="!feedbackText.trim()">
-    Send Feedback
-  </button>
+
+    <button (click)="submitFeedback()"
+            class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-60"
+            [disabled]="!feedbackText.trim()">
+      Send&nbsp;Feedback
+    </button>
 </div>
 
 <!-- tiny thank-you -->

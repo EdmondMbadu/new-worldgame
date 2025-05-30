@@ -67,8 +67,7 @@ export class GameService {
           'A massive drought has hit three nations, affecting 28 million people. Access to safe drinking water is dropping fast, and tensions are rising over shared river systems.',
         mission:
           'Your Mission: Choose how to spend $10 million in international aid to improve the water situation. You’re aiming for long-term impact, sustainability, and regional peace.',
-        quote:
-          'The future isn’t fixed. You’re about to shape it. Choose wisely.',
+        quote: 'Play the Future. Solve the World.',
         postChoiceInsight: 'Water equity prevents conflict.',
         badges: ['Local Hero'],
         choices: [

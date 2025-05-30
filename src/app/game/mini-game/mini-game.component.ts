@@ -95,7 +95,9 @@ export class MiniGameComponent implements OnInit {
     this.unlockedBadge = c.badge;
     this.badges.push(c.badge);
   }
-
+  get isLastScenario(): boolean {
+    return this.currentStep === this.totalSteps - 1;
+  }
   nextScenario() {
     window.scrollTo(0, 0);
     this.currentStep++;
