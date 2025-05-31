@@ -80,6 +80,7 @@ import { PastTournamentsComponent } from './components/past-tournaments/past-tou
 import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
 import { FeaturesComponent } from './blogs/features/features.component';
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
+import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -265,6 +266,10 @@ const routes: Routes = [
   {
     path: 'blogs/features',
     component: FeaturesComponent,
+  },
+  {
+    path: 'blogs/nwg-steps',
+    component: NwgStepsComponent,
   },
 
   {

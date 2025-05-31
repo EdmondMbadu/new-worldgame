@@ -1,0 +1,106 @@
+<div class="dark:bg-slate-900 min-h-screen">
+  <!-- ▸ NAVBAR ------------------------------------------------------------ -->
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [hoveredManualPath]="'bg-gray-100 dark:bg-gray-700'"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      [path]="'home'"
+    ></app-navbar>
+  </div>
+
+  <!-- ▸ MAIN -------------------------------------------------------------- -->
+  <main
+    class="mt-20 pt-8 pb-16 lg:pt-20 lg:pb-24 bg-white dark:bg-gray-900 antialiased"
+  >
+    <div class="flex max-w-screen-xl mx-auto px-4">
+      <!-- ▸ TOC (desktop) -->
+      <nav
+        class="hidden lg:block w-60 mr-12 sticky top-32 self-start"
+        aria-label="Steps navigation"
+      >
+        <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+            <li *ngFor="let s of steps; index as i">
+                <a
+                href="#"
+                (click)="scrollTo('step-' + (i + 1)); $event.preventDefault()"
+                class="block px-3 py-2 rounded-lg hover:bg-gray-100 hover:dark:bg-slate-800"
+                >
+                {{ s }}
+                </a>
+            </li>
+        </ul>
+      </nav>
+
+      <!-- ▸ CONTENT ------------------------------------------------------- -->
+      <article
+        class="w-full max-w-3xl format format-sm sm:format-base lg:format-lg format-blue dark:format-invert"
+      >
+        <!-- Intro kept from your original page --------------------------- -->
+        <header class="mb-8 not-format">
+          <!-- (intro content unchanged – trim/expand as you wish) -->
+          <h1
+            class="mb-4 text-3xl lg:text-4xl font-extrabold leading-tight text-gray-900 dark:text-white"
+          >
+            Welcome to the NewWorld Game
+          </h1>
+          <!-- … Existing paragraphs / figure … -->
+        </header>
+
+        <!-- ▸ STEP SECTIONS --------------------------------------------- -->
+        <section
+          *ngFor="let block of stepBlocks; index as idx"
+          [attr.id]="'step-' + (idx + 1)"
+          class="mb-20 scroll-mt-24"
+        >
+          <!-- STEP HEADER -->
+          <div class="flex items-center space-x-4 mb-4">
+            <img
+              [src]="block.ai.avatarPath"
+              alt="{{ block.ai.name }}"
+              class="w-14 h-14 rounded-full ring-2 ring-blue-500 dark:ring-blue-400"
+            />
+            <div>
+              <h2
+                class="text-2xl lg:text-3xl font-extrabold text-gray-900 dark:text-white"
+              >
+                {{ block.title }}
+              </h2>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                Presented by {{ block.ai.name }}
+              </p>
+            </div>
+          </div>
+
+          <!-- STEP VIDEO -->
+          <figure class="mb-6">
+            <video
+              class="w-full rounded-xl shadow-lg"
+              controls
+              preload="none"
+              playsinline
+              [src]="block.ai.videoUrl"
+            ></video>
+          </figure>
+
+          <!-- AI INTRO -->
+          <p class="text-gray-900 dark:text-gray-200 mb-6">
+            {{ block.ai.intro }}
+          </p>
+
+          <!-- Divider -->
+          <hr class="border-gray-200 dark:border-gray-700" />
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <!-- ▸ FOOTER ----------------------------------------------------------- -->
+  <app-footer></app-footer>
+</div>

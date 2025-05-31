@@ -125,6 +125,7 @@ import { PastTournamentsComponent } from './components/past-tournaments/past-tou
 import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
 import { FeaturesComponent } from './blogs/features/features.component';
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
+import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
 
 @NgModule({
   declarations: [
@@ -226,6 +227,7 @@ import { MiniGameComponent } from './game/mini-game/mini-game.component';
     TournamentManagementComponent,
     FeaturesComponent,
     MiniGameComponent,
+    NwgStepsComponent,
   ],
   imports: [
     BrowserModule,
