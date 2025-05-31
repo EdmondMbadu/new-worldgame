@@ -52,7 +52,7 @@ export class NwgStepsComponent implements OnInit {
       name: 'Elena Volkov',
       intro: `I’m Elena, forged in Ukraine’s resilience; I excel in crisis management…`,
       videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=f5046a0f-e5dc-4da9-8a0b-9cb473e56a67',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=c1440e1e-4489-4987-b92d-0968cc91a98a',
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',

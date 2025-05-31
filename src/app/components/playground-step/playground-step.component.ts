@@ -113,7 +113,7 @@ export class PlaygroundStepComponent {
       intro: `I’m Elena, forged in the fire of Ukraine’s resilience and innovation. I excel in crisis management—helping players stay calm and act fast in emergencies like food insecurity (SDG 2) or health crises (SDG 3). I bring deep knowledge in renewable energy, guiding players to build smart, sustainable solutions like microgrids for off-grid communities (SDG 7). `,
       collectionPath: `users/${this.auth.currentUser.uid}/elena/`,
       videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=f5046a0f-e5dc-4da9-8a0b-9cb473e56a67',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=c1440e1e-4489-4987-b92d-0968cc91a98a',
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',
