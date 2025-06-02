@@ -96,6 +96,20 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       collectionPath: `users/${this.auth.currentUser.uid}/tane/`,
     },
     {
+      avatarPath: '../../../assets/img/marie-curie.jpg',
+      name: 'Marie Curie',
+      group: 'elder',
+      intro: `${name} Polish physicist and chemist who revolutionized the fields of medicine and radiology through her groundbreaking research on radioactivity.`,
+      collectionPath: `users/${this.auth.currentUser.uid}/marie/`,
+    },
+    {
+      avatarPath: '../../../assets/img/rachel-carlson.jpeg',
+      name: 'Rachel Carson',
+      group: 'elder',
+      intro: `${name} American marine biologist, writer, and conservationist who is often called the first woman environmentalist.`,
+      collectionPath: `users/${this.auth.currentUser.uid}/rachel/`,
+    },
+    {
       avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
       group: 'elder',
