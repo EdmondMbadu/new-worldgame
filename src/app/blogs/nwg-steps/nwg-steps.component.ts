@@ -45,14 +45,14 @@ export class NwgStepsComponent implements OnInit {
       name: 'Arjun Patel',
       intro: `I’m Arjun, thriving on jugaad—frugal innovation…`,
       videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step2.mp4?alt=media&token=359333b0-dbb9-4fbb-b675-c58365f637de',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step2.mp4?alt=media&token=ffad8efe-abd5-4197-9def-7935099e481d',
     },
     {
       avatarPath: '../../../assets/img/elena-agent.png',
       name: 'Elena Volkov',
       intro: `I’m Elena, forged in Ukraine’s resilience; I excel in crisis management…`,
       videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=c1440e1e-4489-4987-b92d-0968cc91a98a',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=98584ce3-b127-44a8-a374-2cc9ea812241',
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',

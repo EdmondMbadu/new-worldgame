@@ -104,7 +104,7 @@ export class PlaygroundStepComponent {
       intro: ` I am ${name} an AI agent inspired by India’s vibrant tech and social entrepreneurship scene. I thrive on finding smart solutions with limited resources. My strength lies in data analysis—I help players crunch numbers to tackle challenges like clean water access (SDG 6) or education gaps (SDG 4). I bring a knack for jugaad—that’s frugal innovation—finding creative, low-cost ways to repurpose local materials for sustainable infrastructure.  `,
       collectionPath: `users/${this.auth.currentUser.uid}/arjun/`,
       videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step2.mp4?alt=media&token=359333b0-dbb9-4fbb-b675-c58365f637de',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step2.mp4?alt=media&token=ffad8efe-abd5-4197-9def-7935099e481d',
     },
     {
       avatarPath: '../../../assets/img/elena-agent.png',
@@ -113,7 +113,7 @@ export class PlaygroundStepComponent {
       intro: `I’m Elena, forged in the fire of Ukraine’s resilience and innovation. I excel in crisis management—helping players stay calm and act fast in emergencies like food insecurity (SDG 2) or health crises (SDG 3). I bring deep knowledge in renewable energy, guiding players to build smart, sustainable solutions like microgrids for off-grid communities (SDG 7). `,
       collectionPath: `users/${this.auth.currentUser.uid}/elena/`,
       videoUrl:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=c1440e1e-4489-4987-b92d-0968cc91a98a',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FNWG-Step-3.mp4?alt=media&token=98584ce3-b127-44a8-a374-2cc9ea812241',
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',
