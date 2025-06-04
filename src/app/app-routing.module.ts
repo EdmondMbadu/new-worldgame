@@ -147,6 +147,12 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'challenge-discussion/:id',
+    component: FullDiscussionComponent,
+    canActivate: [AuthGuard], // keep this if you need it
+    data: { docPrefix: 'challengePages' },
+  },
+  {
     path: 'solution-details/:id',
     component: SolutionDetailsComponent,
     canActivate: [AuthGuard],

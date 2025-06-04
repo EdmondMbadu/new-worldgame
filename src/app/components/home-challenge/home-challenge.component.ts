@@ -55,6 +55,12 @@ export class HomeChallengeComponent {
 
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
+  showDiscussion = false;
+
+  // home-challenge.component.ts
+  goToChallengeDiscussion() {
+    this.router.navigate(['/challenge-discussion', this.challengePageId]);
+  }
 
   scrollToSolutions() {
     this.solutionsSection.nativeElement.scrollIntoView({

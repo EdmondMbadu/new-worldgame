@@ -234,6 +234,22 @@
         </div>
       </div>
     </section>
+
+  <!-- home-challenge.component.html -->
+<section class="mx-auto max-w-screen-xl py-6 px-4">
+  <!-- Discussion Card -->
+  <div (click)="goToChallengeDiscussion()"
+       class="mt-6 p-6 bg-teal-600 hover:bg-teal-700 text-white rounded-lg
+              shadow-lg cursor-pointer transition-colors duration-200">
+    <h3 class="text-xl font-semibold">
+      Go to Discussion – {{ heading }}
+    </h3>
+    <p class="text-sm opacity-90">
+      Join the conversation for this Challenge workspace
+    </p>
+  </div>
+</section>
+
 <!-- Some wrapping section, e.g. after Participants & Author Tools -->
 <section
   class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"

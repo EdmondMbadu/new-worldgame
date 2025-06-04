@@ -1,3 +1,5 @@
+import { Comment } from './solution';
+
 export class User {
   uid?: string;
   email?: string;
@@ -75,4 +77,5 @@ export class ChallengePage {
   authorId?: string;
   invitedUsers?: string[];
   restricted?: string;
+  discussion?: Comment[];
 }

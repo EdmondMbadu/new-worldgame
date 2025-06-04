@@ -28,6 +28,9 @@ export class FullDiscussionComponent
 {
   @Input() currentSolution: Solution = {};
   @Input() comments: Comment[] = [];
+  @Input() docPath = ''; // e.g. 'challengePages/xyz' or 'solutions/abc'
+  @Input() titleLabel = ''; // heading text like '#challenge-discussion'
+  @Input() hideNavbar = false;
 
   user: User = {};
   profilePic: string = '';
@@ -57,6 +60,30 @@ export class FullDiscussionComponent
   }
 
   ngOnInit(): void {
+    const prefix = this.activatedRoute.snapshot.data['docPrefix'];
+    const id = this.activatedRoute.snapshot.paramMap.get('id');
+    /* Hosted mode: we got a docPath – stream its data */
+    if (prefix && id) {
+      // ← we are on /challenge-discussion/…
+      this.docPath = `${prefix}/${id}`; // e.g. challengePages/xyz
+      this.titleLabel = '#challenge-discussion';
+    }
+    if (this.docPath) {
+      this.afs
+        .doc(this.docPath)
+        .valueChanges()
+        .subscribe((doc: any) => {
+          this.currentSolution = { title: this.titleLabel }; // for template
+          this.comments = (doc?.discussion || []).map((c: any) =>
+            !c.date || isNaN(Date.parse(c.date as string))
+              ? { ...c, date: undefined }
+              : c
+          );
+          this.scrollToBottom();
+        });
+      return; // skip the old “solution-id via route” code
+    }
+
     // scrool to bottom
     window.scrollTo(0, document.body.scrollHeight);
     // If you need the user’s profile pic
@@ -124,10 +151,15 @@ export class FullDiscussionComponent
     });
 
     // Save to Firestore
+    // const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
+    // this.afs
+    //   .doc<Solution>(`solutions/${this.currentSolution!.solutionId}`)
+    //   .set({ discussion: toSave }, { merge: true });
     const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
-    this.afs
-      .doc<Solution>(`solutions/${this.currentSolution!.solutionId}`)
-      .set({ discussion: toSave }, { merge: true });
+
+    const path =
+      this.docPath || `solutions/${this.currentSolution!.solutionId}`;
+    this.afs.doc(path).set({ discussion: toSave }, { merge: true });
   }
 
   // “Close” might navigate away or handle a different route
