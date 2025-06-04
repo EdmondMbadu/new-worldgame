@@ -78,4 +78,6 @@ export class ChallengePage {
   invitedUsers?: string[];
   restricted?: string;
   discussion?: Comment[];
+  zoomLink?: string; // NEW
+  chatNote?: string; // NEW  (instructions / text-chat info)
 }

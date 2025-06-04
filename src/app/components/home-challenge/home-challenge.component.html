@@ -159,6 +159,17 @@
                 </svg>
                 Add Participant
               </button>
+              <button class="flex items-center px-4 py-2 text-sm font-medium text-white
+               bg-purple-600 rounded hover:bg-purple-700"
+                      (click)="toggle('showEditLinks')">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                      viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 4v16m8-8H4" />
+                </svg>
+                Edit Video / Chat Links
+                </button>
+
 
               <!-- Remove Participant -->
               <button
@@ -256,43 +267,47 @@
 >
   <!-- Possibly other content like participants list / author tools here -->
 
-  <!-- Always-Open Google Meet Link (for everyone) -->
-  <div
-    *ngIf="googleMeetLink"
-    class="mt-8 p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow"
-  >
+<!-- Video / Chat Links -->
+<div class="mt-8 space-y-6">
+
+  <!-- Google Meet Card -->
+  <div *ngIf="googleMeetLink"
+       class="p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow">
     <h2 class="text-lg font-semibold text-green-900 dark:text-green-100">
-      Always-Open Video Chat
+      Google Meet Room
     </h2>
     <p class="text-sm text-gray-600 dark:text-gray-300">
-      Join the ongoing Google Meet room for this challenge.
+      Always-open video chat for this challenge.
     </p>
-    <a
-      [href]="googleMeetLink"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="inline-flex items-center mt-4 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700 transition"
-    >
-      <svg
-        class="w-5 h-5 mr-2"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M15 10l4.553-2.276A1 1 0 0121
-             8.618v6.764a1 1 0 01-1.447.894L15
-             14M4 6h8a2 2 0 012 2v8a2 2 0
-             01-2 2H4a2 2 0 01-2-2V8a2 2
-             0 012-2z"
-        />
-      </svg>
-      Join Live Chat
+    <a [href]="googleMeetLink" target="_blank" rel="noopener"
+       class="inline-flex items-center mt-4 px-4 py-2 text-sm
+              font-medium text-white bg-green-600 rounded hover:bg-green-700">
+      Join Meet
     </a>
   </div>
+
+  <!-- Zoom Card -->
+  <div *ngIf="zoomLink"
+       class="p-6 bg-blue-50 dark:bg-blue-900 rounded-lg shadow">
+    <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100">
+      Zoom Room
+    </h2>
+    <a [href]="zoomLink" target="_blank" rel="noopener"
+       class="inline-flex items-center mt-2 px-4 py-2 text-sm
+              font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+      Join Zoom
+    </a>
+  </div>
+
+  <!-- Optional instructions -->
+  <div *ngIf="chatNote"
+       class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow text-sm
+              text-gray-700 dark:text-gray-300">
+    {{ chatNote }}
+  </div>
+
+</div>
+
 </section>
 
     <!-- Solutions & Category Filter Section -->
@@ -657,3 +672,66 @@
         <div class="mt-2 text-white">Processing your request...</div>
       </div>
     </div>
+
+<!-- EDIT LINKS MODAL -->
+<div *ngIf="showEditLinks"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+  <div class="relative w-full max-w-md px-4 py-8">
+    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+
+      <!-- Title -->
+      <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
+        Update Video / Chat Links
+      </h2>
+
+      <!-- Google Meet -->
+      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+        Google Meet URL
+      </label>
+      <input [(ngModel)]="googleMeetLink" type="url"
+             class="w-full mb-4 p-2 rounded border
+                    bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
+                    focus:outline-none focus:ring-2 focus:ring-teal-500
+                    dark:bg-gray-700 dark:border-gray-600
+                    dark:text-gray-100 dark:placeholder-gray-400">
+
+      <!-- Zoom -->
+      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+        Zoom URL
+      </label>
+      <input [(ngModel)]="zoomLink" type="url"
+             class="w-full mb-4 p-2 rounded border
+                    bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
+                    focus:outline-none focus:ring-2 focus:ring-teal-500
+                    dark:bg-gray-700 dark:border-gray-600
+                    dark:text-gray-100 dark:placeholder-gray-400">
+
+      <!-- Instructions -->
+      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+        Instructions / Chat Note
+      </label>
+      <textarea [(ngModel)]="chatNote" rows="3"
+                class="w-full mb-6 p-2 rounded border resize-none
+                       bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
+                       focus:outline-none focus:ring-2 focus:ring-teal-500
+                       dark:bg-gray-700 dark:border-gray-600
+                       dark:text-gray-100 dark:placeholder-gray-400"></textarea>
+
+      <!-- Buttons -->
+      <div class="flex justify-end space-x-3">
+        <button (click)="toggle('showEditLinks')"
+                class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600
+                       focus:outline-none focus:ring-2 focus:ring-gray-400">
+          Cancel
+        </button>
+
+        <button (click)="saveLinks()"
+                class="px-4 py-2 rounded bg-teal-700 text-white hover:bg-teal-800
+                       focus:outline-none focus:ring-2 focus:ring-teal-500">
+          Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

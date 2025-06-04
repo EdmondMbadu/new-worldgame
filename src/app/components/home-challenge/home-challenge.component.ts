@@ -52,6 +52,9 @@ export class HomeChallengeComponent {
   googleMeetLink: string = '';
   newParticipant: string = '';
   teamMemberToDelete: string = '';
+  zoomLink = '';
+  chatNote = '';
+  showEditLinks = false;
 
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
@@ -121,6 +124,12 @@ export class HomeChallengeComponent {
           this.googleMeetLink = this.challengePage.meetLink;
           console.log('Google Meet Link:', this.googleMeetLink);
         }
+        if (this.challengePage.zoomLink) {
+          this.zoomLink = this.challengePage.zoomLink;
+        }
+        if (this.challengePage.chatNote) {
+          this.chatNote = this.challengePage.chatNote;
+        }
 
         this.challenge
           .getThisUserChallenges(
@@ -150,6 +159,24 @@ export class HomeChallengeComponent {
     this.activeCategory = category;
     this.fetchChallenges(category);
     this.updateChallenges();
+  }
+  async saveLinks() {
+    try {
+      await this.afs.doc(`challengePages/${this.challengePageId}`).set(
+        {
+          meetLink: this.googleMeetLink || null,
+          zoomLink: this.zoomLink || null,
+          chatNote: this.chatNote?.trim() || null,
+        },
+        { merge: true }
+      );
+
+      this.toggle('showEditLinks');
+      alert('Links updated!');
+    } catch (err) {
+      console.error('Error updating links:', err);
+      alert('Could not save links—try again.');
+    }
   }
 
   fetchChallenges(category: string) {
@@ -200,6 +227,7 @@ export class HomeChallengeComponent {
       | 'showAddChallenge'
       | 'showAddTeamMember'
       | 'showRemoveTeamMember'
+      | 'showEditLinks'
   ) {
     this[property] = !this[property];
   }
