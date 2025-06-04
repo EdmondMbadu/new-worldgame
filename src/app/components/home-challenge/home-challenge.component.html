@@ -66,6 +66,24 @@
 
         <!-- Participants List -->
         <div class="w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow">
+<div class="relative w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800
+            rounded-lg p-4 shadow">
+
+  <!-- badge -->
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2
+              flex items-center justify-center
+              w-12 h-12 rounded-full bg-violet-600 shadow-lg
+              ring-4 ring-white dark:ring-gray-900">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+         viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a4 4 0 00-3-3.87M9 
+               20H4v-2a4 4 0 013-3.87M15 7a4 
+               4 0 11-8 0 4 4 0 018 0zm6 4a2 
+               2 0 11-4 0 2 2 0 014 0z"/>
+    </svg>
+  </div>
+  </div>
           <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Participants
           </h2>
@@ -249,16 +267,31 @@
   <!-- home-challenge.component.html -->
 <section class="mx-auto max-w-screen-xl py-6 px-4">
   <!-- Discussion Card -->
-  <div (click)="goToChallengeDiscussion()"
-       class="mt-6 p-6 bg-teal-600 hover:bg-teal-700 text-white rounded-lg
-              shadow-lg cursor-pointer transition-colors duration-200">
-    <h3 class="text-xl font-semibold">
-      Go to Discussion – {{ heading }}
-    </h3>
-    <p class="text-sm opacity-90">
-      Join the conversation for this Challenge workspace
-    </p>
+ <div (click)="goToChallengeDiscussion()"
+     class="relative mt-6 p-6 bg-teal-600 hover:bg-teal-700 text-white
+            rounded-lg shadow-lg cursor-pointer transition-colors duration-200">
+
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2
+              flex items-center justify-center
+              w-12 h-12 rounded-full bg-teal-500 shadow-lg
+              ring-4 ring-white dark:ring-gray-900">
+    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+         viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M7 8h10M7 12h4m-2 8h6l4 4V6a2
+               2 0 00-2-2H6a2 2 0 00-2 2v12a2
+               2 0 002 2z"/>
+    </svg>
   </div>
+
+  <h3 class="pt-6 text-xl font-semibold">
+    Go to Discussion – {{ heading }}
+  </h3>
+  <p class="text-sm opacity-90">
+    Join the conversation for this workspace
+  </p>
+</div>
+
 </section>
 
 <!-- Some wrapping section, e.g. after Participants & Author Tools -->
@@ -271,11 +304,29 @@
 <div class="mt-8 space-y-6">
 
   <!-- Google Meet Card -->
-  <div *ngIf="googleMeetLink"
-       class="p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow">
-    <h2 class="text-lg font-semibold text-green-900 dark:text-green-100">
-      Google Meet Room
-    </h2>
+<div *ngIf="googleMeetLink"
+     class="relative p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow">
+
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2
+              flex items-center justify-center
+              w-12 h-12 rounded-full bg-green-600 shadow-lg
+              ring-4 ring-white dark:ring-gray-900">
+    <a  class [href]="googleMeetLink" target="_blank" rel="noopener">
+        <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 10l4.553-2.276A1 1 0 0121
+                    8.618v6.764a1 1 0 01-1.447.894L15
+                    14M4 6h8a2 2 0 012 2v8a2 2 0
+                    01-2 2H4a2 2 0 01-2-2V8a2 2
+                    0 012-2z"/>
+        </svg>
+    </a>
+  </div>
+
+  <h2 class="pt-6 text-lg font-semibold text-green-900 dark:text-green-100">
+    Google Meet Room
+  </h2>
     <p class="text-sm text-gray-600 dark:text-gray-300">
       Always-open video chat for this challenge.
     </p>
@@ -287,11 +338,26 @@
   </div>
 
   <!-- Zoom Card -->
-  <div *ngIf="zoomLink"
-       class="p-6 bg-blue-50 dark:bg-blue-900 rounded-lg shadow">
-    <h2 class="text-lg font-semibold text-blue-900 dark:text-blue-100">
-      Zoom Room
-    </h2>
+ <div *ngIf="zoomLink"
+     class="relative p-6 bg-blue-50 dark:bg-blue-900 rounded-lg shadow">
+
+  <div class="absolute -top-6 left-1/2 -translate-x-1/2
+              flex items-center justify-center
+              w-12 h-12 rounded-full bg-blue-600 shadow-lg
+              ring-4 ring-white dark:ring-gray-900">
+     <a class="cursor-pointer" [href]="zoomLink" target="_blank" rel="noopener">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 5a2 2 0 012-2h10a2 2 0
+                    012 2v14l-4-4H5a2 2 0 01-2-2z"/>
+          </svg>
+    </a>
+  </div>
+
+  <h2 class="pt-6 text-lg font-semibold text-blue-900 dark:text-blue-100">
+    Zoom Room
+  </h2>
     <a [href]="zoomLink" target="_blank" rel="noopener"
        class="inline-flex items-center mt-2 px-4 py-2 text-sm
               font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
@@ -338,6 +404,23 @@
           *ngFor="let t of titles; let i = index"
           class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 hover:shadow-lg transform transition duration-300 hover:scale-105"
         >
+
+                <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow
+                    p-4 hover:shadow-lg transform transition duration-300 hover:scale-105">
+
+          <div class="absolute -top-4 left-4
+                      flex items-center justify-center
+                      w-10 h-10 rounded-full bg-yellow-500 shadow-lg
+                      ring-4 ring-white dark:ring-gray-800">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                  stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 2a7 7 0 00-4 12v3a1 1 0
+                        001 1h6a1 1 0 001-1v-3a7 7 0
+                        00-4-12zm-2 18h4"/>
+            </svg>
+          </div>
+          </div>
           <app-challenge
             [ngStyle]="{'animation-delay': i * 100 + 'ms'}"
             [image]="challengeImages[i]"
