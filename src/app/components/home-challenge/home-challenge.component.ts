@@ -548,4 +548,37 @@ export class HomeChallengeComponent {
     }
     // }
   }
+  async deleteChallenge(challengeId: string, index: number) {
+    if (!confirm('Delete this challenge? This cannot be undone.')) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    try {
+      /* 1️⃣ delete the user-challenge document */
+      await this.afs.doc(`user-challenges/${challengeId}`).delete();
+
+      /* 2️⃣ (optional) delete the linked Solution doc */
+      await this.afs
+        .doc(`solutions/${challengeId}`)
+        .delete()
+        .catch(() => {});
+
+      /* 3️⃣ Remove from local arrays so the UI updates instantly */
+      this.ids.splice(index, 1);
+      this.titles.splice(index, 1);
+      this.descriptions.splice(index, 1);
+      this.challengeImages.splice(index, 1);
+
+      // If you also track counts per category, update them here.
+
+      alert('Challenge deleted.');
+    } catch (err) {
+      console.error('Error deleting challenge:', err);
+      alert('Could not delete challenge—try again.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
 }
