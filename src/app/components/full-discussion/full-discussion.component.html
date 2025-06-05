@@ -73,18 +73,20 @@
         <ng-container *ngFor="let comment of comments">
           <div class="flex items-start space-x-3">
             <!-- Avatar -->
-            <img
-              *ngIf="comment.profilePic"
-              [src]="comment.profilePic"
-              alt="User Avatar"
-              class="w-10 h-10 rounded-full object-cover"
-            />
-            <img
-              *ngIf="!comment.profilePic"
-              src="../../../assets/img/user.png"
-              alt="Default Avatar"
-              class="w-10 h-10 rounded-full bg-gray-500"
-            />
+        
+          <ng-container *ngIf="comment.profilePic; else letterAvatar">
+            <img [src]="comment.profilePic"
+                alt="{{ comment.authorName }}"
+                class="w-10 h-10 rounded-full object-cover" />
+          </ng-container>
+
+          <ng-template #letterAvatar>
+            <div class="w-10 h-10 rounded-full bg-indigo-500   <!-- pick any Tailwind colour -->
+                flex items-center justify-center
+                text-white font-semibold select-none">
+              {{ getInitial(comment.authorName) }}
+            </div>
+          </ng-template>
   
             <!-- Message content -->
             <div>

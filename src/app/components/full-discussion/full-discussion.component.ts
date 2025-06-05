@@ -246,4 +246,7 @@ Please choose a file under 5 MB.`);
       return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 underline">${url}</a>`;
     });
   }
+  getInitial(name: string = ''): string {
+    return (name.trim()[0] || '?').toUpperCase();
+  }
 }
