@@ -432,6 +432,18 @@
                         00-4-12zm-2 18h4"/>
             </svg>
           </div>
+          <!-- 🟡 move button -->
+          <button *ngIf="isAuthorPage"
+                  (click)="moveChallenge(ids[i], i)"
+                  class="absolute top-2 right-10 bg-yellow-500/90 hover:bg-yellow-600
+                        text-white p-1.5 rounded-full">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+
              <button *ngIf="isAuthorPage"
                   (click)="deleteChallenge(ids[i], i)"
                   class="absolute top-2 right-2 bg-red-600/90 hover:bg-red-700

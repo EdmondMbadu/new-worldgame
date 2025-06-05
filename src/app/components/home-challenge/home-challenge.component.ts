@@ -581,4 +581,49 @@ export class HomeChallengeComponent {
       this.isLoading = false;
     }
   }
+  async moveChallenge(challengeId: string, localIndex: number) {
+    // 1️⃣ Build a list of choices
+    const choices = [...this.categories]; // existing categories
+    const newCat = prompt(
+      'Move to which category?\n' +
+        choices.map((c, idx) => `${idx + 1}. ${c}`).join('\n') +
+        '\n\nOr type a new category name:'
+    );
+
+    if (!newCat) {
+      return;
+    } // user cancelled
+
+    // 2️⃣ Update Firestore
+    this.isLoading = true;
+    try {
+      await this.afs
+        .doc(`user-challenges/${challengeId}`)
+        .update({ category: newCat });
+
+      /* 3️⃣ Local UI updates */
+
+      // 3a remove from current lists
+      this.ids.splice(localIndex, 1);
+      this.titles.splice(localIndex, 1);
+      this.descriptions.splice(localIndex, 1);
+      this.challengeImages.splice(localIndex, 1);
+
+      // 3b if new category is brand-new, add it to the filter pills
+      if (!this.categories.includes(newCat)) {
+        this.categories.push(newCat);
+        this.categories.sort();
+      }
+
+      // 3c fetch challenges for the destination category so it shows up
+      await this.fetchChallenges(newCat);
+      this.activeCategory = newCat; // auto-switch view
+      alert('Challenge moved.');
+    } catch (err) {
+      console.error('Move failed:', err);
+      alert('Could not move challenge—try again.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
 }
