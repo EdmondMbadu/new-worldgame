@@ -93,10 +93,25 @@ export class Comment {
   likes?: string;
   dislikes?: string;
   profilePic?: string;
+  attachments?: Attachment[]; // NEW
+  linkPreview?: LinkPreview;
 }
 
 export class Roles {
   teamLeader?: string;
   facilitator?: string;
   factChecker?: string;
+}
+export interface Attachment {
+  url: string; // download URL in Storage
+  type: 'image' | 'pdf' | 'doc' | 'video' | 'other';
+  name: string; // original filename
+  thumb?: string; // optional thumbnail for videos
+}
+
+export interface LinkPreview {
+  url: string;
+  title: string;
+  description?: string;
+  image?: string; // og:image or snapshot
 }

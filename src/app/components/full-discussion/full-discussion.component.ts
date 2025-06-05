@@ -10,13 +10,19 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { ActivatedRoute, Router } from '@angular/router';
-import { comment } from 'postcss';
-import { Comment, Solution } from 'src/app/models/solution';
+import { Attachment, Comment, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+
+interface PendingPreview {
+  file: File;
+  url: string; // created with URL.createObjectURL
+  type: 'image' | 'other';
+}
 
 @Component({
   selector: 'app-full-discussion',
@@ -31,6 +37,9 @@ export class FullDiscussionComponent
   @Input() docPath = ''; // e.g. 'challengePages/xyz' or 'solutions/abc'
   @Input() titleLabel = ''; // heading text like '#challenge-discussion'
   @Input() hideNavbar = false;
+  pendingFiles: File[] = [];
+  previews: PendingPreview[] = []; // NEW
+  MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB in bytes
 
   user: User = {};
   profilePic: string = '';
@@ -51,7 +60,8 @@ export class FullDiscussionComponent
     private ngZone: NgZone,
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
-    private router: Router
+    private router: Router,
+    private storage: AngularFireStorage
   ) {
     this.user = this.auth.currentUser;
     if (this.user?.profilePicture?.downloadURL) {
@@ -125,15 +135,34 @@ export class FullDiscussionComponent
       chatbox.scrollTop = chatbox.scrollHeight;
     }
   }
+  onFileSelected(evt: Event) {
+    const list = (evt.target as HTMLInputElement).files;
+    if (!list?.length) return;
+    // optional HEIC → JPEG conversion on-client
+    for (const file of Array.from(list)) {
+      if (file.size > this.MAX_FILE_SIZE) {
+        alert(`❗️ ${file.name} is ${(file.size / 1024 / 1024).toFixed(1)} MB.
+Please choose a file under 5 MB.`);
+        continue; // skip this file
+      }
+      this.pendingFiles.push(file);
 
-  addToDiscussion() {
+      // build local preview
+      const url = URL.createObjectURL(file);
+      const type = file.type.startsWith('image/') ? 'image' : 'other';
+      this.previews.push({ file, url, type });
+    }
+    // reset <input> so the same file can be chosen again later
+    (evt.target as HTMLInputElement).value = '';
+  }
+  async addToDiscussion() {
     if (!this.comments) {
       this.comments = [];
     }
-    const content = this.prompt.trim();
-    if (!content) return;
+    const content = this.prompt.trim(); // may be empty
+    if (!content && !this.pendingFiles.length) return; // nothing at all
     const nowIso = new Date().toISOString();
-    this.comments.push({
+    const msg: Comment = {
       date: nowIso,
 
       authorId: this.auth.currentUser.uid,
@@ -142,19 +171,51 @@ export class FullDiscussionComponent
       profilePic: this.profilePic,
       // helper visible immediately in the UI
       displayTime: this.time.formatDateStringComment(nowIso),
-    });
+    };
+    if (this.pendingFiles.length) {
+      msg.attachments = [];
+      for (const file of this.pendingFiles) {
+        if (file.size > this.MAX_FILE_SIZE) {
+          console.warn(`${file.name} skipped (too large)`);
+          continue;
+        }
+        const id = this.afs.createId();
+        const path = `chatUploads/${this.currentSolution.solutionId}/${id}-${file.name}`;
+        const task = await this.storage.upload(path, file);
+        const url = await task.ref.getDownloadURL();
+
+        const att: Attachment = {
+          url,
+          name: file.name,
+          type: file.type.startsWith('image/')
+            ? 'image'
+            : file.type === 'application/pdf'
+            ? 'pdf'
+            : file.type.startsWith('video/')
+            ? 'video'
+            : file.type.includes('word')
+            ? 'doc'
+            : 'other',
+        };
+
+        // Generate thumbnail for videos (Cloud Function) – see §3
+        // if (att.type === 'video') att.thumb = await this.getVideoThumb(url, id);
+
+        msg.attachments.push(att);
+      }
+    }
+
+    this.comments.push(msg);
 
     // Clear the prompt & scroll
+    this.previews.forEach((p) => URL.revokeObjectURL(p.url));
+    this.previews = [];
+    this.pendingFiles = [];
     this.prompt = '';
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => this.scrollToBottom(), 0);
     });
 
-    // Save to Firestore
-    // const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
-    // this.afs
-    //   .doc<Solution>(`solutions/${this.currentSolution!.solutionId}`)
-    //   .set({ discussion: toSave }, { merge: true });
     const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
 
     const path =
@@ -167,6 +228,11 @@ export class FullDiscussionComponent
     // example: navigate away, or hide overlay, or do something else
     this.router.navigate(['/dashboard', this.id]);
     console.log('Closed the full-screen chat');
+  }
+  removePreview(index: number) {
+    URL.revokeObjectURL(this.previews[index].url);
+    this.previews.splice(index, 1);
+    this.pendingFiles.splice(index, 1);
   }
 
   ngOnDestroy(): void {
