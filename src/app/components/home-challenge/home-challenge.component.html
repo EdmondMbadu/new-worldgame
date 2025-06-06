@@ -357,12 +357,15 @@
               w-12 h-12 rounded-full bg-blue-600 shadow-lg
               ring-4 ring-white dark:ring-gray-900">
      <a class="cursor-pointer" [href]="zoomLink" target="_blank" rel="noopener">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+          <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
               viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 5a2 2 0 012-2h10a2 2 0
-                    012 2v14l-4-4H5a2 2 0 01-2-2z"/>
-          </svg>
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 10l4.553-2.276A1 1 0 0121
+                    8.618v6.764a1 1 0 01-1.447.894L15
+                    14M4 6h8a2 2 0 012 2v8a2 2 0
+                    01-2 2H4a2 2 0 01-2-2V8a2 2
+                    0 012-2z"/>
+        </svg>
     </a>
   </div>
 
@@ -372,7 +375,16 @@
     <a [href]="zoomLink" target="_blank" rel="noopener"
        class="inline-flex items-center mt-2 px-4 py-2 text-sm
               font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
-      Join Zoom
+              <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M15 10l4.553-2.276A1 1 0 0121
+                    8.618v6.764a1 1 0 01-1.447.894L15
+                    14M4 6h8a2 2 0 012 2v8a2 2 0
+                    01-2 2H4a2 2 0 01-2-2V8a2 2
+                    0 012-2z"/>
+        </svg>
+     <span class="mx-2">Join Zoom</span>
     </a>
   </div>
 
