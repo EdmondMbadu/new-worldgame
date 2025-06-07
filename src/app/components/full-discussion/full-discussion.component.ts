@@ -5,6 +5,8 @@ import {
   AfterViewChecked,
   OnDestroy,
   NgZone,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import {
   AngularFirestore,
@@ -40,6 +42,11 @@ export class FullDiscussionComponent
   pendingFiles: File[] = [];
   previews: PendingPreview[] = []; // NEW
   MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB in bytes
+  @ViewChild('notifyAudio', { static: true })
+  notifyAudio!: ElementRef<HTMLAudioElement>;
+
+  private firstSnapshot = true; // skip sound on initial load
+  private lastMsgIso = ''; // ISO string of last message shown
 
   user: User = {};
   profilePic: string = '';
@@ -89,6 +96,12 @@ export class FullDiscussionComponent
               ? { ...c, date: undefined }
               : c
           );
+          const latest = this.comments.at(-1);
+          if (latest?.date && latest.date !== this.lastMsgIso) {
+            if (!this.firstSnapshot) this.playPing(); // skip very first batch
+            this.lastMsgIso = latest.date;
+          }
+          this.firstSnapshot = false;
           this.scrollToBottom();
         });
       return; // skip the old “solution-id via route” code
@@ -118,6 +131,11 @@ export class FullDiscussionComponent
       });
       this.hasScrolled = false;
     });
+  }
+  private playPing() {
+    const audio = this.notifyAudio.nativeElement;
+    audio.currentTime = 0; // rewind in case it’s still playing
+    audio.play().catch(() => {}); // ignore autoplay blocking in some browsers
   }
 
   ngAfterViewChecked() {
@@ -217,7 +235,8 @@ Please choose a file under 5 MB.`);
     });
 
     const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
-
+    // play ping before adding message
+    this.playPing;
     const path =
       this.docPath || `solutions/${this.currentSolution!.solutionId}`;
     this.afs.doc(path).set({ discussion: toSave }, { merge: true });
