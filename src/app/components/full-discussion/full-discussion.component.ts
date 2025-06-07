@@ -44,6 +44,7 @@ export class FullDiscussionComponent
   MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB in bytes
   @ViewChild('notifyAudio', { static: true })
   notifyAudio!: ElementRef<HTMLAudioElement>;
+  @ViewChild('bottomAnchor') bottomAnchor!: ElementRef<HTMLDivElement>;
 
   private firstSnapshot = true; // skip sound on initial load
   private lastMsgIso = ''; // ISO string of last message shown
@@ -147,12 +148,13 @@ export class FullDiscussionComponent
     }
   }
 
-  scrollToBottom(): void {
-    const chatbox = document.getElementById('chatboxDiscussion');
-    if (chatbox) {
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
+  private scrollToBottom(): void {
+    // use rAF so it executes immediately after the current paint
+    requestAnimationFrame(() => {
+      this.bottomAnchor?.nativeElement.scrollIntoView({ behavior: 'auto' });
+    });
   }
+
   onFileSelected(evt: Event) {
     const list = (evt.target as HTMLInputElement).files;
     if (!list?.length) return;
@@ -236,7 +238,7 @@ Please choose a file under 5 MB.`);
 
     const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
     // play ping before adding message
-    this.playPing;
+    this.playPing();
     const path =
       this.docPath || `solutions/${this.currentSolution!.solutionId}`;
     this.afs.doc(path).set({ discussion: toSave }, { merge: true });
