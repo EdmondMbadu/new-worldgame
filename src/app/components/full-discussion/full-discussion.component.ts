@@ -84,14 +84,12 @@ export class FullDiscussionComponent
     if (prefix && id) {
       // ← we are on /challenge-discussion/…
       this.docPath = `${prefix}/${id}`; // e.g. challengePages/xyz
-      this.titleLabel = '#challenge-discussion';
     }
     if (this.docPath) {
       this.afs
         .doc(this.docPath)
         .valueChanges()
         .subscribe((doc: any) => {
-          this.currentSolution = { title: this.titleLabel }; // for template
           this.comments = (doc?.discussion || []).map((c: any) =>
             !c.date || isNaN(Date.parse(c.date as string))
               ? { ...c, date: undefined }
@@ -104,6 +102,12 @@ export class FullDiscussionComponent
           }
           this.firstSnapshot = false;
           this.scrollToBottom();
+          const qpTitle =
+            this.activatedRoute.snapshot.queryParamMap.get('title');
+          if (qpTitle) {
+            // <- title was provided
+            this.currentSolution.title = qpTitle; // shown in the template
+          }
         });
       return; // skip the old “solution-id via route” code
     }

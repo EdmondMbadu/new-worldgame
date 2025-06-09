@@ -62,7 +62,10 @@ export class HomeChallengeComponent {
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
-    this.router.navigate(['/challenge-discussion', this.challengePageId]);
+    this.router.navigate(
+      ['/challenge-discussion', this.challengePageId],
+      { queryParams: { title: this.heading } } // ⬅️ add this
+    );
   }
 
   scrollToSolutions() {
