@@ -62,10 +62,12 @@ export class HomeChallengeComponent {
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
-    this.router.navigate(
-      ['/challenge-discussion', this.challengePageId],
-      { queryParams: { title: this.heading } } // ⬅️ add this
-    );
+    this.router.navigate(['/challenge-discussion', this.challengePageId], {
+      queryParams: {
+        title: this.heading, // already added
+        meet: this.googleMeetLink || this.zoomLink || '', // NEW
+      },
+    });
   }
 
   scrollToSolutions() {

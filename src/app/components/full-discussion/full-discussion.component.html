@@ -38,12 +38,21 @@
   
         <!-- Right side: actions (Join call, Close, etc.) -->
         <div class="flex items-center space-x-2">
-          <a
-            routerLink="/video-call/{{ currentSolution.solutionId }}"
-            class="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md text-sm font-medium text-white"
-          >
+                  <a *ngIf="meetingUrl; else defaultCall"
+          [href]="meetingUrl" target="_blank" rel="noopener"
+          class="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md
+                  text-sm font-medium text-white">
+          Join Video Call
+        </a>
+
+        <ng-template #defaultCall>
+          <!-- old behaviour if no link was passed -->
+          <a routerLink="/video-call/{{ currentSolution.solutionId }}"
+            class="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md
+                    text-sm font-medium text-white">
             Join Video Call
           </a>
+        </ng-template>
           <button
             (click)="endChat()"
             class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm text-white"

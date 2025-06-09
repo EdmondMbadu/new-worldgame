@@ -53,6 +53,7 @@ export class FullDiscussionComponent
   profilePic: string = '';
   prompt = '';
   id: any;
+  meetingUrl = ''; // <- add at class level
   // currentSolution: Solution = {};
   introMessage = `
     Welcome to the team discussion chat. You can use the following resource for more advanced prompts
@@ -102,8 +103,12 @@ export class FullDiscussionComponent
           }
           this.firstSnapshot = false;
           this.scrollToBottom();
-          const qpTitle =
-            this.activatedRoute.snapshot.queryParamMap.get('title');
+          const qp = this.activatedRoute.snapshot.queryParamMap;
+          const qpTitle = qp.get('title');
+          if (qpTitle) this.currentSolution.title = qpTitle;
+
+          const qpMeet = qp.get('meet'); // NEW
+          if (qpMeet) this.meetingUrl = qpMeet; // store it
           if (qpTitle) {
             // <- title was provided
             this.currentSolution.title = qpTitle; // shown in the template
