@@ -80,11 +80,12 @@ export class FullDiscussionComponent
 
   ngOnInit(): void {
     const prefix = this.activatedRoute.snapshot.data['docPrefix'];
-    const id = this.activatedRoute.snapshot.paramMap.get('id');
+    // const id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.id = this.activatedRoute.snapshot.paramMap.get('id');
     /* Hosted mode: we got a docPath – stream its data */
-    if (prefix && id) {
+    if (prefix && this.id) {
       // ← we are on /challenge-discussion/…
-      this.docPath = `${prefix}/${id}`; // e.g. challengePages/xyz
+      this.docPath = `${prefix}/${this.id}`; // e.g. challengePages/xyz
     }
     if (this.docPath) {
       this.afs
@@ -123,7 +124,7 @@ export class FullDiscussionComponent
     if (this.user?.profilePicture?.downloadURL) {
       this.profilePic = this.user.profilePicture.downloadURL;
     }
-    this.id = this.activatedRoute.snapshot.paramMap.get('id');
+
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
       this.comments = (data?.discussion || []).map((c: any) => {
@@ -256,7 +257,13 @@ Please choose a file under 5 MB.`);
   // “Close” might navigate away or handle a different route
   endChat() {
     // example: navigate away, or hide overlay, or do something else
-    this.router.navigate(['/dashboard', this.id]);
+
+    if (this.docPath) {
+      this.router.navigate(['/home-challenge', this.id]);
+    } else {
+      this.router.navigate(['/dashboard', this.id]);
+    }
+
     console.log('Closed the full-screen chat');
   }
   removePreview(index: number) {
