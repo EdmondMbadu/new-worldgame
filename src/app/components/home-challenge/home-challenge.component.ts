@@ -55,6 +55,9 @@ export class HomeChallengeComponent {
   zoomLink = '';
   chatNote = '';
   showEditLinks = false;
+  scheduleTitle = ''; // card heading
+  schedulePdfLink = ''; // public URL of the PDF
+  showEditSchedule = false; // modal flag
 
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
@@ -134,6 +137,12 @@ export class HomeChallengeComponent {
         }
         if (this.challengePage.chatNote) {
           this.chatNote = this.challengePage.chatNote;
+        }
+        if (this.challengePage.scheduleTitle) {
+          this.scheduleTitle = this.challengePage.scheduleTitle;
+        }
+        if (this.challengePage.schedulePdfLink) {
+          this.schedulePdfLink = this.challengePage.schedulePdfLink;
         }
 
         this.challenge
@@ -233,8 +242,26 @@ export class HomeChallengeComponent {
       | 'showAddTeamMember'
       | 'showRemoveTeamMember'
       | 'showEditLinks'
+      | 'showEditSchedule'
   ) {
     this[property] = !this[property];
+  }
+  /* ──── SAVE SCHEDULE TO FIRESTORE ──── */
+  async saveSchedule() {
+    try {
+      await this.afs.doc(`challengePages/${this.challengePageId}`).set(
+        {
+          scheduleTitle: this.scheduleTitle?.trim() || null,
+          schedulePdfLink: this.schedulePdfLink?.trim() || null,
+        },
+        { merge: true }
+      );
+      this.toggle('showEditSchedule');
+      alert('Schedule updated!');
+    } catch (err) {
+      console.error('Error updating schedule:', err);
+      alert('Could not save schedule—try again.');
+    }
   }
   async addParticipant() {
     if (!this.newParticipant && this.data.isValidEmail(this.newParticipant)) {

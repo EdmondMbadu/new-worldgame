@@ -80,4 +80,6 @@ export class ChallengePage {
   discussion?: Comment[];
   zoomLink?: string; // NEW
   chatNote?: string; // NEW  (instructions / text-chat info)
+  scheduleTitle?: string;
+  schedulePdfLink?: string;
 }
