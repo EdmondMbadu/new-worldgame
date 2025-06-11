@@ -46,6 +46,9 @@ export class FullDiscussionComponent
   notifyAudio!: ElementRef<HTMLAudioElement>;
   @ViewChild('bottomAnchor') bottomAnchor!: ElementRef<HTMLDivElement>;
 
+  editingId: string | null = null; // holds ISO date (acts as unique id)
+  editingContent = '';
+
   private firstSnapshot = true; // skip sound on initial load
   private lastMsgIso = ''; // ISO string of last message shown
 
@@ -285,5 +288,40 @@ Please choose a file under 5 MB.`);
   }
   getInitial(name: string = ''): string {
     return (name.trim()[0] || '?').toUpperCase();
+  }
+
+  /** --- Methods --- */
+  startEdit(c: Comment) {
+    this.editingId = c.date!; // use ISO date as id
+    this.editingContent = c.content ?? '';
+    /* optional: scroll the textarea into view */
+  }
+
+  cancelEdit() {
+    this.editingId = null;
+    this.editingContent = '';
+  }
+
+  async saveEdit(c: Comment) {
+    if (!this.editingContent.trim()) return; // no empty messages
+    c.content = this.editingContent.trim();
+    this.editingId = null;
+    this.editingContent = '';
+
+    await this.syncDiscussion(); // reuse helper below
+  }
+
+  async deleteComment(c: Comment) {
+    if (!confirm('Delete this message?')) return;
+    this.comments = this.comments.filter((m) => m !== c);
+    await this.syncDiscussion();
+  }
+
+  /** --- helper: update Firestore once --- */
+  private async syncDiscussion() {
+    const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
+    const path =
+      this.docPath || `solutions/${this.currentSolution!.solutionId}`;
+    await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
   }
 }
