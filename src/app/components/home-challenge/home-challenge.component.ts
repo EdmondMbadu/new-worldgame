@@ -171,9 +171,18 @@ export class HomeChallengeComponent {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
   async setActiveCategory(category: string) {
+    if (this.activeCategory === category) {
+      return;
+    } // noop if already active
     this.activeCategory = category;
+
+    // If this category is already in memory, paint it instantly (no flicker)
+    if (this.challenges[category]) {
+      this.updateChallenges();
+    }
+
+    // Always kick off (re)fetch—will refresh data & UI when query returns
     this.fetchChallenges(category);
-    this.updateChallenges();
   }
   async saveLinks() {
     try {
@@ -223,6 +232,10 @@ export class HomeChallengeComponent {
 
   updateChallenges(): void {
     const categoryData = this.challenges[this.activeCategory];
+    // ⬅️ NEW – if we haven’t fetched this category yet, don’t blank the UI
+    if (!categoryData) {
+      return;
+    }
     if (!categoryData) {
       console.warn(`No challenges found for category: ${this.activeCategory}`);
       this.titles = [];

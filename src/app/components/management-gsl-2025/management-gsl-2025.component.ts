@@ -32,6 +32,7 @@ export class ManagementGsl2025Component implements OnInit {
   paymentSummary = { totalPaid: 0, averagePaid: 0 };
   summaryByOccupation: { [key: string]: number } = {};
   dropdownOpen = false;
+  summaryByFocusTopic: { [key: string]: number } = {};
   constructor(
     public auth: AuthService,
     private data: DataService,
@@ -121,6 +122,10 @@ export class ManagementGsl2025Component implements OnInit {
         this.summaryByOccupation[occupation] = 0;
       }
       this.summaryByOccupation[occupation]++;
+      /* 5) NEW — Focus Topic Summary */
+      const focus = user.focusTopic ? user.focusTopic : 'Unspecified';
+      this.summaryByFocusTopic[focus] =
+        (this.summaryByFocusTopic[focus] || 0) + 1;
     }
 
     // Calculate Payment Summaries
