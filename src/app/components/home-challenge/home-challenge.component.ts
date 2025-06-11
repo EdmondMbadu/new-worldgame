@@ -34,6 +34,7 @@ export class HomeChallengeComponent {
   challengePage: ChallengePage = new ChallengePage();
   challengePageId?: any = '';
   categories: string[] = [];
+  showAllParticipants = false;
   challenges: {
     [key: string]: {
       ids?: string[];
@@ -234,6 +235,13 @@ export class HomeChallengeComponent {
     this.descriptions = categoryData.descriptions;
     this.challengeImages = categoryData.images;
     this.ids = categoryData.ids!;
+  }
+  /* ── helper to decide which slice to render (optional) ── */
+  get participantsToRender(): string[] {
+    // always show at least the first 5; show all if toggled
+    return this.showAllParticipants
+      ? this.participants
+      : this.participants.slice(0, 5);
   }
   toggle(
     property:

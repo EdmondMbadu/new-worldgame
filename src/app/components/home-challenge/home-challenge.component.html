@@ -124,31 +124,35 @@
             Participants
           </h2>
           
+          <!-- Participants List -->
           <div *ngIf="participants.length > 0; else noParticipants">
             <ul class="divide-y divide-gray-200 dark:divide-gray-600">
               <li
                 class="py-2 flex items-center space-x-2"
-                *ngFor="let participant of participants"
+                *ngFor="let participant of participantsToRender"
               >
-                <svg
-                  class="w-5 h-5 text-gray-500 dark:text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M5.121 17.804A3 3 0 017 17h10a3 3 0 012.584 1.418M12 13a4 4 0 100-8 4 4 0 000 8z"
-                  ></path>
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none"
+                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M5.121 17.804A3 3 0 017 17h10a3 3 0 012.584 1.418M12 13a4 4 0 100-8 4 4 0 000 8z"/>
                 </svg>
                 <span class="text-gray-700 dark:text-gray-200">
                   {{ participant }}
                 </span>
               </li>
             </ul>
+
+            <!-- Toggle Button -->
+            <button
+              *ngIf="participants.length > 5"
+              class="mt-3 text-sm font-medium text-teal-700 hover:text-teal-900
+                    dark:text-teal-400 dark:hover:text-teal-300 focus:outline-none"
+              (click)="showAllParticipants = !showAllParticipants"
+            >
+              {{ showAllParticipants ? 'Show fewer' : 'Show all (' + participants.length + ')' }}
+            </button>
           </div>
+
           <ng-template #noParticipants>
             <p class="text-gray-500 dark:text-gray-400">
               No participants have been added yet.
