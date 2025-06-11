@@ -81,9 +81,10 @@ import { TournamentManagementComponent } from './components/tournament-managemen
 import { FeaturesComponent } from './blogs/features/features.component';
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
 import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
+import { NoAuthGuard } from './services/no-auth.guard';
 
 const routes: Routes = [
-  { path: '', component: LandingPageComponent },
+  { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'signup', component: SignupComponent },
