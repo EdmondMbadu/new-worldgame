@@ -13,7 +13,7 @@ export class PresentationFormComponent {
   /** injected by dialog -> contains the parent solutionId */
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { solutionId: string },
-    private dialogRef: MatDialogRef<PresentationFormComponent>,
+    public dialogRef: MatDialogRef<PresentationFormComponent>,
     private afs: AngularFirestore,
     private db: DataService
   ) {}

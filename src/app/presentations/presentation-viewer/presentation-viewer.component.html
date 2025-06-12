@@ -1,51 +1,67 @@
-<!-- full-screen overlay -->
+<!-- full-viewport overlay -->
 <div
   class="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
   tabindex="0"
 >
-<!-- close (X) -->
-<button
-  (click)="close()"
-  aria-label="Close"
-  class="absolute top-4 right-4 sm:top-6 sm:right-6
-         text-white text-3xl sm:text-4xl leading-none
-         hover:text-teal-300 focus:outline-none">
-  ×
-</button>
+  <!-- CLOSE × -->
+  <button
+    (click)="close()"
+    aria-label="Close"
+    class="absolute top-4 right-4 sm:top-6 sm:right-6
+           text-white text-3xl sm:text-4xl leading-none
+           hover:text-teal-300">
+    ×
+  </button>
 
-  <!-- left arrow -->
+  <!-- LEFT ARROW -->
   <button
     (click)="prev()"
     [disabled]="i === 0"
     class="absolute left-4 sm:left-10 top-1/2 -translate-y-1/2
            text-white text-5xl sm:text-6xl leading-none
-           hover:text-teal-300 disabled:opacity-30 select-none"
-  >
+           hover:text-teal-300 disabled:opacity-30 select-none">
     ‹
   </button>
 
-  <!-- slide content -->
-  <div class="px-6 max-w-5xl w-full text-center">
-    <img
-      [src]="slide.imageUrl"
-      class="max-h-[80vh] mx-auto rounded-lg object-contain"
-    />
+  <!-- SLIDE -->
+  <div
+    class="w-full max-w-6xl px-6 mx-auto
+           flex flex-col md:flex-row items-center gap-8"
+  >
+    <!-- IMAGE -->
+    <div class="w-full md:w-1/2 flex justify-center">
+      <img
+        [src]="slide.imageUrl"
+        class="max-h-[70vh] w-full object-contain rounded-lg shadow-lg"
+      />
+    </div>
 
-    <ul
-      class="mt-6 text-lg sm:text-xl text-white list-disc list-inside space-y-2"
+    <!-- BULLET CARD -->
+    <div
+      class="w-full md:w-1/2
+             bg-white/95 dark:bg-slate-800/95
+             rounded-xl shadow-xl backdrop-blur
+             p-6 overflow-auto max-h-[70vh]"
     >
-      <li *ngFor="let b of slide?.bullets">{{ b }}</li>
-    </ul>
+      <ul
+        class="text-lg md:text-xl leading-relaxed
+               text-gray-800 dark:text-gray-100
+               list-disc list-inside space-y-3"
+      >
+        <li *ngFor="let b of slide?.bullets" class="font-medium">
+          {{ b }}
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <!-- right arrow -->
+  <!-- RIGHT ARROW -->
   <button
     (click)="next()"
     [disabled]="i === slides.length - 1"
     class="absolute right-4 sm:right-10 top-1/2 -translate-y-1/2
            text-white text-5xl sm:text-6xl leading-none
-           hover:text-teal-300 disabled:opacity-30 select-none"
-  >
+           hover:text-teal-300 disabled:opacity-30 select-none">
     ›
   </button>
 </div>
