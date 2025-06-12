@@ -10,6 +10,7 @@ import { DataService } from 'src/app/services/data.service';
 })
 export class PresentationViewerComponent implements OnInit {
   slides: Slide[] = [];
+  presentationName = '';
   i = 0;
   get slide() {
     return this.slides[this.i];
@@ -24,9 +25,10 @@ export class PresentationViewerComponent implements OnInit {
   ngOnInit() {
     const sid = this.route.snapshot.paramMap.get('solutionId')!;
     const pid = this.route.snapshot.paramMap.get('presentationId')!;
-    this.db
-      .getPresentationById(sid, pid)
-      .subscribe((p: any) => (this.slides = p.slides));
+    this.db.getPresentationById(sid, pid).subscribe((p: any) => {
+      this.slides = p.slides;
+      this.presentationName = p.name; // ➜ keep the title
+    });
   }
 
   next() {

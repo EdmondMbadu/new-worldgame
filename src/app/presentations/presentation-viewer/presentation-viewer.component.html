@@ -3,6 +3,16 @@
   class="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
   tabindex="0"
 >
+<!-- TITLE BAR -->
+<h1
+  class="absolute top-5 left-1/2 -translate-x-1/2
+         px-4 py-1 rounded-md pointer-events-none
+         bg-white/80 text-gray-800
+         dark:bg-slate-900/70 dark:text-gray-100
+         text-lg  font-semibold backdrop-blur">
+  {{ presentationName }}
+</h1>
+
   <!-- CLOSE × -->
   <button
     (click)="close()"
