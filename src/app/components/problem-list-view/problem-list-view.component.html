@@ -1,29 +1,87 @@
-<app-navbar [hoveredPendingPath]="'bg-gray-100 dark:bg-gray-700'"  [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName"[path]="'home'" [currentPagePending]="true"></app-navbar>
-<div class="dark:bg-slate-900 min-h-screen">
-    <div class="container flex flex-row rounded-md shadow-sm mx-auto justify-center my-4 mt-20" role="group">
-        <button routerLink="/problem-list-view" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-       Pending Solutions
-        </button>
-        <button routerLink="/list-finished-solutions" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-            Submitted Solutions
-            </button>
-   
-        
-      </div>
-    <div class="flex flex-col mx-auto justify-center ">
-        <div class=" flex flex-col mx-auto justify-center mb-6 dark:text-white">
-            <h1 class="text-center text-xl font-bold font-Nunito">{{title}} ({{pending}})</h1>
-        </div> 
-            <div class="flex flex-col justify-center mx-auto ">
-                <app-problem-list  (deleteSolutionEvent)="receiveConfirmationDelete($event)"
-                (leaveSolutionEvent)="receiveLeaveSolution($event)" [path]="'/dashboard'"  [solutions]="pendingSolutions" [margin]="'md:mx-16 p-4'"></app-problem-list>
-            
-              
-                
-            </div>
+<!-- problem-list-view.component.html -->
+<div class="min-h-screen px-4 pb-16 dark:bg-slate-900">
+  <!-- wrapper shifts when the sidebar opens -->
+  <div
+    [ngClass]="{ 'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen }"
+    class="transition-all duration-300">
+
+    <!-- NAVBAR -->
+    <app-navbar
+      [hoveredPendingPath]="'bg-gray-100 dark:bg-gray-700'"
     
-    </div>
+  
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      [path]="'home'"
+      [currentPagePending]="true"
+      (toggleAsideEvent)="toggleAside()">
+    </app-navbar>
+
+    <!-- PAGE CONTENT -->
+    <section class="max-w-5xl w-full mx-auto mt-20">
+
+      <!-- Tabs -->
+      <div class="flex justify-center gap-4 my-8">
+        <button
+          routerLink="/problem-list-view"
+          class="px-4 py-2 text-sm font-medium bg-white
+                 text-gray-900 border border-gray-200 rounded-lg
+                 hover:bg-gray-100 hover:text-blue-700
+                 focus:outline-none focus:ring-2 focus:ring-blue-700
+                 dark:bg-gray-800 dark:text-white dark:border-gray-700
+                 dark:hover:bg-gray-700 dark:hover:text-white
+                 dark:focus:ring-blue-500 transition-colors">
+          Pending Solutions
+        </button>
+
+        <button
+          routerLink="/list-finished-solutions"
+          class="px-4 py-2 text-sm font-medium bg-white
+                 text-gray-900 border border-gray-200 rounded-lg
+                 hover:bg-gray-100 hover:text-blue-700
+                 focus:outline-none focus:ring-2 focus:ring-blue-700
+                 dark:bg-gray-800 dark:text-white dark:border-gray-700
+                 dark:hover:bg-gray-700 dark:hover:text-white
+                 dark:focus:ring-blue-500 transition-colors">
+          Submitted Solutions
+        </button>
+      </div>
+
+      <!-- Title + Search -->
+      <div class="text-center mb-10 dark:text-white">
+        <h1 class="text-xl md:text-2xl font-bold font-Nunito">
+          {{ title }} ({{ filteredPendingSolutions.length }})
+        </h1>
+
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Search by title…"
+          class="w-full md:w-2/3 lg:w-1/2 max-w-xl
+                 mx-auto mt-6 px-4 py-2 rounded
+                 border border-gray-300
+                 focus:outline-none focus:ring-2 focus:ring-blue-500
+                 dark:bg-slate-800 dark:border-gray-600 dark:text-white" />
+      </div>
+
+      <!-- List -->
+      <app-problem-list
+        [path]="'/dashboard'"
+        [solutions]="filteredPendingSolutions"
+        [margin]="'p-4'"
+        (deleteSolutionEvent)="receiveConfirmationDelete($event)"
+        (leaveSolutionEvent)="receiveLeaveSolution($event)">
+      </app-problem-list>
+    </section>
+
+    <!-- (Your two modal blocks remain unchanged below) -->
+  </div>
 </div>
+
+
+<!-- (your two modal blocks stay exactly as they are) -->
+
 
 
                  <!-- Modal for deleting a solution  -->

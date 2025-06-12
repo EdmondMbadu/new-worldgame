@@ -18,6 +18,8 @@ export class ProblemListViewComponent implements OnInit {
   confirmationLeaveSolution: boolean = false;
   currentSolution?: Solution;
   pending: number = 0;
+  /** 🆕 bound to the search box */
+  searchTerm = '';
 
   constructor(
     public auth: AuthService,
@@ -101,5 +103,18 @@ export class ProblemListViewComponent implements OnInit {
   receiveLeaveSolution(eventData: Solution) {
     this.currentSolution = eventData;
     this.toggleConfirmationLeaveSolution();
+  }
+  isSidebarOpen = true;
+
+  /** search */
+  get filteredPendingSolutions(): Solution[] {
+    const t = this.searchTerm.trim().toLowerCase();
+    return !t
+      ? this.pendingSolutions
+      : this.pendingSolutions.filter((s) => s.title?.toLowerCase().includes(t));
+  }
+
+  toggleAside() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 }
