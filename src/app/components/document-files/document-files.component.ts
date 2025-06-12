@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { Avatar } from 'src/app/models/user';
+import { PresentationFormComponent } from 'src/app/presentations/presentation-form/presentation-form.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -23,13 +25,15 @@ export class DocumentFilesComponent implements OnInit {
     private time: TimeService,
     private router: Router,
     private fns: AngularFireFunctions,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private dialog: MatDialog
   ) {}
   currentSolution: Solution = {};
   id: any;
   showAddDocument: boolean = false;
   isHovering: boolean = false;
   documents: Avatar[] = [];
+  presentations: any[] = [];
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -39,6 +43,10 @@ export class DocumentFilesComponent implements OnInit {
         this.documents = this.currentSolution.documents;
         console.log('Documents:', this.documents);
       }
+      /* ② NEW – live list of presentations */
+      this.data.getPresentations(this.id).subscribe((p) => {
+        this.presentations = p;
+      });
     });
   }
   documentType: string = '';
@@ -299,5 +307,37 @@ export class DocumentFilesComponent implements OnInit {
 
   isPDF(mimeType: string): boolean {
     return mimeType === 'application/pdf';
+  }
+  /* ③ refresh list after the dialog closes */
+  openPresentationForm() {
+    this.dialog
+      .open(PresentationFormComponent, {
+        data: { solutionId: this.id },
+        width: '700px',
+      })
+      .afterClosed()
+      .subscribe(() => {
+        /* optional: force reload once saved */
+        this.data
+          .getPresentations(this.id)
+          .subscribe((p) => (this.presentations = p));
+      });
+  }
+
+  openViewer(pid: string) {
+    this.router.navigate(
+      ['/document-files', this.id, 'presentation', pid] // absolute path
+    );
+  }
+  deletePresentation(pid: string, e: Event) {
+    e.stopPropagation(); // ⬅ stop card click
+    if (!confirm('Delete this presentation?')) {
+      return;
+    }
+
+    this.data
+      .deletePresentationById(this.id, pid)
+      .then(() => console.log('Presentation deleted'))
+      .catch((err) => console.error(err));
   }
 }

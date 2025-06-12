@@ -82,6 +82,7 @@ import { FeaturesComponent } from './blogs/features/features.component';
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
 import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
 import { NoAuthGuard } from './services/no-auth.guard';
+import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -431,6 +432,12 @@ const routes: Routes = [
     component: HomeChallengeComponent,
     canActivate: [AuthGuard],
   },
+  {
+    path: 'document-files/:solutionId/presentation/:presentationId',
+    component: PresentationViewerComponent,
+    canActivate: [AuthGuard],
+  },
+
   { path: '**', component: PageNotFoundComponent },
 ];
 

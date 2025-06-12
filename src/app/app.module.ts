@@ -126,6 +126,9 @@ import { TournamentManagementComponent } from './components/tournament-managemen
 import { FeaturesComponent } from './blogs/features/features.component';
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
 import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
+import { PresentationFormComponent } from './presentations/presentation-form/presentation-form.component';
+import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
@@ -228,6 +231,8 @@ import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
     FeaturesComponent,
     MiniGameComponent,
     NwgStepsComponent,
+    PresentationFormComponent,
+    PresentationViewerComponent,
   ],
   imports: [
     BrowserModule,
@@ -254,6 +259,7 @@ import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
     MatAutocompleteModule,
     EditorModule,
     CKEditorModule,
+    MatDialogModule,
   ],
 
   providers: [],

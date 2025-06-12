@@ -12,6 +12,7 @@ import { Avatar, User } from '../models/user';
 import { Evaluation, Solution } from '../models/solution';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
+import { Presentation } from '../models/presentation';
 
 @Injectable({
   providedIn: 'root',
@@ -541,6 +542,47 @@ export class DataService implements OnInit {
         if ((this as any).task?.cancel) (this as any).task.cancel();
       },
     };
+  }
+  /** Create OR update an NWG presentation (sub-collection of the solution) */
+  addPresentation(p: Presentation) {
+    return this.afs
+      .collection('solutions')
+      .doc(p.solutionId)
+      .collection<Presentation>('presentations')
+      .doc(p.id)
+      .set(p, { merge: true });
+  }
+
+  /* ------------------------------------------------------------------------- */
+  /** Live list of presentations for one solution, ordered newest first */
+  getPresentations(solutionId: string) {
+    return this.afs
+      .collection('solutions')
+      .doc(solutionId)
+      .collection<Presentation>('presentations', (ref) =>
+        ref.orderBy('dateCreated', 'desc')
+      )
+      .valueChanges({ idField: 'id' });
+  }
+
+  /* ------------------------------------------------------------------------- */
+  /** Single presentation (used by slide-viewer) */
+  getPresentationById(solutionId: string, presentationId: string) {
+    return this.afs
+      .collection('solutions')
+      .doc(solutionId)
+      .collection<Presentation>('presentations')
+      .doc(presentationId)
+      .valueChanges({ idField: 'id' }) as Observable<Presentation>;
+  }
+
+  deletePresentationById(solutionId: string, presentationId: string) {
+    return this.afs
+      .collection('solutions')
+      .doc(solutionId)
+      .collection('presentations')
+      .doc(presentationId)
+      .delete();
   }
 
   UnfollowUser() {}

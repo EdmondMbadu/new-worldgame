@@ -1,0 +1,101 @@
+<!-- ⬆ the surrounding dialog already gives you paddings & backdrop -->
+<div class="w-full max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl
+            flex flex-col max-h-screen">
+
+  <!-- header stays fixed -->
+  <h2 class="text-center text-2xl font-bold text-gray-900 dark:text-white
+             mb-4 p-6 pb-0">
+    New NWG Presentation
+  </h2>
+  <!-- title -->
+  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title *</label>
+  <input
+   name="presentationTitle"     
+    [(ngModel)]="name"
+    class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600
+           bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white
+           focus:ring-teal-600 focus:border-teal-600 shadow-sm px-3 py-2 mb-4"
+  />
+
+  <div class="flex-1 overflow-y-auto px-6 pb-6">
+            <!-- description -->
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+            <textarea
+                [(ngModel)]="description" rows="2"
+                class="mt-1 w-full rounded-md border-gray-300 dark:border-gray-600
+                    bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white
+                    focus:ring-teal-600 focus:border-teal-600 shadow-sm px-3 py-2 mb-6">
+            </textarea>
+
+            <!-- slide-builder card -->
+            <div class="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-5 mb-6">
+                        <input
+                #picker
+                id="fileInput"
+                type="file"
+                hidden
+                accept="image/*"
+                (change)="onFile($event)"
+                >
+
+                <!-- OPEN FILE DIALOG -->
+                <button
+                type="button"
+                (click)="picker.click()"          
+                class="inline-flex items-center px-4 py-2 rounded-md
+                        bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium">
+                Choose Image
+                </button>
+
+                <!-- preview -->
+                <img *ngIf="previewUrl" [src]="previewUrl"
+                    class="mt-4 max-h-48 rounded-md object-contain mx-auto" />
+
+                <!-- bullets -->
+                <textarea
+                *ngIf="previewUrl"
+                [(ngModel)]="bulletText" rows="4"
+                placeholder="• one bullet per line"
+                class="w-full mt-4 rounded-md border-gray-300 dark:border-gray-600
+                        bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white
+                        focus:ring-teal-600 focus:border-teal-600 shadow-sm px-3 py-2 mb-2">
+                </textarea>
+
+                <button
+                *ngIf="previewUrl"
+                (click)="addSlide()"
+                class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md
+                        bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium">
+                Add Slide
+                </button>
+            </div>
+
+            <!-- queue -->
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
+                Slides ({{ slides.length }})
+            </h3>
+            <div class="grid grid-cols-3 gap-2 mb-8">
+                <div *ngFor="let s of slides; let i = index" class="relative group">
+                <img [src]="s.imageUrl" class="h-24 w-full object-cover rounded-md">
+                <button
+                    (click)="removeSlide(i)"
+                    class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white
+                        text-[18px] leading-none flex items-center justify-center
+                        opacity-0 group-hover:opacity-100 transition">
+                    ×
+                </button>
+                </div>
+            </div>
+</div>
+
+  <!-- footer (save button) sticks to the bottom -->
+  <div class="p-6 pt-0 border-t border-gray-200 dark:border-gray-700">
+    <button
+      (click)="save()"
+      class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md
+             bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium
+             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600">
+      Save Presentation
+    </button>
+  </div>
+</div>
