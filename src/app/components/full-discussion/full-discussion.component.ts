@@ -146,6 +146,40 @@ export class FullDiscussionComponent
       this.hasScrolled = false;
     });
   }
+
+  /** True when the comment at index i is the first of a new calendar day */
+  shouldShowDateDivider(i: number): boolean {
+    // NEW
+    if (i === 0) {
+      return true;
+    }
+    return !this.isSameDay(this.comments[i].date, this.comments[i - 1].date);
+  }
+
+  /** Fast same-day comparison */
+  private isSameDay(
+    a: Date | string | undefined,
+    b: Date | string | undefined
+  ): boolean {
+    // NEW
+    if (!a || !b) return false;
+    const da = new Date(a);
+    const db = new Date(b);
+    return (
+      da.getFullYear() === db.getFullYear() &&
+      da.getMonth() === db.getMonth() &&
+      da.getDate() === db.getDate()
+    );
+  }
+
+  /** Sort helper: oldest → newest (undefined dates to top just in case) */
+  private byDateAsc = (a: Comment, b: Comment) => {
+    // NEW
+    if (!a.date) return -1;
+    if (!b.date) return 1;
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  };
+
   private playPing() {
     const audio = this.notifyAudio.nativeElement;
     audio.currentTime = 0; // rewind in case it’s still playing

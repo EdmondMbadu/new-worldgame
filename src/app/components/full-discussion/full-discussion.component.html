@@ -83,7 +83,17 @@
         id="chatboxDiscussion"
         class="flex-1 overflow-y-auto px-4 py-4 space-y-4"
       >
-        <ng-container *ngFor="let comment of comments">
+        <ng-container *ngFor="let comment of comments; let i=index">
+
+          <!-- Day divider -->
+        <div *ngIf="shouldShowDateDivider(i)" class="flex items-center my-6">
+          <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+          <span class="mx-3 text-xs uppercase tracking-wide font-medium
+                      text-gray-500 dark:text-gray-400">
+            {{ comment.date | date:'EEEE, MMM d' }}
+          </span>
+          <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        </div>
           <div class="flex items-start space-x-3 group">
             <!-- Avatar -->
         
