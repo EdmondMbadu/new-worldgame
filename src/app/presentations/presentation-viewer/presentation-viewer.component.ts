@@ -5,35 +5,71 @@ import { DataService } from 'src/app/services/data.service';
 import {
   trigger,
   transition,
-  animate,
   style,
-  keyframes,
+  animate,
+  query,
+  group,
 } from '@angular/animations';
+
+/* ────────────────────────────────────────────────────────────────
+   SLIDE HELPER  ➜ returns the choreography for one direction
+──────────────────────────────────────────────────────────────── */
+function slide(dir: 'left' | 'right') {
+  const offset = dir === 'left' ? '-60px' : '60px';
+  return [
+    /* stack the two pages on top of each other */
+    query(
+      ':enter, :leave',
+      [style({ position: 'absolute', top: 0, left: 0, width: '100%' })],
+      { optional: true }
+    ),
+
+    /* incoming page just outside the view */
+    query(
+      ':enter',
+      [style({ opacity: 0, transform: `translateX(${offset}) scale(0.98)` })],
+      { optional: true }
+    ),
+
+    /* animate them together */
+    group([
+      query(
+        ':leave',
+        [
+          animate(
+            '350ms ease',
+            style({
+              opacity: 0,
+              transform: `translateX(${
+                dir === 'left' ? '60px' : '-60px'
+              }) scale(0.98)`,
+            })
+          ),
+        ],
+        { optional: true }
+      ),
+      query(
+        ':enter',
+        [animate('350ms ease', style({ opacity: 1, transform: 'none' }))],
+        { optional: true }
+      ),
+    ]),
+  ];
+}
+
+/* ────────────────────────────────────────────────────────────────
+   THE ACTUAL TRIGGER
+──────────────────────────────────────────────────────────────── */
+export const pageTransition = trigger('pageTransition', [
+  transition(':increment', slide('right')), // next
+  transition(':decrement', slide('left')), // previous
+]);
 
 @Component({
   selector: 'app-presentation-viewer',
   templateUrl: './presentation-viewer.component.html',
   styleUrls: ['./presentation-viewer.component.css'],
-  animations: [
-    trigger('pageTransition', [
-      /* next page (increment) */
-      transition(':increment', [
-        style({ opacity: 0, transform: 'translateX(60px) scale(0.98)' }),
-        animate(
-          '500ms cubic-bezier(.4, .0, .2, 1)',
-          style({ opacity: 1, transform: 'translateX(0) scale(1)' })
-        ),
-      ]),
-      /* previous page (decrement) */
-      transition(':decrement', [
-        style({ opacity: 0, transform: 'translateX(-60px) scale(0.98)' }),
-        animate(
-          '500ms cubic-bezier(.4, .0, .2, 1)',
-          style({ opacity: 1, transform: 'translateX(0) scale(1)' })
-        ),
-      ]),
-    ]),
-  ],
+  animations: [pageTransition],
 })
 export class PresentationViewerComponent implements OnInit {
   slides: Slide[] = [];

@@ -35,16 +35,14 @@
   </button>
 
   <!-- ─── SLIDE (page) ──────────────────────────────────────────── -->
-  <div
-    class="w-full max-w-6xl px-6 mx-auto"
-  >
-        <div
-        class="page bg-white/95 dark:bg-slate-800/95 rounded-xl shadow-xl
+<div class="w-full max-w-6xl px-6 mx-auto relative h-[75vh]">
+  <!-- the slide itself is now absolute (fills wrapper) -->
+  <div *ngIf="slide"
+       class="page absolute inset-0
+              bg-white/95 dark:bg-slate-800/95 rounded-xl shadow-xl
               backdrop-blur overflow-hidden flex flex-col md:flex-row"
-        [@pageTransition]="i"                   
-        [style.transform]="'scale(' + zoom + ')'"
-      >
-
+       [@pageTransition]="i"
+       [style.transform]="'scale(' + zoom + ')'" >
       <!-- IMAGE -->
       <div class="md:w-1/2 p-6 flex justify-center items-center">
         <img
