@@ -216,9 +216,7 @@ async function fetchAndExtract(gcsUrl: string, mime: string): Promise<string> {
   }
   return buffer.toString('utf8'); // txt + fallback
 }
-
 export const onChatPrompt = functions
-  // deploy in a US region where the image model is available
   .region('us-central1')
   .firestore.document('users/{uid}/discussions/{docId}')
   .onCreate(async (snap) => {
@@ -226,14 +224,13 @@ export const onChatPrompt = functions
       const prompt: string = (snap.data()?.['prompt'] || '').trim();
       if (!prompt) return;
 
+      /* mark as processing */
       await snap.ref.update({
         status: { state: 'PROCESSING' },
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      // ────────────────────────────────────────────────────────────
-      // Build conversation history
-      // ────────────────────────────────────────────────────────────
+      // ────────── 0. helpers ─────────────────────────────────────
       const colRef = snap.ref.parent!;
       const allDocs = await colRef.get();
       const sorted = allDocs.docs
@@ -243,40 +240,60 @@ export const onChatPrompt = functions
             (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
             (b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0)
         );
-      const attachmentList = (snap.data()?.['attachmentList'] || []) as {
+
+      // current turn attachments
+      const thisAttachments = (snap.data()?.['attachmentList'] || []) as {
         url: string;
         mime: string;
         name: string;
       }[];
 
-      let attachmentText = '';
-      if (attachmentList.length) {
-        for (const att of attachmentList) {
+      // ────────── 1. build conversation history ─────────────────
+      let history = '';
+
+      /* include every previous doc (attachments + turns) */
+      for (const d of sorted) {
+        const data = d.data();
+
+        // 1A ▸ earlier attachments
+        if (data?.['attachmentList']?.length) {
+          for (const att of data?.['attachmentList']) {
+            try {
+              const txt = await fetchAndExtract(att.url, att.mime);
+              history +=
+                `\n(Previously shared document «${att.name}»)\n` +
+                txt.slice(0, 12_000) +
+                '\n';
+            } catch (e) {
+              console.warn('Could not reload attachment', att.url, e);
+            }
+          }
+        }
+
+        // 1B ▸ normal dialogue
+        if (data?.['prompt']) history += `User: ${data?.['prompt']}\n`;
+        if (data?.['response']) history += `Assistant: ${data?.['response']}\n`;
+      }
+
+      /* add THIS turn’s attachments (if any) */
+      if (thisAttachments.length) {
+        for (const att of thisAttachments) {
           try {
             const txt = await fetchAndExtract(att.url, att.mime);
-            attachmentText +=
-              `\n--- File: ${att.name} (${att.mime}) ---\n` +
+            history +=
+              `\n(Current document «${att.name}»)\n` +
               txt.slice(0, 12_000) +
-              '\n'; // per-file 12 k truncation
+              '\n';
           } catch (e) {
             console.warn('Extraction failed for', att.url, e);
           }
         }
       }
 
-      let history = '';
-      for (const d of sorted) {
-        const data = d.data();
-        if (data['prompt']) history += `User: ${data['prompt']}\n`;
-        if (data['response']) history += `Assistant: ${data['response']}\n`;
-      }
-      history += attachmentText
-        ? `\nThe user attached a document. Here is its content:\n${attachmentText}\n\nUser: ${prompt}\nAssistant:`
-        : `User: ${prompt}\nAssistant:`;
+      /* finally the fresh user prompt */
+      history += `User: ${prompt}\nAssistant:`;
 
-      // ────────────────────────────────────────────────────────────
-      // Pick model: text‑only vs text‑and‑image
-      // ────────────────────────────────────────────────────────────
+      // ────────── 2. pick model ─────────────────────────────────
       const wantsImage =
         /\b(image|picture|photo|illustration|draw|generate).*?\b/i.test(prompt);
       const modelName = wantsImage
@@ -288,26 +305,21 @@ export const onChatPrompt = functions
         model: modelName,
         tools: [{ google_search: {} }],
         generationConfig: wantsImage
-          ? { responseModalities: ['TEXT', 'IMAGE'] } // NOTE the caps
+          ? { responseModalities: ['TEXT', 'IMAGE'] }
           : {},
       } as any);
 
-      // ────────────────────────────────────────────────────────────
-      // Generate
-      // ────────────────────────────────────────────────────────────
-      const response = await model.generateContent(history);
+      // ────────── 3. generate ───────────────────────────────────
+      const gem = await model.generateContent(history);
 
       let answer = '';
       let imgB64 = '';
-      for (const part of response.response.candidates?.[0]?.content?.parts ||
-        []) {
+      for (const part of gem.response.candidates?.[0]?.content?.parts || []) {
         if (part.text) answer += part.text;
         else if (part.inlineData) imgB64 = part.inlineData.data;
       }
 
-      // ────────────────────────────────────────────────────────────
-      // Store image if any
-      // ────────────────────────────────────────────────────────────
+      // ────────── 4. store image (if any) ───────────────────────
       let imageUrl: string | undefined;
       if (imgB64) {
         const filePath = `generated/${randomUUID()}.png`;
@@ -319,9 +331,7 @@ export const onChatPrompt = functions
         imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
       }
 
-      // ────────────────────────────────────────────────────────────
-      // Final update
-      // ────────────────────────────────────────────────────────────
+      // ────────── 5. final update ───────────────────────────────
       await snap.ref.update({
         status: { state: 'COMPLETED' },
         response: answer || null,
@@ -339,6 +349,7 @@ export const onChatPrompt = functions
       });
     }
   });
+
 // export const onChatPrompt = functions.firestore
 //   .document('users/{uid}/discussions/{docId}')
 //   .onCreate(async (snap, context) => {
