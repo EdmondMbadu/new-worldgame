@@ -35,36 +35,57 @@
   </button>
 
   <!-- ─── SLIDE (page) ──────────────────────────────────────────── -->
-<div class="w-full max-w-6xl px-6 mx-auto relative h-[75vh]">
+<div class="w-full max-w-5xl px-4 mx-auto  
+            relative h-[70vh] md:h-[65vh]   
+            overflow-hidden">
   <!-- the slide itself is now absolute (fills wrapper) -->
-  <div *ngIf="slide"
-       class="page absolute inset-0
-              bg-white/95 dark:bg-slate-800/95 rounded-xl shadow-xl
-              backdrop-blur overflow-hidden flex flex-col md:flex-row"
-       [@pageTransition]="i"
-       [style.transform]="'scale(' + zoom + ')'" >
-      <!-- IMAGE -->
-      <div class="md:w-1/2 p-6 flex justify-center items-center">
-        <img
-          [src]="slide.imageUrl"
-          class="max-h-[70vh] w-full object-contain rounded-lg"
-        />
-      </div>
+ <!-- ─── PAGE ───────────────────────────────────────────────────── -->
+<div *ngIf="slide"
+     class="page absolute inset-0 z-10
+            bg-white/95 dark:bg-slate-800/95 rounded-xl shadow-xl
+            backdrop-blur overflow-hidden flex flex-col md:flex-row"
+     [@pageTransition]="i"
+     [style.transform]="'scale(' + zoom + ')'" >
 
-      <!-- BULLETS -->
-      <div class="md:w-1/2 p-6 overflow-auto max-h-[70vh]">
-        <ul
+  <!-- ======== CASE A · IMAGE + TEXT (two-column) ========== -->
+  <ng-container *ngIf="slide.imageUrl && slide.bullets?.length; else singleColumn">
+    <!-- image -->
+    <div class="md:w-1/2 p-6 flex items-center justify-center">
+      <img [src]="slide.imageUrl"
+           class="max-h-[70vh] w-full object-contain rounded-lg" />
+    </div>
+
+    <!-- bullets -->
+    <div class="md:w-1/2 p-6 overflow-auto max-h-[70vh]">
+      <ul class="text-lg md:text-xl leading-relaxed
+                 text-gray-800 dark:text-gray-100
+                 list-disc list-inside space-y-3">
+        <li *ngFor="let b of slide.bullets" class="font-medium">{{ b }}</li>
+      </ul>
+    </div>
+  </ng-container>
+
+  <!-- ======== CASE B/C · IMAGE-ONLY or TEXT-ONLY ============ -->
+  <ng-template #singleColumn>
+    <div class="w-full p-6 flex flex-col items-center justify-center
+                overflow-auto max-h-[70vh] space-y-6">
+      <!-- show image if present -->
+      <img *ngIf="slide.imageUrl"
+           [src]="slide.imageUrl"
+           class="max-h-[70vh] w-full object-contain rounded-lg" />
+
+      <!-- show bullets if present -->
+      <ul *ngIf="slide.bullets?.length"
           class="text-lg md:text-xl leading-relaxed
                  text-gray-800 dark:text-gray-100
-                 list-disc list-inside space-y-3"
-        >
-          <li *ngFor="let b of slide?.bullets" class="font-medium">
-            {{ b }}
-          </li>
-        </ul>
-      </div>
+                 list-disc list-inside space-y-3">
+        <li *ngFor="let b of slide.bullets" class="font-medium">{{ b }}</li>
+      </ul>
     </div>
-  </div>
+  </ng-template>
+</div>
+
+</div>
 
   <!-- ─── RIGHT ARROW ───────────────────────────────────────────── -->
   <button
@@ -79,7 +100,7 @@
   <!-- ─── CONTROL BAR ───────────────────────────────────────────── -->
   <div
     class="absolute bottom-6 left-1/2 -translate-x-1/2
-           flex items-center gap-6 text-white"
+           flex items-center gap-6 text-white z-20"
   >
     <!-- Zoom – -->
     <button

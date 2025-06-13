@@ -47,18 +47,25 @@ export class PresentationFormComponent {
     this.previewUrl = await this.db.startUpload(fileList, path, 'false');
   }
 
+  /* helper: is the form ready? */
+  canAddSlide(): boolean {
+    return !!this.previewUrl || this.bulletText.trim().length > 0;
+  }
+
   addSlide() {
-    if (!this.previewUrl) {
-      alert('Choose an image');
+    const hasImage = !!this.previewUrl;
+    const bullets = this.bulletText.split('\n').filter((l: any) => l.trim());
+
+    if (!hasImage && bullets.length === 0) {
       return;
     }
 
     this.slides.push({
-      imageUrl: this.previewUrl,
-      bullets: this.bulletText.split('\n').filter((l: any) => l.trim()),
+      ...(hasImage ? { imageUrl: this.previewUrl } : {}), // ← omit key if none
+      bullets,
     });
 
-    /* ✅ reset safely */
+    // reset builder
     this.fileInput.nativeElement.value = '';
     this.previewUrl = '';
     this.bulletText = '';

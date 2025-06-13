@@ -75,25 +75,32 @@
           <img *ngIf="previewUrl" [src]="previewUrl"
                class="max-h-48 mx-auto rounded-md object-contain"/>
 
-          <!-- bullets + add -->
-          <div *ngIf="previewUrl" class="space-y-2">
-            <textarea [(ngModel)]="bulletText" rows="4"
-                      placeholder="• one bullet per line"
-                      class="w-full rounded-md
-                             bg-gray-50 dark:bg-slate-700
-                             border border-gray-300 dark:border-slate-600
-                             text-gray-900 dark:text-white
-                             focus:ring-teal-600 focus:border-teal-600 px-3 py-2"></textarea>
+          <!-- bullets and add-slide (always visible) -->
+              <div class="space-y-2">
+                <textarea [(ngModel)]="bulletText" rows="4"
+                          placeholder="• one bullet per line"
+                          class="w-full rounded-md
+                                bg-gray-50 dark:bg-slate-700
+                                border border-gray-300 dark:border-slate-600
+                                text-gray-900 dark:text-white
+                                focus:ring-teal-600 focus:border-teal-600 px-3 py-2"></textarea>
 
-            <button (click)="addSlide()"
-                    type="button"
-                    class="w-full inline-flex items-center justify-center px-4 py-2
-                           rounded-md bg-slate-600 hover:bg-slate-700
-                           text-white text-sm font-medium">
-              Add Slide
-            </button>
+                <button (click)="addSlide()"
+                        [disabled]="!canAddSlide()"
+                        type="button"
+                        class="w-full inline-flex items-center justify-center px-4 py-2
+                              rounded-md
+                              text-white text-sm font-medium
+                              transition
+                              disabled:opacity-40
+                              disabled:cursor-not-allowed
+                              bg-slate-600 hover:bg-slate-700">
+                  Add Slide
+                </button>
           </div>
         </div>
+
+
       </div>
 
       <!-- slides queue -->
@@ -104,8 +111,16 @@
         <div class="grid grid-cols-3 gap-2">
           <div *ngFor="let s of slides; let i = index"
                class="relative group">
-            <img [src]="s.imageUrl"
-                 class="h-24 object-cover rounded-md">
+            <ng-container *ngIf="s.imageUrl; else textThumb">
+              <img [src]="s.imageUrl" class="h-24 object-cover rounded-md"/>
+            </ng-container>
+            <ng-template #textThumb>
+              <div class="h-24 rounded-md bg-slate-200 dark:bg-slate-600
+                          flex items-center justify-center text-xs
+                          text-gray-700 dark:text-gray-100 p-2 text-center">
+                {{ s.bullets![0] || 'Text Slide' }}
+              </div>
+            </ng-template>
             <button (click)="removeSlide(i)"
                     type="button"
                     class="absolute top-1 right-1 w-6 h-6 rounded-full
