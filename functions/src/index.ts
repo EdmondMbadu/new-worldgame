@@ -14,6 +14,10 @@ import { google } from 'googleapis';
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore – no types published for pdf-parse
+import pdfParse from 'pdf-parse';
+import * as mammoth from 'mammoth';
 
 // read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
 const GEMINI_KEY = functions.config()['gemini'].key;
@@ -170,57 +174,49 @@ export const genericEmail = functions.https.onCall(
 //   return BUCKY_SYSTEM_PROMPT + '\n\nUSER:\n' + userPrompt;
 // }
 
-// export const onChatPrompt = functions.firestore
-//   .document('users/{uid}/discussions/{docId}')
-//   .onCreate(async (snap) => {
-//     const prompt = (snap.data()?.['prompt'] || '').trim();
-//     if (!prompt) return;
+/* helper ------------------------------------------------------ */
+/* helper ------------------------------------------------------ */
+async function fetchAndExtract(gcsUrl: string, mime: string): Promise<string> {
+  const { Storage } = await import('@google-cloud/storage');
+  const storage = new Storage();
 
-//     await snap.ref.update({ status: { state: 'PROCESSING' } });
+  // 1 ▶ bucket/object parse for both URL styles
+  let bucketId = '',
+    objectPath = '';
+  let m = gcsUrl.match(/^https:\/\/storage\.googleapis\.com\/([^/]+)\/(.+)$/);
+  if (m) {
+    bucketId = m[1];
+    objectPath = decodeURIComponent(m[2]);
+  } else {
+    m = gcsUrl.match(/\/b\/([^/]+)\/o\/([^?]+)/);
+    if (!m) throw new Error('Unrecognised GCS URL: ' + gcsUrl);
+    bucketId = decodeURIComponent(m[1]);
+    objectPath = decodeURIComponent(m[2]);
+  }
 
-//     /* ---------- 1. Build the model (with output‑image flag) ---------- */
-//     const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-//     const model = genAI.getGenerativeModel({
-//       model: 'gemini-2.0-flash-exp-image-generation',
-//       generationConfig: { responseModalities: ['text', 'image'] } as any,
-//     });
-//     /*  Combine system‑style context + user question  */
-//     // const fullPrompt = buildPrompt(prompt);
+  const file = storage.bucket(bucketId).file(objectPath);
+  const [buffer] = await file.download();
 
-//     /* ---------- 2. Ask Gemini ---------- */
-//     const resp = await model.generateContent(prompt);
+  // 2 ▶ extraction
+  if (mime === 'application/pdf') {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore – no types published for pdf-parse
+    const pdfMod: any = await import('pdf-parse');
+    const pdfParse = pdfMod.default || pdfMod; // handles both CJS / ESM
+    const { text } = await pdfParse(buffer);
+    return text;
+  }
+  if (
+    mime ===
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    mime === 'application/msword'
+  ) {
+    const { value } = await mammoth.extractRawText({ buffer });
+    return value;
+  }
+  return buffer.toString('utf8'); // txt + fallback
+}
 
-//     let answer = '';
-//     let imgB64 = '';
-
-//     for (const part of resp.response.candidates?.[0]?.content?.parts || []) {
-//       if (part.text) answer += part.text;
-//       if (part.inlineData) imgB64 = part.inlineData.data; // PNG base‑64
-//     }
-
-//     /* ---------- 3. Save image (if any) ---------- */
-//     let imageUrl: string | undefined;
-//     if (imgB64) {
-//       const filePath = `generated/${randomUUID()}.png`;
-//       await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
-//         contentType: 'image/png',
-//         resumable: false,
-//         public: true, // or use signed URLs
-//       });
-//       imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-//     }
-
-//     /* ---------- 4. Final doc update ---------- */
-//     const updateData: any = {
-//       status: { state: 'COMPLETED' },
-//       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-//     };
-
-//     if (answer) updateData.response = answer; // only if not empty
-//     if (imageUrl) updateData.imageUrl = imageUrl;
-
-//     await snap.ref.update(updateData);
-//   });
 export const onChatPrompt = functions
   // deploy in a US region where the image model is available
   .region('us-central1')
@@ -247,6 +243,26 @@ export const onChatPrompt = functions
             (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
             (b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0)
         );
+      const attachmentList = (snap.data()?.['attachmentList'] || []) as {
+        url: string;
+        mime: string;
+        name: string;
+      }[];
+
+      let attachmentText = '';
+      if (attachmentList.length) {
+        for (const att of attachmentList) {
+          try {
+            const txt = await fetchAndExtract(att.url, att.mime);
+            attachmentText +=
+              `\n--- File: ${att.name} (${att.mime}) ---\n` +
+              txt.slice(0, 12_000) +
+              '\n'; // per-file 12 k truncation
+          } catch (e) {
+            console.warn('Extraction failed for', att.url, e);
+          }
+        }
+      }
 
       let history = '';
       for (const d of sorted) {
@@ -254,7 +270,9 @@ export const onChatPrompt = functions
         if (data['prompt']) history += `User: ${data['prompt']}\n`;
         if (data['response']) history += `Assistant: ${data['response']}\n`;
       }
-      history += `User: ${prompt}\nAssistant:`;
+      history += attachmentText
+        ? `\nThe user attached a document. Here is its content:\n${attachmentText}\n\nUser: ${prompt}\nAssistant:`
+        : `User: ${prompt}\nAssistant:`;
 
       // ────────────────────────────────────────────────────────────
       // Pick model: text‑only vs text‑and‑image
@@ -268,6 +286,7 @@ export const onChatPrompt = functions
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
       const model = genAI.getGenerativeModel({
         model: modelName,
+        tools: [{ google_search: {} }],
         generationConfig: wantsImage
           ? { responseModalities: ['TEXT', 'IMAGE'] } // NOTE the caps
           : {},

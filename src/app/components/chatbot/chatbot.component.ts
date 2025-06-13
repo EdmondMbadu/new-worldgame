@@ -4,6 +4,8 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { finalize } from 'rxjs/operators';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -11,9 +13,16 @@ export interface DisplayMessage {
   text?: string; // present for PROMPT / RESPONSE
   src?: string; // present for IMAGE
   link?: { text?: string; url?: string };
-  type: 'PROMPT' | 'RESPONSE' | 'IMAGE';
+  type: 'PROMPT' | 'RESPONSE' | 'IMAGE' | 'ATTACHMENT';
 }
 
+interface PendingPreview {
+  file: File;
+  mime: string;
+  uploading: boolean;
+  path?: string; // cloud-storage object path
+  url?: string; // download URL after upload
+}
 @Component({
   selector: 'app-chatbot',
   templateUrl: './chatbot.component.html',
@@ -23,6 +32,8 @@ export class ChatbotComponent implements OnInit {
   showBot = false; // toggles visibility
   isEnlarged = false; // toggles small vs. big
   copyButtonText = 'Copy'; // button text that changes briefly to "Copied!"
+  private attachment: { url: string; mime: string } | null = null;
+  MAX_SIZE = 10 * 1024 * 1024; // 10,485,760
 
   // Track single-message copy states; index-based, e.g. 'Copy' or 'Copied!'
   singleCopyStates: string[] = [];
@@ -33,6 +44,9 @@ export class ChatbotComponent implements OnInit {
   status = '';
   errorMsg = '';
   prompt = '';
+
+  previews: PendingPreview[] = [];
+  uploading = false; // disables Send
 
   collectionPath: string;
 
@@ -48,7 +62,8 @@ export class ChatbotComponent implements OnInit {
   constructor(
     private afs: AngularFirestore,
     private auth: AuthService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private storage: AngularFireStorage
   ) {
     this.user = this.auth.currentUser;
     this.collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
@@ -63,6 +78,71 @@ export class ChatbotComponent implements OnInit {
 
   toggleBot() {
     this.showBot = !this.showBot;
+  }
+  /* --- remove: import * as mime from 'mime-types'; --- */
+
+  /* simple extension map for rare cases */
+  EXT_MIME: Record<string, string> = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    txt: 'text/plain',
+  };
+  handleFile(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    if (file.size > this.MAX_SIZE) {
+      this.responses.push({
+        type: 'RESPONSE',
+        text: `⚠️ That file is ${(file.size / 1024 / 1024).toFixed(
+          1
+        )} MB — limit is 10 MB.`,
+      });
+      this.scrollToBottom();
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
+    // mime guess
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const mime = file.type || this.EXT_MIME[ext] || 'application/octet-stream';
+
+    // add to preview list
+    const preview: PendingPreview = { file, mime, uploading: true };
+    this.previews.push(preview);
+    this.uploading = true;
+
+    // upload to GCS
+    const path = `chat-uploads/${Date.now()}_${file.name}`;
+    const task = this.storage.upload(path, file, { contentType: mime });
+
+    task
+      .snapshotChanges()
+      .pipe(
+        finalize(async () => {
+          preview.uploading = false;
+          preview.path = path;
+          preview.url = await this.storage
+            .ref(path)
+            .getDownloadURL()
+            .toPromise();
+          this.uploading = this.previews.some((p) => p.uploading); // still something uploading?
+        })
+      )
+      .subscribe();
+  }
+  removePreview(i: number) {
+    const [preview] = this.previews.splice(i, 1);
+    // optional: delete partially uploaded file if it had finished
+    if (preview.path && !preview.uploading) {
+      this.storage
+        .ref(preview.path)
+        .delete()
+        .toPromise()
+        .catch(() => {});
+    }
+    this.uploading = this.previews.some((p) => p.uploading);
   }
 
   toggleChatSize() {
@@ -81,7 +161,14 @@ export class ChatbotComponent implements OnInit {
     const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
       `${this.collectionPath}/${id}`
     );
-    await discussionRef.set({ prompt: trimmed });
+    await discussionRef.set({
+      prompt: trimmed,
+      attachmentList: this.previews
+        .filter((p) => p.url && !p.uploading)
+        .map((p) => ({ url: p.url, mime: p.mime, name: p.file.name })),
+    });
+    this.previews = []; // clear UI
+    this.uploading = false;
 
     const destroyFn = discussionRef.valueChanges().subscribe({
       next: (conversation) => {
