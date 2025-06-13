@@ -149,70 +149,97 @@ export class ChatbotComponent implements OnInit {
     this.isEnlarged = !this.isEnlarged;
   }
 
+  // ---------------------------------------------------------------------------
+  // Send prompt + attachments
+  // ---------------------------------------------------------------------------
   async submitPrompt() {
+    /* block if a file is still uploading */
+    if (this.uploading) return;
+
     const trimmed = this.prompt.trim();
-    if (!trimmed) return;
 
-    this.responses.push({ text: trimmed, type: 'PROMPT' });
-    this.prompt = '';
-    this.status = 'sure, one sec';
+    /* nothing to send? bail out */
+    if (!trimmed && !this.previews.length) return;
 
-    const id = this.afs.createId();
+    // ─── 1. push user's prompt bubble ─────────────────────────────
+    if (trimmed) {
+      this.responses.push({ text: trimmed, type: 'PROMPT' });
+    }
+
+    // ─── 2. push attachment bubbles ───────────────────────────────
+    const attachmentMsgs: DisplayMessage[] = this.previews
+      .filter((p) => p.url && !p.uploading)
+      .map((p) => ({
+        type: 'ATTACHMENT',
+        text: p.file.name,
+        src: p.url!,
+      }));
+    this.responses.push(...attachmentMsgs);
+
+    this.cdRef.detectChanges();
+    setTimeout(() => this.scrollToBottom(), 0);
+
+    // ─── 3. build Firestore payload ───────────────────────────────
+    const attachmentList = attachmentMsgs.map((a) => ({
+      url: a.src!,
+      name: a.text!,
+      mime:
+        this.EXT_MIME[a.text!.split('.').pop()!.toLowerCase()] ||
+        'application/octet-stream',
+    }));
+
+    const docId = this.afs.createId();
     const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
-      `${this.collectionPath}/${id}`
+      `${this.collectionPath}/${docId}`
     );
+
     await discussionRef.set({
       prompt: trimmed,
-      attachmentList: this.previews
-        .filter((p) => p.url && !p.uploading)
-        .map((p) => ({ url: p.url, mime: p.mime, name: p.file.name })),
+      attachmentList,
     });
-    this.previews = []; // clear UI
+
+    // ─── 4. reset compose area ────────────────────────────────────
+    this.prompt = '';
+    this.previews = [];
     this.uploading = false;
+    this.status = 'sure, one sec';
 
-    const destroyFn = discussionRef.valueChanges().subscribe({
-      next: (conversation) => {
-        if (conversation && conversation['status']) {
-          this.status = 'thinking...';
-          const state = conversation['status']['state'];
+    // ─── 5. listen for Bucky’s answer ─────────────────────────────
+    const unsub = discussionRef.valueChanges().subscribe({
+      next: (snap) => {
+        if (!snap?.status) return;
+        const state = snap.status.state;
 
-          switch (state) {
-            case 'COMPLETED':
-              this.status = '';
-              if (conversation['response']) {
-                this.responses.push({
-                  text: conversation['response'],
-                  type: 'RESPONSE',
-                });
-              }
-              if (conversation['imageUrl']) {
-                this.responses.push({
-                  src: conversation['imageUrl'],
-                  type: 'IMAGE',
-                });
-              }
-              this.cdRef.detectChanges();
-              setTimeout(() => this.scrollToBottom(), 0);
-              destroyFn.unsubscribe();
-              break;
-            case 'PROCESSING':
-              this.status = 'preparing your answer...';
-              break;
-            case 'ERRORED':
-              this.status = 'Oh no! Something went wrong.';
-              destroyFn.unsubscribe();
-              break;
-          }
+        switch (state) {
+          case 'PROCESSING':
+            this.status = 'preparing your answer...';
+            break;
+
+          case 'COMPLETED':
+            this.status = '';
+            if (snap.response) {
+              this.responses.push({ text: snap.response, type: 'RESPONSE' });
+            }
+            if (snap.imageUrl) {
+              this.responses.push({ src: snap.imageUrl, type: 'IMAGE' });
+            }
+            this.cdRef.detectChanges();
+            setTimeout(() => this.scrollToBottom(), 0);
+            unsub.unsubscribe();
+            break;
+
+          case 'ERRORED':
+            this.status = 'Oh no! Something went wrong.';
+            unsub.unsubscribe();
+            break;
         }
       },
       error: (err) => {
-        console.log(err);
+        console.error(err);
         this.errorMsg = err.message;
-        destroyFn.unsubscribe();
+        unsub.unsubscribe();
       },
     });
-
-    this.scrollToBottom();
   }
 
   endChat() {
