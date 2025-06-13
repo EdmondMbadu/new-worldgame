@@ -2,18 +2,19 @@
 <div
   class="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
   tabindex="0"
+  style="perspective:1200px"
 >
-<!-- TITLE BAR -->
-<h1
-  class="absolute top-5 left-1/2 -translate-x-1/2
-         px-4 py-1 rounded-md pointer-events-none
-         bg-white/80 text-gray-800
-         dark:bg-slate-900/70 dark:text-gray-100
-         text-lg  font-semibold backdrop-blur">
-  {{ presentationName }}
-</h1>
+  <!-- ─── TITLE BAR ─────────────────────────────────────────────── -->
+  <h1
+    class="absolute top-5 left-1/2 -translate-x-1/2
+           px-4 py-1 rounded-md pointer-events-none
+           bg-white/80 text-gray-800
+           dark:bg-slate-900/70 dark:text-gray-100
+           text-lg font-semibold backdrop-blur">
+    {{ presentationName }}
+  </h1>
 
-  <!-- CLOSE × -->
+  <!-- ─── CLOSE × ───────────────────────────────────────────────── -->
   <button
     (click)="close()"
     aria-label="Close"
@@ -23,7 +24,7 @@
     ×
   </button>
 
-  <!-- LEFT ARROW -->
+  <!-- ─── LEFT ARROW ────────────────────────────────────────────── -->
   <button
     (click)="prev()"
     [disabled]="i === 0"
@@ -33,39 +34,41 @@
     ‹
   </button>
 
-  <!-- SLIDE -->
+  <!-- ─── SLIDE (page) ──────────────────────────────────────────── -->
   <div
-    class="w-full max-w-6xl px-6 mx-auto
-           flex flex-col md:flex-row items-center gap-8"
+    class="w-full max-w-6xl px-6 mx-auto"
   >
-    <!-- IMAGE -->
-    <div class="w-full md:w-1/2 flex justify-center">
-      <img
-        [src]="slide.imageUrl"
-        class="max-h-[70vh] w-full object-contain rounded-lg shadow-lg"
-      />
-    </div>
-
-    <!-- BULLET CARD -->
-    <div
-      class="w-full md:w-1/2
-             bg-white/95 dark:bg-slate-800/95
-             rounded-xl shadow-xl backdrop-blur
-             p-6 overflow-auto max-h-[70vh]"
-    >
-      <ul
-        class="text-lg md:text-xl leading-relaxed
-               text-gray-800 dark:text-gray-100
-               list-disc list-inside space-y-3"
+        <div
+        class="page bg-white/95 dark:bg-slate-800/95 rounded-xl shadow-xl
+              backdrop-blur overflow-hidden flex flex-col md:flex-row"
+        [@pageTransition]="i"                   
+        [style.transform]="'scale(' + zoom + ')'"
       >
-        <li *ngFor="let b of slide?.bullets" class="font-medium">
-          {{ b }}
-        </li>
-      </ul>
+
+      <!-- IMAGE -->
+      <div class="md:w-1/2 p-6 flex justify-center items-center">
+        <img
+          [src]="slide.imageUrl"
+          class="max-h-[70vh] w-full object-contain rounded-lg"
+        />
+      </div>
+
+      <!-- BULLETS -->
+      <div class="md:w-1/2 p-6 overflow-auto max-h-[70vh]">
+        <ul
+          class="text-lg md:text-xl leading-relaxed
+                 text-gray-800 dark:text-gray-100
+                 list-disc list-inside space-y-3"
+        >
+          <li *ngFor="let b of slide?.bullets" class="font-medium">
+            {{ b }}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <!-- RIGHT ARROW -->
+  <!-- ─── RIGHT ARROW ───────────────────────────────────────────── -->
   <button
     (click)="next()"
     [disabled]="i === slides.length - 1"
@@ -74,4 +77,39 @@
            hover:text-teal-300 disabled:opacity-30 select-none">
     ›
   </button>
+
+  <!-- ─── CONTROL BAR ───────────────────────────────────────────── -->
+  <div
+    class="absolute bottom-6 left-1/2 -translate-x-1/2
+           flex items-center gap-6 text-white"
+  >
+    <!-- Zoom – -->
+    <button
+      (click)="zoomOut()"
+      class="bg-white/20 hover:bg-white/30 rounded-full w-10 h-10
+             flex items-center justify-center text-2xl"
+      aria-label="Zoom out"
+    >
+      −
+    </button>
+
+    <!-- Zoom + -->
+    <button
+      (click)="zoomIn()"
+      class="bg-white/20 hover:bg-white/30 rounded-full w-10 h-10
+             flex items-center justify-center text-2xl"
+      aria-label="Zoom in"
+    >
+      +
+    </button>
+
+    <!-- Share -->
+    <button
+      (click)="copyLink()"
+      class="bg-white/20 hover:bg-white/30 rounded-full px-4 py-2
+             text-sm font-semibold"
+    >
+      Share
+    </button>
+  </div>
 </div>
