@@ -112,11 +112,38 @@
 
                               
                         </div>
+                        <div id="workspace" #section>
+                            <figure class="mt-6 mb-6 "><img   class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/instructions%2Fhome-page.png?alt=media&token=3c64ce48-af56-4cb8-9207-142c1e4ac195" alt="">
+                                <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">The evaluation slider</figcaption> -->
+                                </figure>
+
+
+                            <h1 class="my-4 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-6 dark:text-white">
+                              3. My Workspace
+                            </h1>
+
+                            <p class="text-md mb-4 text-gray-900 dark:text-white">
+                              The Workspace is where you’ll find <strong>all your solutions</strong> — whether they are <strong>pending</strong>, or already <strong>submitted</strong>.
+                              It serves as a personalized hub to track everything you’ve created or contributed to.
+                            </p>
+
+                            <ul class="list-disc pl-5 text-md mb-6 text-gray-900 dark:text-white space-y-1">
+                              <li><strong>Search by title</strong> — easily filter through your solutions using a quick keyword search.</li>
+                              <li><strong>Click to open</strong> — selecting any solution takes you directly to its <strong>Solution Dashboard</strong>.</li>
+                              
+                            </ul>
+
+                            <p class="text-md text-gray-900 dark:text-white">
+                              For more details about what you can do in a Solution Dashboard, scroll down to the 
+                              <a (click)="scrollTo('solution-dashboard')" class="text-blue-500 underline hover:text-blue-700">Dashboard section</a>.
+                            </p>
+                          </div>
+
 
                         <div id="start-solution"  #section>
                         
-                            <figure class="mt-6 mb-6 "><img   class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/instructions%2Fhome-page.png?alt=media&token=3c64ce48-af56-4cb8-9207-142c1e4ac195" alt="">
-                                <!-- <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">The evaluation slider</figcaption> -->
+                            <figure class="mt-6 mb-6 "><img   class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fworkspace.png?alt=media&token=a24cf6b0-12be-417a-a549-547a06ccbac9" alt="">
+                                <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">My Workspace</figcaption>
                                 </figure>
 
                         
@@ -577,25 +604,75 @@
                     </div>
 
                     <div id="add-presentation" #section>
-                      <figure class="mt-6 mb-6">
-                        <img class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdocuments-presentation.png?alt=media&token=1549e142-22e0-4e78-af2b-805e5ce893d8" alt="">
-                        <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Team Documents</figcaption>
-                      </figure>
-                      <h1 class="my-4 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-6 dark:text-white">20. How to Add a Presentation or Document</h1>
-                      <p class="text-md mb-2 text-gray-900 dark:text-white">
-                        To upload a presentation or document, go to your solution dashboard → “Documents” → click on “Add Doc”. You can upload any standard format (PDF, PPT, DOCX, etc.). Once uploaded, all team members will be able to view or download the file.
-                      </p>
+                        <figure class="mt-6 mb-6">
+                          <img class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdocuments-presentation.png?alt=media&token=1549e142-22e0-4e78-af2b-805e5ce893d8" alt="">
+                          <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Team Documents</figcaption>
+                        </figure>
+
+                        <h1 class="my-4 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-6 dark:text-white">
+                          20. How to Add a Presentation or Document
+                        </h1>
+
+                        <p class="text-md mb-4 text-gray-900 dark:text-white">
+                          To upload a <strong>document</strong>, go to your Solution Dashboard → “Documents & Presentations” → click on “Add Doc”.
+                          You’ll be asked to enter:
+                        </p>
+
+                        <ul class="list-disc pl-5 text-md mb-4 text-gray-900 dark:text-white space-y-1">
+                          <li><strong>Title</strong> — a short label for the document.</li>
+                          <li><strong>Description</strong> — a brief explanation to help identify the file.</li>
+                          <li><strong>Attach File</strong> — upload a document in PDF, DOCX, or PPT format.</li>
+                        </ul>
+
+                        <p class="text-md mb-6 text-gray-900 dark:text-white">
+                          Once submitted, your document will be accessible to all team members. They will be able to view or download it directly from the dashboard.
+                        </p>
+
+                        <figure class="mt-6 mb-6">
+                          <img class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fadd-doc.png?alt=media&token=c20fd59e-e249-4580-a280-56c9d13427e4" alt="">
+                          <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Add Doc</figcaption>
+                        </figure>
+
+                        <h2 class="my-4 text-xl font-bold leading-tight text-gray-900 dark:text-white">Add a Presentation</h2>
+
+                        <p class="text-md mb-4 text-gray-900 dark:text-white">
+                          To create a <strong>presentation</strong>, stay under the “Documents & Presentations” section, and click on “Add Presentation”.
+                          For each slide you want to add, you will be asked for:
+                        </p>
+
+                        <ul class="list-disc pl-5 text-md mb-4 text-gray-900 dark:text-white space-y-1">
+                          <li><strong>Title</strong> — the slide’s heading.</li>
+                          <li><strong>Description</strong> — short supporting text for the slide.</li>
+                          <li><strong>Image</strong> — optional visual (you can add only image, only text, or both).</li>
+                        </ul>
+
+                        <p class="text-md mb-4 text-gray-900 dark:text-white">
+                          You can add as many slides as you want by clicking “Add Slide” after each entry.
+                          Once all slides are added, click on <strong>“Save Presentation”</strong> to publish and share it.
+                        </p>
+                        
                     </div>
 
+
                     <div id="whiteboard" #section>
-                      <figure class="mt-6 mb-6">
-                        <img class="h-auto" src="PATH_TO_WHITEBOARD_IMAGE" alt="">
-                        <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Team Whiteboard</figcaption>
-                      </figure>
+                     <figure class="mt-6 mb-6">
+                          <img class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fadd-presentation.png?alt=media&token=e60fb768-053d-4b7b-9383-c137bb9d9efb" alt="">
+                          <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Add Slide</figcaption>
+                        </figure>
+
+                        <p class="text-sm italic text-gray-600 dark:text-gray-400">
+                          *Note: Each slide must have at least a title or an image — you need one of these to proceed.
+                        </p>
                       <h1 class="my-4 text-2xl font-extrabold leading-tight text-gray-900 lg:mb-6 dark:text-white">21. Whiteboard Brainstorming</h1>
                       <p class="text-md mb-2 text-gray-900 dark:text-white">
                         The whiteboard is a shared creative space where you and your team can brainstorm visually in real time. You can draw, add sticky notes, create diagrams, or map ideas together. Find this under your solution dashboard under “Whiteboard Brainstorming”.
                       </p>
+                      <figure class="mt-6 mb-6">
+                          <img class="h-auto" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fadd-brainstorm.png?alt=media&token=36c5639b-92ed-4b2a-9dbf-c187b148636a" alt="">
+                          <figcaption class="text-center font-Nunito mt-4 text-gray-900 dark:text-white">Whiteboard</figcaption>
+                        </figure>
+
+                      
                     </div>
 
                         
@@ -644,8 +721,17 @@
                     </a>
                 </li>
                 <li>
+                <a (click)="scrollTo('workspace')"
+                  [ngClass]="{ 'text-blue-500': currentActive === 3, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                  class="cursor-pointer">
+                  <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
+                  Workspace
+                </a>
+              </li>
+
+                <li>
                     <a (click)="scrollTo('start-solution')"
-                       [ngClass]="{ 'text-blue-500': currentActive === 3, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                       [ngClass]="{ 'text-blue-500': currentActive === 4, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                        class="cursor-pointer">
                       <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                     Start Solution
@@ -653,7 +739,7 @@
                 </li>
                 <li>
                     <a (click)="scrollTo('develop-solution')"
-                       [ngClass]="{ 'text-blue-500': currentActive === 4 || currentActive === 5 || currentActive === 6 || currentActive===7 || currentActive===8 || currentActive===9  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                       [ngClass]="{ 'text-blue-500': currentActive === 5 || currentActive === 5 || currentActive === 6 || currentActive===7 || currentActive===8 || currentActive===9  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                        class="cursor-pointer">
                       <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                     Develop Solution
@@ -666,7 +752,7 @@
                   <li class=" flex flex-col">
 
                     <a (click)="scrollTo('d-define-problem')"
-                    [ngClass]="{ 'text-blue-500': currentActive === 5  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                    [ngClass]="{ 'text-blue-500': currentActive === 6  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                        class="flex items-center cursor-pointer hover:text-gray-800 hover:dark:text-gray-100 ">
                        <svg class="w-2 h-2 text-gray-800 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"/>
@@ -677,7 +763,7 @@
                   </li>
                   <li>
                     <a (click)="scrollTo('d-envision')"
-                    [ngClass]="{ 'text-blue-500': currentActive === 6  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                    [ngClass]="{ 'text-blue-500': currentActive === 7  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                     class="flex items-center cursor-pointer hover:text-gray-800 hover:dark:text-gray-100 ">
                     <svg class="w-2 h-2 text-gray-800 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"/>
@@ -687,7 +773,7 @@
                   </li>
                   <li>
                     <a (click)="scrollTo('d-plan')"
-                    [ngClass]="{ 'text-blue-500': currentActive === 7  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                    [ngClass]="{ 'text-blue-500': currentActive === 8  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                     class="flex items-center cursor-pointer hover:text-gray-800 hover:dark:text-gray-100 ">
                     <svg class="w-2 h-2 text-gray-800 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"/>
@@ -697,7 +783,7 @@
                   </li>
                   <li>
                     <a (click)="scrollTo('d-implementation')"
-                    [ngClass]="{ 'text-blue-500': currentActive === 8  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                    [ngClass]="{ 'text-blue-500': currentActive === 9  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                     class="flex items-center cursor-pointer hover:text-gray-800 hover:dark:text-gray-100 ">
                     <svg class="w-2 h-2 text-gray-800 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"/>
@@ -707,7 +793,7 @@
                   </li>
                   <li>
                     <a (click)="scrollTo('d-review')"
-                    [ngClass]="{ 'text-blue-500': currentActive === 9  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                    [ngClass]="{ 'text-blue-500': currentActive === 10  , 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                     class="flex items-center cursor-pointer hover:text-gray-800 hover:dark:text-gray-100 ">
                     <svg class="w-2 h-2 text-gray-800 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 8 14">
                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 13 5.7-5.326a.909.909 0 0 0 0-1.348L1 1"/>
@@ -720,7 +806,7 @@
               </li>
               <li>
                 <a (click)="scrollTo('save-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 10, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 11, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                   Save Solution
@@ -728,7 +814,7 @@
             </li>
               <li>
                 <a (click)="scrollTo('submit-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 11, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 12, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                   Submit Solution
@@ -736,7 +822,7 @@
             </li>
             <li>
                 <a (click)="scrollTo('view-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 12, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 13, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                   View Your Solution
@@ -744,7 +830,7 @@
             </li>
             <li>
                 <a (click)="scrollTo('edit-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 13, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 14, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                  Edit Submitted Solution
@@ -752,7 +838,7 @@
             </li>
             <li>
                 <a (click)="scrollTo('delete-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 14, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 15, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                  Delete Submitted Solution
@@ -760,7 +846,7 @@
             </li>
             <li>
               <a (click)="scrollTo('delete-pending-solution')"
-                 [ngClass]="{ 'text-blue-500': currentActive === 15, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                 [ngClass]="{ 'text-blue-500': currentActive === 16, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                  class="cursor-pointer">
                 <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                Delete Pending Solution
@@ -768,7 +854,7 @@
           </li>
             <li>
                 <a (click)="scrollTo('evaluate-solution')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 16, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 17, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                  Evaluate Submitted Solution
@@ -776,7 +862,7 @@
             </li>
             <li>
                 <a (click)="scrollTo('join-tournament')"
-                   [ngClass]="{ 'text-blue-500': currentActive === 17, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                   [ngClass]="{ 'text-blue-500': currentActive === 18, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                    class="cursor-pointer">
                   <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                  Join Tournament
@@ -784,7 +870,7 @@
             </li>
             <li>
               <a (click)="scrollTo('add-image')"
-                 [ngClass]="{ 'text-blue-500': currentActive === 18, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                 [ngClass]="{ 'text-blue-500': currentActive === 19, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                  class="cursor-pointer">
                 <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                 Add Image To  Text Editor
@@ -793,7 +879,7 @@
           </li>
           <li>
             <a (click)="scrollTo('solution-dashboard')"
-               [ngClass]="{ 'text-blue-500': currentActive === 19, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+               [ngClass]="{ 'text-blue-500': currentActive === 20, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                class="cursor-pointer">
               <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
              Solution Dashboard
@@ -802,7 +888,7 @@
         </li>
             <li>
               <a (click)="scrollTo('video-call')"
-                [ngClass]="{ 'text-blue-500': currentActive === 20, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                [ngClass]="{ 'text-blue-500': currentActive === 21, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                 class="cursor-pointer">
                 <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                 Team Video Call Room
@@ -810,21 +896,13 @@
             </li>
             <li>
               <a (click)="scrollTo('team-chat')"
-                [ngClass]="{ 'text-blue-500': currentActive === 21, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                [ngClass]="{ 'text-blue-500': currentActive === 22, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                 class="cursor-pointer">
                 <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                 Team Discussion (Chat)
               </a>
             </li>
 
-            <li>
-              <a (click)="scrollTo('team-documents')"
-                [ngClass]="{ 'text-blue-500': currentActive === 22, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
-                class="cursor-pointer">
-                <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
-                Documents & Presentations
-              </a>
-            </li>
              <li>
             <a (click)="scrollTo('solution-details')"
                [ngClass]="{ 'text-blue-500': currentActive === 23, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
@@ -836,8 +914,17 @@
         </li>
 
             <li>
-              <a (click)="scrollTo('add-presentation')"
+              <a (click)="scrollTo('team-documents')"
                 [ngClass]="{ 'text-blue-500': currentActive === 24, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                class="cursor-pointer">
+                <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
+                Documents & Presentations
+              </a>
+            </li>
+
+            <li>
+              <a (click)="scrollTo('add-presentation')"
+                [ngClass]="{ 'text-blue-500': currentActive === 25, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                 class="cursor-pointer">
                 <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                 Add a Presentation or Document
@@ -846,7 +933,7 @@
 
             <li>
               <a (click)="scrollTo('whiteboard')"
-                [ngClass]="{ 'text-blue-500': currentActive === 25, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
+                [ngClass]="{ 'text-blue-500': currentActive === 26, 'hover:text-gray-800 hover:dark:text-gray-100': currentActive !== 1 }"
                 class="cursor-pointer">
                 <span class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-full bg-blue-500"></span>
                 Whiteboard Brainstorming
