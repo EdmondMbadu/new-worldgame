@@ -64,6 +64,10 @@ export class HomeChallengeComponent {
   @ViewChild('solutions') solutionsSection!: ElementRef;
   showDiscussion = false;
 
+  isPrivate = false;
+  allowAccess = false; // computed locally
+  pageReady = false;
+
   // home-challenge.component.ts
   goToChallengeDiscussion() {
     this.router.navigate(['/challenge-discussion', this.challengePageId], {
@@ -97,6 +101,7 @@ export class HomeChallengeComponent {
     this.activatedRoute.paramMap.subscribe((params) => {
       this.challengePageId = params.get('id');
       window.scrollTo(0, 0);
+      this.pageReady = false;
       this.loadChallengePage();
     });
   }
@@ -116,6 +121,8 @@ export class HomeChallengeComponent {
         this.challengePage = data;
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
+        this.isPrivate = !!data.isPrivate;
+        this.pageReady = true;
 
         // test first if the logo image is available
         if (this.challengePage.logoImage) {
@@ -145,6 +152,7 @@ export class HomeChallengeComponent {
         if (this.challengePage.schedulePdfLink) {
           this.schedulePdfLink = this.challengePage.schedulePdfLink;
         }
+        this.checkAccess();
 
         this.challenge
           .getThisUserChallenges(
@@ -162,6 +170,12 @@ export class HomeChallengeComponent {
             this.fetchChallenges(this.activeCategory);
           });
       });
+  }
+  private checkAccess(): void {
+    // author always gets in
+    this.allowAccess =
+      this.isAuthorPage ||
+      this.participants.includes(this.auth.currentUser.email);
   }
 
   get isAuthorPage(): boolean {
@@ -678,5 +692,13 @@ export class HomeChallengeComponent {
     } finally {
       this.isLoading = false;
     }
+  }
+  // home-challenge.component.ts  (add below other methods)
+  toggleVisibility(): void {
+    this.isPrivate = !this.isPrivate;
+    this.afs
+      .doc(`challengePages/${this.challengePageId}`)
+      .update({ isPrivate: this.isPrivate })
+      .catch((err) => console.error('Visibility update failed', err));
   }
 }

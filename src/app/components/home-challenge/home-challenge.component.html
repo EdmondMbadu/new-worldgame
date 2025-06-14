@@ -1,564 +1,638 @@
-<div class="min-h-screen px-4 pb-16 dark:bg-slate-900">
-  <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
-    <!-- Navbar (unchanged, except perhaps removing margin/padding if needed) -->
-    <app-navbar
-      [sideBarSmall]="true"
-      [sideBarBig]="isSidebarOpen"
-      [email]="auth.currentUser.email"
-      [firstName]="auth.currentUser.firstName"
-      [lastName]="auth.currentUser.lastName"
-      [path]="'home'"
-      current=""
-      (toggleAsideEvent)="toggleAside()"
-    ></app-navbar>
+<ng-container *ngIf="pageReady && ( !isPrivate || allowAccess); else maybePrivate">
+    <div class="min-h-screen px-4 pb-16 dark:bg-slate-900">
+      <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
+        <!-- Navbar (unchanged, except perhaps removing margin/padding if needed) -->
+        <app-navbar
+          [sideBarSmall]="true"
+          [sideBarBig]="isSidebarOpen"
+          [email]="auth.currentUser.email"
+          [firstName]="auth.currentUser.firstName"
+          [lastName]="auth.currentUser.lastName"
+          [path]="'home'"
+          current=""
+          (toggleAsideEvent)="toggleAside()"
+        ></app-navbar>
 
-    <!-- Header / Hero Section -->
-    <section class="relative w-full bg-white dark:bg-gray-900 mt-14">
-      <div class="mx-auto max-w-screen-xl py-8 px-4 grid md:grid-cols-12 gap-8 items-center">
-        
-        <!-- Logo (if present) + Heading & Subheading -->
-        <div class="md:col-span-6 space-y-6">
-          <div class="flex items-center mb-4">
-            <img
+        <!-- Header / Hero Section -->
+        <section class="relative w-full bg-white dark:bg-gray-900 mt-14">
+          <div class="mx-auto max-w-screen-xl py-8 px-4 grid md:grid-cols-12 gap-8 items-center">
             
-              *ngIf="logoImage"
-              [src]="logoImage"
-              alt="Logo"
-              class="h-24 lg:h-28 w-auto mr-3 rounded object-contain border dark:border-gray-700"
-            />
-            <!-- Heading -->
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
-              {{ heading }}
-            </h1>
-          </div>
+            <!-- Logo (if present) + Heading & Subheading -->
+            <div class="md:col-span-6 space-y-6">
+              <div class="flex items-center mb-4">
+                <img
+                
+                  *ngIf="logoImage"
+                  [src]="logoImage"
+                  alt="Logo"
+                  class="h-24 lg:h-28 w-auto mr-3 rounded object-contain border dark:border-gray-700"
+                />
+                <!-- Heading -->
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  {{ heading }}
+                </h1>
+              </div>
 
-          <!-- Subheading -->
-          <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300">
-            {{ subHeading }}
-          </p>
+              <!-- Subheading -->
+              <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300">
+                {{ subHeading }}
+              </p>
 
-          <!-- Call to Action Button -->
-          <a
-            (click)="scrollToSolutions()"
-            class="inline-block mt-4 rounded-lg bg-teal-700 px-6 py-3.5 text-center font-medium text-white hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 cursor-pointer"
-            >Start Solving</a
-          >
-        </div>
-
-        <!-- Hero / Feature Image -->
-        <div class="md:col-span-6 flex justify-center md:justify-end">
-          <img
-            *ngIf="image"
-            [src]="image"
-            alt="Feature Image"
-            class="h-auto w-full max-w-md rounded-xl shadow-lg border-2 border-white dark:border-gray-700"
-          />
-        </div>
-      </div>
-    </section>
-
-    <!-- Participants & Author Tools Section -->
-    <section
-      class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
-      *ngIf="participants?.length || isAuthorPage"
-    >
-    <!-- Schedule Card -->
-<div *ngIf="schedulePdfLink"
-     class="relative w-full lg:w-1/2 bg-purple-50 dark:bg-purple-900
-            rounded-lg p-6 shadow mb-8">
-
-  <!-- round badge -->
-  <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center
-              justify-center w-12 h-12 rounded-full bg-purple-600 shadow-lg
-              ring-4 ring-white dark:ring-gray-900">
-    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-         stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M8 12h8m-8 4h4m4-14H4a2 2 0 00-2 2v16l4-4h12a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-    </svg>
-  </div>
-
-  <h2 class="pt-6 text-lg font-semibold text-purple-900 dark:text-purple-100">
-    {{ scheduleTitle || 'Schedule' }}
-  </h2>
-
-  <p class="text-sm text-gray-600 dark:text-gray-300">
-    Click below to view or download the PDF.
-  </p>
-
-  <a [href]="schedulePdfLink" target="_blank" rel="noopener"
-     class="inline-flex items-center mt-4 px-4 py-2 text-sm font-medium
-            text-white bg-purple-600 rounded hover:bg-purple-700">
-    <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor"
-         stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M12 4v16m8-8H4"/>
-    </svg>
-    Open&nbsp;PDF
-  </a>
-</div>
-
-      <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6">
-
-        <!-- Participants List -->
-        <div class="w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow">
-<div class="relative w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800
-            rounded-lg p-4 shadow">
-
-  <!-- badge -->
-  <div class="absolute -top-6 left-1/2 -translate-x-1/2
-              flex items-center justify-center
-              w-12 h-12 rounded-full bg-violet-600 shadow-lg
-              ring-4 ring-white dark:ring-gray-900">
-    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-         viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M17 20h5v-2a4 4 0 00-3-3.87M9 
-               20H4v-2a4 4 0 013-3.87M15 7a4 
-               4 0 11-8 0 4 4 0 018 0zm6 4a2 
-               2 0 11-4 0 2 2 0 014 0z"/>
-    </svg>
-  </div>
-  </div>
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Participants
-          </h2>
-          
-          <!-- Participants List -->
-          <div *ngIf="participants.length > 0; else noParticipants">
-            <ul class="divide-y divide-gray-200 dark:divide-gray-600">
-              <li
-                class="py-2 flex items-center space-x-2"
-                *ngFor="let participant of participantsToRender"
+              <!-- Call to Action Button -->
+              <a
+                (click)="scrollToSolutions()"
+                class="inline-block mt-4 rounded-lg bg-teal-700 px-6 py-3.5 text-center font-medium text-white hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300 dark:focus:ring-teal-800 cursor-pointer"
+                >Start Solving</a
               >
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none"
-                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M5.121 17.804A3 3 0 017 17h10a3 3 0 012.584 1.418M12 13a4 4 0 100-8 4 4 0 000 8z"/>
-                </svg>
-                <span class="text-gray-700 dark:text-gray-200">
-                  {{ participant }}
-                </span>
-              </li>
-            </ul>
+            </div>
 
-            <!-- Toggle Button -->
-            <button
-              *ngIf="participants.length > 5"
-              class="mt-3 text-sm font-medium text-teal-700 hover:text-teal-900
-                    dark:text-teal-400 dark:hover:text-teal-300 focus:outline-none"
-              (click)="showAllParticipants = !showAllParticipants"
-            >
-              {{ showAllParticipants ? 'Show fewer' : 'Show all (' + participants.length + ')' }}
-            </button>
+            <!-- Hero / Feature Image -->
+            <div class="md:col-span-6 flex justify-center md:justify-end">
+              <img
+                *ngIf="image"
+                [src]="image"
+                alt="Feature Image"
+                class="h-auto w-full max-w-md rounded-xl shadow-lg border-2 border-white dark:border-gray-700"
+              />
+            </div>
           </div>
+        </section>
 
-          <ng-template #noParticipants>
-            <p class="text-gray-500 dark:text-gray-400">
-              No participants have been added yet.
-            </p>
-          </ng-template>
-        </div>
-
-        <!-- Author Tools (Only visible if isAuthorPage) -->
-        <div
-          class="w-full lg:w-1/2 flex flex-col items-start lg:items-end gap-4"
-          *ngIf="isAuthorPage"
+        <!-- Participants & Author Tools Section -->
+        <section
+          class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
+          *ngIf="participants?.length || isAuthorPage"
         >
-          <div
-            class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow w-full lg:w-auto"
-          >
-            <h3
-              class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2"
-            >
-              Author Tools
-            </h3>
-            <div class="flex flex-wrap gap-3">
-              <!-- Add Challenge -->
-              <button
-                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded hover:bg-teal-700"
-                (click)="toggle('showAddChallenge')"
-              >
-                <svg
-                  class="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 7.757v8.486M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
-                  />
-                </svg>
-                Add Challenge
-              </button>
+        <!-- Schedule Card -->
+    <div *ngIf="schedulePdfLink"
+        class="relative w-full lg:w-1/2 bg-purple-50 dark:bg-purple-900
+                rounded-lg p-6 shadow mb-8">
 
-              <!-- Add Participant -->
-              <button
-                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700"
-                (click)="toggle('showAddTeamMember')"
-              >
-                <svg
-                  class="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
+      <!-- round badge -->
+      <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center
+                  justify-center w-12 h-12 rounded-full bg-purple-600 shadow-lg
+                  ring-4 ring-white dark:ring-gray-900">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M8 12h8m-8 4h4m4-14H4a2 2 0 00-2 2v16l4-4h12a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+        </svg>
+      </div>
+
+      <h2 class="pt-6 text-lg font-semibold text-purple-900 dark:text-purple-100">
+        {{ scheduleTitle || 'Schedule' }}
+      </h2>
+
+      <p class="text-sm text-gray-600 dark:text-gray-300">
+        Click below to view or download the PDF.
+      </p>
+
+      <a [href]="schedulePdfLink" target="_blank" rel="noopener"
+        class="inline-flex items-center mt-4 px-4 py-2 text-sm font-medium
+                text-white bg-purple-600 rounded hover:bg-purple-700">
+        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 4v16m8-8H4"/>
+        </svg>
+        Open&nbsp;PDF
+      </a>
+    </div>
+
+          <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6">
+
+            <!-- Participants List -->
+            <div class="w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow">
+    <div class="relative w-full lg:w-1/2 bg-gray-50 dark:bg-gray-800
+                rounded-lg p-4 shadow">
+
+      <!-- badge -->
+      <div class="absolute -top-6 left-1/2 -translate-x-1/2
+                  flex items-center justify-center
+                  w-12 h-12 rounded-full bg-violet-600 shadow-lg
+                  ring-4 ring-white dark:ring-gray-900">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17 20h5v-2a4 4 0 00-3-3.87M9 
+                  20H4v-2a4 4 0 013-3.87M15 7a4 
+                  4 0 11-8 0 4 4 0 018 0zm6 4a2 
+                  2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      </div>
+      </div>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Participants
+              </h2>
+              
+              <!-- Participants List -->
+              <div *ngIf="participants.length > 0; else noParticipants">
+                <ul class="divide-y divide-gray-200 dark:divide-gray-600">
+                  <li
+                    class="py-2 flex items-center space-x-2"
+                    *ngFor="let participant of participantsToRender"
+                  >
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none"
+                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M5.121 17.804A3 3 0 017 17h10a3 3 0 012.584 1.418M12 13a4 4 0 100-8 4 4 0 000 8z"/>
+                    </svg>
+                    <span class="text-gray-700 dark:text-gray-200">
+                      {{ participant }}
+                    </span>
+                  </li>
+                </ul>
+
+                <!-- Toggle Button -->
+                <button
+                  *ngIf="participants.length > 5"
+                  class="mt-3 text-sm font-medium text-teal-700 hover:text-teal-900
+                        dark:text-teal-400 dark:hover:text-teal-300 focus:outline-none"
+                  (click)="showAllParticipants = !showAllParticipants"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M12 7.757v8.486M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
-                  />
-                </svg>
-                Add Participant
-              </button>
-              <button class="flex items-center px-4 py-2 text-sm font-medium text-white
-               bg-purple-600 rounded hover:bg-purple-700"
-                      (click)="toggle('showEditLinks')">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 4v16m8-8H4" />
-                </svg>
-                Edit Video / Chat Links
+                  {{ showAllParticipants ? 'Show fewer' : 'Show all (' + participants.length + ')' }}
+                </button>
+              </div>
+
+              <ng-template #noParticipants>
+                <p class="text-gray-500 dark:text-gray-400">
+                  No participants have been added yet.
+                </p>
+              </ng-template>
+            </div>
+
+            <!-- Author Tools (Only visible if isAuthorPage) -->
+            <div
+              class="w-full lg:w-1/2 flex flex-col items-start lg:items-end gap-4"
+              *ngIf="isAuthorPage"
+            >
+              <div
+                class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 shadow w-full lg:w-auto"
+              >
+                <h3
+                  class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2"
+                >
+                  Author Tools
+                </h3>
+                <div class="flex flex-wrap gap-3">
+                  <!-- Add Challenge -->
+                  <button
+                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded hover:bg-teal-700"
+                    (click)="toggle('showAddChallenge')"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 7.757v8.486M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Add Challenge
+                  </button>
+
+                  <!-- Add Participant -->
+                  <button
+                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700"
+                    (click)="toggle('showAddTeamMember')"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 7.757v8.486M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Add Participant
+                  </button>
+                  <button class="flex items-center px-4 py-2 text-sm font-medium text-white
+                  bg-purple-600 rounded hover:bg-purple-700"
+                          (click)="toggle('showEditLinks')">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                          viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 4v16m8-8H4" />
+                    </svg>
+                    Edit Video / Chat Links
+                    </button>
+
+
+                  <!-- Remove Participant -->
+                  <button
+                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded hover:bg-orange-700"
+                    (click)="toggle('showRemoveTeamMember')"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
+                      />
+                    </svg>
+                    Remove Participant
+                  </button>
+
+                  <!-- Edit Schedule -->
+                  <button
+                    *ngIf="isAuthorPage"
+                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700"
+                    (click)="toggle('showEditSchedule')">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Edit&nbsp;Schedule
+                  </button>
+                  <!-- Copy URL -->
+                  <button
+                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600"
+                    (click)="copyUrlToClipboard()"
+                  >
+                    <svg
+                      class="w-4 h-4 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      ></path>
+                    </svg>
+                    Copy URL
+                  </button>
+             
+              <!-- PRIVACY PILL SWITCH (knob hides its own label) -->
+              <!-- PRIVACY PILL SWITCH -->
+                <button
+                  (click)="toggleVisibility()"
+                  class="relative inline-flex items-center w-24 h-8 rounded-full
+                        transition-colors focus:outline-none ring-1 ring-gray-300
+                        dark:ring-gray-600"
+                  [ngClass]="
+                    isPrivate
+                      ? 'bg-teal-600'
+                      : 'bg-gray-300 dark:bg-gray-500'  
+                  "
+                  role="switch"
+                  [attr.aria-checked]="isPrivate">
+
+                  <!-- PRIVATE label (shows when knob on right) -->
+                  <span
+                    class="absolute left-2 text-xs font-semibold text-white transition-opacity"
+                    [ngClass]="isPrivate ? 'opacity-100' : 'opacity-0'">
+                    Private
+                  </span>
+
+                  <!-- PUBLIC label (shows when knob on left) -->
+                  <span
+                    class="absolute right-2 text-xs font-semibold
+                          text-gray-800 dark:text-gray-100 transition-opacity"
+                    [ngClass]="isPrivate ? 'opacity-0' : 'opacity-100'">
+                    Public
+                  </span>
+
+                  <!-- KNOB -->
+                  <span
+                    class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow
+                          transition-transform"
+                    [ngStyle]="{
+                      transform: isPrivate ? 'translateX(60px)' : 'translateX(0)'
+                    }">
+                  </span>
                 </button>
 
 
-              <!-- Remove Participant -->
-              <button
-                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded hover:bg-orange-700"
-                (click)="toggle('showRemoveTeamMember')"
-              >
-                <svg
-                  class="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M7.757 12h8.486M21 12A9 9 0 113 12a9 9 0 0118 0z"
-                  />
-                </svg>
-                Remove Participant
-              </button>
 
-              <!-- Edit Schedule -->
-              <button
-                *ngIf="isAuthorPage"
-                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700"
-                (click)="toggle('showEditSchedule')">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 4v16m8-8H4"/>
-                </svg>
-                Edit&nbsp;Schedule
-              </button>
-              <!-- Copy URL -->
-              <button
-                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600"
-                (click)="copyUrlToClipboard()"
-              >
-                <svg
-                  class="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Copy URL
-              </button>
 
-              <!-- Delete Page -->
-              <button
-                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
-                (click)="deleteChallengePage()"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="w-4 h-4 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000
-                        2v10a2 2 0 002 2h8a2 2 0
-                        002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1
-                        1 0 0011 2H9zM7 8a1 1 0 012
-                        0v6a1 1 0 11-2 0V8zm5-1a1
-                        1 0 00-1 1v6a1 1 0 102
-                        0V8a1 1 0 00-1-1z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-                Delete Page
-              </button>
+
+
+                  <!-- Delete Page -->
+                  <button
+                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700"
+                    (click)="deleteChallengePage()"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="w-4 h-4 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000
+                            2v10a2 2 0 002 2h8a2 2 0
+                            002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1
+                            1 0 0011 2H9zM7 8a1 1 0 012
+                            0v6a1 1 0 11-2 0V8zm5-1a1
+                            1 0 00-1 1v6a1 1 0 102
+                            0V8a1 1 0 00-1-1z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                    Delete Page
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
+
+      <!-- home-challenge.component.html -->
+    <section class="mx-auto max-w-screen-xl py-6 px-4">
+      <!-- Discussion Card -->
+    <div (click)="goToChallengeDiscussion()"
+        class="relative mt-6 p-6 bg-teal-600 hover:bg-teal-700 text-white
+                rounded-lg shadow-lg cursor-pointer transition-colors duration-200">
+
+      <div class="absolute -top-6 left-1/2 -translate-x-1/2
+                  flex items-center justify-center
+                  w-12 h-12 rounded-full bg-teal-500 shadow-lg
+                  ring-4 ring-white dark:ring-gray-900">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M7 8h10M7 12h4m-2 8h6l4 4V6a2
+                  2 0 00-2-2H6a2 2 0 00-2 2v12a2
+                  2 0 002 2z"/>
+        </svg>
       </div>
+
+      <h3 class="pt-6 text-xl font-semibold">
+        Go to Discussion – {{ heading }}
+      </h3>
+      <p class="text-sm opacity-90">
+        Join the conversation for this workspace
+      </p>
+    </div>
+
     </section>
 
-  <!-- home-challenge.component.html -->
-<section class="mx-auto max-w-screen-xl py-6 px-4">
-  <!-- Discussion Card -->
- <div (click)="goToChallengeDiscussion()"
-     class="relative mt-6 p-6 bg-teal-600 hover:bg-teal-700 text-white
-            rounded-lg shadow-lg cursor-pointer transition-colors duration-200">
-
-  <div class="absolute -top-6 left-1/2 -translate-x-1/2
-              flex items-center justify-center
-              w-12 h-12 rounded-full bg-teal-500 shadow-lg
-              ring-4 ring-white dark:ring-gray-900">
-    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-         viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M7 8h10M7 12h4m-2 8h6l4 4V6a2
-               2 0 00-2-2H6a2 2 0 00-2 2v12a2
-               2 0 002 2z"/>
-    </svg>
-  </div>
-
-  <h3 class="pt-6 text-xl font-semibold">
-    Go to Discussion – {{ heading }}
-  </h3>
-  <p class="text-sm opacity-90">
-    Join the conversation for this workspace
-  </p>
-</div>
-
-</section>
-
-<!-- Some wrapping section, e.g. after Participants & Author Tools -->
-<section
-  class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
->
-  <!-- Possibly other content like participants list / author tools here -->
-
-<!-- Video / Chat Links -->
-<div class="mt-8 space-y-6">
-
-  <!-- Google Meet Card -->
-<div *ngIf="googleMeetLink"
-     class="relative p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow">
-
-  <div class="absolute -top-6 left-1/2 -translate-x-1/2
-              flex items-center justify-center
-              w-12 h-12 rounded-full bg-green-600 shadow-lg
-              ring-4 ring-white dark:ring-gray-900">
-    <a  class [href]="googleMeetLink" target="_blank" rel="noopener">
-        <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15 10l4.553-2.276A1 1 0 0121
-                    8.618v6.764a1 1 0 01-1.447.894L15
-                    14M4 6h8a2 2 0 012 2v8a2 2 0
-                    01-2 2H4a2 2 0 01-2-2V8a2 2
-                    0 012-2z"/>
-        </svg>
-    </a>
-  </div>
-
-  <h2 class="pt-6 text-lg font-semibold text-green-900 dark:text-green-100">
-    Google Meet Room
-  </h2>
-    <p class="text-sm text-gray-600 dark:text-gray-300">
-      Always-open video chat for this space.
-    </p>
-    <a [href]="googleMeetLink" target="_blank" rel="noopener"
-       class="inline-flex items-center mt-4 px-4 py-2 text-sm
-              font-medium text-white bg-green-600 rounded hover:bg-green-700">
-              <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15 10l4.553-2.276A1 1 0 0121
-                    8.618v6.764a1 1 0 01-1.447.894L15
-                    14M4 6h8a2 2 0 012 2v8a2 2 0
-                    01-2 2H4a2 2 0 01-2-2V8a2 2
-                    0 012-2z"/>
-        </svg>
-        <span class="mx-2">Join Meet</span>
-     
-
-    </a>
-  </div>
-
-  <!-- Zoom Card -->
- <div *ngIf="zoomLink"
-     class="relative p-6 bg-blue-50 dark:bg-blue-900 rounded-lg shadow">
-
-  <div class="absolute -top-6 left-1/2 -translate-x-1/2
-              flex items-center justify-center
-              w-12 h-12 rounded-full bg-blue-600 shadow-lg
-              ring-4 ring-white dark:ring-gray-900">
-     <a class="cursor-pointer" [href]="zoomLink" target="_blank" rel="noopener">
-          <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15 10l4.553-2.276A1 1 0 0121
-                    8.618v6.764a1 1 0 01-1.447.894L15
-                    14M4 6h8a2 2 0 012 2v8a2 2 0
-                    01-2 2H4a2 2 0 01-2-2V8a2 2
-                    0 012-2z"/>
-        </svg>
-    </a>
-  </div>
-
-  <h2 class="pt-6 text-lg font-semibold text-blue-900 dark:text-blue-100">
-    Zoom Room
-  </h2>
-    <a [href]="zoomLink" target="_blank" rel="noopener"
-       class="inline-flex items-center mt-2 px-4 py-2 text-sm
-              font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
-              <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M15 10l4.553-2.276A1 1 0 0121
-                    8.618v6.764a1 1 0 01-1.447.894L15
-                    14M4 6h8a2 2 0 012 2v8a2 2 0
-                    01-2 2H4a2 2 0 01-2-2V8a2 2
-                    0 012-2z"/>
-        </svg>
-     <span class="mx-2">Join Zoom</span>
-    </a>
-  </div>
-
-  <!-- Optional instructions -->
-  <div *ngIf="chatNote"
-       class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow text-sm
-              text-gray-700 dark:text-gray-300">
-    {{ chatNote }}
-  </div>
-
-</div>
-
-</section>
-
-    <!-- Solutions & Category Filter Section -->
+    <!-- Some wrapping section, e.g. after Participants & Author Tools -->
     <section
-      #solutions
-      id="solutions"
-      class="scroll-mt-16 mt-8 mx-auto max-w-screen-xl px-4 pb-8 dark:bg-gray-900"
+      class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
     >
-          <!-- My Challenges Tag / Card -->
-      <div class="relative p-6 bg-teal-50 dark:bg-teal-900 rounded-lg shadow mb-8">
+      <!-- Possibly other content like participants list / author tools here -->
 
-        <!-- round badge -->
-        <div class="absolute -top-6 left-1/2 -translate-x-1/2
-                    flex items-center justify-center
-                    w-12 h-12 rounded-full bg-teal-600 shadow-lg
-                    ring-4 ring-white dark:ring-gray-900">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 8v8m-4-4h8M5 3h14a2 2 0 012 2v16l-4-4H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
-          </svg>
-        </div>
+    <!-- Video / Chat Links -->
+    <div class="mt-8 space-y-6">
 
-        <h2 class="pt-6 text-lg font-semibold text-teal-900 dark:text-teal-100 text-center">
-         Challenges
-        </h2>
-        <!-- optional helper text -->
-        <!-- <p class="text-sm text-gray-600 dark:text-gray-300 text-center">
-            Browse &amp; manage challenges you’ve created
-          </p> -->
+      <!-- Google Meet Card -->
+    <div *ngIf="googleMeetLink"
+        class="relative p-6 bg-green-50 dark:bg-green-900 rounded-lg shadow">
+
+      <div class="absolute -top-6 left-1/2 -translate-x-1/2
+                  flex items-center justify-center
+                  w-12 h-12 rounded-full bg-green-600 shadow-lg
+                  ring-4 ring-white dark:ring-gray-900">
+        <a  class [href]="googleMeetLink" target="_blank" rel="noopener">
+            <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15 10l4.553-2.276A1 1 0 0121
+                        8.618v6.764a1 1 0 01-1.447.894L15
+                        14M4 6h8a2 2 0 012 2v8a2 2 0
+                        01-2 2H4a2 2 0 01-2-2V8a2 2
+                        0 012-2z"/>
+            </svg>
+        </a>
       </div>
 
-      <!-- Category Filter -->
-      <div class="flex flex-wrap justify-center gap-4 mb-8">
-        <button
-          *ngFor="let category of categories"
-          (click)="setActiveCategory(category)"
-          [ngClass]="{
-            'bg-teal-700 text-white': category === activeCategory,
-            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200':
-              category !== activeCategory
-          }"
-          class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 hover:text-white transition"
-        >
-          {{ category }}
-        </button>
+      <h2 class="pt-6 text-lg font-semibold text-green-900 dark:text-green-100">
+        Google Meet Room
+      </h2>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          Always-open video chat for this space.
+        </p>
+        <a [href]="googleMeetLink" target="_blank" rel="noopener"
+          class="inline-flex items-center mt-4 px-4 py-2 text-sm
+                  font-medium text-white bg-green-600 rounded hover:bg-green-700">
+                  <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15 10l4.553-2.276A1 1 0 0121
+                        8.618v6.764a1 1 0 01-1.447.894L15
+                        14M4 6h8a2 2 0 012 2v8a2 2 0
+                        01-2 2H4a2 2 0 01-2-2V8a2 2
+                        0 012-2z"/>
+            </svg>
+            <span class="mx-2">Join Meet</span>
+        
+
+        </a>
       </div>
 
-      <!-- Challenges Grid -->
-      <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <div
-          *ngFor="let t of titles; let i = index"
-          class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 hover:shadow-lg transform transition duration-300 hover:scale-105"
-        >
-  <!-- 🗑 delete button for author only -->
-       
-                <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow
-                    p-4 hover:shadow-lg transform transition duration-300 hover:scale-105">
+      <!-- Zoom Card -->
+    <div *ngIf="zoomLink"
+        class="relative p-6 bg-blue-50 dark:bg-blue-900 rounded-lg shadow">
 
-          <div class="absolute -top-4 left-4
-                      flex items-center justify-center
-                      w-10 h-10 rounded-full bg-yellow-500 shadow-lg
-                      ring-4 ring-white dark:ring-gray-800">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                  stroke-width="2" viewBox="0 0 24 24">
+      <div class="absolute -top-6 left-1/2 -translate-x-1/2
+                  flex items-center justify-center
+                  w-12 h-12 rounded-full bg-blue-600 shadow-lg
+                  ring-4 ring-white dark:ring-gray-900">
+        <a class="cursor-pointer" [href]="zoomLink" target="_blank" rel="noopener">
+              <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 2a7 7 0 00-4 12v3a1 1 0
-                        001 1h6a1 1 0 001-1v-3a7 7 0
-                        00-4-12zm-2 18h4"/>
+                    d="M15 10l4.553-2.276A1 1 0 0121
+                        8.618v6.764a1 1 0 01-1.447.894L15
+                        14M4 6h8a2 2 0 012 2v8a2 2 0
+                        01-2 2H4a2 2 0 01-2-2V8a2 2
+                        0 012-2z"/>
             </svg>
-          </div>
-          <!-- 🟡 move button -->
-          <button *ngIf="isAuthorPage"
-                  (click)="moveChallenge(ids[i], i)"
-                  class="absolute top-2 right-10 bg-yellow-500/90 hover:bg-yellow-600
-                        text-white p-1.5 rounded-full">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </button>
-
-             <button *ngIf="isAuthorPage"
-                  (click)="deleteChallenge(ids[i], i)"
-                  class="absolute top-2 right-2 bg-red-600/90 hover:bg-red-700
-                        text-white p-1.5 rounded-full">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          </div>
-          <app-challenge
-            [ngStyle]="{'animation-delay': i * 100 + 'ms'}"
-            [image]="challengeImages[i]"
-            [fromChallengeSpace]='true'
-            [id]="ids[i]"
-            [description]="descriptions[i]"
-            [restricted]="'true'"
-            [title]="t"
-          >
-          </app-challenge>
-        </div>
+        </a>
       </div>
+
+      <h2 class="pt-6 text-lg font-semibold text-blue-900 dark:text-blue-100">
+        Zoom Room
+      </h2>
+        <a [href]="zoomLink" target="_blank" rel="noopener"
+          class="inline-flex items-center mt-2 px-4 py-2 text-sm
+                  font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                  <svg  class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15 10l4.553-2.276A1 1 0 0121
+                        8.618v6.764a1 1 0 01-1.447.894L15
+                        14M4 6h8a2 2 0 012 2v8a2 2 0
+                        01-2 2H4a2 2 0 01-2-2V8a2 2
+                        0 012-2z"/>
+            </svg>
+        <span class="mx-2">Join Zoom</span>
+        </a>
+      </div>
+
+      <!-- Optional instructions -->
+      <div *ngIf="chatNote"
+          class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow text-sm
+                  text-gray-700 dark:text-gray-300">
+        {{ chatNote }}
+      </div>
+
+    </div>
+
     </section>
-  </div>
-</div>
 
+        <!-- Solutions & Category Filter Section -->
+        <section
+          #solutions
+          id="solutions"
+          class="scroll-mt-16 mt-8 mx-auto max-w-screen-xl px-4 pb-8 dark:bg-gray-900"
+        >
+              <!-- My Challenges Tag / Card -->
+          <div class="relative p-6 bg-teal-50 dark:bg-teal-900 rounded-lg shadow mb-8">
+
+            <!-- round badge -->
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2
+                        flex items-center justify-center
+                        w-12 h-12 rounded-full bg-teal-600 shadow-lg
+                        ring-4 ring-white dark:ring-gray-900">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 8v8m-4-4h8M5 3h14a2 2 0 012 2v16l-4-4H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+              </svg>
+            </div>
+
+            <h2 class="pt-6 text-lg font-semibold text-teal-900 dark:text-teal-100 text-center">
+            Challenges
+            </h2>
+            <!-- optional helper text -->
+            <!-- <p class="text-sm text-gray-600 dark:text-gray-300 text-center">
+                Browse &amp; manage challenges you’ve created
+              </p> -->
+          </div>
+
+          <!-- Category Filter -->
+          <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button
+              *ngFor="let category of categories"
+              (click)="setActiveCategory(category)"
+              [ngClass]="{
+                'bg-teal-700 text-white': category === activeCategory,
+                'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200':
+                  category !== activeCategory
+              }"
+              class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 hover:text-white transition"
+            >
+              {{ category }}
+            </button>
+          </div>
+
+          <!-- Challenges Grid -->
+          <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div
+              *ngFor="let t of titles; let i = index"
+              class="bg-white dark:bg-gray-800 rounded-xl shadow p-4 hover:shadow-lg transform transition duration-300 hover:scale-105"
+            >
+      <!-- 🗑 delete button for author only -->
+          
+                    <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow
+                        p-4 hover:shadow-lg transform transition duration-300 hover:scale-105">
+
+              <div class="absolute -top-4 left-4
+                          flex items-center justify-center
+                          w-10 h-10 rounded-full bg-yellow-500 shadow-lg
+                          ring-4 ring-white dark:ring-gray-800">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                      stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 2a7 7 0 00-4 12v3a1 1 0
+                            001 1h6a1 1 0 001-1v-3a7 7 0
+                            00-4-12zm-2 18h4"/>
+                </svg>
+              </div>
+              <!-- 🟡 move button -->
+              <button *ngIf="isAuthorPage"
+                      (click)="moveChallenge(ids[i], i)"
+                      class="absolute top-2 right-10 bg-yellow-500/90 hover:bg-yellow-600
+                            text-white p-1.5 rounded-full">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+
+                <button *ngIf="isAuthorPage"
+                      (click)="deleteChallenge(ids[i], i)"
+                      class="absolute top-2 right-2 bg-red-600/90 hover:bg-red-700
+                            text-white p-1.5 rounded-full">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                    viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              </div>
+              <app-challenge
+                [ngStyle]="{'animation-delay': i * 100 + 'ms'}"
+                [image]="challengeImages[i]"
+                [fromChallengeSpace]='true'
+                [id]="ids[i]"
+                [description]="descriptions[i]"
+                [restricted]="'true'"
+                [title]="t"
+              >
+              </app-challenge>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+</ng-container>
+
+<ng-template #maybePrivate>
+  <ng-container *ngIf="pageReady" >
+        <div class="relative min-h-screen flex items-center justify-center
+                    bg-gray-100 dark:bg-gray-900">
+          <!-- ✕ close -->
+          <button
+            routerLink="/home"
+            class="absolute top-4 right-4 text-3xl font-bold text-gray-600
+                  hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+            ×
+          </button>
+
+          <!-- message -->
+          <div
+            class="text-center space-y-4 p-8 bg-white/90 dark:bg-slate-800/90
+                  rounded-lg backdrop-blur">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">
+              Private Space
+            </h1>
+            <p class="text-gray-700 dark:text-gray-300">
+              You don’t have permission to view this workspace.<br>
+              Please contact the administrator for access.
+            </p>
+          </div>
+        </div>
+  </ng-container>
+</ng-template>
 
 <!-- ADD CHALLENGE MODAL -->
 <div

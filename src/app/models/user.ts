@@ -82,4 +82,5 @@ export class ChallengePage {
   chatNote?: string; // NEW  (instructions / text-chat info)
   scheduleTitle?: string;
   schedulePdfLink?: string;
+  isPrivate?: boolean;
 }
