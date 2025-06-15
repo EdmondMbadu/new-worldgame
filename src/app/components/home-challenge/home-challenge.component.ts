@@ -34,6 +34,7 @@ export class HomeChallengeComponent {
   challengePage: ChallengePage = new ChallengePage();
   challengePageId?: any = '';
   categories: string[] = [];
+  participantsHidden = false;
   showAllParticipants = false;
   challenges: {
     [key: string]: {
@@ -123,6 +124,8 @@ export class HomeChallengeComponent {
         this.subHeading = this.challengePage.subHeading!;
         this.isPrivate = !!data.isPrivate;
         this.pageReady = true;
+        this.participantsHidden = !!data.participantsHidden; // default = false
+        this.showParticipantsList = !this.participantsHidden; // sync UI
 
         // test first if the logo image is available
         if (this.challengePage.logoImage) {
@@ -216,6 +219,8 @@ export class HomeChallengeComponent {
       alert('Could not save links—try again.');
     }
   }
+  /** whether the detailed list is visible */
+  showParticipantsList = false;
 
   fetchChallenges(category: string) {
     // only fetch challenges if the category is present and not an empty string
@@ -700,5 +705,25 @@ export class HomeChallengeComponent {
       .doc(`challengePages/${this.challengePageId}`)
       .update({ isPrivate: this.isPrivate })
       .catch((err) => console.error('Visibility update failed', err));
+  }
+  async toggleParticipantsVisibilityGlobal() {
+    if (!this.isAuthorPage) {
+      // safeguard - only author can change for all
+      this.showParticipantsList = !this.showParticipantsList; // local fallback
+      return;
+    }
+
+    // flip & persist
+    this.participantsHidden = !this.participantsHidden;
+    this.showParticipantsList = !this.participantsHidden;
+
+    try {
+      await this.afs
+        .doc(`challengePages/${this.challengePageId}`)
+        .update({ participantsHidden: this.participantsHidden });
+    } catch (err) {
+      console.error('Failed to update visibility', err);
+      alert('Could not update participants visibility.');
+    }
   }
 }

@@ -83,4 +83,5 @@ export class ChallengePage {
   scheduleTitle?: string;
   schedulePdfLink?: string;
   isPrivate?: boolean;
+  participantsHidden?: boolean;
 }
