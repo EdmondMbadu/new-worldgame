@@ -84,4 +84,5 @@ export class ChallengePage {
   schedulePdfLink?: string;
   isPrivate?: boolean;
   participantsHidden?: boolean;
+  handouts?: { name: string; url: string }[];
 }

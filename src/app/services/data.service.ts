@@ -433,10 +433,15 @@ export class DataService implements OnInit {
 
     return true;
   }
-  async startUpload(event: FileList, currentPath: string, upload = '') {
-    const file = event?.item(0);
+  async startUpload(
+    fileOrList: File | FileList,
+    currentPath: string,
+    upload = ''
+  ) {
+    const file: File | null =
+      fileOrList instanceof File ? fileOrList : fileOrList.item(0);
     console.log(' current file data', file);
-
+    if (!file) return;
     if (file) {
       if (!this.allowedMimeTypes.includes(file.type)) {
         console.log('unsupported file type');

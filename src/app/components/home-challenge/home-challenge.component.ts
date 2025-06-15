@@ -68,6 +68,12 @@ export class HomeChallengeComponent {
   isPrivate = false;
   allowAccess = false; // computed locally
   pageReady = false;
+  handouts: { name: string; url: string }[] = [];
+  showEditHandouts = false;
+
+  // ✨ temp holders while adding one file
+  handoutName = '';
+  handoutFile: File | null = null;
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -131,6 +137,8 @@ export class HomeChallengeComponent {
         if (this.challengePage.logoImage) {
           this.logoImage = this.challengePage.logoImage;
         }
+        if (data.handouts) this.handouts = data.handouts;
+
         if (this.challengePage.imageChallenge) {
           this.image = this.challengePage.imageChallenge;
         }
@@ -283,6 +291,7 @@ export class HomeChallengeComponent {
       | 'showRemoveTeamMember'
       | 'showEditLinks'
       | 'showEditSchedule'
+      | 'showEditHandouts'
   ) {
     this[property] = !this[property];
   }
@@ -725,5 +734,46 @@ export class HomeChallengeComponent {
       console.error('Failed to update visibility', err);
       alert('Could not update participants visibility.');
     }
+  }
+  async addHandout() {
+    if (!this.handoutName.trim() || !this.handoutFile) {
+      alert('Choose a file and give it a name.');
+      return;
+    }
+    this.isLoading = true;
+    try {
+      const url = await this.uploadHandout(this.handoutFile);
+      this.handouts.push({ name: this.handoutName.trim(), url });
+
+      await this.afs
+        .doc(`challengePages/${this.challengePageId}`)
+        .update({ handouts: this.handouts });
+
+      // reset inputs
+      this.handoutName = '';
+      this.handoutFile = null;
+    } catch (err) {
+      console.error(err);
+      alert('Upload failed.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async removeHandout(index: number) {
+    if (!confirm('Delete this document?')) return;
+    this.handouts.splice(index, 1);
+    await this.afs
+      .doc(`challengePages/${this.challengePageId}`)
+      .update({ handouts: this.handouts });
+  }
+  async uploadHandout(file: File): Promise<string> {
+    // store under the current page → handouts/{randomId}
+    const url = await this.data.startUpload(
+      file,
+      `handouts/${this.afs.createId()}`,
+      'false'
+    );
+    return url!;
   }
 }
