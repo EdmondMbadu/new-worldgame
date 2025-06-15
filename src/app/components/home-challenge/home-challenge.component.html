@@ -63,41 +63,40 @@
           class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
           *ngIf="participants?.length || isAuthorPage"
         >
-        <!-- Schedule Card -->
-    <div *ngIf="schedulePdfLink"
-        class="relative w-full lg:w-1/2 bg-purple-50 dark:bg-purple-900
-                rounded-lg p-6 shadow mb-8">
+ 
+    <!-- Program PDF Card -->
+        <div *ngIf="programPDF"
+            class="relative w-full lg:w-1/2 bg-indigo-50 dark:bg-indigo-900
+                    rounded-lg p-6 shadow mb-8">
 
-      <!-- round badge -->
-      <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center
-                  justify-center w-12 h-12 rounded-full bg-purple-600 shadow-lg
-                  ring-4 ring-white dark:ring-gray-900">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-            stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M8 12h8m-8 4h4m4-14H4a2 2 0 00-2 2v16l4-4h12a2 2 0 002-2V4a2 2 0 00-2-2z"/>
-        </svg>
-      </div>
+          <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center
+                      justify-center w-12 h-12 rounded-full bg-indigo-600 shadow-lg
+                      ring-4 ring-white dark:ring-gray-900">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 12h8m-8 4h4m4-14H4a2 2 0 00-2 2v16l4-4h12
+                      a2 2 0 002-2V4a2 2 0 00-2-2z"/>
+            </svg>
+          </div>
 
-      <h2 class="pt-6 text-lg font-semibold text-purple-900 dark:text-purple-100">
-        {{ scheduleTitle || 'Schedule' }}
-      </h2>
+          <h2 class="pt-6 text-lg font-semibold text-indigo-900 dark:text-indigo-100">
+            {{ programPDF.title }}
+          </h2>
 
-      <p class="text-sm text-gray-600 dark:text-gray-300">
-        Click below to view or download the PDF.
-      </p>
+          <a [href]="programPDF.url" target="_blank" rel="noopener"
+            class="inline-flex items-center mt-4 px-4 py-2 text-sm font-medium
+                    text-white bg-indigo-600 rounded hover:bg-indigo-700
+                    focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 4v16m8-8H4"/>
+            </svg>
+            Open&nbsp;PDF
+          </a>
+        </div>
 
-      <a [href]="schedulePdfLink" target="_blank" rel="noopener"
-        class="inline-flex items-center mt-4 px-4 py-2 text-sm font-medium
-                text-white bg-purple-600 rounded hover:bg-purple-700">
-        <svg class="w-5 h-5 text-white mr-2" fill="none" stroke="currentColor"
-            stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 4v16m8-8H4"/>
-        </svg>
-        Open&nbsp;PDF
-      </a>
-    </div>
       <!-- Handouts Card -->
       <div *ngIf="handouts.length"
           class="relative w-full lg:w-1/2 bg-yellow-50 dark:bg-yellow-900 rounded-lg p-6 shadow mb-8">
@@ -291,18 +290,25 @@
                     Remove Participant
                   </button>
 
-                  <!-- Edit Schedule -->
-                  <button
-                    *ngIf="isAuthorPage"
-                    class="flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700"
-                    (click)="toggle('showEditSchedule')">
+            
+                  <!-- Program PDF – add / edit -->
+                  <button *ngIf="isAuthorPage"
+                          class="flex items-center px-4 py-2 text-sm font-medium text-white
+                                bg-indigo-600 rounded hover:bg-indigo-700
+                                focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                          (click)="toggle('showEditProgram')">
+
+                    <!-- file-plus icon -->
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2"
                         viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 4v16m8-8H4"/>
+                            d="M12 4v16m8-8H4" />
                     </svg>
-                    Edit&nbsp;Schedule
+
+                    <!-- label changes depending on whether a doc exists -->
+                    {{ programPDF ? 'Edit Program PDF' : 'Add Program PDF' }}
                   </button>
+
                   <button *ngIf="isAuthorPage"
                           class="flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded hover:bg-purple-700"
                           (click)="toggle('showEditHandouts')">
@@ -934,58 +940,94 @@
 </div>
 
 <!-- EDIT SCHEDULE MODAL -->
-<div *ngIf="showEditSchedule"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+<!-- EDIT PROGRAM PDF MODAL -->
+<div *ngIf="showEditProgram"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+    <div class="relative rounded-xl shadow-2xl
+                bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10">
 
-      <!-- Title -->
-      <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
-        Update Schedule
-      </h2>
+      <!-- strip -->
+      <div class="h-2 w-full bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-600"></div>
 
-      <!-- Schedule Heading -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-        Schedule Title
-      </label>
-      <input [(ngModel)]="scheduleTitle" type="text"
-             placeholder="Workshop Timeline"
-             class="w-full mb-4 p-2 rounded border
-                    bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-indigo-500
-                    dark:bg-gray-700 dark:border-gray-600
-                    dark:text-gray-100 dark:placeholder-gray-400">
+      <div class="p-6 space-y-6">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor"
+               stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Program&nbsp;PDF
+        </h2>
 
-      <!-- PDF URL -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-        PDF URL
-      </label>
-      <input [(ngModel)]="schedulePdfLink" type="url"
-             placeholder="https://…/schedule.pdf"
-             class="w-full mb-6 p-2 rounded border
-                    bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-indigo-500
-                    dark:bg-gray-700 dark:border-gray-600
-                    dark:text-gray-100 dark:placeholder-gray-400">
+        <!-- show current doc if any -->
+        <div *ngIf="programPDF" class="space-y-2">
+          <p class="text-sm text-gray-700 dark:text-gray-300">
+            Current file:&nbsp;
+            <a [href]="programPDF.url" target="_blank"
+               class="text-indigo-600 dark:text-indigo-300 underline hover:no-underline">
+              {{ programPDF.title }}
+            </a>
+          </p>
+          <button (click)="deleteProgramPDF()"
+                  class="text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700">
+            Delete&nbsp;PDF
+          </button>
+          <hr class="border-gray-300 dark:border-slate-600 my-3">
+          <p class="text-sm text-gray-500 dark:text-gray-400">Replace / rename:</p>
+        </div>
 
-      <!-- Buttons -->
-      <div class="flex justify-end space-x-3">
-        <button (click)="toggle('showEditSchedule')"
-                class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600
-                       focus:outline-none focus:ring-2 focus:ring-gray-400">
-          Cancel
-        </button>
+        <!-- title -->
+        <input type="text" [(ngModel)]="programTitleTmp"
+               placeholder="Agenda, Syllabus, Schedule…"
+               class="w-full p-2 rounded-md border
+                      bg-gray-50 dark:bg-slate-700
+                      border-gray-300 dark:border-slate-600
+                      text-sm text-gray-800 dark:text-gray-100
+                      placeholder-gray-400 dark:placeholder-slate-400"/>
 
-        <button (click)="saveSchedule()"
-                class="px-4 py-2 rounded bg-indigo-700 text-white hover:bg-indigo-800
-                       focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          Save
-        </button>
+        <!-- file picker -->
+        <input type="file"
+               (change)="programFileTmp = $any($event.target).files[0]"
+               accept=".pdf"
+               class="block w-full text-sm text-gray-700 dark:text-gray-200
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-md file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-indigo-50 file:text-indigo-700
+                      hover:file:bg-indigo-100
+                      dark:file:bg-indigo-600/20 dark:file:text-indigo-300
+                      cursor-pointer"/>
+
+        <!-- buttons -->
+        <div class="flex justify-end gap-3 pt-2">
+          <button (click)="toggle('showEditProgram')"
+                  class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600
+                         text-white text-sm">Cancel</button>
+
+          <button (click)="saveProgramPDF()"
+                  class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700
+                         text-white text-sm font-semibold active:scale-95">
+            Upload&nbsp;&amp;&nbsp;Save
+          </button>
+        </div>
       </div>
+
+      <!-- close icon -->
+      <button (click)="toggle('showEditProgram')"
+              class="absolute top-3 right-3 p-1 rounded-full
+                     text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
+                     bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
 
     </div>
   </div>
 </div>
+
 
 <!-- EDIT HANDOUTS MODAL -->
 <div *ngIf="showEditHandouts"

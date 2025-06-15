@@ -85,4 +85,5 @@ export class ChallengePage {
   isPrivate?: boolean;
   participantsHidden?: boolean;
   handouts?: { name: string; url: string }[];
+  programPDF?: { title: string; url: string } | null = null;
 }

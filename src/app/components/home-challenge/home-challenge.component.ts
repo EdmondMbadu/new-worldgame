@@ -57,9 +57,6 @@ export class HomeChallengeComponent {
   zoomLink = '';
   chatNote = '';
   showEditLinks = false;
-  scheduleTitle = ''; // card heading
-  schedulePdfLink = ''; // public URL of the PDF
-  showEditSchedule = false; // modal flag
 
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
@@ -74,6 +71,11 @@ export class HomeChallengeComponent {
   // ✨ temp holders while adding one file
   handoutName = '';
   handoutFile: File | null = null;
+
+  programPDF: { title: string; url: string } | null = null;
+  programTitleTmp = '';
+  programFileTmp: File | null = null;
+  showEditProgram = false;
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -138,6 +140,7 @@ export class HomeChallengeComponent {
           this.logoImage = this.challengePage.logoImage;
         }
         if (data.handouts) this.handouts = data.handouts;
+        if (data.programPDF) this.programPDF = data.programPDF;
 
         if (this.challengePage.imageChallenge) {
           this.image = this.challengePage.imageChallenge;
@@ -157,12 +160,7 @@ export class HomeChallengeComponent {
         if (this.challengePage.chatNote) {
           this.chatNote = this.challengePage.chatNote;
         }
-        if (this.challengePage.scheduleTitle) {
-          this.scheduleTitle = this.challengePage.scheduleTitle;
-        }
-        if (this.challengePage.schedulePdfLink) {
-          this.schedulePdfLink = this.challengePage.schedulePdfLink;
-        }
+
         this.checkAccess();
 
         this.challenge
@@ -290,28 +288,12 @@ export class HomeChallengeComponent {
       | 'showAddTeamMember'
       | 'showRemoveTeamMember'
       | 'showEditLinks'
-      | 'showEditSchedule'
       | 'showEditHandouts'
+      | 'showEditProgram'
   ) {
     this[property] = !this[property];
   }
-  /* ──── SAVE SCHEDULE TO FIRESTORE ──── */
-  async saveSchedule() {
-    try {
-      await this.afs.doc(`challengePages/${this.challengePageId}`).set(
-        {
-          scheduleTitle: this.scheduleTitle?.trim() || null,
-          schedulePdfLink: this.schedulePdfLink?.trim() || null,
-        },
-        { merge: true }
-      );
-      this.toggle('showEditSchedule');
-      alert('Schedule updated!');
-    } catch (err) {
-      console.error('Error updating schedule:', err);
-      alert('Could not save schedule—try again.');
-    }
-  }
+
   async addParticipant() {
     if (!this.newParticipant && this.data.isValidEmail(this.newParticipant)) {
       alert('Please enter a valid email address to add a participant.');
@@ -775,5 +757,58 @@ export class HomeChallengeComponent {
       'false'
     );
     return url!;
+  }
+  async uploadProgramPDF(file: File): Promise<string> {
+    const url = await this.data.startUpload(
+      file,
+      `programDocs/${this.afs.createId()}`,
+      'false'
+    );
+    return url!;
+  }
+  async saveProgramPDF() {
+    if (!this.programTitleTmp.trim()) {
+      alert('Please enter a title.');
+      return;
+    }
+
+    // if user is only renaming, no new file is needed
+    if (!this.programFileTmp && !this.programPDF) {
+      alert('Please choose a PDF to upload.');
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      let url = this.programPDF?.url || '';
+      if (this.programFileTmp) {
+        url = await this.uploadProgramPDF(this.programFileTmp);
+      }
+
+      this.programPDF = { title: this.programTitleTmp.trim(), url };
+
+      await this.afs
+        .doc(`challengePages/${this.challengePageId}`)
+        .update({ programPDF: this.programPDF });
+
+      // reset
+      this.programTitleTmp = '';
+      this.programFileTmp = null;
+      this.toggle('showEditProgram');
+    } catch (err) {
+      console.error('Program PDF update failed', err);
+      alert('Upload failed — try again.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /* delete */
+  async deleteProgramPDF() {
+    if (!confirm('Remove the current Program PDF?')) return;
+    await this.afs
+      .doc(`challengePages/${this.challengePageId}`)
+      .update({ programPDF: null });
+    this.programPDF = null;
   }
 }
