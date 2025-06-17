@@ -35,6 +35,11 @@ export class NwgNewsComponent implements OnInit {
   /** thumbnails under “Previous AI News”  */
   allVideos: Video[] = [
     {
+      id: 'elena',
+      title: 'Global Solutions Lab 2025 Progress - Day 2',
+      url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGSL%202025%20Day%202.mp4?alt=media&token=a12dd4dc-8e9e-492d-97ec-6abdaca0c797',
+    },
+    {
       id: 'mandy',
       title: 'Mandy Welcome Participants to GSL 2025',
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGlobal%20Solutions%20Lab%20Welcome%20AI_1.mp4?alt=media&token=66be6bb7-8cd6-4ab4-a78e-85ed3c35fa2e',
