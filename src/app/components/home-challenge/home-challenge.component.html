@@ -121,8 +121,13 @@
               class="flex items-center justify-between bg-white/70 dark:bg-gray-800/50
                     p-2 rounded">
             <span class="text-sm dark:text-gray-200">{{ h.name }}</span>
-            <a [href]="h.url" target="_blank"
-              class="text-sm font-medium text-yellow-700 hover:underline">Open</a>
+            <!-- <a [href]="h.url" target="_blank"
+              class="text-sm font-medium text-yellow-700 hover:underline">Open</a> -->
+              <a (click)="downloadFile($event, h.name, h.url)"
+                href="{{ h.url }}"
+                class="text-sm font-medium text-yellow-700 hover:underline">
+                Download
+  </a>
           </li>
         </ul>
       </div>

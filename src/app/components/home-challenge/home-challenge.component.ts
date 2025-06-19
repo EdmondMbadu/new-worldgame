@@ -811,4 +811,53 @@ export class HomeChallengeComponent {
       .update({ programPDF: null });
     this.programPDF = null;
   }
+
+  /* ───────── helpers at the bottom of the class ───────── */
+
+  /** Map MIME → extension */
+  private mimeExt(mime: string): string {
+    const map: Record<string, string> = {
+      'application/pdf': 'pdf',
+      'application/msword': 'doc',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        'docx',
+      'application/vnd.ms-powerpoint': 'ppt',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        'pptx',
+    };
+    return map[mime] || '';
+  }
+
+  /** Friendly download that always has a filename+ext */
+  downloadFile(ev: Event, baseName: string, url: string) {
+    ev.preventDefault(); // stop the browser’s default
+    fetch(url)
+      .then((r) => r.blob())
+      .then((blob) => {
+        // figure out extension
+        const ext =
+          this.mimeExt(blob.type) ||
+          url.match(/\.(\w{3,4})(?:\?|$)/)?.[1] ||
+          '';
+        const filename = `${this.stripExt(baseName)}${ext ? '.' + ext : ''}`;
+
+        // download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(link.href);
+      })
+      .catch((err) => {
+        console.error('Download failed', err);
+        window.open(url, '_blank'); // graceful fallback
+      });
+  }
+
+  /** Remove any existing extension from a name */
+  private stripExt(name: string): string {
+    return name.replace(/\.[^./\\]+$/, '');
+  }
 }
