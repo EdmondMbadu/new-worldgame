@@ -34,6 +34,7 @@ export class DocumentFilesComponent implements OnInit {
   isHovering: boolean = false;
   documents: Avatar[] = [];
   presentations: any[] = [];
+  originalFilename = '';
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -96,13 +97,22 @@ export class DocumentFilesComponent implements OnInit {
     }
 
     this.documentType = file.type;
+    this.originalFilename = file.name;
+    if (!this.documentName.trim()) {
+      this.documentName = this.stripExt(file.name);
+    }
     this.documentId ||= this.afs.createId();
 
     try {
+      const meta = {
+        contentType: file.type,
+        contentDisposition: 'attachment', // <-- ALWAYS download
+      };
       const url = await this.data.startUpload(
         fileList,
         `documents/${this.documentId}`,
-        'false'
+        'false',
+        meta
       );
       this.documentDownloadUrl = url ?? '';
     } catch (err) {
@@ -129,6 +139,7 @@ export class DocumentFilesComponent implements OnInit {
     const newDoc: Avatar = {
       downloadURL: this.documentDownloadUrl,
       name: this.documentName,
+      originalFilename: this.originalFilename || this.documentName,
       description: this.documentDescription,
       type: this.documentType, // full MIME
       dateSorted: now.getTime(),
@@ -157,6 +168,7 @@ export class DocumentFilesComponent implements OnInit {
     this.documentType = '';
     this.documentDownloadUrl = '';
     this.documentId = '';
+    this.originalFilename = '';
     this.toggle('showAddDocument');
   }
 
@@ -286,5 +298,61 @@ export class DocumentFilesComponent implements OnInit {
       .deletePresentationById(this.id, pid)
       .then(() => console.log('Presentation deleted'))
       .catch((err) => console.error(err));
+  }
+  /* NEW ──────────────────────────────────────────────── */
+  /** Detect Word documents */
+  isWord(mime: string): boolean {
+    return [
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ].includes(mime);
+  }
+
+  /** Detect PowerPoint files */
+  isPowerPoint(mime: string): boolean {
+    return [
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    ].includes(mime);
+  }
+
+  /** Force-download for any non-image file */
+  downloadAttachment(ev: Event, doc: Avatar) {
+    ev.preventDefault(); // stop the normal anchor navigation
+    fetch(doc.downloadURL!)
+      .then((r) => r.blob())
+      .then((blob) => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = doc.name!; // suggested filename
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(link.href);
+      })
+      .catch((err) => console.error('Download failed', err));
+  }
+  /* NEW ─────────────────────────────────────────────────── */
+  /** Map MIME → matching SVG icon stored in assets/icons */
+  getIconByMime(mime: string): string {
+    switch (true) {
+      case this.isPDF(mime):
+        return '../../../assets/img/pdf.png';
+      case this.isWord(mime):
+        return '../../../assets/img/doc.png';
+      case this.isPowerPoint(mime):
+        return '../../../assets/img/powerpoint.png';
+      case mime.startsWith('text/'):
+        return '../../../assets/img/pdf.png';
+      case mime.includes('excel'):
+        return '../../../assets/img/excel.png';
+      default:
+        return '../../../assets/img/generic.webp'; // generic
+    }
+  }
+
+  /** Strip extension (helper for default title) */
+  private stripExt(filename: string): string {
+    return filename.replace(/\.[^/.]+$/, '');
   }
 }

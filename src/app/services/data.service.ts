@@ -41,8 +41,11 @@ export class DataService implements OnInit {
     'image/heic',
     'application/pdf',
     'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
     'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
   ];
+
   url: string = '';
   private themeSource = new BehaviorSubject<string>(this.getInitialTheme());
   currentTheme = this.themeSource.asObservable();
@@ -436,7 +439,8 @@ export class DataService implements OnInit {
   async startUpload(
     fileOrList: File | FileList,
     currentPath: string,
-    upload = ''
+    upload = '',
+    metadata: Record<string, any> | undefined = undefined // <- NE
   ) {
     const file: File | null =
       fileOrList instanceof File ? fileOrList : fileOrList.item(0);
@@ -465,7 +469,7 @@ export class DataService implements OnInit {
     console.log('the path', path);
 
     // this.task = await this.storage.upload(path, file);
-    const uploadTask = await this.storage.upload(path, file);
+    const uploadTask = await this.storage.upload(path, file, metadata);
     this.url = await uploadTask.ref.getDownloadURL();
     uploadTask.totalBytes;
     // console.log('the download url', this.url);

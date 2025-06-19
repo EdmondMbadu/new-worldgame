@@ -146,13 +146,28 @@
         Created: <span>{{ doc.formattedDateCreated }}</span>
       </p>
     
-      <!-- Optional Preview Image -->
-      <a *ngIf="doc.downloadURL && isImage(doc.type!)" [href]="doc.downloadURL" target="_blank" class="my-2 block">
-        <img [src]="doc.downloadURL" alt="Preview" class="max-h-32 object-contain" />
-      </a>
-      <a *ngIf="doc.downloadURL  && !isImage(doc.type!)" [href]="doc.downloadURL" target="_blank" class="my-2 block">
-        <img  src="../../../assets/img/generic.webp" alt="Preview" class="max-h-32 object-contain" />
-      </a>
+    <!-- Preview / icon •–––––––––––––––––––––––––––––––––––––-->
+        <div class="my-2 flex justify-center cursor-pointer">
+          <!-- Real thumbnail for images -->
+          <ng-container *ngIf="isImage(doc.type!); else iconBlock">
+            <a [href]="doc.downloadURL" target="_blank">
+              <img [src]="doc.downloadURL"
+                  alt="Preview"
+                  class="max-h-32 object-contain mx-auto" />
+            </a>
+          </ng-container>
+
+          <!-- SVG/PNG icon + forced download for everything else -->
+          <ng-template class="cursor-pointer" #iconBlock>
+            <a (click)="downloadAttachment($event, doc)"
+              class="block">
+              <img [src]="getIconByMime(doc.type!)"
+                  alt="File icon"
+                  class="h-16 w-auto mx-auto" />
+            </a>
+          </ng-template>
+        </div>
+
      
     
       <!-- 3-Dot Menu Trigger -->
@@ -287,9 +302,21 @@
                             </div>
       
                             <!-- Fallback for other doc types (DOC, PPT, etc.) -->
+                            <!-- Fallback for DOC / PPT / etc. inside the modal -->
                             <div *ngIf="!isImage(documentType) && !isPDF(documentType)">
-                            <p>Preview not available. <a [href]="documentDownloadUrl" target="_blank">Open/Download</a></p>
+                              <img [src]="getIconByMime(documentType)"
+                                  class="h-16 mx-auto mb-2" />
+                              <p class="text-xs text-center text-gray-500 dark:text-gray-400">
+                                Aperçu indisponible. 
+                                <a [href]="documentDownloadUrl" target="_blank" class="underline">
+                                  Télécharger
+                                </a>
+                              </p>
                             </div>
+
+                            
+                          
+
                          </div>
                          
                             

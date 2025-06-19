@@ -39,6 +39,7 @@ export class Avatar {
   dateCreated?: string;
   dateSorted?: number;
   formattedDateCreated?: string;
+  originalFilename?: string;
 }
 export class Tournament {
   solutionId?: string;
