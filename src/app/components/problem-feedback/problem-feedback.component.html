@@ -127,6 +127,14 @@
                   <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-200">
                     Are you sure you want to submit this feedback?
                   </h3>
+                  <!-- NEW: show if at least one slider is still 0 -->
+                    <p *ngIf="hasZeroScores"
+                      class="mb-5 text-md text-red-600 dark:text-red-400">
+                      One&nbsp;or&nbsp;more evaluation sliders is still at <b>0</b>.
+                      Only leave a <b>0</b> if you truly believe the strategy deserves
+                      the lowest possible score; otherwise please adjust the sliders
+                      before submitting.
+                    </p>
                   <button
                     type="button"
                     class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 

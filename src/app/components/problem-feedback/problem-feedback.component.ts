@@ -24,6 +24,7 @@ export class ProblemFeedbackComponent implements OnInit {
   timeElapsed: string = '';
   submitDisplay: boolean = false;
   comment: string = '';
+  hasZeroScores = false;
 
   sendFeedback: boolean = false;
   evaluationSummary: Evaluation = {};
@@ -99,6 +100,7 @@ export class ProblemFeedbackComponent implements OnInit {
 
   makeSureBeforeSubmit() {
     // console.log('user solution before submitting', this.userSolution);
+    this.hasZeroScores = this.values.some((v) => v === 0);
     this.submitDisplay = true;
   }
   submitEvaluation() {
