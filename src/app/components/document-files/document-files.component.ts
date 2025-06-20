@@ -316,22 +316,62 @@ export class DocumentFilesComponent implements OnInit {
     ].includes(mime);
   }
 
-  /** Force-download for any non-image file */
+  /* ---------------------------------------------------------
+   Helper: map a MIME type to a file-extension (no dot)
+---------------------------------------------------------- */
+  private mimeExt(mime: string): string | undefined {
+    const map: Record<string, string> = {
+      'application/pdf': 'pdf',
+      'application/msword': 'doc',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        'docx',
+      'application/vnd.ms-powerpoint': 'ppt',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        'pptx',
+      'application/vnd.ms-excel': 'xls',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        'xlsx',
+      'text/plain': 'txt',
+      'text/csv': 'csv',
+    };
+    return map[mime];
+  }
+
+  /* ---------------------------------------------------------
+   Replacement for downloadAttachment — identical behaviour
+   to the working downloadFile() from home-challenge
+---------------------------------------------------------- */
   downloadAttachment(ev: Event, doc: Avatar) {
-    ev.preventDefault(); // stop the normal anchor navigation
+    ev.preventDefault(); // stop normal nav
     fetch(doc.downloadURL!)
       .then((r) => r.blob())
       .then((blob) => {
+        // ── figure out the right extension ─────────────────
+        const ext =
+          this.mimeExt(blob.type) || // ① from MIME
+          doc.downloadURL?.match(/\.(\w{3,4})(?:\?|$)/)?.[1] || // ② from URL
+          doc.originalFilename?.match(/\.(\w{3,4})$/)?.[1] || // ③ from stored name
+          '';
+
+        // ── build a clean filename ─────────────────────────
+        const base = this.stripExt(doc.name || doc.originalFilename || 'file');
+        const filename = ext ? `${base}.${ext}` : base;
+
+        // ── trigger the download ───────────────────────────
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = doc.name!; // suggested filename
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(link.href);
       })
-      .catch((err) => console.error('Download failed', err));
+      .catch((err) => {
+        console.error('Download failed', err);
+        window.open(doc.downloadURL!, '_blank'); // graceful fallback
+      });
   }
+
   /* NEW ─────────────────────────────────────────────────── */
   /** Map MIME → matching SVG icon stored in assets/icons */
   getIconByMime(mime: string): string {
