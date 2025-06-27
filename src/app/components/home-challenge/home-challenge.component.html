@@ -3,7 +3,7 @@
       <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
         <!-- Navbar (unchanged, except perhaps removing margin/padding if needed) -->
         <app-navbar
-          [sideBarSmall]="true"
+          [sideBarSmall]="!isSidebarOpen"
           [sideBarBig]="isSidebarOpen"
           [email]="auth.currentUser.email"
           [firstName]="auth.currentUser.firstName"
