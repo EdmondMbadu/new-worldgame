@@ -50,6 +50,10 @@ export class TeamBuildingComponent implements OnInit, OnDestroy {
   isOwner = false;
   solutionId = '';
   viewEntries: EntryView[] = [];
+  /* top-level component fields */
+  showForm = true;
+  private formEverCollapsed = false;
+
   private listSub?: Subscription;
   private entrySubs = new Map<string, Subscription[]>(); // realtime ▶
 
@@ -88,11 +92,19 @@ export class TeamBuildingComponent implements OnInit, OnDestroy {
 
   /* ───────── sync list & attach sub-listeners ───────── */
   private syncEntries(docs: EntryDoc[]) {
-    const existingIds = new Set(this.viewEntries.map((e) => e.id));
-
-    // add new entries
+    const existingMap = new Map(this.viewEntries.map((v) => [v.id, v]));
+    if (docs.length && !this.formEverCollapsed) {
+      this.showForm = false; // hide the form
+      this.formEverCollapsed = true; // never auto-toggle again
+    }
     docs.forEach((d) => {
-      if (!existingIds.has(d.id!)) {
+      const found = existingMap.get(d.id!);
+
+      if (found) {
+        // 🔄 update in-place so Angular change detection sees new fields like revealed
+        Object.assign(found, d);
+      } else {
+        // 🆕 create new view + attach listeners
         const view: EntryView = {
           ...d,
           shuffled: d.statements,
@@ -104,18 +116,26 @@ export class TeamBuildingComponent implements OnInit, OnDestroy {
           guessDetail: [],
         };
         this.viewEntries.unshift(view);
-        this.attachRealtime(view); // realtime ▶
+        this.attachRealtime(view);
       }
     });
 
-    // remove listeners for deleted entries
+    /* remove listeners for entries no longer in Firestore (unchanged) */
     this.viewEntries = this.viewEntries.filter((v) => {
-      const stillExists = docs.some((d) => d.id === v.id);
-      if (!stillExists) {
-        this.detachRealtime(v.id!); // realtime ▶
-      }
-      return stillExists;
+      const still = docs.some((d) => d.id === v.id);
+      if (!still) this.detachRealtime(v.id!);
+      return still;
     });
+  }
+
+  async revealRound(ev: EntryView) {
+    if (ev.revealed) return;
+    if (!confirm('Reveal the correct lie and code meaning to everyone?'))
+      return;
+
+    await this.afs
+      .doc(`solutions/${this.solutionId}/teamBuildingEntries/${ev.id}`)
+      .update({ revealed: true });
   }
 
   /* ───────── attach listeners for votes & guesses ───────── */
