@@ -140,10 +140,25 @@
       </div>
 
       <!-- Reveal -->
-      <ng-container *ngIf="e.revealed">
-        <p class="mt-4 font-semibold text-green-600">✔ Lie was: “{{ e.statements[e.lieIndex] }}”</p>
-        <p class="mt-4 font-semibold text-green-600">✔ Code explanation:"{{ e.codeExplanation }}"</p>
-      </ng-container>
+   <!-- Reveal -->
+        <ng-container *ngIf="e.revealed">
+        <div class="mt-6 rounded-lg border-2 border-green-600 bg-green-50 dark:bg-green-900/40 p-4 text-center shadow-lg">
+            <p class="text-lg md:text-xl font-bold text-green-700 dark:text-green-300 flex items-center justify-center gap-2">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            Lie was:&nbsp;“{{ e.statements[e.lieIndex] }}”
+            </p>
+
+            <p class="mt-3 text-lg md:text-xl font-bold text-green-700 dark:text-green-300 flex items-center justify-center gap-2">
+            <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+            Code meaning:&nbsp;“{{ e.codeExplanation }}”
+            </p>
+        </div>
+        </ng-container>
+
     </div>
   </div>
 </div>
