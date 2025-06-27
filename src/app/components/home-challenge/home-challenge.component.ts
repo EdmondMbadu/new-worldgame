@@ -77,6 +77,15 @@ export class HomeChallengeComponent {
   programFileTmp: File | null = null;
   showEditProgram = false;
 
+  // ─ Edit-challenge modal state ─
+  showEditChallenge = false;
+  editChallengeId = '';
+  editIndex = -1;
+  editTitle = '';
+  editDescription = '';
+  editCategory = '';
+  editCategoryCustom = '';
+
   // home-challenge.component.ts
   goToChallengeDiscussion() {
     this.router.navigate(['/challenge-discussion', this.challengePageId], {
@@ -871,5 +880,69 @@ export class HomeChallengeComponent {
   /** Remove any existing extension from a name */
   private stripExt(name: string): string {
     return name.replace(/\.[^./\\]+$/, '');
+  }
+
+  openEditChallenge(id: string, index: number) {
+    this.editChallengeId = id;
+    this.editIndex = index;
+    this.editTitle = this.titles[index];
+    this.editDescription = this.descriptions[index];
+    this.editCategory = this.activeCategory;
+    this.editCategoryCustom = '';
+    this.showEditChallenge = true;
+  }
+
+  async saveEditChallenge() {
+    /* resolve final category */
+    let newCat =
+      this.editCategory === '__new__'
+        ? this.editCategoryCustom.trim()
+        : this.editCategory;
+
+    if (!newCat) {
+      alert('Category required');
+      return;
+    }
+
+    try {
+      this.isLoading = true;
+
+      await this.afs.doc(`user-challenges/${this.editChallengeId}`).update({
+        title: this.editTitle.trim(),
+        description: this.editDescription.trim(),
+        category: newCat,
+      });
+
+      /* — update local arrays for instant UI feedback — */
+      this.titles[this.editIndex] = this.editTitle.trim();
+      this.descriptions[this.editIndex] = this.editDescription.trim();
+
+      /* if the category changed */
+      if (newCat !== this.activeCategory) {
+        // 1. remove from current view
+        this.ids.splice(this.editIndex, 1);
+        this.titles.splice(this.editIndex, 1);
+        this.descriptions.splice(this.editIndex, 1);
+        this.challengeImages.splice(this.editIndex, 1);
+
+        // 2. add category pill if brand-new
+        if (!this.categories.includes(newCat)) {
+          this.categories.push(newCat);
+          this.categories.sort();
+        }
+
+        // 3. refresh destination category & switch view
+        await this.fetchChallenges(newCat);
+        this.activeCategory = newCat;
+      }
+
+      this.showEditChallenge = false;
+      alert('Challenge updated.');
+    } catch (err) {
+      console.error('Update failed:', err);
+      alert('Could not update challenge—try again.');
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
