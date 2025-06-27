@@ -1,0 +1,121 @@
+<!-- ░░ Navbar ░░ -->
+<app-navbar
+  [sideBarSmall]="true"
+  [sideBarBig]="false"
+  [email]="this.auth.currentUser.email"
+  [firstName]="this.auth.currentUser.firstName"
+  [lastName]="this.auth.currentUser.lastName"
+  path="home"
+  current=""
+></app-navbar>
+
+<!-- ░░ Page wrapper ░░ -->
+<div class="min-h-screen bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-slate-100 flex flex-col items-center pb-24">
+
+  <!-- Heading & reset -->
+  <div class="w-full max-w-6xl flex flex-col sm:flex-row items-center justify-between mt-24 mb-10 px-4">
+    <h1 class="text-4xl font-extrabold tracking-tight">Two Truths &amp; a Code</h1>
+
+    <button *ngIf="isOwner"
+      (click)="resetGame()"
+      class="flex items-center gap-1 mt-4 sm:mt-0 px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white active:scale-95 transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+      Reset
+    </button>
+  </div>
+
+  <!-- ───── Submission ───── -->
+  <div class="w-full max-w-4xl bg-white/70 dark:bg-slate-800/70 backdrop-blur rounded-2xl shadow-lg p-8 mb-14 mx-4">
+    <h2 class="text-2xl font-semibold mb-8 text-center">Share your three statements</h2>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <textarea [(ngModel)]="truth1" rows="2" placeholder="Truth #1"
+        class="w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100
+               placeholder-gray-500 dark:placeholder-slate-400 border border-gray-300 dark:border-slate-600
+               focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+
+      <textarea [(ngModel)]="truth2" rows="2" placeholder="Truth #2"
+        class="w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100
+               placeholder-gray-500 dark:placeholder-slate-400 border border-gray-300 dark:border-slate-600
+               focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+
+      <textarea [(ngModel)]="lie" rows="2" placeholder="Lie — make it sneaky"
+        class="w-full px-4 py-3 rounded-lg md:col-span-2 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100
+               placeholder-gray-500 dark:placeholder-slate-400 border border-gray-300 dark:border-slate-600
+               focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+
+      <input [(ngModel)]="code" placeholder="Code phrase / emoji combo"
+        class="w-full px-4 py-3 rounded-lg md:col-span-2 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100
+               placeholder-gray-500 dark:placeholder-slate-400 border border-gray-300 dark:border-slate-600
+               focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+      <textarea [(ngModel)]="codeExplanation" rows="2" placeholder="What does the code really mean? (hidden until reveal)"
+        class="w-full px-4 py-3 rounded-lg md:col-span-2 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100
+               placeholder-gray-500 dark:placeholder-slate-400 border border-gray-300 dark:border-slate-600
+               focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+
+      <button (click)="submit()" [disabled]="!canSubmit()"
+        class="md:col-span-2 inline-flex justify-center items-center gap-2 py-3 rounded-lg font-semibold tracking-wide
+               bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition">
+        🚀 Publish to everyone
+      </button>
+    </div>
+  </div>
+
+  <!-- ───── Entries list ───── -->
+  <div class="w-full max-w-4xl space-y-6 px-4">
+    <div *ngFor="let e of viewEntries"
+         class="rounded-xl shadow p-6 hover:shadow-xl transition bg-white/70 dark:bg-slate-800/70">
+
+      <div class="flex items-center justify-between mb-3">
+        <span class="font-semibold text-lg">{{ e.displayName }}</span>
+        <span class="text-sm opacity-70">{{ e.voteCount }} ✔</span>
+      </div>
+
+      <!-- Lie poll -->
+      <div class="space-y-2 mb-4">
+        <label *ngFor="let s of e.shuffled; let i = index" class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" [name]="'lie-'+e.id" [disabled]="e.alreadyVoted" (change)="pickLie(e,i)" class="accent-blue-600"/>
+          <span>{{ s }}</span>
+        </label>
+      </div>
+
+      <!-- Live votes -->
+      <div *ngIf="e.votesDetail.length" class="mb-4 text-sm space-y-1">
+        <div class="font-semibold">Votes so far:</div>
+        <div *ngFor="let v of e.votesDetail">
+          <span class="font-semibold">{{ v.name }}</span> picked “<span class="italic">{{ e.shuffled[v.picked] }}</span>”
+        </div>
+      </div>
+
+      <!-- Code -->
+      <div class="text-center text-2xl">{{ e.code }}</div>
+
+      <!-- Guess input -->
+      <div class="mt-3 flex gap-2">
+        <input [(ngModel)]="e.tempGuess" [disabled]="e.alreadyGuessed"
+               placeholder="What does this code mean?"
+               class="flex-1 px-3 py-2 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 focus:outline-none"/>
+        <button (click)="submitGuess(e)" [disabled]="e.alreadyGuessed || !e.tempGuess"
+          class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white active:scale-95
+                 disabled:opacity-40 disabled:cursor-not-allowed transition">Guess</button>
+      </div>
+
+      <!-- Live guesses -->
+      <div *ngIf="e.guessDetail.length" class="mt-3 text-sm space-y-1">
+        <div class="font-semibold">Guesses so far:</div>
+        <div *ngFor="let g of e.guessDetail">
+          <span class="font-semibold">{{ g.name }}</span>: <span class="italic">“{{ g.guess }}”</span>
+        </div>
+      </div>
+
+      <!-- Reveal -->
+      <ng-container *ngIf="e.revealed">
+        <p class="mt-4 font-semibold text-green-600">✔ Lie was: “{{ e.statements[e.lieIndex] }}”</p>
+        <p class="italic">{{ e.codeExplanation }}</p>
+      </ng-container>
+    </div>
+  </div>
+</div>

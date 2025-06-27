@@ -83,6 +83,7 @@ import { MiniGameComponent } from './game/mini-game/mini-game.component';
 import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
 import { NoAuthGuard } from './services/no-auth.guard';
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
+import { TeamBuildingComponent } from './components/team-building/team-building.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -124,6 +125,12 @@ const routes: Routes = [
   {
     path: 'whiteboard/:id',
     component: WhiteboardComponent,
+    canActivate: [AuthGuard],
+    // data: { requireParticipant: true },
+  },
+  {
+    path: 'team-building/:id',
+    component: TeamBuildingComponent,
     canActivate: [AuthGuard],
     // data: { requireParticipant: true },
   },

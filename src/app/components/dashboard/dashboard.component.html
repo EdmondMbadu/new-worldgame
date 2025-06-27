@@ -175,6 +175,39 @@
               Upload and manage project files
             </span>
         </div>
+        <!-- ──────────────── Team Building tile ──────────────── -->
+        <div
+          routerLink="/team-building/{{ currentSolution.solutionId }}"
+          class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white
+                text-xl font-semibold h-44 w-72 flex flex-col items-center
+                justify-center rounded p-4 hover-effect cursor-pointer"
+        >
+          <!-- SVG: two people high-fiving -->
+            <svg
+            class="w-12 h-12 mb-2 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8zm6 0a3 3 0 100-6 3 3 0 000 6zm-12 0a3 3 0 100-6 3 3 0 000 6z"
+            />
+          </svg>
+
+
+          <span>Team Building</span>
+          <span
+            class="font-extralight text-sm text-center opacity-0 hover:opacity-100
+                  transition-opacity duration-300"
+          >
+            Play “Two Truths and a Code”
+          </span>
+        </div>
+
 
 
         <div routerLink="/whiteboard/{{currentSolution.solutionId}}" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">

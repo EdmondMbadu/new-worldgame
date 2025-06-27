@@ -129,6 +129,7 @@ import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
 import { PresentationFormComponent } from './presentations/presentation-form/presentation-form.component';
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { TeamBuildingComponent } from './components/team-building/team-building.component';
 
 @NgModule({
   declarations: [
@@ -233,6 +234,7 @@ import { MatDialogModule } from '@angular/material/dialog';
     NwgStepsComponent,
     PresentationFormComponent,
     PresentationViewerComponent,
+    TeamBuildingComponent,
   ],
   imports: [
     BrowserModule,

@@ -57,6 +57,7 @@ export class Solution {
   /* ---- UI‑only helper fields (optional) ---- */
   editingCategory?: boolean;
   tempCategory?: string;
+  ownerOfTeamPost?: string;
 }
 
 export class Evaluation {
