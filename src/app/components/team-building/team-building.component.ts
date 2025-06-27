@@ -103,6 +103,7 @@ export class TeamBuildingComponent implements OnInit, OnDestroy {
       if (found) {
         // 🔄 update in-place so Angular change detection sees new fields like revealed
         Object.assign(found, d);
+        found.shuffled = [...d.statements];
       } else {
         // 🆕 create new view + attach listeners
         const view: EntryView = {
@@ -183,31 +184,88 @@ export class TeamBuildingComponent implements OnInit, OnDestroy {
     const hit = e.votesDetail.find((v) => v.name === me);
     return hit ? hit.picked : -1;
   }
+  showHow = false; // dropdown state
+
+  get participants(): string[] {
+    // auto-computed chips
+    const set = new Set<string>();
+    this.viewEntries.forEach((e) => {
+      set.add(e.displayName);
+      e.votesDetail.forEach((v) => set.add(v.name));
+      e.guessDetail.forEach((g) => set.add(g.name));
+    });
+    return Array.from(set).sort();
+  }
 
   /* ── submit entry ── */
+  // async submit() {
+  //   if (!this.canSubmit()) return;
+  //   const uid = this.auth.currentUser.uid;
+  //   const name = this.auth.currentUser.firstName || 'Anonymous';
+
+  //   const statements = [this.truth1, this.truth2, this.lie];
+  //   const order = [0, 1, 2].sort(() => Math.random() - 0.5);
+  //   const lieIndex = order.indexOf(2);
+
+  //   await this.afs
+  //     .doc(`solutions/${this.solutionId}`)
+  //     .collection('teamBuildingEntries')
+  //     .add({
+  //       uid,
+  //       displayName: name,
+  //       statements: order.map((i) => statements[i]),
+  //       lieIndex,
+  //       code: this.code,
+  //       codeExplanation: this.codeExplanation,
+  //       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  //       revealed: false,
+  //     });
+
+  //   await this.afs
+  //     .doc(`solutions/${this.solutionId}`)
+  //     .set({ ownerOfTeamPost: uid }, { merge: true });
+
+  //   this.truth1 =
+  //     this.truth2 =
+  //     this.lie =
+  //     this.code =
+  //     this.codeExplanation =
+  //       '';
+  // }
+
   async submit() {
     if (!this.canSubmit()) return;
+
     const uid = this.auth.currentUser.uid;
     const name = this.auth.currentUser.firstName || 'Anonymous';
 
+    /* ---------- 1. build & shuffle ---------- */
     const statements = [this.truth1, this.truth2, this.lie];
-    const order = [0, 1, 2].sort(() => Math.random() - 0.5);
-    const lieIndex = order.indexOf(2);
 
+    // Fisher-Yates
+    for (let i = statements.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [statements[i], statements[j]] = [statements[j], statements[i]];
+    }
+
+    const lieIndex = statements.indexOf(this.lie); // where the lie ended up
+
+    /* ---------- 2. store in Firestore ---------- */
     await this.afs
       .doc(`solutions/${this.solutionId}`)
       .collection('teamBuildingEntries')
       .add({
         uid,
         displayName: name,
-        statements: order.map((i) => statements[i]),
-        lieIndex,
+        statements, // already shuffled
+        lieIndex, // correct position
         code: this.code,
         codeExplanation: this.codeExplanation,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         revealed: false,
       });
 
+    /* keep owner field … & reset local form (unchanged) */
     await this.afs
       .doc(`solutions/${this.solutionId}`)
       .set({ ownerOfTeamPost: uid }, { merge: true });
