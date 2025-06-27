@@ -114,8 +114,20 @@ export class HomeChallengeComponent {
       this.loadChallengePage();
     });
   }
+  private resetPageState(): void {
+    // everything that can legitimately be “missing” on a page
+    this.handouts = [];
+    this.programPDF = null;
+    this.googleMeetLink = '';
+    this.zoomLink = '';
+    this.chatNote = '';
+    this.participants = [];
+    this.logoImage = '';
+    this.image = '';
+  }
   loadChallengePage(): void {
     // Reset challenge-related data before fetching new ones
+    this.resetPageState();
     this.categories = [];
     this.challenges = {};
     this.activeCategory = '';
