@@ -177,6 +177,13 @@ export class TeamBuildingComponent implements OnInit, OnDestroy {
     arr?.forEach((s) => s.unsubscribe());
     this.entrySubs.delete(id);
   }
+  getMyPick(e: EntryView) {
+    // returns index or -1
+    const me = this.auth.currentUser.firstName;
+    const hit = e.votesDetail.find((v) => v.name === me);
+    return hit ? hit.picked : -1;
+  }
+
   /* ── submit entry ── */
   async submit() {
     if (!this.canSubmit()) return;

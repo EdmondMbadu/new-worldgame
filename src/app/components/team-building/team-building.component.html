@@ -91,20 +91,45 @@
       </div>
         <p class="font-semibold mb-1">Choose the lie:</p>
         <!-- Reveal button (owner or entry author; only while unrevealed) -->
-            <button *ngIf="!e.revealed && (isOwner || e.uid === auth.currentUser.uid)"
-                    (click)="revealRound(e)"
-                    class="mb-3 px-3 py-1.5 rounded-md text-sm font-medium
-                        bg-green-600 hover:bg-green-700 text-white active:scale-95 transition">
+            <!-- Reveal button -->
+            <button
+            *ngIf="!e.revealed && (isOwner || e.uid === auth.currentUser.uid)"
+            (click)="revealRound(e)"
+            class="my-4 inline-flex items-center gap-2 px-4 py-2 rounded-full
+                    bg-green-600/90 hover:bg-green-700 text-white
+                    shadow transition active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
             Reveal outcome
             </button>
 
+
       <!-- Lie poll -->
-      <div class="space-y-2 mb-4">
+      <!-- <div class="space-y-2 mb-4">
         <label *ngFor="let s of e.shuffled; let i = index" class="flex items-center gap-2 cursor-pointer">
           <input type="radio" [name]="'lie-'+e.id" [disabled]="e.alreadyVoted" (change)="pickLie(e,i)" class="accent-blue-600"/>
           <span>{{ s }}</span>
         </label>
-      </div>
+      </div> -->
+      <!-- Lie choices -->
+        <div class="flex flex-col gap-2 mb-6">
+        <button
+            *ngFor="let s of e.shuffled; let i = index"
+            (click)="pickLie(e,i)"
+            [disabled]="e.alreadyVoted"
+            [ngClass]="[
+            'w-full text-left px-4 py-2 rounded-lg transition shadow-sm',
+            getMyPick(e)===i
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600',
+            e.alreadyVoted ? 'cursor-default opacity-70' : ''
+            ]"
+        >
+            {{ s }}
+        </button>
+        </div>
+
 
       <!-- Live votes -->
       <div *ngIf="e.votesDetail.length" class="mb-4 text-sm space-y-1">
