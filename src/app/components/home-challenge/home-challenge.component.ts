@@ -495,7 +495,7 @@ export class HomeChallengeComponent {
       description: this.descriptionCreateChallenge,
       category: this.categoryCreateChallenge,
       image: this.imageCreateChallenge,
-      authordId: this.auth.currentUser.uid,
+      authorId: this.auth.currentUser.uid,
       challengePageId: this.challengePageId,
     };
 
