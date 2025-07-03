@@ -12,6 +12,7 @@ import {
 } from '@angular/fire/compat/firestore';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatBotService } from 'src/app/services/chat-bot.service';
+import { DataService, SDG, SDGPlus } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
@@ -25,6 +26,7 @@ export class OtherAisComponent implements OnInit {
   @ViewChild('chatWindow') chatWindow!: ElementRef;
   colleagues: any[] = [];
   elders: any[] = [];
+  public sdgTiles: SDGPlus[] = [];
 
   ngOnInit(): void {
     setTimeout(() => {
@@ -33,6 +35,19 @@ export class OtherAisComponent implements OnInit {
     this.checkLoginStatus();
     this.deleteAllDocuments();
     this.splitGroups();
+    this.sdgTiles = this.data.attachAvatars(this.aiOptions);
+  }
+  selectedSdg?: SDGPlus;
+  /** Find the AI by avatarPath and delegate to the normal selector */
+  selectAvatar(path: string) {
+    const ai = this.aiOptions.find((a) => a.avatarPath === path);
+    if (ai) this.selectAi(ai); // re-uses your existing logic + scroll
+  }
+
+  selectSdg(tile: SDGPlus, ev: MouseEvent) {
+    ev.preventDefault(); // stop link navigation
+    this.selectedSdg = tile;
+    // 🔮  place any filtering logic here if you need it
   }
 
   allAIOptions: boolean = false;
@@ -40,12 +55,19 @@ export class OtherAisComponent implements OnInit {
   collectionPath = `users/${this.auth.currentUser.uid}/bucky`;
   prompt = '';
   status = '';
+  /* put near other UI state */
+  showSdgStrip = false;
 
+  /* simple toggle */
+  toggleSdgStrip() {
+    this.showSdgStrip = !this.showSdgStrip;
+  }
   aiOptions = [
     {
       avatarPath: '../../../assets/img/zara-agent.png',
       name: 'Zara Nkosi',
       group: 'colleague',
+      sdgs: [1, 4, 15, 10, 17],
       intro: `${name}  a vibrant AI inspired by South African ubuntu
 philosophy, believes that “I am because we are.” With a knack for
 weaving compelling narratives, she helps players understand
@@ -64,6 +86,7 @@ ecosystem to a balanced community.`,
       avatarPath: '../../../assets/img/arjun-agent.png',
       name: 'Arjun Patel',
       group: 'colleague',
+      sdgs: [1, 4, 6, 8, 9, 11],
       intro: ` Arjun, an AI modeled after India’s vibrant tech and social
 entrepreneurship scene, thrives on finding solutions with limited
 resources. His expertise in data analysis helps players crunch
@@ -81,6 +104,7 @@ players engaged.`,
       avatarPath: '../../../assets/img/sofia-agent.png',
       name: 'Sofia Morales',
       group: 'colleague',
+      sdgs: [5, 13, 16],
       intro: ` Sofia, inspired by Colombia’s peacebuilding and biodiversity,
 is a fierce advocate for sustainable development. Her expertise in
 conflict resolution helps players navigate tensions in group
@@ -99,6 +123,7 @@ challenges.`,
       avatarPath: '../../../assets/img/li-agent.png',
       name: 'Li Wei',
       group: 'colleague',
+      sdgs: [2, 9, 11],
       intro: ` Li Wei, an AI rooted in China’s rapid urbanization and
 technological advancements, is a master of strategic thinking. He
 excels at helping players design scalable solutions for sustainable
@@ -115,6 +140,7 @@ quoting ancient Chinese proverbs to spark reflection.`,
       avatarPath: '../../../assets/img/amina-agent.png',
       name: 'Amina Al-Sayed',
       group: 'colleague',
+      sdgs: [5, 10, 13],
       intro: `Amina, drawing from Morocco’s rich cultural tapestry, is a
 wise AI who emphasizes inclusion and equity in problem-solving.
 Her expertise in cross-cultural communication helps players
@@ -132,6 +158,7 @@ resonate with professionals.`,
       avatarPath: '../../../assets/img/elena-agent.png',
       name: 'Elena Volkov',
       group: 'colleague',
+      sdgs: [2, 3, 7, 12, 17],
       intro: `Elena, inspired by Ukraine’s resilience and innovation amid
 adversity, is a bold AI who thrives in high-pressure scenarios. Her
 crisis management skills help players tackle urgent challenges
@@ -147,6 +174,7 @@ world pragmatism make her relatable across age groups.`,
     {
       avatarPath: '../../../assets/img/tane-agent.png',
       name: 'Tane Kahu',
+      sdgs: [6, 12, 14, 15],
       group: 'colleague',
       intro: `Tane, an AI rooted in Māori wisdom and New Zealand’s
 sustainability ethos, brings a holistic perspective to problem-
@@ -165,6 +193,7 @@ meaningful, lasting impact.`,
       avatarPath: '../../../assets/img/marie-curie.jpg',
       name: 'Marie Curie',
       group: 'elder',
+      sdgs: [3, 7],
       intro: `${name} Polish physicist and chemist who revolutionized the fields of medicine and radiology through her groundbreaking research on radioactivity.`,
       collectionPath: `users/${this.auth.currentUser.uid}/marie/`,
     },
@@ -172,6 +201,7 @@ meaningful, lasting impact.`,
       avatarPath: '../../../assets/img/rachel-carlson.jpeg',
       name: 'Rachel Carson',
       group: 'elder',
+      sdgs: [8, 13, 14],
       intro: `${name} American marine biologist, writer, and conservationist who is often called the first woman environmentalist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/rachel/`,
     },
@@ -179,6 +209,7 @@ meaningful, lasting impact.`,
       avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
       group: 'elder',
+      // sdgs: [9, 11, 12],
       intro: `${name} American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
     },
@@ -186,6 +217,7 @@ meaningful, lasting impact.`,
       avatarPath: '../../../assets/img/albert.png',
       name: 'Albert Einstein',
       group: 'elder',
+      sdgs: [7, 11, 16],
       intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
       collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
     },
@@ -193,6 +225,7 @@ meaningful, lasting impact.`,
       avatarPath: '../../../assets/img/mandela.png',
       name: 'Nelson Mandela',
       group: 'elder',
+      sdgs: [8, 16],
       intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
@@ -211,7 +244,8 @@ meaningful, lasting impact.`,
     private afs: AngularFirestore,
     public auth: AuthService,
     private cdRef: ChangeDetectorRef,
-    public chat: ChatBotService
+    public chat: ChatBotService,
+    private data: DataService
   ) {}
   checkLoginStatus(): void {
     if (

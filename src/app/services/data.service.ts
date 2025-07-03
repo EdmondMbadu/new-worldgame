@@ -31,8 +31,11 @@ export class DataService implements OnInit {
       }
     });
     this.sdgs = this.transformSDGs(this.sdgsPaths);
+    this.sdgPlus = this.transformSDGsPlus(this.sdgsPaths);
   }
   sdgs: SDG[] = [];
+  sdgPlus: SDGPlus[] = [];
+
   allowedMimeTypes: string[] = [
     'image/jpeg',
     'image/png',
@@ -594,6 +597,45 @@ export class DataService implements OnInit {
       .delete();
   }
 
+  /** NEW: produces an array indexed by SDG number (icons + links only) */
+  private transformSDGsPlus(paths: { [k: string]: string }): SDGPlus[] {
+    const base: { [n: number]: Partial<SDGPlus> } = {};
+    Object.entries(paths).forEach(([k, v]) => {
+      const match = /^SDG(\d{1,2})\s{2,}(.*)/.exec(k);
+      if (!match) return; // skip "None" or broken keys
+      const num = Number(match[1]) as SDGPlus['number'];
+      base[num] ??= { number: num } as SDGPlus;
+      if (k.endsWith('-link')) {
+        base[num]!.link = v;
+      } else {
+        base[num]!.title = match[2];
+        base[num]!.icon = v;
+      }
+    });
+    return Object.values(base).map((b) => ({
+      number: b.number!,
+      title: b.title!,
+      icon: b.icon!,
+      link: b.link ?? '#',
+      avatars: [],
+    }));
+  }
+
+  public attachAvatars(
+    aiOptions: { avatarPath: string; sdgs?: number[] }[]
+  ): SDGPlus[] {
+    // Deep-copy so we don't mutate the singleton
+    const tiles = JSON.parse(JSON.stringify(this.sdgPlus)) as SDGPlus[];
+
+    aiOptions.forEach((ai) => {
+      ai.sdgs?.forEach((n) => {
+        const tile = tiles.find((t) => t.number === n);
+        if (tile) tile.avatars.push(ai.avatarPath);
+      });
+    });
+    return tiles;
+  }
+
   UnfollowUser() {}
 }
 
@@ -603,4 +645,28 @@ export interface SDG {
   imagePath: string;
   link: string;
   backgroundSelected?: string;
+}
+export interface SDGPlus {
+  number:
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17;
+  title: string;
+  icon: string;
+  link: string;
+  avatars: string[]; // will be filled later
 }
