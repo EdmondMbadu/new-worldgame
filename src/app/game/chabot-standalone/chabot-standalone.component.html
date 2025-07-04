@@ -1,0 +1,330 @@
+<!-- Root wrapper: full height, handles dark-mode -->
+<div [class.dark]="isDark"
+     class="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-900
+            transition-colors duration-300">
+
+  <!-- ── NAVBAR (logged-in vs guest) ─────────────────────────────── -->
+  <ng-container *ngIf="auth?.currentUser; else guestNav">
+    <app-navbar
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      [path]="'home'">
+    </app-navbar>
+  </ng-container>
+
+  <ng-template #guestNav>
+    <div class="mt-10">
+        <app-navbar></app-navbar>
+    </div>
+
+
+    
+  </ng-template>
+
+  <!-- ── Page header with theme switch ───────────────────────────── -->
+  <header class="flex items-center justify-between px-6 py-4 shadow-sm">
+    <h1 class="text-2xl font-bold text-teal-700 dark:text-teal-400">
+      Bucky
+    </h1>
+        <!-- SHRINK BACK (visible only if cameFromWidget) -->
+    <ng-container *ngIf="cameFromWidget">
+    <button (click)="goBack()"
+            class="p-2 rounded-full bg-gray-200 dark:bg-slate-700
+                    hover:opacity-80 transition mr-2">
+        <svg xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6 text-gray-700 dark:text-white" fill="none"
+            viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <!-- inward arrows -->
+        <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 8v8m0 0h8m-8 0 6-6
+                m12-8v8m0 0h-8m8 0-6-6"/>
+        </svg>
+    </button>
+    </ng-container>
+
+    <button (click)="toggleTheme()"
+            class="p-2 rounded-full bg-gray-200 dark:bg-slate-700
+                   hover:opacity-80 transition">
+      <!-- sun -->
+      <ng-container *ngIf="!isDark; else moon">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5" fill="none" stroke="currentColor"
+             viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 3v1m0 16v1m8.66-11.66-.71.71M4.05 19.95l-.71-.71
+                   M21 12h1M2 12H1m16.95 4.95-.71-.71M4.05 4.05l-.71.71
+                   M12 7a5 5 0 100 10 5 5 0 000-10z"/>
+        </svg>
+      </ng-container>
+      <!-- moon -->
+      <ng-template #moon>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5" fill="none" stroke="currentColor"
+             viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      </ng-template>
+    </button>
+
+
+
+  </header>
+  <!-- ╭── Scrollable message area ─────────────────────────╮ -->
+  <main id="chatbox"
+        class="flex-1 w-full max-w-3xl mx-auto px-4 py-6 overflow-y-auto">
+
+    <!-- Intro bubble -->
+    <div class="flex items-start space-x-2 mb-6">
+      <img src="../../../assets/img/bucky-1.png"
+           class="w-12 h-12 rounded-full" alt="Bucky">
+      <p class="bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-200
+                py-2 px-4 rounded-lg shadow-sm">
+        {{ introMessage.text }}
+        <a *ngIf="introMessage.link"
+           [routerLink]="introMessage.link.url"
+           class="text-blue-500 underline">
+          {{ introMessage.link.text }}
+        </a>
+      </p>
+    </div>
+
+    <!-- Conversation loop -->
+    <ng-container *ngFor="let resp of responses; let i = index">
+
+      <!-- ▸ PROMPT --------------------------------------------------- -->
+      <div *ngIf="resp.type === 'PROMPT'"
+           class="flex items-start justify-end mb-4 space-x-2">
+        <div class="max-w-[80%] flex space-x-2">
+          <!-- user avatar or placeholder -->
+          <ng-container *ngIf="profilePicturePath; else placeholder">
+            <img [src]="profilePicturePath"
+                 class="w-10 h-10 rounded-full" alt="User">
+          </ng-container>
+          <ng-template #placeholder>
+            <span class="w-10 h-10 rounded-full bg-teal-600 text-white
+                         flex items-center justify-center font-medium">
+              {{ userInitial }}
+            </span>
+          </ng-template>
+
+          <div>
+            <p class="bg-slate-200 dark:bg-slate-500
+                      text-gray-800 dark:text-slate-100
+                      py-2 px-4 rounded-lg shadow-sm">
+              {{ resp.text }}
+            </p>
+
+            <!-- icon-only copy -->
+            <!-- COPY / CHECK BUTTON  -->
+                    <button
+                    class="mt-1 p-1 bg-gray-200 dark:bg-slate-600 rounded
+                            hover:bg-gray-300 dark:hover:bg-slate-500 transition"
+                    (click)="copySingleMessage(resp.text!, i)"
+                    [title]="singleCopyStates[i] === 'Copied!' ? 'Copied!' : 'Copy'">
+
+                    <!-- clipboard icon -->
+                    <ng-container *ngIf="singleCopyStates[i] !== 'Copied!'; else check">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 text-gray-700 dark:text-white"
+                            fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192
+                                M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108
+                                M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12
+                                h9.75c.621 0 1.125-.504 1.125-1.125V16.5"/>
+                        </svg>
+                    </ng-container>
+
+                    <!-- check-mark icon shown for 2 s -->
+                    <ng-template #check>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 text-teal-700 dark:text-teal-400"
+                            fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </ng-template>
+                    </button>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ▸ ATTACHMENT ---------------------------------------------- -->
+      <div *ngIf="resp.type === 'ATTACHMENT'"
+           class="flex items-start justify-end mb-4 space-x-2">
+        <div class="max-w-[80%] flex space-x-2">
+          <svg class="w-10 h-10 text-teal-600" fill="none"
+               stroke="currentColor" stroke-width="1.5"
+               viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364
+                     l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8"/>
+          </svg>
+          <a [href]="resp.src" download target="_blank"
+             class="bg-slate-200 dark:bg-slate-500 px-4 py-2 rounded-lg shadow-sm
+                    text-gray-800 dark:text-slate-100 whitespace-nowrap">
+            {{ resp.text }}
+          </a>
+        </div>
+      </div>
+
+      <!-- ▸ IMAGE ---------------------------------------------------- -->
+      <div *ngIf="resp.type === 'IMAGE'" class="flex items-start mb-4 space-x-2">
+        <img src="../../../assets/img/bucky-1.png"
+             class="w-10 h-10 rounded-full" alt="Bucky">
+        <div class="flex flex-col items-center">
+          <img [src]="resp.src"
+               class="max-w-[250px] md:max-w-sm rounded-lg shadow-sm"
+               alt="AI generated image">
+          <button (click)="downloadImage(resp.src!)"
+                  class="mt-1 text-xs px-2 py-1 bg-gray-200 dark:bg-slate-600
+                         rounded hover:bg-gray-300 dark:hover:bg-slate-500">
+            Download
+          </button>
+        </div>
+      </div>
+
+      <!-- ▸ RESPONSE ------------------------------------------------- -->
+      <div *ngIf="resp.type === 'RESPONSE'"
+           class="flex items-start mb-4 space-x-2">
+        <img src="../../../assets/img/bucky-1.png"
+             class="w-10 h-10 rounded-full" alt="Bucky">
+        <div>
+          <p class="bg-white dark:bg-slate-700
+                    text-gray-900 dark:text-slate-200
+                    py-2 px-4 rounded-lg shadow-sm"
+             [innerHTML]="formatText(resp.text!)"></p>
+
+          <!-- icon-only copy -->
+  <!-- COPY / CHECK BUTTON  -->
+                <button
+                class="mt-1 p-1 bg-gray-200 dark:bg-slate-600 rounded
+                        hover:bg-gray-300 dark:hover:bg-slate-500 transition"
+                (click)="copySingleMessage(resp.text!, i)"
+                [title]="singleCopyStates[i] === 'Copied!' ? 'Copied!' : 'Copy'">
+
+                <!-- clipboard icon -->
+                <ng-container *ngIf="singleCopyStates[i] !== 'Copied!'; else check">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 text-gray-700 dark:text-white"
+                        fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192
+                            M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108
+                            M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12
+                            h9.75c.621 0 1.125-.504 1.125-1.125V16.5"/>
+                    </svg>
+                </ng-container>
+
+                <!-- check-mark icon shown for 2 s -->
+                <ng-template #check>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 text-teal-700 dark:text-teal-400"
+                        fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M5 13l4 4L19 7"/>
+                    </svg>
+                </ng-template>
+                </button>
+
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- Typing / status animation -->
+    <div *ngIf="status"
+         class="flex items-center gap-1 text-gray-500 dark:text-slate-400">
+      <span class="w-2 h-2 bg-gray-400 dark:bg-slate-500 rounded-full
+                   animate-bounce" style="animation-duration:1.2s"></span>
+      <span class="w-2 h-2 bg-gray-400 dark:bg-slate-500 rounded-full
+                   animate-bounce" style="animation-duration:1.2s; animation-delay:.15s"></span>
+      <span class="w-2 h-2 bg-gray-400 dark:bg-slate-500 rounded-full
+                   animate-bounce" style="animation-duration:1.2s; animation-delay:.3s"></span>
+      <span class="ml-2">{{ status }}</span>
+    </div>
+  </main>
+
+  <!-- ╭── Composer ─────────────────────────────────────────╮ -->
+  <footer class="w-full max-w-3xl mx-auto px-4 pb-8 space-y-3">
+
+    <!-- Preview chips -->
+    <div *ngIf="previews.length" class="flex flex-wrap gap-2">
+      <ng-container *ngFor="let p of previews; let i = index">
+        <div class="px-2 py-1 bg-slate-200 dark:bg-slate-600
+                    rounded text-xs flex items-center space-x-1">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor"
+               stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364
+                     l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8"/>
+          </svg>
+          <span class="max-w-[80px] truncate" [title]="p.file.name">
+            {{ p.file.name }}
+          </span>
+          <span *ngIf="p.uploading" class="italic text-[10px]">…</span>
+          <button (click)="removePreview(i)" class="ml-1 text-[10px] font-bold">
+            ×
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Input row -->
+    <div class="flex items-end gap-2">
+      <!-- Attach -->
+      <label class="cursor-pointer flex items-center">
+        <svg class="w-5 h-5 text-slate-600 dark:text-slate-300"
+             fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364
+                   l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8"/>
+        </svg>
+        <input type="file" hidden
+               (change)="handleFile($event)"
+               accept=".pdf,.doc,.docx,.txt">
+      </label>
+
+      <!-- Textarea -->
+      <textarea [(ngModel)]="prompt"
+                (keydown.enter)="submitPrompt(); $event.preventDefault()"
+                rows="2"
+                placeholder="Ask something…"
+                class="flex-1 resize-none px-3 py-2 border rounded-md
+                       focus:outline-none focus:ring-2 focus:ring-teal-400
+                       dark:bg-slate-700 dark:border-slate-600
+                       dark:placeholder-slate-400 dark:text-white"></textarea>
+
+      <!-- Send -->
+      <button (click)="submitPrompt()"
+              [disabled]="uploading"
+              class="p-3 rounded-full bg-teal-700 text-white
+                     hover:bg-teal-800 transition disabled:opacity-50">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5" fill="none" stroke="currentColor"
+             viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 8l16-4-4 16-5-5L4 8z"/>
+        </svg>
+      </button>
+
+      <!-- End chat -->
+       
+     <!-- End chat -->
+            <button (click)="cameFromWidget ? goBack() : endChat()"
+                    class="p-3 rounded-full bg-red-700 text-white
+                        hover:bg-red-800 transition">
+            ×
+            </button>
+
+    </div>
+  </footer>
+</div>

@@ -5,6 +5,7 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -61,9 +62,10 @@ export class ChatbotComponent implements OnInit {
 
   constructor(
     private afs: AngularFirestore,
-    private auth: AuthService,
+    public auth: AuthService,
     private cdRef: ChangeDetectorRef,
-    private storage: AngularFireStorage
+    private storage: AngularFireStorage,
+    public router: Router
   ) {
     this.user = this.auth.currentUser;
     this.collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
@@ -75,7 +77,11 @@ export class ChatbotComponent implements OnInit {
     }
     this.deleteAllDocuments(); // optional, clearing old docs
   }
-
+  openFullPage(): void {
+    // Close the bubble (optional) and jump to stand-alone view
+    this.showBot = false;
+    this.router.navigate(['/chat-bucky'], { queryParams: { from: 'widget' } });
+  }
   toggleBot() {
     this.showBot = !this.showBot;
   }

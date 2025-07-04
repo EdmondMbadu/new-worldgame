@@ -84,6 +84,7 @@ import { NwgStepsComponent } from './blogs/nwg-steps/nwg-steps.component';
 import { NoAuthGuard } from './services/no-auth.guard';
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
+import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -438,6 +439,11 @@ const routes: Routes = [
     path: 'home-challenge/:id',
     component: HomeChallengeComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'chat-bucky',
+    component: ChabotStandaloneComponent,
+    // canActivate: [AuthGuard],
   },
   {
     path: 'document-files/:solutionId/presentation/:presentationId',

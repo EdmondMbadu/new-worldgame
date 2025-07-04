@@ -130,6 +130,7 @@ import { PresentationFormComponent } from './presentations/presentation-form/pre
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
+import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
 
 @NgModule({
   declarations: [
@@ -235,6 +236,7 @@ import { TeamBuildingComponent } from './components/team-building/team-building.
     PresentationFormComponent,
     PresentationViewerComponent,
     TeamBuildingComponent,
+    ChabotStandaloneComponent,
   ],
   imports: [
     BrowserModule,
