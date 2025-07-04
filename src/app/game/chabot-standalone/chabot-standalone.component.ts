@@ -8,36 +8,54 @@ import { AuthService } from 'src/app/services/auth.service';
 @Component({
   selector: 'app-chabot-standalone',
   templateUrl: './chabot-standalone.component.html',
-  styleUrl: './chabot-standalone.component.css',
+  styleUrls: ['./chabot-standalone.component.css'],
 })
 export class ChabotStandaloneComponent extends ChatbotComponent {
-  /** true = dark-mode UI */
+  /* ── UI flags ─────────────────────────────────────────────── */
   isDark = false;
+  cameFromWidget = false;
+  signedIn = false; // real session or guest?
+
   constructor(
     afs: AngularFirestore,
     auth: AuthService,
     cd: ChangeDetectorRef,
     storage: AngularFireStorage,
-    router: Router,
+    router: Router, // keep for goBack()
     route: ActivatedRoute
   ) {
-    super(afs, auth, cd, storage, router); // keep all base-class logic
+    /* 1 ▪ real user present? */
+    super(afs, ensureUser(auth), cd, storage, router); // <— now safe
+
+    /* 2 ▪ origin */
     this.cameFromWidget = route.snapshot.queryParamMap.get('from') === 'widget';
+    this.signedIn = auth.currentUser.uid !== 'guest';
   }
-  cameFromWidget = false;
+
+  /* ── Navigation back to bubble ────────────────────────────── */
   goBack(): void {
-    if (this.cameFromWidget) {
-      this.router.navigate(['../']); // or:  window.history.back();
-    }
+    if (this.cameFromWidget) this.router.navigate(['../']);
   }
-  /** Initial for the placeholder avatar */
+
+  /* ── Placeholder letter for avatar ────────────────────────── */
   get userInitial(): string {
-    const n = this.user?.firstName || this.user?.firstName || '';
-    return n ? n.charAt(0).toUpperCase() : 'U';
+    const n = this.user?.firstName || '';
+    return n ? n[0].toUpperCase() : 'U';
   }
-  /** Toggles Tailwind dark class on <html> */
+
+  /* ── Dark / light toggle ──────────────────────────────────── */
   toggleTheme(): void {
     this.isDark = !this.isDark;
     document.documentElement.classList.toggle('dark', this.isDark);
   }
+}
+
+/* ------------------------------------------------------------------
+   Helper: if AuthService has no user yet, inject a one-field guest
+-------------------------------------------------------------------*/
+function ensureUser(auth: AuthService) {
+  if (!auth.currentUser) {
+    auth.currentUser = { uid: 'guest' } as any;
+  }
+  return auth;
 }

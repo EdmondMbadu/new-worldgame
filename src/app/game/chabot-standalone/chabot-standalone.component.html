@@ -1,26 +1,25 @@
-<!-- Root wrapper: full height, handles dark-mode -->
+<!-- Root wrapper -->
 <div [class.dark]="isDark"
      class="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-900
-            transition-colors duration-300">
-
-  <!-- ── NAVBAR (logged-in vs guest) ─────────────────────────────── -->
-  <ng-container *ngIf="auth?.currentUser; else guestNav">
-    <app-navbar
-      [email]="auth.currentUser.email"
-      [firstName]="auth.currentUser.firstName"
-      [lastName]="auth.currentUser.lastName"
-      [path]="'home'">
-    </app-navbar>
-  </ng-container>
-
-  <ng-template #guestNav>
-    <div class="mt-10">
-        <app-navbar></app-navbar>
-    </div>
+            transition-colors duration-300"
+     [ngClass]="!signedIn ? 'pt-16' : ''">   <!-- adds 64-px top pad for guests -->
 
 
-    
-  </ng-template>
+  <!-- ── NAVBAR ─────────────────────────────────────────────── -->
+<!-- NAVBAR -->
+<app-navbar
+  *ngIf="signedIn; else guestBar"
+  [email]="auth.currentUser.email"
+  [firstName]="auth.currentUser.firstName"
+  [lastName]="auth.currentUser.lastName"
+  [path]="'home'">
+</app-navbar>
+
+<ng-template #guestBar>
+  <app-navbar></app-navbar>
+</ng-template>
+
+
 
   <!-- ── Page header with theme switch ───────────────────────────── -->
   <header class="flex items-center justify-between px-6 py-4 shadow-sm">
