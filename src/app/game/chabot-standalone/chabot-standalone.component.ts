@@ -29,7 +29,10 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
 
     /* 2 ▪ origin */
     this.cameFromWidget = route.snapshot.queryParamMap.get('from') === 'widget';
-    this.signedIn = auth.currentUser.uid !== 'guest';
+    this.signedIn =
+      !!auth.currentUser &&
+      auth.currentUser.uid !== 'guest' &&
+      auth.currentUser.email?.trim().length;
   }
 
   /* ── Navigation back to bubble ────────────────────────────── */
