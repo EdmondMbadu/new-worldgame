@@ -216,23 +216,41 @@
               </p>
             </div>
 
-            <!-- Copy button (AI responses only) -->
-            <button *ngIf="resp.type === 'RESPONSE'"
-                    (click)="copySingleMessage(resp.text, i)"
-                    aria-label="Copy answer"
-                    class="absolute -top-2 -right-2 hidden group-hover:flex
-                           items-center justify-center h-6 w-6 rounded-full
-                           bg-gray-100 dark:bg-slate-600 shadow
-                           hover:bg-gray-200 dark:hover:bg-slate-500">
-              <svg class="h-4 w-4 text-gray-600 dark:text-gray-300"
-                   fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-linecap="round" stroke-linejoin="round"
-                   viewBox="0 0 24 24">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4
-                         c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-            </button>
+<!-- Copy button — stays inside bubble & shows check on success -->
+        <button
+          *ngIf="resp.type === 'RESPONSE'"
+          (click)="copySingleMessage(resp.text, i)"
+          [attr.aria-label]="singleCopyStates[i] === 'Copied!' ? 'Copied' : 'Copy answer'"
+          class="absolute bottom-1 right-1
+                opacity-0 group-hover:opacity-100 transition-opacity duration-150
+                flex items-center justify-center h-6 w-6 rounded-full
+                bg-gray-100 dark:bg-slate-600 shadow
+                hover:bg-gray-200 dark:hover:bg-slate-500">
+
+          <!-- Normal state: copy icon -->
+          <ng-container *ngIf="singleCopyStates[i] !== 'Copied!'; else done">
+            <svg class="h-4 w-4 text-gray-600 dark:text-gray-300"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                viewBox="0 0 24 24">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4
+                      c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </ng-container>
+
+          <!-- Success state: check mark -->
+          <ng-template #done>
+            <svg class="h-4 w-4 text-emerald-600"
+                fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"
+                viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7" />
+            </svg>
+          </ng-template>
+        </button>
+
+
           </div>
         </div>
       </ng-container>
