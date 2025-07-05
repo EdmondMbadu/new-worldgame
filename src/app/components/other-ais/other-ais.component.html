@@ -218,7 +218,7 @@
 
             <!-- Copy button (AI responses only) -->
             <button *ngIf="resp.type === 'RESPONSE'"
-                    (click)="copyToClipboard(resp.text)"
+                    (click)="copySingleMessage(resp.text, i)"
                     aria-label="Copy answer"
                     class="absolute -top-2 -right-2 hidden group-hover:flex
                            items-center justify-center h-6 w-6 rounded-full

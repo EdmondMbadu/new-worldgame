@@ -11,6 +11,7 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AuthService } from 'src/app/services/auth.service';
+import { BoxService } from 'src/app/services/box.service';
 import { ChatBotService } from 'src/app/services/chat-bot.service';
 import { DataService, SDG, SDGPlus } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -27,6 +28,7 @@ export class OtherAisComponent implements OnInit {
   colleagues: any[] = [];
   elders: any[] = [];
   public sdgTiles: SDGPlus[] = [];
+  singleCopyStates: string[] = []; // Initialise alongside responses
 
   ngOnInit(): void {
     setTimeout(() => {
@@ -245,7 +247,8 @@ meaningful, lasting impact.`,
     public auth: AuthService,
     private cdRef: ChangeDetectorRef,
     public chat: ChatBotService,
-    private data: DataService
+    private data: DataService,
+    private box: BoxService
   ) {}
   checkLoginStatus(): void {
     if (
@@ -304,6 +307,15 @@ meaningful, lasting impact.`,
   private scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
     this.bottomAnchor?.nativeElement.scrollIntoView({ behavior });
   }
+  copySingleMessage(text: string, idx: number): void {
+    this.box
+      .copy(text)
+      .then(() => {
+        this.singleCopyStates[idx] = 'Copied!';
+        setTimeout(() => (this.singleCopyStates[idx] = 'Copy'), 2000);
+      })
+      .catch((err) => console.error('Copy failed', err));
+  }
 
   async submitPrompt(
     event: Event,
@@ -316,6 +328,7 @@ meaningful, lasting impact.`,
     this.prompt = promptText.value;
     promptText.value = '';
     this.responses.push({ text: this.prompt, type: 'PROMPT' });
+    this.singleCopyStates.push('Copy');
     this.scrollToBottom();
 
     /* firestore write */

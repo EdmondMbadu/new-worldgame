@@ -16,6 +16,38 @@ export abstract class BoxService {
   constructor(private auth: AuthService, private afs: AngularFirestore) {
     this.userRef = this.afs.doc(`users/${this.auth.currentUser.uid}`);
   }
+  formatText(value: string): string {
+    if (!value) return '';
+
+    let html = value;
+    html = html.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^##  (.*?)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^#   (.*?)$/gm, '<h1>$1</h1>');
+
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    html = html.replace(/^\* (.*?)(?=\n|$)/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*?<\/li>)/g, '<ul>$1</ul>');
+
+    html = html.replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a class="text-blue-500 underline" target="_blank" href="$2">$1</a>'
+    );
+    return html.replace(/\n/g, '<br>');
+  }
+
+  /** Copy one block as plain + rich HTML */
+  copy(text: string): Promise<void> {
+    const html = this.formatText(text);
+
+    const item = new ClipboardItem({
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+      'text/html': new Blob([html], { type: 'text/html' }),
+    });
+
+    return navigator.clipboard.write([item]);
+  }
 
   toggle() {
     if (this.currentDisplay) {
