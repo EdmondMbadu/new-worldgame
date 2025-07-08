@@ -80,7 +80,7 @@ export class ChatbotComponent implements OnInit {
   openFullPage(): void {
     // Close the bubble (optional) and jump to stand-alone view
     this.showBot = false;
-    this.router.navigate(['/chat-bucky'], { queryParams: { from: 'widget' } });
+    this.router.navigate(['/ask-bucky'], { queryParams: { from: 'widget' } });
   }
   toggleBot() {
     this.showBot = !this.showBot;

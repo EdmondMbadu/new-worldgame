@@ -441,7 +441,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'chat-bucky',
+    path: 'ask-bucky',
     component: ChabotStandaloneComponent,
     // canActivate: [AuthGuard],
   },

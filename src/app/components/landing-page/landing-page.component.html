@@ -1,40 +1,40 @@
 <div class="dark:bg-slate-900 min-h-screen ">
 <app-navbar></app-navbar>
 
-<section id="main ">
+  <section id="main" class="pt-10"> <!-- add top padding so content clears fixed navbar -->
+    <div class="testing dark:terrain container flex flex-col-reverse lg:flex-row items-center px-24 mx-auto space-y-0 mt-30 lg:justify-between justify-center">
 
-    <div class=" testing dark:terrain container flex flex-col-reverse lg:flex-row items-center px-24 mx-auto space-y-0 mt-30 lg:justify-between justify-center">
-        <div class="flex flex-col  mb-32 text-center space-y-12 lg:w-1/2 ">
-            <h1 class="animated-text max-w-md mt-10 dark:text-white text-worldsecond   text-3xl font-extrabold md:text-4xl md:text-left">
-                <span class="text-teal-700  "></span> 
-                <h2 class="mt-2">solutions to world problems with people around the world.</h2> 
-                <!-- A global problem solving platform for everyone everywhere -->
+      <!-- ▸ Text column ------------------------------------------------ -->
+      <div class="flex flex-col mb-32 text-center space-y-12 lg:w-1/2">
+        <h1 class="animated-text max-w-md mt-10 dark:text-white text-worldsecond text-3xl font-extrabold md:text-4xl md:text-left">
+          <span class="text-teal-700"></span>
+          <h2 class="mt-2">solutions to world problems with people around the world.</h2>
+        </h1>
 
-            </h1>
-            <!-- <p class="max-w-sm text-center text-gray-500 md:text-left">
-                Design Science methodology inspired by the work of Medard Gabel. 
-                Solutions for the ever changing world continuously evolving.
-            </p> -->
-            <p class="max-w-md text-xl italic text-center lg:text-left text-gray-400">
-                "We are called to be the architects of the future, not its victims."
-               
-                <span class=" px-2 not-italic"> - Buckminster Fuller</span>
+        <p class="max-w-md text-xl italic text-center lg:text-left text-gray-400">
+          "We are called to be the architects of the future, not its victims."
+          <span class="px-2 not-italic"> - Buckminster Fuller</span>
+        </p>
 
-            </p>
-            <a routerLink="/welcome" class=" lg:max-w-xs p-5 px-6  text-white border- bg-teal-700 rounded-full hover:bg-teal-800"> Get Started</a>
-                
+        <!-- Primary CTA -->
+        <a routerLink="/welcome" class="lg:max-w-xs p-5 px-6 text-white bg-teal-700 rounded-full hover:bg-teal-800 transition">Get Started</a>
 
-        </div>
+        <!-- Simple text link CTA like screenshot -->
+       <a routerLink="/ask-bucky"
+           class="mt-4 self-start inline-flex items-center gap-2 px-6 py-3 rounded-full border border-teal-700 text-teal-700 dark:text-white font-medium shadow-sm hover:bg-teal-700 hover:text-white transition">
+          Start solving world problems with Bucky
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
 
-        <div class="lg:w-1/2 px-6 lg:py-36 pt-36 max-w-sm lg:max-w-lg " >
-
-            <img class=" rotate rounded-full " src="../../../assets/img/earth-triangle.png" alt="">
-        </div>
-
-
+      <!-- ▸ Image column ---------------------------------------------- -->
+      <div class="lg:w-1/2 px-6 lg:py-36 pt-36 max-w-sm lg:max-w-lg">
+        <img class="rotate rounded-full" src="../../../assets/img/earth-triangle.png" alt="Earth illustration">
+      </div>
     </div>
-
-</section>
+  </section>
 <section id="design-science">
     <div class="container flex flex-col items-center max-w-7xl px-4 mx-auto space-y-12 md:space-y-0 lg:flex-row justify-between mb-10 ">
       
