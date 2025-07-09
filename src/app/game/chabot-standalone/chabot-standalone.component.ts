@@ -35,6 +35,38 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
       auth.currentUser.email?.trim().length;
   }
 
+  /* ── Suggestions affichées tant qu’aucune question n’est posée ── */
+  /* ── Suggestions affichées tant qu’aucune question n’est posée ── */
+  starterPrompts = [
+    {
+      title: 'Design a solution',
+      subtitle: 'to reduce food waste in urban areas',
+    },
+    {
+      title: 'Create a platform',
+      subtitle: 'to connect volunteers with local NGOs',
+    },
+
+    {
+      title: 'Propose an initiative',
+      subtitle: 'to improve digital access in rural communities',
+    },
+  ];
+
+  /* ▸ Masquage automatique après clic */
+  selectStarter(p: { title: string; subtitle: string }) {
+    this.prompt = `${p.title} ${p.subtitle}`;
+    this.starterPrompts = []; // ➜ fait disparaître le bloc
+    this.submitPrompt(); // (commente-la si tu
+  } //   veux juste pré-remplir)
+  /** Masquer les suggestions et envoyer la question */
+  override async submitPrompt(): Promise<void> {
+    if (!this.prompt?.trim()) return; // rien à faire
+
+    this.starterPrompts = []; // on cache le bloc
+    await super.submitPrompt(); // conserve la logique parent
+  }
+
   /* ── Navigation back to bubble ────────────────────────────── */
   goBack(): void {
     if (this.cameFromWidget) this.router.navigate(['../']);

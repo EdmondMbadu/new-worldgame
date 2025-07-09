@@ -45,6 +45,31 @@
     </h2>
   </section>
 
+<!-- ╭── Starter box ───────────────────────────────────────────╮ -->
+<div *ngIf="starterPrompts.length"
+     class="w-full max-w-3xl mx-auto mt-6 p-6 bg-white/70 dark:bg-slate-800/60
+            border border-gray-200 dark:border-slate-600 rounded-2xl
+            shadow-md backdrop-blur">
+
+  <div class="flex flex-wrap justify-center gap-4">
+    <button *ngFor="let p of starterPrompts"
+            (click)="selectStarter(p)"
+            class="flex flex-col px-6 py-4 text-left border border-gray-300
+                   dark:border-slate-500 rounded-3xl bg-white/80 dark:bg-slate-700/60
+                   hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm transition">
+
+      <span class="font-semibold text-slate-900 dark:text-slate-100">
+        {{ p.title }}
+      </span>
+      <span class="text-gray-600 dark:text-slate-400">
+        {{ p.subtitle }}
+      </span>
+    </button>
+  </div>
+</div>
+<!-- ╰───────────────────────────────────────────────────────────╯ -->
+
+
   <!-- ╭── Scrollable conversation ──────────────────────────────╮ -->
   <main *ngIf="responses.length" id="chatbox" class="flex-1 w-full max-w-3xl mx-auto px-4 py-6 overflow-y-auto">
 
