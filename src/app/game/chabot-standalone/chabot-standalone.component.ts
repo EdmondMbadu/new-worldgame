@@ -51,6 +51,11 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
       title: 'Propose an initiative',
       subtitle: 'to improve digital access in rural communities',
     },
+    {
+      title: 'Latest news',
+      subtitle:
+        'to discover how recent events impact your community and the world',
+    },
   ];
 
   /* ▸ Masquage automatique après clic */

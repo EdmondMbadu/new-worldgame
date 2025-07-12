@@ -51,7 +51,8 @@
             border border-gray-200 dark:border-slate-600 rounded-2xl
             shadow-md backdrop-blur">
 
-  <div class="flex flex-wrap justify-center gap-4">
+  <!-- Switch to grid: 2 columns on sm and above -->
+  <div class="grid gap-4 sm:grid-cols-2">
     <button *ngFor="let p of starterPrompts"
             (click)="selectStarter(p)"
             class="flex flex-col px-6 py-4 text-left border border-gray-300
