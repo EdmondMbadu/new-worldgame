@@ -41,10 +41,12 @@
     class="overflow-hidden transition-all duration-300 ease-in-out"
     [ngClass]="showSdgStrip ? 'max-h-[1000px] mt-6' : 'max-h-0'">
 
-    <div
-      class="grid gap-8
-             sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <!-- Informational Note (Top) -->
+    <div class="mb-6 text-center text-lg text-gray-500 italic">
+      This is not an exhaustive list. Feel free to explore and interact with all AI avatars to discover additional perspectives.
+    </div>
 
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <ng-container *ngFor="let sdg of sdgTiles">
         <article class="flex items-center gap-4">
           <!-- SDG icon -->
@@ -70,11 +72,11 @@
           </div>
         </article>
       </ng-container>
-
     </div>
+
   </div>
 </section>
->
+
 
 
 
