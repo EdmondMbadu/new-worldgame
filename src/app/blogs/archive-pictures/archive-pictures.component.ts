@@ -45,9 +45,6 @@ export class ArchivePicturesComponent implements OnInit, OnDestroy {
             this.imageList[0], // clone of first
           ];
         }
-
-        // Once images are ready, start auto-play
-        this.startAutoPlay();
       });
     });
   }
@@ -68,66 +65,16 @@ export class ArchivePicturesComponent implements OnInit, OnDestroy {
       .listAll()
       .pipe(map((result) => result.items.map((ref) => ref.getDownloadURL())));
   }
+  modalVisible = false;
+  modalImage: string | null = null;
 
-  /**
-   * Starts the auto-play mechanism: go to the next slide every 5 seconds.
-   */
-  private startAutoPlay(): void {
-    // Clear any existing interval to prevent duplication
-    if (this.autoPlayInterval) {
-      clearInterval(this.autoPlayInterval);
-    }
-
-    this.autoPlayInterval = setInterval(() => {
-      this.nextSlide();
-    }, 5000);
+  openModal(imageUrl: string): void {
+    this.modalImage = imageUrl;
+    this.modalVisible = true;
   }
 
-  /**
-   * Move to the next slide in the array.
-   */
-  nextSlide(): void {
-    if (this.slides.length === 0) return;
-    this.currentIndex++;
-  }
-
-  /**
-   * Move to the previous slide in the array.
-   */
-  prevSlide(): void {
-    if (this.slides.length === 0) return;
-    this.currentIndex--;
-  }
-
-  /**
-   * Jump to a specific index (useful if you want dot indicators).
-   */
-  goToSlide(index: number): void {
-    this.currentIndex = index;
-  }
-
-  /**
-   * This fires when the CSS transition on the .flex container finishes.
-   * We detect if we've slid onto a "cloned" slide (either index=0 or
-   * index=slides.length-1) and snap to the real slide while *disabling* transition
-   * so the user doesn't see the jump.
-   */
-  onTransitionEnd(): void {
-    // If we're on the cloned first slide (index 0),
-    // jump to the real last slide (index = imageList.length).
-    if (this.currentIndex === 0) {
-      this.transitioning = false;
-      this.currentIndex = this.imageList.length;
-      // re-enable transitions after we snap
-      setTimeout(() => (this.transitioning = true), 0);
-
-      // If we're on the cloned last slide (index = slides.length-1),
-      // jump to the real first slide (index = 1).
-    } else if (this.currentIndex === this.slides.length - 1) {
-      this.transitioning = false;
-      this.currentIndex = 1;
-      // re-enable transitions after we snap
-      setTimeout(() => (this.transitioning = true), 0);
-    }
+  closeModal(): void {
+    this.modalVisible = false;
+    this.modalImage = null;
   }
 }
