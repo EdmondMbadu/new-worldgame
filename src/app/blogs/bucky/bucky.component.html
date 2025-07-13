@@ -1,6 +1,12 @@
 <!-- Root wrapper -->
 <div class="dark:bg-slate-900 min-h-screen flex flex-col">
-  <app-navbar></app-navbar>
+     <div *ngIf="!isLoggedIn">
+        <app-navbar></app-navbar>
+      </div>
+      <div *ngIf="isLoggedIn">
+        <app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" ></app-navbar>
+      </div>
+
 
   <!-- ── HERO ──────────────────────────────────────────────── -->
   <section

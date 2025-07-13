@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-bucky',
@@ -31,7 +32,12 @@ export class BuckyComponent implements OnInit, OnDestroy {
 
   currentQuoteIndex = 0;
   private intervalId!: number;
-
+  isLoggedIn: boolean = false;
+  constructor(public auth: AuthService) {
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
+  }
   images = [
     'https://i0.wp.com/www.bfi.org/wp-content/uploads/2022/02/bucky-foster-wide.jpeg?w=940&ssl=1',
     'https://www.buckminsterfuller.net/images/home/k13_66-L-1.jpg',
