@@ -85,6 +85,7 @@ import { NoAuthGuard } from './services/no-auth.guard';
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
 import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
+import { BuckyComponent } from './blogs/bucky/bucky.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -444,6 +445,10 @@ const routes: Routes = [
     path: 'ask-bucky',
     component: ChabotStandaloneComponent,
     // canActivate: [AuthGuard],
+  },
+  {
+    path: 'bucky',
+    component: BuckyComponent,
   },
   {
     path: 'document-files/:solutionId/presentation/:presentationId',
