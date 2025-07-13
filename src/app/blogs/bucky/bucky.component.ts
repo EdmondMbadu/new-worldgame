@@ -36,6 +36,12 @@ export class BuckyComponent implements OnInit, OnDestroy {
     'https://i0.wp.com/www.bfi.org/wp-content/uploads/2022/02/bucky-foster-wide.jpeg?w=940&ssl=1',
     'https://www.buckminsterfuller.net/images/home/k13_66-L-1.jpg',
     'https://www.buckminsterfuller.net/images/home/22_606%20copy%202-1.jpg',
+    'https://www.buckminsterfuller.net/images/home/Bucky%20with%20model%20copy.jpg',
+    'https://designsciencelab.com/wordpress/wp-content/uploads/2016/03/Bucky-Meddie_party-1.jpg',
+    'https://designsciencelab.com/wordpress/wp-content/uploads/2021/12/BFullerTimeCover.jpg',
+    'https://www.buckminsterfuller.net/images/home/Img025.jpg',
+    'https://designsciencelab.com/wordpress/wp-content/uploads/2016/03/Bucky-Meddie_dome-1.jpg',
+    'https://designsciencelab.com/wordpress/wp-content/uploads/2021/12/Expo.jpg',
   ];
   // timers
   private quoteTimer!: number;
