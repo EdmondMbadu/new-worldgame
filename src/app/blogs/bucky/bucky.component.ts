@@ -11,7 +11,24 @@ export class BuckyComponent implements OnInit, OnDestroy {
     '“There is nothing in a caterpillar that tells you it’s going to be a butterfly.”',
     '“Don’t fight forces, use them.”',
     '“You never change things by fighting the existing reality. To change something, build a new model that makes the existing model obsolete.”',
+    '“When I am working on a problem, I never think about beauty. But when I have finished, if the solution is not beautiful, I know it is wrong.”',
+    '“The best way to predict the future is to design it.”',
+    '“Dare to be naïve.”',
+    '“Pollution is nothing but the resources we are not harvesting. We allow them to disperse because we’ve been ignorant of their value.”',
+    '“Humanity is acquiring all the right technology for all the wrong reasons.”',
+    '“I just invent, then wait until man comes around to needing what I’ve invented.”',
+    '“Integrity is the essence of everything successful.”',
+    '“The minute you choose to do what you really want to do, it’s a different kind of life.”',
+    '“Nature is trying very hard to make us succeed, but nature does not depend on us. We are not the only experiment.”',
+    '“Don’t try to make me consistent. I am learning all the time.”',
+    '“I’m not trying to imitate nature. I’m trying to find the principles she’s using.”',
+    '“Sometimes I think we’re alone in the universe, and sometimes I think we’re not. In either case, the idea is quite staggering.”',
+    '“There is no such thing as a failed experiment, only experiments with unexpected outcomes.”',
+    '“War is the ultimate tool of politics... It is obsolete and destructive in today’s interconnected world.”',
+    '“You can’t better the world by simply talking to it. Philosophy to be effective must be mechanically applied.”',
+    '“We are all astronauts on a little spaceship called Earth.”',
   ];
+
   currentQuoteIndex = 0;
   private intervalId!: number;
 

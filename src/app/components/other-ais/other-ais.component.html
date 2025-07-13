@@ -169,9 +169,11 @@
                 <img class="rounded-full w-20" [src]="ai.avatarPath" alt="AI avatar">
               </div>
               <div class="w-full ps-3">
-                <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
-                  <span class="font-semibold text-gray-900 dark:text-white">{{ ai.name }}</span>: {{ ai.intro }}
-                </div>
+               <div class="text-gray-500 text-sm mb-1.5 dark:text-gray-400">
+                <span class="font-semibold text-gray-900 dark:text-white">{{ ai.name }}</span>:
+                <span [innerHTML]="ai.intro"></span>
+              </div>
+
               </div>
             </a>
           </div>
@@ -209,7 +211,7 @@
               <!-- First message shows intro -->
               <p *ngIf="i === 0">
                 <span class="font-bold">{{ aiSelected.name }}</span><br />
-                {{ aiSelected.intro }}
+               <span [innerHTML]="aiSelected.intro"></span>
               </p>
 
               <!-- Subsequent messages -->

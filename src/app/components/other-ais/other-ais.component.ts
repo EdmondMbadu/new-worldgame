@@ -212,7 +212,8 @@ meaningful, lasting impact.`,
       name: 'Buckminster Fuller',
       group: 'elder',
       // sdgs: [9, 11, 12],
-      intro: `${name} American architect, systems theorist, writer, designer, inventor, philosopher, and futurist.`,
+      intro: `Born in 1895 in Milton, Massachusetts, Buckminster Fuller dedicated his life to “making the world work for 100% of humanity in the shortest possible time.” Trained as a naval officer and driven by an unshakeable belief in the power of design, he coined the term Comprehensive Anticipatory Design Science. His most renowned creation, the geodesic dome, demonstrated how doing more with less could provide strong, lightweight shelter in the harshest environments. Over his five-decade career, Fuller patented dozens of inventions, authored 28 books, and inspired generations to rethink architecture, engineering, and social systems.
+   For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
       collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
     },
     {
