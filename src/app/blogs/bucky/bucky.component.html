@@ -177,20 +177,20 @@
   </div>
 </section>
 
-<!-- ── IMAGE CAROUSEL ───────────────────────────────────── -->
+<!-- ── IMAGE GALLERY ─────────────────────────────────────── -->
 <section class="bg-white dark:bg-slate-900 py-16">
-  <div class="max-w-6xl mx-auto">
-    <div class="overflow-hidden rounded-3xl shadow-lg">
-      <div class="relative h-80 sm:h-[28rem]">
-        <img *ngFor="let img of images; let i = index"
-             [src]="img"
-             [alt]="'Buckminster Fuller image ' + (i + 1)"
-             [class]="(i === imgIdx
-                       ? 'opacity-100 scale-100'
-                       : 'opacity-0 scale-105')
-                       + ' absolute inset-0 w-full h-full object-cover transition duration-700 ease-in-out'"
+  <div class="max-w-6xl mx-auto px-4">
+    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <figure
+        *ngFor="let img of images; let i = index"
+        class="overflow-hidden rounded-3xl shadow-lg group"
+      >
+        <img
+          [src]="img"
+          [alt]="'Buckminster Fuller image ' + (i + 1)"
+          class="w-full h-72 object-cover transform transition duration-500 group-hover:scale-105"
         />
-      </div>
+      </figure>
     </div>
   </div>
 </section>
