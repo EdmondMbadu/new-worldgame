@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
 
 @Component({
   selector: 'app-tournament-landing',
@@ -10,9 +11,10 @@ export class TournamentLandingComponent {
   ngOnInit(): void {
     window.scroll(0, 0);
   }
+  aiOptions: any[] = [];
   email: string = 'newworld@newworld-game.org';
   isLoggedIn: boolean = false;
-  constructor(public auth: AuthService) {
+  constructor(public auth: AuthService, data: DataService) {
     // console.log('curent user email', this.auth.currentUser);
     if (
       this.auth.currentUser !== null &&
@@ -20,5 +22,6 @@ export class TournamentLandingComponent {
     ) {
       this.isLoggedIn = true;
     }
+    this.aiOptions = data.aiOptions;
   }
 }

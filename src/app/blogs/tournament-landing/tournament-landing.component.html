@@ -9,60 +9,84 @@
     <app-navbar [email]="this.auth.currentUser.email"
                 [firstName]="this.auth.currentUser.firstName"
                 [lastName]="this.auth.currentUser.lastName"
-                [path]="'home'"></app-navbar>
+                [path]="'home'"
+                [sideBarBig]="false"
+                [sideBarSmall]="true"
+                ></app-navbar>
   </div>
 
-<!-- ── HERO SECTION ─────────────────────────────────────────── -->
-<section
-  class="relative overflow-hidden bg-center bg-cover bg-no-repeat text-white"
-  style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-trophy.png?alt=media&token=145fee70-8375-429e-b37e-24af6931d6e8');"
->
-  <!-- Optional dark overlay to improve text readability -->
-  <div class="absolute inset-0 bg-black/50 z-0"></div>
+  <!-- ── HERO SECTION ─────────────────────────────────────────── -->
+  <section
+    class="relative overflow-hidden bg-center bg-cover bg-no-repeat text-white"
+    style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-trophy.png?alt=media&token=145fee70-8375-429e-b37e-24af6931d6e8');">
+    <div class="absolute inset-0 bg-black/50 z-0"></div>
 
-  <!-- Main content -->
-  <div class="relative z-10 container mx-auto px-6 py-24 lg:py-32 text-center">
-
-    <!-- Hero Emoji Icon -->
-    <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
-      <span class="text-4xl">🌍</span>
-    </div>
-
-    <!-- Headings -->
-    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-      <span class="block bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">NewWorld Game</span>
-      <span class="block text-2xl sm:text-3xl lg:text-4xl font-medium">Changemakers Tournament 2025–26</span>
-    </h1>
-
-    <!-- Subheading -->
-    <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-10">
-      Where Global Challenges Meet Student Imagination
-    </p>
-
-    <!-- Call to Action -->
-    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-      <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">
-        💥 Registration Now Open
+    <div class="relative z-10 container mx-auto px-6 py-24 lg:py-32 text-center">
+      <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
+        <span class="text-4xl">🌍</span>
       </div>
-      <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">
-        $199&nbsp;Per&nbsp;School
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+        <span class="block bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">NewWorld Game</span>
+        <span class="block text-2xl sm:text-3xl lg:text-4xl font-medium">Changemakers Tournament 2025–26</span>
+      </h1>
+      <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-10">Where Global Challenges Meet Student Imagination</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">💥 Registration Now Open</div>
+        <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">$199&nbsp;Per&nbsp;School</div>
+      </div>
+      <a href="#register" class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">Register&nbsp;Now</a>
+    </div>
+    <div class="absolute top-24 left-8 animate-bounce text-4xl opacity-90 z-10">🤖</div>
+  </section>
+
+  <!-- ── QUICK GLANCE AT PRIZES (TOP) ────────────────────────── -->
+  <section class="py-12 bg-indigo-50 dark:bg-slate-800">
+    <div class="container mx-auto px-6 flex flex-wrap justify-center gap-6 text-center">
+      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+        <div class="text-3xl mb-2">🥇</div>
+        <span class="font-semibold text-slate-900 dark:text-white">Gold</span>
+        <small class="text-slate-600 dark:text-indigo-200">$5,000</small>
+      </div>
+      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+        <div class="text-3xl mb-2">🥈</div>
+        <span class="font-semibold text-slate-900 dark:text-white">Silver</span>
+        <small class="text-slate-600 dark:text-indigo-200">$2,500</small>
+      </div>
+      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+        <div class="text-3xl mb-2">🥉</div>
+        <span class="font-semibold text-slate-900 dark:text-white">Bronze</span>
+        <small class="text-slate-600 dark:text-indigo-200">$1,000</small>
+      </div>
+      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+        <div class="text-3xl mb-2">🌟</div>
+        <span class="font-semibold text-slate-900 dark:text-white">Special</span>
+        <small class="text-slate-600 dark:text-indigo-200">4 Categories</small>
       </div>
     </div>
+  </section>
 
-    <!-- Register Button -->
-    <a href="#register"
-       class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">
-      Register&nbsp;Now
-    </a>
-  </div>
-
-  <!-- Floating emojis -->
-  <div class="absolute top-24 left-8 animate-bounce text-4xl opacity-90 z-10">🤖</div>
-</section>
-
-
-
-
+  <!-- ── HEYGEN AVATAR INTRO VIDEOS ──────────────────────────── -->
+  <section class="py-20 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 max-w-6xl">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">Hear It from Our AI Hosts</h2>
+      <div class="grid gap-10 md:grid-cols-2">
+        <div class="bg-slate-100 dark:bg-slate-800 p-6 rounded-3xl shadow-lg flex flex-col items-center">
+          <h3 class="text-xl font-bold mb-4 text-slate-900 dark:text-white">For Teachers</h3>
+          <video controls class="w-full rounded-lg shadow-md">
+            <source src="/assets/videos/avatar-teacher.mp4" type="video/mp4" />
+          </video>
+          <p class="mt-4 text-slate-600 dark:text-slate-300 text-center text-sm md:text-base max-w-md">“Get ready to change the world—literally! … Teachers, this is the project‑based learning experience your students will never forget. Are you in?”</p>
+        </div>
+        <div class="bg-slate-100 dark:bg-slate-800 p-6 rounded-3xl shadow-lg flex flex-col items-center">
+          <h3 class="text-xl font-bold mb-4 text-slate-900 dark:text-white">For Students</h3>
+          <video controls class="w-full rounded-lg shadow-md">
+            <source src="/assets/videos/avatar-students.mp4" type="video/mp4" />
+          </video>
+          <p class="mt-4 text-slate-600 dark:text-slate-300 text-center text-sm md:text-base max-w-md">“What if your ideas could actually change the world? … Ready to build your future? Let’s go!”</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
   <section class="py-20 bg-white dark:bg-slate-900">
@@ -70,36 +94,12 @@
       <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">What’s Included in Your <span class="text-indigo-600">$199</span> Entry</h2>
       <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-12">Everything your students need to compete on the global stage</p>
       <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-        <!-- Card template -->
-        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
-          <span class="text-3xl mb-4">🏆</span>
-          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Unlimited Student Teams</h3>
-          <p class="text-slate-600 dark:text-slate-300 flex-grow">Unlimited teams can develop solutions. Submit 3 teams (3–5 students each) to the tournament.</p>
-        </div>
-        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
-          <span class="text-3xl mb-4">🌐</span>
-          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Collaboration Platform</h3>
-          <p class="text-slate-600 dark:text-slate-300 flex-grow">Video channels & messaging connect international teams seamlessly.</p>
-        </div>
-        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
-          <span class="text-3xl mb-4">🧠</span>
-          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Innovation Curriculum</h3>
-          <p class="text-slate-600 dark:text-slate-300 flex-grow">Step‑by‑step design‑thinking resources and lesson plans.</p>
-        </div>
-        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
-          <span class="text-3xl mb-4">🤖</span>
-          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Hands‑On AI Tools</h3>
-          <p class="text-slate-600 dark:text-slate-300 flex-grow">Access top language & vision models for research and storytelling.</p>
-        </div>
-        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
-          <span class="text-3xl mb-4">🎖</span>
-          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Awards & Badges</h3>
-          <p class="text-slate-600 dark:text-slate-300 flex-grow">Prestigious trophies, digital certificates, and global recognition.</p>
-        </div>
-        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
-          <span class="text-3xl mb-4">📩</span>
-          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Teacher Toolkit</h3>
-          <p class="text-slate-600 dark:text-slate-300 flex-grow">Complete facilitation guide, lesson slides, and optional mentorship.</p>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1"><span class="text-3xl mb-4">🏆</span><h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Unlimited Student Teams</h3><p class="text-slate-600 dark:text-slate-300 flex-grow">Unlimited teams can develop solutions. Submit 3 teams (3–5 students each) to the tournament.</p></div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1"><span class="text-3xl mb-4">🌐</span><h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Collaboration Platform</h3><p class="text-slate-600 dark:text-slate-300 flex-grow">Video channels & messaging connect international teams seamlessly.</p></div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1"><span class="text-3xl mb-4">🧠</span><h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Innovation Curriculum</h3><p class="text-slate-600 dark:text-slate-300 flex-grow">Step‑by‑step design‑thinking resources and lesson plans.</p></div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1"><span class="text-3xl mb-4">🤖</span><h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Hands‑On AI Tools</h3><p class="text-slate-600 dark:text-slate-300 flex-grow">Access top language & vision models for research and storytelling.</p></div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1"><span class="text-3xl mb-4">🎖</span><h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Awards & Badges</h3><p class="text-slate-600 dark:text-slate-300 flex-grow">Prestigious trophies, digital certificates, and
+            optional mentorship.</p>
         </div>
       </div>
       <p class="text-center mt-10"><span class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-full">Add extra tournament teams for just $30&nbsp;each</span></p>
@@ -265,6 +265,46 @@
       </div>
     </div>
   </section>
+
+  <!-- ── CHOOSE YOUR AVATAR ─────────────────────────────────── -->
+<!-- ── CHOOSE YOUR AVATAR ─────────────────────────────────── -->
+<section class="py-20 bg-indigo-50 dark:bg-slate-800">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">
+      Choose Your Avatar
+    </h2>
+    <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-10">
+      Select the AI guide that best fits your team’s challenge.
+    </p>
+
+    <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div
+        *ngFor="let ai of aiOptions"
+        class="flex flex-col items-center bg-white dark:bg-slate-900 p-6 rounded-3xl shadow hover:-translate-y-1 transition"
+      >
+        <img
+          [src]="ai.avatarPath"
+          [alt]="ai.name"
+          class="w-24 h-24 rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">{{ ai.name }}</h3>
+        <span class="text-sm text-indigo-600 dark:text-indigo-300 capitalize">{{ ai.group }}</span>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 text-center">
+          {{ ai.intro | slice:0:90 }}{{ ai.intro.length > 90 ? '…' : '' }}
+        </p>
+      </div>
+    </div>
+    <div class="mt-12 flex justify-center">
+                <a routerLink="/other-ais" class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300">
+                  Chat with the AIs
+                </a>
+    </div>
+  </div>
+</section>
+
+
+
+
 <!-- ── CALL TO ACTION ─────────────────────────────────────── -->
 <section
   id="register"
@@ -297,5 +337,5 @@
 
   <!-- ── FOOTER ─────────────────────────────────────────────── -->
 
-   <app-footer></app-footer>
+ <app-footer></app-footer>
 </div>
