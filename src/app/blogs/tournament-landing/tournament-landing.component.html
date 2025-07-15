@@ -14,8 +14,11 @@
 
 <!-- ── HERO SECTION ─────────────────────────────────────────── -->
 <section class="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-teal-600 text-white">
-  <div class="absolute inset-0 bg-black/10"></div>
-  <div class="relative z-10 container mx-auto px-6 py-24 lg:py-32 text-center">
+  <!-- Optional dark overlay -->
+  <div class="absolute inset-0 bg-black/10 z-0"></div>
+
+  <!-- Main content -->
+  <div class="relative z-20 container mx-auto px-6 pt-24 lg:pt-32 text-center">
 
     <!-- Hero Emoji Icon -->
     <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
@@ -48,12 +51,23 @@
        class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">
       Register&nbsp;Now
     </a>
+
+    <!-- Trophy Below Content -->
+    <div class="mt-20 flex justify-center">
+      <img
+        src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-trophy.png?alt=media&token=145fee70-8375-429e-b37e-24af6931d6e8"
+        alt="Trophy Illustration"
+        class="w-72 lg:w-96 opacity-95 drop-shadow-2xl brightness-110 pointer-events-none"
+      />
+    </div>
+
   </div>
 
-  <!-- Decorative floating emojis (AI & Trophy replacements) -->
-  <div class="absolute top-24 right-16 animate-bounce text-4xl opacity-80">🤖</div>
-  <div class="absolute bottom-24 left-16 animate-bounce text-5xl opacity-80">🏆</div>
+  <!-- Floating emojis -->
+  <div class="absolute top-24 left-8 animate-bounce text-4xl opacity-90 z-20">🤖</div>
 </section>
+
+
 
 
   <!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
