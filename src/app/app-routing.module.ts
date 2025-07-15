@@ -86,6 +86,7 @@ import { PresentationViewerComponent } from './presentations/presentation-viewer
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
 import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
 import { BuckyComponent } from './blogs/bucky/bucky.component';
+import { TournamentLandingComponent } from './blogs/tournament-landing/tournament-landing.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -449,6 +450,10 @@ const routes: Routes = [
   {
     path: 'bucky',
     component: BuckyComponent,
+  },
+  {
+    path: 'tournament-landing',
+    component: TournamentLandingComponent,
   },
   {
     path: 'document-files/:solutionId/presentation/:presentationId',

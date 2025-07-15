@@ -1,0 +1,179 @@
+<!-- ── WRAPPER & NAVBAR ──────────────────────────────────────── -->
+<div class="dark:bg-slate-900 min-h-screen flex flex-col font-sans">
+
+  <!-- Navbar (handled by parent component) -->
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar [email]="this.auth.currentUser.email"
+                [firstName]="this.auth.currentUser.firstName"
+                [lastName]="this.auth.currentUser.lastName"
+                [path]="'home'"></app-navbar>
+  </div>
+
+  <!-- ── HERO SECTION ─────────────────────────────────────────── -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-teal-600 text-white">
+    <div class="absolute inset-0 bg-black/10"></div>
+    <div class="relative z-10 container mx-auto px-6 py-24 lg:py-32 text-center">
+      <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
+        <span class="text-4xl">🌍</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+        <span class="block bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">NewWorld Game</span>
+        <span class="block text-2xl sm:text-3xl lg:text-4xl font-medium">Changemakers Tournament 2025–26</span>
+      </h1>
+      <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-10">Where Global Challenges Meet Student Imagination</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">💥 Registration Now Open</div>
+        <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">$199&nbsp;Per&nbsp;School</div>
+      </div>
+      <a href="#register" class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">Register&nbsp;Now</a>
+    </div>
+
+    <!-- Decorative placeholders for AI & Trophy -->
+    <img src="assets/img/ai-placeholder.png" alt="AI illustration" class="absolute w-16 h-16 top-24 right-16 animate-bounce opacity-80" />
+    <img src="assets/img/trophy-placeholder.png" alt="Trophy illustration" class="absolute w-20 h-20 bottom-24 left-16 animate-bounce opacity-80" />
+  </section>
+
+  <!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
+  <section class="py-20 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">What’s Included in Your <span class="text-indigo-600">$199</span> Entry</h2>
+      <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-12">Everything your students need to compete on the global stage</p>
+      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+        <!-- Card template -->
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+          <span class="text-3xl mb-4">🏆</span>
+          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Unlimited Student Teams</h3>
+          <p class="text-slate-600 dark:text-slate-300 flex-grow">Unlimited teams can develop solutions. Submit 3 teams (3–5 students each) to the tournament.</p>
+        </div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+          <span class="text-3xl mb-4">🌐</span>
+          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Collaboration Platform</h3>
+          <p class="text-slate-600 dark:text-slate-300 flex-grow">Video channels & messaging connect international teams seamlessly.</p>
+        </div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+          <span class="text-3xl mb-4">🧠</span>
+          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Innovation Curriculum</h3>
+          <p class="text-slate-600 dark:text-slate-300 flex-grow">Step‑by‑step design‑thinking resources and lesson plans.</p>
+        </div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+          <span class="text-3xl mb-4">🤖</span>
+          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Hands‑On AI Tools</h3>
+          <p class="text-slate-600 dark:text-slate-300 flex-grow">Access top language & vision models for research and storytelling.</p>
+        </div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+          <span class="text-3xl mb-4">🎖</span>
+          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Awards & Badges</h3>
+          <p class="text-slate-600 dark:text-slate-300 flex-grow">Prestigious trophies, digital certificates, and global recognition.</p>
+        </div>
+        <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+          <span class="text-3xl mb-4">📩</span>
+          <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Teacher Toolkit</h3>
+          <p class="text-slate-600 dark:text-slate-300 flex-grow">Complete facilitation guide, lesson slides, and optional mentorship.</p>
+        </div>
+      </div>
+      <p class="text-center mt-10"><span class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-full">Add extra tournament teams for just $30&nbsp;each</span></p>
+    </div>
+  </section>
+
+  <!-- ── TEACHER BENEFITS ────────────────────────────────────── -->
+  <section class="py-20 bg-gradient-to-br from-indigo-700 to-teal-700 text-white">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Why Teachers & Schools Are Joining</h2>
+      <ul class="space-y-5 text-lg">
+        <li class="flex items-start gap-3"><span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span> Aligns with IB Learner Profile, CAS & Theory of Knowledge</li>
+        <li class="flex items-start gap-3"><span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span> Fosters real‑world problem solving & creativity</li>
+        <li class="flex items-start gap-3"><span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span> Builds AI literacy through hands‑on practice</li>
+        <li class="flex items-start gap-3"><span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span> Encourages teamwork across borders or within classrooms</li>
+        <li class="flex items-start gap-3"><span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span> Brings international recognition to students & schools</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── TESTIMONIAL ─────────────────────────────────────────── -->
+  <section class="py-20 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 text-center">
+      <blockquote class="max-w-4xl mx-auto text-2xl md:text-3xl font-medium text-slate-800 dark:text-slate-100 italic">“The NewWorld Game is an exceptional platform for diving into SDG challenges. Highly recommend it for anyone interested in making a global difference.”</blockquote>
+      <p class="mt-6 text-lg font-semibold text-indigo-700 dark:text-indigo-300">— Allen Johnson, Drexel University</p>
+    </div>
+  </section>
+
+  <!-- ── AWARDS ─────────────────────────────────────────────── -->
+  <section class="py-20 bg-gradient-to-r from-indigo-600 to-teal-600 text-white">
+    <div class="container mx-auto px-6">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Awards & Recognition</h2>
+      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+        <div class="p-6 bg-white/10 rounded-3xl text-center backdrop-blur">
+          <img src="assets/img/trophy-placeholder.png" alt="Gold trophy" class="w-24 h-24 mx-auto mb-4" />
+          <h3 class="text-2xl font-bold mb-2">Gold Award</h3>
+          <p>$5,000 + Trophy + Mentorship + Spotlight</p>
+        </div>
+        <div class="p-6 bg-white/10 rounded-3xl text-center backdrop-blur">
+          <img src="assets/img/trophy-placeholder.png" alt="Silver trophy" class="w-24 h-24 mx-auto mb-4 opacity-80" />
+          <h3 class="text-2xl font-bold mb-2">Silver Award</h3>
+          <p>$2,500 + Coaching + Certificate</p>
+        </div>
+        <div class="p-6 bg-white/10 rounded-3xl text-center backdrop-blur">
+          <img src="assets/img/trophy-placeholder.png" alt="Bronze trophy" class="w-24 h-24 mx-auto mb-4 opacity-75" />
+          <h3 class="text-2xl font-bold mb-2">Bronze Award</h3>
+          <p>$1,000 + Feature on NWG Blog</p>
+        </div>
+        <div class="p-6 bg-white/10 rounded-3xl text-center backdrop-blur">
+          <img src="assets/img/ai-placeholder.png" alt="AI icon" class="w-24 h-24 mx-auto mb-4" />
+          <h3 class="text-2xl font-bold mb-2">Special Categories</h3>
+          <ul class="list-disc list-inside text-sm space-y-1 text-center">
+            <li>Best Climate Action</li>
+            <li>Best Tech‑for‑Good</li>
+            <li>Best Gender Equity Idea</li>
+            <li>Best Collaboration</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TIMELINE ───────────────────────────────────────────── -->
+  <section class="py-20 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">Tournament Timeline</h2>
+      <div class="border-l-4 border-indigo-600 dark:border-indigo-400 pl-8 space-y-8">
+        <div>
+          <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">Oct 31, 2025</time>
+          <p class="text-slate-700 dark:text-slate-300">Registration Closes</p>
+        </div>
+        <div>
+          <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">Nov 2025 – Feb 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Students Play, Develop Solutions & Submit Projects</p>
+        </div>
+        <div>
+          <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">Feb – Apr 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Voting & Judging</p>
+        </div>
+        <div>
+          <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">May 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Regional Virtual Awards Celebration</p>
+        </div>
+        <div>
+          <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">June 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Global Solutions Lab Grand Prize Celebration</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CALL TO ACTION ─────────────────────────────────────── -->
+  <section id="register" class="py-24 bg-gradient-to-br from-indigo-600 to-teal-600 text-white text-center">
+    <div class="container mx-auto px-6 max-w-3xl">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Join?</h2>
+      <p class="text-lg md:text-xl mb-6">$199 per school • 3 team entries included • Additional teams $30</p>
+      <p class="font-semibold mb-8">Deadline: October 31, 2025</p>
+      <a href="https://newworld-game.org/register" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-12 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">Register Today</a>
+      <p class="mt-8 italic">“This is more than a game. It’s their moment to lead.”</p>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+   <app-footer></app-footer>
+</div>

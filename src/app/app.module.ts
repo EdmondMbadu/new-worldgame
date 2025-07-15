@@ -132,6 +132,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
 import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
 import { BuckyComponent } from './blogs/bucky/bucky.component';
+import { TournamentLandingComponent } from './blogs/tournament-landing/tournament-landing.component';
 
 @NgModule({
   declarations: [
@@ -239,6 +240,7 @@ import { BuckyComponent } from './blogs/bucky/bucky.component';
     TeamBuildingComponent,
     ChabotStandaloneComponent,
     BuckyComponent,
+    TournamentLandingComponent,
   ],
   imports: [
     BrowserModule,
