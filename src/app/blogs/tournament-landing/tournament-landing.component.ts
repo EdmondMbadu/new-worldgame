@@ -16,12 +16,9 @@ export class TournamentLandingComponent {
   isLoggedIn: boolean = false;
   constructor(public auth: AuthService, data: DataService) {
     // console.log('curent user email', this.auth.currentUser);
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
     this.aiOptions = data.aiOptions;
   }
 }

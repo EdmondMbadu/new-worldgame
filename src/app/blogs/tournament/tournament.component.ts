@@ -14,12 +14,8 @@ export class TournamentComponent implements OnInit {
   email: string = 'newworld@newworld-game.org';
   isLoggedIn: boolean = false;
   constructor(public auth: AuthService, private solution: SolutionService) {
-    // console.log('curent user email', this.auth.currentUser);
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 }
