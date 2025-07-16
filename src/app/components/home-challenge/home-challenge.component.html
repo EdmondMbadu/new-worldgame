@@ -13,6 +13,21 @@
           (toggleAsideEvent)="toggleAside()"
         ></app-navbar>
 
+
+        <!-- Navigation bar -->
+        <div class="hidden md:block sticky top-28 z-40 w-full transition-all duration-300 ease-in-out ">
+          <div class="container mx-auto flex justify-center py-2">
+            <div class="flex items-center justify-center space-x-1 rounded-full bg-white dark:bg-slate-800 p-1 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10">
+              
+              <a (click)="scrollTo($event, 'discussion')" href="#discussion" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Discussion</a>
+                <a (click)="scrollTo($event, 'video')" href="#video" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Meeting Room</a>
+              
+              <a (click)="scrollTo($event, 'solutions')" href="#solutions" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Teams</a>
+     
+            </div>
+          </div>
+        </div>
+
         <!-- Header / Hero Section -->
         <section class="relative w-full bg-white dark:bg-gray-900 mt-14">
           <div class="mx-auto max-w-screen-xl py-8 px-4 grid md:grid-cols-12 gap-8 items-center">
@@ -422,7 +437,7 @@
         </section>
 
       <!-- home-challenge.component.html -->
-    <section class="mx-auto max-w-screen-xl py-6 px-4">
+    <section id='discussion' class="mx-auto max-w-screen-xl py-6 px-4">
       <!-- Discussion Card -->
     <div (click)="goToChallengeDiscussion()"
         class="relative mt-6 p-6 bg-teal-600 hover:bg-teal-700 text-white
@@ -452,7 +467,7 @@
     </section>
 
     <!-- Some wrapping section, e.g. after Participants & Author Tools -->
-    <section
+    <section id="video"
       class="mx-auto max-w-screen-xl py-6 px-4 bg-white dark:bg-gray-900"
     >
       <!-- Possibly other content like participants list / author tools here -->
