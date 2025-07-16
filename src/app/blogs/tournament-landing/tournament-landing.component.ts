@@ -34,7 +34,7 @@ export class TournamentLandingComponent {
     const element = document.getElementById(fragment);
     if (element) {
       // 1. Define the height of your sticky navigation bar
-      const offset = 100; // 👈 ADJUST THIS VALUE (in pixels)
+      const offset = 150; // 👈 ADJUST THIS VALUE (in pixels)
 
       // 2. Calculate the element's position from the top of the page
       const elementPosition =

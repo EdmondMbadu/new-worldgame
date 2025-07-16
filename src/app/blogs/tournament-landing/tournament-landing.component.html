@@ -14,11 +14,12 @@
                 [sideBarSmall]="true"
                 ></app-navbar>
   </div>
-<div class="sticky top-24 z-40 w-full transition-all duration-300 ease-in-out ">
+<div class="sticky top-28 z-40 w-full transition-all duration-300 ease-in-out ">
   <div class="container mx-auto flex justify-center py-2">
     <div class="flex items-center justify-center space-x-1 rounded-full bg-white dark:bg-slate-800 p-1 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10">
       
       <a (click)="scrollTo($event, 'overview')" href="#overview" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Overview</a>
+        <a (click)="scrollTo($event, 'pricing')" href="#pricing" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Pricing</a>
       
       <a (click)="scrollTo($event, 'benefits')" href="#benefits" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Benefits</a>
             <a (click)="scrollTo($event, 'testimonials')" href="#Testimonials" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Testimonials </a>
@@ -38,9 +39,9 @@
     <div class="absolute inset-0 bg-black/50 z-0"></div>
 
     <div class="relative z-10 container mx-auto px-6 py-24 lg:py-32 text-center">
-      <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
+      <!-- <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
         <span class="text-4xl">🌍</span>
-      </div>
+      </div> -->
       <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
         <span class="block bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">NewWorld Game</span>
         <span class="block text-2xl sm:text-3xl lg:text-4xl font-medium">Changemakers Tournament 2025–26</span>
@@ -52,7 +53,7 @@
       </div>
       <a href="#register" class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">Register&nbsp;Now</a>
     </div>
-    <div class="absolute top-24 left-8 animate-bounce text-4xl opacity-90 z-10">🤖</div>
+
   </section>
 
   <!-- ── QUICK GLANCE AT PRIZES (TOP) ────────────────────────── -->
@@ -105,7 +106,7 @@
   </section>
 
   <!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
-  <section id="overview" class="py-20 bg-white dark:bg-slate-900">
+  <section id="overview" class="py-10 bg-white dark:bg-slate-900">
     <div class="container mx-auto px-6">
       <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">What’s Included in Your <span class="text-indigo-600">$199</span> Entry</h2>
       <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-12">Everything your students need to compete on the global stage</p>
@@ -121,6 +122,173 @@
       <p class="text-center mt-10"><span class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-full">Add extra tournament teams for just $30&nbsp;each</span></p>
     </div>
   </section>
+
+
+  <!-- ── PRICING TABLE ────────────────────────────────────────── -->
+<section id="pricing" class="py-10 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 max-w-7xl">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">
+      Choose the Plan That Fits Your School
+    </h2>
+    <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-16">
+      Simple, transparent pricing. Cancel anytime.
+    </p>
+
+    <!-- Cards -->
+    <div
+      class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+    >
+      <!-- Free Preview -->
+      <div
+        class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+               bg-gradient-to-br from-white via-indigo-50 to-indigo-100
+               dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60"
+      >
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">
+          Free Preview
+        </h3>
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">
+          $0
+        </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Evaluate the platform
+        </p>
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+          <li class="flex items-start gap-2">
+            ✓ 1 demo project
+          </li>
+          <li class="flex items-start gap-2">
+            ✓ Limited AI minutes
+          </li>
+          <li class="flex items-start gap-2">
+            ✓ Email support
+          </li>
+        </ul>
+        <a
+          href="#register"
+          class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                 bg-indigo-600 text-white hover:bg-indigo-500 transition"
+        >
+          Start Free
+        </a>
+      </div>
+
+      <!-- License-Only -->
+      <div
+        class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+               bg-gradient-to-br from-indigo-50 via-purple-50 to-purple-100
+               dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60"
+      >
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">
+          License-Only
+        </h3>
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">
+          $99
+        </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Annual school license
+        </p>
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+          <li class="flex items-start gap-2">✓ Unlimited student accounts</li>
+          <li class="flex items-start gap-2">✓ 1 project submission</li>
+          <li class="flex items-start gap-2">✓ Community forums</li>
+        </ul>
+        <a
+          href="#register"
+          class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                 bg-indigo-600 text-white hover:bg-indigo-500 transition"
+        >
+          Get License
+        </a>
+      </div>
+
+      <!-- Tournament (Best value) -->
+      <div
+        class="flex flex-col rounded-3xl border-4 border-yellow-400 p-8 shadow-lg
+               bg-gradient-to-br from-indigo-600 via-purple-700 to-fuchsia-700
+               text-white relative"
+      >
+        <span
+          class="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-slate-900
+                 text-xs font-bold px-3 py-0.5 rounded-full shadow"
+        >BEST VALUE</span>
+        <h3 class="text-xl font-bold mb-2 text-white">Tournament</h3>
+        <p class="text-5xl font-extrabold mb-1">$199</p>
+        <p class="text-sm text-indigo-200 mb-6">Early-bird (reg. $299)</p>
+        <ul class="space-y-2 flex-grow text-indigo-50">
+          <li class="flex items-start gap-2">✓ All License perks</li>
+          <li class="flex items-start gap-2">✓ 3 team entries</li>
+          <li class="flex items-start gap-2">✓ Global judging & prizes</li>
+        </ul>
+        <a
+          href="#register"
+          class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                 bg-yellow-300 text-slate-900 hover:bg-yellow-200 transition"
+        >
+          Join Tournament
+        </a>
+      </div>
+
+      <!-- Pro -->
+      <div
+        class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+               bg-gradient-to-br from-fuchsia-50 via-pink-50 to-pink-100
+               dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60"
+      >
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">
+          Pro
+        </h3>
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">
+          $249
+        </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          Extra support & training
+        </p>
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+          <li class="flex items-start gap-2">✓ Tournament perks</li>
+          <li class="flex items-start gap-2">✓ Staff PD webinar</li>
+          <li class="flex items-start gap-2">✓ 2 extra team entries</li>
+        </ul>
+        <a
+          href="#register"
+          class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                 bg-indigo-600 text-white hover:bg-indigo-500 transition"
+        >
+          Go Pro
+        </a>
+      </div>
+
+      <!-- Enterprise -->
+      <div
+        class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+               bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200
+               dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60"
+      >
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">
+          Enterprise
+        </h3>
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">
+          $799
+        </p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          District or university
+        </p>
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+          <li class="flex items-start gap-2">✓ Unlimited campuses</li>
+          <li class="flex items-start gap-2">✓ Priority support</li>
+          <li class="flex items-start gap-2">✓ Custom onboarding</li>
+        </ul>
+        <a
+          href="#register"
+          class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                 bg-indigo-600 text-white hover:bg-indigo-500 transition"
+        >
+          Contact Sales
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ── TEACHER BENEFITS ────────────────────────────────────── -->
 <section id="benefits"
