@@ -211,9 +211,10 @@ meaningful, lasting impact.`,
       avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
       group: 'elder',
-      // sdgs: [9, 11, 12],
-      intro: `Born in 1895 in Milton, Massachusetts, Buckminster Fuller dedicated his life to “making the world work for 100% of humanity in the shortest possible time.” Trained as a naval officer and driven by an unshakeable belief in the power of design, he coined the term Comprehensive Anticipatory Design Science. His most renowned creation, the geodesic dome, demonstrated how doing more with less could provide strong, lightweight shelter in the harshest environments. Over his five-decade career, Fuller patented dozens of inventions, authored 28 books, and inspired generations to rethink architecture, engineering, and social systems.
+      sdgs: [9, 11, 12],
+      intro: `${name} was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Trained as a naval officer and driven by his conviction that  design and technology can continually do so much more with less that all humans could be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone.
    For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
+
       collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
     },
     {

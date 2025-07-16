@@ -14,7 +14,23 @@
                 [sideBarSmall]="true"
                 ></app-navbar>
   </div>
+<div class="sticky top-24 z-40 w-full transition-all duration-300 ease-in-out ">
+  <div class="container mx-auto flex justify-center py-2">
+    <div class="flex items-center justify-center space-x-1 rounded-full bg-white dark:bg-slate-800 p-1 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10">
+      
+      <a (click)="scrollTo($event, 'overview')" href="#overview" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Overview</a>
+      
+      <a (click)="scrollTo($event, 'benefits')" href="#benefits" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Benefits</a>
+            <a (click)="scrollTo($event, 'testimonials')" href="#Testimonials" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Testimonials </a>
+          <a (click)="scrollTo($event, 'awards')" href="#awards" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Awards</a>
+      
 
+
+      <a (click)="scrollTo($event, 'timeline')" href="#timeline" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Timeline</a>
+  
+    </div>
+  </div>
+</div>
   <!-- ── HERO SECTION ─────────────────────────────────────────── -->
   <section
     class="relative overflow-hidden bg-center bg-cover bg-no-repeat text-white"
@@ -89,7 +105,7 @@
   </section>
 
   <!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
-  <section class="py-20 bg-white dark:bg-slate-900">
+  <section id="overview" class="py-20 bg-white dark:bg-slate-900">
     <div class="container mx-auto px-6">
       <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">What’s Included in Your <span class="text-indigo-600">$199</span> Entry</h2>
       <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-12">Everything your students need to compete on the global stage</p>
@@ -107,7 +123,7 @@
   </section>
 
 <!-- ── TEACHER BENEFITS ────────────────────────────────────── -->
-<section
+<section id="benefits"
   class="relative py-20 bg-center bg-cover bg-no-repeat text-white"
   style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Favatars.jpg?alt=media&token=d589fa9a-5738-4d81-9469-f422d650f989');"
 >
@@ -144,7 +160,7 @@
 
 
 <!-- ── TESTIMONIALS ────────────────────────────────────────── -->
-<section class="py-24 bg-white dark:bg-slate-900">
+<section id="testimonials" class="py-24 bg-white dark:bg-slate-900">
   <div class="container mx-auto px-6 text-center">
     <h2 class="text-4xl font-extrabold text-slate-900 dark:text-white mb-4">What People Are Saying</h2>
     <p class="text-lg text-slate-600 dark:text-slate-300 mb-16">
@@ -152,34 +168,29 @@
     </p>
 
     <div class="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      <!-- Testimonial 1 -->
       <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
         <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“It’s amazing what you’ve put together in this simulation — the innovation, inclusiveness, and diversity of the AI avatars are truly inspiring.”</p>
-        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Mercedes Brown<br><span class="text-slate-500 dark:text-slate-400">Drexel University</span></p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">M.B.<br><span class="text-slate-500 dark:text-slate-400">Drexel University</span></p>
       </div>
 
-      <!-- Testimonial 2 -->
       <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
         <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“Your tools and collaborative mindset are a perfect fit for what we’re learning. It's great to see someone so deeply connected to NewWorld Game and eager to support others.”</p>
-        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Cesar Banacloy<br><span class="text-slate-500 dark:text-slate-400">Participant</span></p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">C.B.<br><span class="text-slate-500 dark:text-slate-400">Participant</span></p>
       </div>
 
-      <!-- Testimonial 3 -->
       <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
         <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“What a fantastic tool. It's incredibly personable. Have you considered expanding it beyond social and sustainability?”</p>
-        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Allen Riddick<br><span class="text-slate-500 dark:text-slate-400">Educator</span></p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">A.R.<br><span class="text-slate-500 dark:text-slate-400">Educator</span></p>
       </div>
 
-      <!-- Testimonial 4 -->
       <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
         <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“Thanks so much for the help and insight you're bringing. Looking forward to learning more about NewWorld Game this quarter.”</p>
-        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Bridget Steinetz<br><span class="text-slate-500 dark:text-slate-400">Student</span></p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">B.S.<br><span class="text-slate-500 dark:text-slate-400">Student</span></p>
       </div>
 
-      <!-- Testimonial 5 -->
       <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
         <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“I’m excited to dive deeper into this program. I can already tell this tool has great potential — just need a little guidance to unlock more.”</p>
-        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Stephen Herman<br><span class="text-slate-500 dark:text-slate-400">Participant</span></p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">S.H.<br><span class="text-slate-500 dark:text-slate-400">Participant</span></p>
       </div>
     </div>
   </div>
@@ -187,7 +198,7 @@
 
 
 <!-- ── AWARDS ─────────────────────────────────────────────── -->
-<section
+<section id="awards"
   class="relative py-20 bg-center bg-cover bg-no-repeat text-white"
   style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fstudent-trophy.jpg?alt=media&token=599d3061-f521-43a8-800e-8fb30bd53216');"
 >
@@ -238,7 +249,7 @@
 
 
   <!-- ── TIMELINE ───────────────────────────────────────────── -->
-  <section class="py-20 bg-white dark:bg-slate-900">
+  <section id="timeline" class="py-20 bg-white dark:bg-slate-900">
     <div class="container mx-auto px-6 max-w-5xl">
       <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">Tournament Timeline</h2>
       <div class="border-l-4 border-indigo-600 dark:border-indigo-400 pl-8 space-y-8">
