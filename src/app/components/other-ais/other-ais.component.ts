@@ -333,6 +333,15 @@ meaningful, lasting impact.`,
     this.singleCopyStates.push('Copy');
     this.scrollToBottom();
 
+    //   immediate placeholder AI bubble with spinner
+    const placeholder: DisplayMessage = {
+      text: '',
+      type: 'RESPONSE',
+      loading: true,
+    };
+    const placeholderIndex = this.responses.push(placeholder) - 1; // remember its slot
+    this.scrollToBottom('auto');
+    this.status = 'thinking…';
     /* firestore write */
     const id = this.afs.createId();
     const discussionRef = this.afs.doc(
@@ -350,6 +359,9 @@ meaningful, lasting impact.`,
         }
         if (state === 'COMPLETED') {
           this.status = '';
+          placeholder.loading = false;
+          /* 1️⃣  remove the spinner bubble */
+          this.responses.splice(placeholderIndex, 1);
 
           /* ---- create ONE placeholder message ---- */
           const msg: DisplayMessage = { text: '', type: 'RESPONSE' };
@@ -361,6 +373,9 @@ meaningful, lasting impact.`,
         }
         if (state === 'ERRORED') {
           this.status = 'Oh no! Something went wrong. Please try again.';
+          placeholder.loading = false;
+          /* 1️⃣  remove the spinner bubble */
+          this.responses.splice(placeholderIndex, 1);
           destroyFn.unsubscribe();
         }
       },
@@ -423,4 +438,5 @@ meaningful, lasting impact.`,
 interface DisplayMessage {
   text: string;
   type: 'PROMPT' | 'RESPONSE';
+  loading?: boolean;
 }

@@ -64,3 +64,14 @@ header       { margin-bottom: 15px; }
   display: flex;
   justify-content: space-evenly;
 }
+
+
+.loader {
+  width: 1.25rem;            /* 20 px */
+  height: 1.25rem;
+  border: 3px solid transparent;
+  border-top-color: currentColor;     /* inherits dark/light text colour */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
