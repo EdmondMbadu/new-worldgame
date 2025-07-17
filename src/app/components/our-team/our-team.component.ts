@@ -13,7 +13,7 @@ export class OurTeamComponent implements OnInit {
       name: 'Medard Gabel',
       title: 'Director of EarthGame, NewWorld Game Designer',
       description:
-        'Medard is the executive director of the non-profit research and development organization EarthGame. He also leads BigPictureSmallWorld and the Global Solutions Lab. He is the former executive director of the World Game Institute and director of The Cornucopia Project and the Regeneration Project at Rodale Press. ',
+        'Medard is the executive director of the non-profit research and development organization EarthGame and founding director of the World Game Institute. He also leads BigPictureSmallWorld and the Global Solutions Lab and is author of books on the global energy and food situations, multinational corporations, and strategic planning, and editor of three volumes of books on global options. ',
 
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2FNG73q08IBlW39QiC3CzwTGe6zVo2-medard-jpeg.jpeg?alt=media&token=111999e5-6382-4868-b6df-0db2d06ba419',
