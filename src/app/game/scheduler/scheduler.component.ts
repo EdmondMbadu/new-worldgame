@@ -194,8 +194,10 @@ export class SchedulerComponent implements OnInit {
       !this.userName ||
       !this.userEmail ||
       !this.selectedDate ||
-      !this.selectedTime
+      !this.selectedTime ||
+      !this.notes
     ) {
+      alert('Please fill out all fields.');
       return;
     }
 
