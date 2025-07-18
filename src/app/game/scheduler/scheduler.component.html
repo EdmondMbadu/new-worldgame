@@ -186,6 +186,38 @@
             <p class="text-slate-600 dark:text-slate-300 mt-2">Thank you, {{ userName }}. Your demo is confirmed.</p>
           </div>
 
+          <!-- STEP 4 : Final Thank-You -->
+            <div *ngIf="step === 4"
+                class="flex flex-col items-center justify-center h-full text-center">
+            <!-- animated pulse “pop” -->
+            <div class="relative">
+                <div class="absolute inset-0 rounded-full bg-blue-500 opacity-30 animate-ping"></div>
+                <div class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center relative">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 13l4 4L19 7" />
+                </svg>
+                </div>
+            </div>
+
+            <h2 class="text-3xl font-extrabold mt-8 text-slate-900 dark:text-white">
+                Thank you!
+            </h2>
+            <p class="text-lg text-slate-600 dark:text-slate-300 mt-3">
+                Your demo has been scheduled.<br>
+                We look forward to meeting you.
+            </p>
+
+            <!-- optional “back home” button -->
+            <a routerLink="/"
+                class="mt-8 px-6 py-3 bg-blue-600 hover:bg-blue-700
+                        text-white font-bold rounded-lg transition-colors">
+                Back to Home
+            </a>
+            </div>
+
+
         </div>
       </div>
     </div>

@@ -189,16 +189,37 @@ export class SchedulerComponent implements OnInit {
    * In a real-world application, this is where you would make an API call
    * to your backend to save the appointment details.
    */
-  submitDemo(): void {
-    if (this.userName && this.userEmail) {
-      console.log('--- DEMO SCHEDULED ---');
-      console.log('Date:', this.selectedDate?.toDateString());
-      console.log('Time:', this.selectedTime);
-      console.log('Name:', this.userName);
-      console.log('Email:', this.userEmail);
-      console.log('Notes:', this.notes);
-
-      this.step = 3; // Move to the confirmation view
+  async submitDemo(): Promise<void> {
+    if (
+      !this.userName ||
+      !this.userEmail ||
+      !this.selectedDate ||
+      !this.selectedTime
+    ) {
+      return;
     }
+
+    // Combine date + time into a single UTC millisecond value for sorting
+    const [time, meridian] = this.selectedTime.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (meridian === 'PM' && hours < 12) hours += 12;
+    if (meridian === 'AM' && hours === 12) hours = 0;
+
+    const fullDateTime = new Date(this.selectedDate);
+    fullDateTime.setHours(hours, minutes, 0, 0);
+
+    await this.auth.addDemoScheduled({
+      demoDate: this.selectedDate.toISOString().substring(0, 10),
+      demoTime: this.selectedTime,
+      demoDateTime: fullDateTime.getTime(),
+      name: this.userName,
+      email: this.userEmail,
+      notes: this.notes || '',
+      uid: this.auth.currentUser?.uid || null,
+      createdAt: Date.now(), // will be overwritten by serverTimestamp()
+    });
+
+    this.step = 3; // Confirmation view
+    // setTimeout(() => (this.step = 4), 1600); // 1.6-second pop to step 4
   }
 }

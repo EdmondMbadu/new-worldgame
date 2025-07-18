@@ -40,3 +40,15 @@ export interface GameChoice {
   insight: string;
   badge: string;
 }
+
+export interface DemoBooking {
+  id?: string; // populated automatically when reading
+  demoDate: string; // ISO date portion – e.g. “2025-07-22”
+  demoTime: string; // “02:30 PM”
+  demoDateTime: number; // milliseconds since epoch, for easy sorting
+  name: string;
+  email: string;
+  notes?: string;
+  createdAt: number; // server timestamp
+  uid?: string; // if the user was logged-in
+}

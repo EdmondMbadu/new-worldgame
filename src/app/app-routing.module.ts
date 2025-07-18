@@ -89,6 +89,7 @@ import { BuckyComponent } from './blogs/bucky/bucky.component';
 import { TournamentLandingComponent } from './blogs/tournament-landing/tournament-landing.component';
 import { Scheduler } from 'rxjs';
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
+import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -272,6 +273,12 @@ const routes: Routes = [
   {
     path: 'management-primer',
     component: ManagementPrimerComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+      {
+    path: 'management-demo',
+    component:ManagementDemoComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },

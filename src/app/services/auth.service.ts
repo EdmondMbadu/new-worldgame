@@ -4,11 +4,14 @@ import {
   AngularFirestore,
   AngularFirestoreCollection,
   AngularFirestoreDocument,
+  DocumentReference,
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { Observable, of, switchMap } from 'rxjs';
 import { NewUser, User } from '../models/user';
 import { TimeService } from './time.service';
+import { DemoBooking } from '../models/tournament';
+import { serverTimestamp } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -266,5 +269,24 @@ export class AuthService {
         this.router.navigate(['/']);
         // ...
       });
+  }
+  private col = this.afs.collection<DemoBooking>('demoBookings');
+  /** Write one booking and return the document reference */
+  addDemoScheduled(
+    booking: DemoBooking
+  ): Promise<DocumentReference<DemoBooking>> {
+    return this.col.add({
+      ...booking,
+      createdAt: serverTimestamp() as any, // keeps clock authority on server
+    });
+  }
+
+  /** Live list for the admin component, ordered by slot */
+  listAll() {
+    return this.afs
+      .collection<DemoBooking>('demoBookings', (ref) =>
+        ref.orderBy('demoDateTime', 'asc')
+      )
+      .valueChanges({ idField: 'id' });
   }
 }

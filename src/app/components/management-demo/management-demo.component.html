@@ -1,0 +1,143 @@
+<app-navbar
+  [sideBarSmall]="true"
+  [sideBarBig]="false"
+  [email]="auth.currentUser.email"
+  [firstName]="auth.currentUser.firstName"
+  [lastName]="auth.currentUser.lastName"
+  [path]="'home'"
+  current=""
+></app-navbar>
+
+<div class="dark:bg-slate-900 min-h-screen">
+  <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
+    <!-- --- Nav buttons (reuse from Primer) -------------------------------- -->
+    <div
+      class="container flex flex-row rounded-md shadow-sm mx-auto justify-center my-4"
+      role="group"
+    >
+    <button routerLink="/user-management" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                SignUp
+                </button>
+                <button routerLink="/solution-publication" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                    Solutions
+                    </button>
+                <button routerLink="/management-primer" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                   Primer
+                    </button>
+        
+                <button routerLink="/management-gsl-2025" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+                    GSL-2025
+                </button>
+                  <button routerLink="/tournament-management"
+            type="button"
+            class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border
+                   border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700
+                   focus:ring-2 focus:ring-blue-700 dark:bg-gray-800 dark:border-gray-700
+                   dark:text-white dark:hover:bg-gray-700">
+      Tournaments
+    </button>
+  <button routerLink="/management-demo" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
+        Demo Signups
+      </button>
+   
+    </div>
+
+    <!-- --- Main card ------------------------------------------------------- -->
+    <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+      <h3 class="text-3xl font-bold dark:text-white text-center mb-4">
+        Demo Signups
+      </h3>
+
+      <div
+        class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden"
+      >
+        <!-- toolbar -->
+        <div
+          class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
+        >
+          <!-- search -->
+          <div class="w-full md:w-1/2">
+            <div class="relative">
+              <div
+                class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
+              >
+                <svg
+                  class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <input
+                type="text"
+                [(ngModel)]="search"
+                (input)="applyFilter()"
+                placeholder="Search"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                       focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2
+                       dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <!-- total + export -->
+          <button
+            (click)="downloadCsv()"
+            class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border
+                   border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700
+                   dark:bg-gray-600 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+          >
+            Export CSV
+          </button>
+
+          <h2 class="font-bold dark:text-white">
+            {{ filtered.length }}&nbsp;Signups
+          </h2>
+        </div>
+
+        <!-- table -->
+        <div class="overflow-x-auto">
+          <table
+            class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+          >
+            <thead
+              class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+            >
+              <tr>
+                <th class="px-4 py-3">#</th>
+                <th class="px-4 py-3">Name</th>
+                <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3">Slot</th>
+                <th class="px-4 py-3">Notes</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                *ngFor="let b of filtered; let i = index"
+                class="border-b dark:border-gray-700"
+              >
+                <td class="px-4 py-3">{{ i + 1 }}</td>
+                <td class="px-4 py-3 font-medium dark:text-white">
+                  {{ b.name }}
+                </td>
+                <td class="px-4 py-3">{{ b.email }}</td>
+                <td class="px-4 py-3">
+                  {{ b.demoDate }} {{ b.demoTime }}
+                </td>
+                <td class="px-4 py-3 max-w-xs truncate" title="{{ b.notes }}">
+                  {{ b.notes }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
