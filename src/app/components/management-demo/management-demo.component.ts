@@ -15,15 +15,42 @@ export class ManagementDemoComponent implements OnInit {
 
   constructor(public auth: AuthService) {}
 
+  sortBy: 'createdAt' | 'demoDateTime' = 'createdAt';
+
   ngOnInit(): void {
     window.scroll(0, 0);
     this.isLoggedIn = !!this.auth.currentUser?.email;
 
     this.auth.listAll().subscribe((list) => {
-      // newest first
-      this.bookings = [...list].sort((a, b) => b.demoDateTime - a.demoDateTime);
+      this.bookings = [...list].map((b) => ({
+        ...b,
+        createdAt: this.normalizeTimestamp(b.createdAt),
+      }));
+      this.sortBookings();
       this.applyFilter();
     });
+  }
+
+  toggleSort(): void {
+    this.sortBy = this.sortBy === 'createdAt' ? 'demoDateTime' : 'createdAt';
+    this.sortBookings();
+    this.applyFilter(); // re-apply after sort
+  }
+
+  private sortBookings(): void {
+    if (this.sortBy === 'createdAt') {
+      // Newest first
+      this.bookings.sort((a, b) => b.createdAt - a.createdAt);
+    } else if (this.sortBy === 'demoDateTime') {
+      // Soonest first
+      this.bookings.sort((a, b) => a.demoDateTime - b.demoDateTime);
+    }
+  }
+
+  private normalizeTimestamp(timestamp: any): number {
+    if (typeof timestamp === 'number') return timestamp;
+    if (timestamp?.seconds) return timestamp.seconds * 1000;
+    return Date.now();
   }
 
   applyFilter(): void {
@@ -45,9 +72,10 @@ export class ManagementDemoComponent implements OnInit {
         b.email,
         `${b.demoDate} ${b.demoTime}`,
         `"${b.notes?.replace(/"/g, '""') || ''}"`,
+        new Date(b.createdAt).toLocaleString(), // <-- Add this line
       ].join(',')
     );
-    const csv = ['Name,Email,Slot,Notes', ...rows].join('\r\n');
+    const csv = ['Name,Email,Slot,Notes,Scheduled At', ...rows].join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

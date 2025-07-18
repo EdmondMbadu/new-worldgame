@@ -94,6 +94,13 @@
           >
             Export CSV
           </button>
+          <button
+            (click)="toggleSort()"
+            class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-600 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+            >
+            Sort by: {{ sortBy === 'createdAt' ? 'Most Recently Scheduled' : 'Earliest Demo Slot'  }}
+            </button>
+
 
           <h2 class="font-bold dark:text-white">
             {{ filtered.length }}&nbsp;Signups
@@ -113,7 +120,9 @@
                 <th class="px-4 py-3">Name</th>
                 <th class="px-4 py-3">Email</th>
                 <th class="px-4 py-3">Slot</th>
+                      <th class="px-4 py-3">Scheduled At</th>
                 <th class="px-4 py-3">Notes</th>
+
               </tr>
             </thead>
 
@@ -130,6 +139,10 @@
                 <td class="px-4 py-3">
                   {{ b.demoDate }} {{ b.demoTime }}
                 </td>
+                <td class="px-4 py-3">
+                {{ b.createdAt | date: 'short' }}
+                </td>
+
                 <td class="px-4 py-3 max-w-xs truncate" title="{{ b.notes }}">
                   {{ b.notes }}
                 </td>
