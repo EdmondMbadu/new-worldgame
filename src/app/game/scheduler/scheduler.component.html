@@ -1,0 +1,195 @@
+<!-- 
+  This is the HTML template for your Angular Scheduler Component.
+  It has been updated to match the layout and style of the provided screenshots.
+  Key changes:
+  - Time slots now appear to the right of the calendar.
+  - Accent color changed from teal to blue.
+  - "Next" button is now only visible after a time is selected.
+-->
+<div class="dark:bg-slate-900 text-white min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
+    <!--  Navbar (unchanged)  -->
+    <div *ngIf="!isLoggedIn">
+      <app-navbar></app-navbar>
+    </div>
+    <div *ngIf="isLoggedIn">
+      <app-navbar
+        [hoveredOtherAisPath]="'bg-gray-100 dark:bg-gray-700'"
+        [showMoreOrLess]="true"
+        [sideBarSmall]="true"
+        [sideBarBig]="false"
+        [email]="this.auth.currentUser.email"
+        [firstName]="this.auth.currentUser.firstName"
+        [lastName]="this.auth.currentUser.lastName"
+        [path]="'home'">
+      </app-navbar>
+    </div>
+<!-- 
+  This is the HTML template for your Angular Scheduler Component.
+  It has been updated to support both light and dark themes using Tailwind CSS's `dark:` variants.
+  The component will automatically switch between themes based on the presence of a 'dark' class
+  on a parent element (e.g., <html class="dark">).
+-->
+  <div class="max-w-5xl mx-auto mt-20">
+
+    <!-- Step-based Main Container -->
+    <div class="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 min-h-[600px]">
+
+        <!-- Left Column: Static Information & Summary -->
+        <div class="p-8 border-r border-slate-200 dark:border-slate-700">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">NewWorld Game Demo</h1>
+          <div class="flex items-center text-slate-500 dark:text-slate-400 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>30 min</span>
+          </div>
+          
+          <!-- General Info -->
+          <div *ngIf="step < 3">
+         <p class="text-slate-600 dark:text-slate-300">
+            Book a live demo with our team to explore how the NewWorld Game empowers individuals and teams to develop real-world solutions to global and local challenges. We'll walk you through the platform’s unique features, collaborative tools, and how it combines fun, creativity, and impact—drawing on the legacy of Buckminster Fuller’s World Game.
+        </p>
+
+          </div>
+
+          <!-- Show selected time on Step 2 and 3 -->
+          <div *ngIf="step > 1" class="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Your Scheduled Demo</h2>
+              <div class="flex items-center text-blue-600 dark:text-blue-400 mt-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  <span>{{ selectedDate | date:'fullDate' }}</span>
+              </div>
+              <div class="flex items-center text-blue-600 dark:text-blue-400 mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span>{{ selectedTime }} (EST)</span>
+              </div>
+          </div>
+
+          <!-- Confirmation Details on Step 3 -->
+          <div *ngIf="step === 3" class="mt-4">
+            <p class="text-slate-600 dark:text-slate-300">A calendar invitation has been sent to <strong class="text-slate-800 dark:text-slate-100">{{ userEmail }}</strong>.</p>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Interactive Area -->
+        <div class="p-8">
+          
+          <!-- STEP 1: Date and Time Selection -->
+          <div *ngIf="step === 1">
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Select a Date & Time</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              
+              <!-- Calendar -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <button (click)="changeMonth(-1)" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+                  <h3 class="font-semibold text-lg text-slate-800 dark:text-slate-100">{{ currentMonthDate | date:'MMMM yyyy' }}</h3>
+                  <button (click)="changeMonth(1)" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-sm text-slate-500 dark:text-slate-400 mb-2">
+                  <div *ngFor="let day of weekDays">{{ day }}</div>
+                </div>
+                <div class="grid grid-cols-7 gap-2">
+        <div *ngFor="let day of monthDays" 
+            (click)="day.isCurrentMonth && !day.isPast && day.isValidBookingDay ? selectDate(day.date) : null"
+            class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
+            [class.cursor-pointer]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay"
+            [class.text-slate-700]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay && !isDateSelected(day.date)"
+            [class.dark:text-slate-200]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay && !isDateSelected(day.date)"
+            [class.text-white]="isDateSelected(day.date)"
+            [class.text-slate-400]="!day.isCurrentMonth || day.isPast || !day.isValidBookingDay"
+            [class.dark:text-slate-600]="!day.isCurrentMonth || day.isPast || !day.isValidBookingDay"
+            [class.bg-blue-600]="isDateSelected(day.date)"
+            [class.font-semibold]="isDateSelected(day.date)"
+            [class.hover:bg-slate-200]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay && !isDateSelected(day.date)"
+            [class.dark:hover:bg-slate-700]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay && !isDateSelected(day.date)">
+             {{ day.day }}
+        </div>
+
+
+
+                </div>
+              </div>
+
+              <!-- Time Slots (appears after date selection) -->
+              <div *ngIf="selectedDate" class="transition-opacity duration-300 ease-in-out">
+                <h3 class="font-semibold text-center mb-4 text-slate-700 dark:text-slate-300">{{ selectedDate | date:'EEEE, MMM d' }}</h3>
+                <div class="flex flex-col space-y-2 max-h-60 overflow-y-auto pr-2">
+                  <button *ngFor="let time of availableTimes" 
+                        (click)="selectTime(time)"
+                        [class.bg-blue-600]="time === selectedTime"
+                        [class.text-white]="time === selectedTime"
+                        [class.text-slate-700]="time !== selectedTime"
+                        [class.dark:text-slate-200]="time !== selectedTime"
+                        [class.border-blue-500]="time === selectedTime"
+                        [class.hover:border-blue-500]="time !== selectedTime"
+                        class="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg text-center transition-colors">
+                        {{ time }}
+                </button>
+
+                  
+                 
+                </div>
+              </div>
+               <!-- Next Button appears here -->
+                  <button *ngIf="selectedTime"
+                          (click)="nextStep()" 
+                          class="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors mt-4">
+                    Next
+                  </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: User Details -->
+          <div *ngIf="step === 2">
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Enter Your Details</h2>
+            <form>
+              <div class="mb-4">
+                <label for="name" class="block text-slate-600 dark:text-slate-300 mb-2">Name</label>
+                <input type="text" id="name" [(ngModel)]="userName" name="name" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              <div class="mb-4">
+                <label for="email" class="block text-slate-600 dark:text-slate-300 mb-2">Email</label>
+                <input type="email" id="email" [(ngModel)]="userEmail" name="email" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              </div>
+              <div class="mb-6">
+                <label for="notes" class="block text-slate-600 dark:text-slate-300 mb-2">Notes (optional)</label>
+                <textarea id="notes" [(ngModel)]="notes" name="notes" rows="4" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+              </div>
+              <div class="flex justify-between items-center">
+                <button type="button" (click)="prevStep()" class="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                  Back
+                </button>
+                <button type="button" (click)="submitDemo()" 
+                        [disabled]="!userName || !userEmail"
+                        [class.opacity-50]="!userName || !userEmail"
+                        [class.cursor-not-allowed]="!userName || !userEmail"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                  Schedule Demo
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- STEP 3: Confirmation -->
+          <div *ngIf="step === 3" class="flex flex-col items-center justify-center h-full text-center">
+            <div class="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Demo Scheduled!</h2>
+            <p class="text-slate-600 dark:text-slate-300 mt-2">Thank you, {{ userName }}. Your demo is confirmed.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

@@ -87,6 +87,8 @@ import { TeamBuildingComponent } from './components/team-building/team-building.
 import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
 import { BuckyComponent } from './blogs/bucky/bucky.component';
 import { TournamentLandingComponent } from './blogs/tournament-landing/tournament-landing.component';
+import { Scheduler } from 'rxjs';
+import { SchedulerComponent } from './game/scheduler/scheduler.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -450,6 +452,10 @@ const routes: Routes = [
   {
     path: 'bucky',
     component: BuckyComponent,
+  },
+   {
+    path: 'scheduler',
+    component: SchedulerComponent,
   },
   {
     path: 'tournament-landing',

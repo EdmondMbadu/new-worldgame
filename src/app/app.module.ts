@@ -133,6 +133,7 @@ import { TeamBuildingComponent } from './components/team-building/team-building.
 import { ChabotStandaloneComponent } from './game/chabot-standalone/chabot-standalone.component';
 import { BuckyComponent } from './blogs/bucky/bucky.component';
 import { TournamentLandingComponent } from './blogs/tournament-landing/tournament-landing.component';
+import { SchedulerComponent } from './game/scheduler/scheduler.component';
 
 @NgModule({
   declarations: [
@@ -241,6 +242,7 @@ import { TournamentLandingComponent } from './blogs/tournament-landing/tournamen
     ChabotStandaloneComponent,
     BuckyComponent,
     TournamentLandingComponent,
+    SchedulerComponent,
   ],
   imports: [
     BrowserModule,
