@@ -11,36 +11,7 @@
 <div class="dark:bg-slate-900 min-h-screen">
   <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
     <!-- --- Nav buttons (reuse from Primer) -------------------------------- -->
-    <div
-      class="container flex flex-row rounded-md shadow-sm mx-auto justify-center my-4"
-      role="group"
-    >
-    <button routerLink="/user-management" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                SignUp
-                </button>
-                <button routerLink="/solution-publication" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                    Solutions
-                    </button>
-                <button routerLink="/management-primer" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                   Primer
-                    </button>
-        
-                <button routerLink="/management-gsl-2025" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-                    GSL-2025
-                </button>
-                  <button routerLink="/tournament-management"
-            type="button"
-            class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border
-                   border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700
-                   focus:ring-2 focus:ring-blue-700 dark:bg-gray-800 dark:border-gray-700
-                   dark:text-white dark:hover:bg-gray-700">
-      Tournaments
-    </button>
-  <button routerLink="/management-demo" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-        Demo Signups
-      </button>
-   
-    </div>
+    <app-management-toolbar></app-management-toolbar>
 
     <!-- --- Main card ------------------------------------------------------- -->
     <div class="mx-auto max-w-screen-xl px-4 lg:px-12">

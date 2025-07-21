@@ -135,6 +135,7 @@ import { BuckyComponent } from './blogs/bucky/bucky.component';
 import { TournamentLandingComponent } from './blogs/tournament-landing/tournament-landing.component';
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
 import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
+import { ManagementToolbarComponent } from './game/management-toolbar/management-toolbar.component';
 
 @NgModule({
   declarations: [
@@ -245,6 +246,7 @@ import { ManagementDemoComponent } from './components/management-demo/management
     TournamentLandingComponent,
     SchedulerComponent,
     ManagementDemoComponent,
+    ManagementToolbarComponent,
   ],
   imports: [
     BrowserModule,

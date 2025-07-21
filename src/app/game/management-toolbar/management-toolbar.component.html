@@ -1,0 +1,24 @@
+<!-- pill-shaped toolbar -->
+<nav
+  class="mx-auto mt-4 flex w-max items-center gap-1 rounded-full px-2 py-1
+         shadow-lg backdrop-blur
+         bg-white/30 ring-1 ring-gray-300          <!-- light -->
+         dark:bg-white/10 dark:ring-0">            <!-- dark -->
+  
+  <a *ngFor="let item of items"
+     [routerLink]="item.path"
+
+     class="px-5 py-2 rounded-full text-sm font-medium tracking-wide
+            text-gray-700 hover:text-gray-900          <!-- light -->
+            dark:text-gray-300 dark:hover:text-white   <!-- dark -->
+            transition-colors"
+
+     routerLinkActive #rla="routerLinkActive"
+     [ngClass]="{
+      
+       'bg-gray-800/10 text-gray-900                dark:bg-teal-500/20 dark:text-white':
+       rla.isActive
+     }">
+    {{ item.label }}
+  </a>
+</nav>
