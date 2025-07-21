@@ -8,6 +8,34 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
+/** Full SDG titles in the order 1 → 17.
+ *  ⚠  Keep the exact spelling & double-space after the number,
+ *     because your data service uses those as keys. */
+const SDG_TITLES: string[] = [
+  'No Poverty',
+  'Zero Hunger',
+  'Good Health And Well Being',
+  'Quality Education',
+  'Gender Equality',
+  'Clean Water And Sanitation',
+  'Affordable And Clean Energy',
+  'Decent Work And Economic Growth',
+  'Industry Innovation And Infrastructure',
+  'Reduced Inequalities',
+  'Sustainable Cities And Communities',
+  'Responsible Consumption And Production',
+  'Climate Action',
+  'Life Below Water',
+  'Life And Land',
+  'Peace, Justice And Strong Institutions',
+  'Partnership For The Goals',
+];
+
+/** Builds the exact key used in sdgsPaths, e.g. 1 → "SDG1   No Poverty" */
+function toSdgKey(n: number): string {
+  return `SDG${n}   ${SDG_TITLES[n - 1]}`;
+}
+
 @Component({
   selector: 'app-solution-details',
   templateUrl: './solution-details.component.html',
@@ -52,10 +80,21 @@ export class SolutionDetailsComponent implements OnInit {
   showAddAdmin = false;
   showRemoveAdmin = false;
 
+  /* ---- SDG state ---- */
+  /* ---- SDG state ---- */
+  showAddSdg = false;
+  showRemoveSdg = false;
+
+  newSdg = ''; // ← string, pas number
+  sdgToDelete = ''; // idem
+  selectedSdgToAdd = ''; // holds full key e.g. "SDG4   Quality Education"
+  selectedSdgToRemove = ''; // idem
+
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+      console.log('the current solution sdgs', this.currentSolution.sdgs);
       // edge case if the solution has no description
       /* ––– load admins once solution arrives ––– */
       this.admins = this.currentSolution.chosenAdmins ?? [];
@@ -92,6 +131,8 @@ export class SolutionDetailsComponent implements OnInit {
       | 'showRemoveEvaluator'
       | 'showAddAdmin'
       | 'showRemoveAdmin'
+      | 'showAddSdg'
+      | 'showRemoveSdg'
   ) {
     this[property] = !this[property];
   }
@@ -436,5 +477,53 @@ export class SolutionDetailsComponent implements OnInit {
       )
       .then(onOk)
       .catch(() => alert('Error while updating admins – try again'));
+  }
+  addSdgToSolution() {
+    const key = this.selectedSdgToAdd;
+    if (!key) {
+      alert('Choose an SDG');
+      return;
+    }
+
+    const updated = [...(this.currentSolution.sdgs ?? []), key];
+    this.persistSdgs(updated, () => {
+      this.currentSolution.sdgs = updated;
+      this.selectedSdgToAdd = '';
+      this.toggle('showAddSdg');
+    });
+  }
+
+  removeSdgFromSolution() {
+    const key = this.selectedSdgToRemove;
+    if (!key) {
+      alert('Choose an SDG');
+      return;
+    }
+
+    const updated = (this.currentSolution.sdgs ?? []).filter((k) => k !== key);
+    this.persistSdgs(updated, () => {
+      this.currentSolution.sdgs = updated;
+      this.selectedSdgToRemove = '';
+      this.toggle('showRemoveSdg');
+    });
+  }
+
+  private persistSdgs(list: string[], onOk: () => void) {
+    this.solution
+      .updateSolutionField(this.currentSolution.solutionId!, 'sdgs', list)
+      .then(onOk)
+      .catch(() => alert('Error while updating SDGs – try again'));
+  }
+  get availableSdgs(): string[] {
+    // keys that are NOT yet selected
+    const current = this.currentSolution.sdgs ?? [];
+    return Array.from({ length: 17 }, (_, i) => toSdgKey(i + 1)).filter(
+      (k) => !current.includes(k)
+    );
+  }
+
+  get currentSdgs(): string[] {
+    // keys that ARE already selected
+    return [...(this.currentSolution.sdgs ?? [])];
   }
 }
