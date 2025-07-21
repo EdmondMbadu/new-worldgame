@@ -1,9 +1,11 @@
 <!-- pill-shaped toolbar -->
 <nav
-  class="mx-auto mt-4 flex w-max items-center gap-1 rounded-full px-2 py-1
-         shadow-lg backdrop-blur
-         bg-white/30 ring-1 ring-gray-300          <!-- light -->
-         dark:bg-white/10 dark:ring-0">            <!-- dark -->
+
+  class="sticky top-20 z-50                              <!-- NEW -->
+         mx-auto mt-4 flex w-max items-center gap-1
+         rounded-full px-2 py-1 shadow-lg backdrop-blur
+         bg-white/30 ring-1 ring-gray-300
+         dark:bg-white/10 dark:ring-0">      <!-- dark -->
   
   <a *ngFor="let item of items"
      [routerLink]="item.path"

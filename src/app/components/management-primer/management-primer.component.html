@@ -1,8 +1,8 @@
 <app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
-
+<app-management-toolbar></app-management-toolbar>
 <div class="dark:bg-slate-900 min-h-screen ">
     <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
-        <app-management-toolbar></app-management-toolbar>
+        
     <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
         <!-- Start coding here -->
         <h3 class="text-3xl font-bold dark:text-white text-center mb-4">Primer Downloads</h3>
