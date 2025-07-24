@@ -53,7 +53,7 @@ export class PrimerComponent implements OnInit {
         let workshop = await this.data.primerSignUp(this.pid, this.primerData);
         // this.sendConfirmationEmail();
         window.open(
-          'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2FTools%20for%20Changing%20the%20Worlda%CC%82%E2%82%AC%E2%80%9D%20A%20Design%20Science%20Primer_FOR%20WEB.pdf?alt=media&token=7ebaba13-2a28-4be8-8da9-026c3c0f1232',
+          'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2FTCW2_web.pdf?alt=media&token=c9b916aa-58f2-4c32-a180-90237777b3d2',
           '_blank'
         );
       } catch (error) {
