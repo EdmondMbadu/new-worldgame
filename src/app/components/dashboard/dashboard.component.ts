@@ -20,6 +20,18 @@ export class DashboardComponent implements OnInit {
     private router: Router,
     private fns: AngularFireFunctions
   ) {}
+  showInviteModal = false;
+  toggleInviteModal() {
+    this.showInviteModal = !this.showInviteModal;
+  }
+  includeReadMe = true;
+
+  channels = {
+    email: true,
+    broadcastFeed: true,
+    social: false,
+    customApi: false,
+  };
 
   currentSolution: Solution = {};
   id: any;
@@ -31,6 +43,12 @@ export class DashboardComponent implements OnInit {
       this.currentSolution = data;
     });
   }
+  // In your component
+  showBroadcastModal = false;
+  toggleBroadcastModal() {
+    this.showBroadcastModal = !this.showBroadcastModal;
+  }
+
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
@@ -49,5 +67,33 @@ export class DashboardComponent implements OnInit {
     // fix the below code to open the file dialog
 
     const fileInput = document.getElementById('getFile') as HTMLElement;
+  }
+  selectPlan(plan: 'plus' | 'pro') {
+    // TODO: redirect to checkout, or call your backend, etc.
+    console.log('Selected plan:', plan);
+    // After purchase or redirect:
+    // this.toggleInviteModal();
+  }
+  // In your TS
+
+  get generatedInviteLink(): string {
+    return `https://newworldgame.org/solve/${
+      this.currentSolution.solutionId || this.id
+    }`;
+  }
+
+  copyInviteLink() {
+    navigator.clipboard.writeText(this.generatedInviteLink);
+    // toast/snackbar...
+  }
+
+  askBuckyForPitch() {
+    // Call your AI service
+    // this.currentSolution.broadCastInviteMessage = await buckyService.improvePitch(...);
+  }
+
+  sendBroadcast() {
+    // Build payload from fields & channels
+    // Call backend; show success; close modal
   }
 }

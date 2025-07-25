@@ -58,6 +58,8 @@ export class Solution {
   editingCategory?: boolean;
   tempCategory?: string;
   ownerOfTeamPost?: string;
+  broadCastInvitation?: string;
+  broadCastInviteMessage?: string;
 }
 
 export class Evaluation {
