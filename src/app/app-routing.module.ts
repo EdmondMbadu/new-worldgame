@@ -90,6 +90,7 @@ import { TournamentLandingComponent } from './blogs/tournament-landing/tournamen
 import { Scheduler } from 'rxjs';
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
 import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
+import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -127,6 +128,12 @@ const routes: Routes = [
     component: DashboardComponent,
     canActivate: [AuthGuard],
     data: { requireParticipant: true },
+  },
+  {
+    path: 'join/:id',
+    component: JoinSolutionComponent,
+    canActivate: [AuthGuard],
+    // data: { requireParticipant: true },
   },
   {
     path: 'whiteboard/:id',
@@ -276,9 +283,9 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
-      {
+  {
     path: 'management-demo',
-    component:ManagementDemoComponent,
+    component: ManagementDemoComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
@@ -460,7 +467,7 @@ const routes: Routes = [
     path: 'bucky',
     component: BuckyComponent,
   },
-   {
+  {
     path: 'scheduler',
     component: SchedulerComponent,
   },

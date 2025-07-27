@@ -389,4 +389,23 @@ export class ChatbotComponent implements OnInit {
       window.open(src, '_blank', 'noopener');
     }
   }
+  handleComposerKey(event: KeyboardEvent) {
+    // Don’t submit while using an IME (e.g., Chinese/Japanese composition)
+    if ((event as any).isComposing) return;
+
+    // Send on Enter, allow new line on Shift+Enter
+    if (
+      event.key === 'Enter' &&
+      !event.shiftKey &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey
+    ) {
+      event.preventDefault(); // stop the newline
+      if (!this.uploading) {
+        // your submitPrompt already guards, but this feels snappier
+        this.submitPrompt();
+      }
+    }
+  }
 }

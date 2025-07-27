@@ -136,6 +136,7 @@ import { TournamentLandingComponent } from './blogs/tournament-landing/tournamen
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
 import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
 import { ManagementToolbarComponent } from './game/management-toolbar/management-toolbar.component';
+import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 
 @NgModule({
   declarations: [
@@ -247,6 +248,7 @@ import { ManagementToolbarComponent } from './game/management-toolbar/management
     SchedulerComponent,
     ManagementDemoComponent,
     ManagementToolbarComponent,
+    JoinSolutionComponent,
   ],
   imports: [
     BrowserModule,

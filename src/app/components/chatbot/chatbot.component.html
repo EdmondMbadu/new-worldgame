@@ -367,6 +367,7 @@
       [(ngModel)]="prompt"
       rows="2"
       placeholder="Ask something..."
+      (keydown)="handleComposerKey($event)" 
       class="flex-1 px-3 py-2 border rounded-md
              focus:outline-none focus:ring-2 focus:ring-blue-400
              dark:bg-slate-700 dark:border-slate-600

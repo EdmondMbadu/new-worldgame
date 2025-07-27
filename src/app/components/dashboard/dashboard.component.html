@@ -88,6 +88,7 @@
     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
   </svg>
 </div> -->
+
 <!-- ▲ END INVITE CTA ▲ -->
 
 
@@ -245,7 +246,10 @@
     Bring more minds to your project
   </span>
 </div> -->
-        <!-- ──────────────── Team Building tile ──────────────── -->
+        
+
+
+<!-- ──────────────── Team Building tile ──────────────── -->
         <!-- <div
           routerLink="/team-building/{{ currentSolution.solutionId }}"
           class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white
@@ -276,7 +280,7 @@
           >
             Play “Two Truths and a Code”
           </span>
-        </div> -->
+</div> -->
 
 
 
@@ -678,6 +682,15 @@
             <a [href]="generatedInviteLink" target="_blank"
                class="break-all text-xs text-emerald-700 dark:text-emerald-400 hover:underline">
               {{ generatedInviteLink }}
+            </a>
+          </div>
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-700">
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Join Page Link:
+            </p>
+            <a routerLink="/join/{{currentSolution.solutionId}}" target="_blank"
+               class="break-all text-xs text-emerald-700 dark:text-emerald-400 hover:underline">
+            {{ "/join/" + currentSolution.solutionId }}
             </a>
           </div>
         </div>
