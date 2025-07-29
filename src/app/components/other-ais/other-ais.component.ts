@@ -233,6 +233,14 @@ meaningful, lasting impact.`,
       intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
       collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
     },
+    {
+      avatarPath: '../../../assets/img/gandhi.jpg',
+      name: 'Mahatma Gandhi',
+      group: 'elder',
+      sdgs: [],
+      intro: `${name} Indian lawyer, anti-colonial nationalist, and political ethicist who employed nonviolent resistance to lead the successful campaign for India's independence from British rule.`,
+      collectionPath: `users/${this.auth.currentUser.uid}/gandhi/`,
+    },
   ];
 
   aiSelected: any = this.aiOptions[0];
