@@ -298,7 +298,7 @@ export const onChatPrompt = functions
         /\b(image|picture|photo|illustration|draw|generate).*?\b/i.test(prompt);
       const modelName = wantsImage
         ? 'gemini-2.0-flash-preview-image-generation'
-        : 'gemini-2.0-flash';
+        : 'gemini-2.5-flash';
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
       const model = genAI.getGenerativeModel({
