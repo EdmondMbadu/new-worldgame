@@ -89,6 +89,15 @@
       Close
     </span>
   </button>
+   <!-- 🔽 INSERT THE PILL RIGHT HERE, still inside this div -->
+    <span *ngIf="uiPhase === 'thinking'"
+          class="ml-2 inline-flex items-center text-xs px-2 py-0.5 rounded-full
+                 bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200 animate-pulse">
+      {{ thinkingLabel }}
+      <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce"></span>
+      <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.15s]"></span>
+      <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.30s]"></span>
+    </span>
 </div>
 
     
@@ -323,9 +332,32 @@
        </ng-container>
 
        <!-- Status (like 'thinking...') -->
-       <p class="text-gray-500 dark:text-slate-400">
-         {{ status }}
-       </p>
+      <!-- Animated Thinking Bubble (Tailwind only) -->
+        <div *ngIf="uiPhase === 'thinking'" class="flex items-start space-x-2">
+          <!-- Bucky avatar with soft ping ring -->
+          <div class="relative">
+            <img src="../../../assets/img/bucky-1.png" class="w-10 h-10 rounded-full" alt="Bucky" />
+            <span class="absolute inset-0 rounded-full ring-4 ring-teal-300/30 animate-ping"></span>
+          </div>
+
+          <!-- Skeleton "answer incoming" block -->
+          <div class="max-w-[75%]">
+            <div class="rounded-lg p-3 bg-white dark:bg-slate-700 shadow-sm">
+              <div class="h-3 w-40 rounded mb-2 bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
+              <div class="h-3 w-64 rounded mb-2 bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
+              <div class="h-3 w-56 rounded bg-slate-200 dark:bg-slate-600 animate-pulse"></div>
+            </div>
+
+            <!-- Typing dots + rotating label -->
+            <div class="mt-2 flex items-center text-xs text-slate-500 dark:text-slate-400">
+              <span>{{ thinkingLabel }}</span>
+              <span class="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce"></span>
+              <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.15s]"></span>
+              <span class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.30s]"></span>
+            </div>
+          </div>
+        </div>
+
      </section>
    </div>
 

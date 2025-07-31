@@ -16,6 +16,8 @@ export interface DisplayMessage {
   link?: { text?: string; url?: string };
   type: 'PROMPT' | 'RESPONSE' | 'IMAGE' | 'ATTACHMENT';
 }
+// put this near your class top
+type UiPhase = 'idle' | 'thinking' | 'error';
 
 interface PendingPreview {
   file: File;
@@ -69,6 +71,15 @@ export class ChatbotComponent implements OnInit {
   ) {
     this.user = this.auth.currentUser;
     this.collectionPath = `users/${this.auth.currentUser.uid}/discussions`;
+  }
+  uiPhase: UiPhase = 'idle';
+  thinkingLabel = 'Thinking';
+  private thinkingTimer?: any;
+  private thinkingPhrases = ['Thinking', 'Reasoning', 'Writing'];
+  private thinkingIndex = 0;
+
+  ngOnDestroy(): void {
+    this.stopThinking();
   }
 
   ngOnInit(): void {
@@ -203,6 +214,8 @@ export class ChatbotComponent implements OnInit {
       prompt: trimmed,
       attachmentList,
     });
+    this.startThinking();
+    this.cdRef.detectChanges(); // force immediate paint of the thinking UI
 
     // ─── 4. reset compose area ────────────────────────────────────
     this.prompt = '';
@@ -218,10 +231,12 @@ export class ChatbotComponent implements OnInit {
 
         switch (state) {
           case 'PROCESSING':
+            this.startThinking();
             this.status = 'preparing your answer...';
             break;
 
           case 'COMPLETED':
+            this.stopThinking();
             this.status = '';
             if (snap.response) {
               this.responses.push({ text: snap.response, type: 'RESPONSE' });
@@ -235,6 +250,7 @@ export class ChatbotComponent implements OnInit {
             break;
 
           case 'ERRORED':
+            this.stopThinking();
             this.status = 'Oh no! Something went wrong.';
             unsub.unsubscribe();
             break;
@@ -407,5 +423,31 @@ export class ChatbotComponent implements OnInit {
         this.submitPrompt();
       }
     }
+  }
+
+  private startThinking(): void {
+    // clear any previous timer first
+    if (this.thinkingTimer) {
+      clearInterval(this.thinkingTimer);
+      this.thinkingTimer = undefined;
+    }
+
+    this.uiPhase = 'thinking';
+    this.thinkingIndex = 0;
+    this.thinkingLabel = this.thinkingPhrases[this.thinkingIndex];
+
+    this.thinkingTimer = setInterval(() => {
+      this.thinkingIndex =
+        (this.thinkingIndex + 1) % this.thinkingPhrases.length;
+      this.thinkingLabel = this.thinkingPhrases[this.thinkingIndex];
+    }, 900);
+  }
+
+  private stopThinking(): void {
+    if (this.thinkingTimer) {
+      clearInterval(this.thinkingTimer);
+      this.thinkingTimer = undefined;
+    }
+    this.uiPhase = 'idle';
   }
 }
