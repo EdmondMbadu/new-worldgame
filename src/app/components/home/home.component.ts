@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
@@ -42,6 +42,15 @@ export class HomeComponent implements OnInit {
 
   isHovering: boolean = false;
   showAddChallenge: boolean = false;
+
+  /** Loading UX flags */
+  isInitialLoad = true; // fullscreen overlay when the page first opens
+  isLoadingChallenges = true; // skeletons in the grid when (re)loading challenges
+  isErrorChallenges = false; // error state if fetch fails
+
+  // (optional) simple cache hit to prevent flashing loader if we already have data for that category
+  private minOverlayMs = 400; // minimum visible time to prevent jarring flicker
+  private initialStart = performance.now();
 
   updateChallenges(): void {
     const categoryData = this.challenges[this.activeCategory];
@@ -93,63 +102,94 @@ export class HomeComponent implements OnInit {
   }
   async ngOnInit() {
     this.filterSolutions();
+
     if (this.user && this.user.location) {
       this.displayPromptLocation = false;
     }
     window.scroll(0, 0);
-    this.solution.getHomePageSolutions().subscribe((data) => {
-      this.allSolutions = data;
-      this.findCompletedSolutions();
-    });
 
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
-      // console.log('this is the current user solutions', data);
       this.currentUserSolutions = data;
       this.findPendingSolutions();
     });
 
     this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
-      this.evaluationSolutions = data.filter((element) => {
-        return element.finished !== undefined && element.finished === 'true';
-      });
-
+      this.evaluationSolutions = data.filter(
+        (e) => e.finished !== undefined && e.finished === 'true'
+      );
       this.evaluation = this.evaluationSolutions.length;
     });
 
     if (this.user!.profilePicture && this.user.profilePicture.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL;
     }
-    this.challenge.getAllChallenges().subscribe((challenges: any[]) => {
-      const uniqueCategories = Array.from(
-        new Set(challenges.map((challenge) => challenge.category))
-      );
-      // this.categories = uniqueCategories;
-      this.fetchChallenges(this.activeCategory);
-    });
-  }
 
-  fetchChallenges(category: string) {
+    // Get categories then load the active one
     this.challenge
-      .getChallengesByCategory(category)
-      .subscribe((data: any[]) => {
-        // Transform the array into the expected format
-        const transformedData = {
-          ids: data.map((challenge) => challenge.id),
-          titles: data.map((challenge) => challenge.title),
-          descriptions: data.map((challenge) => challenge.description),
-          images: data.map(
-            (challenge) => challenge.image || 'No image available'
-          ),
-        };
-        this.challenges[category] = transformedData; // Assign to the challenges object
-        // console.log(
-        //   `Challenges for category ${category}:`,
-        //   this.challenges[category]
-        // );
-        this.updateChallenges(); // Update the active challenge display
+      .getAllChallenges()
+      .pipe(take(1))
+      .subscribe({
+        next: (challenges: any[]) => {
+          const uniqueCategories = Array.from(
+            new Set(challenges.map((c) => c.category))
+          );
+          // this.categories = uniqueCategories; // if you want the live categories from DB
+          this.fetchChallenges(this.activeCategory, { isInitial: true });
+        },
+        error: () => {
+          // even if categories fail, try loading the default category gracefully
+          this.fetchChallenges(this.activeCategory, { isInitial: true });
+        },
       });
   }
 
+  fetchChallenges(category: string, opts?: { isInitial?: boolean }) {
+    // If already cached, reuse immediately without refetch (prevents loader flicker)
+    if (this.challenges[category]?.titles?.length) {
+      this.updateChallenges();
+      this.isLoadingChallenges = false;
+      if (opts?.isInitial) this.finishInitialOverlay();
+      return;
+    }
+
+    this.isErrorChallenges = false;
+    this.isLoadingChallenges = true;
+
+    this.challenge
+      .getChallengesByCategory(category)
+      .pipe(take(1))
+      .subscribe({
+        next: (data: any[]) => {
+          const transformedData = {
+            ids: data.map((d) => d.id),
+            titles: data.map((d) => d.title),
+            descriptions: data.map((d) => d.description),
+            images: data.map((d) => d.image || 'No image available'),
+          };
+          this.challenges[category] = transformedData;
+          this.updateChallenges();
+        },
+        error: (err) => {
+          console.error('Error loading challenges:', err);
+          this.isErrorChallenges = true;
+        },
+        complete: () => {
+          this.isLoadingChallenges = false;
+          if (opts?.isInitial) this.finishInitialOverlay();
+        },
+      });
+  }
+
+  private finishInitialOverlay() {
+    const elapsed = performance.now() - this.initialStart;
+    const remaining = Math.max(this.minOverlayMs - elapsed, 0);
+    setTimeout(() => (this.isInitialLoad = false), remaining);
+  }
+
+  async setActiveCategory(category: string) {
+    this.activeCategory = category;
+    this.fetchChallenges(category);
+  }
   extractNumber(filename: string, prefix: string): number {
     const match = filename.match(new RegExp(`${prefix}-(\\d+)`)); // Extract number based on the prefix
     return match ? parseInt(match[1], 10) : 0;
@@ -262,13 +302,6 @@ export class HomeComponent implements OnInit {
 
   activeCategory: string = 'Climate';
   filteredSolutions: Solution[] = [];
-
-  async setActiveCategory(category: string) {
-    this.activeCategory = category;
-    // await this.loadCategoryImages(category);
-    this.fetchChallenges(category);
-    // this.updateChallenges();
-  }
 
   // Filter solutions based on the active category
   filterSolutions(): void {
