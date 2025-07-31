@@ -76,7 +76,7 @@ export class ChatbotComponent implements OnInit {
   uiPhase: UiPhase = 'idle';
   thinkingLabel = 'Thinking';
   private thinkingTimer?: any;
-  private thinkingPhrases = ['Thinking', 'Reasoning', 'Writing'];
+  private thinkingPhrases = ['Thinking'];
   private thinkingIndex = 0;
 
   ngOnDestroy(): void {
