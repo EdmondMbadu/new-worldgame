@@ -284,12 +284,12 @@
            />
            <div>
              <!-- The message text -->
-             <p
-               class="bg-white dark:bg-slate-700 
-                      text-gray-900 dark:text-slate-200
-                      py-2 px-4 rounded-lg shadow-sm"
-               [innerHTML]="formatText(resp.text!)"
-             ></p>
+            <!-- While streaming, render as plain text; once done, apply formatText -->
+            <p
+              class="bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-200
+                    py-2 px-4 rounded-lg shadow-sm whitespace-pre-wrap"
+              [innerHTML]="resp.streaming ? resp.text : formatText(resp.text || '')"
+            ></p>
 
              <!-- Single-message copy button, placed under the bubble -->
              <div class="mt-1 flex justify-end">

@@ -15,6 +15,7 @@ export interface DisplayMessage {
   src?: string; // present for IMAGE
   link?: { text?: string; url?: string };
   type: 'PROMPT' | 'RESPONSE' | 'IMAGE' | 'ATTACHMENT';
+  streaming?: boolean; // ⬅️ add this
 }
 // put this near your class top
 type UiPhase = 'idle' | 'thinking' | 'error';
@@ -239,7 +240,22 @@ export class ChatbotComponent implements OnInit {
             this.stopThinking();
             this.status = '';
             if (snap.response) {
-              this.responses.push({ text: snap.response, type: 'RESPONSE' });
+              // 1) push an empty message slot that streams
+              const slot: DisplayMessage = {
+                type: 'RESPONSE',
+                text: '',
+                streaming: true,
+              };
+              this.responses.push(slot);
+              this.cdRef.detectChanges();
+              setTimeout(() => this.scrollToBottom('auto'), 0);
+
+              // 2) stream text quickly; when done, mark as not streaming so we format once
+              this.typewriterEffect(snap.response, slot, () => {
+                slot.streaming = false; // switch to formatted render
+                this.cdRef.detectChanges();
+                setTimeout(() => this.scrollToBottom('smooth'), 0);
+              });
             }
             if (snap.imageUrl) {
               this.responses.push({ src: snap.imageUrl, type: 'IMAGE' });
@@ -269,11 +285,39 @@ export class ChatbotComponent implements OnInit {
     this.toggleBot();
   }
 
-  scrollToBottom(): void {
+  scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
     const chatbox = document.getElementById('chatbox');
     if (chatbox) {
-      chatbox.scrollTop = chatbox.scrollHeight;
+      chatbox.scrollTo({ top: chatbox.scrollHeight, behavior });
     }
+  }
+
+  /** Animates text into `msg.text` quickly but smoothly. */
+  private typewriterEffect(
+    fullText: string,
+    msg: DisplayMessage,
+    done: () => void
+  ): void {
+    let i = 0;
+    const chunkSize = 8; // ⬅️ fast & smooth; tweak 5–12 to taste
+    msg.text = msg.text || '';
+
+    const id = setInterval(() => {
+      // Append a small chunk per tick
+      const next = fullText.slice(i, i + chunkSize);
+      msg.text += next;
+      i += next.length;
+
+      this.cdRef.detectChanges();
+      this.scrollToBottom('auto');
+
+      if (i >= fullText.length) {
+        clearInterval(id);
+        // one final smooth scroll
+        this.scrollToBottom('smooth');
+        done();
+      }
+    }, 10); // ⬅️ tick speed; 10ms feels fast. Set to 1–16 as you like
   }
 
   // Copies the entire conversation
