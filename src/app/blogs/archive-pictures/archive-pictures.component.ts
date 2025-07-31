@@ -54,17 +54,27 @@ export class ArchivePicturesComponent implements OnInit, OnDestroy {
       clearInterval(this.autoPlayInterval);
     }
   }
-
+  // Helpful for Angular re-render performance
+  trackByUrl(index: number, url: string) {
+    return url;
+  }
   /**
    * Firebase: get references of all images in "archive-pictures-gsl"
    * and convert them to download URLs.
    */
   private getFilesList() {
     const storageRef = this.storage.ref('archive-pictures-gsl');
-    return storageRef
-      .listAll()
-      .pipe(map((result) => result.items.map((ref) => ref.getDownloadURL())));
+    return storageRef.listAll().pipe(
+      map((result) => {
+        // sort by file name for stable order
+        const items = [...result.items].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        return items.map((ref) => ref.getDownloadURL());
+      })
+    );
   }
+
   modalVisible = false;
   modalImage: string | null = null;
 

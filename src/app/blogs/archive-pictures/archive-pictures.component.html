@@ -24,20 +24,23 @@
   <h2 class="text-2xl font-bold text-center mb-6 dark:text-white">Gallery</h2>
 
   <!-- Responsive Image Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  <ng-container *ngIf="slides.length > 2">
     <div
-      *ngFor="let slide of slides"
+      *ngFor="let img of slides.slice(1, -1); trackBy: trackByUrl"
       class="rounded-2xl overflow-hidden shadow-lg group relative cursor-pointer"
-      (click)="openModal(slide)"
+      (click)="openModal(img)"
     >
       <img
-        [src]="slide"
+        [src]="img"
         alt="participant"
         class="w-full h-64 object-cover transform group-hover:scale-105 transition duration-300 ease-in-out"
         loading="lazy"
       />
     </div>
-  </div>
+  </ng-container>
+</div>
+
 </div>
 
 <!-- Fullscreen Image Modal -->
