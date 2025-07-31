@@ -75,6 +75,7 @@
   <p class="text-base md:text-lg max-w-3xl mx-auto">
     <strong>The NewWorld Game</strong> is a platform, a work- and play-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented.
     Its goal is to have real impact—to change the world—by providing you and millions of other like-minded creative individuals with space and tools for developing solutions to the problems and issues you care about.
+    These formally outlandish goals and the process for achieving them are made possible by the creative combination of AI and human intelligence.
     <a routerLink="/overview" class="inline-block font-semibold text-indigo-700 dark:text-yellow-300 underline hover:text-indigo-900 dark:hover:text-yellow-200 ml-1">Learn more</a>.
   </p>
 </section>
@@ -121,7 +122,7 @@
         <span class="text-3xl mb-4">🏆</span>
         <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Unlimited Student Teams</h3>
         <p class="text-slate-600 dark:text-slate-300 flex-grow">
-          Unlimited teams can develop solutions. Submit 3 teams (3–5 students each) to the tournament.
+         Unlimited teams can develop solutions. Submit solutions from 3 teams (3–5 students each) to the tournament.
         </p>
       </div>
 
@@ -130,7 +131,7 @@
         <span class="text-3xl mb-4">🌐</span>
         <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Collaboration Platform</h3>
         <p class="text-slate-600 dark:text-slate-300 flex-grow">
-          Video channels, messaging, and innovative peer review connect international teams seamlessly.
+         Video channels, messaging, and innovative peer review connect international and local teams seamlessly.
         </p>
       </div>
 
@@ -147,9 +148,16 @@
       <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
         <span class="text-3xl mb-4">🤖</span>
         <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Hands‑On AI Tools</h3>
-        <p class="text-slate-600 dark:text-slate-300 flex-grow">
-          Access a dozen custom-trained AI avatar "Colleagues” and top models for research, solution development and storytelling.
-        </p>
+       <p class="text-slate-600 dark:text-slate-300 flex-grow">
+        Access a dozen custom-trained AI avatar "Colleagues” 
+        <a [routerLink]="['/tournament-landing']" fragment="avatars"
+          class="text-indigo-600 dark:text-indigo-300 underline hover:text-indigo-800 dark:hover:text-indigo-400">
+          (see below)
+        </a> 
+        and top models for research, solution development and storytelling.
+      </p>
+
+
       </div>
       <!-- Teacher AI Training -->
       <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
@@ -168,7 +176,7 @@
         <span class="text-3xl mb-4">🎖</span>
         <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Awards & Recognition</h3>
         <p class="text-slate-600 dark:text-slate-300 flex-grow">
-          Distinguished trophies, digital certificates, and optional mentorship opportunities for top teams.
+         Trophies, digital certificates, and optional mentorship opportunities for top teams.
         </p>
       </div>
 
@@ -260,10 +268,11 @@
         <h3 class="text-xl font-bold mb-4 text-slate-900 dark:text-white">For Teachers</h3>
 
         <div class="w-full flex justify-center">
-          <video
+         <video
             controls
-            preload="metadata"
+            preload="none"
             playsinline
+            poster="../../../assets/img/sofia-agent.png"
             class="w-full max-w-[720px] rounded-2xl shadow-md mx-auto aspect-[16/9]"
             style="aspect-ratio: 16/9;"
           >
@@ -283,8 +292,9 @@
         <div class="w-full flex justify-center">
           <video
             controls
-            preload="metadata"
+            preload="none"
             playsinline
+            poster="../../../assets/img/li-agent.png"
             class="w-full max-w-[720px] rounded-2xl shadow-md mx-auto aspect-[16/9]"
             style="aspect-ratio: 16/9;"
           >
@@ -846,13 +856,13 @@
 
   <!-- ── CHOOSE YOUR AVATAR ─────────────────────────────────── -->
 <!-- ── CHOOSE YOUR AVATAR ─────────────────────────────────── -->
-<section class="py-20 bg-indigo-50 dark:bg-slate-800">
+<section id="avatars" class="py-20 bg-indigo-50 dark:bg-slate-800">
   <div class="container mx-auto px-6">
     <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">
       Meet Your NewWorld Colleagues
     </h2>
     <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-10">
-     Powered by the latest AI models and fine-tuned to tackle the world’s biggest challenges, our twelve digital strategists and advisors guide both students and teachers alike on a mission to solve real-world problems. Get ready to collaborate, innovate, and architect the future—together!"
+     Powered by the latest AI models and fine-tuned to tackle the world’s biggest challenges, our twelve digital strategists and advisors guide both students and teachers alike on a mission to solve real-world problems. Get ready to collaborate, innovate, and architect the future—together!
 
 
     </p>
