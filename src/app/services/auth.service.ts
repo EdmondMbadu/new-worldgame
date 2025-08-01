@@ -366,4 +366,17 @@ export class AuthService {
         throw err;
       });
   }
+  getSchoolDoc(id: string) {
+    return this.afs.doc<School>(`schools/${id}`).valueChanges();
+  }
+
+  getStudentsInSchool(schoolId: string) {
+    return this.afs
+      .collection<User>(
+        'users',
+        (ref) =>
+          ref.where('schoolId', '==', schoolId).where('role', '==', 'student') // admins excluded
+      )
+      .valueChanges();
+  }
 }

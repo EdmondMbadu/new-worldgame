@@ -65,6 +65,8 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() currentPageTournament: boolean = false;
   @Input() currenPageLabBanner: boolean = true;
   profilePicturePath: string = '';
+
+  isSchoolAdmin = false;
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -181,6 +183,8 @@ export class NavbarComponent implements OnInit, OnChanges {
       this.userChallengePages = uniqueChallenges;
       this.showMyPages = this.userChallengePages.length > 0;
     });
+
+    this.isSchoolAdmin = this.auth.currentUser?.role === 'schoolAdmin';
   }
 
   // setThemeModeLogo() {

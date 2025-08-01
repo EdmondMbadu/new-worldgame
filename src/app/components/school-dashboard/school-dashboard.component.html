@@ -1,0 +1,179 @@
+<div
+  class="min-h-screen flex flex-col bg-gradient-to-br from-white via-slate-50 to-teal-50
+         dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"
+>
+  <!-- fixed navbar you already have -->
+  <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      path="home"
+      current=""
+    ></app-navbar>
+
+  <!-- page body -->
+  <main class="flex-grow pt-24 px-4">
+    <div class="max-w-7xl mx-auto space-y-12">
+      <!-- █ Header -->
+      <section class="text-center space-y-3">
+        <h1
+          class="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-teal-600 to-emerald-500
+                 bg-clip-text text-transparent dark:from-teal-400 dark:to-emerald-300"
+        >
+          School Admin Dashboard
+        </h1>
+        <p class="text-lg text-slate-700 dark:text-slate-400">
+          {{ schoolName }}
+        </p>
+      </section>
+
+      <!-- █ Stats -->
+      <section
+        class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 text-slate-900 dark:text-slate-100"
+      >
+        <!-- total invited -->
+        <div
+          class="flex items-center p-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur
+                 rounded-2xl shadow-lg ring-1 ring-teal-500/10 space-x-4"
+        >
+          <div
+            class="p-3 rounded-xl bg-teal-600/10 text-teal-600 dark:bg-teal-400/10 dark:text-teal-300"
+          >
+            <!-- users icon -->
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M17 20h5v-2a4 4 0 0 0-5-3.87M9 20H4v-2a4 4 0 0 1 5-3.87M8 7a4 4 0 1 1 8 0 4 4 0 0 1-8 0Zm12 5h.01M4 12h.01"
+              />
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ invitedCount }}</p>
+            <p class="text-sm">Students&nbsp;Invited</p>
+          </div>
+        </div>
+
+        <!-- verified -->
+        <div
+          class="flex items-center p-6 bg-white/90 dark:bg-slate-800/90 backdrop-blur
+                 rounded-2xl shadow-lg ring-1 ring-teal-500/10 space-x-4"
+        >
+          <div
+            class="p-3 rounded-xl bg-emerald-600/10 text-emerald-600 dark:bg-emerald-400/10 dark:text-emerald-300"
+          >
+            <!-- shield-check icon -->
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m9 12 2 2 4-4m-3-8-7 4v5c0 5.55 3.84 10.74 10 12
+                   6.16-1.26 10-6.45 10-12V6l-7-4-3-2-3 2Z"
+              />
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ verifiedCount }}</p>
+            <p class="text-sm">Verified&nbsp;Students</p>
+          </div>
+        </div>
+
+        <!-- placeholder third card -->
+        <div
+          class="flex items-center justify-center p-6 bg-white/60 dark:bg-slate-800/60
+                 rounded-2xl border-2 border-dashed border-teal-300/40
+                 dark:border-teal-500/40 text-slate-500 dark:text-slate-400"
+        >
+          <span class="text-sm">More analytics coming&nbsp;soon…</span>
+        </div>
+      </section>
+
+      <!-- █ Students list -->
+      <section
+        class="bg-white/90 text-slate-900 dark:text-slate-100 dark:bg-slate-800/90 backdrop-blur rounded-2xl shadow-xl ring-1 ring-teal-500/10"
+      >
+        <header
+          class="px-6 py-4 border-b border-slate-200 dark:border-slate-700
+                 flex items-center justify-between"
+        >
+          <h2 class="text-xl font-semibold">Students</h2>
+          <button
+            class="inline-flex items-center gap-2 text-sm font-medium
+                   text-white bg-teal-600 hover:bg-teal-700 rounded-full px-4 py-2"
+            (click)="inviteStudent()"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Invite
+          </button>
+        </header>
+
+        <div class="overflow-x-auto">
+          <table
+            class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm"
+          >
+            <thead class="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+              <tr>
+                <th class="px-6 py-3 text-left font-medium">Name</th>
+                <th class="px-6 py-3 text-left font-medium">Email</th>
+                <th class="px-6 py-3 text-left font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody
+              class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-900 dark:text-slate-100"
+            >
+              <tr *ngFor="let s of students">
+                <td class="px-6 py-3">{{ s.name }}</td>
+                <td class="px-6 py-3">{{ s.email }}</td>
+                <td class="px-6 py-3">
+                  <span
+                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
+                    [ngClass]="
+                      s.verified
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
+                        : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                    "
+                  >
+                    {{ s.verified ? 'Verified' : 'Invited' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="students.length === 0">
+                <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                  No students yet. Click “Invite” to add the first one.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

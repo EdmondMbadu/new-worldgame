@@ -537,9 +537,19 @@
             </div> -->
             <div class="cursor-pointer flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full hover:text-blue-600 dark:hover:text-blue-500 md:me-0 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-white">
               <!-- Profile Icon -->
-              <svg *ngIf="profilePicturePath ==''" class="w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+               <!-- Profile Icon -->
+              <!-- <svg *ngIf="profilePicturePath ==''" class="w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-              </svg>
+              </svg> -->
+             <!-- Initial badge shown when no profile picture -->
+                <span
+                  *ngIf="profilePicturePath === ''"
+                  class="w-8 h-8 me-2 flex items-center justify-center rounded-full
+                        bg-indigo-600 dark:bg-indigo-500 text-white font-medium uppercase
+                        ring-2 ring-white dark:ring-slate-800">
+                  {{ firstName?.charAt(0) || '?' }}
+                </span>
+
               
               <!-- Profile Picture -->
               <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-12 h-12 me-2 rounded-full" alt="">
@@ -612,6 +622,19 @@
                           Generate Challenge Page
                       </a>
                   </li>
+                  <li *ngIf="isSchoolAdmin">
+                    <a routerLink="/school-dashboard"
+                      class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                      <svg class="w-[20px] h-[20px] inline-block mr-2 text-gray-800 dark:text-white"
+                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M3 10h18M5 6h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm4 11h6"/>
+                      </svg>
+                      School Admin&nbsp;Dashboard
+                    </a>
+                  </li>
+
               </ul>
               <div class="m-4 flex flex-row text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
                   <svg class="w-6 h-6 text-gray-800 dark:text-white pt-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

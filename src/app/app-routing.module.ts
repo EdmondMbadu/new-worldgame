@@ -92,6 +92,7 @@ import { SchedulerComponent } from './game/scheduler/scheduler.component';
 import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
 import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
+import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -101,6 +102,10 @@ const routes: Routes = [
   {
     path: 'signup-school',
     component: SchoolSignupComponent,
+  },
+  {
+    path: 'school-dashboard',
+    component: SchoolDashboardComponent,
   },
 
   { path: 'game', component: GameComponent },
