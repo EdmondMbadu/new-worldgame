@@ -139,6 +139,7 @@ import { ManagementToolbarComponent } from './game/management-toolbar/management
 import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
 import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
+import { InvitationsComponent } from './components/invitations/invitations.component';
 
 @NgModule({
   declarations: [
@@ -253,6 +254,7 @@ import { SchoolDashboardComponent } from './components/school-dashboard/school-d
     JoinSolutionComponent,
     SchoolSignupComponent,
     SchoolDashboardComponent,
+    InvitationsComponent,
   ],
   imports: [
     BrowserModule,

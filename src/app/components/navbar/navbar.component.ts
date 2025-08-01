@@ -15,6 +15,7 @@ import {
   combineLatest,
   debounceTime,
   distinctUntilChanged,
+  filter,
   of,
   switchMap,
 } from 'rxjs';
@@ -24,6 +25,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { use } from 'marked';
+import { SchoolService } from 'src/app/services/school.service';
 
 @Component({
   selector: 'app-navbar',
@@ -71,7 +73,8 @@ export class NavbarComponent implements OnInit, OnChanges {
     public auth: AuthService,
     private solution: SolutionService,
     private data: DataService,
-    private challenge: ChallengesService
+    private challenge: ChallengesService,
+    private schoolService: SchoolService
   ) {}
 
   @Input() hoveredHomePath: string = ``;
@@ -95,6 +98,8 @@ export class NavbarComponent implements OnInit, OnChanges {
 
   userChallengePages: ChallengePage[] = [];
   showMyPages: boolean = false; // Control visibility of "My Pages"
+
+  pendingInvitesCount = 0;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -185,15 +190,17 @@ export class NavbarComponent implements OnInit, OnChanges {
     });
 
     this.isSchoolAdmin = this.auth.currentUser?.role === 'schoolAdmin';
+    // watch pending invites for logged-in user
+    this.auth.user$.pipe(filter((u: any) => !!u?.email)).subscribe((u) => {
+      this.schoolService
+        .getPendingInvitesForEmail(u!.email!.toLowerCase())
+        .subscribe({
+          next: (invites) => (this.pendingInvitesCount = invites.length),
+          error: (err) => console.error('Invites stream error:', err),
+        });
+    });
   }
 
-  // setThemeModeLogo() {
-  //   if (localStorage['theme'] === 'light') {
-  //     this.dark = false;
-  //   } else {
-  //     this.dark = true;
-  //   }
-  // }
   setThemeModeLogo() {
     try {
       if (localStorage.getItem('theme') === 'light') {

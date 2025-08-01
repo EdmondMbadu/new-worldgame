@@ -521,8 +521,10 @@
 
          
 
-          <div class=" lg:flex md:flex-col mx-auto items-center" (click)="toggleDropDown()"  >
-
+          <div class=" lg:flex md:flex-col mx-auto items-center"   >
+              <!-- Always-visible pending invites bell -->
+            
+           
             <!-- <div class="">
              
              
@@ -535,30 +537,54 @@
               <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-8 h-8 mx-auto rounded-full"  alt="">
          
             </div> -->
-            <div class="cursor-pointer flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full hover:text-blue-600 dark:hover:text-blue-500 md:me-0 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-white">
-              <!-- Profile Icon -->
-               <!-- Profile Icon -->
-              <!-- <svg *ngIf="profilePicturePath ==''" class="w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-              </svg> -->
-             <!-- Initial badge shown when no profile picture -->
-                <span
-                  *ngIf="profilePicturePath === ''"
-                  class="w-8 h-8 me-2 flex items-center justify-center rounded-full
-                        bg-indigo-600 dark:bg-indigo-500 text-white font-medium uppercase
-                        ring-2 ring-white dark:ring-slate-800">
-                  {{ firstName.charAt(0) || '?' }}
-                </span>
+           <!-- Profile trigger (with overlaid invites badge) -->
+      <div
+        class="cursor-pointer flex items-center text-sm pe-1 font-medium text-gray-900 rounded-full
+              hover:text-blue-600 dark:hover:text-blue-500 md:me-0 focus:ring-4 focus:ring-gray-100
+              dark:focus:ring-gray-700 dark:text-white gap-2"
+        (click)="toggleDropDown()"
+      >
+        <!-- Avatar + badge wrapper -->
+        <div class="relative">
+          <!-- Initial when no picture -->
+          <span
+            *ngIf="profilePicturePath === ''"
+            class="w-10 h-10 flex items-center justify-center rounded-full
+                  bg-indigo-600 dark:bg-indigo-500 text-white font-medium uppercase
+                  ring-2 ring-white dark:ring-slate-800"
+          >
+            {{ firstName.charAt(0) || '?' }}
+          </span>
 
-              
-              <!-- Profile Picture -->
-              <img *ngIf="profilePicturePath !==''" src="{{profilePicturePath}}" class="w-12 h-12 me-2 rounded-full" alt="">
-              
-              {{firstName}} {{lastName}}
-              <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-              </svg>
-          </div>
+          <!-- Profile picture -->
+          <img
+            *ngIf="profilePicturePath !== ''"
+            [src]="profilePicturePath"
+            class="w-10 h-10 rounded-full"
+            alt="Profile"
+          />
+
+          <!-- Red badge over avatar -->
+          <a
+            *ngIf="pendingInvitesCount > 0"
+            routerLink="/invitations"
+            (click)="$event.stopPropagation()"
+            class="absolute -top-1 -right-1 min-w-[1.05rem] h-[1.05rem] text-[0.65rem] leading-[1.05rem]
+                  text-white bg-rose-600 rounded-full text-center px-[0.2rem]"
+            aria-label="Pending invitations"
+            title="Pending invitations"
+          >
+            {{ pendingInvitesCount > 9 ? '9+' : pendingInvitesCount }}
+          </a>
+        </div>
+
+        <!-- Name + chevron -->
+        <span>{{ firstName }} {{ lastName }}</span>
+        <svg class="w-2.5 h-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+        </svg>
+      </div>
+
           
           <div *ngIf="showDropDown" class="z-10 mt-10 absolute cursor-pointer bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 md:w-fit dark:bg-gray-700 dark:divide-gray-600">
               <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
@@ -577,6 +603,27 @@
                           Profile
                       </a>
                   </li>
+                                    <!-- Somewhere in your right side of navbar before/after profile -->
+                  <!-- Pending invitations section (inside dropdown) -->
+                  <ng-container *ngIf="pendingInvitesCount > 0">
+                    <!-- <div class="px-4 pt-3 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Pending invitations
+                    </div> -->
+                    <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
+                      <li>
+                        <a routerLink="/invitations"
+                          class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z"/>
+                          </svg>
+                          <span>View Invitations ({{ pendingInvitesCount }})</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </ng-container>
+
+
                   <li>
                       <a routerLink="/blogs/instructions" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                         <svg class="w-[20px] h-[20px] inline-block mr-2 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">

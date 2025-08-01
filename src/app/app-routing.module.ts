@@ -93,6 +93,7 @@ import { ManagementDemoComponent } from './components/management-demo/management
 import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
 import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
+import { InvitationsComponent } from './components/invitations/invitations.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -107,6 +108,12 @@ const routes: Routes = [
     path: 'school-admin',
     component: SchoolDashboardComponent,
     canActivate: [AuthGuard],
+  },
+  // app-routing.module.ts
+  {
+    path: 'invitations',
+    component: InvitationsComponent,
+    canActivate: [AuthGuard], // if you have one
   },
 
   { path: 'game', component: GameComponent },
