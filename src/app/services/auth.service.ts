@@ -8,7 +8,7 @@ import {
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { Observable, of, switchMap } from 'rxjs';
-import { NewUser, User } from '../models/user';
+import { NewUser, School, User } from '../models/user';
 import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
@@ -288,5 +288,82 @@ export class AuthService {
         ref.orderBy('demoDateTime', 'asc')
       )
       .valueChanges({ idField: 'id' });
+  }
+
+  addNewUserSchoolAdmin(
+    firstName: string,
+    lastName: string,
+    user: any,
+    goal: string,
+    sdgsSelected: string[],
+
+    role: 'individual' | 'schoolAdmin' = 'individual',
+    schoolId?: string
+  ) {
+    const userRef: AngularFirestoreDocument<User> = this.afs.doc(
+      `users/${user.uid}`
+    );
+    const data = {
+      uid: user.uid,
+      email: user.email,
+      firstName: firstName,
+      lastName: lastName,
+      followers: '0',
+      following: '0',
+      employement: '',
+      status: '',
+      profileCredential: '',
+      profileDescription: '',
+      education: '',
+      location: '',
+      profilePicture: {},
+      dateJoined: this.time.getCurrentDate(),
+      contentViews: '0',
+      goal: goal,
+      sdgsSelected: sdgsSelected,
+      profilePicPath: '',
+      role,
+      schoolId: schoolId || '',
+    };
+    return userRef.set(data, { merge: true });
+  }
+  /** AuthService */
+  registerSchool(
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+    schoolName: string
+  ): Promise<void> {
+    // ← return a Promise the caller can await
+    return this.fireauth
+      .createUserWithEmailAndPassword(email, password)
+      .then(async (cred) => {
+        await this.sendEmailForVerification(cred.user);
+
+        // 1. create school
+        const schoolRef = this.afs.collection<School>('schools').doc();
+        await schoolRef.set({
+          id: schoolRef.ref.id,
+          name: schoolName,
+          ownerUid: cred.user!.uid,
+          createdAt: this.time.getCurrentDate(),
+        });
+
+        // 2. create admin user
+        await this.addNewUserSchoolAdmin(
+          firstName,
+          lastName,
+          cred.user,
+          '',
+          [],
+          'schoolAdmin',
+          schoolRef.ref.id
+        );
+      })
+      .catch((err) => {
+        // surface the error to the caller
+        throw err;
+      });
   }
 }

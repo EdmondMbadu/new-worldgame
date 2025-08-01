@@ -27,6 +27,8 @@ export class User {
   lastLogin?: string;
   tempSolutionstarted?: string;
   tempSolutionSubmitted?: string;
+  role?: string;
+  schoolId?: string;
 }
 
 export class Avatar {
@@ -87,4 +89,11 @@ export class ChallengePage {
   participantsHidden?: boolean;
   handouts?: { name: string; url: string }[];
   programPDF?: { title: string; url: string } | null = null;
+}
+// models/school.ts
+export interface School {
+  id?: string;
+  name: string;
+  ownerUid: string;
+  createdAt: string;
 }

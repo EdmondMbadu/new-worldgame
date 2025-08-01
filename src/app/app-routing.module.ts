@@ -91,12 +91,18 @@ import { Scheduler } from 'rxjs';
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
 import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
 import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
+import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'signup', component: SignupComponent },
+  {
+    path: 'signup-school',
+    component: SchoolSignupComponent,
+  },
+
   { path: 'game', component: GameComponent },
   { path: 'mini-game', component: MiniGameComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
