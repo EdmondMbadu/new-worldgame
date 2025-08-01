@@ -162,7 +162,26 @@
                     {{ s.verified ? 'Verified' : 'Invited' }}
                   </span>
                 </td>
-              </tr>
+                 <td class="px-6 py-3">
+                    <button
+                        (click)="removeStudent(s)"
+                        [disabled]="removingEmail === s.email"
+                        class="inline-flex items-center gap-2 text-sm font-medium
+                            text-white bg-rose-600 hover:bg-rose-700 rounded-full px-3 py-1.5
+                            disabled:opacity-50"
+                        title="Remove this student from the school"
+                    >
+                        <svg *ngIf="removingEmail !== s.email" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m6 18 12-12M6 6l12 12"/>
+                        </svg>
+                        <svg *ngIf="removingEmail === s.email" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 5v0m7 7v0m-7 7v0m-7-7v0M4.93 4.93l0 0m12.14 0l0 0m0 12.14l0 0M4.93 19.07l0 0"/>
+                        </svg>
+                        Remove
+                    </button>
+                </td>
+                            </tr>
               <tr *ngIf="students.length === 0">
                 <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
                   No students yet. Click “Invite” to add the first one.
@@ -176,4 +195,111 @@
   </main>
 
   <app-footer></app-footer>
+</div>
+
+
+<!-- ░░ Invite students modal ░░ -->
+<div
+  *ngIf="showInvite"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+>
+  <div
+    class="max-w-lg w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+           rounded-2xl shadow-2xl ring-1 ring-slate-900/10 dark:ring-slate-50/10
+           p-8 space-y-6"
+  >
+    <header class="flex items-center justify-between">
+      <h3 class="text-xl font-semibold">Invite students</h3>
+      <button
+        (click)="closeInvite()"
+        class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="m6 18 12-12M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- textarea -->
+    <label class="block text-sm font-medium mb-1"
+      >Emails (comma, space, or newline&nbsp;separated)</label
+    >
+    <textarea
+      [(ngModel)]="inviteRaw"
+      rows="4"
+      placeholder="alice@school.org, bob@school.org"
+      class="w-full rounded-lg border border-slate-300 dark:border-slate-600
+             bg-slate-50 dark:bg-slate-700/60 px-4 py-2 text-sm focus:outline-none
+             focus:ring-2 focus:ring-teal-500 placeholder:text-slate-400
+             dark:placeholder:text-slate-500 resize-y"
+    ></textarea>
+
+    <!-- csv upload -->
+    <div>
+      <label
+        for="csvInput"
+        class="inline-flex items-center gap-2 cursor-pointer text-sm font-medium
+               text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 4v16m8-8H4M4 16h16M4 8h16"
+          />
+        </svg>
+        Upload CSV
+      </label>
+      <input
+        id="csvInput"
+        type="file"
+        accept=".csv"
+        hidden
+        (change)="loadCsv($event)"
+      />
+      <span *ngIf="csvName" class="ml-2 text-xs text-slate-500 dark:text-slate-400">{{ csvName }}</span>
+    </div>
+
+    <!-- errors -->
+    <p *ngIf="inviteError" class="text-sm text-red-600 dark:text-red-400">{{ inviteError }}</p>
+
+    <!-- footer -->
+    <footer class="flex justify-end gap-3 pt-2">
+      <button
+        (click)="closeInvite()"
+        class="px-4 py-2 rounded-full text-sm font-semibold bg-slate-200/60
+               dark:bg-slate-700/60 hover:bg-slate-300 dark:hover:bg-slate-600"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="sendInvites()"
+        [disabled]="sending"
+        class="px-4 py-2 rounded-full text-sm font-semibold text-white
+               bg-teal-600 hover:bg-teal-700 disabled:opacity-50 flex items-center gap-2"
+      >
+        <svg
+          *ngIf="sending"
+          class="w-4 h-4 animate-spin"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 5v0m7 7v0m-7 7v0m-7-7v0M4.93 4.93l0 0m12.14 0l0 0m0 12.14l0 0M4.93 19.07l0 0"
+          />
+        </svg>
+        {{ sending ? 'Sending…' : 'Send invites' }}
+      </button>
+    </footer>
+  </div>
 </div>

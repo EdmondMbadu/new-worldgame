@@ -29,7 +29,7 @@ export class User {
   tempSolutionSubmitted?: string;
   role?: string;
   schoolId?: string;
-  verified?: string;
+  verified?: boolean;
 }
 
 export class Avatar {

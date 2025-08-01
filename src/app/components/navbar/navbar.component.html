@@ -547,7 +547,7 @@
                   class="w-8 h-8 me-2 flex items-center justify-center rounded-full
                         bg-indigo-600 dark:bg-indigo-500 text-white font-medium uppercase
                         ring-2 ring-white dark:ring-slate-800">
-                  {{ firstName?.charAt(0) || '?' }}
+                  {{ firstName.charAt(0) || '?' }}
                 </span>
 
               
@@ -623,7 +623,7 @@
                       </a>
                   </li>
                   <li *ngIf="isSchoolAdmin">
-                    <a routerLink="/school-dashboard"
+                    <a routerLink="/school-admin"
                       class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                       <svg class="w-[20px] h-[20px] inline-block mr-2 text-gray-800 dark:text-white"
                           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

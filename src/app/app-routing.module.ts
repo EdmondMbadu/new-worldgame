@@ -104,8 +104,9 @@ const routes: Routes = [
     component: SchoolSignupComponent,
   },
   {
-    path: 'school-dashboard',
+    path: 'school-admin',
     component: SchoolDashboardComponent,
+    canActivate: [AuthGuard],
   },
 
   { path: 'game', component: GameComponent },

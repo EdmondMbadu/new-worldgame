@@ -225,32 +225,31 @@ export class AuthService {
   SignIn(email: string, password: string) {
     this.fireauth
       .signInWithEmailAndPassword(email, password)
-      .then(
-        (res) => {
-          if (res.user?.emailVerified == true) {
-            // this is the redirect flow here.
-            if (this.redirectUrl) {
-              this.router.navigateByUrl(this.redirectUrl); // ← replace navigate()
-              this.redirectUrl = '';
-            } else {
-              this.router.navigate(['/home']);
-            }
-          } else {
-            this.router.navigate(['/verify-email']);
+      .then(async (res) => {
+        const user = res.user;
+        if (!user) return;
+
+        /* ── ① write “verified” once ────────────────────────── */
+        if (user.emailVerified) {
+          const userRef = this.afs.doc<User>(`users/${user.uid}`);
+          const snap = await userRef.get().toPromise(); // one-shot read
+          if (!snap?.data()?.verified) {
+            /* field missing or false → set it */
+            await userRef.set({ verified: true } as Partial<User>, {
+              merge: true,
+            });
           }
-        },
-        (err) => {
-          // alert('Something went wrong');
-          this.logingError = of(err);
-          // this.router.navigate(['/']);
         }
-      )
-      .catch((error) => {
-        // alert('Something went wrong');
-        this.logingError = of(error);
-        // this.router.navigate(['/']);
-        // ...
-      });
+
+        /* ── ② normal redirect flow ─────────────────────────── */
+        if (user.emailVerified) {
+          this.router.navigateByUrl(this.redirectUrl || '/home');
+          this.redirectUrl = '';
+        } else {
+          this.router.navigate(['/verify-email']);
+        }
+      })
+      .catch((err) => (this.logingError = of(err)));
   }
 
   forgotPassword(email: string) {
