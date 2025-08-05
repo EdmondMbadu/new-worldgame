@@ -29,62 +29,65 @@ export class TournamentLandingComponent {
     this.showTable = !this.showTable;
   }
   /** Comparison-matrix source.  `minPlanIndex` handles feature inheritance */
-  featureRows: FeatureRow[] = [
+  // Table rows
+  featureRows = [
     {
       name: 'Student capacity',
-      detail: 'Maximum concurrent student accounts.',
-      minPlanIndex: 0,
-      customValues: ['30', 'Unlimited', 'Unlimited', 'Unlimited', 'Unlimited'],
-    },
-    {
-      name: 'Unlimited solution runs',
-      detail: 'No limit on code executions / AI calls.',
-      minPlanIndex: 0,
+      values: [
+        'Single player',
+        'Unlimited',
+        'Unlimited',
+        'Unlimited',
+        'Unlimited (multi-campus)',
+      ],
+      detail:
+        'Free is single-player only. Paid plans allow unlimited student accounts.',
     },
     {
       name: 'AI avatars included',
-      detail: 'Ready-made AI personas for classroom use.',
-      minPlanIndex: 0,
-      customValues: ['3', '12', '12', '12', 'Custom'],
+      values: [true, true, true, true, true],
+      detail:
+        'AI avatar bundles are not included in plan pricing. (Show as — for clarity.)',
     },
     {
       name: 'Tournament access',
-      detail: 'Ability to enter the global NewWorld Game tournament.',
-      minPlanIndex: 2, // starts at “Tournament” plan
+      values: [false, true, true, true, true],
+      detail: 'Ability to enter official tournaments.',
     },
     {
       name: 'Tournament entries',
-      detail: 'Max number of team submissions per school.',
-      minPlanIndex: 1, // License and up
-      customValues: ['0', '1', '3', '5', 'Custom'],
+      values: ['—', '1', '3', '5', 'Custom'],
+      detail: 'Number of team entries included per season.',
     },
     {
       name: 'Global judging & prizes',
-      detail: 'Projects reviewed by international jury; prizes awarded.',
-      minPlanIndex: 2,
+      // If you want License-Only to count as judged (because it includes 1 submission),
+      // set the second value to true instead of '—'.
+      values: ['—', '—', true, true, true],
+      detail: 'Eligibility for global judging rounds and prize consideration.',
     },
     {
-      name: 'Email support',
-      detail: 'Standard support (48h SLA).',
-      minPlanIndex: 1,
+      name: 'Teacher AI-training masterclass',
+      values: ['—', '—', true, true, true],
+      detail: 'Live training with recording.',
     },
     {
-      name: 'Staff PD webinar',
-      detail: '60-minute live Professional-Development session.',
-      minPlanIndex: 3,
+      name: 'Support',
+      values: ['—', 'Email', 'Email', 'Priority', 'Priority + Manager'],
+      detail: 'Support level and response expectations.',
     },
     {
-      name: 'Priority support',
-      detail: 'Fast-track queue and shorter SLA.',
-      minPlanIndex: 4,
+      name: 'Onboarding & training',
+      values: ['—', '—', '—', '—', 'Custom'],
+      detail:
+        'Setup, workshops, migration, and tailored enablement for Enterprise.',
     },
     {
       name: 'Dedicated account manager',
-      detail: 'Personal onboarding & quarterly success reviews.',
-      minPlanIndex: 4,
+      values: ['—', '—', '—', '—', true],
+      detail: 'Direct point-of-contact for multi-campus deployments.',
     },
   ];
-
   /** UI state */
   expanded: boolean[] = this.featureRows.map(() => false);
   showMode: 'summary' | 'details' = 'summary';
@@ -106,17 +109,14 @@ export class TournamentLandingComponent {
   }
 
   /** Resolve cell value based on inheritance rules */
-  cellValue(row: FeatureRow, planIdx: number): string {
-    // custom override?
-    if (row.customValues && row.customValues[planIdx] !== null) {
-      return row.customValues[planIdx] as string;
-    }
-    // inherited ✓ if planIdx >= minPlanIndex
-    if (row.minPlanIndex !== null && planIdx >= row.minPlanIndex) {
-      return '✓';
-    }
-    return '—';
+  // Helper used by the template
+  cellValue(row: any, j: number) {
+    const v = row.values[j];
+    if (v === true) return '✓';
+    if (v === false || v === null || v === undefined) return '—';
+    return v; // string/number already formatted
   }
+
   aiOptions: any[] = [];
   email: string = 'newworld@newworld-game.org';
   isLoggedIn: boolean = false;
