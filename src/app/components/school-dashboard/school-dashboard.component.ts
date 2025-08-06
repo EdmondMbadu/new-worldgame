@@ -11,28 +11,43 @@ interface Row {
   email: string;
   verified: boolean;
 }
-
+interface SchoolDoc {
+  name?: string;
+  website?: string;
+  ownerUid?: string;
+  adminUids?: string[]; // optional; for future multiple admins
+}
 @Component({
   selector: 'app-school-dashboard',
   templateUrl: './school-dashboard.component.html',
 })
 export class SchoolDashboardComponent implements OnInit, OnDestroy {
   schoolName = '';
-  students: Row[] = [];
+  schoolWebsite = '';
 
+  ownerName = '';
+  ownerEmail = '';
+
+  isAdmin = false;
+
+  students: Row[] = [];
   invitedCount = 0;
   verifiedCount = 0;
 
-  /** invite modal state */
+  // invite modal state (unchanged)
   showInvite = false;
   inviteRaw = '';
   csvName = '';
   inviteError = '';
   sending = false;
 
-  private sub?: Subscription;
-
   removingEmail: string | null = null;
+
+  private authSub?: Subscription;
+  private rosterSub?: Subscription;
+  private schoolSub?: Subscription;
+  private ownerSub?: Subscription;
+
   constructor(
     public auth: AuthService,
     private afs: AngularFirestore,
@@ -40,40 +55,89 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    /* ① logged-in admin → fetch school doc + live students */
-    this.sub = this.auth.user$
-      .pipe(
-        switchMap((admin) => {
-          if (!admin?.schoolId) throw new Error('No schoolId on user');
+    this.authSub = this.auth.user$.subscribe(async (me) => {
+      if (!me?.schoolId) return;
 
-          /* fetch the school’s display name once */
-          this.afs
-            .doc(`schools/${admin.schoolId}`)
-            .valueChanges()
-            .subscribe((s: any) => (this.schoolName = s?.name ?? ''));
+      // ── Load school meta (name, website, owner/admins) ───────────────────
+      this.schoolSub?.unsubscribe();
+      this.schoolSub = this.afs
+        .doc<SchoolDoc>(`schools/${me.schoolId}`)
+        .valueChanges()
+        .subscribe(async (school) => {
+          this.schoolName = school?.name ?? '';
+          this.schoolWebsite = school?.website ?? '';
 
-          /* live stream the sub-collection */
-          return this.afs
-            .collection(`schools/${admin.schoolId}/students`)
-            .valueChanges({ idField: 'id' }); // <— “id” is the student’s email
-        }),
-        map((docs: any[]) =>
-          docs.map((d) => ({
-            name: d.firstName ? `${d.firstName} ${d.lastName}`.trim() : '',
-            email: d.email,
-            verified: !!d.verified,
-          }))
-        )
-      )
-      .subscribe((rows) => {
-        this.students = rows;
-        this.invitedCount = rows.length;
-        this.verifiedCount = rows.filter((r) => r.verified).length;
-      });
+          const ownerUid = school?.ownerUid ?? '';
+          const admins = Array.isArray(school?.adminUids)
+            ? school!.adminUids!
+            : [];
+
+          this.isAdmin =
+            !!me.uid && (me.uid === ownerUid || admins.includes(me.uid));
+
+          // Load owner’s profile (name/email)
+          this.ownerSub?.unsubscribe();
+          if (ownerUid) {
+            this.ownerSub = this.afs
+              .doc<User>(`users/${ownerUid}`)
+              .valueChanges()
+              .subscribe((owner) => {
+                const first = owner?.firstName?.trim() ?? '';
+                const last = owner?.lastName?.trim() ?? '';
+                this.ownerName = first || last ? `${first} ${last}`.trim() : '';
+                this.ownerEmail = owner?.email ?? '';
+              });
+          } else {
+            this.ownerName = '';
+            this.ownerEmail = '';
+          }
+
+          // ── Roster handling ───────────────────────────────────────────────
+          this.rosterSub?.unsubscribe();
+
+          if (this.isAdmin) {
+            // Admin: subscribe to students and show full roster
+            this.rosterSub = this.afs
+              .collection(`schools/${me.schoolId}/students`)
+              .valueChanges({ idField: 'id' })
+              .pipe(
+                map((docs: any[]) =>
+                  docs.map((d) => ({
+                    name: d.firstName
+                      ? `${d.firstName} ${d.lastName}`.trim()
+                      : '',
+                    email: d.email,
+                    verified: !!d.verified,
+                  }))
+                )
+              )
+              .subscribe((rows) => {
+                this.students = rows;
+                this.invitedCount = rows.length;
+                this.verifiedCount = rows.filter((r) => r.verified).length;
+              });
+          } else {
+            // Student: do NOT read identities; get counts only
+            const col = this.afs.firestore.collection(
+              `schools/${me.schoolId}/students`
+            );
+            const [allSnap, verifiedSnap] = await Promise.all([
+              col.get(),
+              col.where('verified', '==', true).get(),
+            ]);
+            this.students = []; // keep empty to avoid accidental rendering
+            this.invitedCount = allSnap.size;
+            this.verifiedCount = verifiedSnap.size;
+          }
+        });
+    });
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.authSub?.unsubscribe();
+    this.schoolSub?.unsubscribe();
+    this.ownerSub?.unsubscribe();
+    this.rosterSub?.unsubscribe();
   }
 
   /* ───────── invite modal helpers ───────── */

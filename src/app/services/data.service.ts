@@ -656,10 +656,25 @@ meaningful, lasting impact.`,
     // this.router.navigate(['/home']);
   }
 
-  public parseDateMMDDYYYY(dateString: string): number {
-    const [month, day, year] = dateString.split('-').map(Number);
-    return new Date(year, month - 1, day).getTime();
+  parseDateMMDDYYYY(dateStr?: string): number {
+    if (!dateStr) return 0;
+    const s = dateStr.trim();
+
+    const native = Date.parse(s);
+    if (!Number.isNaN(native)) return native;
+
+    const sep = s.includes('/') ? '/' : s.includes('-') ? '-' : '';
+    if (!sep) return 0;
+
+    const [mm, dd, yyyy] = s.split(sep);
+    const t = new Date(
+      parseInt(yyyy, 10),
+      parseInt(mm, 10) - 1,
+      parseInt(dd, 10)
+    ).getTime();
+    return Number.isNaN(t) ? 0 : t;
   }
+
   addDocument(documents: Avatar[], solutionId: string) {
     const solutioneRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`

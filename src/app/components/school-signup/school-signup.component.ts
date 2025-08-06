@@ -14,7 +14,7 @@ function isPlanKey(v: unknown): v is PlanKey {
 
 const PRICE_BOOK: Record<PlanKey, number> = {
   free: 0,
-  license: 1,
+  license: 99,
   tournament: 199,
   pro: 249,
 };

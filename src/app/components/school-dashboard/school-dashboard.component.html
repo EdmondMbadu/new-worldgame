@@ -28,6 +28,31 @@
           {{ schoolName }}
         </p>
       </section>
+      <!-- ░░ School meta (website + owner + current user) ░░ -->
+<section class="mx-auto max-w-3xl">
+  <div class="p-4 rounded-2xl bg-white/90 dark:bg-slate-800/90 shadow ring-1 ring-teal-500/10">
+    <div class="space-y-1 text-slate-900 dark:text-slate-100">
+      <p *ngIf="schoolWebsite">
+        <span class="font-medium">Website:</span>
+        <a [href]="schoolWebsite" target="_blank" rel="noopener" class="text-teal-600 underline">
+          {{ schoolWebsite }}
+        </a>
+      </p>
+
+      <p>
+        <span class="font-medium">Owner:</span>
+        {{ ownerName || '—' }} <span *ngIf="ownerEmail">({{ ownerEmail }})</span>
+      </p>
+
+      <p class="text-sm text-slate-600 dark:text-slate-400">
+        You’re logged in as {{ auth.currentUser.firstName }} {{ auth.currentUser.lastName }}
+        ({{ auth.currentUser.email }}).
+        <span *ngIf="!isAdmin"> You’re viewing the student version of this page; the roster is hidden. </span>
+      </p>
+    </div>
+  </div>
+</section>
+
 
       <!-- █ Stats -->
       <section
@@ -104,6 +129,7 @@
 
       <!-- █ Students list -->
       <section
+      *ngIf="isAdmin"
         class="bg-white/90 text-slate-900 dark:text-slate-100 dark:bg-slate-800/90 backdrop-blur rounded-2xl shadow-xl ring-1 ring-teal-500/10"
       >
         <header
@@ -162,7 +188,7 @@
                     {{ s.verified ? 'Verified' : 'Invited' }}
                   </span>
                 </td>
-                 <td class="px-6 py-3">
+                 <td  *ngIf="isAdmin" class="px-6 py-3">
                     <button
                         (click)="removeStudent(s)"
                         [disabled]="removingEmail === s.email"

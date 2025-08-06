@@ -818,8 +818,8 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
       // Authoritative pricing (in cents)
       const baseByPlan: Record<string, number> = {
         free: 0,
-        // license: 9900,
-        license: 100,
+        license: 9900,
+        // license: 100,
         tournament: 19900,
         pro: 24900,
       };
@@ -995,8 +995,8 @@ export const stripeWebhook = functions.https.onRequest(
       const schoolRef = admin.firestore().collection('schools').doc();
       const baseByPlan: Record<string, number> = {
         free: 0,
-        // license: 9900,
-        license: 100,
+        license: 9900,
+        // license: 100,
         tournament: 19900,
         pro: 24900,
       };
