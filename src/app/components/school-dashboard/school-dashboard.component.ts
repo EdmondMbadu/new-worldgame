@@ -13,9 +13,10 @@ interface Row {
 }
 interface SchoolDoc {
   name?: string;
-  website?: string;
   ownerUid?: string;
-  adminUids?: string[]; // optional; for future multiple admins
+  adminUids?: string[];
+  website?: string; // support flat form
+  meta?: { website?: string; country?: string; type?: string } | any; // nested
 }
 @Component({
   selector: 'app-school-dashboard',
@@ -64,18 +65,28 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
         .doc<SchoolDoc>(`schools/${me.schoolId}`)
         .valueChanges()
         .subscribe(async (school) => {
+          console.log('current school', school);
+
           this.schoolName = school?.name ?? '';
-          this.schoolWebsite = school?.website ?? '';
+
+          // Prefer top-level website, fallback to meta.website
+          const rawSite =
+            school?.website ?? (school as any)?.meta?.website ?? '';
+
+          // normalize (add https:// if missing)
+          this.schoolWebsite =
+            rawSite && !/^https?:\/\//i.test(rawSite)
+              ? `https://${rawSite}`
+              : rawSite;
 
           const ownerUid = school?.ownerUid ?? '';
           const admins = Array.isArray(school?.adminUids)
             ? school!.adminUids!
             : [];
-
           this.isAdmin =
             !!me.uid && (me.uid === ownerUid || admins.includes(me.uid));
 
-          // Load owner’s profile (name/email)
+          // Owner profile (if readable)
           this.ownerSub?.unsubscribe();
           if (ownerUid) {
             this.ownerSub = this.afs
@@ -91,6 +102,8 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
             this.ownerName = '';
             this.ownerEmail = '';
           }
+
+          // … roster logic unchanged …
 
           // ── Roster handling ───────────────────────────────────────────────
           this.rosterSub?.unsubscribe();
