@@ -82,11 +82,11 @@ export class JoinSuccessComponent implements OnInit, OnDestroy {
       if (this.paid && this.schoolId) {
         this.loading = false;
 
-        const u = await this.afAuth.currentUser;
-        if (u) {
-          // they already have an auth session → go straight to dashboard
-          this.router.navigate(['/school-admin']);
-        }
+        //   const u = await this.afAuth.currentUser;
+        //   if (u) {
+        //     // they already have an auth session → go straight to dashboard
+        //     this.router.navigate(['/school-admin']);
+        //   }
       }
     } catch (err) {
       console.error(err);

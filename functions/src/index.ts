@@ -940,7 +940,7 @@ export const stripeWebhook = functions.https.onRequest(
       const snap = await paymentDoc.get();
       const alreadyPaid =
         snap.exists &&
-        (snap.data()?.status === 'paid' || snap.data()?.paid === true);
+        (snap.data()!['status'] === 'paid' || snap.data()!['paid'] === true);
       if (!alreadyPaid) {
         await paymentDoc.set(
           {
