@@ -17,6 +17,7 @@ export class JoinSuccessComponent implements OnInit, OnDestroy {
   schoolId: string | null = null;
   amountPaid: number | null = null;
   currency = 'usd';
+  canceled = false; // <-- NEW
 
   private pollSub?: Subscription;
 
@@ -27,20 +28,27 @@ export class JoinSuccessComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sessionId = this.route.snapshot.queryParamMap.get('session_id') || '';
+    const qp = this.route.snapshot.queryParamMap;
+    this.canceled = qp.has('canceled') || qp.has('cancelled'); // support both spellings
+
+    if (this.canceled) {
+      // User backed out of Stripe → just show “Checkout canceled” UI.
+      this.loading = false;
+      return;
+    }
+
+    this.sessionId = qp.get('session_id') || '';
     if (!this.sessionId) {
       this.errorMsg = 'Missing session ID.';
       this.loading = false;
       return;
     }
 
-    // Quick check immediately, then poll for up to ~30s (Stripe→Webhook latency)
     this.checkOnce();
     this.pollSub = interval(2000).subscribe(async (i) => {
       if (this.paid && this.schoolId) {
         this.pollSub?.unsubscribe();
       } else if (i < 15) {
-        // cap 15 attempts (~30s)
         await this.checkOnce();
       } else {
         this.errorMsg = 'Still processing payment. Please refresh in a moment.';

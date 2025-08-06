@@ -14,7 +14,7 @@ function isPlanKey(v: unknown): v is PlanKey {
 
 const PRICE_BOOK: Record<PlanKey, number> = {
   free: 0,
-  license: 99,
+  license: 1,
   tournament: 199,
   pro: 249,
 };
@@ -252,7 +252,7 @@ export class SchoolSignupComponent implements OnInit {
       const payload = {
         uid,
         plan: this.plan,
-        currency: this.currency,
+        currency: (this.currency || 'USD').toLowerCase(), // <— quick test
         extraTeams: Math.max(0, Math.floor(this.extraTeams || 0)),
         schoolName: this.schoolName.trim(),
         schoolCountry: this.schoolCountry || '',

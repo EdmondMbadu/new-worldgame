@@ -818,7 +818,8 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
       // Authoritative pricing (in cents)
       const baseByPlan: Record<string, number> = {
         free: 0,
-        license: 9900,
+        // license: 9900,
+        license: 100,
         tournament: 19900,
         pro: 24900,
       };
@@ -853,7 +854,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
         // IMPORTANT: your domain here
         success_url:
           'https://newworld-game.org/join-success?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url: 'https://newworld-game.org/join?cancelled=1',
+        cancel_url: 'https://newworld-game.org/join-success?canceled=1', // <— was /join?cancelled=1
         client_reference_id: uid, // binds to user
         metadata: {
           uid,
@@ -949,7 +950,8 @@ export const stripeWebhook = functions.https.onRequest(
       const schoolRef = admin.firestore().collection('schools').doc();
       const baseByPlan: Record<string, number> = {
         free: 0,
-        license: 9900,
+        // license: 9900,
+        license: 100,
         tournament: 19900,
         pro: 24900,
       };

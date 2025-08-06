@@ -19,6 +19,28 @@
           We’re confirming your payment and creating your school…
         </p>
       </div>
+        <!-- Canceled -->
+        <div *ngIf="!loading && canceled"
+            class="text-amber-900 dark:text-amber-100 bg-amber-100/90 dark:bg-amber-900/40
+                    border border-amber-300/70 dark:border-amber-700/50 p-4 rounded-xl space-y-3 text-center">
+        <div class="text-4xl">🟡</div>
+        <h2 class="text-xl font-bold">Checkout canceled</h2>
+        <p class="text-sm text-amber-800 dark:text-amber-200">
+            Your payment wasn’t completed. You can return to the signup page and try again.
+        </p>
+        <div class="flex items-center justify-center gap-3">
+            <a routerLink="/join"
+            class="inline-flex items-center px-5 py-2.5 rounded-full font-semibold bg-slate-900 dark:bg-white
+                    text-white dark:text-slate-900 hover:opacity-90 transition">
+            Back to Signup
+            </a>
+            <a routerLink="/contact"
+            class="inline-flex items-center px-5 py-2.5 rounded-full font-semibold ring-1 ring-current
+                    text-slate-900 dark:text-white">
+            Contact Support
+            </a>
+        </div>
+        </div>
 
       <!-- Error -->
       <div *ngIf="!loading && errorMsg"
