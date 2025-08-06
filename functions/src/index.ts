@@ -937,20 +937,26 @@ export const stripeWebhook = functions.https.onRequest(
         .firestore()
         .collection('payments')
         .doc(session.id);
-      const exists = await paymentDoc.get();
-      if (!exists.exists) {
-        await paymentDoc.set({
-          sessionId: session.id,
-          uid,
-          plan,
-          currency,
-          extraTeams: Number(extraTeams || 0),
-          amountPaid,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          status: 'paid',
-          paid: true, // <— add this
-          email: customerEmail, // <— add this
-        });
+      const snap = await paymentDoc.get();
+      const alreadyPaid =
+        snap.exists &&
+        (snap.data()?.status === 'paid' || snap.data()?.paid === true);
+      if (!alreadyPaid) {
+        await paymentDoc.set(
+          {
+            sessionId: session.id,
+            uid,
+            plan,
+            currency,
+            extraTeams: Number(extraTeams || 0),
+            amountPaid,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            status: 'paid',
+            paid: true,
+            email: customerEmail,
+          },
+          { merge: true }
+        );
       } else {
         // already processed
         return res.json({ received: true, duplicate: true });
@@ -967,6 +973,15 @@ export const stripeWebhook = functions.https.onRequest(
         // School already exists; just link the payment to it and return
         const existingId = existingSchoolSnap.docs[0].id;
         await paymentDoc.set({ schoolId: existingId }, { merge: true });
+        if (uid) {
+          await admin
+            .firestore()
+            .doc(`users/${uid}`)
+            .set(
+              { role: 'schoolAdmin', schoolId: existingId, status: 'active' },
+              { merge: true }
+            );
+        }
         return res.json({ received: true, reused: true });
       } // ensure user doc has email
       if (uid && customerEmail) {
