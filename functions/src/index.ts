@@ -868,6 +868,23 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
           email,
         },
       });
+      // after `const session = await stripe.checkout.sessions.create(...);`
+      await admin
+        .firestore()
+        .doc(`payments/${session.id}`)
+        .set(
+          {
+            sessionId: session.id,
+            uid,
+            plan,
+            currency,
+            extraTeams: Number(extraTeams || 0),
+            amountExpected: amount,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            status: 'pending',
+          },
+          { merge: true }
+        );
 
       return { url: session.url };
     } catch (err) {
@@ -888,7 +905,7 @@ export const stripeWebhook = functions.https.onRequest(
       event = stripe.webhooks.constructEvent(
         req.rawBody,
         sig,
-        functions.config()['stripe'].webhook_secret_nwg
+        functions.config()['stripe'].webhook_secret_earthgame
       );
     } catch (err) {
       console.error('❌ Webhook signature verify failed:', err);
@@ -899,6 +916,11 @@ export const stripeWebhook = functions.https.onRequest(
       const session = event.data.object as Stripe.Checkout.Session;
       const amountPaid = session.amount_total ?? 0;
       const md = (session.metadata || {}) as any;
+      const customerEmail =
+        session.customer_details?.email ||
+        (session as any).customer_email ||
+        md.email ||
+        null;
 
       const {
         uid,
@@ -926,6 +948,8 @@ export const stripeWebhook = functions.https.onRequest(
           amountPaid,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           status: 'paid',
+          paid: true, // <— add this
+          email: customerEmail, // <— add this
         });
       } else {
         // already processed
@@ -944,6 +968,12 @@ export const stripeWebhook = functions.https.onRequest(
         const existingId = existingSchoolSnap.docs[0].id;
         await paymentDoc.set({ schoolId: existingId }, { merge: true });
         return res.json({ received: true, reused: true });
+      } // ensure user doc has email
+      if (uid && customerEmail) {
+        await admin
+          .firestore()
+          .doc(`users/${uid}`)
+          .set({ email: customerEmail }, { merge: true });
       }
 
       // Create the school (server authority)
