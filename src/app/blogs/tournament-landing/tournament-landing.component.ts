@@ -73,7 +73,7 @@ export class TournamentLandingComponent {
     },
     {
       name: 'Support',
-      values: ['—', 'Email', 'Email', 'Priority', 'Priority + Manager'],
+      values: ['Email', 'Email', 'Email', 'Priority', 'Priority + Manager'],
       detail: 'Support level and response expectations.',
     },
     {
