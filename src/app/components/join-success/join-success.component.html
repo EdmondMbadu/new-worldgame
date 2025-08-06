@@ -1,0 +1,66 @@
+<!-- src/app/join-success/join-success.component.html -->
+<div class="min-h-screen flex flex-col bg-gradient-to-br from-white via-slate-50 to-teal-50
+            dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+  <app-navbar></app-navbar>
+
+  <main class="flex-grow container mx-auto px-6 py-20 max-w-2xl">
+    <div class="rounded-3xl p-8 bg-white/90 dark:bg-slate-900/80 ring-1 ring-slate-200/60 dark:ring-white/10
+                shadow-2xl space-y-6 text-center">
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Payment Status</h1>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex flex-col items-center gap-3">
+        <svg class="animate-spin h-8 w-8 text-teal-600" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+          <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path>
+        </svg>
+        <p class="text-slate-700 dark:text-slate-300">
+          We’re confirming your payment and creating your school…
+        </p>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="!loading && errorMsg"
+           class="text-red-900 dark:text-red-100 bg-red-100/90 dark:bg-red-900/50
+                  border border-red-300/70 dark:border-red-700/50 p-4 rounded-xl">
+        {{ errorMsg }}
+      </div>
+
+      <!-- Success -->
+      <div *ngIf="!loading && !errorMsg && paid"
+           class="space-y-4">
+        <div class="text-5xl">🎉</div>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Payment confirmed!</h2>
+
+        <p class="text-slate-700 dark:text-slate-300">
+          Your school has been created
+          <span *ngIf="schoolId" class="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+            {{ schoolId }}
+          </span>.
+        </p>
+
+        <div *ngIf="amountPaid !== null" class="text-slate-700 dark:text-slate-300">
+          Amount paid:
+          <strong class="text-slate-900 dark:text-white">
+            {{ amountPaid | currency:(currency | uppercase):'symbol' }}
+          </strong>
+        </div>
+
+        <button (click)="goToLogin()"
+          class="mt-4 inline-flex items-center justify-center px-6 py-3 rounded-full font-semibold
+                 bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600
+                 text-white shadow active:scale-95 transition">
+          Continue to Login
+        </button>
+      </div>
+    </div>
+
+    <!-- Secondary info -->
+    <p class="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      If this page doesn’t update within ~30 seconds, try refreshing. Payments can take a moment to propagate.
+    </p>
+  </main>
+
+  <app-footer></app-footer>
+</div>

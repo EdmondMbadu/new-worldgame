@@ -423,4 +423,59 @@ export class AuthService {
       )
       .valueChanges();
   }
+  // AuthService additions
+  async getUid(): Promise<string | null> {
+    const u = await this.fireauth.currentUser;
+    return u?.uid ?? null;
+  }
+
+  async fetchSignInMethods(email: string): Promise<string[]> {
+    return this.fireauth.fetchSignInMethodsForEmail(email);
+  }
+
+  // Silent sign-in that RETURNS uid and DOES NOT navigate
+  async signInForCheckout(email: string, password: string): Promise<string> {
+    const cred = await this.fireauth.signInWithEmailAndPassword(
+      email,
+      password
+    );
+    return cred.user!.uid;
+  }
+
+  async createAuthUserOnly(
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ): Promise<string> {
+    const cred = await this.fireauth.createUserWithEmailAndPassword(
+      email,
+      password
+    );
+    await this.sendEmailForVerification(cred.user);
+
+    // optional: create a user profile document now
+    await this.afs.doc(`users/${cred.user!.uid}`).set(
+      {
+        uid: cred.user!.uid,
+        firstName,
+        lastName,
+        email,
+        role: 'schoolAdmin', // provisional
+        createdAt: this.time.getCurrentDate(),
+        status: 'pendingPayment',
+      },
+      { merge: true }
+    );
+
+    return cred.user!.uid;
+  }
+  // AuthService
+  userDoc$(uid: string) {
+    return this.afs.doc<any>(`users/${uid}`).valueChanges();
+  }
+
+  schoolDoc$(schoolId: string) {
+    return this.afs.doc<any>(`schools/${schoolId}`).valueChanges();
+  }
 }

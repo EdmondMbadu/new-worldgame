@@ -140,6 +140,7 @@ import { JoinSolutionComponent } from './components/join-solution/join-solution.
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
 import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
 import { InvitationsComponent } from './components/invitations/invitations.component';
+import { JoinSuccessComponent } from './components/join-success/join-success.component';
 
 @NgModule({
   declarations: [
@@ -255,6 +256,7 @@ import { InvitationsComponent } from './components/invitations/invitations.compo
     SchoolSignupComponent,
     SchoolDashboardComponent,
     InvitationsComponent,
+    JoinSuccessComponent,
   ],
   imports: [
     BrowserModule,

@@ -94,6 +94,7 @@ import { JoinSolutionComponent } from './components/join-solution/join-solution.
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
 import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
 import { InvitationsComponent } from './components/invitations/invitations.component';
+import { JoinSuccessComponent } from './components/join-success/join-success.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -115,6 +116,8 @@ const routes: Routes = [
     component: InvitationsComponent,
     canActivate: [AuthGuard], // if you have one
   },
+  // app-routing.module.ts
+  { path: 'join-success', component: JoinSuccessComponent },
 
   { path: 'game', component: GameComponent },
   { path: 'mini-game', component: MiniGameComponent },

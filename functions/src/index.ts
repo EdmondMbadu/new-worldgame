@@ -350,103 +350,6 @@ export const onChatPrompt = functions
     }
   });
 
-// export const onChatPrompt = functions.firestore
-//   .document('users/{uid}/discussions/{docId}')
-//   .onCreate(async (snap, context) => {
-//     try {
-//       //--------------------------------------------------------------------
-//       // 0) Validation / mark as PROCESSING
-//       //--------------------------------------------------------------------
-//       const prompt: string = (snap.data()?.['prompt'] || '').trim();
-//       if (!prompt) return;
-
-//       await snap.ref.update({
-//         status: { state: 'PROCESSING' },
-//         createdAt: admin.firestore.FieldValue.serverTimestamp(), // add once
-//       });
-
-//       //--------------------------------------------------------------------
-//       // 1) Retrieve full conversation history (oldest → newest)
-//       //--------------------------------------------------------------------
-//       const colRef = snap.ref.parent!;
-//       const allDocs = await colRef.get();
-
-//       const sorted = allDocs.docs
-//         .filter((d) => d.id !== snap.id) // current doc handled separately
-//         .sort((a, b) => {
-//           // prefer explicit createdAt, fall back to createTime
-//           const ta =
-//             a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0;
-//           const tb =
-//             b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0;
-//           return ta - tb;
-//         });
-
-//       let historyText = '';
-//       for (const doc of sorted) {
-//         const data = doc.data();
-//         if (data['prompt']) historyText += `User: ${data['prompt']}\n`;
-//         if (data['response']) historyText += `Assistant: ${data['response']}\n`;
-//       }
-//       historyText += `User: ${prompt}\nAssistant:`;
-
-//       //--------------------------------------------------------------------
-//       // 2) Ask Gemini
-//       //--------------------------------------------------------------------
-//       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-//       const model = genAI.getGenerativeModel({
-//         model: 'gemini-2.0-flash-exp-image-generation',
-//       });
-
-//       const geminiResp = await model.generateContent(historyText);
-
-//       //--------------------------------------------------------------------
-//       // 3) Extract text / image (if any)
-//       //--------------------------------------------------------------------
-//       let answer = '';
-//       let imgB64 = '';
-//       for (const part of geminiResp.response.candidates?.[0]?.content?.parts ||
-//         []) {
-//         if ('text' in part && part.text) answer += part.text;
-//         if ('inlineData' in part && part.inlineData)
-//           imgB64 = part.inlineData.data;
-//       }
-
-//       //--------------------------------------------------------------------
-//       // 4) Upload image if needed
-//       //--------------------------------------------------------------------
-//       let imageUrl: string | undefined;
-//       if (imgB64) {
-//         const filePath = `generated/${randomUUID()}.png`;
-//         await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
-//           contentType: 'image/png',
-//           resumable: false,
-//           public: true,
-//         });
-//         imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
-//       }
-
-//       //--------------------------------------------------------------------
-//       // 5) Final update
-//       //--------------------------------------------------------------------
-//       await snap.ref.update({
-//         status: { state: 'COMPLETED' },
-//         response: answer || null,
-//         imageUrl: imageUrl || null,
-//         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-//       });
-//     } catch (err) {
-//       console.error('onChatPrompt error:', err);
-//       await snap.ref.update({
-//         status: {
-//           state: 'ERRORED',
-//           error: err instanceof Error ? err.message : String(err),
-//         },
-//         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-//       });
-//     }
-//   });
-
 export const nonUserEmail = functions.https.onCall(
   async (data: any, context: any) => {
     //   if (!context.auth && !context.auth!.token.email) {
@@ -729,7 +632,7 @@ export const createCheckoutSession = functions.https.onCall(
   }
 );
 
-export const stripeWebhook = functions.https.onRequest(
+export const stripeWebhook2 = functions.https.onRequest(
   async (req: any, res: any) => {
     let event;
 
@@ -872,6 +775,263 @@ export const stripeWebhook = functions.https.onRequest(
   }
 );
 
+export const createNwgSchoolCheckoutSession = functions.https.onCall(
+  async (data: any, context: any) => {
+    try {
+      const {
+        uid,
+        plan,
+        currency = 'usd',
+        extraTeams = 0,
+        schoolName,
+        schoolCountry,
+        schoolType,
+        schoolWebsite,
+      } = data;
+
+      if (!uid || !plan) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          'Missing uid or plan'
+        );
+      }
+      // Block duplicate paid schools for the same owner
+      const existing = await admin
+        .firestore()
+        .collection('schools')
+        .where('ownerUid', '==', uid)
+        .limit(1)
+        .get();
+
+      if (!existing.empty) {
+        const sch = existing.docs[0].data() as any;
+        if (sch?.billing?.paymentStatus === 'paid') {
+          throw new functions.https.HttpsError(
+            'already-exists',
+            'You already manage a paid school. Contact support to change plan or add seats.'
+          );
+        }
+        // If not paid, it likely doesn't exist (you only create on payment),
+        // but keeping this here is future-proof if you ever pre-create drafts.
+      }
+
+      // Authoritative pricing (in cents)
+      const baseByPlan: Record<string, number> = {
+        free: 0,
+        license: 9900,
+        tournament: 19900,
+        pro: 24900,
+      };
+      const base = baseByPlan[plan] ?? 19900;
+      const addOns = Math.max(0, Number(extraTeams) || 0) * 3000;
+      const amount = base + addOns;
+      // fetch email safely on the server (preferred) to avoid client tampering
+      const userSnap = await admin.firestore().doc(`users/${uid}`).get();
+      const email = userSnap.get('email') || undefined;
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        payment_method_types: ['card'],
+        customer_email: email, // <— add this
+        customer_creation: 'always', // <— makes a Customer for future billing
+        line_items: [
+          {
+            price_data: {
+              currency,
+              product_data: {
+                name: `NWG ${
+                  plan.charAt(0).toUpperCase() + plan.slice(1)
+                } Plan`,
+                description: addOns
+                  ? `Includes ${extraTeams} extra team(s)`
+                  : undefined,
+              },
+              unit_amount: amount,
+            },
+            quantity: 1,
+          },
+        ],
+        // IMPORTANT: your domain here
+        success_url:
+          'https://newworld-game.org/join-success?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url: 'https://newworld-game.org/join?cancelled=1',
+        client_reference_id: uid, // binds to user
+        metadata: {
+          uid,
+          plan,
+          currency,
+          extraTeams: String(extraTeams),
+          schoolName,
+          schoolCountry,
+          schoolType,
+          schoolWebsite,
+          email,
+        },
+      });
+
+      return { url: session.url };
+    } catch (err) {
+      console.error('Error createNwgSchoolCheckoutSession', err);
+      throw new functions.https.HttpsError(
+        'internal',
+        'Unable to create session'
+      );
+    }
+  }
+);
+
+export const stripeWebhook = functions.https.onRequest(
+  async (req: any, res: any) => {
+    let event;
+    try {
+      const sig = req.headers['stripe-signature'] as string;
+      event = stripe.webhooks.constructEvent(
+        req.rawBody,
+        sig,
+        functions.config()['stripe'].webhook_secret_nwg
+      );
+    } catch (err) {
+      console.error('❌ Webhook signature verify failed:', err);
+      return res.status(400).send(`Webhook Error: ${err}`);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const amountPaid = session.amount_total ?? 0;
+      const md = (session.metadata || {}) as any;
+
+      const {
+        uid,
+        plan,
+        currency,
+        extraTeams,
+        schoolName,
+        schoolCountry,
+        schoolType,
+        schoolWebsite,
+      } = md;
+
+      const paymentDoc = admin
+        .firestore()
+        .collection('payments')
+        .doc(session.id);
+      const exists = await paymentDoc.get();
+      if (!exists.exists) {
+        await paymentDoc.set({
+          sessionId: session.id,
+          uid,
+          plan,
+          currency,
+          extraTeams: Number(extraTeams || 0),
+          amountPaid,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          status: 'paid',
+        });
+      } else {
+        // already processed
+        return res.json({ received: true, duplicate: true });
+      }
+      // BEFORE creating a new schoolRef in the webhook:
+      const existingSchoolSnap = await admin
+        .firestore()
+        .collection('schools')
+        .where('ownerUid', '==', uid)
+        .limit(1)
+        .get();
+
+      if (!existingSchoolSnap.empty) {
+        // School already exists; just link the payment to it and return
+        const existingId = existingSchoolSnap.docs[0].id;
+        await paymentDoc.set({ schoolId: existingId }, { merge: true });
+        return res.json({ received: true, reused: true });
+      }
+
+      // Create the school (server authority)
+      const schoolRef = admin.firestore().collection('schools').doc();
+      const baseByPlan: Record<string, number> = {
+        free: 0,
+        license: 9900,
+        tournament: 19900,
+        pro: 24900,
+      };
+      const base = baseByPlan[plan] ?? 19900;
+      const addOns = Number(extraTeams || 0) * 3000;
+      const total = base + addOns;
+
+      await schoolRef.set({
+        id: schoolRef.id,
+        name: schoolName || 'Untitled School',
+        ownerUid: uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        meta: {
+          country: schoolCountry || null,
+          type: schoolType || null,
+          website: schoolWebsite || null,
+        },
+        billing: {
+          plan,
+          currency: currency || 'usd',
+          basePrice: base / 100,
+          extraTeams: Number(extraTeams || 0),
+          addOns: addOns / 100,
+          total: total / 100,
+          paymentStatus: 'paid',
+          stripe: {
+            sessionId: session.id,
+            paymentIntent: session.payment_intent || null,
+          },
+        },
+      });
+      await paymentDoc.set({ schoolId: schoolRef.id }, { merge: true });
+
+      // finalize user role
+      if (uid) {
+        await admin.firestore().doc(`users/${uid}`).set(
+          {
+            role: 'schoolAdmin',
+            schoolId: schoolRef.id,
+            status: 'active',
+          },
+          { merge: true }
+        );
+      }
+
+      // (Optional) send emails here…
+    }
+
+    res.json({ received: true });
+  }
+);
+// functions/src/index.ts
+export const getCheckoutStatus = functions.https.onCall(
+  async (data: any, context: any) => {
+    const { sessionId } = data || {};
+    if (!sessionId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'sessionId is required'
+      );
+    }
+
+    const snap = await admin.firestore().doc(`payments/${sessionId}`).get();
+    if (!snap.exists) {
+      return { exists: false, paid: false };
+    }
+
+    const p = snap.data() || {};
+    // Normalize a simple shape for the client
+    return {
+      exists: true,
+      paid: p['status'] === 'paid' || p['paid'] === true,
+      amountPaid: p['amountPaid'] ?? null,
+      currency: p['currency'] ?? 'usd',
+      plan: p['plan'] ?? null,
+      extraTeams: p['extraTeams'] ?? 0,
+      schoolId: p['schoolId'] ?? null, // ← added by webhook update below
+      createdAt: p['createdAt'] ?? null,
+    };
+  }
+);
+
 export const gslRegistrationEmail = functions.https.onCall(
   async (data: any, context: any) => {
     const msg = {
@@ -974,376 +1134,6 @@ async function runGslAdminNotificationEmail(data: any) {
   };
   await sgMail.send(msg);
 }
-
-// exports.dailyNews = functions.pubsub
-//   .schedule('every day 04:10')
-//   .timeZone('America/Los_Angeles')
-//   .onRun(async (context:any) => {
-//     const summary = await createAndFetchSummary();
-//     sendSummaryToDID(summary);
-//   });
-
-// async function createAndFetchSummary() {
-//   const db = admin.firestore();
-//   const now = new Date();
-//   const yesterday = new Date(now.setDate(now.getDate() - 1));
-//   const yesterdayStartString = formatDateAsString(yesterday, 'start');
-//   const yesterdayEndString = formatDateAsString(yesterday, 'end');
-//   const today = new Date();
-
-//   const monthNames = [
-//     'January',
-//     'February',
-//     'March',
-//     'April',
-//     'May',
-//     'June',
-//     'July',
-//     'August',
-//     'September',
-//     'October',
-//     'November',
-//     'December',
-//   ];
-
-//   const year = today.getFullYear();
-
-//   const date = today.getDate();
-
-//   const suffix = ['st', 'nd', 'rd'][
-//     date % 100 > 10 && date % 100 < 20
-//       ? 0
-//       : date % 10 === 1
-//       ? 1
-//       : date % 10 === 2
-//       ? 2
-//       : 3
-//   ];
-//   const formattedDate = `${
-//     monthNames[today.getMonth()]
-//   } ${date}${suffix}, ${year}`;
-
-//   const solutions = await db
-//     .collection('solutions')
-//     .where('submissionDate', '>=', yesterdayStartString)
-//     .where('submissionDate', '<=', yesterdayEndString)
-//     .get();
-
-//   let solutionsToSummarize = [];
-
-//   if (solutions.empty) {
-//     const recentSolutions = await db
-//       .collection('solutions')
-//       .orderBy('submissionDate', 'desc')
-//       .limit(5)
-//       .get();
-//     solutionsToSummarize = recentSolutions.docs.map((doc: any) => doc.data());
-//   } else {
-//     solutionsToSummarize = solutions.docs.map((doc: any) => doc.data());
-//   }
-
-//   const summaryText = solutionsToSummarize
-//     .map(
-//       (solution: any) =>
-//         `Title: ${solution.title}\nAuthor: ${
-//           solution.authorName
-//         }\nDate: ${convertToDate(
-//           solution.submissionDate
-//         ).toISOString()}\nContent: ${solution.content}`
-//     )
-//     .join('\n\n');
-
-//   const enhancedPrompt = `
-//       Envision yourself as a groundbreaking news reporter who embodies an exceptional combination of attributes: the ability to contextualize current events within their historical tapestry; the capacity to infuse news analysis with engaging and insightful wit; the skill to cover stories with the profound global awareness and nuanced understanding; and the profound commitment to and knowledge of sustainable development and environmental conservation. Your reporting not only informs and entertains but also enlightens viewers on the importance of environmental stewardship and sustainable practices.
-//       Your approach to news:
-//       - Start with your name ( My name is Rachel) and todays' date ${formattedDate}
-//       - Place the event within a historical continuum, highlighting how past events and trends have shaped the current situation, providing viewers with a deep understanding of its roots.
-//       - Incorporates a balanced use of wit to make the news more engaging, ensuring humor serves to enlighten rather than detract from the gravity of topics, especially those concerning environmental issues.
-//       - Expands the story’s scope to include its global implications, drawing on a wide-ranging knowledge of international affairs and cultural insights, while always mindful of the environmental angle.
-//       - Integrates sustainable development insights into your analysis, inspired by Elizabeth Wathuti’s work. You highlight the environmental impact of events, advocate for sustainable solutions, and inspire action towards a more sustainable future.
-//       - Add a closing message ( like thank you that is all for today. I will see you tomorrow)\n
-//       - Remove weird characaters on the summary text such *, or #.
-//       - Make the summary about 3-4 minutes long
-//       Now summarize the text below: \n
-//       ${summaryText}
-//     `;
-
-//   const summaryDocRef = db.collection('summaries').doc();
-//   await summaryDocRef.set({ text: enhancedPrompt });
-
-//   listenForSummaryResponse(summaryDocRef);
-// }
-
-// function formatDateAsString(date: any, type: any) {
-//   const year = date.getFullYear();
-//   const month = date.getMonth() + 1;
-//   const day = date.getDate();
-//   const hours = type === 'start' ? '00' : '23';
-//   const minutes = type === 'start' ? '00' : '59';
-//   const seconds = type === 'start' ? '00' : '59';
-//   return `${month}-${day}-${year}-${hours}-${minutes}-${seconds}`;
-// }
-
-// function convertToDate(dateStr: any) {
-//   const parts = dateStr.split('-');
-//   return new Date(
-//     parts[2],
-//     parts[0] - 1,
-//     parts[1],
-//     parts[3],
-//     parts[4],
-//     parts[5]
-//   );
-// }
-
-// function listenForSummaryResponse(docRef: any) {
-//   const unsubscribe = docRef.onSnapshot(
-//     (docSnapshot: any) => {
-//       if (docSnapshot.exists && docSnapshot.data().summary) {
-//         console.log('Summary received:', docSnapshot.data().summary);
-//         return docSnapshot.data().summary;
-//         unsubscribe(); // Detach the listener after receiving the summary
-//       }
-//     },
-//     (err: any) => {
-//       console.log(`Encountered error: ${err}`);
-
-//       unsubscribe();
-
-//       return;
-//     }
-//   );
-// }
-
-// function sendSummaryToDID(summaryText: any) {
-//   axios
-//     .post(
-//       'https://api.d-id.com/talks',
-//       {
-//         source_url:
-//           's3://d-id-images-prod/auth0|65ea804bc78b9c5681c49d5d/img_gPCzWvI6vGdaEj_is9nlx/news-anchor.png',
-//         script: {
-//           type: 'text',
-//           input: summaryText,
-//         },
-//         webhook:
-//           'https://us-central1-new-worldgame.cloudfunctions.net/videoReady', // Replace 'your-project-id' with your actual Firebase project ID
-//       },
-//       {
-//         headers: {
-//           Authorization: `Basic ${DID_API_KEY}`, // Replace 'YOUR_API_KEY' with your actual D-ID API Key
-//           'Content-Type': 'application/json',
-//         },
-//       }
-//     )
-//     .then((response: any) =>
-//       console.log('Video creation request sent successfully', response.data)
-//     )
-//     .catch((error: any) =>
-//       console.error('Failed to send video creation request', error)
-//     );
-// }
-
-// Function to handle the webhook response
-// exports.videoReady = functions.https.onRequest(async (req: any, res: any) => {
-//   if (req.method === 'POST') {
-//     const videoId = req.body.id;
-//     const videoUrl = `https://api.d-id.com/talks/${videoId}`;
-//     console.log('The video id is', videoId);
-
-//     try {
-//       // Download the video content
-//       const response = await axios.get(videoUrl, { responseType: 'stream' });
-//       const fileStream = response.data;
-//       const file = bucket.file('nwg-news');
-//       const writeStream = file.createWriteStream({
-//         metadata: {
-//           contentType: 'video/mp4', // Adjust depending on the actual video format
-//         },
-//       });
-
-//       fileStream
-//         .pipe(writeStream)
-//         .on('error', (error: any) => {
-//           console.error('Stream Error:', error);
-//           res.status(500).send('Failed to upload video');
-//         })
-//         .on('finish', () => {
-//           console.log('Video uploaded successfully');
-//           res.status(200).send('Video uploaded successfully');
-//         });
-//     } catch (error) {
-//       console.error('Failed to handle video:', error);
-//       res.status(500).send('Failed to handle video');
-//     }
-//   } else {
-//     res.status(405).send('Method not allowed');
-//   }
-// });
-
-// exports.uploadImage = functions.https.onRequest(async (req: any, res: any) => {
-//   if (req.method !== 'POST') {
-//     console.log(
-//       `Failed because the request body is not POST. The request itself is: ${req}`
-//     );
-//     return res.status(405).send('Method Not Allowed');
-//   }
-
-//   if (!req.body || !req.body.image) {
-//     console.log(
-//       `Failed because there is no request image or body. The request itself is: ${req}`
-//     );
-//     return res.status(400).send('No image provided');
-//   }
-
-//   const image = req.body.image; // Assuming the image is sent as a base64 encoded string
-//   const buffer = Buffer.from(image, 'base64');
-//   const fileName = `uploads/${Date.now()}_uploaded_image.jpg`; // You might want to adjust the filename and extension
-//   const file = bucket.file(fileName);
-
-//   try {
-//     await file.save(buffer, {
-//       metadata: {
-//         contentType: 'image/jpeg', // You might want to dynamically determine the MIME type
-//       },
-//     });
-
-//     await file.makePublic();
-//     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-//     res.status(200).send({ url: publicUrl });
-//   } catch (error) {
-//     console.log(
-//       `Failed because while uploading image to cloud. The request itself: ${req}`
-//     );
-//     console.error('Failed to upload image:', error);
-//     res.status(500).send('Error uploading image');
-//   }
-// });
-
-// exports.uploadImage = functions.https.onRequest(async (req: any, res: any) => {
-//   if (req.method !== 'POST') {
-//     return res.status(405).send('Method Not Allowed');
-//   }
-
-//   const imageUrl = req.body.imageUrl;
-//   if (!imageUrl) {
-//     return res.status(400).send('No image URL provided');
-//   }
-
-//   try {
-//     const response = await axios({
-//       method: 'get',
-//       url: imageUrl,
-//       responseType: 'arraybuffer',
-//     });
-
-//     const buffer = Buffer.from(response.data, 'binary');
-//     const contentType = response.headers['content-type'];
-//     const fileName = `uploads/${Date.now()}_uploaded_image.${
-//       contentType.split('/')[1]
-//     }`;
-//     const file = bucket.file(fileName);
-
-//     await file.save(buffer, {
-//       metadata: {
-//         contentType: contentType,
-//       },
-//     });
-
-//     await file.makePublic();
-//     const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-//     res.status(200).send({ url: publicUrl });
-//   } catch (error) {
-//     console.error('Failed to upload image:', error);
-//     res.status(500).send('Error uploading image');
-//   }
-// });
-
-// exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
-//   if (req.method !== 'POST') {
-//     console.log('this method is not allowed', req.body);
-//     return res.status(405).send('Method Not Allowed');
-//   }
-
-//   const busboy = new Busboy({ headers: req.headers });
-//   const tmpdir = os.tmpdir();
-//   let fileWrites: any = [];
-//   let publicUrl = '';
-
-//   console.log('being processed by busboy');
-//   busboy.on(
-//     'file',
-//     (
-//       fieldname: any,
-//       file: any,
-//       filename: any,
-//       encoding: any,
-//       mimetype: any
-//     ) => {
-//       // Note: os.tmpdir() is not recommended for production use; consider using a dedicated temp directory
-
-//       const filepath = path.join(tmpdir, filename);
-//       const filenamePath = `ckeditor-images/${filename}`;
-//       console.log(' the filename path', filenamePath);
-//       const writeStream = fs.createWriteStream(filepath);
-
-//       file.pipe(writeStream);
-
-//       const promise = new Promise((resolve, reject) => {
-//         file.on('end', () => {
-//           writeStream.end();
-//           console.log('File stream ended:', filename);
-//         });
-//         writeStream.on('finish', () => {
-//           console.log('File write finished, starting upload to GCS:', filename);
-//           fs.createReadStream(filepath).pipe(
-//             bucket
-//               .file(filename)
-//               .createWriteStream({
-//                 metadata: {
-//                   contentType: mimetype,
-//                 },
-//               })
-//               .on('error', (error: any) => {
-//                 console.error('Error uploading to GCS:', error);
-//                 reject(error);
-//               })
-//               .on('finish', async () => {
-//                 try {
-//                   const uploadedFile = bucket.file(filename);
-//                   await uploadedFile.makePublic();
-//                   publicUrl = `https://storage.googleapis.com/${bucket.name}/${filename}`;
-//                   console.log('File uploaded and made public:', publicUrl);
-//                   resolve(publicUrl);
-//                 } catch (error) {
-//                   reject(error);
-//                 }
-//               })
-//           );
-//         });
-//         writeStream.on('error', (error: any) => {
-//           console.error('Error writing file on server:', error);
-//           reject(error);
-//         });
-//       });
-
-//       fileWrites.push(promise);
-//     }
-//   );
-
-//   busboy.on('finish', async () => {
-//     console.log('Busboy finished processing');
-//     try {
-//       await Promise.all(fileWrites);
-//       res.status(200).send({ url: publicUrl });
-//     } catch (error) {
-//       console.error('Failed to upload one or more files:', error);
-//       res.status(500).send('Error uploading image');
-//     }
-//   });
-
-//   busboy.end(req.rawBody);
-// });
 
 exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
   console.log('Request received with method:', req.method);

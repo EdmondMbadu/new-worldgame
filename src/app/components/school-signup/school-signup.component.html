@@ -3,8 +3,20 @@
   <!-- Top bar -->
   <app-navbar [currentPageJoinNow]="true"></app-navbar>
 
+  <!-- If blocked, show message and exit -->
+<div *ngIf="blocked" class="max-w-2xl mx-auto mt-16 p-6 rounded-2xl
+            bg-amber-50 dark:bg-amber-900/30 ring-1 ring-amber-200/40 dark:ring-amber-700/40">
+  <h2 class="text-xl font-semibold text-amber-900 dark:text-amber-100 mb-2">Already registered</h2>
+  <p class="text-amber-800 dark:text-amber-200">
+    {{ blockedReason }} If you need to change your plan or add seats, go to <a routerLink="/billing"
+    class="underline font-medium">Billing</a> or <a routerLink="/contact" class="underline font-medium">contact us</a>.
+  </p>
+</div>
+
+
+
 <!-- Centered card -->
-<main class="flex-grow mt-10 flex items-center justify-center px-4 py-20">
+<main *ngIf="!blocked" class="flex-grow mt-10 flex items-center justify-center px-4 py-20">
   <!-- gradient border wrapper -->
   <div class="w-full max-w-2xl p-[1px] rounded-3xl bg-gradient-to-r from-teal-500/40 via-emerald-500/40 to-teal-500/40">
     <form
@@ -217,22 +229,38 @@
         </span>
       </label>
 
-      <!-- ◈ submit -->
+    <!-- Submit area -->
+    <div class="flex flex-col gap-3">
+      <!-- Paid plan -->
       <button
-        type="submit"
-        [disabled]="loading"
+        *ngIf="total > 0"
+        type="button"
+        [disabled]="loading || !isFormComplete() || !agreed"
+        (click)="beginCheckout()"
         class="relative w-full py-3 rounded-full font-semibold bg-gradient-to-r
-               from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600
-               active:scale-95 transition text-white disabled:opacity-40 overflow-hidden
-               ring-1 ring-white/10 dark:ring-black/10 flex items-center justify-center gap-2"
-      >
+              from-indigo-600 to-fuchsia-600 hover:from-indigo-700 hover:to-fuchsia-700
+              active:scale-95 transition text-white disabled:opacity-40 flex items-center justify-center gap-2">
         <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
-          <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path>
-        </svg>
+            stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+          <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path></svg>
+        <span>{{ loading ? 'Processing…' : 'Pay & Create account' }}</span>
+      </button>
+
+      <!-- Free plan -->
+      <button
+        *ngIf="total === 0"
+        type="submit"
+        [disabled]="loading || !isFormComplete() || !agreed"
+        class="relative w-full py-3 rounded-full font-semibold bg-gradient-to-r
+              from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600
+              active:scale-95 transition text-white disabled:opacity-40 flex items-center justify-center gap-2">
+        <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+          <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path></svg>
         <span>{{ loading ? 'Creating…' : 'Create school account' }}</span>
       </button>
+    </div>
+
 
       <!-- ◈ toast: success -->
       <div *ngIf="success" role="status" aria-live="polite"

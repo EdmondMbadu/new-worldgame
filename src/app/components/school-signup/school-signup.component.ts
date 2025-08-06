@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { combineLatest, of, switchMap, map } from 'rxjs';
 
 type PlanKey = 'free' | 'license' | 'tournament' | 'pro';
 
@@ -44,10 +48,15 @@ export class SchoolSignupComponent implements OnInit {
   success = false;
   errorMsg = '';
 
+  blocked = false; // if true, show a message instead of the form
+  blockedReason = '';
+
   constructor(
     private auth: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private fns: AngularFireFunctions,
+    private afAuth: AngularFireAuth
   ) {}
 
   ngOnInit(): void {
@@ -88,6 +97,36 @@ export class SchoolSignupComponent implements OnInit {
         } catch {}
       }
     }
+
+    // If logged in, check if they already own a paid school
+    this.afAuth.authState
+      .pipe(
+        switchMap((u) => {
+          if (!u) return of(null);
+          return this.auth.userDoc$(u.uid).pipe(
+            switchMap((userDoc) => {
+              if (!userDoc?.schoolId) return of({ userDoc, school: null });
+              return combineLatest([
+                of(userDoc),
+                this.auth.schoolDoc$(userDoc.schoolId),
+              ]).pipe(map(([userDoc, school]) => ({ userDoc, school })));
+            })
+          );
+        })
+      )
+      .subscribe((res) => {
+        if (!res) return;
+        const { userDoc, school } = res;
+        if (
+          school?.billing?.paymentStatus === 'paid' &&
+          school?.ownerUid === userDoc?.uid
+        ) {
+          this.blocked = true;
+          this.blockedReason = `You already manage “${school.name}”.`;
+          // Optionally redirect:
+          this.router.navigate(['/dashboard']);
+        }
+      });
   }
 
   get total(): number {
@@ -104,6 +143,17 @@ export class SchoolSignupComponent implements OnInit {
     if (msg.includes('auth/invalid-email'))
       return 'Please enter a valid email address.';
     return 'Something went wrong. Please try again.';
+  }
+  isFormComplete(): boolean {
+    const req = [
+      this.firstName,
+      this.lastName,
+      this.schoolName,
+      this.email,
+      this.password,
+      this.rePassword,
+    ].every(Boolean);
+    return req && this.password === this.rePassword && !!this.plan;
   }
   async createSchoolAccount() {
     /* front-end guards */
@@ -156,6 +206,64 @@ export class SchoolSignupComponent implements OnInit {
       console.error(err);
       this.errorMsg = this.friendly(err?.message || '');
     } finally {
+      this.loading = false;
+    }
+  }
+
+  async beginCheckout() {
+    if (!this.isFormComplete() || !this.agreed || !this.plan) {
+      this.errorMsg = 'Please complete all required fields and accept terms.';
+      return;
+    }
+    this.loading = true;
+    this.errorMsg = '';
+
+    try {
+      // 1) Use current auth session if present (Auth, not Firestore)
+      let uid = await this.auth.getUid();
+
+      if (!uid) {
+        // 2) Decide whether to create or sign in based on whether the email exists
+        const methods = await this.auth.fetchSignInMethods(this.email);
+
+        if (methods && methods.length) {
+          // Account exists → sign in silently with provided password
+          try {
+            uid = await this.auth.signInForCheckout(this.email, this.password);
+          } catch {
+            this.errorMsg =
+              'This email is already registered. Enter your existing password or reset it.';
+            this.loading = false;
+            return;
+          }
+        } else {
+          // New account → create and send verification email
+          uid = await this.auth.createAuthUserOnly(
+            this.firstName,
+            this.lastName,
+            this.email,
+            this.password
+          );
+        }
+      }
+
+      // 3) Create Stripe Checkout session
+      const callable = this.fns.httpsCallable('createNwgSchoolCheckoutSession');
+      const payload = {
+        uid,
+        plan: this.plan,
+        currency: this.currency,
+        extraTeams: Math.max(0, Math.floor(this.extraTeams || 0)),
+        schoolName: this.schoolName.trim(),
+        schoolCountry: this.schoolCountry || '',
+        schoolType: this.schoolType || '',
+        schoolWebsite: this.schoolWebsite || '',
+      };
+      const { url } = await firstValueFrom(callable(payload));
+      window.location.href = url;
+    } catch (err) {
+      console.error(err);
+      this.errorMsg = 'Unable to start checkout. Please try again.';
       this.loading = false;
     }
   }
