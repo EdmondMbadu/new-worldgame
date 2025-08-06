@@ -12,6 +12,24 @@ import { NewUser, School, User } from '../models/user';
 import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
+// Add this where you keep shared types (optional)
+type PlanKey = 'free' | 'license' | 'tournament' | 'pro';
+
+interface RegisterSchoolMeta {
+  plan: PlanKey;
+  currency: string; // e.g., 'USD'
+  extraTeams: number; // integer
+  schoolCountry?: string;
+  schoolType?: string; // 'Public' | 'Private' | 'IB' | 'Other'
+  schoolWebsite?: string;
+}
+
+const BASE_PRICE: Record<PlanKey, number> = {
+  free: 0,
+  license: 99,
+  tournament: 199,
+  pro: 249,
+};
 
 @Injectable({
   providedIn: 'root',
@@ -332,24 +350,51 @@ export class AuthService {
     lastName: string,
     email: string,
     password: string,
-    schoolName: string
+    schoolName: string,
+    meta?: RegisterSchoolMeta
   ): Promise<void> {
-    // ← return a Promise the caller can await
     return this.fireauth
       .createUserWithEmailAndPassword(email, password)
       .then(async (cred) => {
         await this.sendEmailForVerification(cred.user);
 
-        // 1. create school
-        const schoolRef = this.afs.collection<School>('schools').doc();
+        // ---- derive pricing server-side (do NOT trust client) ----
+        const plan: PlanKey = meta?.plan ?? 'tournament'; // sensible default
+        const basePrice = BASE_PRICE[plan];
+        const extraTeams = Math.max(0, meta?.extraTeams ?? 0);
+        const currency = meta?.currency || 'USD';
+        const addOns = extraTeams * 30;
+        const total = basePrice + addOns;
+
+        // 1) create school doc
+        const schoolRef = this.afs.collection('schools').doc();
         await schoolRef.set({
           id: schoolRef.ref.id,
           name: schoolName,
           ownerUid: cred.user!.uid,
           createdAt: this.time.getCurrentDate(),
+
+          // optional metadata
+          meta: {
+            country: meta?.schoolCountry || null,
+            type: meta?.schoolType || null,
+            website: meta?.schoolWebsite || null,
+          },
+
+          // billing snapshot at signup
+          billing: {
+            plan,
+            currency,
+            basePrice,
+            extraTeams,
+            addOns,
+            total,
+            paymentStatus: basePrice === 0 ? 'paid' : 'pending', // free = auto-paid
+            // you can add: checkoutSessionId, provider, etc.
+          },
         });
 
-        // 2. create admin user
+        // 2) create admin user tied to the school
         await this.addNewUserSchoolAdmin(
           firstName,
           lastName,
@@ -361,10 +406,10 @@ export class AuthService {
         );
       })
       .catch((err) => {
-        // surface the error to the caller
         throw err;
       });
   }
+
   getSchoolDoc(id: string) {
     return this.afs.doc<School>(`schools/${id}`).valueChanges();
   }

@@ -3,17 +3,74 @@
   <!-- Top bar -->
   <app-navbar [currentPageJoinNow]="true"></app-navbar>
 
-  <!-- Centered card -->
-  <main class="flex-grow flex items-center justify-center px-4 py-20">
+<!-- Centered card -->
+<main class="flex-grow mt-10 flex items-center justify-center px-4 py-20">
+  <!-- gradient border wrapper -->
+  <div class="w-full max-w-2xl p-[1px] rounded-3xl bg-gradient-to-r from-teal-500/40 via-emerald-500/40 to-teal-500/40">
     <form
-      class="w-full max-w-xl rounded-3xl bg-white/90 dark:bg-slate-800/90 backdrop-blur
-             shadow-xl shadow-teal-600/10 dark:shadow-teal-400/10 ring-1 ring-teal-500/10
-             p-8 md:p-12 space-y-10"
+      class="rounded-3xl bg-white/95 dark:bg-slate-900/80 backdrop-blur
+             shadow-2xl shadow-teal-600/10 dark:shadow-teal-400/10
+             ring-1 ring-slate-200/60 dark:ring-white/10
+             p-6 md:p-10 space-y-8"
       (ngSubmit)="createSchoolAccount()"
       novalidate
     >
+
+      <!-- Selected Plan Summary -->
+      <section class="rounded-2xl border border-indigo-200/70 dark:border-indigo-500/30 p-5
+                      bg-indigo-50/60 dark:bg-indigo-950/30">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold
+                           bg-indigo-600 text-white dark:bg-indigo-500">
+                {{ plan ? (plan | titlecase) : 'No Plan' }}
+              </span>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-50">Order Summary</h3>
+            </div>
+
+            <p *ngIf="plan; else noPlan" class="text-sm text-slate-700 dark:text-slate-300">
+              Base: <strong>{{ amount | currency:currency:'symbol' }}</strong>
+            </p>
+            <ng-template #noPlan>
+              <p class="text-sm text-slate-700 dark:text-slate-300">
+                No plan selected.
+                <a routerLink="/tournament-landing" fragment="pricing"
+                   class="text-indigo-700 dark:text-indigo-300 font-semibold underline underline-offset-2">
+                  Choose a plan
+                </a>.
+              </p>
+            </ng-template>
+          </div>
+
+          <a routerLink="/tournament-landing" fragment="pricing"
+             class="text-sm font-semibold text-indigo-700 dark:text-indigo-300 hover:opacity-90">
+            Change
+          </a>
+        </div>
+
+        <!-- Extra teams -->
+        <div class="mt-4 grid gap-3 sm:grid-cols-[auto,1fr,auto] items-center">
+          <label class="text-sm text-slate-700 dark:text-slate-300">Extra teams ($30 each)</label>
+          <input
+            type="number" min="0" [(ngModel)]="extraTeams" name="extraTeams"
+            class="w-full sm:w-28 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm
+                   placeholder:text-slate-400 dark:placeholder:text-slate-500
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition"
+          />
+          <div class="text-right sm:text-left">
+            <span class="block text-xs text-slate-600 dark:text-slate-400">Total due at payment</span>
+            <strong class="text-xl text-slate-900 dark:text-slate-50">
+              {{ total | currency:currency:'symbol' }}
+            </strong>
+          </div>
+        </div>
+      </section>
+
       <!-- ◈ header -->
-      <header class="text-center space-y-3">
+      <header class="text-center space-y-2">
         <h1
           class="text-3xl font-extrabold tracking-tight
                  bg-gradient-to-r from-teal-600 to-emerald-500 bg-clip-text text-transparent
@@ -21,7 +78,7 @@
         >
           Register your School
         </h1>
-        <p class="text-sm text-slate-600 dark:text-slate-400">
+        <p class="text-sm text-slate-600 dark:text-slate-300">
           Create the first admin account for the school.
         </p>
       </header>
@@ -29,128 +86,117 @@
       <!-- ◈ admin names -->
       <div class="grid gap-6 md:grid-cols-2">
         <div>
-          <label
-            for="first_name"
-            class="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
-            >Admin first name</label
-          >
-          <input
-            id="first_name"
-            type="text"
-            name="firstName"
-            [(ngModel)]="firstName"
-            required
-            class="w-full rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm
+          <label for="first_name" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+            Admin first name
+          </label>
+          <input id="first_name" type="text" name="firstName" [(ngModel)]="firstName" required
+            autocomplete="given-name"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
                    placeholder:text-slate-400 dark:placeholder:text-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-800 transition"
-          />
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
         </div>
 
         <div>
-          <label
-            for="last_name"
-            class="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
-            >Admin last name</label
-          >
-          <input
-            id="last_name"
-            type="text"
-            name="lastName"
-            [(ngModel)]="lastName"
-            required
-            class="w-full rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm
+          <label for="last_name" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+            Admin last name
+          </label>
+          <input id="last_name" type="text" name="lastName" [(ngModel)]="lastName" required
+            autocomplete="family-name"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
                    placeholder:text-slate-400 dark:placeholder:text-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-800 transition"
-          />
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
         </div>
       </div>
 
       <!-- ◈ school name -->
       <div>
-        <label
-          for="school_name"
-          class="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
-          >School name</label
-        >
-        <input
-          id="school_name"
-          type="text"
-          name="schoolName"
-          [(ngModel)]="schoolName"
-          required
-          class="w-full rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-slate-100
-                 border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm
+        <label for="school_name" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+          School name
+        </label>
+        <input id="school_name" type="text" name="schoolName" [(ngModel)]="schoolName" required
+          autocomplete="organization"
+          class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                 border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
                  placeholder:text-slate-400 dark:placeholder:text-slate-500
-                 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-                 focus:ring-offset-white dark:focus:ring-offset-slate-800 transition"
-        />
+                 focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                 focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
+      </div>
+
+      <!-- ◈ school extras -->
+      <div class="grid gap-6 md:grid-cols-2">
+        <div>
+          <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">Country/Region</label>
+          <input type="text" [(ngModel)]="schoolCountry" name="schoolCountry" autocomplete="country-name"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
+                   placeholder:text-slate-400 dark:placeholder:text-slate-500
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
+        </div>
+        <div>
+          <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">School type</label>
+          <select [(ngModel)]="schoolType" name="schoolType"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition">
+            <option>Public</option>
+            <option>Private</option>
+            <option>IB</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">School website (optional)</label>
+        <input type="url" [(ngModel)]="schoolWebsite" name="schoolWebsite" autocomplete="url"
+          class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                 border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
+                 placeholder:text-slate-400 dark:placeholder:text-slate-500
+                 focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                 focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
       </div>
 
       <!-- ◈ email -->
       <div>
-        <label
-          for="email"
-          class="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
-          >Admin email</label
-        >
-        <input
-          id="email"
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          required
-          class="w-full rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-slate-100
-                 border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm
+        <label for="email" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+          Admin email
+        </label>
+        <input id="email" type="email" name="email" [(ngModel)]="email" required autocomplete="email"
+          class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                 border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
                  placeholder:text-slate-400 dark:placeholder:text-slate-500
-                 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-                 focus:ring-offset-white dark:focus:ring-offset-slate-800 transition"
-        />
+                 focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                 focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
       </div>
 
       <!-- ◈ passwords -->
       <div class="grid gap-6 md:grid-cols-2">
         <div>
-          <label
-            for="pwd"
-            class="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
-            >Password</label
-          >
-          <input
-            id="pwd"
-            type="password"
-            name="password"
-            [(ngModel)]="password"
-            required
-            class="w-full rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm
+          <label for="pwd" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">Password</label>
+          <input id="pwd" type="password" name="password" [(ngModel)]="password" required autocomplete="new-password"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
                    placeholder:text-slate-400 dark:placeholder:text-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-800 transition"
-          />
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
         </div>
 
         <div>
-          <label
-            for="pwd2"
-            class="block mb-1 text-sm font-medium text-slate-700 dark:text-slate-200"
-            >Confirm password</label
-          >
-          <input
-            id="pwd2"
-            type="password"
-            name="rePassword"
-            [(ngModel)]="rePassword"
-            required
-            class="w-full rounded-xl bg-slate-100 dark:bg-slate-700/60 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm
+          <label for="pwd2" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+            Confirm password
+          </label>
+          <input id="pwd2" type="password" name="rePassword" [(ngModel)]="rePassword" required autocomplete="new-password"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
                    placeholder:text-slate-400 dark:placeholder:text-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-800 transition"
-          />
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
         </div>
       </div>
 
@@ -158,78 +204,61 @@
       <label class="flex items-start gap-3 text-sm select-none">
         <input
           type="checkbox"
-          class="accent-teal-600 shrink-0 mt-1 h-4 w-4 rounded border-slate-300
-                 dark:border-slate-600 focus:ring-teal-500"
+          class="accent-teal-600 shrink-0 mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600
+                 focus:ring-teal-500/70"
           (change)="agreed = !agreed"
         />
-        <span class="text-slate-700 dark:text-slate-300"
-          >I agree to the
-          <a
-            routerLink="/privacy"
-            target="_blank"
-            class="text-teal-600 hover:underline"
-            >terms &amp; conditions</a
-          >.</span
-        >
+        <span class="text-slate-700 dark:text-slate-300">
+          I agree to the
+          <a routerLink="/privacy" target="_blank"
+             class="text-teal-700 dark:text-teal-300 font-semibold underline underline-offset-2">
+             terms &amp; conditions
+          </a>.
+        </span>
       </label>
 
       <!-- ◈ submit -->
-   <button
+      <button
         type="submit"
         [disabled]="loading"
         class="relative w-full py-3 rounded-full font-semibold bg-gradient-to-r
-         from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600
-         active:scale-95 transition text-white disabled:opacity-40 overflow-hidden
-         flex items-center justify-center gap-2"
-            >
-            <svg
-                *ngIf="loading"
-                class="animate-spin h-5 w-5 text-white"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
-                <path
-                d="M22 12a10 10 0 0 1-10 10"
-                opacity="0.75"
-                stroke-linecap="round"
-                ></path>
-            </svg>
-            <span>{{ loading ? 'Creating…' : 'Create school account' }}</span>
-    </button>
-
+               from-teal-600 to-emerald-500 hover:from-teal-700 hover:to-emerald-600
+               active:scale-95 transition text-white disabled:opacity-40 overflow-hidden
+               ring-1 ring-white/10 dark:ring-black/10 flex items-center justify-center gap-2"
+      >
+        <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+          <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path>
+        </svg>
+        <span>{{ loading ? 'Creating…' : 'Create school account' }}</span>
+      </button>
 
       <!-- ◈ toast: success -->
-      <div
-        *ngIf="success"
-        class="flex items-center gap-2 text-sm text-green-800 dark:text-green-200
-               bg-green-50 dark:bg-green-800/40 p-3 rounded-lg"
-      >
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            d="M10 18a8 8 0 1 0-8-8 8 8 0 0 0 8 8zm3.54-10.79-4 4a1 1 0 0 1-1.42 0l-2-2a1 1 0 0 1 1.42-1.42L9 9.59l3.29-3.3a1 1 0 0 1 1.42 1.42Z"
-          />
+      <div *ngIf="success" role="status" aria-live="polite"
+           class="flex items-center gap-2 text-sm text-green-900 dark:text-green-100
+                  bg-green-100/90 dark:bg-green-900/50 border border-green-300/70 dark:border-green-700/50
+                  p-3 rounded-lg">
+        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 0-8-8 8 8 0 0 0 8 8zm3.54-10.79-4 4a1 1 0 0 1-1.42 0l-2-2a1 1 0 1 1 1.42-1.42L9 9.59l3.29-3.3a1 1 0 0 1 1.42 1.42Z"/>
         </svg>
-        School registered! Check your inbox to verify the email.
+        <span>School registered! Check your inbox to verify the email.</span>
       </div>
 
       <!-- ◈ toast: error -->
-      <div
-        *ngIf="errorMsg"
-        class="flex items-center gap-2 text-sm text-red-800 dark:text-red-200
-               bg-red-50 dark:bg-red-800/40 p-3 rounded-lg"
-      >
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            d="M10 18a8 8 0 1 0-8-8 8 8 0 0 0 8 8zm1-11V5a1 1 0 0 0-2 0v2a1 1 0 1 0 2 0zm-1 3a1 1 0 0 0-1 1v3a1 1 0 0 0 2 0v-3a1 1 0 0 0-1-1Z"
-          />
+      <div *ngIf="errorMsg" role="alert" aria-live="assertive"
+           class="flex items-center gap-2 text-sm text-red-900 dark:text-red-100
+                  bg-red-100/90 dark:bg-red-900/50 border border-red-300/70 dark:border-red-700/50
+                  p-3 rounded-lg">
+        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M10 18a8 8 0 1 0-8-8 8 8 0 0 0 8 8zm1-11V5a1 1 0 0 0-2 0v2a1 1 0 1 0 2 0zm-1 3a1 1 0 0 0-1 1v3a1 1 0 0 0 2 0v-3a1 1 0 0 0-1-1Z"/>
         </svg>
-        {{ errorMsg }}
+        <span>{{ errorMsg }}</span>
       </div>
     </form>
-  </main>
+  </div>
+</main>
+
 
   <app-footer></app-footer>
 </div>

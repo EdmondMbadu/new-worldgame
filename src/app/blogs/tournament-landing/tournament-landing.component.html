@@ -339,7 +339,7 @@
           </li>
     
         </ul>
-        <a href="#register"
+        <a routerLink="/welcome"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-indigo-600 text-white hover:bg-indigo-500 transition">Start Free</a>
       </div>
@@ -356,7 +356,8 @@
           <li class="flex items-start gap-2">✓ 1 tournament submission</li>
           <li class="flex items-start gap-2">✓ Email support</li>
         </ul>
-        <a href="#register"
+        <a [routerLink]="['/signup-school']"
+              [queryParams]="{ plan: 'license', amount: 99, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-indigo-600 text-white hover:bg-indigo-500 transition">Get License</a>
       </div>
@@ -382,7 +383,8 @@
           </li>
 
         </ul>
-        <a href="#register"
+        <a [routerLink]="['/signup-school']"
+          [queryParams]="{ plan: 'tournament', amount: 199, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-yellow-300 text-slate-900 hover:bg-yellow-200 transition">Join Tournament</a>
       </div>
@@ -399,7 +401,8 @@
           <li class="flex items-start gap-2">✓ Staff Professional Development webinar</li>
           <li class="flex items-start gap-2">✓ 2 extra team tournament entries</li>
         </ul>
-        <a href="#register"
+        <a [routerLink]="['/signup-school']"
+        [queryParams]="{ plan: 'pro', amount: 249, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-indigo-600 text-white hover:bg-indigo-500 transition">Go Pro</a>
       </div>
@@ -416,7 +419,8 @@
           <li class="flex items-start gap-2">✓ Custom onboarding & training</li>
           <li class="flex items-start gap-2">✓ Dedicated account manager</li>
         </ul>
-        <a href="#register"
+        <a [routerLink]="['/contact-us']"
+   [queryParams]="{ plan: 'pro', amount: 249, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-indigo-600 text-white hover:bg-indigo-500 transition">Contact Us</a>
       </div>
