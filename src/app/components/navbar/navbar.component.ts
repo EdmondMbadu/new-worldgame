@@ -68,7 +68,12 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() currenPageLabBanner: boolean = true;
   profilePicturePath: string = '';
 
+  hasSchoolAccess = false; // show link for admins OR invited students
   isSchoolAdmin = false;
+  schoolRoute: any[] = ['/school-admin'];
+  schoolQuery: any = {}; // { sid: '...' } when student only has an invite
+  pendingInvitesCount = 0;
+
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -85,6 +90,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() hoveredStartLabPath: string = ``;
   @Input() hoveredSolutionTourPath: string = ``;
   @Input() hoveredOtherAisPath: string = ``;
+  @Input() hoveredSchoolAdmin: string = ``;
   @Input() hoveredDiscoverPath: string = ``;
 
   beta: boolean = true;
@@ -98,8 +104,6 @@ export class NavbarComponent implements OnInit, OnChanges {
 
   userChallengePages: ChallengePage[] = [];
   showMyPages: boolean = false; // Control visibility of "My Pages"
-
-  pendingInvitesCount = 0;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -190,14 +194,35 @@ export class NavbarComponent implements OnInit, OnChanges {
     });
 
     this.isSchoolAdmin = this.auth.currentUser?.role === 'schoolAdmin';
-    // watch pending invites for logged-in user
-    this.auth.user$.pipe(filter((u: any) => !!u?.email)).subscribe((u) => {
-      this.schoolService
-        .getPendingInvitesForEmail(u!.email!.toLowerCase())
-        .subscribe({
-          next: (invites) => (this.pendingInvitesCount = invites.length),
-          error: (err) => console.error('Invites stream error:', err),
-        });
+    // Watch current user & invites to decide link visibility + query param
+    this.auth.user$.pipe(filter((u: any) => !!u)).subscribe((u) => {
+      const email = (u.email || '').toLowerCase().trim();
+      const hasSchoolId = !!u.schoolId;
+
+      // stream invites
+      this.schoolService.getPendingInvitesForEmail(email).subscribe({
+        next: (invites: any[]) => {
+          this.pendingInvitesCount = invites.length;
+
+          // show link if admin OR has schoolId OR has at least one invite
+          this.hasSchoolAccess =
+            this.isSchoolAdmin || hasSchoolId || invites.length > 0;
+
+          // compute query param:
+          // - if user already in a school, no query needed
+          // - else (invited only), pass first invite’s schoolId so the page can load counts
+          if (hasSchoolId) {
+            this.schoolQuery = {};
+          } else if (invites.length > 0) {
+            const firstInvite = invites[0];
+            // assuming your invite object has a schoolId field
+            this.schoolQuery = { sid: firstInvite.id };
+          } else {
+            this.schoolQuery = {};
+          }
+        },
+        error: (err) => console.error('Invites stream error:', err),
+      });
     });
   }
 

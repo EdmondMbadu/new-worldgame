@@ -4,6 +4,7 @@
 >
   <!-- fixed navbar you already have -->
   <app-navbar
+  [hoveredSchoolAdmin]="'bg-gray-100 dark:bg-gray-700'"
       [sideBarSmall]="true"
       [sideBarBig]="false"
       [email]="this.auth.currentUser.email"
@@ -11,6 +12,7 @@
       [lastName]="this.auth.currentUser.lastName"
       path="home"
       current=""
+
     ></app-navbar>
 
   <!-- page body -->
