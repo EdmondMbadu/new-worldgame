@@ -61,6 +61,8 @@ export class HomeChallengeComponent {
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
   showDiscussion = false;
+  public showAuthorTools: boolean = true; // or false if you want it hidden by default
+  public isAuthorToolsVisible: boolean = false;
 
   isPrivate = false;
   allowAccess = false; // computed locally
@@ -945,6 +947,4 @@ export class HomeChallengeComponent {
       this.isLoading = false;
     }
   }
-
-
 }
