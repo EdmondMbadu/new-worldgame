@@ -1,0 +1,205 @@
+<!-- schools-management.component.html -->
+<div class="dark:bg-slate-900 min-h-screen">
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser.email"
+    [firstName]="auth.currentUser.firstName"
+    [lastName]="auth.currentUser.lastName"
+    path="home"
+    current=""
+  ></app-navbar>
+
+   <app-management-toolbar></app-management-toolbar>
+  <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
+    <div class="mx-auto max-w-screen-2xl px-4 lg:px-8">
+      <!-- Header -->
+      <div class="text-center mb-6">
+        <h3 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-teal-600 to-emerald-500 bg-clip-text text-transparent dark:from-teal-400 dark:to-emerald-300">
+          Schools
+        </h3>
+        <p class="text-slate-600 dark:text-slate-400">All signed-up institutions and billing overview</p>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-6">
+        <div class="flex items-center p-6 bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-lg ring-1 ring-teal-500/10">
+          <div class="p-3 rounded-xl bg-teal-600/10 text-teal-700 dark:bg-teal-400/10 dark:text-teal-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M5 12h14M7 17h10"/>
+            </svg>
+          </div>
+          <div class="ml-4 dark:text-white">
+            <p class="text-2xl font-bold">{{ totalSchools }}</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Total Schools</p>
+          </div>
+        </div>
+
+        <div class="flex items-center p-6 bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-lg ring-1 ring-emerald-500/10">
+          <div class="p-3 rounded-xl bg-emerald-600/10 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-3 0-5 1.5-5 3s2 3 5 3 5-1.5 5-3-2-3-5-3Zm0 0V4m0 10v6"/>
+            </svg>
+          </div>
+          <div class="ml-4 dark:text-white">
+            <p class="text-2xl font-bold">{{ money(totalMRR, 'usd') }}</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Total Monthly Revenue (est.)</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center p-6 bg-white/60 dark:bg-slate-800/60 rounded-2xl border-2 border-dashed border-teal-300/40 dark:border-teal-500/40 text-slate-500 dark:text-slate-400">
+          <span class="text-sm">More billing analytics soon…</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+        <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
+          <div>
+            <button (click)="toggleActionDropDown()"
+                    class="inline-flex items-center text-gray-600 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+                    type="button">
+              <span class="sr-only">Action button</span>
+              Actions
+              <svg class="w-3 h-3 ml-2" aria-hidden="true" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+              </svg>
+            </button>
+
+            <div *ngIf="showActionDropDown"
+                 class="z-10 absolute mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+              <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
+                <li><a (click)="downloadCSV()" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Download CSV</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <form class="w-full md:w-1/2">
+            <label class="sr-only">Search</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+              </div>
+              <input
+                type="text"
+                [(ngModel)]="searchTerm"
+                name="searchTerm"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                placeholder="Search schools, admins, plan…"
+              />
+            </div>
+          </form>
+
+          <div class="w-full md:w-auto text-right">
+            <h2 class="font-bold dark:text-white">{{ filteredSchools.length }} of {{ totalSchools }} schools</h2>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
+            <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th class="px-4 py-3">School</th>
+                <th class="px-4 py-3">Website</th>
+                <th class="px-4 py-3">Admin</th>
+                <th class="px-4 py-3">Plan</th>
+                <th class="px-4 py-3">Price</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Created</th>
+                <th class="px-4 py-3"><span class="sr-only">Open</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of filteredSchools" class="border-b dark:border-gray-700 hover:bg-gray-50/60 dark:hover:bg-slate-700/40">
+                <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-teal-600/10 dark:bg-teal-400/10 flex items-center justify-center">
+                      <span class="text-sm font-bold text-teal-700 dark:text-teal-300">
+                        {{ (s.name || 'S').charAt(0).toUpperCase() }}
+                      </span>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="truncate">{{ s.name }}</div>
+                      <div class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ s.id }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="px-4 py-3">
+                  <a *ngIf="s.website" [href]="s.website" target="_blank" rel="noopener" class="text-teal-700 dark:text-teal-300 hover:underline truncate block">
+                    {{ s.website }}
+                  </a>
+                  <span *ngIf="!s.website" class="text-slate-400">—</span>
+                </td>
+
+                <td class="px-4 py-3">
+                  <div class="truncate">{{ s.ownerName || '—' }}</div>
+                  <a *ngIf="s.ownerEmail" [href]="'mailto:'+s.ownerEmail" class="text-xs text-slate-500 dark:text-slate-400 hover:underline truncate">
+                    {{ s.ownerEmail }}
+                  </a>
+                </td>
+
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+                               bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    {{ s.plan || '—' }}
+                  </span>
+                  <span class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold
+                               bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
+                    {{ (s.currency || 'USD').toUpperCase() }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-3 font-semibold">
+                  {{ money(s.amount, s.currency) }}
+                </td>
+
+                <td class="px-4 py-3">
+                  <span
+                    [ngClass]="
+                      (s.paymentStatus || '').toLowerCase() === 'paid'
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
+                        : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                    "
+                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                  >
+                    {{ s.paymentStatus || '—' }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-3">
+                  <span class="text-xs text-slate-500">
+                    {{ toMillis(s.createdAt) | date:'mediumDate' }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-3 text-right">
+                  <a
+                    [routerLink]="['/school-admin']"
+                    [queryParams]="{ sid: s.id }"
+                    class="inline-flex items-center gap-1 text-teal-700 hover:text-teal-800 dark:text-teal-300 dark:hover:text-teal-200"
+                  >
+                    Open
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </a>
+                </td>
+              </tr>
+
+              <tr *ngIf="filteredSchools.length === 0">
+                <td colspan="8" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                  No schools found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>

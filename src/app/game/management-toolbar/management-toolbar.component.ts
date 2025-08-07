@@ -19,5 +19,6 @@ export class ManagementToolbarComponent {
     { path: '/management-gsl-2025', label: 'GSL-2025' },
     { path: '/tournament-management', label: 'Tournaments' },
     { path: '/management-demo', label: 'Demo Sign-ups' },
+    { path: '/schools-management', label: 'Schools' },
   ];
 }

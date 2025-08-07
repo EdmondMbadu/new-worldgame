@@ -141,6 +141,7 @@ import { SchoolSignupComponent } from './components/school-signup/school-signup.
 import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
 import { InvitationsComponent } from './components/invitations/invitations.component';
 import { JoinSuccessComponent } from './components/join-success/join-success.component';
+import { SchoolManagementComponent } from './components/school-management/school-management.component';
 
 @NgModule({
   declarations: [
@@ -257,6 +258,7 @@ import { JoinSuccessComponent } from './components/join-success/join-success.com
     SchoolDashboardComponent,
     InvitationsComponent,
     JoinSuccessComponent,
+    SchoolManagementComponent,
   ],
   imports: [
     BrowserModule,
