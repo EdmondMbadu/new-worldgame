@@ -23,6 +23,8 @@ export class GenerateChallengesComponent implements OnInit {
   logoImage: string = '';
   challengePageId: string = '';
   challengePage: ChallengePage = new ChallengePage();
+
+  private schoolId: string | null = null;
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
@@ -33,7 +35,13 @@ export class GenerateChallengesComponent implements OnInit {
     private router: Router,
     private challenge: ChallengesService
   ) {}
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // read sid from query params; fallback to user’s schoolId if exists
+    this.activatedRoute.queryParamMap.subscribe((p) => {
+      this.schoolId =
+        p.get('sid') || (this.auth.currentUser as any)?.schoolId || null;
+    });
+  }
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
@@ -90,10 +98,36 @@ export class GenerateChallengesComponent implements OnInit {
         participants: [this.auth.currentUser.email],
         challengePageId: this.challengePageId,
         restricted: 'true',
-      };
+        // NEW
+        schoolId: this.schoolId || undefined,
+        type: 'class',
+        createdByUid: this.auth.currentUser.uid,
+        createdAt: this.time.getCurrentDate(),
+      } as any;
 
-      this.challenge.createChallengePage(this.challengePage).then(() => {
-        this.router.navigate(['/home-challenge/' + this.challengePageId]);
+      this.challenge.createChallengePage(this.challengePage).then(async () => {
+        // Write a denormalized summary under the school for fast listing
+        if (this.schoolId) {
+          await this.afs
+            .doc(`schools/${this.schoolId}/classes/${this.challengePageId}`)
+            .set(
+              {
+                challengePageId: this.challengePageId,
+                name: this.name,
+                heading: this.heading,
+                logoImage: this.logoImage || null,
+                imageChallenge: this.imageChallenge || null,
+                createdAt: this.time.getCurrentDate(),
+                createdByUid: this.auth.currentUser.uid,
+                restricted: true,
+              },
+              { merge: true }
+            );
+        }
+
+        this.router.navigate(['/home-challenge', this.challengePageId], {
+          queryParams: this.schoolId ? { sid: this.schoolId } : {},
+        });
         this.resetChallengePageForm();
       });
     }

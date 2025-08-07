@@ -464,6 +464,7 @@ export class AuthService {
         role: 'schoolAdmin', // provisional
         createdAt: this.time.getCurrentDate(),
         status: 'pendingPayment',
+        dateJoined: this.time.getCurrentDate(),
       },
       { merge: true }
     );

@@ -203,6 +203,62 @@
           <span class="text-sm">More analytics coming&nbsp;soon…</span>
         </div>
       </section>
+<!-- █ Classes (Challenge Pages linked to this school) -->
+<section class="bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-2xl shadow-xl ring-1 ring-teal-500/10">
+  <header class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100">Classes</h2>
+    <button *ngIf="isAdmin"
+      (click)="createClass()"
+      class="inline-flex items-center gap-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-full px-4 py-2">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Create Class
+    </button>
+  </header>
+
+  <div *ngIf="classes.length > 0; else noClasses" class="p-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div *ngFor="let c of classes"
+         class="group rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:shadow-lg transition">
+      <div class="h-32 bg-slate-100 dark:bg-slate-800 relative">
+        <img *ngIf="c.imageChallenge" [src]="c.imageChallenge" alt="" class="w-full h-full object-cover">
+        <div *ngIf="!c.imageChallenge" class="absolute inset-0 flex items-center justify-center text-slate-400">No image</div>
+      </div>
+      <div class="p-4">
+        <div class="flex items-center gap-3">
+          <img *ngIf="c.logoImage" [src]="c.logoImage" alt="" class="w-9 h-9 rounded-xl object-cover">
+          <div *ngIf="!c.logoImage" class="w-9 h-9 rounded-xl bg-teal-600/10 dark:bg-teal-400/10 flex items-center justify-center">
+            <span class="text-sm font-bold text-teal-700 dark:text-teal-300">
+              {{ (c.name || 'C').charAt(0).toUpperCase() }}
+            </span>
+          </div>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-slate-900 dark:text-white truncate">{{ c.name }}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ c.heading }}</p>
+          </div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between">
+          <a [routerLink]="['/home-challenge', c.challengePageId]"
+             [queryParams]="{ sid: (auth.user$ | async)?.schoolId }"
+             class="text-sm font-medium text-teal-700 hover:text-teal-800 dark:text-teal-300 dark:hover:text-teal-200">
+            Open Class →
+          </a>
+        <span class="text-xs text-slate-500">
+        {{ toDate(c.createdAt) | date:'mediumDate' }}
+      </span>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noClasses>
+    <div class="p-8 text-center text-slate-500 dark:text-slate-400">
+      No classes yet. <button *ngIf="isAdmin" (click)="createClass()" class="underline text-teal-700 dark:text-teal-300">Create the first one</button>.
+    </div>
+  </ng-template>
+</section>
 
       <!-- █ Students list -->
       <section

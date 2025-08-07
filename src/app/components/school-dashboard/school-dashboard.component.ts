@@ -5,11 +5,24 @@ import { firstValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { User, School } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { TimeService } from 'src/app/services/time.service';
+// at the top of school-dashboard.component.ts
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore'; // <-- REQUIRED for firebase.firestore.FieldValue
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface Row {
   name: string;
   email: string;
   verified: boolean;
+}
+interface ClassRow {
+  id: string;
+  name: string;
+  heading?: string;
+  logoImage?: string;
+  imageChallenge?: string;
+  challengePageId: string;
+  createdAt?: any;
 }
 interface SchoolDoc {
   name?: string;
@@ -48,11 +61,15 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   private rosterSub?: Subscription;
   private schoolSub?: Subscription;
   private ownerSub?: Subscription;
+  classes: ClassRow[] = [];
+  private classesSub?: Subscription;
 
   constructor(
     public auth: AuthService,
     private afs: AngularFirestore,
-    private time: TimeService
+    private time: TimeService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -85,7 +102,25 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
             : [];
           this.isAdmin =
             !!me.uid && (me.uid === ownerUid || admins.includes(me.uid));
-
+          if (me?.schoolId) {
+            this.classesSub?.unsubscribe();
+            this.classesSub = this.afs
+              .collection(`schools/${me.schoolId}/classes`, (ref) =>
+                ref.orderBy('createdAt', 'desc')
+              )
+              .valueChanges({ idField: 'id' })
+              .subscribe((rows: any[]) => {
+                this.classes = rows.map((r) => ({
+                  id: r.id,
+                  name: r.name ?? '—',
+                  heading: r.heading ?? '',
+                  logoImage: r.logoImage ?? '',
+                  imageChallenge: r.imageChallenge ?? '',
+                  challengePageId: r.challengePageId,
+                  createdAt: r.createdAt ?? null,
+                }));
+              });
+          }
           // Owner profile (if readable)
           this.ownerSub?.unsubscribe();
           if (ownerUid) {
@@ -151,6 +186,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     this.schoolSub?.unsubscribe();
     this.ownerSub?.unsubscribe();
     this.rosterSub?.unsubscribe();
+    this.classesSub?.unsubscribe();
   }
 
   /* ───────── invite modal helpers ───────── */
@@ -176,6 +212,31 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     const r = new FileReader();
     r.onload = () => (this.inviteRaw += '\n' + r.result);
     r.readAsText(f);
+  }
+
+  // optional: put near other helpers
+  toDate(d: any): Date | null {
+    if (!d) return null;
+    // Firestore Timestamp
+    if (typeof d.toDate === 'function') return d.toDate();
+    // {seconds, nanoseconds}
+    if (typeof d.seconds === 'number') {
+      return new Date(
+        d.seconds * 1000 + Math.floor((d.nanoseconds || 0) / 1e6)
+      );
+    }
+    // JS Date
+    if (d instanceof Date) return d;
+    // ISO/string/number
+    const t = Date.parse(String(d));
+    return Number.isNaN(t) ? null : new Date(t);
+  }
+
+  createClass() {
+    // open the generator and carry the schoolId along
+    this.router.navigate(['/generate-challenges'], {
+      queryParams: { sid: (this.auth.currentUser as any)?.schoolId },
+    });
   }
 
   async sendInvites() {
@@ -233,16 +294,45 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
     try {
       this.removingEmail = row.email;
+
       const admin = await firstValueFrom(this.auth.user$);
       if (!admin?.schoolId) throw new Error('schoolId missing');
 
-      // subcollection doc-id is the email
-      await this.afs
-        .doc(`schools/${admin.schoolId}/students/${row.email}`)
-        .delete();
+      const schoolId = admin.schoolId;
+      const batch = this.afs.firestore.batch();
 
-      // If you also keep a reverse index (e.g., users/{uid}.schoolId),
-      // you could clear it here. For invites-only rows there’s no user doc yet.
+      // 1) delete from roster (doc-id = email)
+      const rosterRef = this.afs.firestore.doc(
+        `schools/${schoolId}/students/${row.email}`
+      );
+      batch.delete(rosterRef);
+
+      // 2) find the user by email (if they have a users/* doc)
+      const usersSnap = await firstValueFrom(
+        this.afs
+          .collection<User>('users', (ref) =>
+            ref.where('email', '==', row.email.toLowerCase()).limit(1)
+          )
+          .get()
+      );
+
+      if (!usersSnap.empty) {
+        const userDoc = usersSnap.docs[0];
+        const userRef = userDoc.ref;
+        const currentSchoolId = userDoc.get('schoolId');
+
+        // only clear if they still point to THIS school (don’t wipe newer memberships)
+        if (currentSchoolId === schoolId) {
+          batch.update(userRef, {
+            schoolId: firebase.firestore.FieldValue.delete(),
+            // optionally clear role/status if they’re school-scoped:
+            // role: firebase.firestore.FieldValue.delete(),
+            // status: firebase.firestore.FieldValue.delete(),
+          });
+        }
+      }
+
+      await batch.commit();
     } catch (err) {
       console.error(err);
       alert('Failed to remove student. Please try again.');
