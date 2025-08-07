@@ -98,3 +98,32 @@ export interface School {
   ownerUid: string;
   createdAt: string;
 }
+
+// plans.ts
+export const PLAN_KEYS = [
+  'free',
+  'license',
+  'tournament',
+  'pro',
+  'school',
+] as const;
+
+export type PlanKey = (typeof PLAN_KEYS)[number];
+
+export const PRICE_BOOK: Record<PlanKey, number> = {
+  free: 0,
+  license: 99,
+  tournament: 199,
+  pro: 249,
+  school: 299,
+};
+function isPlanKey(v: unknown): v is PlanKey {
+  return (
+    v === 'free' ||
+    v === 'license' ||
+    v === 'tournament' ||
+    v === 'pro' ||
+    v === 'school'
+  );
+}
+export { isPlanKey };

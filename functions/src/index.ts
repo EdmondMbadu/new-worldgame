@@ -822,6 +822,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
         // license: 100,
         tournament: 19900,
         pro: 24900,
+        school: 29900,
       };
       const base = baseByPlan[plan] ?? 19900;
       const addOns = Math.max(0, Number(extraTeams) || 0) * 3000;
@@ -999,6 +1000,7 @@ export const stripeWebhook = functions.https.onRequest(
         // license: 100,
         tournament: 19900,
         pro: 24900,
+        school: 29900,
       };
       const base = baseByPlan[plan] ?? 19900;
       const addOns = Number(extraTeams || 0) * 3000;

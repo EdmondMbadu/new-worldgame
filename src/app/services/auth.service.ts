@@ -8,12 +8,11 @@ import {
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { Observable, of, switchMap } from 'rxjs';
-import { NewUser, School, User } from '../models/user';
+import { NewUser, PlanKey, PRICE_BOOK, School, User } from '../models/user';
 import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
 // Add this where you keep shared types (optional)
-type PlanKey = 'free' | 'license' | 'tournament' | 'pro';
 
 interface RegisterSchoolMeta {
   plan: PlanKey;
@@ -23,13 +22,6 @@ interface RegisterSchoolMeta {
   schoolType?: string; // 'Public' | 'Private' | 'IB' | 'Other'
   schoolWebsite?: string;
 }
-
-const BASE_PRICE: Record<PlanKey, number> = {
-  free: 0,
-  license: 99,
-  tournament: 199,
-  pro: 249,
-};
 
 @Injectable({
   providedIn: 'root',
@@ -360,7 +352,7 @@ export class AuthService {
 
         // ---- derive pricing server-side (do NOT trust client) ----
         const plan: PlanKey = meta?.plan ?? 'tournament'; // sensible default
-        const basePrice = BASE_PRICE[plan];
+        const basePrice = PRICE_BOOK[plan];
         const extraTeams = Math.max(0, meta?.extraTeams ?? 0);
         const currency = meta?.currency || 'USD';
         const addOns = extraTeams * 30;

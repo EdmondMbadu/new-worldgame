@@ -341,7 +341,7 @@
         </ul>
         <a routerLink="/welcome"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
-                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Start Free</a>
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
       </div>
 
       <!-- License-Only -->
@@ -359,7 +359,7 @@
         <a [routerLink]="['/signup-school']"
               [queryParams]="{ plan: 'license', amount: 99, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
-                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Get License</a>
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
       </div>
 
       <!-- Tournament (Primary Offer) -->
@@ -386,7 +386,7 @@
         <a [routerLink]="['/signup-school']"
           [queryParams]="{ plan: 'tournament', amount: 199, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
-                  bg-yellow-300 text-slate-900 hover:bg-yellow-200 transition">Join Tournament</a>
+                  bg-yellow-300 text-slate-900 hover:bg-yellow-200 transition">Register</a>
       </div>
 
       <!-- Pro -->
@@ -404,7 +404,7 @@
         <a [routerLink]="['/signup-school']"
         [queryParams]="{ plan: 'pro', amount: 249, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
-                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Go Pro</a>
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
       </div>
 
       <!-- Enterprise -->
@@ -894,7 +894,8 @@
         </span>
 
         <!-- Optional CTA buttons -->
-        <a (click)="data.scrollTo($event, 'pricing')" href="#pricing" class="inline-flex items-center rounded-full px-5 py-2 text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+        <a [routerLink]="['/signup-school']"
+          [queryParams]="{ plan: 'school', amount: 299, currency: 'USD' }" class="inline-flex items-center rounded-full px-5 py-2 text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
           Register
         </a>
         <a routerLink="/contact-us" class="inline-flex items-center rounded-full px-5 py-2 text-sm font-semibold ring-1 ring-inset ring-slate-300 dark:ring-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">

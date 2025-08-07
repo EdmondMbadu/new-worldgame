@@ -5,19 +5,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { combineLatest, of, switchMap, map } from 'rxjs';
-
-type PlanKey = 'free' | 'license' | 'tournament' | 'pro';
-
-function isPlanKey(v: unknown): v is PlanKey {
-  return v === 'free' || v === 'license' || v === 'tournament' || v === 'pro';
-}
-
-const PRICE_BOOK: Record<PlanKey, number> = {
-  free: 0,
-  license: 99,
-  tournament: 199,
-  pro: 249,
-};
+import { isPlanKey, PlanKey, PRICE_BOOK } from 'src/app/models/user';
 
 @Component({
   selector: 'app-school-signup',
