@@ -195,35 +195,34 @@ export class NavbarComponent implements OnInit, OnChanges {
 
     this.isSchoolAdmin = this.auth.currentUser?.role === 'schoolAdmin';
     // Watch current user & invites to decide link visibility + query param
+    // Make isSchoolAdmin reactive to the live user
     this.auth.user$.pipe(filter((u: any) => !!u)).subscribe((u) => {
+      this.isSchoolAdmin = u?.role === 'schoolAdmin';
+
       const email = (u.email || '').toLowerCase().trim();
       const hasSchoolId = !!u.schoolId;
 
-      // stream invites
       this.schoolService.getPendingInvitesForEmail(email).subscribe({
         next: (invites: any[]) => {
           this.pendingInvitesCount = invites.length;
-
-          // show link if admin OR has schoolId OR has at least one invite
           this.hasSchoolAccess =
             this.isSchoolAdmin || hasSchoolId || invites.length > 0;
 
-          // compute query param:
-          // - if user already in a school, no query needed
-          // - else (invited only), pass first invite’s schoolId so the page can load counts
-          if (hasSchoolId) {
-            this.schoolQuery = {};
-          } else if (invites.length > 0) {
-            const firstInvite = invites[0];
-            // assuming your invite object has a schoolId field
-            this.schoolQuery = { sid: firstInvite.id };
-          } else {
-            this.schoolQuery = {};
-          }
+          // keep your query param logic
+          if (hasSchoolId) this.schoolQuery = {};
+          else if (invites.length > 0)
+            this.schoolQuery = {
+              sid: invites[0].id,
+            }; // or .schoolId if that's your field
+          else this.schoolQuery = {};
         },
         error: (err) => console.error('Invites stream error:', err),
       });
     });
+  }
+
+  get schoolNavLabel(): string {
+    return this.isSchoolAdmin ? 'School Admin Page' : 'School Dashboard';
   }
 
   setThemeModeLogo() {
