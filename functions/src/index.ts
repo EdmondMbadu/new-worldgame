@@ -220,7 +220,7 @@ async function fetchAndExtract(gcsUrl: string, mime: string): Promise<string> {
 }
 
 export const sendDemoInvite = functions.firestore
-  .document('demoScheduled/{demoId}')
+  .document('demoBookings/{demoId}')
   .onCreate(async (snap) => {
     const data = snap.data();
 
