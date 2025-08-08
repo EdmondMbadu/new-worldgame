@@ -218,60 +218,68 @@ async function fetchAndExtract(gcsUrl: string, mime: string): Promise<string> {
   }
   return buffer.toString('utf8'); // txt + fallback
 }
-
 export const sendDemoInvite = functions.firestore
   .document('demoBookings/{demoId}')
   .onCreate(async (snap) => {
-    const data = snap.data();
+    const data = snap.data();                    // bracket-notation only
 
-    /** 1. Convert date & time coming from UI (EST) to UTC */
+    /* 1 ║ build times (EST → UTC) */
     const startEST = new Date(`${data['demoDate']} ${data['demoTime']} EST`);
-    const startUTC = new Date(startEST.getTime() + 5 * 60 * 60 * 1000); // EST→UTC (+5 h in summer)
+    const startUTC = new Date(startEST.getTime() + 5 * 60 * 60 * 1000);
 
-    /** 2. Build calendar attachment */
+    functions.logger.info('SG key starts with', API_KEY?.slice(0, 10));
+
+    /* 2 ║ .ics attachment */
     const ics = buildICS(
       startUTC,
       data['name'],
       data['email'],
       'https://meet.google.com/pea-twnz-uwn'
     );
-
-    /** 3. Common attachment block (base-64) */
     const attachment = {
-      content: Buffer.from(ics).toString('base64'),
+      content: Buffer.from(ics.replace(/\n/g, '\r\n')).toString('base64'),
       filename: 'invite.ics',
-      type: 'text/calendar; method=REQUEST; charset=UTF-8',
+      type:     'text/calendar; method=REQUEST; charset=UTF-8',
       disposition: 'attachment',
     };
 
-    /** 4. Send to participant */
-    await sgMail.send({
-      to: data['email'],
-      from: 'newworld@newworld-game.org',
-      templateId: TEMPLATE_DEMO,
-      dynamicTemplateData: {
-        firstName: data['name'].split(' ')[0] ?? '',
-        date: startEST.toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        time: data['demoTime'] + ' (EST)',
-        meetingLink: 'https://meet.google.com/pea-twnz-uwn',
-      },
-      attachments: [attachment],
-    });
+    /* 3 ║ SUBJECT lines you asked for */
+    const userSubject = `✅ NewWorld Game Workshop confirmed – ${data['demoDate']} ${data['demoTime']} EST`;
+    const opsSubject  = `📆 NewWorld demo booked – ${data['name']} – ${data['demoDate']} ${data['demoTime']} EST`;
 
-    /** 5. Copy to your ops inbox – you can reuse the same template or
-            a plainer text version */
-    await sgMail.send({
-      to: 'newworld@newworld-game.org',
-      from: 'newworld@newworld-game.org',
-      subject: `📆 NewWorld demo booked – ${data['name']}`,
-      text: `${data['name']} just scheduled a workshop for ${data['demoDate']} at ${data['demoTime']} (EST).\nNotes: ${data['notes']}`,
-      attachments: [attachment],
-    });
+    /* 4 ║ USER message */
+    const userMsg = {
+      to:         data['email'],
+      from:       'newworld@newworld-game.org',           // must be verified
+      subject:    userSubject,                            // shows in preview
+      templateId: TEMPLATE_DEMO,                          // HTML body lives here
+      dynamicTemplateData: {
+        firstName:   data['name'].split(' ')[0] ?? '',
+        date:        data['demoDate'],
+        time:        data['demoTime'],
+        meetingLink: 'https://meet.google.com/pea-twnz-uwn',
+        // add more tokens if you later put them in the template
+      },
+      attachments:[attachment],
+    };
+
+    /* 5 ║ OPS copy (plain text) */
+    const opsMsg = {
+      to:         'newworld@newworld-game.org',
+      from:       'newworld@newworld-game.org',
+      subject:    opsSubject,
+      text:       `${data['name']} booked ${data['demoDate']} at ${data['demoTime']} EST\nNotes: ${data['notes']}`,
+      attachments:[attachment],
+    };
+
+    /* 6 ║ send and log */
+    try {
+      await Promise.all([ sgMail.send(userMsg), sgMail.send(opsMsg) ]);
+      functions.logger.info('✅ calendar invite sent for doc', snap.id);
+    } catch (e: any) {
+      functions.logger.error('❌ SendGrid error', e?.response?.body ?? e);
+      throw e;  // marks function as failed
+    }
   });
 
 export const onChatPrompt = functions
