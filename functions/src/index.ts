@@ -254,6 +254,7 @@ export const sendDemoInvite = functions.firestore
       subject: userSubject,
       templateId: TEMPLATE_DEMO,
       dynamicTemplateData: {
+        subject: userSubject, // <- NEW line
         firstName: data['name'].split(' ')[0] ?? '',
         date: data['demoDate'],
         time: data['demoTime'],
