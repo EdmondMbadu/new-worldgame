@@ -10,6 +10,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
+import { buildICS } from '../lib/ics';
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -111,6 +112,7 @@ const TEMPLATE_ID_EVALUTION =
 const TEMPLATE_ID_EVALUATION_COMPLETE =
   functions.config()['sendgrid'].templateevaluationcomplete;
 sgMail.setApiKey(API_KEY);
+const TEMPLATE_DEMO = functions.config()['sendgrid'].templatenwgdemo;
 
 // Twilio credentials from config
 const accountSid = functions.config()['twilio'].account_sid;
@@ -216,6 +218,62 @@ async function fetchAndExtract(gcsUrl: string, mime: string): Promise<string> {
   }
   return buffer.toString('utf8'); // txt + fallback
 }
+
+export const sendDemoInvite = functions.firestore
+  .document('demoScheduled/{demoId}')
+  .onCreate(async (snap) => {
+    const data = snap.data();
+
+    /** 1. Convert date & time coming from UI (EST) to UTC */
+    const startEST = new Date(`${data['demoDate']} ${data['demoTime']} EST`);
+    const startUTC = new Date(startEST.getTime() + 5 * 60 * 60 * 1000); // EST→UTC (+5 h in summer)
+
+    /** 2. Build calendar attachment */
+    const ics = buildICS(
+      startUTC,
+      data['name'],
+      data['email'],
+      'https://meet.google.com/pea-twnz-uwn'
+    );
+
+    /** 3. Common attachment block (base-64) */
+    const attachment = {
+      content: Buffer.from(ics).toString('base64'),
+      filename: 'invite.ics',
+      type: 'text/calendar; method=REQUEST; charset=UTF-8',
+      disposition: 'attachment',
+    };
+
+    /** 4. Send to participant */
+    await sgMail.send({
+      to: data['email'],
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_DEMO,
+      dynamicTemplateData: {
+        firstName: data['name'].split(' ')[0] ?? '',
+        date: startEST.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        time: data['demoTime'] + ' (EST)',
+        meetingLink: 'https://meet.google.com/pea-twnz-uwn',
+      },
+      attachments: [attachment],
+    });
+
+    /** 5. Copy to your ops inbox – you can reuse the same template or
+            a plainer text version */
+    await sgMail.send({
+      to: 'newworld@newworld-game.org',
+      from: 'newworld@newworld-game.org',
+      subject: `📆 NewWorld demo booked – ${data['name']}`,
+      text: `${data['name']} just scheduled a workshop for ${data['demoDate']} at ${data['demoTime']} (EST).\nNotes: ${data['notes']}`,
+      attachments: [attachment],
+    });
+  });
+
 export const onChatPrompt = functions
   .region('us-central1')
   .firestore.document('users/{uid}/discussions/{docId}')
