@@ -10,7 +10,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
-import { buildICS } from '../lib/ics';
+import { buildICS } from './ics';
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
