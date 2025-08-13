@@ -272,7 +272,7 @@ export class PlaygroundStepsComponent implements OnInit {
   AllQuestions: Array<Array<string>> = [
     [
       'What is the problem you have chosen and why is it important?',
-      'What are the symptoms of this problem? How do you measure it? (Also consider asking, after this question, What are the causes of these symptoms? This will provide deeper insight into the problem.)',
+      'What are the symptoms of this problem? How do you measure it? (Also consider asking, after this question, What are the causes of these symptoms? This will provide deeper insight into the problem.) For further prompts for NWG solution-development, ',
       'How many people does this problem impact in the world? Where is it most severe?',
       'What will happen if nothing is done to deal with this problem?',
     ],
