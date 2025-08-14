@@ -29,6 +29,24 @@ export class UserManagementComponent implements OnInit {
   userUnfinishedSolutions: Solution[] = [];
   allUsers: User[] = [];
   everySolution: Solution[] = [];
+  // component.ts
+  solutionTab: ('all' | 'finished' | 'unfinished')[] = [];
+  toggleSolutions(email: string, i: number) {
+    // Load data first
+    this.findSolutionsByEmail(email, i);
+
+    // Toggle ONLY here
+    this.showSolutions = this.showSolutions.map(
+      (open, idx) => (idx === i ? !open : false) // optional: close others; use just "!open" if you want multiple open
+    );
+
+    if (!this.solutionTab[i]) this.solutionTab[i] = 'all';
+  }
+
+  setSolutionTab(i: number, tab: 'all' | 'finished' | 'unfinished') {
+    this.solutionTab[i] = tab;
+  }
+
   ngOnInit(): void {
     this.auth.getALlUsers().subscribe((data) => {
       this.allUsers = data.sort((a, b) => {
@@ -97,7 +115,6 @@ export class UserManagementComponent implements OnInit {
   toggleUserDetails(index: number) {
     this.userDetails[index] = !this.userDetails[index];
   }
-
   public findSolutionsByEmail(email: string, index: number) {
     const normalizedEmail = email.trim().toLowerCase();
     this.userSolutions = this.everySolution.filter(
@@ -115,12 +132,11 @@ export class UserManagementComponent implements OnInit {
     this.userUnfinishedSolutions = this.userSolutions.filter(
       (solution) => solution.finished !== 'true'
     );
-    this.toggleShowSolution(index);
+
+    // ❌ remove this — it caused double toggle
+    // this.toggleShowSolution(index);
   }
 
-  toggleShowSolution(index: number) {
-    this.showSolutions[index] = !this.showSolutions[index];
-  }
   toggleActionDropDown() {
     this.showActionDropDown = !this.showActionDropDown;
   }
@@ -170,5 +186,20 @@ export class UserManagementComponent implements OnInit {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+  asNum(v: unknown): number {
+    if (typeof v === 'number') return v;
+    const n = Number(v ?? 0);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  finishedCount(u: any): number {
+    return this.asNum(u?.tempSolutionSubmitted);
+  }
+
+  inProgressCount(u: any): number {
+    const started = this.asNum(u?.tempSolutionstarted);
+    const submitted = this.asNum(u?.tempSolutionSubmitted);
+    return Math.max(0, started - submitted);
   }
 }

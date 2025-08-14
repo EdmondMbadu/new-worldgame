@@ -4,10 +4,12 @@
 
     <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
 
-    <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+        <div class="mx-auto w-full max-w-screen-2xl 2xl:max-w-[95%] px-4 lg:px-8">
+
         <!-- Start coding here -->
         <h3 class="text-3xl font-bold dark:text-white text-center mb-4">NewWorld Game Sign Ups</h3>
-        <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+            <div class="overflow-x-auto xl:overflow-x-visible">
+
             <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
                 <div>
                     <button (click)="toggleActionDropDown()" id="dropdownActionButton" data-dropdown-toggle="dropdownAction" class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
@@ -81,7 +83,8 @@
                   
                 </div>
             </div>
-            <div class="overflow-x-auto">
+                <div class="overflow-x-auto xl:overflow-x-visible">
+
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
@@ -123,47 +126,164 @@
                                 <td class="px-4 py-3">{{user.tempSolutionstarted}}</td>
                                 <td class="px-4 py-3">{{user.tempSolutionSubmitted}}</td>
                             
+                             <!-- Actions -->
                                 <td class="px-4 py-3 flex items-center justify-end">
-                                
-                                
-                                    <button (click)="toggleUserDetails(i)" id="apple-imac-27-dropdown-button" data-dropdown-toggle="apple-imac-27-dropdown" class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100" type="button">
-                                        <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                                        </svg>
-                                    </button>
-                                    <div class="relative">
-                                        <div *ngIf="userDetails[i]" id="userDetail-{{i}}" class="absolute right-8 top-0  z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
-                                            <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="apple-imac-27-dropdown-button">
-                                                <li>
-                                                    <a (click)="findSolutionsByEmail(user.email!, i)" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Un/Show Solutions</a>
-                                                </li>
-                                                <!-- <li>
-                                                    <a href="#" class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit</a>
-                                                </li> -->
-                                            </ul>
-                                            <div class="py-1">
-                                                <a (click)="toggleUserDetails(i)" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Close</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    </td>
+                                <button
+                                    (click)="toggleSolutions(user.email!, i)"
+                                    class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium
+                                        text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                                    type="button"
+                                >
+                                    <!-- eye icon -->
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="1.5"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                    <span>Solutions</span>
+
+                                    <!-- counts: finished / in-progress -->
+                                    <span class="ml-1 inline-flex items-center gap-1">
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+                                                    bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200"
+                                            title="Finished">
+                                        {{ finishedCount(user) }}
+                                        </span>
+
+                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+                                                    bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
+                                            title="In progress">
+                                        {{ inProgressCount(user) }}
+                                        </span>
+
+                                    </span>
+
+                                    <!-- chevron -->
+                                    <svg
+                                    class="h-4 w-4 transition-transform"
+                                    [class.rotate-180]="showSolutions[i]"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    aria-hidden="true"
+                                    >
+                                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                                </td>
+
                             </tr>
                                
-                                <tr class="dark:bg-slate-100" *ngIf="showSolutions[i]">
-                                    <td colspan="7" class="text-center bg-gray-100 dark:bg-gray-800 p-4">
-                                      <!-- Finished Solutions Section -->
-                                      <h1 class="text-lg font-semibold mb-2">Finished Solutions</h1>
-                                      <div *ngFor="let fi of userFinishedSolutions; let j = index" class="flex flex-col items-center">
-                                        <a routerLink="/solution-view/{{fi.solutionId}}" class="text-blue-500 font-medium hover:underline">{{j + 1}}. {{fi.title}}</a>
-                                      </div>
-                            
-                                      <!-- Unfinished Solutions Section -->
-                                      <h1 class="text-lg font-semibold mt-4 mb-2">Unfinished Solutions</h1>
-                                      <div *ngFor="let un of userUnfinishedSolutions ; let k = index" class="flex flex-col items-center">
-                                        <a routerLink="/playground-steps/{{un.solutionId}}" class="text-gray-500 font-medium hover:underline">{{k + 1}}. {{un.title}}</a>
-                                      </div>
-                                    </td>
-                                  </tr>
+                            <!-- Expanded solutions row -->
+                                <tr *ngIf="showSolutions[i]">
+                                <td colspan="8" class="bg-slate-50 dark:bg-slate-900/60 p-4">
+                                    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm
+                                                dark:border-slate-800 dark:bg-slate-900">
+                                    <!-- mini tabs -->
+                                    <div class="mb-4 inline-flex rounded-full bg-slate-100 p-1 text-sm
+                                                dark:bg-slate-800">
+                                        <button
+                                        (click)="setSolutionTab(i, 'all')"
+                                        class="px-3 py-1.5 rounded-full"
+                                        [ngClass]="solutionTab[i] === 'all'
+                                            ? 'bg-white text-slate-900 shadow dark:bg-slate-700 dark:text-white'
+                                            : 'text-slate-600 dark:text-slate-300'"
+                                        >
+                                        All
+                                        </button>
+                                        <button
+                                        (click)="setSolutionTab(i, 'finished')"
+                                        class="px-3 py-1.5 rounded-full"
+                                        [ngClass]="solutionTab[i] === 'finished'
+                                            ? 'bg-white text-slate-900 shadow dark:bg-slate-700 dark:text-white'
+                                            : 'text-slate-600 dark:text-slate-300'"
+                                        >
+                                        Finished
+                                        </button>
+                                        <button
+                                        (click)="setSolutionTab(i, 'unfinished')"
+                                        class="px-3 py-1.5 rounded-full"
+                                        [ngClass]="solutionTab[i] === 'unfinished'
+                                            ? 'bg-white text-slate-900 shadow dark:bg-slate-700 dark:text-white'
+                                            : 'text-slate-600 dark:text-slate-300'"
+                                        >
+                                        In&nbsp;progress
+                                        </button>
+                                    </div>
+
+                                    <!-- Finished -->
+                                    <div *ngIf="solutionTab[i] !== 'unfinished'">
+                                        <div class="mb-2 flex items-center gap-2">
+                                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Finished</h4>
+                                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium
+                                                        text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                            {{ finishedCount(user) }}
+                                        </span>
+                                        </div>
+
+                                        <ng-container *ngIf="userFinishedSolutions?.length; else noFinished">
+                                        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                            <a
+                                            *ngFor="let fi of userFinishedSolutions; let j = index"
+                                            [routerLink]="'/solution-view/' + fi.solutionId"
+                                            class="group rounded-lg border border-slate-200 px-3 py-2
+                                                    hover:bg-slate-50 hover:shadow-sm dark:border-slate-800
+                                                    dark:hover:bg-slate-800/60"
+                                            >
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="line-clamp-1 font-medium text-slate-800 dark:text-slate-100">
+                                                {{ j + 1 }}. {{ fi.title }}
+                                                </span>
+                                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold
+                                                            text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                                Finished
+                                                </span>
+                                            </div>
+                                            </a>
+                                        </div>
+                                        </ng-container>
+                                        <ng-template #noFinished>
+                                        <p class="text-sm italic text-slate-500 dark:text-slate-400">No finished solutions.</p>
+                                        </ng-template>
+                                    </div>
+
+                                    <!-- In progress -->
+                                    <div class="mt-4" *ngIf="solutionTab[i] !== 'finished'">
+                                        <div class="mb-2 flex items-center gap-2">
+                                        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">In progress</h4>
+                                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium
+                                                        text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                                             {{ inProgressCount(user) }}
+                                        </span>
+                                        </div>
+
+                                        <ng-container *ngIf="userUnfinishedSolutions?.length; else noUnfinished">
+                                        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                            <a
+                                            *ngFor="let un of userUnfinishedSolutions; let k = index"
+                                            [routerLink]="'/playground-steps/' + un.solutionId"
+                                            class="group rounded-lg border border-slate-200 px-3 py-2
+                                                    hover:bg-slate-50 hover:shadow-sm dark:border-slate-800
+                                                    dark:hover:bg-slate-800/60"
+                                            >
+                                            <div class="flex items-center justify-between gap-2">
+                                                <span class="line-clamp-1 font-medium text-slate-800 dark:text-slate-100">
+                                                {{ k + 1 }}. {{ un.title }}
+                                                </span>
+                                                <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold
+                                                            text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                                                In progress
+                                                </span>
+                                            </div>
+                                            </a>
+                                        </div>
+                                        </ng-container>
+                                        <ng-template #noUnfinished>
+                                        <p class="text-sm italic text-slate-500 dark:text-slate-400">No in-progress solutions.</p>
+                                        </ng-template>
+                                    </div>
+                                    </div>
+                                </td>
+                                </tr>
+
                             
                     </ng-container>
                     </tbody>
