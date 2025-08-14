@@ -196,6 +196,12 @@
                                 <button (click)="toggle('showEditLinks')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">Edit Links</button>
                                 <button (click)="toggle('showAddTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition">Add Participant</button>
                                 <button (click)="toggle('showRemoveTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition">Remove Participant</button>
+                                <button (click)="toggle('showMergeSolution')"
+                                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white
+                                              bg-cyan-600 rounded-lg hover:bg-cyan-700 transition">
+                                  Merge Solution by ID
+                                </button>
+
                                 <button (click)="copyUrlToClipboard()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-slate-500 rounded-lg hover:bg-slate-600 transition">Copy URL</button>
                                 <button (click)="deleteChallengePage()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">Delete Page</button>
                             </div>
@@ -881,6 +887,75 @@
           Save
         </button>
       </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- MERGE SOLUTION MODAL -->
+<div *ngIf="showMergeSolution"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="relative w-full max-w-md px-4 py-8">
+    <div class="relative rounded-xl shadow-2xl
+                bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 p-6">
+
+      <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
+        Merge Existing Solution
+      </h2>
+
+      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+        Solution ID
+      </label>
+      <input [(ngModel)]="mergeSolutionId"
+             placeholder="e.g. 3P3V3XsmoQBdJAp633ce"
+             class="w-full mb-4 p-2 rounded-md border
+                    bg-gray-50 dark:bg-slate-700
+                    border-gray-300 dark:border-slate-600
+                    text-sm text-gray-800 dark:text-gray-100
+                    placeholder-gray-400 dark:placeholder-slate-400"/>
+
+      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+        Category (optional)
+      </label>
+      <div class="grid grid-cols-2 gap-2 mb-6">
+        <select [(ngModel)]="mergeCategory"
+                class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700
+                       border-gray-300 dark:border-slate-600 text-sm
+                       text-gray-800 dark:text-gray-100">
+          <option value="">— choose existing —</option>
+          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+        </select>
+        <input [(ngModel)]="mergeCategoryCustom"
+               placeholder="or type a new one…"
+               class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700
+                      border-gray-300 dark:border-slate-600 text-sm
+                      text-gray-800 dark:text-gray-100" />
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button (click)="toggle('showMergeSolution')"
+                class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600
+                       text-white text-sm">Cancel</button>
+
+        <button (click)="mergeExistingSolution()"
+                class="px-4 py-2 rounded-md bg-cyan-600 hover:bg-cyan-700
+                       text-white text-sm font-semibold active:scale-95">
+          Merge
+        </button>
+      </div>
+
+      <!-- close icon -->
+      <button (click)="toggle('showMergeSolution')"
+              class="absolute top-3 right-3 p-1 rounded-full
+                     text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
+                     bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+             viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
 
     </div>
   </div>

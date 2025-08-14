@@ -58,6 +58,11 @@ export class HomeChallengeComponent {
   chatNote = '';
   showEditLinks = false;
 
+  showMergeSolution = false;
+  mergeSolutionId = '';
+  mergeCategory = '';
+  mergeCategoryCustom = '';
+
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
   showDiscussion = false;
@@ -313,6 +318,7 @@ export class HomeChallengeComponent {
       | 'showEditLinks'
       | 'showEditHandouts'
       | 'showEditProgram'
+      | 'showMergeSolution'
   ) {
     this[property] = !this[property];
   }
@@ -943,6 +949,156 @@ export class HomeChallengeComponent {
     } catch (err) {
       console.error('Update failed:', err);
       alert('Could not update challenge—try again.');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private pickMergeCategory(): string {
+    const typed = this.mergeCategoryCustom?.trim();
+    return typed
+      ? typed
+      : this.mergeCategory || this.activeCategory || 'General';
+  }
+
+  private emailsFromSolutionParticipants(pList: any): string[] {
+    // your solution uses array of maps: [{name: 'email'}, ...]
+    if (!Array.isArray(pList)) return [];
+    return pList
+      .map((p: any) => (p?.name || '').toString().trim().toLowerCase())
+      .filter((e) => e && this.data.isValidEmail(e));
+  }
+
+  private uniqueEmails(...groups: string[][]): string[] {
+    const set = new Set<string>();
+    groups.flat().forEach((e) => set.add(e.trim().toLowerCase()));
+    return Array.from(set);
+  }
+
+  private toParticipantObjects(emails: string[]): { name: string }[] {
+    return emails.map((e) => ({ name: e }));
+  }
+
+  async mergeExistingSolution() {
+    const id = this.mergeSolutionId.trim();
+    if (!id) {
+      alert('Enter a solution ID.');
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      // 1) Load the solution
+      const solSnap = await this.afs.doc(`solutions/${id}`).ref.get();
+      if (!solSnap.exists) {
+        alert('No solution found with that ID.');
+        return;
+      }
+      const sol: any = solSnap.data();
+
+      // 2) Build participants unions (solution <-> challenge page)
+      const emailsFromSol = this.emailsFromSolutionParticipants(
+        sol.participants
+      );
+      const emailsFromPage = (this.participants || [])
+        .map((e) => (e || '').toString().trim().toLowerCase())
+        .filter((e) => e && this.data.isValidEmail(e));
+
+      const unionForSolution = this.uniqueEmails(emailsFromSol, emailsFromPage);
+      const unionForPage = this.uniqueEmails(emailsFromPage, emailsFromSol);
+
+      // 3) Determine category + fields for the challenge card
+      const category = this.pickMergeCategory();
+
+      // IMPORTANT: authorId should be the page’s author so your queries pick it up
+      const authorIdForCard = this.challengePage.authorId;
+
+      const title = (
+        sol.title ||
+        sol.solutionTitle ||
+        'Untitled Solution'
+      ).toString();
+      const description = (sol.description || '').toString();
+      const image = (sol.image || '').toString();
+      const titleLower = title.toLowerCase();
+
+      // 4) Write in one batch:
+      //    - user-challenges/{solutionId} (the card)
+      //    - solutions/{solutionId} participants + back-link to this page
+      //    - challengePages/{pageId} participants (union)
+      const batch = this.afs.firestore.batch();
+
+      const cardRef = this.afs.doc(`user-challenges/${id}`).ref;
+      batch.set(
+        cardRef,
+        {
+          id,
+          title,
+          titleLower,
+          description,
+          image,
+          category,
+          authorId: authorIdForCard, // ✅ key fix
+          challengePageId: this.challengePageId, // ✅ ensure page linkage
+        },
+        { merge: true }
+      );
+
+      const solutionRef = this.afs.doc(`solutions/${id}`).ref;
+      batch.set(
+        solutionRef,
+        {
+          participants: this.toParticipantObjects(unionForSolution),
+          challengePageId: this.challengePageId, // optional but handy back-link
+        },
+        { merge: true }
+      );
+
+      const pageRef = this.afs.doc(
+        `challengePages/${this.challengePageId}`
+      ).ref;
+      batch.set(
+        pageRef,
+        {
+          participants: unionForPage,
+        },
+        { merge: true }
+      );
+
+      await batch.commit();
+
+      // 5) Update local UI instantly
+      this.participants = unionForPage;
+
+      if (!this.categories.includes(category)) {
+        this.categories.push(category);
+        this.categories.sort();
+      }
+
+      // If we are already on this category, inject the card immediately for snappier UX
+      if (this.activeCategory === category) {
+        if (!this.ids.includes(id)) {
+          this.ids.unshift(id);
+          this.titles.unshift(title);
+          this.descriptions.unshift(description);
+          this.challengeImages.unshift(image || 'No image available');
+        }
+      } else {
+        // otherwise fetch and switch
+        await this.fetchChallenges(category);
+        this.activeCategory = category;
+      }
+
+      // reset modal
+      this.mergeSolutionId = '';
+      this.mergeCategory = '';
+      this.mergeCategoryCustom = '';
+      this.showMergeSolution = false;
+
+      alert('Solution merged and challenge card created.');
+    } catch (err) {
+      console.error('Merge failed', err);
+      alert('Could not merge solution — check the ID and try again.');
     } finally {
       this.isLoading = false;
     }
