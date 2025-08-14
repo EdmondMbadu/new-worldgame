@@ -143,17 +143,18 @@
 
                                     <!-- counts: finished / in-progress -->
                                     <span class="ml-1 inline-flex items-center gap-1">
-                                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                                                    bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200"
-                                            title="Finished">
-                                        {{ finishedCount(user) }}
-                                        </span>
+                                    <span class="inline-flex items-center justify-center whitespace-nowrap leading-none
+                                                rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium
+                                                text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                    {{ finishedCount(user) }}
+                                    </span>
 
-                                        <span class="px-2 py-0.5 rounded-full text-xs font-semibold
-                                                    bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
-                                            title="In progress">
-                                        {{ inProgressCount(user) }}
-                                        </span>
+                                    <span class="inline-flex items-center justify-center whitespace-nowrap leading-none
+                                                rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium
+                                                text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                                    {{ inProgressCount(user) }}
+                                    </span>
+
 
                                     </span>
 
@@ -213,10 +214,13 @@
                                     <div *ngIf="solutionTab[i] !== 'unfinished'">
                                         <div class="mb-2 flex items-center gap-2">
                                         <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Finished</h4>
-                                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium
-                                                        text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-                                            {{ finishedCount(user) }}
+                                        <span class="inline-flex items-center justify-center whitespace-nowrap leading-none
+                                                    rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium
+                                                    text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                        {{ finishedCount(user) }}
                                         </span>
+
+
                                         </div>
 
                                         <ng-container *ngIf="userFinishedSolutions?.length; else noFinished">
@@ -228,15 +232,17 @@
                                                     hover:bg-slate-50 hover:shadow-sm dark:border-slate-800
                                                     dark:hover:bg-slate-800/60"
                                             >
-                                            <div class="flex items-center justify-between gap-2">
-                                                <span class="line-clamp-1 font-medium text-slate-800 dark:text-slate-100">
-                                                {{ j + 1 }}. {{ fi.title }}
+                                            <div class="flex items-center gap-2">
+                                                <span class="flex-1 min-w-0 truncate font-medium text-slate-800 dark:text-slate-100">
+                                                    {{ j + 1 }}. {{ fi.title }}
                                                 </span>
-                                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold
-                                                            text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-                                                Finished
+                                                <span class="shrink-0 inline-flex items-center whitespace-nowrap leading-none
+                                                                rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold
+                                                                text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
+                                                    Finished
                                                 </span>
-                                            </div>
+                                                </div>
+
                                             </a>
                                         </div>
                                         </ng-container>
@@ -264,15 +270,17 @@
                                                     hover:bg-slate-50 hover:shadow-sm dark:border-slate-800
                                                     dark:hover:bg-slate-800/60"
                                             >
-                                            <div class="flex items-center justify-between gap-2">
-                                                <span class="line-clamp-1 font-medium text-slate-800 dark:text-slate-100">
+                                           <div class="flex items-center gap-2">
+                                            <span class="flex-1 min-w-0 truncate font-medium text-slate-800 dark:text-slate-100">
                                                 {{ k + 1 }}. {{ un.title }}
-                                                </span>
-                                                <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold
+                                            </span>
+                                            <span class="shrink-0 inline-flex items-center whitespace-nowrap leading-none
+                                                            rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold
                                                             text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
-                                                In progress
-                                                </span>
+                                                In&nbsp;progress
+                                            </span>
                                             </div>
+
                                             </a>
                                         </div>
                                         </ng-container>
