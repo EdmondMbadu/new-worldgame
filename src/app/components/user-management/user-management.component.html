@@ -160,7 +160,7 @@
                                       <!-- Unfinished Solutions Section -->
                                       <h1 class="text-lg font-semibold mt-4 mb-2">Unfinished Solutions</h1>
                                       <div *ngFor="let un of userUnfinishedSolutions ; let k = index" class="flex flex-col items-center">
-                                        <a class="text-gray-500 font-medium hover:underline">{{k + 1}}. {{un.title}}</a>
+                                        <a routerLink="/playground-steps/{{un.solutionId}}" class="text-gray-500 font-medium hover:underline">{{k + 1}}. {{un.title}}</a>
                                       </div>
                                     </td>
                                   </tr>

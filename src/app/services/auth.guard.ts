@@ -1,6 +1,5 @@
 import {
   ActivatedRouteSnapshot,
-  CanActivateFn,
   Router,
   RouterStateSnapshot,
   UrlTree,
@@ -10,46 +9,76 @@ import { User } from '../models/user';
 import { AuthService } from './auth.service';
 import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { SolutionService } from './solution.service'; // Import SolutionService for participant checks
+import { SolutionService } from './solution.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthGuard {
   constructor(
     private auth: AuthService,
     private router: Router,
     private afs: AngularFirestore,
-    private solutionService: SolutionService // Inject SolutionService
+    private solutionService: SolutionService
   ) {}
+
+  /** Accepts boolean true or string 'true' */
+  private isAdmin(user: User | null): boolean {
+    return (
+      !!user && ((user as any).admin === true || (user as any).admin === 'true')
+    );
+  }
 
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> {
-    const requireAdmin = route.data['requireAdmin'];
-    const requireAdminOrPaid = route.data['requireAdminOrPaid'] ?? requireAdmin; // support both keys
-    const requireParticipant = route.data['requireParticipant'];
+    const requireAdmin = route.data['requireAdmin'] === true;
+    const requireAdminOrPaid =
+      route.data['requireAdminOrPaid'] ?? route.data['requireAdmin'] ?? false;
+    const requireParticipant = route.data['requireParticipant'] === true;
 
-    if (requireAdminOrPaid) {
-      return this.canActivateAdminOrPaidSchool(route, state);
-    }
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap((user: User | null) => {
+        // Not logged in → send to login
+        if (!user) {
+          this.auth.setRedirectUrl(state.url);
+          this.router.navigate(['/login']);
+          return of(false);
+        }
 
-    if (requireParticipant) {
-      const solutionId = route.paramMap.get('id');
-      return this.auth.user$.pipe(
-        take(1),
-        switchMap((user: User | null) => {
-          if (!user) {
-            this.auth.setRedirectUrl(state.url);
-            this.router.navigate(['/login']);
+        // 🔓 Global admin bypass: admins see everything
+        if (this.isAdmin(user)) {
+          return of(true);
+        }
+
+        // Explicit admin-only pages (if you use data:{requireAdmin:true})
+        if (requireAdmin) {
+          // We already know not admin (bypass above), so deny.
+          this.auth.setRedirectUrl(state.url);
+          this.router.navigate(['/home']);
+          return of(false);
+        }
+
+        // Admin or PAID school-admin pages
+        if (requireAdminOrPaid) {
+          return this.canActivateAdminOrPaidSchool(route, state);
+        }
+
+        // Participant-gated pages
+        if (requireParticipant) {
+          const solutionId = route.paramMap.get('id');
+          if (!solutionId) {
+            this.router.navigate(['/home']);
             return of(false);
           }
-          return this.solutionService.getSolution(solutionId!).pipe(
-            map((solution) => {
+
+          return this.solutionService.getSolution(solutionId).pipe(
+            take(1),
+            map((solution: any) => {
               if (!solution?.participants) return false;
+              // your existing participant email check
               return Object.values(solution.participants).some(
-                (participant) => {
+                (participant: any) => {
                   const email = Object.values(participant)?.[0];
                   return email === user.email;
                 }
@@ -62,19 +91,10 @@ export class AuthGuard {
               }
             })
           );
-        })
-      );
-    }
-
-    // default auth check
-    return this.auth.user$.pipe(
-      take(1),
-      map((user: User | null) => !!user),
-      tap((loggedIn) => {
-        if (!loggedIn) {
-          this.auth.setRedirectUrl(state.url);
-          this.router.navigate(['/login']);
         }
+
+        // Default: logged-in is enough
+        return of(true);
       })
     );
   }
@@ -95,18 +115,15 @@ export class AuthGuard {
           return of(false);
         }
 
-        const isPlatformAdmin = user.admin === 'true';
-        if (isPlatformAdmin) return of(true);
+        // (Extra safety) platform admin already handled in main guard, but keep here too
+        if (this.isAdmin(user)) return of(true);
 
-        // Determine which school we are checking
         const schoolId = sidFromQuery || (user as any)?.schoolId;
         if (!schoolId) {
-          // No school context and not a platform admin
           this.router.navigate(['/home']);
           return of(false);
         }
 
-        // Fetch the school once and evaluate admin+paid
         return this.afs
           .doc(`schools/${schoolId}`)
           .valueChanges()
@@ -115,12 +132,10 @@ export class AuthGuard {
             map((s: any) => {
               if (!s) return false;
 
-              // School admin check (owner or in adminUids)
               const isSchoolAdmin =
                 s.ownerUid === user.uid ||
                 (Array.isArray(s.adminUids) && s.adminUids.includes(user.uid));
 
-              // Paid check (explicit first, then fallbacks)
               const statusTop = (s.paymentStatus || '')
                 .toString()
                 .toLowerCase();
@@ -151,17 +166,14 @@ export class AuthGuard {
     );
   }
 
+  // Optional: keep if you use it explicitly elsewhere
   canActivateAdmin(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ):
-    | Observable<boolean | UrlTree>
-    | Promise<boolean | UrlTree>
-    | boolean
-    | UrlTree {
+  ): Observable<boolean | UrlTree> {
     return this.auth.user$.pipe(
       take(1),
-      map((user: User) => user && user.admin === 'true'), // Check if user is admin
+      map((user: User | null) => this.isAdmin(user)),
       tap((isAdmin: boolean) => {
         if (!isAdmin) {
           this.auth.setRedirectUrl(state.url);
