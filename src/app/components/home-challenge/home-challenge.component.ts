@@ -93,6 +93,20 @@ export class HomeChallengeComponent {
   editCategory = '';
   editCategoryCustom = '';
 
+  // page admins
+  adminEmails: string[] = [];
+  adminUids: string[] = [];
+  showAddAdmin = false;
+  showRemoveAdmin = false;
+  newAdminEmail = '';
+  adminToRemove = '';
+
+  showAdminsList = true;
+  showAllAdmins = false;
+
+  authorEmail = '';
+  visibleAdminEmails: string[] = [];
+
   // home-challenge.component.ts
   goToChallengeDiscussion() {
     this.router.navigate(['/challenge-discussion', this.challengePageId], {
@@ -163,6 +177,24 @@ export class HomeChallengeComponent {
         this.participantsHidden = !!data.participantsHidden; // default = false
         this.showParticipantsList = !this.participantsHidden; // sync UI
 
+        if (Array.isArray(data.adminEmails))
+          this.adminEmails = data.adminEmails.map((e: string) =>
+            (e || '').toLowerCase()
+          );
+        if (Array.isArray(data.adminUids)) this.adminUids = data.adminUids;
+        // after: this.challengePage = data;
+        const ownerId = this.challengePage.authorId;
+        if (ownerId) {
+          firstValueFrom(this.auth.getAUser(ownerId))
+            .then((u) => {
+              this.authorEmail = this.normalizeEmail((u as any)?.email || '');
+              this.recomputeAdminsView();
+            })
+            .catch(() => this.recomputeAdminsView());
+        } else {
+          this.recomputeAdminsView();
+        }
+
         // test first if the logo image is available
         if (this.challengePage.logoImage) {
           this.logoImage = this.challengePage.logoImage;
@@ -216,8 +248,17 @@ export class HomeChallengeComponent {
   }
 
   get isAuthorPage(): boolean {
-    return this.challengePage.authorId === this.auth.currentUser.uid;
+    const meUid = this.auth.currentUser?.uid;
+    const meEmail = (this.auth.currentUser?.email || '').toLowerCase();
+    const isAuthor = this.challengePage.authorId === meUid;
+
+    const isPageAdmin =
+      (this.adminEmails || []).includes(meEmail) ||
+      (this.adminUids || []).includes(meUid);
+
+    return isAuthor || isPageAdmin;
   }
+
   toggleAside() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
@@ -319,15 +360,22 @@ export class HomeChallengeComponent {
       | 'showEditHandouts'
       | 'showEditProgram'
       | 'showMergeSolution'
+      | 'showRemoveAdmin'
+      | 'showAddAdmin'
   ) {
     this[property] = !this[property];
   }
+  get adminEmailsToRender(): string[] {
+    const list = this.visibleAdminEmails || [];
+    return this.showAllAdmins ? list : list.slice(0, 5);
+  }
 
   async addParticipant() {
-    if (!this.newParticipant && this.data.isValidEmail(this.newParticipant)) {
+    if (!this.newParticipant || !this.data.isValidEmail(this.newParticipant)) {
       alert('Please enter a valid email address to add a participant.');
       return;
     }
+
     if (this.participants.includes(this.newParticipant)) {
       alert('This participant has already been added.');
       return;
@@ -1102,5 +1150,116 @@ export class HomeChallengeComponent {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private normalizeEmail(e: string): string {
+    return (e || '').trim().toLowerCase();
+  }
+
+  async addAdminByEmail() {
+    const emailLC = this.normalizeEmail(this.newAdminEmail);
+
+    if (!emailLC || !this.data.isValidEmail(emailLC)) {
+      alert('Enter a valid admin email.');
+      return;
+    }
+    if ((this.adminEmails || []).includes(emailLC)) {
+      alert('This admin is already added.');
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      // try to resolve a user by email → store uid if exists
+      let uidToAdd: string | null = null;
+      try {
+        const users = await firstValueFrom(this.auth.getUserFromEmail(emailLC));
+        if (users && users.length > 0 && users[0]?.uid) {
+          uidToAdd = users[0].uid;
+        }
+      } catch {}
+
+      // update local arrays
+      this.adminEmails = [...(this.adminEmails || []), emailLC];
+      if (uidToAdd && !(this.adminUids || []).includes(uidToAdd)) {
+        this.adminUids = [...(this.adminUids || []), uidToAdd];
+      }
+
+      // persist
+      await this.afs.doc(`challengePages/${this.challengePageId}`).set(
+        {
+          adminEmails: this.adminEmails,
+          adminUids: this.adminUids,
+        },
+        { merge: true }
+      );
+
+      // optional: notify by email (reuse your function)
+      try {
+        await this.sendEmailToParticipant(emailLC); // it accepts custom subject; if not, it still invites
+      } catch {}
+
+      alert('Admin added.');
+      this.toggle('showAddAdmin');
+    } catch (err) {
+      console.error('Failed to add admin', err);
+      alert('Could not add admin—try again.');
+    } finally {
+      this.isLoading = false;
+      this.newAdminEmail = '';
+    }
+  }
+
+  async removeAdminByEmail(email: string) {
+    const emailLC = this.normalizeEmail(email);
+    if (emailLC === this.authorEmail) {
+      alert('You can’t remove the page owner from admins.');
+      return;
+    }
+
+    if (!emailLC) return;
+
+    if (!confirm(`Remove admin ${emailLC}?`)) return;
+
+    // remove email
+    this.adminEmails = (this.adminEmails || []).filter((e) => e !== emailLC);
+
+    // best-effort remove uid too
+    try {
+      const users = await firstValueFrom(this.auth.getUserFromEmail(emailLC));
+      const uid = users && users[0]?.uid ? users[0].uid : null;
+      if (uid) {
+        this.adminUids = (this.adminUids || []).filter((u) => u !== uid);
+      }
+    } catch {
+      /* ignore */
+    }
+
+    this.isLoading = true;
+    try {
+      await this.afs.doc(`challengePages/${this.challengePageId}`).set(
+        {
+          adminEmails: this.adminEmails,
+          adminUids: this.adminUids,
+        },
+        { merge: true }
+      );
+      alert('Admin removed.');
+    } catch (err) {
+      console.error('Failed to remove admin', err);
+      alert('Could not remove admin—try again.');
+    } finally {
+      this.isLoading = false;
+      this.adminToRemove = '';
+      this.toggle('showRemoveAdmin');
+    }
+  }
+
+  private recomputeAdminsView() {
+    const base = (this.adminEmails || []).map((e) => this.normalizeEmail(e));
+    const extra = this.normalizeEmail(this.authorEmail);
+    const set = new Set<string>(base);
+    if (extra) set.add(extra);
+    this.visibleAdminEmails = Array.from(set);
   }
 }
