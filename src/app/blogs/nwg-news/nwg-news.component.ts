@@ -39,7 +39,7 @@ export class NwgNewsComponent implements OnInit {
   allVideos: Video[] = [
     {
       id: 'tane-kahu',
-      title: `NewWorld Game Changemakers Tournament 2025–26`,
+      title: `NewWorld Game Changemakers Tournament 2025–26  `,
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FIB%20Flyer-%20Tane%20Kahu.mp4?alt=media&token=438a21d0-82a9-4043-ad20-0b004d895101',
       speaker: 'Tāne Kahu',
       thumbUrl: '../../../assets/img/tane-agent.png', // ← put your real URL
@@ -79,20 +79,20 @@ export class NwgNewsComponent implements OnInit {
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGSL%202025%20Day%203.mp4?alt=media&token=d8f8f632-297c-4d0f-a629-3e55af34d17c',
 
       speaker: 'Georgia',
-      thumbUrl: '../../../assets/img/elena-agent.png',
+      thumbUrl: '../../../assets/img/georgia-avatar.png',
     },
     {
       id: 'elena',
       title: 'Global Solutions Lab 2025 Progress - Day 2',
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGSL%202025%20Day%202.mp4?alt=media&token=a12dd4dc-8e9e-492d-97ec-6abdaca0c797',
-      speaker: 'Georgia',
+      speaker: 'Elena',
       thumbUrl: '../../../assets/img/elena-agent.png',
     },
     {
       id: 'mandy',
       title: 'Mandy Welcome Participants to GSL 2025',
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGlobal%20Solutions%20Lab%20Welcome%20AI_1.mp4?alt=media&token=66be6bb7-8cd6-4ab4-a78e-85ed3c35fa2e',
-      speaker: 'Georgia',
+      speaker: 'Mandy',
       thumbUrl: '../../../assets/img/elena-avatar.png',
     },
     {
