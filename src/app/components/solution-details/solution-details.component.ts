@@ -51,6 +51,33 @@ export class SolutionDetailsComponent implements OnInit {
     private fns: AngularFireFunctions
   ) {}
 
+  copied = false;
+
+  async copySolutionId(id?: string) {
+    if (!id) return;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(id);
+      } else {
+        // Fallback for older browsers
+        const ta = document.createElement('textarea');
+        ta.value = id;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      this.copied = true;
+      setTimeout(() => (this.copied = false), 1500);
+    } catch {
+      // small retry fallback if needed
+      this.copied = false;
+    }
+  }
+
   currentSolution: Solution = {};
   id: any;
   newReadMe: string = '';
