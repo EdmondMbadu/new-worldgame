@@ -1,0 +1,275 @@
+<!-- ── WRAPPER & NAVBAR ──────────────────────────────────────── -->
+<div class="dark:bg-slate-900 min-h-screen">
+  <!-- Navbar (handled by parent component) -->
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      [path]="'home'"
+      [sideBarBig]="false"
+      [sideBarSmall]="true">
+    </app-navbar>
+  </div>
+
+  <!-- Sticky section pills -->
+  <div class="hidden md:block sticky top-28 z-40 w-full transition-all duration-300 ease-in-out">
+    <div class="container mx-auto flex flex-col items-center gap-2 py-2">
+      <div class="flex items-center justify-center space-x-1 rounded-full bg-white dark:bg-slate-800 p-1 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10">
+        <a (click)="data.scrollTo($event,'register')" href="#register" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Register</a>
+        <a (click)="data.scrollTo($event,'school-admin')" href="#school-admin" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">School Admin</a>
+        <a (click)="data.scrollTo($event,'class')" href="#class" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Class</a>
+        <a (click)="data.scrollTo($event,'challenge-teams')" href="#challenge-teams" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Challenge & Teams</a>
+        <a (click)="data.scrollTo($event,'submission')" href="#submission" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Submission</a>
+        <a (click)="data.scrollTo($event,'timeline')" href="#timeline" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all">Timeline</a>
+      </div>
+     
+    </div>
+  </div>
+
+  <!-- ── HERO (concise) ─────────────────────────────────────── -->
+  <section
+    class="relative overflow-hidden bg-center bg-cover bg-no-repeat text-white"
+    style="background-image:url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-trophy.png?alt=media&token=145fee70-8375-429e-b37e-24af6931d6e8');">
+    <div class="absolute inset-0 bg-black/50 z-0"></div>
+    <div class="relative z-10 container mx-auto px-6 py-16 lg:py-24 text-center">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-3">
+        <span class="block bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">Tournament Instructions</span>
+      </h1>
+      <p class="text-lg sm:text-xl max-w-3xl mx-auto text-white/90">
+        Register your school, set up classes, form teams, and submit solutions to the NewWorld Game tournament.
+      </p>
+      <!-- <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+        <a
+          [routerLink]="['/signup-school']"
+          [queryParams]="{ plan: 'tournament', amount: 199, currency: 'USD' }"
+          class="inline-flex items-center justify-center px-10 py-3 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200">
+          Register
+        </a>
+        <a
+          routerLink="/scheduler"
+          class="inline-flex items-center justify-center px-10 py-3 border border-white/30 bg-white/10 text-white font-medium rounded-full hover:bg-white/20 backdrop-blur">
+          Schedule a Demo
+        </a>
+      </div> -->
+    </div>
+  </section>
+
+  <!-- ── STEP OVERVIEW ───────────────────────────────────────── -->
+  <section class="py-8 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 max-w-6xl">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">1</div>
+          <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">Register</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Create school account & pay $199.</p>
+        </div>
+        <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">2</div>
+          <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">School Admin</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Invite/verify students; create classes.</p>
+        </div>
+        <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">3</div>
+          <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">Class</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Add participants, resources & video room.</p>
+        </div>
+        <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">4</div>
+          <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">Challenge</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Create challenge (solution) students join.</p>
+        </div>
+        <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">5</div>
+          <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">Teams</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Collaborate via video, chat, whiteboard, docs.</p>
+        </div>
+        <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">6</div>
+          <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">Submit</h3>
+          <!-- <p class="text-sm text-slate-600 dark:text-slate-300">Enter up to 3 teams (add more @ $30).</p> -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 1: REGISTER ───────────────────────────────────── -->
+  <section id="register" class="py-10 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">1) Register your school</h2>
+      <p class="mt-2 text-slate-700 dark:text-slate-300">
+        Use the official signup link, enter school details, and pay <strong>$199</strong>.
+        Includes <strong>3</strong> team entries (3–5 students each). Extra teams: <strong>$30</strong> each.
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a
+          [routerLink]="['/signup-school']"
+          [queryParams]="{ plan: 'tournament', amount: 199, currency: 'USD' }"
+          class="inline-flex items-center px-5 py-2 rounded-full bg-yellow-300 text-slate-900 font-semibold hover:bg-yellow-200">
+          Register
+        </a>
+        <a
+          routerLink="/scheduler"
+          class="inline-flex items-center px-5 py-2 rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-200 ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700">
+          Schedule a Demo
+        </a>
+      </div>
+      <!-- IMAGE SLOT -->
+      <div class="mt-5 p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
+        IMAGE SLOT — Signup form / payment confirmation
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 2: SCHOOL ADMIN ───────────────────────────────── -->
+  <section id="school-admin" class="py-10 bg-indigo-50 dark:bg-slate-800">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">2) School Admin dashboard</h2>
+      <div class="grid gap-6 md:grid-cols-2 mt-3">
+        <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+          <li>General school information</li>
+          <li>Counts: <strong>verified</strong> vs. <strong>invited</strong> students</li>
+          <li>Lists: invited students and who accepted</li>
+          <li>Create & manage classes</li>
+        </ul>
+        <!-- IMAGE SLOT -->
+        <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
+          IMAGE SLOT — School Admin overview (stats & lists)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 3: CLASS ──────────────────────────────────────── -->
+  <section id="class" class="py-10 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">3) Create a class</h2>
+      <div class="grid gap-6 md:grid-cols-2 mt-3">
+        <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+          <li>Class discussion area</li>
+          <li>Shared video room for all class members</li>
+          <li>Attach handouts & all required documents</li>
+          <li>Add / remove participants</li>
+          <li>Make class <strong>private</strong> or <strong>public</strong></li>
+          <li>Add challenge(s) for students to join</li>
+          <li>Add a video meeting</li>
+        </ul>
+        <!-- IMAGE SLOT -->
+        <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
+          IMAGE SLOT — New Class form / Class page
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 4 & 5: CHALLENGE + TEAMS ──────────────────────── -->
+  <section id="challenge-teams" class="py-10 bg-indigo-50 dark:bg-slate-800">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">4) Challenge (Solution) & 5) Team workspace</h2>
+
+      <!-- Challenge / Solution -->
+      <div class="mt-4 rounded-2xl border border-indigo-100 dark:border-slate-700 p-6 bg-white dark:bg-slate-900">
+        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Challenge (Solution)</h3>
+        <p class="mt-2 text-slate-700 dark:text-slate-300">
+          The core unit where students develop their solutions. Students form teams inside each challenge.
+          Admins/teachers can monitor and manage teams (add/remove, etc.).
+        </p>
+        <!-- IMAGE SLOT -->
+        <div class="mt-4 p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
+          IMAGE SLOT — Challenge/Solution page
+        </div>
+      </div>
+
+      <!-- Teams -->
+      <div class="mt-6 rounded-2xl border border-indigo-100 dark:border-slate-700 p-6 bg-white dark:bg-slate-900">
+        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Teams</h3>
+        <div class="grid gap-6 md:grid-cols-2 mt-2">
+          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+            <li><strong>Team dashboard</strong>: only the team admin can add/remove members</li>
+            <li>All team members can update and evolve the solution</li>
+            <li>Always-open <strong>video channel</strong></li>
+            <li>Dedicated <strong>chat channel</strong></li>
+            <li><strong>Whiteboard</strong> for brainstorming</li>
+            <li><strong>Documents</strong> area for key files</li>
+            <li><strong>Solution details</strong> page (team members & description)</li>
+          </ul>
+          <!-- IMAGE SLOT -->
+          <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
+            IMAGE SLOT — Team workspace (video / chat / whiteboard / docs / details)
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 6: SUBMISSION ─────────────────────────────────── -->
+  <section id="submission" class="py-10 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">6) Submit to the tournament</h2>
+      <div class="grid gap-6 md:grid-cols-2 mt-3">
+        <div>
+          <h3 class="font-semibold text-slate-900 dark:text-white">Submission limits</h3>
+          <ul class="mt-2 list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+            <li>Included: up to <strong>3</strong> team entries per school</li>
+            <li>Optional: add more teams for <strong>$30</strong> each</li>
+          </ul>
+          <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Include in your submission</h3>
+          <ul class="mt-2 list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+            <li>Solution title & challenge statement</li>
+            <li>Approach & innovation highlights</li>
+            <li>Implementation roadmap & expected impact</li>
+            <li>References & attachments (docs, images, links)</li>
+            <li>Optional: short demo or pitch video link</li>
+          </ul>
+        </div>
+        <!-- IMAGE SLOT -->
+        <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
+          IMAGE SLOT — Submission form / example
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TIMELINE ───────────────────────────────────────────── -->
+  <section id="timeline" class="py-12 bg-indigo-50 dark:bg-slate-800">
+    <div class="container mx-auto px-6 max-w-5xl">
+      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-6">Tournament Timeline</h2>
+      <div class="border-l-4 border-indigo-600 dark:border-indigo-400 pl-8 space-y-6">
+        <div>
+          <time class="text-lg font-semibold text-indigo-700 dark:text-indigo-300">Oct 31, 2025</time>
+          <p class="text-slate-700 dark:text-slate-300">Registration Closes</p>
+        </div>
+        <div>
+          <time class="text-lg font-semibold text-indigo-700 dark:text-indigo-300">Nov 2025 – Feb 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Students Play, Develop Solutions & Submit Projects</p>
+        </div>
+        <div>
+          <time class="text-lg font-semibold text-indigo-700 dark:text-indigo-300">Feb – Apr 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Voting & Judging</p>
+        </div>
+        <div>
+          <time class="text-lg font-semibold text-indigo-700 dark:text-indigo-300">May 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Regional Virtual Awards Celebration</p>
+        </div>
+        <div>
+          <time class="text-lg font-semibold text-indigo-700 dark:text-indigo-300">June 2026</time>
+          <p class="text-slate-700 dark:text-slate-300">Global Solutions Lab Grand Prize Celebration</p>
+        </div>
+      </div>
+
+      <div class="mt-6 rounded-2xl border border-indigo-100 dark:border-slate-700 p-6 bg-white dark:bg-slate-900">
+        <h3 class="font-semibold text-slate-900 dark:text-white">Your Tournament (flex schedule)</h3>
+        <p class="mt-2 text-slate-700 dark:text-slate-300">
+          Need a different schedule? Run a custom timeline that fits your program.
+          <a routerLink="/contact-us" class="text-indigo-700 dark:text-indigo-300 underline">Contact us</a> for details.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+  <app-footer></app-footer>
+</div>

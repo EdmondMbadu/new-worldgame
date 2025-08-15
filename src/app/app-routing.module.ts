@@ -96,6 +96,7 @@ import { SchoolDashboardComponent } from './components/school-dashboard/school-d
 import { InvitationsComponent } from './components/invitations/invitations.component';
 import { JoinSuccessComponent } from './components/join-success/join-success.component';
 import { SchoolManagementComponent } from './components/school-management/school-management.component';
+import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -505,6 +506,10 @@ const routes: Routes = [
   {
     path: 'tournament-landing',
     component: TournamentLandingComponent,
+  },
+  {
+    path: 'tournament-instructions',
+    component: TournamentInstructionsComponent,
   },
   {
     path: 'document-files/:solutionId/presentation/:presentationId',

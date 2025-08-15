@@ -142,6 +142,7 @@ import { SchoolDashboardComponent } from './components/school-dashboard/school-d
 import { InvitationsComponent } from './components/invitations/invitations.component';
 import { JoinSuccessComponent } from './components/join-success/join-success.component';
 import { SchoolManagementComponent } from './components/school-management/school-management.component';
+import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
 
 @NgModule({
   declarations: [
@@ -259,6 +260,7 @@ import { SchoolManagementComponent } from './components/school-management/school
     InvitationsComponent,
     JoinSuccessComponent,
     SchoolManagementComponent,
+    TournamentInstructionsComponent,
   ],
   imports: [
     BrowserModule,
