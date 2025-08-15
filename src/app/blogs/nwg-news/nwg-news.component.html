@@ -14,72 +14,84 @@
       </app-navbar>
     </div>
   
-    <!-- MAIN VIDEO -->
-    <section class="bg-white dark:bg-gray-900 mt-12">
-      <div class="py-4 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-        <div class="mx-auto max-w-screen-md sm:text-center">
-          <h2
-            class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white"
-          >
-            {{ mainVideo.title }}
-          </h2>
-          <p
-            class="mx-auto mb-2 max-w-2xl font-light text-gray-500 md:mb-2 sm:text-xl dark:text-gray-400"
-          >
-            Stay up to date with solutions being developed in real time
-          </p>
-          <video
-            class="w-full h-[30rem] max-w-full mx-auto"
-            [src]="mainVideo.url"
-            autoplay
-            loop
-            controls
-            muted          
-            playsinline>   
-          ></video>
-        </div>
-      </div>
-    </section>
-  
-    <!-- PREVIOUS AI NEWS -->
-    <section class="bg-white dark:bg-gray-900 mt-2">
-        <div class="py-4 px-4 mx-auto max-w-screen-xl lg:py-8 lg:px-6">
-          <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center ">
-            Previous AI News
-          </h3>
-          <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
-          >
-            <ng-container *ngFor="let vid of previousVideos">
-              <div
-                (click)="selectVideo(vid)"
-                class="cursor-pointer w-full max-w-xs bg-white dark:bg-slate-800 rounded-lg shadow-md 
-                       hover:shadow-lg transition-shadow duration-200 transform hover:scale-105 overflow-hidden"
-              >
-                <!-- PLAY BUTTON PLACEHOLDER -->
-                <div
-                  class="relative w-full h-48 bg-gray-200 dark:bg-slate-700 flex items-center justify-center"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-12 w-12 text-gray-500 dark:text-gray-200"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <div class="p-4">
-                  <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                    {{ vid.title }}
-                  </h4>
-                </div>
-              </div>
-            </ng-container>
+<!-- MAIN VIDEO -->
+<section class="bg-white dark:bg-gray-900 mt-12">
+  <div class="py-4 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+    <div class="mx-auto max-w-screen-md sm:text-center">
+      <h2 class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white">
+        {{ mainVideo.title }}
+      </h2>
+      <p class="mx-auto mb-2 max-w-2xl font-light text-gray-500 md:mb-2 sm:text-xl dark:text-gray-400">
+        Stay up to date with solutions being developed in real time
+      </p>
+
+      <video
+        class="w-full h-[30rem] max-w-full mx-auto rounded-xl shadow"
+        [src]="mainVideo.url"
+        [attr.poster]="mainVideo.thumbUrl || DEFAULT_THUMB"
+        autoplay
+        loop
+        controls
+        muted
+        playsinline>
+      </video>
+    </div>
+  </div>
+</section>
+
+<!-- PREVIOUS AI NEWS -->
+<section class="bg-white dark:bg-gray-900 mt-2">
+  <div class="py-4 px-4 mx-auto max-w-screen-xl lg:py-8 lg:px-6">
+    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4 text-center">
+      Previous AI News
+    </h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+      <ng-container *ngFor="let vid of previousVideos; trackBy: trackById">
+        <div
+          (click)="selectVideo(vid)"
+          class="group cursor-pointer w-full max-w-xs bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 transform hover:scale-105 overflow-hidden"
+          role="button"
+          tabindex="0"
+         >
+
+          <!-- Thumbnail (speaker photo) -->
+          <div class="relative w-full h-48">
+            <img
+              [src]="vid.thumbUrl || DEFAULT_THUMB"
+              [alt]="vid.speaker ? (vid.speaker + ' portrait') : (vid.title + ' thumbnail')"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+              (error)="onImageError($event)" />
+
+            <!-- subtle dark overlay + play icon on hover -->
+            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white/95" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+
+            <!-- speaker chip -->
+            <div class="absolute bottom-2 left-2">
+              <span class="inline-block rounded-full bg-black/70 text-white text-xs font-medium px-2 py-1 backdrop-blur">
+                {{ vid.speaker || 'Speaker' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="p-4">
+            <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 line-clamp-2">
+              {{ vid.title }}
+            </h4>
           </div>
         </div>
-      </section>
-      
+      </ng-container>
+    </div>
+  </div>
+</section>
+
   
     <app-footer></app-footer>
   </div>
