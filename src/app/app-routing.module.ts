@@ -470,12 +470,14 @@ const routes: Routes = [
     path: 'blogs/worldgame-packet',
     component: WorldgamePacketComponent,
   },
+  // in your routing
   {
     path: 'generate-challenges',
     component: GenerateChallengesComponent,
     canActivate: [AuthGuard],
-    data: { requireAdmin: true },
+    data: { requireAdminOrSchoolAdmin: true }, // <— change this
   },
+
   {
     path: 'solution-publication',
     component: SolutionPublicationComponent,

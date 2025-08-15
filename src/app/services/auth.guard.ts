@@ -1,15 +1,16 @@
+import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   Router,
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { Observable, take, map, tap, switchMap, of } from 'rxjs';
-import { User } from '../models/user';
-import { AuthService } from './auth.service';
-import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Observable, of } from 'rxjs';
+import { map, switchMap, take, tap } from 'rxjs/operators';
+import { AuthService } from './auth.service';
 import { SolutionService } from './solution.service';
+import { User } from '../models/user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard {
@@ -20,105 +21,137 @@ export class AuthGuard {
     private solutionService: SolutionService
   ) {}
 
-  /** Accepts boolean true or string 'true' */
-  private isAdmin(user: User | null): boolean {
-    return (
-      !!user && ((user as any).admin === true || (user as any).admin === 'true')
-    );
-  }
-
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> {
-    const requireAdmin = route.data['requireAdmin'] === true;
-    const requireAdminOrPaid =
-      route.data['requireAdminOrPaid'] ?? route.data['requireAdmin'] ?? false;
     const requireParticipant = route.data['requireParticipant'] === true;
+    const requireAdmin = route.data['requireAdmin'] === true; // platform admin only
+    const requireAdminOrPaid = route.data['requireAdminOrPaid'] === true; // legacy paid gate
+    const requireAdminOrSchoolAdmin =
+      route.data['requireAdminOrSchoolAdmin'] === true; // NEW
+    const requireSchoolAdmin = route.data['requireSchoolAdmin'] === true; // optional
 
+    if (requireParticipant) return this.checkParticipant(route, state);
+    if (requireAdminOrPaid) return this.checkAdminOrPaidSchool(route, state);
+    if (requireAdminOrSchoolAdmin)
+      return this.checkAdminOrSchoolAdmin(route, state);
+    if (requireSchoolAdmin) return this.checkSchoolAdmin(route, state);
+    if (requireAdmin) return this.checkPlatformAdmin(state); // strict admin
+
+    // default: must be logged in
     return this.auth.user$.pipe(
       take(1),
-      switchMap((user: User | null) => {
-        // Not logged in → send to login
-        if (!user) {
+      map((u: User | null) => !!u),
+      tap((loggedIn) => {
+        if (!loggedIn) {
           this.auth.setRedirectUrl(state.url);
           this.router.navigate(['/login']);
-          return of(false);
         }
-
-        // 🔓 Global admin bypass: admins see everything
-        if (this.isAdmin(user)) {
-          return of(true);
-        }
-
-        // Explicit admin-only pages (if you use data:{requireAdmin:true})
-        if (requireAdmin) {
-          // We already know not admin (bypass above), so deny.
-          this.auth.setRedirectUrl(state.url);
-          this.router.navigate(['/home']);
-          return of(false);
-        }
-
-        // Admin or PAID school-admin pages
-        if (requireAdminOrPaid) {
-          return this.canActivateAdminOrPaidSchool(route, state);
-        }
-
-        // Participant-gated pages
-        if (requireParticipant) {
-          const solutionId = route.paramMap.get('id');
-          if (!solutionId) {
-            this.router.navigate(['/home']);
-            return of(false);
-          }
-
-          return this.solutionService.getSolution(solutionId).pipe(
-            take(1),
-            map((solution: any) => {
-              if (!solution?.participants) return false;
-              // your existing participant email check
-              return Object.values(solution.participants).some(
-                (participant: any) => {
-                  const email = Object.values(participant)?.[0];
-                  return email === user.email;
-                }
-              );
-            }),
-            tap((ok) => {
-              if (!ok) {
-                console.log('Access denied: User is not a participant');
-                this.router.navigate(['/home']);
-              }
-            })
-          );
-        }
-
-        // Default: logged-in is enough
-        return of(true);
       })
     );
   }
 
-  /** Admins OR Paid School Admins (owner/adminUids of a paid school) */
-  private canActivateAdminOrPaidSchool(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<boolean | UrlTree> {
-    const sidFromQuery = route.queryParamMap.get('sid') || null;
+  // ---- helpers ----
 
+  private isPlatformAdmin(u: any): boolean {
+    return u?.admin === 'true' || u?.role === 'admin';
+  }
+
+  private resolveSchoolId(
+    route: ActivatedRouteSnapshot,
+    u: any
+  ): string | null {
+    // try query ?sid=, then :sid or :schoolId or :id, then user.schoolId
+    return (
+      route.queryParamMap.get('sid') ||
+      route.paramMap.get('sid') ||
+      route.paramMap.get('schoolId') ||
+      route.paramMap.get('id') ||
+      u?.schoolId ||
+      null
+    );
+  }
+
+  private checkPlatformAdmin(state: RouterStateSnapshot) {
     return this.auth.user$.pipe(
       take(1),
-      switchMap((user: User | null) => {
-        if (!user) {
+      map((u) => !!u && this.isPlatformAdmin(u)),
+      tap((ok) => {
+        if (!ok) {
+          this.auth.setRedirectUrl(state.url);
+          this.router.navigate(['/home']);
+        }
+      })
+    );
+  }
+
+  /** Platform admin OR school admin (no paid requirement) */
+  private checkAdminOrSchoolAdmin(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ) {
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap((u: any) => {
+        if (!u) {
           this.auth.setRedirectUrl(state.url);
           this.router.navigate(['/login']);
           return of(false);
         }
+        if (this.isPlatformAdmin(u)) return of(true);
 
-        // (Extra safety) platform admin already handled in main guard, but keep here too
-        if (this.isAdmin(user)) return of(true);
+        const schoolId = this.resolveSchoolId(route, u);
+        if (!schoolId) {
+          // fallback: if user explicitly has role=schoolAdmin, allow
+          if (u?.role === 'schoolAdmin') return of(true);
+          this.router.navigate(['/home']);
+          return of(false);
+        }
 
-        const schoolId = sidFromQuery || (user as any)?.schoolId;
+        return this.afs
+          .doc(`schools/${schoolId}`)
+          .valueChanges()
+          .pipe(
+            take(1),
+            map((s: any) => {
+              if (!s) {
+                // fallback to user role if school doc missing
+                return u?.role === 'schoolAdmin';
+              }
+              const isSchoolAdmin =
+                s.ownerUid === u.uid ||
+                (Array.isArray(s.adminUids) && s.adminUids.includes(u.uid)) ||
+                u?.role === 'schoolAdmin';
+              return !!isSchoolAdmin;
+            }),
+            tap((ok) => {
+              if (!ok) {
+                this.auth.setRedirectUrl(state.url);
+                this.router.navigate(['/home']);
+              }
+            })
+          );
+      })
+    );
+  }
+
+  /** Platform admin OR admin of a *paid* school (your previous behavior) */
+  private checkAdminOrPaidSchool(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ) {
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap((u: any) => {
+        if (!u) {
+          this.auth.setRedirectUrl(state.url);
+          this.router.navigate(['/login']);
+          return of(false);
+        }
+        if (this.isPlatformAdmin(u)) return of(true);
+
+        const schoolId = this.resolveSchoolId(route, u);
         if (!schoolId) {
           this.router.navigate(['/home']);
           return of(false);
@@ -131,11 +164,10 @@ export class AuthGuard {
             take(1),
             map((s: any) => {
               if (!s) return false;
-
               const isSchoolAdmin =
-                s.ownerUid === user.uid ||
-                (Array.isArray(s.adminUids) && s.adminUids.includes(user.uid));
-
+                s.ownerUid === u.uid ||
+                (Array.isArray(s.adminUids) && s.adminUids.includes(u.uid)) ||
+                u?.role === 'schoolAdmin';
               const statusTop = (s.paymentStatus || '')
                 .toString()
                 .toLowerCase();
@@ -151,12 +183,10 @@ export class AuthGuard {
                 statusBilling === 'paid' ||
                 hasStripe ||
                 numericTotal > 0;
-
               return isSchoolAdmin && looksPaid;
             }),
-            tap((allowed) => {
-              if (!allowed) {
-                console.log('Access denied: not admin of a paid school');
+            tap((ok) => {
+              if (!ok) {
                 this.auth.setRedirectUrl(state.url);
                 this.router.navigate(['/home']);
               }
@@ -166,20 +196,85 @@ export class AuthGuard {
     );
   }
 
-  // Optional: keep if you use it explicitly elsewhere
-  canActivateAdmin(
+  /** Participant check unchanged */
+  private checkParticipant(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean | UrlTree> {
+  ) {
+    const solutionId = route.paramMap.get('id');
+    const allowAdminBypass = route.data['allowAdminBypass'] !== false; // default: admins can bypass
+
     return this.auth.user$.pipe(
       take(1),
-      map((user: User | null) => this.isAdmin(user)),
-      tap((isAdmin: boolean) => {
-        if (!isAdmin) {
+      switchMap((user: User | null) => {
+        if (!user) {
           this.auth.setRedirectUrl(state.url);
-          console.log('Admin access denied');
-          this.router.navigate(['/home']);
+          this.router.navigate(['/login']);
+          return of(false);
         }
+
+        // ⬇️ platform admin bypass
+        if (allowAdminBypass && this.isPlatformAdmin(user)) {
+          return of(true);
+        }
+
+        // regular participant check
+        return this.solutionService.getSolution(solutionId!).pipe(
+          map((solution: any) => {
+            if (!solution?.participants) return false;
+            return Object.values(solution.participants).some(
+              (participant: any) => {
+                const email = (Object.values(participant)?.[0] ?? '')
+                  .toString()
+                  .toLowerCase();
+                return email === (user.email ?? '').toLowerCase();
+              }
+            );
+          }),
+          tap((ok) => {
+            if (!ok) this.router.navigate(['/home']);
+          })
+        );
+      })
+    );
+  }
+
+  /** Optional: schoolAdmin only (no platform admin) */
+  private checkSchoolAdmin(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ) {
+    return this.auth.user$.pipe(
+      take(1),
+      switchMap((u: any) => {
+        if (!u) {
+          this.auth.setRedirectUrl(state.url);
+          this.router.navigate(['/login']);
+          return of(false);
+        }
+        const schoolId = this.resolveSchoolId(route, u);
+        if (!schoolId) return of(u?.role === 'schoolAdmin');
+
+        return this.afs
+          .doc(`schools/${schoolId}`)
+          .valueChanges()
+          .pipe(
+            take(1),
+            map((s: any) => {
+              if (!s) return u?.role === 'schoolAdmin';
+              return (
+                s.ownerUid === u.uid ||
+                (Array.isArray(s.adminUids) && s.adminUids.includes(u.uid)) ||
+                u?.role === 'schoolAdmin'
+              );
+            }),
+            tap((ok) => {
+              if (!ok) {
+                this.auth.setRedirectUrl(state.url);
+                this.router.navigate(['/home']);
+              }
+            })
+          );
       })
     );
   }
