@@ -9,7 +9,6 @@ interface FeatureRow {
   minPlanIndex: number | null; // 0-based index of the first plan that gets this feature
   customValues?: (string | null)[]; // Optional per-plan override (numbers, “Custom”, “—”)
 }
-export const PLANS = ['Free', 'License', 'Tournament', 'Pro', 'Enterprise'];
 
 @Component({
   selector: 'app-tournament-landing',
@@ -20,7 +19,7 @@ export class TournamentLandingComponent {
   ngOnInit(): void {
     window.scroll(0, 0);
   }
-  plans = PLANS;
+
   /** Accordion-open state */
   showTable = false;
 
@@ -39,6 +38,7 @@ export class TournamentLandingComponent {
     'District/University',
   ];
 
+  plans = this.PLANS;
   // Comparison rows (5 columns per row, same order as PLANS above)
   featureRows = [
     {
