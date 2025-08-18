@@ -319,10 +319,10 @@
     </p>
 
     <!-- Cards -->
-    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5  mx-auto">
 
       <!-- Free Evaluation -->
-      <div class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+      <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
                   bg-gradient-to-br from-white via-indigo-50 to-indigo-100
                   dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
         <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Free Evaluation</h3>
@@ -330,10 +330,12 @@
         <!-- <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">30-day, one-class trial</p> -->
         <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
           <!-- <li class="flex items-start gap-2">✓ Up to 30 students</li> -->
-          <li class="flex items-start gap-2">✓ Unlimited inspection & playing</li>
+         
           <!-- <li class="flex items-start gap-2">✓ 3 AI avatars</li> -->
-          <li class="flex items-start gap-2">✓ No tournament access</li>
+         
          <li class="flex items-start gap-2">✓ Single Player Full Access</li>
+          <li class="flex items-start gap-2">✓ Unlimited inspection & playing</li>
+           <li class="flex items-start gap-2">✓ No tournament access</li>
           <li class="flex items-start gap-2 text-sm italic text-slate-500 dark:text-slate-400">
             (Class, and school play requires a paid plan)
           </li>
@@ -345,16 +347,19 @@
       </div>
 
       <!-- License-Only -->
-      <div class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+      <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
                   bg-gradient-to-br from-indigo-50 via-purple-50 to-purple-100
                   dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
-        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">License-Only</h3>
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">NWG Only</h3>
         <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$99</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Annual school license</p>
         <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
           <li class="flex items-start gap-2">✓ Unlimited student accounts</li>
-          <li class="flex items-start gap-2">✓ 1 tournament submission</li>
-          <li class="flex items-start gap-2">✓ Email support</li>
+           <li class="flex items-start gap-2">✓ No tournament access</li>
+          
+           <li class="flex items-start gap-2">✓ Private Dashboard for School or Class </li>
+           <li class="flex items-start gap-2">✓ Email support</li>
+
         </ul>
         <a [routerLink]="['/signup-school']"
               [queryParams]="{ plan: 'license', amount: 99, currency: 'USD' }"
@@ -370,57 +375,72 @@
                      text-xs font-bold px-3 py-0.5 rounded-full shadow">
           MOST POPULAR
         </span>
-        <h3 class="text-xl font-bold mb-2">Tournament</h3>
-        <p class="text-5xl font-extrabold mb-1">$199</p>
-        <p class="text-sm text-indigo-200 mb-6">Early-bird (reg. $299)</p>
-         <p class="text-sm text-indigo-200 mb-6">All License-Only features</p>
+        <h3 class="text-xl font-bold mb-2">NWG & Tournament</h3>
+        <p class="text-5xl font-extrabold mb-1">$299</p>
+        <!-- <p class="text-sm text-indigo-200 mb-6">Early-bird (reg. $299)</p> -->
+         <p class="text-sm text-indigo-200 mb-6">All NWG Only features</p>
         <ul class="space-y-2 flex-grow text-indigo-50">
           <!-- <li class="flex items-start gap-2">✓ All License-Only features</li> -->
           <li class="flex items-start gap-2">✓ 3 team tournament entries</li>
           <li class="flex items-start gap-2">✓ Global judging & prizes</li>
           <li class="flex items-start gap-2">
-            ✓ Teacher AI‑training masterclass (live + recording)
+            ✓ Teacher AI‑training masterclass 
           </li>
+           <!-- <li class="flex items-start gap-2">✓ Private Dashboard for School or Class </li>
+           <li class="flex items-start gap-2">✓ Email support</li> -->
 
         </ul>
         <a [routerLink]="['/signup-school']"
-          [queryParams]="{ plan: 'tournament', amount: 199, currency: 'USD' }"
+          [queryParams]="{ plan: 'tournament', amount: 299, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-yellow-300 text-slate-900 hover:bg-yellow-200 transition">Register</a>
       </div>
 
       <!-- Pro -->
-      <div class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+      <div class="flex flex-col  text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
                   bg-gradient-to-br from-fuchsia-50 via-pink-50 to-pink-100
                   dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
-        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Pro</h3>
-        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$249</p>
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white"> NWG & Your Tournament</h3>
+
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$349</p>
+         <p class="text-sm text-indigo-200 mb-6">All NWG & Tournament features</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Extra support & training</p>
         <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
-          <li class="flex items-start gap-2">✓ All Tournament features</li>
-          <li class="flex items-start gap-2">✓ Staff Professional Development webinar</li>
-          <li class="flex items-start gap-2">✓ 2 extra team tournament entries</li>
+           <!-- <li class="flex items-start gap-2">✓ Annual school license</li> -->
+         
+          <li class="flex items-start gap-2">✓ Use of NWG in any class for any curriculum-related purpose</li>
+          <!-- <li class="flex items-start gap-2">✓ Teacher AI‑training masterclass</li> -->
+           <li class="flex items-start gap-2">✓ Extra support & training</li>
+          <li class="flex items-start gap-2">✓ Email and video support</li>
+         
+          <!-- <li class="flex items-start gap-2">✓ 2 extra team tournament entries</li> -->
+          
         </ul>
         <a [routerLink]="['/signup-school']"
-        [queryParams]="{ plan: 'pro', amount: 249, currency: 'USD' }"
+        [queryParams]="{ plan: 'pro', amount: 349, currency: 'USD' }"
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
       </div>
 
+      <!-- Pro -->
+    
+
       <!-- Enterprise -->
-      <div class="flex flex-col rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+      <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
                   bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200
                   dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
-        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Enterprise</h3>
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">District/University  </h3>
         <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$9,999</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">District or university (up to 10 campuses)</p>
         <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
-          <li class="flex items-start gap-2">✓ Priority support</li>
+             <li class="flex items-start gap-2">✓ Two-year license.     </li>
+          <li class="flex items-start gap-2">✓ Priority email and video support</li>
           <li class="flex items-start gap-2">✓ Custom onboarding & training</li>
+           <li class="flex items-start gap-2">✓ Staff Professional Development webinar + AI‑training </li>
           <li class="flex items-start gap-2">✓ Dedicated account manager</li>
         </ul>
         <a [routerLink]="['/contact-us']"
-   [queryParams]="{ plan: 'pro', amount: 249, currency: 'USD' }"
+
            class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
                   bg-indigo-600 text-white hover:bg-indigo-500 transition">Contact Us</a>
       </div>
