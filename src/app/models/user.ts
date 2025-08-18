@@ -113,9 +113,9 @@ export type PlanKey = (typeof PLAN_KEYS)[number];
 export const PRICE_BOOK: Record<PlanKey, number> = {
   free: 0,
   license: 99,
-  tournament: 199,
-  pro: 249,
-  school: 299,
+  tournament: 299,
+  pro: 349,
+  school: 349,
 };
 function isPlanKey(v: unknown): v is PlanKey {
   return (
