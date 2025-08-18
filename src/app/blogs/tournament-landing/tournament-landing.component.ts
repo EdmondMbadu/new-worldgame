@@ -30,64 +30,110 @@ export class TournamentLandingComponent {
   }
   /** Comparison-matrix source.  `minPlanIndex` handles feature inheritance */
   // Table rows
+  // Plans (match the card headers exactly)
+  PLANS = [
+    'Free Evaluation',
+    'NWG Only',
+    'NWG & Tournament',
+    'NWG & Your Tournament',
+    'District/University',
+  ];
+
+  // Comparison rows (5 columns per row, same order as PLANS above)
   featureRows = [
     {
       name: 'Student capacity',
       values: [
         'Single player',
-        'Unlimited',
-        'Unlimited',
-        'Unlimited',
-        'Unlimited (multi-campus)',
+        'Unlimited students',
+        'Unlimited students',
+        'Unlimited students',
+        'Unlimited users (multi-campus)',
       ],
       detail:
-        'Free is single-player only. Paid plans allow unlimited student accounts.',
+        'Free is single-player only. All paid plans allow unlimited student accounts; District/University extends across campuses.',
     },
     {
-      name: 'AI avatars included',
-      values: [true, true, true, true, true],
+      name: 'Private Dashboard (School/Class)',
+      values: [false, true, true, true, true],
       detail:
-        'AI avatar bundles are not included in plan pricing. (Show as — for clarity.)',
+        'Admin dashboard for teachers/classes. Included from NWG Only upward and inherited by all higher tiers.',
     },
     {
       name: 'Tournament access',
-      values: [false, true, true, true, true],
-      detail: 'Ability to enter official tournaments.',
+      values: [false, false, true, true, true],
+      detail: 'Eligibility to participate in official tournaments.',
     },
     {
-      name: 'Tournament entries',
-      values: ['—', '1', '3', '5', 'Custom'],
-      detail: 'Number of team entries included per season.',
+      name: 'Tournament entries included',
+      values: ['—', '—', '3 teams', '3 teams', 'Custom'],
+      detail:
+        'Baseline team entries included with the plan. District/University is arranged per deployment.',
+    },
+    {
+      name: 'Extra team entries (add-on)',
+      values: ['—', '—', '$30 each', '$30 each', 'Custom'],
+      detail: 'Per-team add-on price where applicable.',
     },
     {
       name: 'Global judging & prizes',
-      // If you want License-Only to count as judged (because it includes 1 submission),
-      // set the second value to true instead of '—'.
       values: ['—', '—', true, true, true],
-      detail: 'Eligibility for global judging rounds and prize consideration.',
+      detail: 'Access to global judging rounds and prize consideration.',
     },
     {
       name: 'Teacher AI-training masterclass',
       values: ['—', '—', true, true, true],
-      detail: 'Live training with recording.',
+      detail:
+        'Included live training (with recording) in Tournament/Your Tournament; District/University includes PD + AI training.',
     },
     {
-      name: 'Support',
-      values: ['Email', 'Email', 'Email', 'Priority', 'Priority + Manager'],
-      detail: 'Support level and response expectations.',
+      name: 'Your tournament set-up',
+      values: ['—', '—', '—', true, true],
+      detail:
+        'Hands-on set-up for your own school/class tournament. Inherited by District/University.',
+    },
+    {
+      name: 'Use of NWG in any class (curriculum-related)',
+      values: ['—', '—', '—', true, true],
+      detail:
+        'Explicit allowance to integrate NWG into any class/curriculum use case.',
+    },
+    {
+      name: 'Support level',
+      values: [
+        '—',
+        'Email',
+        'Email',
+        'Email & Video',
+        'Priority (Email & Video) + Manager',
+      ],
+      detail:
+        'Support channel and priority. District/University includes a dedicated manager.',
     },
     {
       name: 'Onboarding & training',
-      values: ['—', '—', '—', '—', 'Custom'],
+      values: ['—', '—', '—', '—', 'Custom onboarding & training'],
       detail:
-        'Setup, workshops, migration, and tailored enablement for Enterprise.',
+        'Tailored setup/workshops for multi-campus deployments (District/University).',
+    },
+    {
+      name: 'License term',
+      values: ['—', 'Annual', 'Annual', 'Annual', 'Two-year'],
+      detail: 'Plan duration. District/University is a two-year license.',
+    },
+    {
+      name: 'Campuses included',
+      values: ['—', '1 school', '1 school', '1 school', 'Up to 10 campuses'],
+      detail: 'Intended deployment scope per plan.',
     },
     {
       name: 'Dedicated account manager',
       values: ['—', '—', '—', '—', true],
-      detail: 'Direct point-of-contact for multi-campus deployments.',
+      detail:
+        'Single point of contact for planning, enablement, and success (District/University).',
     },
   ];
+
   /** UI state */
   expanded: boolean[] = this.featureRows.map(() => false);
   showMode: 'summary' | 'details' = 'summary';
