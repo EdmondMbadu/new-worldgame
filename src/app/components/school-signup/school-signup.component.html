@@ -63,8 +63,8 @@
 
         <!-- Extra teams -->
         <div class="mt-4 grid gap-3 sm:grid-cols-[auto,1fr,auto] items-center">
-          <label class="text-sm text-slate-700 dark:text-slate-300">Extra teams ($30 each)</label>
-          <input
+          <label *ngIf="plan!='school'" class="text-sm text-slate-700 dark:text-slate-300">Extra teams ($30 each)</label>
+          <input *ngIf="plan!='school'" 
             type="number" min="0" [(ngModel)]="extraTeams" name="extraTeams"
             class="w-full sm:w-28 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
                    border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm

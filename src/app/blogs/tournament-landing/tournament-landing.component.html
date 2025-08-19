@@ -403,7 +403,7 @@
         <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white"> NWG & Your Tournament</h3>
 
         <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$349</p>
-         <p class="text-sm text-indigo-200 mb-6">All NWG & Tournament features</p>
+         <p class="text-sm dark:text-indigo-200 text-indigo-600 mb-6">All NWG & Tournament features</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Extra support & training</p>
         <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
            <!-- <li class="flex items-start gap-2">✓ Annual school license</li> -->
@@ -412,6 +412,7 @@
           <!-- <li class="flex items-start gap-2">✓ Teacher AI‑training masterclass</li> -->
            <li class="flex items-start gap-2">✓ Extra support & training</li>
           <li class="flex items-start gap-2">✓ Email and video support</li>
+           <li class="flex items-start gap-2">✓ Unlimited Tournament Entries</li>
          
           <!-- <li class="flex items-start gap-2">✓ 2 extra team tournament entries</li> -->
           
@@ -429,7 +430,7 @@
       <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
                   bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200
                   dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
-        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">District/University  </h3>
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">NWG and Your District or University </h3>
         <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$9,999</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">District or university (up to 10 campuses)</p>
         <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
@@ -860,28 +861,88 @@
 </section>
 
 
-
 <!-- ── TIMELINE ───────────────────────────────────────────── -->
 <section id="timeline" class="py-20 bg-white dark:bg-slate-900">
   <div class="container mx-auto px-6 max-w-5xl">
-    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-6">
       NewWorld Game Tournament Timeline
     </h2>
 
-   
+    <!-- Options block -->
+    <div class="mb-8">
+      <h3 id="nwg-options-title"
+          class="text-base md:text-lg font-semibold text-slate-900 dark:text-white mb-3 text-center">
+        NWG and Tournament Options
+      </h3>
 
-    <div class="border-l-4 border-indigo-600 dark:border-indigo-400 pl-8 space-y-8">
+      <!-- Compact, aligned buttons -->
+      <div role="group" aria-labelledby="nwg-options-title"
+           class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
+
+        <!-- Free Evaluation -->
+        <a routerLink="/welcome"
+           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+                  ring-1 ring-slate-200 shadow-sm transition
+                  bg-white text-slate-900 hover:bg-slate-50
+                  dark:bg-slate-800/60 dark:text-white dark:ring-slate-700 dark:hover:bg-slate-800">
+          Free Evaluation
+        </a>
+
+        <!-- NWG Only $99 -->
+        <a [routerLink]="['/signup-school']"
+           [queryParams]="{ plan: 'license', amount: 99, currency: 'USD' }"
+           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+                  ring-1 ring-indigo-200 shadow-sm transition
+                  bg-indigo-50 text-indigo-700 hover:bg-indigo-100
+                  dark:bg-slate-800/60 dark:text-indigo-300 dark:ring-slate-700 dark:hover:bg-slate-800">
+          <span class="leading-none">NWG Only</span>
+          <span class="ml-1 text-xs opacity-80 leading-none">$99</span>
+        </a>
+
+        <!-- NWG & Tournament $299 -->
+        <a [routerLink]="['/signup-school']"
+           [queryParams]="{ plan: 'tournament', amount: 299, currency: 'USD' }"
+           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+                  ring-1 ring-yellow-300 shadow-sm transition
+                  bg-yellow-300 text-slate-900 hover:bg-yellow-200">
+          <span class="leading-none">NWG &amp; Tournament</span>
+          <span class="ml-1 text-xs opacity-80 leading-none">$299</span>
+        </a>
+
+        <!-- NWG & Your Tournament -->
+        <a [routerLink]="['/signup-school']"
+           [queryParams]="{ plan: 'school', amount: 349, currency: 'USD' }"
+           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+                  ring-1 ring-fuchsia-200 shadow-sm transition
+                  bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100
+                  dark:bg-slate-800/60 dark:text-fuchsia-300 dark:ring-slate-700 dark:hover:bg-slate-800">
+          NWG &amp; Your Tournament
+        </a>
+
+        <!-- NWG & Your District or University -->
+        <a [routerLink]="['/contact-us']"
+           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+                  ring-1 ring-slate-200 shadow-sm transition
+                  bg-slate-50 text-slate-700 hover:bg-slate-100
+                  dark:bg-slate-800/60 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-800">
+          NWG &amp; Your District or University
+        </a>
+      </div>
+    </div>
+
+    <!-- Timeline items -->
+    <div class="border-l-4 border-indigo-600 dark:border-indigo-400 pl-6 space-y-6">
       <div>
         <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">Oct 31, 2025</time>
         <p class="text-slate-700 dark:text-slate-300">Registration Closes</p>
       </div>
       <div>
         <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">Nov 2025 – Feb 2026</time>
-        <p class="text-slate-700 dark:text-slate-300">Students Play, Develop Solutions & Submit Projects</p>
+        <p class="text-slate-700 dark:text-slate-300">Students Play, Develop Solutions &amp; Submit Projects</p>
       </div>
       <div>
         <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">Feb – Apr 2026</time>
-        <p class="text-slate-700 dark:text-slate-300">Voting & Judging</p>
+        <p class="text-slate-700 dark:text-slate-300">Voting &amp; Judging</p>
       </div>
       <div>
         <time class="text-xl font-semibold text-indigo-600 dark:text-indigo-300">May 2026</time>
@@ -894,6 +955,9 @@
     </div>
   </div>
 </section>
+
+
+
 
 <section id="your-tournament" class="py-16 bg-white dark:bg-slate-900">
   <div class="container mx-auto px-6 max-w-5xl">

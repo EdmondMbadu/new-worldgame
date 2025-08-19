@@ -35,7 +35,7 @@ export class TournamentLandingComponent {
     'NWG Only',
     'NWG & Tournament',
     'NWG & Your Tournament',
-    'District/University',
+    'NWG and Your District or University',
   ];
 
   plans = this.PLANS;
