@@ -881,7 +881,7 @@
 
         <!-- Free Evaluation -->
         <a routerLink="/welcome"
-           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+           class="inline-flex text-center items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
                   ring-1 ring-slate-200 shadow-sm transition
                   bg-white text-slate-900 hover:bg-slate-50
                   dark:bg-slate-800/60 dark:text-white dark:ring-slate-700 dark:hover:bg-slate-800">
@@ -891,7 +891,7 @@
         <!-- NWG Only $99 -->
         <a [routerLink]="['/signup-school']"
            [queryParams]="{ plan: 'license', amount: 99, currency: 'USD' }"
-           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+           class="inline-flex text-center items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
                   ring-1 ring-indigo-200 shadow-sm transition
                   bg-indigo-50 text-indigo-700 hover:bg-indigo-100
                   dark:bg-slate-800/60 dark:text-indigo-300 dark:ring-slate-700 dark:hover:bg-slate-800">
@@ -902,7 +902,7 @@
         <!-- NWG & Tournament $299 -->
         <a [routerLink]="['/signup-school']"
            [queryParams]="{ plan: 'tournament', amount: 299, currency: 'USD' }"
-           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+           class="inline-flex text-center items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
                   ring-1 ring-yellow-300 shadow-sm transition
                   bg-yellow-300 text-slate-900 hover:bg-yellow-200">
           <span class="leading-none">NWG &amp; Tournament</span>
@@ -912,16 +912,17 @@
         <!-- NWG & Your Tournament -->
         <a [routerLink]="['/signup-school']"
            [queryParams]="{ plan: 'school', amount: 349, currency: 'USD' }"
-           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+           class="inline-flex text-center items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
                   ring-1 ring-fuchsia-200 shadow-sm transition
                   bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100
                   dark:bg-slate-800/60 dark:text-fuchsia-300 dark:ring-slate-700 dark:hover:bg-slate-800">
           NWG &amp; Your Tournament
+           <span class="ml-1 text-xs opacity-80 leading-none">$349</span>
         </a>
 
         <!-- NWG & Your District or University -->
         <a [routerLink]="['/contact-us']"
-           class="inline-flex items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
+           class="inline-flex text-center items-center justify-center w-full h-11 rounded-full px-4 text-sm font-semibold
                   ring-1 ring-slate-200 shadow-sm transition
                   bg-slate-50 text-slate-700 hover:bg-slate-100
                   dark:bg-slate-800/60 dark:text-slate-200 dark:ring-slate-700 dark:hover:bg-slate-800">
