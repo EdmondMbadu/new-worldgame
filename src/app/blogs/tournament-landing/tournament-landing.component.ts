@@ -66,9 +66,8 @@ export class TournamentLandingComponent {
     },
     {
       name: 'Tournament entries included',
-      values: ['—', '—', '3 teams', '3 teams', 'Custom'],
-      detail:
-        'Baseline team entries included with the plan. District/University is arranged per deployment.',
+      values: ['—', '—', '3 teams', 'Unlimited', 'Unlimited & Custom'],
+      detail: 'Baseline team entries included with the plan',
     },
     {
       name: 'Extra team entries (add-on)',
