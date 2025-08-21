@@ -35,47 +35,65 @@
       </div>
     </div>
   </section>
-<section id="design-science">
-    <div class="container flex flex-col items-center max-w-7xl px-4 mx-auto space-y-12 md:space-y-0 lg:flex-row justify-between mb-10 ">
-      
+<!-- ── QUOTE (brought to life) ────────────────────────────── -->
+<section id="quote-nwg" class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+  <!-- ambient glow blobs -->
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full
+              bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -bottom-28 -right-28 h-[26rem] w-[26rem] rounded-full
+              bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"></div>
 
+  <div class="container mx-auto max-w-7xl px-6">
+    <figure class="relative mx-auto max-w-4xl">
+      <!-- halo behind card -->
+      <div aria-hidden="true"
+           class="absolute -inset-6 rounded-[2rem]
+                  bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"></div>
 
-        <figure class="max-w-screen-md mx-auto text-center">
-            <svg class="w-10 h-10 mx-auto mb-3 text-gray-400 dark:text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 14">
-                <path d="M6 0H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4v1a3 3 0 0 1-3 3H2a1 1 0 0 0 0 2h1a5.006 5.006 0 0 0 5-5V2a2 2 0 0 0-2-2Zm10 0h-4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h4v1a3 3 0 0 1-3 3h-1a1 1 0 0 0 0 2h1a5.006 5.006 0 0 0 5-5V2a2 2 0 0 0-2-2Z"/>
-            </svg>
-            <blockquote>
-                <p class="text-2xl lg:text-4xl italic font-medium text-gray-900 dark:text-white">"We can't build a future for our grandchildren with a system built for our grandparents.”</p>
-            </blockquote>
-            <figcaption class="flex items-center justify-center mt-6 space-x-3 rtl:space-x-reverse">
-                <img class="w-12  rounded-full" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2FAnto%CC%81nio_Guterres%2C_23.03.23.jpg?alt=media&token=27007e3c-17fe-46de-9f17-26a2533ed066" alt="profile picture">
-                <div class="flex items-center divide-x-2 rtl:divide-x-reverse divide-gray-500 dark:divide-gray-700">
-                    <cite class="pe-3 font-medium text-lg text-gray-900 dark:text-white">ANTÓNIO GUTERRES</cite>
-                    <cite class="ps-3 text-lg text-gray-500 dark:text-gray-400">United Nations Secretary-General</cite>
-                    
-                </div>
-                
-            </figcaption>
-            <figcaption class="flex items-center justify-center mt-6 space-x-3 rtl:space-x-reverse">
-               
-                <div class="flex items-center divide-x-2 rtl:divide-x-reverse divide-gray-500 dark:divide-gray-700">
-                 
-                    <cite class="ps-3 text-lg text-gray-500 dark:text-gray-400">We need a NewWorld. 
-                        A NewWorld Game.  </cite>
-                    
-                </div>
-                
-            </figcaption>
-           
-        </figure>
-        
+      <!-- card -->
+      <div class="relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-900/60
+                  ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 md:p-12 shadow-2xl">
+        <!-- decorative quote mark -->
+        <div class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-2xl
+                    bg-gradient-to-tr from-teal-500 via-emerald-500 to-cyan-500 text-white shadow">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"/>
+          </svg>
+        </div>
 
-        
+        <!-- main quote -->
+        <blockquote class="text-center">
+          <p class="text-2xl md:text-4xl leading-tight font-semibold italic
+                    text-slate-900 dark:text-white">
+            “We can’t build a future for our grandchildren with a system built for our grandparents.”
+          </p>
+        </blockquote>
 
-    </div>
+        <!-- author -->
+        <figcaption class="mt-8 flex flex-col items-center gap-4 text-center">
+          <div class="flex items-center gap-4">
+            <img class="h-12 w-12 rounded-full ring-2 ring-white/80 dark:ring-slate-900/80"
+                 src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2FAnto%CC%81nio_Guterres%2C_23.03.23.jpg?alt=media&token=27007e3c-17fe-46de-9f17-26a2533ed066"
+                 alt="António Guterres" loading="lazy">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:divide-x sm:divide-slate-300/60 dark:sm:divide-slate-700/70">
+              <cite class="px-0 sm:pe-3 font-semibold text-slate-900 dark:text-white">António Guterres</cite>
+              <cite class="sm:ps-3 text-slate-600 dark:text-slate-400">United Nations Secretary-General</cite>
+            </div>
+          </div>
 
-
+          <!-- supportive line -->
+          <p class="mt-2 text-base md:text-lg text-slate-600 dark:text-slate-300">
+            We need a <span class="font-semibold bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">NewWorld</span>.
+            A <span class="font-semibold bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">NewWorld Game</span>.
+          </p>
+        </figcaption>
+      </div>
+    </figure>
+  </div>
 </section>
+
 
 
   
@@ -85,234 +103,543 @@
 
 
 
-<section id="intro-video">
-    <div class="container flex flex-col items-center max-w-7xl px-4 mx-auto space-y-12 md:space-y-0 lg:flex-row justify-between mb-24 ">
-        <div class="flex flex-col space-y-5  lg:w-1/2 space-x-4">
+<!-- ── INTRO VIDEO (elevated & responsive) ─────────────────── -->
+<section id="intro-video" class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+  <!-- ambient glow blobs -->
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full
+              bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -bottom-28 -right-28 h-[26rem] w-[26rem] rounded-full
+              bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"></div>
 
-            <h2 class="dark:text-white max-w-md text-3xl lg:text-4xl text-worldsecond font-bold text-center lg:text-left">
-               Intro Video
-            </h2>
+  <div class="container mx-auto max-w-7xl px-6">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
 
-            <p class="max-w-xl text-xl text-center md:text-left text-gray-400 ">
-               Watch a short intro video about the NewWorld Game
-            </p>
-           
+      <!-- Copy -->
+      <div class="space-y-6">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold
+                     ring-1 ring-teal-300/50 text-teal-700 bg-teal-50
+                     dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70">
+          Watch • 2 min intro
+        </span>
 
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          <span class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+            Intro Video
+          </span>
+        </h2>
 
+        <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+          Watch a short introduction to how NewWorld Game turns bold ideas into real-world impact.
+        </p>
+
+        <!-- Optional secondary action -->
+        <div>
+          <a href="https://www.youtube.com/watch?v=ofmmHOR6n4s" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold
+                    text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70
+                    hover:bg-teal-50 dark:hover:bg-teal-900/20 transition">
+            Watch on YouTube
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Video: framed, glowy, perfectly responsive -->
+      <div class="relative">
+        <!-- halo behind player -->
+        <div aria-hidden="true"
+             class="absolute -inset-6 rounded-[2rem]
+                    bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"></div>
+
+        <div class="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl
+                    ring-1 ring-black/5 dark:ring-white/10 shadow-2xl">
+          <!-- maintain aspect on all screens -->
+          <div class="aspect-video">
+            <iframe
+              class="h-full w-full"
+              src="https://www.youtube.com/embed/ofmmHOR6n4s"
+              title="NewWorld Game: Players Wanted"
+              frameborder="0"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen>
+            </iframe>
+          </div>
+
+          <!-- subtle decorative overlay (non-interactive) -->
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/5 via-transparent"></div>
+
+          <!-- corner label -->
+          <span class="pointer-events-none absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80
+                       ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold
+                       text-teal-700 dark:text-teal-300">
+            Intro Video
+          </span>
         </div>
 
-        <div class="flex flex-col mx-auto my-8  lg:w-1/2 md:mb-8">
-            <!-- <iframe height="480" src="https://youtu.be/ofmmHOR6n4s" title="NewWorld Game: Players Wanted" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe> -->
-            <iframe  height="480" src="https://www.youtube.com/embed/ofmmHOR6n4s" title="NewWorld Game: Players Wanted" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-        </div>
+        <!-- caption -->
+        <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+          Short, visual overview of NewWorld Game.
+        </p>
+      </div>
 
     </div>
-
-
-</section>
-
-<section id="challenge" class="md:mt-24">
-
-    <div class="items-center mt-8 max-w-7xl container flex flex-col lg:flex-row mx-auto space-y-12"> 
-        <div class=" flex flex-col lg:w-1/2">
-            <img class="lg:max-w-md max-w-sm w-3/2 rounded-lg  md:px-6 lg:px-0"  src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fchallenge-landing.webp?alt=media&token=69a081df-466d-4837-b6d7-d274f61a3462" alt="">
-
-        </div>
-
-        <div class="flex flex-col lg:w-1/2 space-y-5 ">
-            <h2 class="dark:text-white max-w-md  lg:text-4xl  text-worldsecond text-3xl font-bold text-center lg:text-left">
-
-                NewWorld Game: Shape the Future
-
-            </h2>
-
-            <p class="max-w-xl text-xl text-center lg:text-left text-gray-400 ">
-                            NewWorld Game is a Challenge like you have never seen before.
-            It’s a challenge that needs boldness, creativity, collaboration, openness to fun, a sense
-            of humor and persistence. It’s where your vision and experience build the future you
-            want. Where you are not the victim but the challenger. That it leads to rewards for you
-            and the rest of the world is a nice spin-off.
-            The Challenge is where you compete with the so-called leaders of the world – the
-            politicians, billionaires, bureaucrats and self-anointed— to solve the real problems
-            facing the world. The ones you care about.
-            It’s not a fantasy game. It’s real.
-            You don’t need luck to win.
-            You need an idea of what the world should be, and the boldness and persistence to
-            make it real. NewWorld Game will show you how.
-            And you will show the world what you can do.
-            </p>
-            <!-- <a routerLink="/welcome" class=" lg:max-w-xs p-5 px-6  text-white text-center bg-teal-700 rounded-full hover:bg-teal-800"> Get Started</a> -->
-            <!-- <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" type="button" class=" text-white bg-gradient-to-r from-teal-400 via-teal-500 lg:max-w-xs to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 font-medium rounded-full text-md px-10 py-5 text-center me-2 mb-2">Support NewWorld Game</a> -->
-
-        </div>
-
-
-       
-
-    </div>
-
-    <!-- <div class=" container items-center justify-center flex flex-col lg:flex-row mx-auto my-16 ">
-        <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" type="button" class="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 font-medium rounded-full text-sm px-10 py-5 text-center me-2 mb-2">Support NewWorld Game</a>
-    </div> -->
-
-
-
-</section>
-
-
-<section id="sdgs" class="md:mt-24">
-
-    <div class="items-center mt-8 max-w-7xl container flex flex-col lg:flex-row mx-auto space-y-12"> 
-
-        <div class="flex flex-col lg:w-1/2 space-y-5 ">
-            <h2 class="dark:text-white max-w-md  lg:text-4xl  text-worldsecond text-3xl font-bold text-center lg:text-left">
-
-                SDGs you can achieve
-
-            </h2>
-
-            <p class="max-w-xl text-xl text-center lg:text-left text-gray-400 ">
-                The UN’S Sustainable Development Goals (SDGs) aim to transform our world. They are a call to
-                action to end poverty and inequality, protect the planet, and ensure that all people enjoy
-                health, justice and prosperity. The NewWorld Game enables you to develop ways of achieving
-                them.
-            </p>
-            <!-- <a routerLink="/welcome" class=" lg:max-w-xs p-5 px-6  text-white text-center bg-teal-700 rounded-full hover:bg-teal-800"> Get Started</a> -->
-            <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" type="button" class=" text-white bg-gradient-to-r from-teal-400 via-teal-500 lg:max-w-xs to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 font-medium rounded-full text-md px-10 py-5 text-center me-2 mb-2">Support NewWorld Game</a>
-
-        </div>
-
-
-        <div class=" flex flex-col lg:w-1/2">
-            <img class="lg:max-w-md max-w-sm w-3/2 rounded-lg  md:px-6 lg:px-0"  src="../../../assets/img/sdgs.png" alt="">
-
-        </div>
-
-    </div>
-
-    <!-- <div class=" container items-center justify-center flex flex-col lg:flex-row mx-auto my-16 ">
-        <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" type="button" class="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 font-medium rounded-full text-sm px-10 py-5 text-center me-2 mb-2">Support NewWorld Game</a>
-    </div> -->
-
-
-
-</section>
-
-<section class="md:mt-12">
-    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-6">
-        <div class="mx-auto max-w-screen-sm">
-            <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Testimonials</h2>
-            <p class="mb-8 font-light text-gray-500 lg:mb-16 sm:text-xl dark:text-gray-400">We are proud to help people around the world make a difference. (Global Solutions Lab uses NewWorld Game as its platform for solving real world problems.)</p>
-        </div> 
-        <div class="grid mb-8 lg:mb-12 lg:grid-cols-2">
-            <figure class="flex flex-col justify-center items-center p-8 text-center bg-gray-50 border-b border-gray-200 md:p-12 lg:border-r dark:bg-gray-800 dark:border-gray-700">
-                <blockquote class="mx-auto mb-8 max-w-2xl text-gray-500 dark:text-gray-400">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Empowering Change: Electrifying Health Clinics in the DRC</h3>
-                    <p class="my-4">"We are incredibly honored to have our project recognized by the NewWorld Game 2024 tournament. Electrifying health clinics in the Democratic Republic of Congo has been a true passion for our team. </p>
-                    <p class="my-4">Receiving this distinction strengthens our belief in the transformative potential of our work, not just for the local communities in the DRC but beyond. The cash prize will greatly assist us in continuing this impactful project, and we are committed to using these funds responsibly to maximize its impact. </p>
-                    <p class="my-4">This initiative has inspired us deeply, and we hope it will continue to inspire future generations of NewWorld participants."</p>
-                </blockquote>
-                <figcaption class="flex justify-center items-center space-x-3">
-                    <img class="w-9 h-9 rounded-full" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2FNvP0racQnPhL8t7BKymLa9qdPCO2-PROFIL%20THAVEX%20-%20Copie.jpg?alt=media&token=8b1e69db-759c-4630-93c4-6b1da8d689f0g" alt="profile picture">
-                    <div class="space-y-0.5 font-medium dark:text-white text-left">
-                        <div>Nicholson Thamba Vuadi, DRC</div>
-                        <div class="text-sm font-light text-gray-500 dark:text-gray-400">2024 NewWorld Game Participant & Member of the winning team</div>
-                    </div>
-                </figcaption>    
-            </figure>
-            <figure class="flex flex-col justify-center items-center p-8 text-center bg-gray-50 border-b border-gray-200 md:p-12 dark:bg-gray-800 dark:border-gray-700">
-                <blockquote class="mx-auto mb-8 max-w-2xl text-gray-500 dark:text-gray-400">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">A Global Gathering for Real Change</h3>
-                    <p class="my-4">"My experience at the Global Solutions Lab in 2019 was truly transformative. Coming from Togo, West Africa, and representing Youth Impact for Sustainable Development, I was amazed by how the Lab brought together individuals from various countries, continents, cultures, education levels, and ages—all united by a shared passion for making the world a better place.</p>
-                    <p class="my-4">This unique opportunity broadened my perspective and helped me grow, especially as we proposed projects focused on contributing to quality education for all."</p>
-                </blockquote>
-                <figcaption class="flex justify-center items-center space-x-3">
-                    <img class="w-9 h-9 rounded-full" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/presentations%2Fjulio.png?alt=media&token=fb929184-5f39-4dbc-afe3-a8b2fee0bcaf" alt="profile picture">
-                    <div class="space-y-0.5 font-medium dark:text-white text-left">
-                        <div>Julio Atti, Togo</div>
-                        <div class="text-sm font-light text-gray-500 dark:text-gray-400">Youth Impact for Sustainable Development Representative</div>
-                    </div>
-                </figcaption>    
-            </figure>
-            <figure class="flex flex-col justify-center items-center p-8 text-center bg-gray-50 border-b border-gray-200 lg:border-b-0 md:p-12 lg:border-r dark:bg-gray-800 dark:border-gray-700">
-                <blockquote class="mx-auto mb-8 max-w-2xl text-gray-500 dark:text-gray-400">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">A Unique Experience of Global Collaboration</h3>
-                    <p class="my-4">"What I liked most about the Global Solutions Lab was meeting new people. I made so many new friends, and it was truly a great experience to connect with individuals from all walks of life.
-
-                    </p>
-                    <p class="my-4">As a political science major and global affairs minor, I was naturally drawn to the Lab's focus on global interconnectedness. The setup was unique, far beyond what I expected. It was amazing to see everyone put their skills on the table and collaborate effectively."</p>
-                    <!-- <p class="my-4">In my group, we had students from Saudi Arabia and even a college professor who was incredibly knowledgeable and kind. It was inspiring to learn about each person's background and culture, bringing it all together to solve problems at the Lab."</p> -->
-                </blockquote>
-                <figcaption class="flex justify-center items-center space-x-3">
-                    <img class="w-9 h-9 rounded-full" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/presentations%2Fhajrah.png?alt=media&token=3bfa3579-1fe8-402a-97f5-dae9ecd17bff" alt="profile picture">
-                    <div class="space-y-0.5 font-medium dark:text-white text-left">
-                        <div>Hajrah Najem, USA</div>
-                        <div class="text-sm font-light text-gray-500 dark:text-gray-400">NewWorld Game Participant</div>
-                    </div>
-                </figcaption>    
-            </figure>
-            <figure class="flex flex-col justify-center items-center p-8 text-center bg-gray-50 border-gray-200 md:p-12 dark:bg-gray-800 dark:border-gray-700">
-                <blockquote class="mx-auto mb-8 max-w-2xl text-gray-500 dark:text-gray-400">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">An Innovative Platform for Global Problem-Solving</h3>
-                    <p class="my-4">"We found NewWorld Game (NWG) to be incredibly impressive and stimulating. The platform offers a unique approach to addressing and solving both global and local challenges. By bringing people together from around the world, NWG creates a collaborative space where users can share ideas and develop concrete solutions.</p>
-                    <p class="my-4">What sets NWG apart is its encouragement of experimentation and rapid prototyping. Users have the chance to test their ideas, receive real-time feedback, and refine their solutions before implementing them on a larger scale. This innovative approach not only reduces risk but also significantly increases the chances of success."</p>
-                </blockquote>
-                <figcaption class="flex justify-center items-center space-x-3">
-                    <!-- <img class="w-9 h-9 rounded-full" src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/joseph-mcfall.png" alt="profile picture"> -->
-                    <div class="space-y-0.5 font-medium dark:text-white text-left">
-                        <div>NewWorld Game Participant</div>
-                        <div class="text-sm font-light text-gray-500 dark:text-gray-400">NewWorld Game Participant</div>
-                    </div>
-                </figcaption>    
-            </figure>
-        </div>
-        <div class="text-center">
-            <a href="https://www.youtube.com/watch?v=6sFUOMEw0TM&list=PLLMcZ82vC3JTzvjzWTdXEAHWWaPxH4Hsk" class="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Watch Video...</a> 
-        </div>
-    </div>
-</section>
-
-<section id="design-science">
-    <div class="container flex flex-col items-center max-w-7xl px-4 mx-auto space-y-12 md:space-y-0 lg:flex-row justify-between mb-10 ">
-        <div class=" flex flex-col lg:w-1/2 md:mb-8 xl:mt-20">
-            <img class="max-w-md w-96 rounded-xl  md:px-6 lg:px-0"  src="../../../assets/img/design-science.png" alt="">
-
-        </div>
-
-
-        <div class="flex flex-col space-y-5  lg:w-1/2">
-
-            <h2 class="dark:text-white max-w-md text-3xl lg:text-4xl text-worldsecond font-bold text-center lg:text-left">
-                Design Science
-            </h2>
-
-            <p class="max-w-xl text-xl text-center md:text-left text-gray-400 ">
-                Design Science is the methodology used by NewWorld Game for developing life preserving and enhancing solutions to society's problems. This methodology is inspired by the work of Buckminster Fuller and others through their work on the World Game and Global Solutions Lab— on which the NewWorld Game is based. For details see <a class="text-blue-400 underline" target="_blank" href="https://newworld-game.org/primer">Tools For Changing the World— A Design Science Primer</a>.
-            </p>
-           
-
-
-        </div>
-
-        
-
-    </div>
-
-
+  </div>
 </section>
 
 
+<!-- ── CHALLENGE (elevated) ─────────────────────────────────── -->
+<section id="challenge" class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+  <!-- ambient glow blobs -->
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full
+              bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -bottom-28 -right-28 h-[26rem] w-[26rem] rounded-full
+              bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"></div>
 
-<section class="">
-    <div class="py-2 px-4 mx-auto max-w-screen-xl lg:py-0 lg:px-6">
-        <div class="mx-auto flex flex-col max-w-screen-md sm:text-center">
-            <h2 class="mb-4 text-3xl mx-auto tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white">Try NewWorld Game Now</h2>
-            <p class="mx-auto mb-8 max-w-2xl font-light text-gray-500 md:mb-12 sm:text-xl dark:text-gray-400">Start solving problems and making a difference.</p>
-            
-            <a routerLink="/welcome" class="mx-auto lg:max-w-xs p-5 px-24   text-white border- bg-teal-700 rounded-full hover:bg-teal-800"> Get Started</a>
+  <div class="container mx-auto max-w-7xl px-6">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+
+      <!-- Visual: framed with glow and subtle motion -->
+      <div class="relative">
+        <!-- halo -->
+        <div aria-hidden="true"
+             class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr
+                    from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"></div>
+
+        <figure class="relative mx-auto w-full max-w-md">
+          <img
+            src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fchallenge-landing.webp?alt=media&token=69a081df-466d-4837-b6d7-d274f61a3462"
+            alt="Participants collaborating to tackle real-world challenges"
+            class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl
+                   transition-transform duration-300 hover:-translate-y-1"
+          />
+          <!-- corner tag -->
+          <span class="absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80
+                       ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold
+                       text-teal-700 dark:text-teal-300">
+            The Challenge
+          </span>
+        </figure>
+      </div>
+
+      <!-- Copy -->
+      <div class="space-y-6">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold
+                     ring-1 ring-teal-300/50 text-teal-700 bg-teal-50
+                     dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70">
+          Bold ideas • Real impact
+        </span>
+
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          <span class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+            NewWorld Game: Shape the Future
+          </span>
+        </h2>
+
+        <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+          NewWorld Game is a challenge like you’ve never seen—powered by boldness, creativity,
+          collaboration, and a sense of fun. It’s where your vision builds the future you want.
+          You’re not the victim—you’re the challenger.
+        </p>
+
+        <!-- key traits as compact chips -->
+        <div class="flex flex-wrap gap-2">
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">Boldness</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">Creativity</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">Collaboration</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">Persistence</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">Playfulness</span>
         </div>
+
+        <!-- emphasis callout -->
+        <div class="relative overflow-hidden rounded-2xl p-5 ring-1 ring-slate-200/70 dark:ring-slate-800/70
+                    bg-white/70 dark:bg-slate-900/60">
+          <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-emerald-500/5"></div>
+          <p class="relative text-slate-700 dark:text-slate-200">
+            <span class="font-semibold">It’s not a fantasy game—it's real.</span> You don’t need luck to win.
+            You need a clear idea of the world you want and the courage to make it real. NewWorld Game
+            will show you how—and you’ll show the world what you can do.
+          </p>
+        </div>
+
+        <!-- supportive line -->
+        <p class="max-w-xl text-slate-600 dark:text-slate-300">
+          Compete with the so-called “leaders” to solve the problems <em>you</em> care about—political, social,
+          economic, environmental. The rewards? For you and for the world.
+        </p>
+
+        <!-- CTAs -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
+          <a routerLink="/welcome"
+             class="group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold
+                    text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600
+                    shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4
+                    focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all">
+            Join the Challenge
+            <svg class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+
+          <a routerLink="/overview"
+             class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold
+                    text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70
+                    hover:bg-teal-50 dark:hover:bg-teal-900/20 transition">
+            How it works
+          </a>
+        </div>
+      </div>
+
     </div>
-  </section>
+  </div>
+</section>
+
+
+<!-- ── SDGs SECTION ────────────────────────────────────────── -->
+<section id="sdgs" class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+
+  <!-- soft gradient blobs -->
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full
+              bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -bottom-32 -right-28 h-[26rem] w-[26rem] rounded-full
+              bg-gradient-to-tr from-fuchsia-400 via-indigo-400 to-teal-400 opacity-20 blur-3xl"></div>
+
+  <div class="container mx-auto max-w-7xl px-6">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+
+      <!-- Copy -->
+      <div class="space-y-6">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold
+                     ring-1 ring-teal-300/50 text-teal-700 bg-teal-50
+                     dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70">
+          UN SDGs • Global Impact
+        </span>
+
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          <span class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+            SDGs you can achieve
+          </span>
+        </h2>
+
+        <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+          The UN’s Sustainable Development Goals (SDGs) aim to transform our world—ending poverty and inequality,
+          protecting the planet, and ensuring health, justice, and prosperity for all. The NewWorld Game helps you
+          design concrete, actionable ways to advance them.
+        </p>
+
+        <!-- tasteful SDG badges (optional; remove if not needed) -->
+        <div class="flex flex-wrap gap-2 pt-2">
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">1 • No Poverty</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">3 • Good Health</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">4 • Quality Education</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">7 • Clean Energy</span>
+          <span class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200">13 • Climate Action</span>
+        </div>
+
+        <!-- CTA -->
+        <div>
+          <a target="_blank"
+             href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
+             class="group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm md:text-base font-semibold
+                    text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600
+                    shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4
+                    focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all">
+            Support NewWorld Game
+            <svg class="h-4 w-4 -rotate-45 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Visual -->
+      <div class="relative">
+        <!-- halo behind image -->
+        <div aria-hidden="true"
+             class="absolute -inset-x-10 -inset-y-8 rounded-[3rem]
+                    bg-gradient-to-tr from-teal-300/20 via-cyan-300/10 to-emerald-300/20 blur-2xl"></div>
+
+        <figure class="relative mx-auto w-full max-w-md">
+          <img
+            src="../../../assets/img/sdgs.png"
+            alt="UN Sustainable Development Goals"
+            class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-xl
+                   transition-transform duration-300 hover:-translate-y-1"
+          />
+          <figcaption class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+            Built for real-world impact with the UN SDGs in mind.
+          </figcaption>
+        </figure>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ── TESTIMONIALS ────────────────────────────────────────── -->
+<section id="testimonials" class="relative py-24 bg-white dark:bg-slate-900 overflow-hidden">
+  <!-- soft gradient blobs -->
+  <div aria-hidden="true" class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-indigo-400 to-cyan-400 opacity-20 blur-3xl"></div>
+  <div aria-hidden="true" class="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-fuchsia-400 to-indigo-400 opacity-20 blur-3xl"></div>
+
+  <div class="container mx-auto px-6 max-w-7xl">
+    <header class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        What People Are Saying
+      </h2>
+      <p class="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+        Real feedback from educators, students, and collaborators of the NewWorld Game.
+      </p>
+    </header>
+
+    <!-- Cards -->
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- Item -->
+      <figure class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <svg class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"/>
+        </svg>
+        <blockquote class="mt-4 text-lg italic text-slate-800 dark:text-slate-100">
+          “It’s amazing what you’ve put together in this simulation — the innovation, inclusiveness, and diversity of the AI avatars are truly inspiring.”
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold">MB</div>
+          <div>
+            <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">M.B.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Drexel University</p>
+          </div>
+        </figcaption>
+      </figure>
+
+      <!-- Item -->
+      <figure class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <svg class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"/>
+        </svg>
+        <blockquote class="mt-4 text-lg italic text-slate-800 dark:text-slate-100">
+          “Your tools and collaborative mindset are a perfect fit for what we’re learning. It's great to see someone so deeply connected to NewWorld Game and eager to support others.”
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold">CB</div>
+          <div>
+            <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">C.B.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Participant</p>
+          </div>
+        </figcaption>
+      </figure>
+
+      <!-- Item -->
+      <figure class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <svg class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"/>
+        </svg>
+        <blockquote class="mt-4 text-lg italic text-slate-800 dark:text-slate-100">
+          “What a fantastic tool. It's incredibly personable. Have you considered expanding it beyond social and sustainability?”
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold">AR</div>
+          <div>
+            <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">A.R.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Educator</p>
+          </div>
+        </figcaption>
+      </figure>
+
+      <!-- Item -->
+      <figure class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <svg class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"/>
+        </svg>
+        <blockquote class="mt-4 text-lg italic text-slate-800 dark:text-slate-100">
+          “Thanks so much for the help and insight you're bringing. Looking forward to learning more about NewWorld Game this quarter.”
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold">BS</div>
+          <div>
+            <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">B.S.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Student</p>
+          </div>
+        </figcaption>
+      </figure>
+
+      <!-- Item -->
+      <figure class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <svg class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"/>
+        </svg>
+        <blockquote class="mt-4 text-lg italic text-slate-800 dark:text-slate-100">
+          “I’m excited to dive deeper into this program. I can already tell this tool has great potential — just need a little guidance to unlock more.”
+        </blockquote>
+        <figcaption class="mt-6 flex items-center gap-3">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold">SH</div>
+          <div>
+            <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">S.H.</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Participant</p>
+          </div>
+        </figcaption>
+      </figure>
+    </div>
+
+    <!-- Optional CTA -->
+    <div class="mt-14 text-center">
+      <a href="https://www.youtube.com/watch?v=4kB224SeqBo&list=PLLMcZ82vC3JTzvjzWTdXEAHWWaPxH4Hsk&index=1"
+         class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium ring-1 ring-indigo-200/70 dark:ring-indigo-900/40
+                bg-white/80 hover:bg-white dark:bg-slate-800/80 dark:hover:bg-slate-800
+                text-indigo-700 dark:text-indigo-300 shadow-sm transition">
+        Watch video testimonials
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ── DESIGN SCIENCE (teal/cyan glow) ─────────────────────── -->
+<section id="design-science" class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+  <!-- ambient glow blobs (teal/cyan/emerald) -->
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full
+              bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -bottom-28 -left-20 h-[26rem] w-[26rem] rounded-full
+              bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"></div>
+
+  <div class="container mx-auto max-w-7xl px-6">
+    <div class="grid items-center gap-12 lg:grid-cols-2">
+
+      <!-- Visual w/ halo -->
+      <div class="relative order-last lg:order-first">
+        <!-- teal/cyan halo -->
+        <div aria-hidden="true"
+             class="absolute -inset-6 rounded-[2rem]
+                    bg-gradient-to-tr from-teal-300/30 via-cyan-300/20 to-emerald-300/30 blur-2xl"></div>
+
+        <figure class="relative mx-auto w-full max-w-md">
+          <img
+            src="../../../assets/img/design-science.png"
+            alt="Design Science visual"
+            class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl
+                   transition-transform duration-300 hover:-translate-y-1"
+          />
+          <figcaption class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+            A practical methodology for world-changing solutions.
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- Copy -->
+      <div class="space-y-6">
+        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold
+                     ring-1 ring-teal-300/50 text-teal-700 bg-teal-50
+                     dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70">
+          Design Science • Methodology
+        </span>
+
+        <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          <span class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+            Design Science
+          </span>
+        </h2>
+
+        <p class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+          Design Science is the methodology used by NewWorld Game for developing life-preserving and enhancing
+          solutions to society's problems. This methodology is inspired by the work of Buckminster Fuller and
+          others through the World Game and Global Solutions Lab—on which the NewWorld Game is based.
+          For details see
+          <a class="text-teal-600 dark:text-teal-300 underline decoration-teal-300/60 hover:decoration-teal-500"
+             target="_blank" href="https://newworld-game.org/primer">
+            Tools For Changing the World—A Design Science Primer
+          </a>.
+        </p>
+
+        <!-- CTA -->
+        <div>
+          <a target="_blank" href="https://newworld-game.org/primer"
+             class="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold
+                    text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600
+                    shadow-lg shadow-teal-500/25 hover:shadow-xl focus:outline-none focus:ring-4
+                    focus:ring-teal-300/50 dark:focus:ring-teal-800 transition-all">
+            Read the Primer
+            <svg class="h-4 w-4 -rotate-45 transition-transform group-hover:translate-x-0.5"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ── CTA: Try NewWorld Game ─────────────────────────────── -->
+<section id="cta" class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden">
+  <!-- ambient glow blobs -->
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -top-28 -left-24 h-72 w-72 rounded-full
+              bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none absolute -bottom-32 -right-24 h-[26rem] w-[26rem] rounded-full
+              bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"></div>
+
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="mx-auto max-w-3xl text-center">
+      <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold
+                   ring-1 ring-teal-300/50 text-teal-700 bg-teal-50
+                   dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70">
+        Start solving real problems
+      </span>
+
+      <h2 class="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+        <span class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+          Try NewWorld Game Now
+        </span>
+      </h2>
+
+      <p class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300">
+        Start solving problems and making a difference.
+      </p>
+
+      <!-- CTA -->
+      <div class="mt-10">
+        <a routerLink="/welcome"
+           class="group inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold
+                  text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600
+                  shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4
+                  focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all">
+          Get Started
+          <svg class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 
 <app-footer></app-footer>

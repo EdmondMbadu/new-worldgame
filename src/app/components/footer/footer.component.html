@@ -1,102 +1,126 @@
-<!--Footer-->
-<section id="footer" >
-    <footer class="mt-12 dark:bg-slate-800 bg-teal-800">
-        <div class="container flex flex-col-reverse justify-between px-6 py-10 mx-auto space-y-8 lg:flex-row md:space-y-0">
-   <!-- Logo and social links container -->
-        <div class="flex flex-col-reverse items-center justify-between space-y-12 md:flex-col md:space-y-0 md:items-start">
-            <a class="flex flex-row items-center space-x-4 cursor-pointer hover:scale-105 transition-transform duration-300" routerLink="/">
-                <!-- Logo Image -->
-                <img src="../../../assets/img/earth-triangle-test.png" class="w-16 h-16 rounded-xl shadow-lg" alt="NewWorld Game Logo">
-                <!-- Logo Text -->
-                <h1 class="text-2xl font-bold bg-gradient-to-r to-emerald-600 from-sky-400 bg-clip-text text-transparent drop-shadow-lg ">
-                    NewWorld Game
-                </h1>
+<!-- ── FOOTER (modern + pro, simplified) ───────────────────── -->
+<section id="footer" class="relative">
+  <footer class="relative bg-slate-900 text-slate-300">
+    <!-- subtle top accent line -->
+    <div class="h-[2px] bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 opacity-60"></div>
+
+    <div class="mx-auto max-w-7xl px-6 py-20">
+      <div class="grid gap-y-16 gap-x-12 lg:grid-cols-12">
+        <!-- Brand / mission -->
+        <div class="lg:col-span-5">
+          <a class="flex items-center gap-3 hover:opacity-90 transition" routerLink="/" aria-label="NewWorld Game home">
+            <img src="../../../assets/img/earth-triangle-test.png"
+                 alt="NewWorld Game logo"
+                 class="h-12 w-12 rounded-xl shadow-lg ring-1 ring-white/10">
+            <span class="text-2xl font-extrabold bg-gradient-to-r from-sky-400 to-emerald-500 bg-clip-text text-transparent">
+              NewWorld Game
+            </span>
+          </a>
+
+          <p class="mt-6 text-sm leading-7 text-slate-400">
+            NewWorld Game is a program of the nonprofit research and education organization
+            <span class="font-semibold text-slate-200">EarthGame</span>—whose mission is to develop tools that enable and
+            democratize access to global and local problem-solving. EarthGame is a
+            <span class="font-semibold text-slate-200">501(c)(3)</span> nonprofit organization. Donations are tax-deductible.
+          </p>
+
+          <!-- Socials -->
+          <div class="mt-8 flex items-center gap-3">
+            <a href="https://twitter.com/RocketGoals" target="_blank" rel="noopener"
+               class="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-white/10 hover:ring-white/20 hover:bg-white/5 transition"
+               aria-label="Twitter / X">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
+                <path d="M18.244 2H21l-6.5 7.43L22.5 22h-6.88l-4.42-6.1L5.9 22H3.156l6.96-7.96L1.5 2h6.96l4.04 5.72L18.244 2Zm-2.4 18h1.78L8.3 4H6.52l9.324 16Z"/>
+              </svg>
             </a>
-  
-    <!-- Description -->
-    <div class="mx-auto my-6 text-center text-white container max-w-sm pb-4">
-      <p>
-        NewWorld Game is a program of the nonprofit research and education organization EarthGame— whose mission is to develop tools that enable and democratize access to global and local problem-solving. EarthGame is a 501(c)(3) nonprofit organization. Donations are tax-deductible. ©2025 EarthGame. All rights reserved.
-      </p>
-    </div>
-  
-    <!-- Social links -->
-    <div class="flex justify-center space-x-4">
-      <!-- Twitter -->
-      <a href="https://twitter.com/RocketGoals" target="_blank">
-        <img src="../../../assets/img/icon-twitter.svg" class="h-8" alt="Twitter">
-      </a>
-  
-      <!-- YouTube -->
-      <a href="https://www.youtube.com/@globalsolutionslab6445/videos" target="_blank">
-        <img src="../../../assets/img/icon-youtube.svg" class="h-8" alt="YouTube">
-      </a>
-  
-      <!-- Facebook -->
-      <a href="https://www.facebook.com/GlobalSolutionsLab" target="_blank">
-        <img src="../../../assets/img/icon-facebook.svg" class="h-8" alt="Facebook">
-      </a>
-  
-      <!-- Discord -->
-      <a href="https://discord.gg/tE5VtkcEtN" target="_blank">
-        <svg class="fill-white -mt-2" width="50px" height="50px" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="12" d="m68 138-8 16c-10.19-4.246-20.742-8.492-31.96-15.8-3.912-2.549-6.284-6.88-6.378-11.548-.488-23.964 5.134-48.056 19.369-73.528 1.863-3.334 4.967-5.778 8.567-7.056C58.186 43.02 64.016 40.664 74 39l6 11s6-2 16-2 16 2 16 2l6-11c9.984 1.664 15.814 4.02 24.402 7.068 3.6 1.278 6.704 3.722 8.567 7.056 14.235 25.472 19.857 49.564 19.37 73.528-.095 4.668-2.467 8.999-6.379 11.548-11.218 7.308-21.769 11.554-31.96 15.8l-8-16m-68-8s20 10 40 10 40-10 40-10"/>
-          <ellipse cx="71" cy="101" fill="#000000" rx="13" ry="15"/>
-          <ellipse cx="121" cy="101" fill="#000000" rx="13" ry="15"/>
-        </svg>
-      </a>
-    </div>
-  </div>
-            <!-- List Container-->
-            <div class="flex justify-around space-x-32">
-                <!-- <div class="flex flex-col space-y-3 text-white">
-          
-                    <a routerLink="/signup" class=" hover:underline">Join Now</a>
-                    <a routerLink="/login" class="hover:underline">Sign In</a>
-                  
-              
-                </div> -->
-                <div class="flex flex-col space-y-3 text-white">
-                    <a  class="hover:text-brightRed font-extrabold">Resources</a>
-                    <a routerLink="/overview" class="hover:underline">About</a>
-                    <a routerLink="/operating-manual"class="hover:underline">Operating Manual</a>
-                    <!-- <a routerLink="/plans" class="hover:underline">Support NewWorld Game</a> -->
-                    <a href="https://buy.stripe.com/8wM5lR1IK2og8r6000" target="_blank" class="hover:underline">Donate</a>
-                    <a routerLink="/archive-pictures" class="hover:underline">GSL Archive Pictures</a>
-                    <a routerLink="/careers" class="hover:underline">Internship</a>
-                    <!-- <a routerLink="/workshop" class="hover:underline">Workshop</a> -->
-                    <a routerLink="/our-team" class="hover:underline">Our Team</a>
-                      <a routerLink="/blogs/features" class="hover:underline">Features</a>
-                       <a routerLink="/mini-game" class="hover:underline">Mini WorldGame</a>
-                        <a routerLink="/ask-bucky" class="hover:underline">Ask Bucky</a>
-                        <a routerLink="/tournament-landing" class="hover:underline">Tournament For Schools</a>
-                         <a routerLink="/tournament-instructions" class="hover:underline">Tournament Instructions</a>
-                          <a routerLink="/ask-anything" class="hover:underline">Ask Anything</a>
-                         <!-- <a routerLink="/ask-bucky" class="hover:underline">Donate</a> -->
-                   
-                </div>
-                <div class="flex flex-col space-y-3 text-white">
-                    <a routerLink="/contact-us" class="hover:underline">Contact Us</a>
-                    <a routerLink="/privacy" class="hover:underline">Privacy Policy</a>
+            <a href="https://www.youtube.com/@globalsolutionslab6445/videos" target="_blank" rel="noopener"
+               class="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-white/10 hover:ring-white/20 hover:bg-white/5 transition"
+               aria-label="YouTube">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
+                <path d="M23.5 6.2a4.7 4.7 0 0 0-3.3-3.3C18.5 2.3 12 2.3 12 2.3s-6.5 0-8.2.6A4.7 4.7 0 0 0 .5 6.2C0 7.9 0 12 0 12s0 4.1.5 5.8a4.7 4.7 0 0 0 3.3 3.3c1.7.6 8.2.6 8.2.6s6.5 0 8.2-.6a4.7 4.7 0 0 0 3.3-3.3c.5-1.7.5-5.8.5-5.8s0-4.1-.5-5.8ZM9.6 15.6V8.4L15.8 12l-6.2 3.6Z"/>
+              </svg>
+            </a>
+            <a href="https://www.facebook.com/GlobalSolutionsLab" target="_blank" rel="noopener"
+               class="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-white/10 hover:ring-white/20 hover:bg-white/5 transition"
+               aria-label="Facebook">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
+                <path d="M22 12.06C22 6.48 17.52 2 11.94 2 6.35 2 1.88 6.48 1.88 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.42v-2.22c0-2.4 1.43-3.73 3.62-3.73 1.05 0 2.15.19 2.15.19v2.37h-1.21c-1.2 0-1.58.74-1.58 1.5v1.9h2.7l-.43 2.9h-2.27V22c4.78-.79 8.44-4.94 8.44-9.94Z"/>
+              </svg>
+            </a>
+            <a href="https://discord.gg/tE5VtkcEtN" target="_blank" rel="noopener"
+               class="inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-white/10 hover:ring-white/20 hover:bg-white/5 transition"
+               aria-label="Discord">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" aria-hidden="true">
+                <path d="M20.3 4.4A17.2 17.2 0 0 0 15.9 3l-.2.4a15.7 15.7 0 0 1 4.1 1.3c-1.7-.8-3.4-1.3-5.1-1.6-1.6-.3-3.3-.4-5-.1-1.7.3-3.4.8-5.1 1.6a15.7 15.7 0 0 1 4.1-1.3l-.2-.4a17.2 17.2 0 0 0-4.4 1.4C2.4 7 1.6 10 1.6 13v.1c0 .1 2 2.4 6.4 3.1a11 11 0 0 0 1.4-1.9c-.8-.3-1.5-.7-2.2-1.2.4.1.8.3 1.3.4.3.1.6.2.9.3.2.1.5.1.7.2.5.1 1.1.2 1.6.2.5 0 1.1.1 1.6 0l.7-.1.7-.2.7-.2c.5-.1 1-.3 1.4-.4-.6.5-1.4.9-2.2 1.2.4.7.9 1.3 1.4 1.9 4.4-.7 6.4-3 6.4-3.1V13c0-3-1-6-3.3-8.6ZM9.3 13.9c-.8 0-1.5-.7-1.5-1.5 0-.9.7-1.5 1.5-1.5.8 0 1.5.6 1.5 1.5 0 .8-.7 1.5-1.5 1.5Zm5.4 0c-.8 0-1.5-.7-1.5-1.5 0-.9.7-1.5 1.5-1.5s1.5.6 1.5 1.5c0 .8-.7 1.5-1.5 1.5Z"/>
+              </svg>
+            </a>
+          </div>
 
-                 
-                </div>
-
-            </div>
-
-            <!--Input Container-->
-            <div class="flex flex-col justify-between">
-                
-
-                <!-- <div class="hidden text-white lg:block">
-                    <h1>Copyright &copy; NewWorld Game All Rights Reserved</h1>
-                </div> -->
-                <!-- <div class="mx-auto my-6 text center text-white container max-w-sm pb-4">
-                    <p>NewWorld Game is a program of the nonprofit research and education organization EarthGame— whose mission is to develop tools that enable and democratize access to global and local problem-solving. 
-                        © EarthGame 2024
-                        </p>
-                </div> -->
-            </div>
+          <!-- Donate CTA -->
+          <div class="mt-8">
+            <a href="https://buy.stripe.com/8wM5lR1IK2og8r6000" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 rounded-full px-6 py-3 text-base font-semibold
+                      text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600
+                      shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4
+                      focus:ring-teal-300/60 transition">
+              Donate
+              <svg class="h-5 w-5 -rotate-45" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
         </div>
-    </footer>
+
+        <!-- Navigation columns -->
+        <div class="lg:col-span-7">
+          <div class="grid grid-cols-2 gap-10 sm:grid-cols-3">
+            <div>
+              <h3 class="text-sm font-semibold text-slate-200">Resources</h3>
+              <ul class="mt-5 space-y-3 text-sm">
+                <li><a routerLink="/overview" class="hover:text-teal-300 transition">About</a></li>
+                <li><a routerLink="/operating-manual" class="hover:text-teal-300 transition">Operating Manual</a></li>
+                <li><a href="https://buy.stripe.com/8wM5lR1IK2og8r6000" target="_blank" class="hover:text-teal-300 transition">Donate</a></li>
+                <li><a routerLink="/archive-pictures" class="hover:text-teal-300 transition">GSL Archive Pictures</a></li>
+                <li><a routerLink="/careers" class="hover:text-teal-300 transition">Internship</a></li>
+                <li><a routerLink="/our-team" class="hover:text-teal-300 transition">Our Team</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-slate-200">Programs</h3>
+              <ul class="mt-5 space-y-3 text-sm">
+                <li><a routerLink="/blogs/features" class="hover:text-teal-300 transition">Features</a></li>
+                <li><a routerLink="/mini-game" class="hover:text-teal-300 transition">Mini WorldGame</a></li>
+                <li><a routerLink="/ask-bucky" class="hover:text-teal-300 transition">Ask Bucky</a></li>
+                <li><a routerLink="/tournament-landing" class="hover:text-teal-300 transition">Tournament for Schools</a></li>
+                <li><a routerLink="/tournament-instructions" class="hover:text-teal-300 transition">Tournament Instructions</a></li>
+                <li><a routerLink="/ask-anything" class="hover:text-teal-300 transition">Ask Anything</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-slate-200">Support</h3>
+              <ul class="mt-5 space-y-3 text-sm">
+                <li><a routerLink="/contact-us" class="hover:text-teal-300 transition">Contact Us</a></li>
+                <li><a routerLink="/privacy" class="hover:text-teal-300 transition">Privacy Policy</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bottom bar -->
+      <div class="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+        <p class="text-xs text-slate-400">© 2025 EarthGame. All rights reserved.</p>
+        <a href="#top" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-teal-300 transition" aria-label="Back to top">
+          Back to top
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
 </section>
