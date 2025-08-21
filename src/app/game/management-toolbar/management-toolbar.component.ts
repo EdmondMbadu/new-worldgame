@@ -20,5 +20,6 @@ export class ManagementToolbarComponent {
     { path: '/tournament-management', label: 'Tournaments' },
     { path: '/management-demo', label: 'Demo Sign-ups' },
     { path: '/schools-management', label: 'Schools' },
+    { path: '/management-ask', label: 'Questions' },
   ];
 }

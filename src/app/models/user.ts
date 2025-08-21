@@ -126,4 +126,17 @@ function isPlanKey(v: unknown): v is PlanKey {
     v === 'school'
   );
 }
+
+export type AskStatus = 'new' | 'read' | 'closed';
+
+export interface AskDoc {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  question: string;
+  uid: string | null;
+  createdAt: any; // raw (string | number | Timestamp)
+  status: AskStatus;
+}
 export { isPlanKey };

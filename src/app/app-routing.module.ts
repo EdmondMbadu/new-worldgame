@@ -98,6 +98,7 @@ import { JoinSuccessComponent } from './components/join-success/join-success.com
 import { SchoolManagementComponent } from './components/school-management/school-management.component';
 import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
 import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.component';
+import { ManagementAskComponent } from './components/management-ask/management-ask.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -317,6 +318,12 @@ const routes: Routes = [
   {
     path: 'management-demo',
     component: ManagementDemoComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'management-ask',
+    component: ManagementAskComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },

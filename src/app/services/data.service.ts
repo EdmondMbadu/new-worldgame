@@ -6,9 +6,9 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AuthService } from './auth.service';
-import { BehaviorSubject, lastValueFrom, Observable, of } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, map, Observable, of } from 'rxjs';
 import { ActiveDescendantKeyManager } from '@angular/cdk/a11y';
-import { Avatar, User } from '../models/user';
+import { AskDoc, AskStatus, Avatar, User } from '../models/user';
 import { Evaluation, Solution } from '../models/solution';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
@@ -504,6 +504,27 @@ meaningful, lasting impact.`,
     status: 'new' | 'read' | 'closed';
   }) {
     return this.afs.collection('ask_anything').add(payload);
+  }
+  listAskAnything(): Observable<AskDoc[]> {
+    return this.afs
+      .collection('ask_anything') // order is done in component after normalization
+      .snapshotChanges()
+      .pipe(
+        map((snaps) =>
+          snaps.map((s) => {
+            const data = s.payload.doc.data() as Omit<AskDoc, 'id'>;
+            return { id: s.payload.doc.id, ...data };
+          })
+        )
+      );
+  }
+
+  setAskStatus(id: string, status: AskStatus) {
+    return this.afs.doc(`ask_anything/${id}`).set({ status }, { merge: true });
+  }
+
+  deleteAsk(id: string) {
+    return this.afs.doc(`ask_anything/${id}`).delete();
   }
   globalLabSignUp(pid: string, registrations: any) {
     const globalLabRef: AngularFirestoreDocument<any> = this.afs.doc(

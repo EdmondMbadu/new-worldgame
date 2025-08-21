@@ -1,0 +1,164 @@
+<div class="dark:bg-slate-900 min-h-screen">
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser?.email"
+    [firstName]="auth.currentUser?.firstName"
+    [lastName]="auth.currentUser?.lastName"
+    [path]="'home'">
+  </app-navbar>
+   <app-management-toolbar></app-management-toolbar>
+
+  <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
+    <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
+      <h3 class="text-3xl font-bold dark:text-white text-center mb-6">Ask Anything – Submissions</h3>
+
+      <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
+     <!-- toolbar (clean & cohesive) -->
+        <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+
+            <!-- Left: Search + Filters -->
+            <div class="flex flex-1 flex-col gap-3 md:flex-row md:items-center">
+            <!-- Search -->
+            <div class="relative w-full md:max-w-md">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                        clip-rule="evenodd"/>
+                </svg>
+                </div>
+                <input
+                type="text"
+                [(ngModel)]="search"
+                (input)="applyFilter()"
+                placeholder="Search name, email, or question…"
+                class="h-10 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                        focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 pr-10
+                        dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+                <!-- quick clear -->
+                <button *ngIf="search"
+                        (click)="search=''; applyFilter()"
+                        class="absolute inset-y-0 right-2 my-auto h-6 w-6 rounded-full
+                            text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                ✕
+                </button>
+            </div>
+
+            <!-- Status select -->
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Status</label>
+                <select [(ngModel)]="statusFilter" (change)="applyFilter()"
+                        class="h-10 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                            text-sm text-gray-900 dark:text-white px-3">
+                <option value="all">All ({{ countAll }})</option>
+                <option value="new">New ({{ countNew }})</option>
+                <option value="read">Read ({{ countRead }})</option>
+                <option value="closed">Closed ({{ countClosed }})</option>
+                </select>
+            </div>
+
+            <!-- Sort select -->
+            <div class="flex items-center gap-2 md:ml-2">
+                <label class="text-sm font-medium text-slate-600 dark:text-slate-300">Sort</label>
+                <select [(ngModel)]="sortBy" (change)="onSortChange()"
+                        class="h-10 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600
+                            text-sm text-gray-900 dark:text-white px-3">
+                <option value="createdAt">Newest First</option>
+                <option value="status">Status (New → Closed)</option>
+                </select>
+            </div>
+            </div>
+
+            <!-- Right: Counts + Export -->
+            <div class="flex items-center gap-3 justify-end">
+            <span class="text-sm text-slate-500 dark:text-slate-400">
+                Showing <span class="font-medium text-slate-700 dark:text-slate-200">{{ filtered.length }}</span> of {{ countAll }}
+            </span>
+            <button (click)="downloadCsv()"
+                class="h-10 px-4 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg
+                    hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-600 dark:border-gray-700
+                    dark:text-white dark:hover:bg-gray-700">
+                Export CSV
+            </button>
+            </div>
+        </div>
+        </div>
+
+
+        <!-- table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-600 dark:text-gray-300">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
+              <tr>
+                <th class="px-4 py-3">#</th>
+                <th class="px-4 py-3">Name</th>
+                <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3 w-[45%]">Question</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3 whitespace-nowrap">Asked At</th>
+                <th class="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let r of filtered; let i = index" class="border-b dark:border-gray-700">
+                <td class="px-4 py-3">{{ i + 1 }}</td>
+                <td class="px-4 py-3 font-medium dark:text-white">{{ r.name || '—' }}</td>
+                <td class="px-4 py-3">{{ r.email }}</td>
+                <td class="px-4 py-3 max-w-2xl">
+                  <div class="line-clamp-3" title="{{ r.question }}">{{ r.question }}</div>
+                </td>
+
+                <td class="px-4 py-3">
+                  <span
+                    class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                    [ngClass]="{
+                      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200': r.status === 'new',
+                      'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200': r.status === 'read',
+                      'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200': r.status === 'closed'
+                    }">
+                    {{ r.status | titlecase }}
+                  </span>
+                </td>
+
+                <td class="px-4 py-3 whitespace-nowrap">
+                  {{ r.createdAtMs ? (r.createdAtMs | date:'short') : '—' }}
+                </td>
+
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <button (click)="markStatus(r, 'new')"
+                      class="px-2 py-1 text-xs rounded-lg border border-emerald-300 text-emerald-700
+                             hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-200 dark:hover:bg-emerald-900/20">
+                      Mark New
+                    </button>
+                    <button (click)="markStatus(r, 'read')"
+                      class="px-2 py-1 text-xs rounded-lg border border-sky-300 text-sky-700
+                             hover:bg-sky-50 dark:border-sky-700 dark:text-sky-200 dark:hover:bg-sky-900/20">
+                      Mark Read
+                    </button>
+                    <button (click)="markStatus(r, 'closed')"
+                      class="px-2 py-1 text-xs rounded-lg border border-slate-300 text-slate-700
+                             hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700/30">
+                      Close
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr *ngIf="filtered.length === 0">
+                <td colspan="7" class="px-4 py-10 text-center text-slate-500 dark:text-slate-400">
+                  No submissions found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
