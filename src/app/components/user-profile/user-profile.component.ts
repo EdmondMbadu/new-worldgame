@@ -110,4 +110,43 @@ export class UserProfileComponent implements OnInit {
       }
     }
   }
+  get namePresent(): boolean {
+    const fn = this.user?.firstName?.trim();
+    const ln = this.user?.lastName?.trim();
+    return !!(fn || ln);
+  }
+
+  get initials(): string {
+    const fn = (this.user?.firstName || '').trim();
+    const ln = (this.user?.lastName || '').trim();
+    if (fn || ln) return ((fn[0] || '') + (ln[0] || '')).toUpperCase();
+    const email = (this.user?.email || '').trim();
+    const local = email.split('@')[0] || '';
+    if (local.length >= 2) return (local[0] + local[1]).toUpperCase();
+    if (local.length === 1) return local[0].toUpperCase();
+    return '•';
+  }
+
+  /** Only flag true placeholders – include your real default name if needed (e.g., 'duma'). */
+  isPlaceholderAvatar(path?: string | null): boolean {
+    if (!path) return true;
+    const p = path.toLowerCase();
+    return /(^$|duma|default|placeholder|no[-_ ]?photo|anon|empty)/.test(p);
+  }
+
+  /** Final avatar mode:
+   * - no name => initials
+   * - name + real photo => photo
+   * - otherwise => silhouette
+   */
+  get avatarMode(): 'initials' | 'photo' | 'silhouette' {
+    if (!this.namePresent) return 'initials';
+    if (
+      this.profilePicturePath &&
+      !this.isPlaceholderAvatar(this.profilePicturePath)
+    ) {
+      return 'photo';
+    }
+    return 'silhouette';
+  }
 }

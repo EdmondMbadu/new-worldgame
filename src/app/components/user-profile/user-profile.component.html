@@ -1,222 +1,244 @@
-<app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
+<app-navbar
+  [sideBarSmall]="true"
+  [sideBarBig]="false"
+  [email]="auth.currentUser?.email"
+  [firstName]="auth.currentUser?.firstName"
+  [lastName]="auth.currentUser?.lastName"
+  [path]="'home'"
+  current="''">
+</app-navbar>
 
-<div class="dark:bg-slate-900 min-h-screen min-w-max">
-    <div class="container flex flex-col md:flex-row mx-auto justify-center md:justify-between mt-20">
+<div class="min-h-screen dark:bg-slate-950">
+  <!-- ambient glow -->
+  <div aria-hidden="true"
+       class="pointer-events-none fixed -top-24 -left-24 hidden md:block h-80 w-80 rounded-full
+              bg-gradient-to-tr from-violet-500 to-sky-400 opacity-20 blur-3xl"></div>
+  <div aria-hidden="true"
+       class="pointer-events-none fixed -bottom-28 -right-28 hidden md:block h-[28rem] w-[28rem] rounded-full
+              bg-gradient-to-tr from-teal-500 to-emerald-400 opacity-20 blur-3xl"></div>
 
-        <div class="container flex flex-col mx-auto items-center  my-10 ">
+  <!-- widened container -->
+  <div class="mx-auto max-w-7xl px-6 pt-24 pb-10">
+    <!-- PROFILE HEADER CARD -->
+    <section
+      class="relative isolate overflow-visible rounded-3xl border border-slate-200/70 bg-white/70 shadow-xl
+             backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+      <!-- gradient ribbon -->
+      <div class="h-28 bg-gradient-to-r from-violet-500/20 via-sky-500/20 to-teal-500/20
+                  dark:from-violet-500/15 dark:via-sky-500/15 dark:to-teal-500/15"></div>
 
-                <div class="flex flex-row">
-                    <div class="flex flex-col mx-auto">
-                        <img *ngIf="profilePicturePath  !==''" [src]="profilePicturePath" class="rounded-full w-32" alt="">
-                        
-                        <div *ngIf="profilePicturePath  ===''" class=" w-20 h-20 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-               
-                            <svg class=" w-24 h-24 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                        </div>
-                       
-                    </div>
-                    <!-- <span *ngIf="user.status==='offline'" class=" ml-3 absolute w-5 h-5 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
-                    <!-- <span *ngIf="user.status==='online'" class=" ml-3 absolute w-5 h-5 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
-                    <div class="flex flex-col px-6 space-y-2">
-                        <h1 class=" text-2xl font-bold text-center md:text-left dark:text-gray-200">{{user!.firstName}} {{user!.lastName}}  </h1>
-                        <span class=" text-2xl font-light  dark:text-gray-200">{{user.email}} </span>
-                        <h2 class=" text-lg  font-Nunito font-semibold text-center md:text-left hover:underline dark:text-gray-200" > {{user!.profileCredential}}</h2>
-                        
-                    
-                        <h2 class=" text-gray-500 text-center md:text-left dark:text-gray-400"> {{user!.followers}} followers . {{user!.following}} following</h2>
-                        <div *ngIf="!followingThisUser"  >
-                            <a (click)="followThisUser()" class="bg-teal-800 hover:bg-teal-950 text-white w-fit px-4 py-2 rounded-full text-center mx-auto md:mx-0">Follow</a>
-                        </div>
-                        <div *ngIf="followingThisUser"  >
-                            <a (click)="UnFollowThisUser()" class="bg-teal-800 hover:bg-teal-950 text-white w-fit px-4 py-2 rounded-full text-center mx-auto md:mx-0">Unfollow</a>
-                        </div>
-                        
-                    
-                
-                    </div>
-                
+      <div class="-mt-12 px-6 pb-6 sm:px-8">
+        <div class="flex flex-col gap-6 md:flex-row md:items-center">
+          <!-- AVATAR (exclusive rendering) -->
+          <div class="relative shrink-0">
+            <!-- initials mode -->
+            <ng-container *ngIf="avatarMode === 'initials'; else avatarNonInitials">
+              <div
+                class="grid h-24 w-24 place-items-center rounded-3xl ring-2 ring-white shadow-2xl
+                       bg-gradient-to-br from-sky-500 to-violet-600 text-white text-3xl font-semibold
+                       dark:ring-slate-900">
+                {{ initials }}
+              </div>
+            </ng-container>
+
+            <!-- photo or silhouette -->
+            <ng-template #avatarNonInitials>
+              <ng-container *ngIf="avatarMode === 'photo'; else avatarSilhouette">
+                <img
+                  [src]="profilePicturePath"
+                  alt="Profile picture"
+                  class="h-24 w-24 rounded-3xl object-cover ring-2 ring-white shadow-2xl
+                         dark:ring-slate-900" />
+              </ng-container>
+              <ng-template #avatarSilhouette>
+                <div
+                  class="grid h-24 w-24 place-items-center rounded-3xl bg-slate-100 text-slate-400
+                         ring-2 ring-white shadow-2xl dark:bg-slate-800 dark:text-slate-500 dark:ring-slate-900">
+                  <svg class="h-12 w-12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                  </svg>
+                </div>
+              </ng-template>
+            </ng-template>
+          </div>
+
+          <!-- NAME + META + ACTIONS -->
+          <div class="flex-1">
+            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  <span *ngIf="namePresent">{{ user?.firstName }} {{ user?.lastName }}</span>
+                  <span *ngIf="!namePresent">{{ user?.email }}</span>
+                </h1>
+
+                <div class="mt-1 text-slate-600 dark:text-slate-300">
+                  <span class="text-base">{{ user?.email }}</span>
                 </div>
 
-                <div class="flex flex-col mt-4">
-                <p class="px-6 hover:underline dark:text-gray-200"  >
-                
-                    {{user!.profileDescription}}
-                </p>
-                
-            
-
-                </div>
-                <div *ngIf="completedSolutions.length>0" class=" flex flex-col mt-4 text-left text-xl">
-                    <h1 class="font-bold dark:text-gray-200">Achievements</h1>
-                    <div class="flex flex-row mt-2">
-                        <img (mouseenter)="onHoverImageToggle('solution-completed')" (mouseleave)="onHoverImageToggle('solution-completed')" class="w-24" src="../../../assets/img/solution-completed-badge.png" alt="">
-                        <div>
-                           
-                            <div *ngIf="showSolutionCompletedBadge" class="-mt-4 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 absolute">
-                                <a >
-                                    <img class="rounded-t-lg w-64" src="../../../assets/img/solution-completed-badge.png" alt="" />
-                                </a>
-                                <div class="p-5">
-                                    <a>
-                                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Solution Completed</h5>
-                                    </a>
-                                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">This badge marks that you have completed a solution. The first milestone to developing solutions that will make the world a better place.</p>
-                                    <!-- <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                        Read more
-                                         <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                                        </svg>
-                                    </a> -->
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex flex-row ">
-                            <img (mouseenter)="onHoverImageToggle('points')" (mouseleave)="onHoverImageToggle('points')"  *ngIf="points!==0" class="rounded-full w-24" src="../../../assets/img/nwg-solution-badge.png" alt="">
-                            
-                            <div *ngIf="showSolutionWithPointsBadge" class="-mt-4 ml-20 max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 absolute">
-                                <a >
-                                    <img class="rounded-t-lg w-64" src="../../../assets/img/nwg-solution-badge.png" alt="" />
-                                </a>
-                                <div class="p-5">
-                                    <a>
-                                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">You Got Points</h5>
-                                    </a>
-                                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">This badge marks that you have completed a solution and got evaluated. Thus, you have got points. Feel free to expand your solution and have it evaluated until you get a 9 to enter the tournament.</p>
-                                    <!-- <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                        Read more
-                                         <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                                        </svg>
-                                    </a> -->
-                                </div>
-                            </div>
-                        </div>
-                       
-                    </div>
-                   
-                </div>
-           
-
-            
-                
-            
-
-            
-
-
-
-        </div>
-
-
-        <div class="container flex flex-col items-center mx-auto my-10 ">
-
-            <div class="flex flex-col space-y-4 mx-4 ">
-                <h1 class="text-xl dark:text-gray-200">Credentials & Highlights </h1>
-
-                <div *ngIf="user!.employement!==''" class=" flex flex-row max-w-sm">
-                   
-                    <svg width="30px" height="30px" class="dark:fill-white fill-black stroke-0" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                        <title>work-case</title>
-                        <g id="Page-1" stroke="none" stroke-width="1"  fill-rule="evenodd">
-                            <g id="Combined-Shape" transform="translate(42.666667, 64.000000)">
-                                <path d="M277.333333,1.42108547e-14 L298.666667,21.3333333 L298.666,64 L426.666667,64 L426.666667,362.666667 L3.55271368e-14,362.666667 L3.55271368e-14,64 L128,64 L128,21.3333333 L149.333333,1.42108547e-14 L277.333333,1.42108547e-14 Z M42.6664912,220.935181 L42.6666667,320 L384,320 L384.000468,220.935097 C341.375319,233.130501 298.701692,240.759085 256.000479,243.809455 L256,277.333333 L170.666667,277.333333 L170.666323,243.809465 C127.965163,240.759108 85.2915887,233.130549 42.6664912,220.935181 Z M384,106.666667 L42.6666667,106.666667 L42.6668606,176.433085 C99.6386775,193.933257 156.507113,202.666667 213.333333,202.666667 C270.159803,202.666667 327.028489,193.933181 384.000558,176.432854 L384,106.666667 Z M256,42.6666667 L170.666667,42.6666667 L170.666667,64 L256,64 L256,42.6666667 Z">
-
-                    </path>
-                            </g>
-                        </g>
-                    </svg>
-                    <h2 class="px-2 hover:underline font-bold dark:text-gray-200" >{{user!.employement}}</h2>
-                    
-                
-                </div>
-                <div class=" flex flex-row max-w-sm" *ngIf="user!.education!==''">
-                    <svg class="dark:fill-white fill-black" width="30px" height="30px" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path d="M197.769 791.767l60.672-286.853c2.341-11.066-4.733-21.934-15.799-24.275s-21.934 4.733-24.275 15.799l-60.672 286.853c-2.341 11.066 4.733 21.934 15.799 24.275s21.934-4.733 24.275-15.799zm571.063-286.786l61.778 287.068c2.38 11.058 13.273 18.093 24.33 15.713s18.093-13.273 15.713-24.33l-61.778-287.068c-2.38-11.058-13.273-18.093-24.33-15.713s-18.093 13.273-15.713 24.33z"/><path d="M967.45 386.902L535.9 208.126c-10.609-4.399-30.569-4.442-41.207-.088L57.821 386.901l436.881 178.857c10.624 4.355 30.583 4.313 41.207-.085L967.45 386.901zM551.583 603.516c-20.609 8.533-51.787 8.599-72.409.145L24.437 417.494c-32.587-13.359-32.587-47.847.009-61.188l454.73-186.174c20.641-8.448 51.818-8.382 72.407.156l448.836 185.936c32.466 13.442 32.466 47.913.004 61.354l-448.84 185.938zm288.673 166.569c-98 57.565-209.669 88.356-325.888 88.356-116.363 0-228.162-30.866-326.246-88.564-9.749-5.735-22.301-2.481-28.036 7.268s-2.481 22.301 7.268 28.036c104.336 61.377 223.297 94.22 347.014 94.22 123.564 0 242.386-32.763 346.634-93.998 9.753-5.729 13.015-18.279 7.286-28.032s-18.279-13.015-28.032-7.286z"/><path d="M983.919 383.052v296.233c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V383.052c0-11.311-9.169-20.48-20.48-20.48s-20.48 9.169-20.48 20.48z"/></svg>
-                    <h2 *ngIf="user!.education!==''" class="px-2 hover:underline font-bold dark:text-gray-200" >{{user!.education}}</h2>
-
-                
-                </div>
-                <div class=" flex flex-row max-w-sm" *ngIf="user!.location!==''">
-                    <svg version="1.0" class="dark:fill-white fill-black" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                        width="30px" height="30px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
-                        <g>
-                        <path  d="M32,0C18.745,0,8,10.745,8,24c0,5.678,2.502,10.671,5.271,15l17.097,24.156C30.743,63.686,31.352,64,32,64
-                        s1.257-0.314,1.632-0.844L50.729,39C53.375,35.438,56,29.678,56,24C56,10.745,45.255,0,32,0z M48.087,39h-0.01L32,61L15.923,39
-                        h-0.01C13.469,35.469,10,29.799,10,24c0-12.15,9.85-22,22-22s22,9.85,22,22C54,29.799,50.281,35.781,48.087,39z"/>
-                        <path  d="M32,14c-5.523,0-10,4.478-10,10s4.477,10,10,10s10-4.478,10-10S37.523,14,32,14z M32,32
-                        c-4.418,0-8-3.582-8-8s3.582-8,8-8s8,3.582,8,8S36.418,32,32,32z"/>
-                        <path d="M32,10c-7.732,0-14,6.268-14,14s6.268,14,14,14s14-6.268,14-14S39.732,10,32,10z M32,36
-                        c-6.627,0-12-5.373-12-12s5.373-12,12-12s12,5.373,12,12S38.627,36,32,36z"/>
-                        </g>
-                </svg>
-                    <h2  class="px-2 hover:underline font-bold dark:text-gray-200">{{user!.location}} </h2>
-                
-                
-                </div>
-                    <div class=" flex flex-row max-w-sm items-center">
-                    
-            
-                        <img class="rounded-full w-10 " src="../../../assets/img/nwg-solution-badge.png" alt="">
-                    <h2 *ngIf="points!==0" class="px-2 dark:text-gray-200">Points: {{points}}  </h2>
-                    <h2 *ngIf="points==0" class="px-2 dark:text-gray-200">Points: __  </h2>
-                    </div>
-                <div class=" flex flex-row max-w-sm">
-                    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
-                        width="30px" class="dark:fill-white fill-black" height="30px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
-                        <g>
-                        <path d="M28.498,13.832c0-4.589-2.339-8.835-6.045-11.341l1.009-1.74c0.139-0.239,0.057-0.545-0.182-0.684
-                        c-0.241-0.14-0.545-0.058-0.684,0.182l-0.994,1.713c-0.624-0.358-1.279-0.67-1.965-0.928c-0.257-0.1-0.547,0.034-0.644,0.292
-                        c-0.097,0.259,0.034,0.547,0.292,0.644c0.634,0.238,1.239,0.527,1.816,0.857L20.01,4.71c-1.53-0.872-3.296-1.378-5.18-1.378
-                        c-5.79,0-10.5,4.71-10.5,10.5c0,3.594,1.817,6.769,4.578,8.663l-1.081,1.88c-0.443-0.294-0.874-0.606-1.28-0.957
-                        c-0.209-0.181-0.525-0.158-0.706,0.051s-0.158,0.524,0.051,0.705c0.454,0.393,0.938,0.741,1.436,1.068l-0.865,1.505
-                        c-0.138,0.239-0.055,0.545,0.185,0.683c0.079,0.045,0.164,0.066,0.249,0.066c0.173,0,0.341-0.09,0.434-0.251l0.852-1.483
-                        c1.78,0.992,3.766,1.575,5.817,1.7V31h-3c-0.276,0-0.5,0.224-0.5,0.5S10.724,32,11,32h7c0.276,0,0.5-0.224,0.5-0.5S18.276,31,18,31
-                        h-3v-3.509C22.457,27.399,28.498,21.311,28.498,13.832z M5.33,13.832c0-5.238,4.262-9.5,9.5-9.5s9.5,4.262,9.5,9.5
-                        s-4.262,9.5-9.5,9.5c-1.83,0-3.534-0.529-4.986-1.429c-0.005-0.003-0.008-0.009-0.013-0.012c-0.004-0.002-0.009-0.002-0.013-0.004
-                        C7.129,20.208,5.33,17.23,5.33,13.832z M9.759,23.02c1.505,0.834,3.232,1.312,5.071,1.312c5.79,0,10.5-4.71,10.5-10.5
-                        c0-3.548-1.773-6.684-4.475-8.586l1.094-1.887c3.403,2.327,5.549,6.242,5.549,10.473c0,6.985-5.683,12.668-12.667,12.668
-                        c-2.168,0-4.28-0.565-6.149-1.604L9.759,23.02z"/>
-                        </g>
-                    </svg>
-                    <h2 class="px-2 dark:text-gray-200">Joined in {{dateJoined}} </h2>
+                <div *ngIf="user?.profileCredential" class="mt-2">
+                  <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm
+                                border-slate-200 bg-white text-slate-700 shadow-sm
+                                dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    {{ user!.profileCredential }}
+                  </span>
                 </div>
 
+                <div class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  {{ user!.followers }} followers · {{ user!.following }} following
+                </div>
+              </div>
 
+              <div class="mt-2 md:mt-0">
+                <button *ngIf="!followingThisUser"
+                        (click)="followThisUser()"
+                        class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-600 to-teal-600
+                               px-5 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg
+                               transition active:scale-[.98]">
+                  Follow
+                </button>
+                <button *ngIf="followingThisUser"
+                        (click)="UnFollowThisUser()"
+                        class="inline-flex items-center gap-2 rounded-full border border-slate-300
+                               bg-white px-5 py-2 text-sm font-medium text-slate-700 shadow-sm
+                               hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                  Unfollow
+                </button>
+              </div>
             </div>
 
+            <!-- Bio -->
+            <p *ngIf="user?.profileDescription"
+               class="mt-5 max-w-3xl leading-relaxed text-slate-700 dark:text-slate-300">
+              {{ user!.profileDescription }}
+            </p>
 
-        
-        </div>
+            <!-- Achievements (no clipping, high z-index) -->
+            <div *ngIf="completedSolutions.length > 0" class="mt-6 overflow-visible">
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">Achievements</h2>
+              <div class="mt-3 flex flex-wrap items-center gap-4">
+                <!-- Solution Completed -->
+                <div class="relative">
+                  <img (mouseenter)="onHoverImageToggle('solution-completed')"
+                       (mouseleave)="onHoverImageToggle('solution-completed')"
+                       class="h-16 w-16 rounded-xl border border-slate-200 bg-white p-2 shadow-sm
+                              dark:border-slate-700 dark:bg-slate-800"
+                       src="../../../assets/img/solution-completed-badge.png"
+                       alt="Solution Completed badge" />
+                  <div *ngIf="showSolutionCompletedBadge"
+                       class="absolute left-20 top-1 z-50 w-72 rounded-xl border border-slate-200 bg-white p-4
+                              text-sm shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                    <img class="mb-3 h-24 w-full rounded-lg object-contain"
+                         src="../../../assets/img/solution-completed-badge.png" alt="" />
+                    <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">
+                      Solution Completed
+                    </h3>
+                    <p class="text-slate-600 dark:text-slate-300">
+                      You completed a solution—first milestone toward real-world impact.
+                    </p>
+                  </div>
+                </div>
 
-    
-
-    </div>
-    <div class="container mx-auto px-24">
-        <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200 my-4">
-            Solutions ({{ completedSolutions.length }})
-        </h1>
-    
-        <div class="grid grid-cols-1  md:grid-cols-3 2xl:grid-cols-4 gap-6">
-            <div *ngFor="let solution of completedSolutions; let i = index" class="transform transition-transform duration-300 hover:scale-105">
-                <app-solution [user]="user" [solution]="solution"></app-solution>
+                <!-- Points -->
+                <div class="relative" *ngIf="points !== 0">
+                  <img (mouseenter)="onHoverImageToggle('points')"
+                       (mouseleave)="onHoverImageToggle('points')"
+                       class="h-16 w-16 rounded-full border border-slate-200 bg-white p-2 shadow-sm
+                              dark:border-slate-700 dark:bg-slate-800"
+                       src="../../../assets/img/nwg-solution-badge.png"
+                       alt="Points badge" />
+                  <div *ngIf="showSolutionWithPointsBadge"
+                       class="absolute left-20 top-1 z-50 w-72 rounded-xl border border-slate-200 bg-white p-4
+                              text-sm shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                    <img class="mb-3 h-24 w-full rounded-lg object-contain"
+                         src="../../../assets/img/nwg-solution-badge.png" alt="" />
+                    <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">
+                      You Got Points
+                    </h3>
+                    <p class="text-slate-600 dark:text-slate-300">
+                      Your solution earned points—iterate to reach top scores for the tournament.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
+
+          </div> <!-- /meta -->
         </div>
-    </div>
-    
-<!-- 
-    <div class="container flex flex-col md:flex-row mx-auto justify-center">
+      </div>
+    </section>
 
-        <div class=" container flex flex-col max-w-2xl ">
-            <h1 class="text-center text-2xl font-bold underline underline-offset-8 dark:text-gray-200">Solutions ({{completedSolutions.length }})</h1>
-            <div *ngFor="let solution of completedSolutions; let i= index">
-                <app-solution [user]="user"   [solution]="solution"></app-solution>
-            
+    <!-- RIGHT COLUMN: Credentials & Highlights -->
+    <section class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div class="lg:col-span-2"></div>
+      <aside
+        class="rounded-3xl border border-slate-200/70 bg-white/70 p-6 shadow-xl backdrop-blur
+               dark:border-slate-800 dark:bg-slate-900/70">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Credentials & Highlights</h2>
+
+        <ul class="mt-4 space-y-4 text-slate-700 dark:text-slate-300">
+          <li *ngIf="user!.employement !== ''" class="flex items-start gap-3">
+            <svg width="22" height="22" class="mt-0.5 shrink-0 dark:fill-white" viewBox="0 0 512 512">
+              <path d="M277.333 0L298.667 21.333V64H426.667V362.667H0V64H128V21.333L149.333 0H277.333Z
+                       M42.667 220.935V320H384V220.935C341.375 233.13 298.702 240.759 256 243.809V277.333H170.667V243.809
+                       C127.965 240.759 85.292 233.131 42.667 220.935ZM384 106.667H42.667V176.433
+                       C99.639 193.933 156.507 202.667 213.333 202.667S327.028 193.933 384 176.433V106.667Z
+                       M256 42.667H170.667V64H256V42.667Z"/>
+            </svg>
+            <span class="font-medium">{{ user!.employement }}</span>
+          </li>
+
+          <li *ngIf="user!.education !== ''" class="flex items-start gap-3">
+            <svg width="22" height="22" class="mt-0.5 shrink-0 dark:fill-white" viewBox="0 0 1024 1024">
+              <path d="M197.8 791.8l60.7-286.9c2.3-11.1-4.7-21.9-15.8-24.3s-21.9 4.7-24.3 15.8l-60.7 286.9
+                       c-2.3 11.1 4.7 21.9 15.8 24.3 11.1 2.3 21.9-4.7 24.3-15.8zm571.1-286.8l61.8 287.1c2.4 11.1 13.3 18.1 24.3 15.7
+                       11.1-2.4 18.1-13.3 15.7-24.3l-61.8-287.1c-2.4-11.1-13.3-18.1-24.3-15.7-11.1 2.4-18.1 13.3-15.7 24.3z"/>
+              <path d="M967.5 386.9L535.9 208.1c-10.6-4.4-30.6-4.4-41.2-.1L57.8 386.9l436.9 178.9c10.6 4.4 30.6 4.3 41.2-.1l431.6-178.8z"/>
+            </svg>
+            <span class="font-medium">{{ user!.education }}</span>
+          </li>
+
+          <li *ngIf="user!.location !== ''" class="flex items-start gap-3">
+            <svg width="22" height="22" class="mt-0.5 shrink-0 dark:fill-white" viewBox="0 0 64 64">
+              <path d="M32 0C18.7 0 8 10.7 8 24c0 5.7 2.5 10.7 5.3 15L30.4 63.2c.3.5.9.8 1.6.8s1.3-.3 1.6-.8L50.7 39
+                       C53.4 35.4 56 29.7 56 24 56 10.7 45.3 0 32 0zM48.1 39L32 61 15.9 39C13.5 35.5 10 29.8 10 24 10 11.8 19.8 2 32 2
+                       s22 9.8 22 22c0 5.8-3.7 11.5-5.9 15z"/>
+            </svg>
+            <span class="font-medium">{{ user!.location }}</span>
+          </li>
+
+          <li class="flex items-center gap-3">
+            <img class="h-6 w-6 rounded-full" src="../../../assets/img/nwg-solution-badge.png" alt="">
+            <span>Points: <strong>{{ points || '__' }}</strong></span>
+          </li>
+
+          <li class="flex items-start gap-3">
+            <svg width="22" height="22" class="mt-0.5 shrink-0 dark:fill-white" viewBox="0 0 32 32">
+              <path d="M28.5 13.8c0-4.6-2.3-8.8-6-11.3l1-1.7c.1-.2.1-.6-.2-.7-.2-.1-.6-.1-.7.2l-1 1.7C19.2 1.6 17.4 1 15.5 1
+                       9.7 1 5 5.7 5 11.5c0 3.6 1.8 6.8 4.6 8.7l-1.1 1.9a12.5 12.5 0 0011 1.7V31h-3a.5.5 0 000 1h7a.5.5 0 000-1h-3v-3.5
+                       c5.5-.1 11.5-6.2 11.5-13.7zM6.8 11.5c0-5.2 4.3-9.5 9.5-9.5s9.5 4.3 9.5 9.5-4.3 9.5-9.5 9.5-9.5-4.3-9.5-9.5z"/>
+            </svg>
+            <span>Joined in {{ dateJoined }}</span>
+          </li>
+        </ul>
+      </aside>
+    </section>
+
+    <!-- SOLUTIONS -->
+    <section class="mt-10">
+      <h2 class="text-center text-2xl font-bold text-slate-900 underline underline-offset-8 dark:text-white">
+        Solutions ({{ completedSolutions.length }})
+      </h2>
+
+      <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div *ngFor="let solution of completedSolutions; let i = index"
+             class="min-w-0 transition-transform duration-200 hover:scale-[1.01]">
+          <app-solution [user]="user" [solution]="solution"></app-solution>
         </div>
- 
+      </div>
+    </section>
+  </div>
 
-
-
-    </div> -->
-    <app-footer class="md:hidden"></app-footer>
+  <app-footer class="md:hidden"></app-footer>
 </div>
 
 <app-chatbot></app-chatbot>
