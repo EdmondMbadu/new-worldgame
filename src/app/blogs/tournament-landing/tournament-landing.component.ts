@@ -71,7 +71,7 @@ export class TournamentLandingComponent {
     },
     {
       name: 'Extra team entries (add-on)',
-      values: ['—', '—', '$30 each', '$30 each', 'Custom'],
+      values: ['—', '—', '$30 each', '—', 'Custom'],
       detail: 'Per-team add-on price where applicable.',
     },
     {

@@ -80,7 +80,7 @@
         <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">4</div>
           <h3 class="mt-3 font-semibold text-slate-900 dark:text-white">Challenge</h3>
-          <p class="text-sm text-slate-600 dark:text-slate-300">Create challenge (solution) students join.</p>
+          <p class="text-sm text-slate-600 dark:text-slate-300">Pick challenge (solution) students join.</p>
         </div>
         <div class="p-5 rounded-2xl border border-indigo-100 dark:border-slate-700 bg-white dark:bg-slate-800">
           <div class="w-8 h-8 rounded-full bg-yellow-300 text-slate-900 grid place-items-center font-bold">5</div>
@@ -120,130 +120,220 @@
       <!-- IMAGE SLOT -->
       <div class="mt-5 p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
         IMAGE SLOT — Signup form / payment confirmation
-        <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fregister-school.png?alt=media&token=2538bf78-b0fe-4259-b1c4-33728185d7f9" alt="">
+        <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fregister-school-2.png?alt=media&token=49131155-8f54-41bb-bcee-dedab63c5aa0" alt="">
       </div>
     </div>
   </section>
+<!-- ── STEP 2: SCHOOL ADMIN ───────────────────────────────── -->
+<section id="school-admin" class="py-10 bg-indigo-50 dark:bg-slate-800">
+  <div class="container mx-auto px-6 max-w-7xl"> <!-- was max-w-5xl -->
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">2) School Admin dashboard</h2>
 
-  <!-- ── STEP 2: SCHOOL ADMIN ───────────────────────────────── -->
-  <section id="school-admin" class="py-10 bg-indigo-50 dark:bg-slate-800">
-    <div class="container mx-auto px-6 max-w-5xl">
-      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">2) School Admin dashboard</h2>
-      <div class="grid gap-6 md:grid-cols-2 mt-3">
-        <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
-          <li>General school information</li>
-          <li>Counts: <strong>verified</strong> vs. <strong>invited</strong> students</li>
-          <li>Lists: invited students and who accepted</li>
-          <li>Create & manage classes</li>
+    <!-- widen images on large screens -->
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mt-3">
+      <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1 lg:col-span-2">
+        <li>General school information</li>
+        <li>Counts: <strong>verified</strong> vs. <strong>invited</strong> students</li>
+        <li>Lists: invited students and who accepted</li>
+        <li>Create & manage classes</li>
+      </ul>
+
+      <!-- IMAGE SLOT -->
+      <div class="lg:col-span-3 p-4 rounded-xl border-2 border-dashed border-indigo-300">
+        <div class="grid grid-cols-1 gap-4">
+          <!-- Image 1 -->
+          <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fschool-admin-dashboard.png?alt=media&token=2f11a961-ed8d-4a2a-a36a-81100d2e6e3d"
+             target="_blank" rel="noopener" class="block group">
+            <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fschool-admin-dashboard.png?alt=media&token=2f11a961-ed8d-4a2a-a36a-81100d2e6e3d"
+                alt="School Admin overview – stats & lists"
+                class="block w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                loading="lazy"
+              />
+            </div>
+          </a>
+
+          <!-- Image 2 -->
+          <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fdashboard-2.png?alt=media&token=722b7dec-ad4e-4ee1-a9ad-4bd49342eaa3"
+             target="_blank" rel="noopener" class="block group">
+            <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fdashboard-2.png?alt=media&token=722b7dec-ad4e-4ee1-a9ad-4bd49342eaa3"
+                alt="School Admin dashboard – activity view"
+                class="block w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                loading="lazy"
+              />
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── STEP 3: CLASS ──────────────────────────────────────── -->
+<section id="class" class="py-10 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 max-w-7xl">
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">3) Create a class</h2>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mt-3">
+      <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1 lg:col-span-2">
+        <li>Class discussion area</li>
+        <li>Shared video room for all class members</li>
+        <li>Attach handouts & all required documents</li>
+        <li>Add / remove participants</li>
+        <li>Make class <strong>private</strong> or <strong>public</strong></li>
+        <li>Add challenge(s) for students to join</li>
+        <li>Add a video meeting</li>
+      </ul>
+
+      <!-- IMAGES -->
+      <div class="lg:col-span-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 1 -->
+          <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fchallenge-page.png?alt=media&token=0a876b75-f6ef-41ef-bc84-ad5b8a684d7b"
+             target="_blank" rel="noopener" class="block group">
+            <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+              <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fchallenge-page.png?alt=media&token=0a876b75-f6ef-41ef-bc84-ad5b8a684d7b"
+                   alt="Challenge page"
+                   class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
+            </div>
+          </a>
+          <!-- 2 -->
+          <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard.png?alt=media&token=c1689399-095a-41ec-a411-7c9551a8764b"
+             target="_blank" rel="noopener" class="block group">
+            <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+              <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard.png?alt=media&token=c1689399-095a-41ec-a411-7c9551a8764b"
+                   alt="Class dashboard"
+                   class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
+            </div>
+          </a>
+          <!-- 3 -->
+          <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard-2.png?alt=media&token=040310cc-98d6-4552-9fa7-5e8587b4de01"
+             target="_blank" rel="noopener" class="block group">
+            <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+              <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard-2.png?alt=media&token=040310cc-98d6-4552-9fa7-5e8587b4de01"
+                   alt="Class dashboard (variant 2)"
+                   class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
+            </div>
+          </a>
+          <!-- 4 -->
+          <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard-3.png?alt=media&token=567eb09b-0438-4632-b639-609e98e10677"
+             target="_blank" rel="noopener" class="block group">
+            <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+              <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard-3.png?alt=media&token=567eb09b-0438-4632-b639-609e98e10677"
+                   alt="Class dashboard (variant 3)"
+                   class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STEP 4: CHALLENGE (SOLUTION) ───────────────────────── -->
+<section id="challenge" class="py-10 bg-indigo-50 dark:bg-slate-800">
+  <div class="container mx-auto px-6 max-w-7xl">
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+      4) Challenge (Solution)
+    </h2>
+    <p class="mt-2 text-slate-700 dark:text-slate-300">
+      The core unit where students develop their solutions. Students form teams inside each challenge.
+      Admins/teachers can monitor and manage teams (add/remove, etc.).
+    </p>
+
+    <!-- IMAGE -->
+    <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fteam-admin-2.png?alt=media&token=969085cb-a574-4a6a-8fe2-cdd403053676"
+       target="_blank" rel="noopener" class="block group mt-5">
+      <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+        <img
+          src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fteam-admin-2.png?alt=media&token=969085cb-a574-4a6a-8fe2-cdd403053676"
+          alt="Challenge / Solution page"
+          class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+          loading="lazy"
+        />
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ── STEP 5: TEAM WORKSPACE ─────────────────────────────── -->
+<section id="teams" class="py-10 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 max-w-7xl">
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+      5) Team workspace
+    </h2>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mt-3">
+      <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1 lg:col-span-2">
+        <li><strong>Team dashboard</strong>: only the team admin can add/remove members</li>
+        <li>All team members can update and evolve the solution</li>
+        <li>Always-open <strong>video channel</strong></li>
+        <li>Dedicated <strong>chat channel</strong></li>
+        <li><strong>Whiteboard</strong> for brainstorming</li>
+        <li><strong>Documents</strong> area for key files</li>
+        <li><strong>Solution details</strong> page (team members & description)</li>
+      </ul>
+
+      <!-- IMAGE -->
+      <div class="lg:col-span-3">
+        <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fteam-admin.png?alt=media&token=ca9c67e2-4150-49c0-90bd-17154e8e125b"
+           target="_blank" rel="noopener" class="block group">
+          <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fteam-admin.png?alt=media&token=ca9c67e2-4150-49c0-90bd-17154e8e125b"
+              alt="Team workspace (video / chat / whiteboard / docs / details)"
+              class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              loading="lazy"
+            />
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── STEP 6: SUBMISSION ─────────────────────────────────── -->
+<section id="submission" class="py-10 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 max-w-7xl">
+    <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">6) Submit to the tournament</h2>
+
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mt-3">
+      <div class="lg:col-span-2">
+        <h3 class="font-semibold text-slate-900 dark:text-white">Submission limits</h3>
+        <ul class="mt-2 list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+          <li>Included: up to <strong>3</strong> team entries per school</li>
+          <li>Optional: add more teams for <strong>$30</strong> each</li>
         </ul>
-        <!-- IMAGE SLOT -->
-        <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
-          IMAGE SLOT — School Admin overview (stats & lists)
-          <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fschool-admin-dashboard.png?alt=media&token=2f11a961-ed8d-4a2a-a36a-81100d2e6e3d" alt="">
-            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fdashboard-2.png?alt=media&token=722b7dec-ad4e-4ee1-a9ad-4bd49342eaa3" alt="">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── STEP 3: CLASS ──────────────────────────────────────── -->
-  <section id="class" class="py-10 bg-white dark:bg-slate-900">
-    <div class="container mx-auto px-6 max-w-5xl">
-      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">3) Create a class</h2>
-      <div class="grid gap-6 md:grid-cols-2 mt-3">
-        <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
-          <li>Class discussion area</li>
-          <li>Shared video room for all class members</li>
-          <li>Attach handouts & all required documents</li>
-          <li>Add / remove participants</li>
-          <li>Make class <strong>private</strong> or <strong>public</strong></li>
-          <li>Add challenge(s) for students to join</li>
-          <li>Add a video meeting</li>
+        <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Include in your submission</h3>
+        <ul class="mt-2 list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
+          <li>Solution title & challenge statement</li>
+          <li>Approach & innovation highlights</li>
+          <li>Implementation roadmap & expected impact</li>
+          <li>References & attachments (docs, images, links)</li>
+          <li>Optional: short demo or pitch video link</li>
         </ul>
-        <!-- IMAGE SLOT -->
-        <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
-          IMAGE SLOT — New Class form / Class page
-          <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fchallenge-page.png?alt=media&token=0a876b75-f6ef-41ef-bc84-ad5b8a684d7b" alt="">
-        <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard.png?alt=media&token=c1689399-095a-41ec-a411-7c9551a8764b" alt="">
-        <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard-2.png?alt=media&token=040310cc-98d6-4552-9fa7-5e8587b4de01" alt="">
-        <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fclass-dashboard-3.png?alt=media&token=567eb09b-0438-4632-b639-609e98e10677" alt="">
-        </div>
+      </div>
+
+      <!-- IMAGE -->
+      <div class="lg:col-span-3">
+        <a href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Ftpurnament-submission.png?alt=media&token=1c5acc42-dfe0-4589-b3c5-a1feb340fb68"
+           target="_blank" rel="noopener" class="block group">
+          <div class="aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden ring-1 ring-slate-200/70 dark:ring-slate-700 shadow">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Ftpurnament-submission.png?alt=media&token=1c5acc42-dfe0-4589-b3c5-a1feb340fb68"
+                 alt="Submission form example"
+                 class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]" loading="lazy" />
+          </div>
+        </a>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ── STEP 4 & 5: CHALLENGE + TEAMS ──────────────────────── -->
-  <section id="challenge-teams" class="py-10 bg-indigo-50 dark:bg-slate-800">
-    <div class="container mx-auto px-6 max-w-5xl">
-      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">4) Challenge (Solution) & 5) Team workspace</h2>
-
-      <!-- Challenge / Solution -->
-      <div class="mt-4 rounded-2xl border border-indigo-100 dark:border-slate-700 p-6 bg-white dark:bg-slate-900">
-        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Challenge (Solution)</h3>
-        <p class="mt-2 text-slate-700 dark:text-slate-300">
-          The core unit where students develop their solutions. Students form teams inside each challenge.
-          Admins/teachers can monitor and manage teams (add/remove, etc.).
-        </p>
-        <!-- IMAGE SLOT -->
-        <div class="mt-4 p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
-          IMAGE SLOT — Challenge/Solution page
-          <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fteam-admin-2.png?alt=media&token=969085cb-a574-4a6a-8fe2-cdd403053676" alt="">
-          
-        </div>
-      </div>
-
-      <!-- Teams -->
-      <div class="mt-6 rounded-2xl border border-indigo-100 dark:border-slate-700 p-6 bg-white dark:bg-slate-900">
-        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Teams</h3>
-        <div class="grid gap-6 md:grid-cols-2 mt-2">
-          <ul class="list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
-            <li><strong>Team dashboard</strong>: only the team admin can add/remove members</li>
-            <li>All team members can update and evolve the solution</li>
-            <li>Always-open <strong>video channel</strong></li>
-            <li>Dedicated <strong>chat channel</strong></li>
-            <li><strong>Whiteboard</strong> for brainstorming</li>
-            <li><strong>Documents</strong> area for key files</li>
-            <li><strong>Solution details</strong> page (team members & description)</li>
-          </ul>
-          <!-- IMAGE SLOT -->
-          <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
-            IMAGE SLOT — Team workspace (video / chat / whiteboard / docs / details)
-          <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Fteam-admin.png?alt=media&token=ca9c67e2-4150-49c0-90bd-17154e8e125b" alt="">
-        
-        </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── STEP 6: SUBMISSION ─────────────────────────────────── -->
-  <section id="submission" class="py-10 bg-white dark:bg-slate-900">
-    <div class="container mx-auto px-6 max-w-5xl">
-      <h2 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">6) Submit to the tournament</h2>
-      <div class="grid gap-6 md:grid-cols-2 mt-3">
-        <div>
-          <h3 class="font-semibold text-slate-900 dark:text-white">Submission limits</h3>
-          <ul class="mt-2 list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
-            <li>Included: up to <strong>3</strong> team entries per school</li>
-            <li>Optional: add more teams for <strong>$30</strong> each</li>
-          </ul>
-          <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Include in your submission</h3>
-          <ul class="mt-2 list-disc list-inside text-slate-700 dark:text-slate-300 space-y-1">
-            <li>Solution title & challenge statement</li>
-            <li>Approach & innovation highlights</li>
-            <li>Implementation roadmap & expected impact</li>
-            <li>References & attachments (docs, images, links)</li>
-            <li>Optional: short demo or pitch video link</li>
-          </ul>
-        </div>
-        <!-- IMAGE SLOT -->
-        <div class="p-4 rounded-xl border-2 border-dashed border-indigo-300 text-sm text-slate-600 dark:text-slate-300">
-          IMAGE SLOT — Submission form / example
-          <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/tournament%2Ftpurnament-submission.png?alt=media&token=1c5acc42-dfe0-4589-b3c5-a1feb340fb68" alt="">
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ── TIMELINE ───────────────────────────────────────────── -->
   <section id="timeline" class="py-12 bg-indigo-50 dark:bg-slate-800">
