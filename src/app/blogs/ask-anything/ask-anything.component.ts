@@ -69,15 +69,15 @@ export class AskAnythingComponent implements OnInit {
     if (this.form.invalid) return;
 
     const v = this.form.value;
+    const now = Date.now();
     const payload = {
       firstName: (v.firstName || this.auth.currentUser?.firstName || '').trim(),
       lastName: (v.lastName || this.auth.currentUser?.lastName || '').trim(),
       email: (v.email || this.auth.currentUser?.email || '').trim(),
       question: (v.question || '').trim(),
       uid: this.auth.currentUser?.uid || null,
-      createdAt: this.time?.todaysDate
-        ? this.time.todaysDate()
-        : new Date().toISOString(),
+      // NEW: local fallback to show time immediately
+      createdAtMs: now,
       status: 'new' as const,
     };
 

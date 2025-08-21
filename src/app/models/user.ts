@@ -136,7 +136,8 @@ export interface AskDoc {
   email: string;
   question: string;
   uid: string | null;
-  createdAt: any; // raw (string | number | Timestamp)
   status: AskStatus;
+  createdAt?: any; // Firestore Timestamp | string | number (legacy)
+  createdAtMs?: number; // NEW: local millisecond fallback
 }
 export { isPlanKey };

@@ -48,11 +48,13 @@ export class ManagementAskComponent implements OnInit {
   }
 
   private hydrate(d: AskDoc): AskRow {
-    const createdAtMs = this.normalizeTimestamp(d.createdAt);
+    const createdAtMs =
+      (d as any).createdAtMs ?? this.normalizeTimestamp((d as any).createdAt);
+
     const name = `${(d.firstName || '').trim()} ${(
       d.lastName || ''
     ).trim()}`.trim();
-    return { ...d, createdAtMs, name };
+    return { ...d, createdAtMs, name } as AskRow;
   }
 
   private normalizeTimestamp(v: any): number {

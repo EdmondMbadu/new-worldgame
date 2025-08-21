@@ -500,10 +500,13 @@ meaningful, lasting impact.`,
     email: string;
     question: string;
     uid: string | null;
-    createdAt: string;
+    createdAtMs: number; // <-- NEW
     status: 'new' | 'read' | 'closed';
   }) {
-    return this.afs.collection('ask_anything').add(payload);
+    return this.afs.collection('ask_anything').add({
+      ...payload,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(), // exact server write time
+    });
   }
   listAskAnything(): Observable<AskDoc[]> {
     return this.afs
