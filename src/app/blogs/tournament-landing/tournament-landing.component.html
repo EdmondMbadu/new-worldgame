@@ -79,31 +79,63 @@
   </p>
 </section>
 
-  <!-- ── QUICK GLANCE AT PRIZES (TOP) ────────────────────────── -->
-  <section class="py-12 bg-indigo-50 dark:bg-slate-800">
-    <div class="container mx-auto px-6 flex flex-wrap justify-center gap-6 text-center">
-      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
-        <div class="text-3xl mb-2">🥇</div>
-        <span class="font-semibold text-slate-900 dark:text-white">Gold</span>
-        <small class="text-slate-600 dark:text-indigo-200">$5,000</small>
-      </div>
-      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
-        <div class="text-3xl mb-2">🥈</div>
-        <span class="font-semibold text-slate-900 dark:text-white">Silver</span>
-        <small class="text-slate-600 dark:text-indigo-200">$2,500</small>
-      </div>
-      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
-        <div class="text-3xl mb-2">🥉</div>
-        <span class="font-semibold text-slate-900 dark:text-white">Bronze</span>
-        <small class="text-slate-600 dark:text-indigo-200">$1,000</small>
-      </div>
-      <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
-        <div class="text-3xl mb-2">🌟</div>
-        <span class="font-semibold text-slate-900 dark:text-white">Special</span>
-        <small class="text-slate-600 dark:text-indigo-200">4 Categories</small>
-      </div>
+
+<!-- ── QUICK GLANCE AT PRIZES (TOP) ────────────────────────── -->
+<section class="py-12 bg-indigo-50 dark:bg-slate-800">
+  <div class="container mx-auto px-6 flex flex-wrap justify-center gap-6 text-center">
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🥇</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Gold</span>
+      <small class="text-slate-600 dark:text-indigo-200">$5,000</small>
     </div>
-  </section>
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🥈</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Silver</span>
+      <a (click)="data.scrollTo($event, 'awards')" href="#awards"
+         class="mt-1 font-medium underline underline-offset-4 decoration-2
+                text-indigo-600 hover:text-indigo-700
+                dark:text-indigo-300 dark:hover:text-indigo-200
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+                transition-colors">
+        See below
+      </a>
+      <!-- <small class="text-slate-600 dark:text-indigo-200">$2,500</small> -->
+    </div>
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🥉</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Bronze</span>
+      <a (click)="data.scrollTo($event, 'awards')" href="#awards"
+         class="mt-1 font-medium underline underline-offset-4 decoration-2
+                text-indigo-600 hover:text-indigo-700
+                dark:text-indigo-300 dark:hover:text-indigo-200
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+                transition-colors">
+        See below
+      </a>
+      <!-- <small class="text-slate-600 dark:text-indigo-200">$1,000</small> -->
+    </div>
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🌟</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Special</span>
+      <small class="text-slate-600 dark:text-indigo-200">4 Categories</small>
+      <!-- Optional: also link to awards -->
+      <!--
+      <a href="#awards" class="mt-1 font-medium underline underline-offset-4 decoration-2
+                             text-indigo-600 hover:text-indigo-700
+                             dark:text-indigo-300 dark:hover:text-indigo-200 transition-colors">
+        See below
+      </a>
+      -->
+    </div>
+
+  </div>
+</section>
 
 <!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
 <section id="overview" class="py-10 bg-white dark:bg-slate-900">
@@ -692,102 +724,6 @@
   </div>
 </section>
 
-<!-- <section id="partners" class="py-20 bg-indigo-50 dark:bg-slate-800">
-  <div class="container mx-auto px-6">
-    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">
-      Our Partners
-    </h2>
-
-    <div
-      class="flex gap-8 overflow-x-auto px-1                                
-             snap-x snap-mandatory scroll-pl-6 scroll-pr-6                   
-             md:grid md:grid-cols-4 md:gap-12 md:overflow-visible md:px-0">  
-
-    
-      <div class="flex flex-col items-center shrink-0 snap-start md:snap-none">
-        <div
-          class="w-32 h-32 rounded-full bg-white/90 
-                 ring-1 ring-slate-200 dark:ring-slate-600
-                 flex items-center justify-center shadow-md
-                 hover:shadow-lg hover:-translate-y-1 transition">
-          <img
-            src="https://international-partnerships.ec.europa.eu/sites/default/files/styles/oe_theme_medium_no_crop/public/2022-05/sdg-wheel-landscape-white-bg_en.png?itok=XaUGogrB"
-            alt="UN Sustainable Development Goals"
-            class="max-h-24 object-contain"
-          />
-        </div>
-        <p class="mt-3 text-center text-sm font-semibold text-slate-900 dark:text-slate-200 leading-snug">
-          UN&nbsp;Sustainable<br>Development Goals
-        </p>
-      </div>
-
-      
-      <div class="flex flex-col items-center shrink-0 snap-start md:snap-none">
-        <div
-          class="w-32 h-32 rounded-full bg-white/90 
-                 ring-1 ring-slate-200 dark:ring-slate-600
-                 flex items-center justify-center shadow-md
-                 hover:shadow-lg hover:-translate-y-1 transition">
-          <img
-            src="https://kuvuna.org/wp-content/uploads/2023/11/Green-100px.png"
-            alt="Kuvuna Foundation"
-            class="max-h-24 object-contain"
-          />
-        </div>
-        <p class="mt-3 text-center text-sm font-semibold text-slate-900 dark:text-slate-200 leading-snug">
-          Kuvuna&nbsp;Foundation
-        </p>
-      </div>
-
-
-      <div class="flex flex-col items-center shrink-0 snap-start md:snap-none">
-        <div
-          class="w-32 h-32 rounded-full bg-white/90 
-                 ring-1 ring-slate-200 dark:ring-slate-600
-                 flex items-center justify-center shadow-md
-                 hover:shadow-lg hover:-translate-y-1 transition">
-          <img
-            src="https://1earthgame.org/wp-content/uploads/2020/09/cropped-earthgame_logo-square@2x-1.png"
-            alt="EarthGame"
-            class="max-h-24 object-contain"
-          />
-        </div>
-        <p class="mt-3 text-center text-sm font-semibold text-slate-900 dark:text-slate-200 leading-snug">
-          EarthGame
-        </p>
-      </div>
-
-    
-      <div class="flex flex-col items-center shrink-0 snap-start md:snap-none">
-        <div
-          class="w-32 h-32 rounded-full bg-white/90
-                 ring-1 ring-slate-200 dark:ring-slate-600
-                 flex items-center justify-center shadow-md
-                 hover:shadow-lg hover:-translate-y-1 transition">
-          <img
-            src="https://us1-photo.nextdoor.com/pages_avatar_photos/83/1a/831a8441ed5fe8b32af54734b9bc5617.jpg"
-            alt="Drexel University – School of Entrepreneurship"
-            class="max-h-24 object-contain"
-          />
-        </div>
-        <p class="mt-3 text-center text-sm font-semibold text-slate-900 dark:text-slate-200 leading-snug">
-          Drexel University<br>Charles D. Close School of Entrepreneurship
-        </p>
-      </div>
-    </div>
-
- 
-    <p class="mt-16 text-center text-sm italic text-slate-600 dark:text-slate-400">
-      Want to see your logo here?&nbsp;
-      <a href="mailto:info@newworld-game.org"
-         class="underline text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200">
-        Get in touch
-      </a>.
-    </p>
-  </div>
-</section> -->
-
-
 
 <!-- ── AWARDS ─────────────────────────────────────────────── -->
 <section id="awards"
@@ -815,14 +751,14 @@
       <div class="p-6 bg-white/10 rounded-3xl text-center backdrop-blur">
         <div class="text-6xl mb-4">🥈</div>
         <h3 class="text-2xl font-bold mb-2">Silver Award</h3>
-        <p> Coaching • Certificate</p>
+        <p> Coaching • Certificate • Scholarship to the 2026 Global Solutions Lab</p>
       </div>
 
       <!-- Bronze Award -->
       <div class="p-6 bg-white/10 rounded-3xl text-center backdrop-blur">
         <div class="text-6xl mb-4">🥉</div>
         <h3 class="text-2xl font-bold mb-2">Bronze Award</h3>
-        <p>Feature on NWG Blog</p>
+        <p>Feature on NWG Blog • Scholarship to the 2026 Global Solutions Lab</p>
       </div>
 
       <!-- Special Categories -->
