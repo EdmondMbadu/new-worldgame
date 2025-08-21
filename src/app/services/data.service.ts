@@ -493,6 +493,18 @@ meaningful, lasting impact.`,
     };
     return primerRef.set(data, { merge: true });
   }
+  // NEW: Ask Anything submission
+  askAnythingSubmit(payload: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    question: string;
+    uid: string | null;
+    createdAt: string;
+    status: 'new' | 'read' | 'closed';
+  }) {
+    return this.afs.collection('ask_anything').add(payload);
+  }
   globalLabSignUp(pid: string, registrations: any) {
     const globalLabRef: AngularFirestoreDocument<any> = this.afs.doc(
       `global-lab-2025/${pid}`

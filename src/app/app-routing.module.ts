@@ -97,6 +97,7 @@ import { InvitationsComponent } from './components/invitations/invitations.compo
 import { JoinSuccessComponent } from './components/join-success/join-success.component';
 import { SchoolManagementComponent } from './components/school-management/school-management.component';
 import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
+import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -506,6 +507,10 @@ const routes: Routes = [
   {
     path: 'tournament-landing',
     component: TournamentLandingComponent,
+  },
+  {
+    path: 'ask-anything',
+    component: AskAnythingComponent,
   },
   {
     path: 'tournament-instructions',

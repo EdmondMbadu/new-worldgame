@@ -143,6 +143,7 @@ import { InvitationsComponent } from './components/invitations/invitations.compo
 import { JoinSuccessComponent } from './components/join-success/join-success.component';
 import { SchoolManagementComponent } from './components/school-management/school-management.component';
 import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
+import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.component';
 
 @NgModule({
   declarations: [
@@ -261,6 +262,7 @@ import { TournamentInstructionsComponent } from './blogs/tournament-instructions
     JoinSuccessComponent,
     SchoolManagementComponent,
     TournamentInstructionsComponent,
+    AskAnythingComponent,
   ],
   imports: [
     BrowserModule,
