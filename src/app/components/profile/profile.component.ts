@@ -183,4 +183,47 @@ export class ProfileComponent implements OnInit {
       // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
     }
   }
+  // --- Avatar display helpers (non-breaking) ---
+  get namePresent(): boolean {
+    const fn = this.user?.firstName?.trim();
+    const ln = this.user?.lastName?.trim();
+    return !!(fn || ln);
+  }
+
+  get initials(): string {
+    const fn = (this.user?.firstName || '').trim();
+    const ln = (this.user?.lastName || '').trim();
+    if (fn || ln) return ((fn[0] || '') + (ln[0] || '')).toUpperCase();
+    const email = (this.user?.email || '').trim();
+    const local = email.split('@')[0] || '';
+    if (local.length >= 2) return (local[0] + local[1]).toUpperCase();
+    if (local.length === 1) return local[0].toUpperCase();
+    return '•';
+  }
+
+  /** Only treat real placeholders as placeholders. Add specific names if you have them (e.g., 'duma'). */
+  isPlaceholderAvatar(path?: string | null): boolean {
+    if (!path) return true;
+    const p = path.toLowerCase();
+    return (
+      /(^$|duma|default|placeholder|no[-_ ]?photo|anon|empty)$/.test(p) ||
+      p.includes('duma')
+    );
+  }
+
+  /** Final avatar mode:
+   * - no name => initials (even if photo exists)
+   * - name + real photo => photo
+   * - otherwise => silhouette
+   */
+  get avatarMode(): 'initials' | 'photo' | 'silhouette' {
+    if (!this.namePresent) return 'initials';
+    if (
+      this.profilePicturePath &&
+      !this.isPlaceholderAvatar(this.profilePicturePath)
+    ) {
+      return 'photo';
+    }
+    return 'silhouette';
+  }
 }
