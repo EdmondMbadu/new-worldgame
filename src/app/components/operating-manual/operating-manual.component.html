@@ -1,226 +1,399 @@
+<div class="dark:bg-slate-900 min-h-screen antialiased selection:bg-indigo-600/20 selection:text-indigo-900 dark:selection:text-indigo-200">
+  <!-- NAVBAR -->
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [hoveredManualPath]="'bg-gray-100 dark:bg-gray-700'"
+      [showMoreOrLess]="true"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      [path]="'home'">
+    </app-navbar>
+  </div>
 
-     <div class="dark:bg-slate-900 min-h-screen">
-        <div *ngIf="!isLoggedIn">
-            <app-navbar></app-navbar>
-        </div>
-        <div *ngIf="isLoggedIn">
-            <app-navbar [hoveredManualPath]="'bg-gray-100 dark:bg-gray-700'" [showMoreOrLess]="true" [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email" [firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"></app-navbar>
-        </div>
-    
-        <aside aria-label="Related articles" class="py-12 px-4 mt-20 bg-gray-50 dark:bg-slate-900">
-            <div class="mx-auto max-w-screen-xl">
-                <h2 class="mb-8 text-2xl font-bold text-gray-900 dark:text-white">Operating Manual</h2>
-                <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    
-                    <!-- Articles Start -->
-                    
-                    <article class="w-full">
-                        <a routerLink="/blogs/instructions">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fhow-to-use-nwg.png?alt=media" class="mb-4 rounded-lg w-full h-48 object-cover" alt="How To Use NewWorld Game">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/instructions">How To Use NewWorld Game</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">A cheatsheet for everything in the NewWorld Game web application.</p>
-                        <a routerLink="/blogs/instructions" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">Read in 3 minutes</a>
-                    </article>
-                    
-                    <article class="w-full">
-                        <a routerLink="/overview">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2Fworld-game-presentation.jpeg?alt=media" class="mb-4 rounded-lg w-full h-48 object-cover" alt="About">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/overview">About</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">The NewWorld Game is a work- and play-space for developing solutions to real-world problems.</p>
-                        <a routerLink="/overview" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">Read in 3 minutes</a>
-                    </article>
-                    
-                    <article class="w-full">
-                        <a routerLink="/primer">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdesign-science-primer.png?alt=media" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Design Science Primer">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/primer">Tools for Changing the World— A Design Science Primer</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">Tools for Changing the World presents a methodology for changing the world.</p>
-                    </article>
-                    
-                    <article class="w-full">
-                        <a routerLink="/blogs/worldgame-packet">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fworldgame-packet.png?alt=media" class="mb-4 rounded-lg w-full h-48 object-cover" alt="World Game">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/worldgame-packet">World Game</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">A description of the World Game, predecessor/inspiration for NewWorld Game.</p>
-                        <a routerLink="/blogs/worldgame-packet" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">Read in 2 minutes</a>
-                    </article>
-                        <article class="w-full">
-                        <a routerLink="/blogs/nwg-steps">
-                            <img src="../../../assets/img/sofia-agent.png"  class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/nwg-solution-tour">Step I-V AI Tour</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">AI tour of Step I - V of the NewWorld Game  ...</p>
-                        <a routerLink="/blogs/nwg-solution-tour" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a routerLink="/blogs/nwg-solution-tour">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-solution-tour.png?alt=media&token=95cff4d3-6ad6-4ace-9f3c-85dbfb14fc2d"  class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/nwg-solution-tour">NewWorld Game Solution Tour</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">A step-by-step guide to solving problems on the NewWorld Game platform ...</p>
-                        <a routerLink="/blogs/nwg-solution-tour" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                            Read in 5 minutes 
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a routerLink="/evaluators">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fevaluator.png?alt=media&token=84a50cac-6d8d-49a3-b146-fe0968f83fc5"  class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/evaluators">NewWorld Game Evaluator</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">A critical part of NewWorld Game is the Evaluator. As an Evaluator you become part of the Design Team that develops the solution....</p>
-                        <a routerLink="/evaluators" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                            Read in 2 minutes
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a routerLink="/blogs/tournament">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/tournament">NewWorld Tournament</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">The NewWorld Tournament.is an exciting option for all players/designers in the NewWorld Game......</p>
-                        <a routerLink="/blogs/tournament" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                            Read in 3 minutes
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a routerLink="/blogs/custom-storyboard">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fstory-1.png?alt=media&token=74f68956-b57f-4541-9cf6-e02fecb80608" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/custom-storyboard">Custom GPT for Design Science Storyboards</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">These pictures were made with a custom ChatGPT called Story Illustrator: ” .....</p>
-                        <a routerLink="/blogs/custom-storyboard" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                            Read in 5 minutes
-                        </a>
-                    </article>
-        
-                    <article class="w-full">
-                        <a routerLink="/blogs/global-statistical-tools">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-statistical-data.png?alt=media&token=20d8598d-74d2-4062-9741-e3a4b0be21b4" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/global-statistical-tools">Global Statistical Data and Data Analysis Tools</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">Accurate statistics on the state of the world are indispensable for dealing with the problems of the world. ” .....</p>
-                        <a routerLink="/blogs/global-statistical-tools" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                            Read in ... minutes
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a routerLink="/blogs/nwg-ai">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fnwg-ai.png?alt=media&token=1a07d326-b9df-46e8-a0f8-a087b0809b11" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a routerLink="/blogs/nwg-ai">NewWorld Game AI</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">The NewWorld Game uses AI (or more precisely Large Language Models— LLMs) to assist in answering many of the questions needed for solving global and local problems.” .....</p>
-                        <a routerLink="/blogs/nwg-ai" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                            Read in 3 ... minutes
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a  href="https://www.youtube.com/@globalsolutionslab6445/videos">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fbackground-videos.png?alt=media&token=06b311b9-a35d-426e-84d8-814037178300" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a target="_blank" href="https://www.youtube.com/@globalsolutionslab6445/videos">Background Videos</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">Previous videos fom the Global Solutions Lab” .....</p>
-                        <a target="_blank" href="https://www.youtube.com/@globalsolutionslab6445/videos" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a routerLink="/blogs/sample-preferred-states">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/news-anchor%2Fnewworld-news.png?alt=media&token=a011df9a-8877-4d8d-a0b3-2dddf8dc4e6b" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a  routerLink="/blogs/sample-preferred-states">Sample Preferred States</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">The below are taken from previous work by participants in the 2005-2023 Global Solutions
-                            Lab, published in the Designs for a World That Works for All, Volumes I-III....</p>
-                        <a routerLink="/blogs/sample-preferred-states" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           Read in ... minutes.
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a  routerLink="/nwg-news">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/news-anchor%2Fnewworld-news.png?alt=media&token=a011df9a-8877-4d8d-a0b3-2dddf8dc4e6b" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a  routerLink="/nwg-news">NewWorld News</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">Weekly News on solutions being developed on the NewWorld Game platform</p>
-                        <a  routerLink="/nwg-news" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a  routerLink="/blogs/solution-libraries">
-                            <img src="https://i.postimg.cc/Z5Pp7CHs/A-vibrant-and-futuristic-library-scene-showcasing-various-global-solution-databases-and-libraries-T.jpg" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a  routerLink="/blogs/solution-libraries">Global Solutions Libraries/Databases:
-                                Options for Changing the World</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">Check out the following for ideas, alternatives, technology for possible use in your strategy:</p>
-                        <a routerLink="/blogs/solution-libraries" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           
-                        </a>
-                    </article>
-                    <article class="w-full">
-                        <a  routerLink="/blogs/ask-bucky">
-                            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fask-bucky-prompts.png?alt=media&token=5dfbbbc8-4f5f-4291-b897-f59b375fb03e" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a  routerLink="/blogs/ask-bucky">Ask Bucky Prompts for Global Solution Implementation:</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">What foundations, government agencies, or other funding sources would fund ...</p>
-                        <a  routerLink="/blogs/ask-bucky" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           
-                        </a>
-                    </article>
-    
-                    <article class="w-full">
-                        <a  routerLink="/blogs/state-of-world">
-                            <img src="https://i.postimg.cc/KYc8qQCH/DALL-E-2024-06-17-06-42-32-Create-an-image-for-a-blog-titled-State-of-the-World-The-image-shoul.webp" class="mb-4 rounded-lg w-full h-48 object-cover" alt="Image 1">
-                        </a>
-                        <h2 class="mb-2 text-xl font-bold leading-tight text-gray-900 dark:text-white">
-                            <a  routerLink="/blogs/state-of-world">State of the World Reports</a>
-                        </h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">The link below takes you to our collection of over 400 state-of-the-world reports ...</p>
-                        <a  routerLink="/blogs/state-of-world" class="inline-flex items-center font-medium underline underline-offset-4 text-primary-600 dark:text-gray-200 hover:no-underline">
-                           
-                        </a>
-                    </article>
-                    
-                    
-                </div>
-            </div>
-        </aside>
-        <app-footer></app-footer>
+  <!-- CONTENT -->
+  <aside aria-label="Related articles"
+         class="relative isolate py-16 px-4 mt-20 bg-gradient-to-b from-slate-50 via-indigo-50/30 to-white
+                dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+
+    <!-- ambient glow blobs -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="absolute -top-28 -left-24 h-72 w-72 rounded-full bg-indigo-500/25 blur-3xl"></div>
+      <div class="absolute -bottom-20 -right-16 h-80 w-80 rounded-full bg-cyan-400/20 blur-3xl"></div>
+      <div class="absolute top-1/3 -right-24 h-52 w-52 rounded-full bg-fuchsia-400/10 blur-3xl"></div>
     </div>
-    
+
+    <div class="mx-auto max-w-screen-xl">
+      <h2 class="mb-3 text-2xl md:text-3xl font-extrabold tracking-tight
+                 bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-cyan-400 to-fuchsia-500">
+        Operating Manual
+      </h2>
+      <p class="mb-10 text-slate-600 dark:text-slate-300">
+        Quick reads and walkthroughs for NewWorld Game.
+      </p>
+
+      <div class="grid gap-7 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+        <!-- CARD PATTERN (copy for each article) -->
+        <!-- 1. How To Use NewWorld Game -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl
+                        border border-white/20 dark:border-white/10
+                        bg-white/60 dark:bg-slate-900/40 backdrop-blur-md
+                        shadow-[0_8px_30px_rgba(2,6,23,0.08)]
+                        transition-all duration-300 ease-out
+                        hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)]
+                        focus-within:shadow-[0_16px_60px_rgba(99,102,241,0.25)]
+                        before:content-[''] before:absolute before:inset-0 before:rounded-2xl
+                        before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)]
+                        before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl
+                        hover:before:opacity-25 focus-within:before:opacity-25">
+
+          <a routerLink="/blogs/instructions" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fhow-to-use-nwg.png?alt=media"
+                 alt="How To Use NewWorld Game"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold leading-tight text-slate-900 dark:text-white">
+              <a routerLink="/blogs/instructions" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                How To Use NewWorld Game
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">
+              A cheatsheet for everything in the NewWorld Game web application.
+            </p>
+            <a routerLink="/blogs/instructions"
+               class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium
+                      border border-slate-300/60 dark:border-slate-600/60
+                      text-slate-800 dark:text-slate-200
+                      hover:bg-white/70 dark:hover:bg-slate-800/60
+                      hover:border-indigo-400/60
+                      hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)]
+                      transition">
+              Read in 3 minutes <span class="translate-x-0 transition-transform group-hover/card:translate-x-0.5">→</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- 2. About -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 ease-out hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/overview" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2Fworld-game-presentation.jpeg?alt=media"
+                 alt="About NewWorld Game"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/overview" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">About</a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">
+              A work- and play-space for developing solutions to real-world problems.
+            </p>
+            <a routerLink="/overview" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in 3 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 3. Design Science Primer -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/primer" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdesign-science-primer.png?alt=media"
+                 alt="Design Science Primer"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/primer" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Tools for Changing the World— A Design Science Primer
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">
+              A methodology that turns ideas into action and impact.
+            </p>
+          </div>
+        </article>
+
+        <!-- 4. World Game -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/worldgame-packet" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fworldgame-packet.png?alt=media"
+                 alt="World Game"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/worldgame-packet" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                World Game
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">
+              Predecessor and inspiration for NewWorld Game.
+            </p>
+            <a routerLink="/blogs/worldgame-packet" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in 2 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 5. Step I–V AI Tour -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/nwg-steps" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="../../../assets/img/sofia-agent.png"
+                 alt="Step I–V AI Tour"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/nwg-solution-tour" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Step I–V AI Tour
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">AI tour of Step I–V of the NewWorld Game.</p>
+          </div>
+        </article>
+
+        <!-- 6. NewWorld Game Solution Tour -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/nwg-solution-tour" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-solution-tour.png?alt=media&token=95cff4d3-6ad6-4ace-9f3c-85dbfb14fc2d"
+                 alt="NewWorld Game Solution Tour"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/nwg-solution-tour" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">NewWorld Game Solution Tour</a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">A step-by-step guide to solving problems on the platform.</p>
+            <a routerLink="/blogs/nwg-solution-tour" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in 5 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 7. NewWorld Game Evaluator -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/evaluators" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fevaluator.png?alt=media&token=84a50cac-6d8d-49a3-b146-fe0968f83fc5"
+                 alt="NewWorld Game Evaluator"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/evaluators" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">NewWorld Game Evaluator</a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Join the design team that reviews and strengthens solutions.</p>
+            <a routerLink="/evaluators" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in 2 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 8. NewWorld Tournament -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/tournament" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d"
+                 alt="NewWorld Tournament"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/tournament" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">NewWorld Tournament</a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">An exciting option for all players/designers in the Game.</p>
+            <a routerLink="/blogs/tournament" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in 3 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 9. Custom GPT for Storyboards -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/custom-storyboard" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fstory-1.png?alt=media&token=74f68956-b57f-4541-9cf6-e02fecb80608"
+                 alt="Custom GPT for Design Science Storyboards"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/custom-storyboard" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Custom GPT for Design Science Storyboards
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Images made with our Story Illustrator custom GPT.</p>
+            <a routerLink="/blogs/custom-storyboard" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in 5 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 10. Global Statistical Data -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/global-statistical-tools" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-statistical-data.png?alt=media&token=20d8598d-74d2-4062-9741-e3a4b0be21b"
+                 alt="Global Statistical Data and Tools"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/global-statistical-tools" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Global Statistical Data & Analysis Tools
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Accurate stats are indispensable for tackling world problems.</p>
+          </div>
+        </article>
+
+        <!-- 11. NewWorld Game AI -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/nwg-ai" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fnwg-ai.png?alt=media&token=1a07d326-b9df-46e8-a0f8-a087b0809b11"
+                 alt="NewWorld Game AI"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/nwg-ai" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">NewWorld Game AI</a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">LLMs assist across the solution design workflow.</p>
+            <a routerLink="/blogs/nwg-ai" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read in ~3 minutes →
+            </a>
+          </div>
+        </article>
+
+        <!-- 12. Background Videos (external) -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a target="_blank" href="https://www.youtube.com/@globalsolutionslab6445/videos" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fbackground-videos.png?alt=media&token=06b311b9-a35d-426e-84d8-814037178300"
+                 alt="Background Videos"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a target="_blank" href="https://www.youtube.com/@globalsolutionslab6445/videos" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Background Videos
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Previous videos from the Global Solutions Lab.</p>
+            <a target="_blank" href="https://www.youtube.com/@globalsolutionslab6445/videos" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Watch on YouTube →
+            </a>
+          </div>
+        </article>
+
+        <!-- 13. Sample Preferred States -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/sample-preferred-states" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/news-anchor%2Fnewworld-news.png?alt=media&token=a011df9a-8877-4d8d-a0b3-2dddf8dc4e6b"
+                 alt="Sample Preferred States"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/sample-preferred-states" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Sample Preferred States
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Selections from Global Solutions Lab publications.</p>
+            <a routerLink="/blogs/sample-preferred-states" class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium border border-slate-300/60 dark:border-slate-600/60 text-slate-800 dark:text-slate-200 hover:bg-white/70 dark:hover:bg-slate-800/60 hover:border-indigo-400/60 hover:shadow-[0_0_0_6px_rgba(99,102,241,0.15)] transition">
+              Read now →
+            </a>
+          </div>
+        </article>
+
+        <!-- 14. NewWorld News -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/nwg-news" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/news-anchor%2Fnewworld-news.png?alt=media&token=a011df9a-8877-4d8d-a0b3-2dddf8dc4e6b"
+                 alt="NewWorld News"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/nwg-news" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">NewWorld News</a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Weekly updates on solutions being developed.</p>
+          </div>
+        </article>
+
+        <!-- 15. Global Solutions Libraries/Databases -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/solution-libraries" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://i.postimg.cc/Z5Pp7CHs/A-vibrant-and-futuristic-library-scene-showcasing-various-global-solution-databases-and-libraries-T.jpg"
+                 alt="Global Solutions Libraries and Databases"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/solution-libraries" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Global Solutions Libraries/Databases
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Explore catalogs of ideas, tech, and precedents.</p>
+          </div>
+        </article>
+
+        <!-- 16. Ask Bucky Prompts -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/ask-bucky" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fask-bucky-prompts.png?alt=media&token=5dfbbbc8-4f5f-4291-b897-f59b375fb03e"
+                 alt="Ask Bucky Prompts"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/ask-bucky" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                Ask Bucky: Prompts for Implementation
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Find funders, agencies, and partners for your project.</p>
+          </div>
+        </article>
+
+        <!-- 17. State of the World Reports -->
+        <article class="group/card relative w-full overflow-hidden rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-[0_8px_30px_rgba(2,6,23,0.08)] transition-all duration-300 hover:shadow-[0_16px_60px_rgba(99,102,241,0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-[conic-gradient(at_50%_50%,#6366f1_0deg,#22d3ee_120deg,#a78bfa_240deg,#6366f1_360deg)] before:opacity-0 before:transition-opacity before:duration-300 before:blur-3xl hover:before:opacity-25">
+          <a routerLink="/blogs/state-of-world" class="block relative aspect-[16/10] mx-3 mt-3 overflow-hidden rounded-xl">
+            <img src="https://i.postimg.cc/KYc8qQCH/DALL-E-2024-06-17-06-42-32-Create-an-image-for-a-blog-titled-State-of-the-World-The-image-shoul.webp"
+                 alt="State of the World Reports"
+                 class="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-[1.04]" />
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+          </a>
+          <div class="p-5">
+            <h3 class="mb-2 text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+              <a routerLink="/blogs/state-of-world" class="outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 rounded">
+                State of the World Reports
+              </a>
+            </h3>
+            <p class="mb-4 text-slate-600 dark:text-slate-300">Browse 400+ reports that inform strategic design.</p>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </aside>
+
+  <!-- FOOTER -->
+  <app-footer></app-footer>
+</div>
