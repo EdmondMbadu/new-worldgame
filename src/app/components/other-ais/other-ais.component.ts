@@ -241,6 +241,15 @@ meaningful, lasting impact.`,
       intro: `${name} Indian lawyer, anti-colonial nationalist, and political ethicist who employed nonviolent resistance to lead the successful campaign for India's independence from British rule.`,
       collectionPath: `users/${this.auth.currentUser.uid}/gandhi/`,
     },
+    {
+      avatarPath: '../../../assets/img/twain.jpg',
+      name: 'Mark Twain',
+      group: 'elder',
+      sdgs: [],
+      requiresAdmin: true, // ⬅️ add this
+      intro: `${name} Distinguished American author, essayist, journalist, and literary critic. He's known for his novels The Adventures of Tom Sawyer (1876) and Adventures of Huckleberry Finn (1884), which some call the "Great American Novel". `,
+      collectionPath: `users/${this.auth.currentUser.uid}/twain/`,
+    },
   ];
 
   aiSelected: any = this.aiOptions[0];
@@ -251,6 +260,9 @@ meaningful, lasting impact.`,
       type: 'RESPONSE',
     },
   ];
+  get isAdmin(): boolean {
+    return !!this.auth?.currentUser?.admin;
+  }
   isLoggedIn: boolean = false;
   constructor(
     private afs: AngularFirestore,
