@@ -1,14 +1,23 @@
 <app-navbar></app-navbar>
 
-<div class="dark:bg-slate-900 min-h-screen flex flex-col">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex flex-col">
   <!-- Content Container -->
   <div class="container mx-auto mt-32 px-4 flex-grow">
-    <div class="max-w-xl md:max-w-3xl mx-auto text-center mb-10">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-200 mb-4">
-        GSL ARCHIVE PICTURES
+    <!-- Header -->
+    <div class="max-w-3xl md:max-w-4xl mx-auto text-center mb-10">
+      <p class="text-[11px] md:text-xs font-semibold tracking-[0.2em] uppercase text-indigo-600 dark:text-indigo-400">
+        Archive
+      </p>
+
+      <h1
+        class="mt-2 text-3xl md:text-5xl font-extrabold leading-tight tracking-tight
+               bg-gradient-to-r from-sky-500 via-indigo-600 to-emerald-500 bg-clip-text text-transparent"
+      >
+        GSL Archive Pictures
       </h1>
-      <p class="text-gray-900 dark:text-white">
-        <span class="font-bold">Previous Lab participants have come from:</span>
+
+      <p class="mt-4 text-sm md:text-base text-slate-700 dark:text-slate-200">
+        <span class="font-semibold text-slate-900 dark:text-white">Previous Lab participants have come from:</span>
         Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania,
         Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Senegal,
         Ivory Coast, Kenya, Uganda, Zimbabwe, South Africa, DR Congo, Congo,
@@ -19,50 +28,71 @@
       </p>
     </div>
 
-<!-- Gallery Wrapper -->
-<div class="max-w-6xl mx-auto px-4 py-10">
-  <h2 class="text-2xl font-bold text-center mb-6 dark:text-white">Gallery</h2>
+    <!-- Gallery Wrapper -->
+    <div class="max-w-6xl mx-auto px-2 sm:px-4 py-8">
+      <h2 class="sr-only">Gallery</h2>
 
-  <!-- Responsive Image Grid -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-  <ng-container *ngIf="slides.length > 2">
+      <!-- Masonry-style columns -->
+      <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-5 [column-fill:_balance]">
+        <ng-container *ngIf="slides.length > 2">
+          <div
+            *ngFor="let img of slides.slice(1, -1); trackBy: trackByUrl"
+            class="mb-5 break-inside-avoid overflow-hidden rounded-2xl
+                   ring-1 ring-slate-200/60 dark:ring-slate-800/60
+                   bg-white/80 dark:bg-slate-900/60 backdrop-blur
+                   supports-[backdrop-filter]:bg-white/60
+                   shadow-sm hover:shadow-lg transition-shadow
+                   group relative cursor-pointer"
+            (click)="openModal(img)"
+          >
+            <div class="relative">
+              <img
+                [src]="img"
+                alt="Archive participant"
+                class="w-full h-auto object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02]"
+                loading="lazy"
+              />
+              <!-- hover veil -->
+              <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition
+                          bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+              <!-- quick affordance -->
+              <span
+                class="pointer-events-none absolute top-3 right-3 inline-flex items-center rounded-full
+                       bg-white/90 px-2.5 py-1 text-[11px] font-medium text-slate-700
+                       ring-1 ring-slate-200 shadow-sm
+                       dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700
+                       opacity-0 group-hover:opacity-100 transition"
+              >
+                View
+              </span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
     <div
-      *ngFor="let img of slides.slice(1, -1); trackBy: trackByUrl"
-      class="rounded-2xl overflow-hidden shadow-lg group relative cursor-pointer"
-      (click)="openModal(img)"
+      *ngIf="modalVisible"
+      class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      role="dialog" aria-modal="true" tabindex="0" (keydown.escape)="closeModal()"
     >
+      <button
+        (click)="closeModal()"
+        class="absolute top-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full
+               bg-white/10 text-white text-xl font-bold ring-1 ring-white/20
+               hover:bg-white/20 hover:text-red-300 transition"
+        aria-label="Close full screen image"
+      >
+        &times;
+      </button>
+
       <img
-        [src]="img"
-        alt="participant"
-        class="w-full h-64 object-cover transform group-hover:scale-105 transition duration-300 ease-in-out"
-        loading="lazy"
+        [src]="modalImage"
+        alt="Full screen view"
+        class="max-w-[92vw] max-h-[90vh] rounded-xl shadow-2xl ring-1 ring-white/10"
       />
     </div>
-  </ng-container>
-</div>
-
-</div>
-
-<!-- Fullscreen Image Modal -->
-<div
-  *ngIf="modalVisible"
-  class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center"
->
-  <button
-    (click)="closeModal()"
-    class="absolute top-6 right-6 text-white text-3xl font-bold hover:text-red-400 transition"
-    aria-label="Close full screen image"
-  >
-    &times;
-  </button>
-
-  <img
-    [src]="modalImage"
-    alt="Full screen view"
-    class="max-w-[90vw] max-h-[90vh] rounded-xl shadow-lg"
-  />
-</div>
-
   </div>
 
   <app-footer></app-footer>

@@ -7,7 +7,13 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrl: './our-team.component.css',
 })
 export class OurTeamComponent implements OnInit {
-  constructor(public auth: AuthService) {}
+  isLoggedIn: boolean = false;
+  constructor(public auth: AuthService) {
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
+  }
+
   ourTeam: Team[] = [
     {
       name: 'Medard Gabel',
