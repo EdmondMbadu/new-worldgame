@@ -100,6 +100,7 @@ import { TournamentInstructionsComponent } from './blogs/tournament-instructions
 import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.component';
 import { ManagementAskComponent } from './components/management-ask/management-ask.component';
 import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.component';
+import { FeedbackManagementComponent } from './components/feedback-management/feedback-management.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -313,6 +314,12 @@ const routes: Routes = [
   {
     path: 'management-primer',
     component: ManagementPrimerComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'feedback-management',
+    component: FeedbackManagementComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },

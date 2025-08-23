@@ -21,5 +21,6 @@ export class ManagementToolbarComponent {
     { path: '/management-demo', label: 'Demo Sign-ups' },
     { path: '/schools-management', label: 'Schools' },
     { path: '/management-ask', label: 'Questions' },
+    { path: '/feedback-management', label: 'NWG Feedback' },
   ];
 }

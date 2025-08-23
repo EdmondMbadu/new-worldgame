@@ -13,6 +13,7 @@ import { Evaluation, Solution } from '../models/solution';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
 import { Presentation } from '../models/presentation';
+import { FeedbackDoc } from '../components/feedback-management/feedback-management.component';
 
 @Injectable({
   providedIn: 'root',
@@ -541,6 +542,32 @@ meaningful, lasting impact.`,
     });
   }
 
+  // List feedback (ask_feedback)
+  listAskFeedback(): Observable<FeedbackDoc[]> {
+    return this.afs
+      .collection('ask_feedback') // order handled client-side (createdAtMs normalized)
+      .snapshotChanges()
+      .pipe(
+        map((snaps) =>
+          snaps.map((s) => {
+            const data = s.payload.doc.data() as Omit<FeedbackDoc, 'id'>;
+            return { id: s.payload.doc.id, ...data } as FeedbackDoc;
+          })
+        )
+      );
+  }
+
+  // Update status
+  setAskFeedbackStatus(
+    docId: string,
+    status: 'new' | 'read' | 'closed'
+  ): Promise<void> {
+    return this.afs.collection('ask_feedback').doc(docId).update({
+      status,
+      // optional: audit trail
+      statusChangedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  }
   setAskStatus(id: string, status: AskStatus) {
     return this.afs.doc(`ask_anything/${id}`).set({ status }, { merge: true });
   }
