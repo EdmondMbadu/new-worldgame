@@ -99,6 +99,7 @@ import { SchoolManagementComponent } from './components/school-management/school
 import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
 import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.component';
 import { ManagementAskComponent } from './components/management-ask/management-ask.component';
+import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -518,6 +519,10 @@ const routes: Routes = [
   {
     path: 'ask-anything',
     component: AskAnythingComponent,
+  },
+  {
+    path: 'ask-feedback',
+    component: AskFeedbackComponent,
   },
   {
     path: 'tournament-instructions',

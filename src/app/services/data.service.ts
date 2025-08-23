@@ -521,6 +521,25 @@ meaningful, lasting impact.`,
         )
       );
   }
+  // Feedback submission
+  askFeedbackSubmit(payload: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    opinion: string; // A
+    levels: string[]; // B
+    improvements: string; // C
+    prompts: string; // D
+    courseUse: string; // E
+    uid: string | null;
+    createdAtMs: number;
+    status: 'new' | 'read' | 'closed';
+  }) {
+    return this.afs.collection('ask_feedback').add({
+      ...payload,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  }
 
   setAskStatus(id: string, status: AskStatus) {
     return this.afs.doc(`ask_anything/${id}`).set({ status }, { merge: true });

@@ -145,6 +145,7 @@ import { SchoolManagementComponent } from './components/school-management/school
 import { TournamentInstructionsComponent } from './blogs/tournament-instructions/tournament-instructions.component';
 import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.component';
 import { ManagementAskComponent } from './components/management-ask/management-ask.component';
+import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.component';
 
 @NgModule({
   declarations: [
@@ -265,6 +266,7 @@ import { ManagementAskComponent } from './components/management-ask/management-a
     TournamentInstructionsComponent,
     AskAnythingComponent,
     ManagementAskComponent,
+    AskFeedbackComponent,
   ],
   imports: [
     BrowserModule,
