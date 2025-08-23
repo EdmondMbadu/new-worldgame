@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -30,6 +36,10 @@ export class AskFeedbackComponent implements OnInit {
   submitted = false;
   submitError: string | null = null;
   success = false;
+
+  // NEW: modal state + focus handle
+  showSuccessModal = false;
+  @ViewChild('successCloseBtn') successCloseBtn?: ElementRef<HTMLButtonElement>;
 
   // B) Levels — includes the new "Business" option
   levelOptions = [
@@ -88,6 +98,22 @@ export class AskFeedbackComponent implements OnInit {
       if (ctrl.value) selected.push(this.levelOptions[idx]);
     });
     return selected;
+  }
+
+  // NEW: handy open/close helpers
+  openSuccessModal() {
+    this.showSuccessModal = true;
+    // move focus to the Close button for accessibility
+    setTimeout(() => this.successCloseBtn?.nativeElement.focus(), 0);
+  }
+  closeSuccessModal() {
+    this.showSuccessModal = false;
+  }
+
+  // NEW: allow closing with the Escape key anywhere
+  @HostListener('document:keydown.escape')
+  handleEscape() {
+    if (this.showSuccessModal) this.closeSuccessModal();
   }
 
   async submit() {
@@ -158,6 +184,7 @@ export class AskFeedbackComponent implements OnInit {
 
       this.form.markAsPristine();
       this.form.markAsUntouched();
+      this.openSuccessModal();
     } catch (err) {
       console.error('Error submitting feedback', err);
       this.loading = false;

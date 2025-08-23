@@ -36,11 +36,11 @@
 
         <!-- Quick anchors -->
         <nav class="mt-6 flex flex-wrap justify-center gap-2">
-          <a href="#qA" class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">A</a>
-          <a href="#qB" class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">B</a>
-          <a href="#qC" class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">C</a>
-          <a href="#qD" class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">D</a>
-          <a href="#qE" class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">E</a>
+          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">A</a>
+          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">B</a>
+          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">C</a>
+          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">D</a>
+          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">E</a>
         </nav>
       </header>
 
@@ -279,4 +279,54 @@
   </section>
 
   <app-footer></app-footer>
+</div>
+
+
+
+
+<!-- !-- NEW: Success Modal -->
+<div *ngIf="showSuccessModal"
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     role="dialog" aria-modal="true" aria-labelledby="success-title">
+
+  <!-- click-away background -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeSuccessModal()"></div>
+
+  <!-- modal card -->
+  <div class="relative mx-4 w-full max-w-md">
+    <div class="rounded-3xl p-[1px] bg-gradient-to-br from-emerald-400/40 via-sky-400/30 to-cyan-400/30">
+      <div class="rounded-3xl bg-white dark:bg-slate-900 ring-1 ring-black/5 shadow-2xl">
+        <div class="p-6 md:p-8 text-center">
+          <div class="mx-auto mb-4 h-12 w-12 rounded-full bg-emerald-50 text-emerald-600
+                      flex items-center justify-center dark:bg-emerald-900/30 dark:text-emerald-300">
+            <!-- check icon -->
+            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+          </div>
+
+          <h3 id="success-title" class="text-xl font-semibold text-slate-900 dark:text-white">Thank you!</h3>
+          <p class="mt-2 text-slate-600 dark:text-slate-300">
+            Your feedback was submitted successfully. We’ll follow up by email if needed.
+          </p>
+
+          <div class="mt-6 flex gap-3 justify-center">
+            <button #successCloseBtn type="button"
+                    (click)="closeSuccessModal()"
+                    class="rounded-full px-5 py-2.5 text-sm font-medium text-white
+                           bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              Close
+            </button>
+            <button type="button"
+                    (click)="closeSuccessModal()"
+                    class="rounded-full px-5 py-2.5 text-sm font-medium
+                           text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700
+                           hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
