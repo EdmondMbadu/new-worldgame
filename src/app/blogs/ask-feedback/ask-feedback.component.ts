@@ -280,4 +280,56 @@ export class AskFeedbackComponent implements OnInit {
       this.success = false;
     }
   }
+
+  get globalErrorList(): string[] {
+    const list: string[] = [];
+    const f = this.form.controls;
+
+    // Identity (only when signed out)
+    if (!this.isLoggedIn) {
+      if (f.firstName.errors?.['required'])
+        list.push('First name is required.');
+      if (f.lastName.errors?.['required']) list.push('Last name is required.');
+    }
+
+    // Email
+    if (f.email.errors?.['required']) list.push('Email is required.');
+    else if (f.email.errors?.['email'])
+      list.push('Email must be a valid address.');
+
+    // A) Opinion
+    if (f.opinion.errors?.['required']) list.push('A) Opinion is required.');
+    else if (f.opinion.errors?.['minlength'])
+      list.push('A) Opinion must be at least 20 characters.');
+
+    // B) Levels
+    if (this.levelsFA.errors?.['required'])
+      list.push('B) Select at least one level.');
+
+    // C) Improvements
+    if (f.improvements.errors?.['required'])
+      list.push('C) Improvements is required.');
+    else if (f.improvements.errors?.['minlength'])
+      list.push('C) Improvements must be at least 5 characters.');
+
+    // F) Ask Bucky
+    if (f.askBuckyUseful.errors?.['required'])
+      list.push('F) Please select if “Ask Bucky” was useful.');
+
+    // G) Concerns
+    if (f.concerns.errors?.['required'])
+      list.push('G) Problems/issues is required.');
+
+    // J) Course usefulness
+    if (f.courseUse.errors?.['required'])
+      list.push('J) Course usefulness is required.');
+    else if (f.courseUse.errors?.['minlength'])
+      list.push('J) Course usefulness must be at least 10 characters.');
+
+    // L) Anything else
+    if (f.more.errors?.['required'])
+      list.push('L) What else would you like to add? is required.');
+
+    return list;
+  }
 }
