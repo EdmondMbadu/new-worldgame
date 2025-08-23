@@ -5,26 +5,30 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { AuthService } from 'src/app/services/auth.service';
-import { DataService } from 'src/app/services/data.service';
-import { TimeService } from 'src/app/services/time.service';
 import {
   AbstractControl,
   ValidationErrors,
   ValidatorFn,
   FormArray,
+  FormBuilder,
   FormControl,
+  Validators,
 } from '@angular/forms';
+import { AuthService } from 'src/app/services/auth.service';
+import { DataService } from 'src/app/services/data.service';
+import { TimeService } from 'src/app/services/time.service';
 
 function atLeastOneChecked(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const fa = control as FormArray<FormControl<boolean>>;
-    if (!fa?.controls?.length) return { required: true }; // or return null if you prefer
-    const hasOne = fa.controls.some((c) => !!c.value);
+    const hasOne =
+      Array.isArray(fa?.controls) && fa.controls.some((c) => !!c.value);
     return hasOne ? null : { required: true };
   };
 }
+
+type AskBuckyUseful = 'yes' | 'somewhat' | 'no' | 'not_sure';
+
 @Component({
   selector: 'app-ask-feedback',
   templateUrl: './ask-feedback.component.html',
@@ -37,33 +41,59 @@ export class AskFeedbackComponent implements OnInit {
   submitError: string | null = null;
   success = false;
 
-  // NEW: modal state + focus handle
   showSuccessModal = false;
+
+  // for focus management
+  @ViewChild('successDialog') successDialog?: ElementRef<HTMLDivElement>;
   @ViewChild('successCloseBtn') successCloseBtn?: ElementRef<HTMLButtonElement>;
 
-  // B) Levels — includes the new "Business" option
+  // Updated levels
   levelOptions = [
-    'High school',
-    'College/University',
-    'Researchers',
-    'Organizations/NGOs',
-    'Business', // ← added as requested
+    'High School',
+    'College',
+    'Professionals',
+    'Business',
+    'Other',
   ];
 
-  // Reactive form
   form = this.fb.group({
     // identity
     firstName: [''],
     lastName: [''],
-    email: ['', [Validators.email]],
-    // questions
-    opinion: ['', [Validators.required, Validators.minLength(20)]], // A
-    levels: this.fb.array([] as FormControl[], atLeastOneChecked()), // B
-    improvements: [''], // C
-    prompts: [''], // D
-    courseUse: ['', [Validators.required, Validators.minLength(10)]], // E
-  });
+    email: ['', [Validators.required, Validators.email]],
 
+    // A
+    opinion: ['', [Validators.required, Validators.minLength(20)]],
+
+    // B (non-nullable checkboxes created here)
+    levels: this.fb.array(
+      this.levelOptions.map(() => this.fb.nonNullable.control(false)),
+      { validators: atLeastOneChecked() }
+    ),
+
+    levelsDetails: this.fb.group({
+      hsCourses: [''],
+      collegeCourses: [''],
+      professionalAreas: [''],
+      otherText: [''],
+    }),
+
+    // C
+    improvements: ['', [Validators.required, Validators.minLength(5)]],
+
+    // F (typed union)
+    askBuckyUseful: this.fb.control<AskBuckyUseful | null>(null, {
+      validators: Validators.required,
+    }),
+
+    // G, H, I, J, K, L
+    concerns: ['', Validators.required],
+    otherAgents: [''],
+    prompts: [''],
+    courseUse: ['', [Validators.required, Validators.minLength(10)]],
+    teamBuilding: [''],
+    more: ['', Validators.required],
+  });
   constructor(
     public auth: AuthService,
     private data: DataService,
@@ -72,11 +102,69 @@ export class AskFeedbackComponent implements OnInit {
   ) {
     window.scroll(0, 0);
     // init levels FormArray
-    this.levelOptions.forEach(() => this.levelsFA.push(new FormControl(false)));
+    // this.levelOptions.forEach(() => this.levelsFA.push(this.fb.control(false)));
   }
 
-  get levelsFA(): FormArray {
-    return this.form.get('levels') as FormArray;
+  get levelsFA(): FormArray<FormControl<boolean>> {
+    return this.form.get('levels') as FormArray<FormControl<boolean>>;
+  }
+
+  isLevelSelected(label: string): boolean {
+    const idx = this.levelOptions.indexOf(label);
+    if (idx < 0) return false;
+    return !!this.levelsFA.at(idx)?.value;
+  }
+
+  // ✅ Open / Close helpers
+  openSuccessModal() {
+    this.showSuccessModal = true;
+    // move focus to the Close button after view updates
+    setTimeout(() => this.successCloseBtn?.nativeElement.focus(), 0);
+    document.body.style.overflow = 'hidden'; // prevent background scroll
+  }
+
+  // ✅ Allow closing with Escape anywhere
+  @HostListener('document:keydown.escape', ['$event'])
+  onEsc(e: KeyboardEvent) {
+    if (this.showSuccessModal) {
+      e.preventDefault();
+      this.closeSuccessModal();
+    }
+  }
+
+  onModalKeydown(e: KeyboardEvent) {
+    if (!this.showSuccessModal || e.key !== 'Tab') return;
+    const root = this.successDialog?.nativeElement;
+    if (!root) return;
+
+    const focusables = root.querySelectorAll<HTMLElement>(
+      'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusables.length) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  closeSuccessModal() {
+    this.showSuccessModal = false;
+    document.body.style.overflow = ''; // restore scroll
+  }
+
+  private selectedLevels(): string[] {
+    const selected: string[] = [];
+    this.levelsFA.controls.forEach((ctrl, idx) => {
+      if (ctrl.value) selected.push(this.levelOptions[idx]);
+    });
+    return selected;
   }
 
   async ngOnInit(): Promise<void> {
@@ -92,63 +180,50 @@ export class AskFeedbackComponent implements OnInit {
     }
   }
 
-  private selectedLevels(): string[] {
-    const selected: string[] = [];
-    this.levelsFA.controls.forEach((ctrl, idx) => {
-      if (ctrl.value) selected.push(this.levelOptions[idx]);
-    });
-    return selected;
-  }
-
-  // NEW: handy open/close helpers
-  openSuccessModal() {
-    this.showSuccessModal = true;
-    // move focus to the Close button for accessibility
-    setTimeout(() => this.successCloseBtn?.nativeElement.focus(), 0);
-  }
-  closeSuccessModal() {
-    this.showSuccessModal = false;
-  }
-
-  // NEW: allow closing with the Escape key anywhere
-  @HostListener('document:keydown.escape')
-  handleEscape() {
-    if (this.showSuccessModal) this.closeSuccessModal();
-  }
-
   async submit() {
     this.submitted = true;
     this.submitError = null;
     this.success = false;
 
-    // Make identity required for signed-out users
+    // If signed-out, also require identity fields
     if (!this.isLoggedIn) {
       this.form.controls['firstName'].addValidators([Validators.required]);
       this.form.controls['lastName'].addValidators([Validators.required]);
-      this.form.controls['email'].addValidators([
-        Validators.required,
-        Validators.email,
-      ]);
       this.form.controls['firstName'].updateValueAndValidity();
       this.form.controls['lastName'].updateValueAndValidity();
-      this.form.controls['email'].updateValueAndValidity();
     }
 
     if (this.form.invalid) return;
 
     const v = this.form.value;
+    // Narrow the value to the union (safe after Validators.required)
+    const askBuckyUseful = (v.askBuckyUseful as AskBuckyUseful) ?? 'not_sure';
     const now = Date.now();
 
     const payload = {
+      // identity
       firstName: (v.firstName || this.auth.currentUser?.firstName || '').trim(),
       lastName: (v.lastName || this.auth.currentUser?.lastName || '').trim(),
       email: (v.email || this.auth.currentUser?.email || '').trim(),
-      // A–E
+
+      // A–L answers
       opinion: (v.opinion || '').trim(),
       levels: this.selectedLevels(),
+      levelsDetails: {
+        hsCourses: (v.levelsDetails?.hsCourses || '').trim(),
+        collegeCourses: (v.levelsDetails?.collegeCourses || '').trim(),
+        professionalAreas: (v.levelsDetails?.professionalAreas || '').trim(),
+        otherText: (v.levelsDetails?.otherText || '').trim(),
+      },
       improvements: (v.improvements || '').trim(),
+      askBuckyUseful, // 'yes' | 'somewhat' | 'no' | 'not_sure'
+      concerns: (v.concerns || '').trim(),
+      otherAgents: (v.otherAgents || '').trim(),
       prompts: (v.prompts || '').trim(),
       courseUse: (v.courseUse || '').trim(),
+      teamBuilding: (v.teamBuilding || '').trim(),
+      more: (v.more || '').trim(),
+
       // meta
       uid: this.auth.currentUser?.uid || null,
       createdAtMs: now,
@@ -162,7 +237,10 @@ export class AskFeedbackComponent implements OnInit {
       this.success = true;
       this.submitted = false;
 
-      // Reset fields but keep identity if logged in
+      // reset levels
+      this.levelsFA.controls.forEach((c) => c.setValue(false));
+
+      // keep identity if logged in
       const identity = this.isLoggedIn
         ? {
             firstName: this.auth.currentUser?.firstName || '',
@@ -171,19 +249,29 @@ export class AskFeedbackComponent implements OnInit {
           }
         : { firstName: '', lastName: '', email: '' };
 
-      // reset levels
-      this.levelsFA.controls.forEach((c) => c.setValue(false));
-
       this.form.reset({
         ...identity,
         opinion: '',
+        levelsDetails: {
+          hsCourses: '',
+          collegeCourses: '',
+          professionalAreas: '',
+          otherText: '',
+        },
         improvements: '',
+        askBuckyUseful: null,
+        concerns: '',
+        otherAgents: '',
         prompts: '',
         courseUse: '',
+        teamBuilding: '',
+        more: '',
       });
 
       this.form.markAsPristine();
       this.form.markAsUntouched();
+
+      // If you implemented the success modal earlier, you can open it here:
       this.openSuccessModal();
     } catch (err) {
       console.error('Error submitting feedback', err);

@@ -523,15 +523,29 @@ meaningful, lasting impact.`,
       );
   }
   // Feedback submission
+  // Feedback submission (updated payload shape)
   askFeedbackSubmit(payload: {
     firstName: string;
     lastName: string;
     email: string;
+
     opinion: string; // A
     levels: string[]; // B
+    levelsDetails: {
+      hsCourses: string;
+      collegeCourses: string;
+      professionalAreas: string;
+      otherText: string;
+    };
     improvements: string; // C
-    prompts: string; // D
-    courseUse: string; // E
+    askBuckyUseful: 'yes' | 'somewhat' | 'no' | 'not_sure'; // F
+    concerns: string; // G
+    otherAgents: string; // H
+    prompts: string; // I
+    courseUse: string; // J
+    teamBuilding: string; // K
+    more: string; // L
+
     uid: string | null;
     createdAtMs: number;
     status: 'new' | 'read' | 'closed';

@@ -18,9 +18,7 @@
   </div>
 
   <!-- Body -->
-<section class="pb-20"
-         [class.mt-20]="isLoggedIn"
-         [class.mt-28]="!isLoggedIn">
+  <section class="pb-20" [ngClass]="isLoggedIn ? 'mt-20' : 'mt-28'">
     <div class="mx-auto max-w-4xl px-4">
       <!-- Page header -->
       <header class="text-center">
@@ -30,26 +28,16 @@
           </span>
         </h1>
         <p class="mt-4 text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-          Your insights help us improve NWG for learners, teams, organizations—and businesses—working on real-world solutions.
-          If you’re signed in, we’ll prefill your info.
+          After completing a full solution on NWG, please answer the questions below. Your input helps us make NWG better.
         </p>
-
-        <!-- Quick anchors -->
-        <nav class="mt-6 flex flex-wrap justify-center gap-2">
-          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">A</a>
-          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">B</a>
-          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">C</a>
-          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">D</a>
-          <a  class="rounded-full border border-slate-200/80 dark:border-slate-700/70 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">E</a>
-        </nav>
       </header>
 
       <!-- Card -->
       <div class="mt-8 rounded-3xl p-[1px] bg-gradient-to-br from-sky-400/30 via-cyan-400/20 to-emerald-400/30">
         <div class="rounded-3xl bg-white/90 dark:bg-slate-900/80 ring-1 ring-black/5 shadow-xl backdrop-blur-md p-6 md:p-10">
 
-          <!-- Success -->
-          <div *ngIf="success"
+          <!-- Success banner (kept) -->
+          <div *ngIf="success" aria-live="polite"
                class="mb-6 rounded-xl border border-emerald-200/60 bg-emerald-50 text-emerald-900
                       dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-200 p-4 text-sm md:text-base">
             ✅ Thank you! Your feedback was submitted successfully.
@@ -65,68 +53,44 @@
           <!-- Form -->
           <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-10">
 
-            <!-- Identity (signed out only) -->
-            <div *ngIf="!isLoggedIn" class="space-y-6">
+            <!-- Identity -->
+            <section class="space-y-4">
               <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Your information</h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <!-- First name -->
-                <div>
-                  <label for="firstName" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">First name</label>
-                  <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                      <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-3-3.87M4 21v-2a4 4 0 0 1 3-3.87M7 7a5 5 0 1 1 10 0 5 5 0 0 1-10 0z"/>
-                      </svg>
-                    </span>
-                    <input id="firstName" type="text" formControlName="firstName"
-                      class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
-                             bg-white dark:bg-slate-800/80 px-3 py-3 pl-11 text-base
-                             text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                             caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                      placeholder="Jane"/>
-                  </div>
+                <div *ngIf="!isLoggedIn">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">First name</label>
+                  <input type="text" formControlName="firstName"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                                bg-white dark:bg-slate-800/80 px-3 py-3 text-base
+                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"/>
                   <p *ngIf="submitted && form.controls.firstName.invalid" class="mt-1 text-xs text-rose-600">First name is required.</p>
                 </div>
 
-                <!-- Last name -->
-                <div>
-                  <label for="lastName" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Last name</label>
-                  <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                      <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-3-3.87M4 21v-2a4 4 0 0 1 3-3.87M7 7a5 5 0 1 1 10 0 5 5 0 0 1-10 0z"/>
-                      </svg>
-                    </span>
-                    <input id="lastName" type="text" formControlName="lastName"
-                      class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
-                             bg-white dark:bg-slate-800/80 px-3 py-3 pl-11 text-base
-                             text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                             caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                      placeholder="Doe"/>
-                  </div>
+                <div *ngIf="!isLoggedIn">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Last name</label>
+                  <input type="text" formControlName="lastName"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                                bg-white dark:bg-slate-800/80 px-3 py-3 text-base
+                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"/>
                   <p *ngIf="submitted && form.controls.lastName.invalid" class="mt-1 text-xs text-rose-600">Last name is required.</p>
                 </div>
 
-                <!-- Email -->
+                <!-- Email (always required) -->
                 <div class="sm:col-span-2">
-                  <label for="email" class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Email</label>
-                  <div class="relative">
-                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-                      <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/>
-                      </svg>
-                    </span>
-                    <input id="email" type="email" formControlName="email"
-                      class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
-                             bg-white dark:bg-slate-800/80 px-3 py-3 pl-11 text-base
-                             text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                             caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                      placeholder="you@school.edu"/>
-                  </div>
-                  <p *ngIf="submitted && form.controls.email.invalid" class="mt-1 text-xs text-rose-600">Valid email is required.</p>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Email <span class="text-rose-600">*</span></label>
+                  <input type="email" formControlName="email" [readOnly]="isLoggedIn"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                                bg-white dark:bg-slate-800/80 px-3 py-3 text-base
+                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                         placeholder="you@school.edu"/>
+                  <p *ngIf="(submitted || form.controls.email.touched) && form.controls.email.invalid"
+                     class="mt-1 text-xs text-rose-600">Valid email is required.</p>
                 </div>
               </div>
-            </div>
+            </section>
 
             <!-- A) Opinion -->
             <section id="qA" class="space-y-3">
@@ -137,40 +101,32 @@
                 </h2>
               </div>
               <p class="text-sm text-slate-600 dark:text-slate-400">
-                Did you like it? Will it help develop solutions to global and/or local problems—including developing
-                businesses, products, or services that support the Sustainable Development Goals? What else do you think?
+                Did you like it? Will it help develop solutions to global/local problems—including developing
+                businesses, products, or services that support the SDGs? What else do you think?
               </p>
-              <div class="relative">
-                <span class="pointer-events-none absolute top-3 left-3">
-                  <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 9h6M9 13h3"/><path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h7"/>
-                  </svg>
-                </span>
-                <textarea formControlName="opinion" rows="6"
-                  class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
-                         bg-white dark:bg-slate-800/80 px-4 py-4 pl-12 text-base
-                         text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                         caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                  placeholder="Share your thoughts…"></textarea>
-              </div>
-              <div class="mt-1 flex items-center justify-between">
+              <textarea formControlName="opinion" rows="6"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Share your thoughts…"></textarea>
+              <div class="flex items-center justify-between">
                 <p *ngIf="(form.controls.opinion.touched || submitted) && form.controls.opinion.invalid"
                    class="text-xs text-rose-600">Please add at least 20 characters.</p>
-                <span class="text-xs text-slate-500 dark:text-slate-400">
-                  {{ (form.controls.opinion.value?.length || 0) }} chars
-                </span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">{{ (form.controls.opinion.value?.length || 0) }} chars</span>
               </div>
             </section>
 
-            <!-- B) Levels -->
-            <section id="qB" class="space-y-3">
+            <!-- B) Levels + details -->
+            <section id="qB" class="space-y-4">
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">B</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   What age/expertise level will NWG work for? <span class="text-rose-600">*</span>
                 </h2>
               </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">Check all that apply.</p>
+              <p class="text-sm text-slate-600 dark:text-slate-400">Check all that apply and (optionally) add details.</p>
+
               <div formArrayName="levels" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label *ngFor="let opt of levelOptions; let i = index"
                        class="inline-flex items-center gap-3 rounded-2xl border px-4 py-3 text-base
@@ -180,33 +136,134 @@
                   <span>{{ opt }}</span>
                 </label>
               </div>
-              <p *ngIf="(levelsFA.touched || submitted) && levelsFA.invalid"
-                 class="text-xs text-rose-600">Please select at least one level.</p>
+              <p *ngIf="(levelsFA.touched || submitted) && levelsFA.invalid" class="text-xs text-rose-600">Please select at least one level.</p>
+
+              <!-- Details (conditional) -->
+              <div formGroupName="levelsDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div *ngIf="isLevelSelected('High School')">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                    High School — what areas/courses?
+                  </label>
+                  <input type="text" formControlName="hsCourses"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                </div>
+
+                <div *ngIf="isLevelSelected('College')">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                    College — what areas/courses?
+                  </label>
+                  <input type="text" formControlName="collegeCourses"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                </div>
+
+                <div *ngIf="isLevelSelected('Professionals')">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                    Professionals — what area?
+                  </label>
+                  <input type="text" formControlName="professionalAreas"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                </div>
+
+                <div *ngIf="isLevelSelected('Other')">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                    Other — please specify
+                  </label>
+                  <input type="text" formControlName="otherText"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                </div>
+              </div>
             </section>
 
-            <!-- C) Improvements -->
+            <!-- C) Improvements (required) -->
             <section id="qC" class="space-y-3">
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">C</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What would you add to make NWG better, more useful, easier to use?
+                  What would you add to NWG to make it better, more useful, easier to use? <span class="text-rose-600">*</span>
                 </h2>
               </div>
               <textarea formControlName="improvements" rows="5"
-                class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
-                       bg-white dark:bg-slate-800/80 px-4 py-4 text-base
-                       text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                       caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                placeholder="Features, UI ideas, integrations, anything…"></textarea>
-              <div class="text-right text-xs text-slate-500 dark:text-slate-400">
-                {{ (form.controls.improvements.value?.length || 0) }} chars
-              </div>
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Features, UI ideas, integrations, anything…"></textarea>
+              <p *ngIf="(form.controls.improvements.touched || submitted) && form.controls.improvements.invalid"
+                 class="text-xs text-rose-600">Please add at least 5 characters.</p>
             </section>
 
-            <!-- D) Prompts -->
+            <!-- NEW: F) Ask Bucky useful? -->
+            <section id="qF" class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">F</span>
+                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+                  Was “Ask Bucky” useful? <span class="text-rose-600">*</span>
+                </h2>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 dark:text-white">
+                <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
+                               border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <input type="radio" value="yes" formControlName="askBuckyUseful" class="accent-sky-500">
+                  <span>Yes</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
+                               border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <input type="radio" value="somewhat" formControlName="askBuckyUseful" class="accent-sky-500">
+                  <span>Somewhat</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
+                               border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <input type="radio" value="no" formControlName="askBuckyUseful" class="accent-sky-500">
+                  <span>No</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
+                               border-slate-200 dark:border-slate-700 cursor-pointer">
+                  <input type="radio" value="not_sure" formControlName="askBuckyUseful" class="accent-sky-500">
+                  <span>Not sure</span>
+                </label>
+              </div>
+              <p *ngIf="(form.controls.askBuckyUseful.touched || submitted) && form.controls.askBuckyUseful.invalid"
+                 class="text-xs text-rose-600">Please select one option.</p>
+            </section>
+
+            <!-- NEW: G) Problems you could use NWG for -->
+            <section id="qG" class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">G</span>
+                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+                  Are there problems or issues you could use NWG for developing solutions? <span class="text-rose-600">*</span>
+                </h2>
+              </div>
+              <textarea formControlName="concerns" rows="5"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Briefly describe the problems/issues…"></textarea>
+              <p *ngIf="(form.controls.concerns.touched || submitted) && form.controls.concerns.invalid"
+                 class="text-xs text-rose-600">This field is required.</p>
+            </section>
+
+            <!-- NEW: H) Other AI agents -->
+            <section id="qH" class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">H</span>
+                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+                  Did you use any other AI agents? What for? Was it useful?
+                </h2>
+              </div>
+              <textarea formControlName="otherAgents" rows="4"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Which agent(s), how you used them, and whether it helped…"></textarea>
+            </section>
+
+            <!-- D) Prompts (kept) -->
             <section id="qD" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">D</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">I</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   Prompts you used or created
                 </h2>
@@ -216,40 +273,63 @@
                 Did you create new, useful prompts? Please share so we can help other users.
               </p>
               <textarea formControlName="prompts" rows="5"
-                class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
-                       bg-white dark:bg-slate-800/80 px-4 py-4 text-base
-                       text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                       caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                placeholder="Paste or write the prompts that worked for you…"></textarea>
-              <div class="text-right text-xs text-slate-500 dark:text-slate-400">
-                {{ (form.controls.prompts.value?.length || 0) }} chars
-              </div>
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Paste or write the prompts that worked for you…"></textarea>
             </section>
 
-            <!-- E) Course usefulness -->
+            <!-- E) Course usefulness (kept, required) -->
             <section id="qE" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">E</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">J</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What would be needed to make NWG more useful in your course? <span class="text-rose-600">*</span>
+                  What would make NWG more useful in your course? <span class="text-rose-600">*</span>
                 </h2>
               </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">
-                Think of what would help your peers (high school, college students, researchers, organizations, etc.).
-              </p>
               <textarea formControlName="courseUse" rows="5"
-                class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
-                       bg-white dark:bg-slate-800/80 px-4 py-4 text-base
-                       text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                       caret-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60 focus:border-transparent"
-                placeholder="Tell us what would make NWG truly valuable in your course context…"></textarea>
-              <div class="mt-1 flex items-center justify-between">
-                <p *ngIf="(form.controls.courseUse.touched || submitted) && form.controls.courseUse.invalid"
-                   class="text-xs text-rose-600">Please add at least 10 characters.</p>
-                <span class="text-xs text-slate-500 dark:text-slate-400">
-                  {{ (form.controls.courseUse.value?.length || 0) }} chars
-                </span>
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Think of what would help your peers (HS, college, researchers, orgs, etc.)…"></textarea>
+              <p *ngIf="(form.controls.courseUse.touched || submitted) && form.controls.courseUse.invalid"
+                 class="text-xs text-rose-600">Please add at least 10 characters.</p>
+            </section>
+
+            <!-- NEW: K) Team building -->
+            <section id="qK" class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">K</span>
+                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+                  What could improve team building and overall functioning of Teams?
+                </h2>
               </div>
+              <textarea formControlName="teamBuilding" rows="4"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Onboarding, roles, comms, facilitation, tooling, etc."></textarea>
+            </section>
+
+            <!-- NEW: L) Anything else (required) -->
+            <section id="qL" class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">L</span>
+                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
+                  What else would you like to add? <span class="text-rose-600">*</span>
+                </h2>
+              </div>
+              <textarea formControlName="more" rows="4"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        placeholder="Anything we missed…"></textarea>
+              <p *ngIf="(form.controls.more.touched || submitted) && form.controls.more.invalid"
+                 class="text-xs text-rose-600">This field is required.</p>
             </section>
 
             <!-- Submit -->
@@ -273,60 +353,83 @@
       </div>
     </div>
 
+    <!-- Back to top -->
     <div class="mt-10 text-center">
       <a href="#top" class="text-sm text-slate-600 dark:text-slate-400 hover:underline">Back to top</a>
     </div>
   </section>
 
+  <!-- (If you added the success modal earlier, keep it as-is here) -->
   <app-footer></app-footer>
 </div>
 
 
 
 
-<!-- !-- NEW: Success Modal -->
-<div *ngIf="showSuccessModal"
-     class="fixed inset-0 z-50 flex items-center justify-center"
-     role="dialog" aria-modal="true" aria-labelledby="success-title">
+<!-- ✅ Success Modal -->
+<div *ngIf="showSuccessModal" class="fixed inset-0 z-[100]">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
 
-  <!-- click-away background -->
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closeSuccessModal()"></div>
+  <!-- Centered modal -->
+  <div class="absolute inset-0 flex items-center justify-center px-4"
+       (keydown)="onModalKeydown($event)">
+    <div #successDialog
+         class="relative w-full max-w-lg"
+         role="dialog" aria-modal="true"
+         aria-labelledby="success-title" aria-describedby="success-desc">
 
-  <!-- modal card -->
-  <div class="relative mx-4 w-full max-w-md">
-    <div class="rounded-3xl p-[1px] bg-gradient-to-br from-emerald-400/40 via-sky-400/30 to-cyan-400/30">
-      <div class="rounded-3xl bg-white dark:bg-slate-900 ring-1 ring-black/5 shadow-2xl">
-        <div class="p-6 md:p-8 text-center">
-          <div class="mx-auto mb-4 h-12 w-12 rounded-full bg-emerald-50 text-emerald-600
-                      flex items-center justify-center dark:bg-emerald-900/30 dark:text-emerald-300">
-            <!-- check icon -->
-            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 6L9 17l-5-5"></path>
-            </svg>
-          </div>
+      <!-- Gradient halo -->
+      <div class="rounded-3xl p-[1px] bg-gradient-to-br from-emerald-400/40 via-sky-400/30 to-cyan-400/30 shadow-2xl">
+        <div class="rounded-3xl bg-white dark:bg-slate-900 ring-1 ring-black/5 overflow-hidden">
+          <!-- Header actions -->
+          <button type="button"
+                  (click)="closeSuccessModal()"
+                  class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center
+                         rounded-full text-slate-500 hover:text-slate-700 dark:text-slate-300 dark:hover:text-white
+                         hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  aria-label="Close">
+            ✕
+          </button>
 
-          <h3 id="success-title" class="text-xl font-semibold text-slate-900 dark:text-white">Thank you!</h3>
-          <p class="mt-2 text-slate-600 dark:text-slate-300">
-            Your feedback was submitted successfully. We’ll follow up by email if needed.
-          </p>
+          <div class="p-6 md:p-8 text-center">
+            <!-- Icon -->
+            <div class="mx-auto mb-4 h-14 w-14 rounded-full bg-emerald-50 text-emerald-600
+                        flex items-center justify-center dark:bg-emerald-900/30 dark:text-emerald-300">
+              <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </div>
 
-          <div class="mt-6 flex gap-3 justify-center">
-            <button #successCloseBtn type="button"
-                    (click)="closeSuccessModal()"
-                    class="rounded-full px-5 py-2.5 text-sm font-medium text-white
-                           bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              Close
-            </button>
-            <button type="button"
-                    (click)="closeSuccessModal()"
-                    class="rounded-full px-5 py-2.5 text-sm font-medium
-                           text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700
-                           hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400">
-              OK
-            </button>
+            <h3 id="success-title" class="text-xl md:text-2xl font-semibold text-slate-900 dark:text-white">
+              Feedback sent
+            </h3>
+            <p id="success-desc" class="mt-2 text-slate-600 dark:text-slate-300">
+              Thank you! Your feedback has been submitted successfully.
+              <span *ngIf="form.controls.email.value">We’ll follow up at <strong>{{ form.controls.email.value }}</strong> if needed.</span>
+            </p>
+
+            <!-- Buttons -->
+            <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+              <button #successCloseBtn type="button"
+                      (click)="closeSuccessModal()"
+                      class="rounded-full px-5 py-2.5 text-sm font-medium text-white
+                             bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                Close
+              </button>
+              <a href="#" (click)="$event.preventDefault(); closeSuccessModal();"
+                 class="rounded-full px-5 py-2.5 text-sm font-medium
+                        text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700
+                        hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 text-center">
+                Submit another
+              </a>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Subtle glow -->
+      <div class="pointer-events-none absolute -inset-1 rounded-3xl bg-gradient-to-tr from-emerald-400/10 via-sky-400/10 to-cyan-400/10 blur-2xl"></div>
     </div>
   </div>
 </div>
