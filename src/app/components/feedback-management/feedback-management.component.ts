@@ -6,20 +6,38 @@ import { map } from 'rxjs/operators';
 type AskStatus = 'new' | 'read' | 'closed';
 type SortKey = 'createdAt' | 'status';
 type StatusFilter = 'all' | AskStatus;
+type AskBuckyUseful = 'yes' | 'somewhat' | 'no' | 'not_sure';
+
+export interface LevelsDetails {
+  hsCourses: string;
+  collegeCourses: string;
+  professionalAreas: string;
+  otherText: string;
+}
 
 export interface FeedbackDoc {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
+
   opinion: string; // A
   levels: string[]; // B
+  levelsDetails?: LevelsDetails; // B details
+
   improvements: string; // C
-  prompts: string; // D
-  courseUse: string; // E
+  prompts: string; // I (letter kept from form)
+  courseUse: string; // J
+
+  askBuckyUseful?: AskBuckyUseful; // F
+  concerns?: string; // G
+  otherAgents?: string; // H
+  teamBuilding?: string; // K
+  more?: string; // L
+
   uid?: string | null;
-  createdAt?: any; // Firestore timestamp maybe
-  createdAtMs?: number; // local ms we saved
+  createdAt?: any;
+  createdAtMs?: number;
   status: AskStatus;
 }
 
@@ -43,13 +61,11 @@ export class FeedbackManagementComponent implements OnInit {
   sortBy: SortKey = 'createdAt';
   statusFilter: StatusFilter = 'all';
 
-  // counts
   countAll = 0;
   countNew = 0;
   countRead = 0;
   countClosed = 0;
 
-  // expansion state
   expanded = new Set<string>();
   expandAll = false;
 
@@ -109,7 +125,7 @@ export class FeedbackManagementComponent implements OnInit {
 
   private sortItems(): void {
     if (this.sortBy === 'createdAt') {
-      this.items.sort((a, b) => b.createdAtMs - a.createdAtMs); // newest first
+      this.items.sort((a, b) => b.createdAtMs - a.createdAtMs);
     } else {
       const order: Record<AskStatus, number> = { new: 0, read: 1, closed: 2 };
       this.items.sort((a, b) => {
@@ -124,6 +140,8 @@ export class FeedbackManagementComponent implements OnInit {
     this.filtered = this.items.filter((i) => {
       const matchesStatus =
         this.statusFilter === 'all' ? true : i.status === this.statusFilter;
+
+      const levelDetailsBlob = Object.values(i.levelsDetails || {}).join(' ');
       const big = [
         i.name,
         i.email,
@@ -131,16 +149,22 @@ export class FeedbackManagementComponent implements OnInit {
         i.improvements,
         i.prompts,
         i.courseUse,
+        i.concerns,
+        i.otherAgents,
+        i.teamBuilding,
+        i.more,
+        levelDetailsBlob,
         ...(i.levels || []),
+        i.askBuckyUseful ? this.formatBucky(i.askBuckyUseful) : '',
       ]
         .join(' ')
         .toLowerCase();
+
       const matchesQuery = !q || big.includes(q);
       return matchesStatus && matchesQuery;
     });
-    if (this.expandAll) {
-      this.filtered.forEach((r) => this.expanded.add(r.id));
-    }
+
+    if (this.expandAll) this.filtered.forEach((r) => this.expanded.add(r.id));
   }
 
   toggle(id: string) {
@@ -162,6 +186,32 @@ export class FeedbackManagementComponent implements OnInit {
     this.applyFilter();
   }
 
+  // --- Ask Bucky helpers ---
+  formatBucky(v?: AskBuckyUseful): string {
+    if (!v) return '—';
+    const map: Record<AskBuckyUseful, string> = {
+      yes: 'Yes',
+      somewhat: 'Somewhat',
+      no: 'No',
+      not_sure: 'Not sure',
+    };
+    return map[v] ?? '—';
+  }
+
+  buckyBadgeClass(v?: AskBuckyUseful) {
+    return {
+      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200':
+        v === 'yes',
+      'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200':
+        v === 'somewhat',
+      'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200':
+        v === 'no',
+      'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200':
+        v === 'not_sure' || !v,
+    };
+  }
+
+  // --- CSV export (A–L) ---
   downloadCsv(): void {
     const esc = (s: any) => `"${String(s ?? '').replace(/"/g, '""')}"`;
     const rows = this.filtered.map((r) =>
@@ -172,13 +222,23 @@ export class FeedbackManagementComponent implements OnInit {
         new Date(r.createdAtMs || 0).toLocaleString(),
         r.opinion,
         (r.levels || []).join('; '),
+        r.levelsDetails?.hsCourses || '',
+        r.levelsDetails?.collegeCourses || '',
+        r.levelsDetails?.professionalAreas || '',
+        r.levelsDetails?.otherText || '',
         r.improvements,
+        this.formatBucky(r.askBuckyUseful),
+        r.concerns,
+        r.otherAgents,
         r.prompts,
         r.courseUse,
+        r.teamBuilding,
+        r.more,
       ]
         .map(esc)
         .join(',')
     );
+
     const header = [
       'Name',
       'Email',
@@ -186,10 +246,20 @@ export class FeedbackManagementComponent implements OnInit {
       'Submitted',
       'A_Opinion',
       'B_Levels',
+      'B_HS_Courses',
+      'B_College_Courses',
+      'B_Professional_Areas',
+      'B_Other',
       'C_Improvements',
-      'D_Prompts',
-      'E_CourseUse',
+      'F_AskBuckyUseful',
+      'G_Concerns',
+      'H_OtherAgents',
+      'I_Prompts',
+      'J_CourseUse',
+      'K_TeamBuilding',
+      'L_More',
     ].join(',');
+
     const csv = [header, ...rows].join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -214,15 +284,34 @@ ${r.opinion || '—'}
 
 B) Levels:
 ${(r.levels || []).join(', ') || '—'}
+B) Details:
+HS: ${r.levelsDetails?.hsCourses || '—'}
+College: ${r.levelsDetails?.collegeCourses || '—'}
+Professional: ${r.levelsDetails?.professionalAreas || '—'}
+Other: ${r.levelsDetails?.otherText || '—'}
 
 C) Improvements:
 ${r.improvements || '—'}
 
-D) Prompts:
+F) Ask Bucky useful?: ${this.formatBucky(r.askBuckyUseful)}
+
+G) Problems / issues:
+${r.concerns || '—'}
+
+H) Other AI agents:
+${r.otherAgents || '—'}
+
+I) Prompts:
 ${r.prompts || '—'}
 
-E) Course Usefulness:
+J) Course usefulness:
 ${r.courseUse || '—'}
+
+K) Team building:
+${r.teamBuilding || '—'}
+
+L) Anything else:
+${r.more || '—'}
 `;
     navigator.clipboard?.writeText(txt);
   }

@@ -145,7 +145,7 @@
                     High School — what areas/courses?
                   </label>
                   <input type="text" formControlName="hsCourses"
-                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
                 </div>
 
                 <div *ngIf="isLevelSelected('College')">
@@ -153,7 +153,7 @@
                     College — what areas/courses?
                   </label>
                   <input type="text" formControlName="collegeCourses"
-                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
                 </div>
 
                 <div *ngIf="isLevelSelected('Professionals')">
@@ -161,15 +161,15 @@
                     Professionals — what area?
                   </label>
                   <input type="text" formControlName="professionalAreas"
-                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
                 </div>
 
                 <div *ngIf="isLevelSelected('Other')">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-white mb-1">
                     Other — please specify
                   </label>
                   <input type="text" formControlName="otherText"
-                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
+                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 "/>
                 </div>
               </div>
             </section>
@@ -353,10 +353,8 @@
       </div>
     </div>
 
-    <!-- Back to top -->
-    <div class="mt-10 text-center">
-      <a href="#top" class="text-sm text-slate-600 dark:text-slate-400 hover:underline">Back to top</a>
-    </div>
+  
+    
   </section>
 
   <!-- (If you added the success modal earlier, keep it as-is here) -->

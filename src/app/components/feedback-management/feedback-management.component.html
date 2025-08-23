@@ -34,11 +34,10 @@
                   type="text"
                   [(ngModel)]="search"
                   (input)="applyFilter()"
-                  placeholder="Search name, email, or answers A–E…"
+                  placeholder="Search name, email, or answers A–L…"
                   class="h-11 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl
                          focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 pr-10
                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"/>
-                <!-- quick clear -->
                 <button *ngIf="search"
                         (click)="search=''; applyFilter()"
                         class="absolute inset-y-0 right-2 my-auto h-6 w-6 rounded-full
@@ -100,6 +99,7 @@
                 <th class="px-4 py-3 whitespace-nowrap">Submitted</th>
                 <th class="px-4 py-3">Name</th>
                 <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3">Bucky</th> <!-- NEW quick badge -->
                 <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3">Actions</th>
                 <th class="px-4 py-3"></th>
@@ -121,6 +121,15 @@
                       <button (click)="copy(r.email)" class="text-xs text-sky-600 hover:underline">Copy</button>
                     </span>
                   </td>
+
+                  <!-- NEW: quick “Ask Bucky useful?” badge -->
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          [ngClass]="buckyBadgeClass(r.askBuckyUseful)">
+                      {{ formatBucky(r.askBuckyUseful) }}
+                    </span>
+                  </td>
+
                   <td class="px-4 py-3">
                     <span
                       class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -167,8 +176,9 @@
 
                 <!-- expanded details -->
                 <tr *ngIf="expanded.has(r.id)" class="bg-gray-50/60 dark:bg-slate-800/60">
-                  <td colspan="7" class="px-6 py-6">
+                  <td colspan="8" class="px-6 py-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
                       <!-- A) Opinion -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
@@ -178,13 +188,13 @@
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.opinion || '—' }}</p>
                       </div>
 
-                      <!-- B) Levels -->
+                      <!-- B) Levels + details -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
                           <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">B</span>
-                          <h4 class="font-semibold text-slate-900 dark:text-white">Levels it works for</h4>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Levels & details</h4>
                         </div>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="flex flex-wrap gap-2 mb-3">
                           <span *ngFor="let lv of r.levels"
                                 class="inline-flex items-center rounded-full border px-3 py-1 text-xs
                                        border-slate-300 bg-white text-slate-700 shadow-sm
@@ -192,6 +202,13 @@
                             {{ lv }}
                           </span>
                           <span *ngIf="!r.levels?.length" class="text-sm text-slate-500 dark:text-slate-400">—</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                          <div *ngIf="r.levelsDetails?.hsCourses"><span class="font-semibold">HS Courses:</span> {{ r.levelsDetails!.hsCourses }}</div>
+                          <div *ngIf="r.levelsDetails?.collegeCourses"><span class="font-semibold">College Courses:</span> {{ r.levelsDetails!.collegeCourses }}</div>
+                          <div *ngIf="r.levelsDetails?.professionalAreas"><span class="font-semibold">Professional Areas:</span> {{ r.levelsDetails!.professionalAreas }}</div>
+                          <div *ngIf="r.levelsDetails?.otherText"><span class="font-semibold">Other:</span> {{ r.levelsDetails!.otherText }}</div>
+                          <div *ngIf="!r.levelsDetails?.hsCourses && !r.levelsDetails?.collegeCourses && !r.levelsDetails?.professionalAreas && !r.levelsDetails?.otherText" class="text-slate-500 dark:text-slate-400">No details provided.</div>
                         </div>
                       </div>
 
@@ -204,22 +221,70 @@
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.improvements || '—' }}</p>
                       </div>
 
-                      <!-- D) Prompts -->
+                      <!-- F) Ask Bucky useful? -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">D</span>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">F</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">“Ask Bucky” useful?</h4>
+                        </div>
+                        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                              [ngClass]="buckyBadgeClass(r.askBuckyUseful)">
+                          {{ formatBucky(r.askBuckyUseful) }}
+                        </span>
+                      </div>
+
+                      <!-- G) Problems / issues to use NWG for -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">G</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Problems / issues for NWG</h4>
+                        </div>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.concerns || '—' }}</p>
+                      </div>
+
+                      <!-- H) Other AI agents -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">H</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Other AI agents used</h4>
+                        </div>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.otherAgents || '—' }}</p>
+                      </div>
+
+                      <!-- I) Prompts -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">I</span>
                           <h4 class="font-semibold text-slate-900 dark:text-white">Prompts used/created</h4>
                         </div>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.prompts || '—' }}</p>
                       </div>
 
-                      <!-- E) Course usefulness -->
-                      <div class="lg:col-span-2 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                      <!-- J) Course usefulness -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">E</span>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">J</span>
                           <h4 class="font-semibold text-slate-900 dark:text-white">Course usefulness</h4>
                         </div>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.courseUse || '—' }}</p>
+                      </div>
+
+                      <!-- K) Team building -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">K</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Team building & functioning</h4>
+                        </div>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.teamBuilding || '—' }}</p>
+                      </div>
+
+                      <!-- L) More -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700 lg:col-span-2">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">L</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Anything else</h4>
+                        </div>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.more || '—' }}</p>
 
                         <div class="mt-4 flex flex-wrap gap-3">
                           <a [href]="'mailto:' + r.email"
@@ -234,13 +299,14 @@
                           </button>
                         </div>
                       </div>
+
                     </div>
                   </td>
                 </tr>
               </ng-container>
 
               <tr *ngIf="filtered.length === 0">
-                <td colspan="7" class="px-4 py-10 text-center text-slate-500 dark:text-slate-400">
+                <td colspan="8" class="px-4 py-10 text-center text-slate-500 dark:text-slate-400">
                   No submissions found.
                 </td>
               </tr>
