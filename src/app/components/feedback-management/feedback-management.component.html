@@ -118,7 +118,15 @@
                   <td class="px-4 py-3">
                     <span class="inline-flex items-center gap-2">
                       {{ r.email }}
-                      <button (click)="copy(r.email)" class="text-xs text-sky-600 hover:underline">Copy</button>
+                     <button (click)="copyEmail(r)"
+                            class="text-xs rounded-full px-2 py-1 transition"
+                            [ngClass]="copiedEmail.has(r.id)
+                            ? 'text-emerald-700 bg-emerald-50 dark:text-emerald-200 dark:bg-emerald-900/20'
+                            : 'text-sky-600 hover:underline'">
+                    <span *ngIf="!copiedEmail.has(r.id)">Copy</span>
+                    <span *ngIf="copiedEmail.has(r.id)">Copied</span>
+                    </button>
+
                     </span>
                   </td>
 
@@ -293,10 +301,14 @@
                             Email
                           </a>
                           <button (click)="copyThread(r)"
-                                  class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium
-                                         border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200">
-                            Copy all answers
-                          </button>
+                                class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium border transition"
+                                [ngClass]="copiedAll.has(r.id)
+                                ? 'border-emerald-300 text-emerald-700 bg-emerald-50 dark:border-emerald-700 dark:text-emerald-200 dark:bg-emerald-900/20'
+                                : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200'">
+                        <span *ngIf="!copiedAll.has(r.id)">Copy all answers</span>
+                        <span *ngIf="copiedAll.has(r.id)">Copied!</span>
+                        </button>
+
                         </div>
                       </div>
 

@@ -69,6 +69,26 @@ export class FeedbackManagementComponent implements OnInit {
   expanded = new Set<string>();
   expandAll = false;
 
+  copiedEmail = new Set<string>();
+  copiedAll = new Set<string>();
+  private emailTimers = new Map<string, any>();
+  private allTimers = new Map<string, any>();
+
+  private flash(
+    set: Set<string>,
+    timers: Map<string, any>,
+    id: string,
+    ms = 1500
+  ) {
+    if (timers.has(id)) clearTimeout(timers.get(id));
+    set.add(id);
+    const t = setTimeout(() => {
+      set.delete(id);
+      timers.delete(id);
+    }, ms);
+    timers.set(id, t);
+  }
+
   constructor(public auth: AuthService, private data: DataService) {}
 
   ngOnInit(): void {
@@ -274,6 +294,30 @@ export class FeedbackManagementComponent implements OnInit {
     navigator.clipboard?.writeText(text);
   }
 
+  private async copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback for older browsers
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    }
+  }
+
+  // ✅ NEW: copy email with flash
+  copyEmail(row: Row) {
+    this.copyToClipboard(row.email);
+    this.flash(this.copiedEmail, this.emailTimers, row.id);
+  }
+
+  // ✅ UPDATED: copy all answers with flash
   copyThread(r: Row) {
     const txt = `NWG Feedback — ${r.name} <${r.email}>
 Submitted: ${r.createdAtMs ? new Date(r.createdAtMs).toLocaleString() : '—'}
@@ -313,6 +357,7 @@ ${r.teamBuilding || '—'}
 L) Anything else:
 ${r.more || '—'}
 `;
-    navigator.clipboard?.writeText(txt);
+    this.copyToClipboard(txt);
+    this.flash(this.copiedAll, this.allTimers, r.id);
   }
 }
