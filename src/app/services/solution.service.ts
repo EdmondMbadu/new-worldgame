@@ -889,4 +889,55 @@ export class SolutionService {
       )
       .valueChanges({ idField: 'id' });
   }
+
+  private normalizeParticipants(raw: any): { name: string }[] {
+    if (!raw) return [];
+    if (Array.isArray(raw)) {
+      // ensure each entry is { name: string }
+      return raw
+        .map((x: any) =>
+          typeof x === 'string'
+            ? { name: x }
+            : { name: (x?.name || '').toString() }
+        )
+        .filter((p: any) => (p.name || '').trim());
+    }
+    // map/object -> array
+    return Object.values(raw)
+      .map((v: any) => ({
+        name: (typeof v === 'string' ? v : v?.name || '').toString(),
+      }))
+      .filter((p: any) => (p.name || '').trim());
+  }
+
+  async approveJoinRequest(
+    solutionId: string,
+    user: { uid: string; email: string }
+  ): Promise<void> {
+    const solRef = this.afs.doc(`solutions/${solutionId}`).ref;
+    const reqRef = this.afs.doc(
+      `solutions/${solutionId}/joinRequests/${user.uid}`
+    ).ref;
+
+    await this.afs.firestore.runTransaction(async (tx) => {
+      const solSnap = await tx.get(solRef);
+      const solData: any = solSnap.exists ? solSnap.data() : {};
+      const participants = this.normalizeParticipants(solData.participants);
+
+      const email = (user.email || '').trim().toLowerCase();
+      const exists = participants.some(
+        (p) => (p.name || '').trim().toLowerCase() === email
+      );
+      if (!exists) {
+        participants.push({ name: email });
+      }
+
+      tx.update(solRef, { participants });
+      tx.update(reqRef, {
+        status: 'approved',
+        approvedAt: new Date().toISOString(),
+        approvedBy: this.auth.currentUser?.uid || null,
+      });
+    });
+  }
 }

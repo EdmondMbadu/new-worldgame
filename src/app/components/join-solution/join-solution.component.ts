@@ -22,6 +22,8 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   alreadyMember = false; // is in participants
   myRequestStatus: ReqStatus = 'none';
 
+  acceptingId: string | null = null;
+
   // owner view of requests
   pendingRequests$ = of<any[]>([]);
   isOwner = false;
@@ -176,5 +178,23 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
       );
     }
     return !!participants[email] || Object.values(participants).includes(email);
+  }
+
+  async accept(r: any) {
+    if (!r?.uid || !r?.email) return;
+    this.acceptingId = r.uid;
+    try {
+      await this.solutionService.approveJoinRequest(this.id, {
+        uid: r.uid,
+        email: r.email,
+      });
+      // Optional toast
+      // alert(`${r.email} added to participants.`);
+    } catch (e) {
+      console.error(e);
+      alert('Could not approve request. Please try again.');
+    } finally {
+      this.acceptingId = null;
+    }
   }
 }
