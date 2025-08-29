@@ -141,4 +141,32 @@ export class DashboardComponent implements OnInit {
       this.sendingBroadcast = false;
     }
   }
+  // Helpers for broadcast state in the dashboard component class
+  get isBroadcasting(): boolean {
+    // Treat as broadcasting when explicitly marked AND not stopped
+    const status = (this.currentSolution as any)?.broadcastStatus as
+      | 'active'
+      | 'paused'
+      | 'stopped'
+      | undefined;
+    return (
+      (this.currentSolution as any)?.isBroadcasting === true &&
+      status !== 'stopped'
+    );
+  }
+
+  get broadcastStatus(): 'active' | 'paused' | 'stopped' {
+    const status = (this.currentSolution as any)?.broadcastStatus as
+      | 'active'
+      | 'paused'
+      | 'stopped'
+      | undefined;
+    return status ?? 'active';
+  }
+
+  // Stop button in tile should not open modal
+  onStopTile(ev: Event) {
+    ev.stopPropagation();
+    this.stopBroadcast();
+  }
 }
