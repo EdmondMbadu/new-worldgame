@@ -78,9 +78,11 @@ export class DashboardComponent implements OnInit {
   // In your TS
 
   get generatedInviteLink(): string {
-    return `https://newworld-game.org/join/${
-      this.currentSolution.solutionId || this.id
-    }`;
+    return `join/${this.currentSolution.solutionId || this.id}`;
+  }
+
+  get allBroadcasts(): string {
+    return `broadcasts/`;
   }
 
   copyInviteLink() {
