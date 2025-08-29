@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription, combineLatest, map, of } from 'rxjs';
+import { Subscription, combineLatest, map, of, switchMap } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
@@ -44,7 +44,6 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id')!;
 
-    // Load solution + my request + pending list (for owner)
     const sol$ = this.solutionService.getSolution(this.id);
 
     const me = this.auth.currentUser;
@@ -52,15 +51,15 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
       ? this.solutionService.getJoinRequestForUser(this.id, me.uid)
       : of(undefined);
 
+    // 1) main state
     this.sub = combineLatest([sol$, myReq$]).subscribe(([s, r]: any[]) => {
       this.solution = s;
       this.loading = false;
 
-      // is owner?
-      this.isOwner =
-        !!s?.authorAccountId && s.authorAccountId === this.auth.currentUser.uid;
+      // robust owner test
+      this.isOwner = this.isOwnerOf(s);
 
-      // am I already a member?
+      // membership
       this.alreadyMember = this.isUserInParticipants(
         s?.participants,
         this.auth.currentUser.email
@@ -68,12 +67,16 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
 
       // my request status
       this.myRequestStatus = (r?.status as ReqStatus) || 'none';
-
-      // owner sees pending requests list
-      this.pendingRequests$ = this.isOwner
-        ? this.solutionService.listPendingJoinRequests(this.id)
-        : of([]);
     });
+
+    // 2) owner-gated stream of pending requests
+    this.pendingRequests$ = sol$.pipe(
+      switchMap((s: any) =>
+        this.isOwnerOf(s)
+          ? this.solutionService.listPendingJoinRequests(this.id)
+          : of([])
+      )
+    );
   }
 
   ngOnDestroy(): void {
@@ -144,6 +147,24 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   }
   trackByIndex(i: number) {
     return i;
+  }
+
+  private isOwnerOf(s: any): boolean {
+    const uid = this.auth?.currentUser?.uid;
+    const email = (this.auth?.currentUser?.email || '').toLowerCase();
+
+    // common owner fields your docs might use
+    const ownerUidMatches =
+      s?.authorAccountId === uid ||
+      s?.authorUid === uid ||
+      s?.ownerId === uid ||
+      s?.createdById === uid;
+
+    const ownerEmailMatches =
+      (s?.authorEmail || '').toLowerCase() === email ||
+      (s?.ownerEmail || '').toLowerCase() === email;
+
+    return !!(ownerUidMatches || ownerEmailMatches);
   }
 
   private isUserInParticipants(participants: any, email: string): boolean {
