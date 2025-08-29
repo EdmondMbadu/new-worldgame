@@ -33,6 +33,7 @@ export class DashboardComponent implements OnInit {
     customApi: false,
   };
 
+  sendingBroadcast = false;
   currentSolution: Solution = {};
   id: any;
   isHovering: boolean = false;
@@ -77,7 +78,7 @@ export class DashboardComponent implements OnInit {
   // In your TS
 
   get generatedInviteLink(): string {
-    return `https://newworldgame.org/solve/${
+    return `https://newworld-game.org/join/${
       this.currentSolution.solutionId || this.id
     }`;
   }
@@ -92,8 +93,52 @@ export class DashboardComponent implements OnInit {
     // this.currentSolution.broadCastInviteMessage = await buckyService.improvePitch(...);
   }
 
-  sendBroadcast() {
-    // Build payload from fields & channels
-    // Call backend; show success; close modal
+  // Update sendBroadcast()
+  async sendBroadcast() {
+    if (!this.currentSolution?.solutionId) return;
+    try {
+      this.sendingBroadcast = true;
+
+      const payload = {
+        solutionId: this.currentSolution.solutionId,
+        title: this.currentSolution.title || 'Untitled Solution',
+        message: this.currentSolution.broadCastInviteMessage || '',
+        includeReadMe: !!this.includeReadMe,
+        readMe: this.includeReadMe
+          ? this.currentSolution.description || ''
+          : undefined,
+        channels: this.channels,
+        inviteLink: this.generatedInviteLink,
+        joinLink: `/join/${this.currentSolution.solutionId}`,
+      };
+
+      const id = await this.solution.startBroadcast(payload);
+
+      // optional toast
+      alert('Broadcast sent! Your solution is now discoverable.');
+      this.toggleBroadcastModal();
+    } catch (e) {
+      console.error(e);
+      alert('Sorry, broadcast failed. Please try again.');
+    } finally {
+      this.sendingBroadcast = false;
+    }
+  }
+
+  // Optional: stop button handler (for later use)
+  async stopBroadcast() {
+    if (!this.currentSolution?.solutionId) return;
+    try {
+      this.sendingBroadcast = true;
+      await this.solution.stopBroadcastBySolutionId(
+        this.currentSolution.solutionId
+      );
+      alert('Broadcast stopped.');
+    } catch (e) {
+      console.error(e);
+      alert('Could not stop broadcast.');
+    } finally {
+      this.sendingBroadcast = false;
+    }
   }
 }

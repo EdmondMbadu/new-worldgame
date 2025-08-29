@@ -59,7 +59,15 @@ export class Solution {
   tempCategory?: string;
   ownerOfTeamPost?: string;
   broadCastInvitation?: string;
+
   broadCastInviteMessage?: string;
+  isBroadcasting?: boolean;
+  broadcastId?: string;
+  broadcastStatus?: 'active' | 'paused' | 'stopped';
+  // broadcastChannels?: {...};
+
+  // broadcastStartedAt?: serverTimestamp;
+  // broadcastUpdatedAt?: serverTimestam;
 }
 
 export class Evaluation {
@@ -117,4 +125,28 @@ export interface LinkPreview {
   title: string;
   description?: string;
   image?: string; // og:image or snapshot
+}
+
+export interface Broadcast {
+  broadcastId: string;
+  solutionId: string;
+  title: string;
+  message: string;
+  includeReadMe: boolean;
+  readMe?: string;
+  channels: {
+    email: boolean;
+    broadcastFeed: boolean;
+    social: boolean;
+    customApi: boolean;
+  };
+  inviteLink: string;
+  joinLink: string;
+  active: boolean;
+  status: 'active' | 'paused' | 'stopped';
+  createdByUid: string;
+  createdByName: string;
+  createdByEmail: string;
+  createdAt: any;
+  updatedAt: any;
 }

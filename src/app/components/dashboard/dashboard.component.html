@@ -226,9 +226,9 @@
             </span>
         </div>
               <!-- Grid Tile: Invite -->
-<!-- <div
+<div
   (click)="toggleBroadcastModal()"
-  class="relative bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200
+  class="relative text-center bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200
          text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center
          rounded-xl p-4 shadow hover:shadow-lg hover:-translate-y-0.5 transition
          hover-effect cursor-pointer"
@@ -241,11 +241,11 @@
     <path stroke-linecap="round" stroke-linejoin="round"
           d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0" />
   </svg>
-  <span>Invite People</span>
-  <span class="font-extralight text-sm text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-    Bring more minds to your project
+  <span>List page: Solutions Seeking Collaborators</span>
+  <span class="font-extralight text-center text-sm text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+    Bring more minds to your solution
   </span>
-</div> -->
+</div>
         
 
 
@@ -711,13 +711,19 @@
 
       <button
         (click)="sendBroadcast()"
-        class="inline-flex justify-center items-center rounded-md px-5 py-2.5 text-sm font-semibold
-               bg-emerald-600 text-white hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400
-               shadow transition"
+        [disabled]="sendingBroadcast"
+        class="inline-flex justify-center items-center gap-2 rounded-md px-5 py-2.5 text-sm font-semibold
+              bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed
+              dark:bg-emerald-500 dark:hover:bg-emerald-400 shadow transition"
         type="button"
       >
-        Send Broadcast
+        <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+        </svg>
+        <span>{{ sendingBroadcast ? 'Sending…' : 'Send Broadcast' }}</span>
       </button>
+
     </footer>
   </div>
 </div>

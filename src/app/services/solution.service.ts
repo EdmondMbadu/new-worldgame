@@ -3,12 +3,13 @@ import {
   AngularFirestoreDocument,
   AngularFirestore,
 } from '@angular/fire/compat/firestore';
-import { Evaluation, Roles, Solution } from '../models/solution';
+import { Broadcast, Evaluation, Roles, Solution } from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import {
   combineLatest,
   count,
+  firstValueFrom,
   from,
   last,
   map,
@@ -21,6 +22,8 @@ import { ChallengePage, Tournament, User } from '../models/user';
 import { SafeResourceUrlWithIconOptions } from '@angular/material/icon';
 import { Email } from '../components/create-playground/create-playground.component';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -661,5 +664,134 @@ export class SolutionService {
           .valueChanges({ idField: 'solutionId' })
       )
     ).pipe(map((arr) => arr.flat()));
+  }
+
+  // === Start a broadcast ===
+  async startBroadcast(params: {
+    solutionId: string;
+    title: string;
+    message: string;
+    includeReadMe: boolean;
+    readMe?: string;
+    channels: {
+      email: boolean;
+      broadcastFeed: boolean;
+      social: boolean;
+      customApi: boolean;
+    };
+    inviteLink: string;
+    joinLink: string;
+  }): Promise<string> {
+    const broadcastId = this.afs.createId();
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+
+    const payload: Broadcast = {
+      broadcastId,
+      solutionId: params.solutionId,
+      title: params.title,
+      message: params.message || '',
+      includeReadMe: !!params.includeReadMe,
+      readMe: params.includeReadMe ? params.readMe || '' : undefined,
+      channels: params.channels,
+      inviteLink: params.inviteLink,
+      joinLink: params.joinLink,
+      active: true,
+      status: 'active',
+      createdByUid: this.auth.currentUser.uid,
+      createdByName: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+      createdByEmail: this.auth.currentUser.email,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // 1) create broadcast doc
+    await this.afs
+      .doc(`broadcasts/${broadcastId}`)
+      .set(payload, { merge: true });
+
+    // 2) mirror status on the solution
+    await this.afs.doc(`solutions/${params.solutionId}`).set(
+      {
+        isBroadcasting: true,
+        broadcastId,
+        broadcastStatus: 'active',
+        broadcastChannels: params.channels,
+        broadCastInviteMessage: params.message || '',
+        broadcastStartedAt: now,
+        broadcastUpdatedAt: now,
+      },
+      { merge: true }
+    );
+
+    // (Optional) trigger emails / feeds via CF if chosen
+    // if (params.channels.email) {
+    //   const send = this.fns.httpsCallable('sendSolutionBroadcastEmails');
+    //   await firstValueFrom(send({ broadcastId }));
+    // }
+
+    return broadcastId;
+  }
+
+  // === Stop broadcast by solutionId ===
+  async stopBroadcastBySolutionId(solutionId: string): Promise<void> {
+    // find active broadcast for this solution
+    const snap = await firstValueFrom(
+      this.afs
+        .collection<Broadcast>('broadcasts', (ref) =>
+          ref
+            .where('solutionId', '==', solutionId)
+            .where('active', '==', true)
+            .limit(1)
+        )
+        .get()
+    );
+    if (snap.empty) {
+      // still clear solution mirror if it somehow stayed on
+      await this.afs.doc(`solutions/${solutionId}`).set(
+        {
+          isBroadcasting: false,
+          broadcastStatus: 'stopped',
+          broadcastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+      return;
+    }
+
+    const doc = snap.docs[0].ref;
+    await doc.set(
+      {
+        active: false,
+        status: 'stopped',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    await this.afs.doc(`solutions/${solutionId}`).set(
+      {
+        isBroadcasting: false,
+        broadcastStatus: 'stopped',
+        broadcastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
+
+  // === Read: active broadcasts (for your future page) ===
+  listActiveBroadcasts() {
+    return this.afs
+      .collection<Broadcast>('broadcasts', (ref) =>
+        ref.where('active', '==', true).orderBy('createdAt', 'desc')
+      )
+      .valueChanges({ idField: 'broadcastId' });
+  }
+
+  // Active broadcasts → Solutions (convenience)
+  listActiveBroadcastSolutions() {
+    return this.listActiveBroadcasts().pipe(
+      map((bcs) => bcs.map((b) => b.solutionId)),
+      switchMap((ids) => this.getSolutionsByIds(ids)) // you already have this helper
+    );
   }
 }
