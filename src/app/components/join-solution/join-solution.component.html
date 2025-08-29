@@ -76,24 +76,44 @@
         </div>
       </section>
 
-      <!-- CTA BAR (sticky on mobile) -->
-      <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 sm:hidden w-[calc(100%-2rem)]">
-        <button
-          (click)="joinTeam()"
-          [disabled]="joining || alreadyMember"
-          class="w-full inline-flex justify-center items-center gap-2 rounded-full py-3 text-base font-semibold
-                 shadow-xl backdrop-blur bg-emerald-600 text-white hover:bg-emerald-500
-                 disabled:opacity-50 transition"
-        >
-          <ng-container *ngIf="!alreadyMember; else joinedSmall">
+        <!-- CTA BAR (sticky on mobile) -->
+        <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 sm:hidden w-[calc(100%-2rem)]">
+          <!-- Already member -->
+          <button
+            *ngIf="alreadyMember"
+            class="w-full inline-flex justify-center items-center gap-2 rounded-full py-3 text-base font-semibold
+                  shadow-xl backdrop-blur bg-slate-400 text-white cursor-default"
+            disabled
+          >
+            Already a Designer ✓
+          </button>
+
+          <!-- Pending request -->
+          <button
+            *ngIf="!alreadyMember && myRequestStatus==='pending'"
+            (click)="cancelMyRequest()"
+            [disabled]="joining"
+            class="w-full inline-flex justify-center items-center gap-2 rounded-full py-3 text-base font-semibold
+                  shadow-xl backdrop-blur bg-amber-500 text-white hover:bg-amber-400 disabled:opacity-60 transition"
+          >
+            {{ joining ? 'Cancelling…' : 'Cancel Join Request' }}
+          </button>
+
+          <!-- No request yet (or was cancelled/rejected) -->
+          <button
+            *ngIf="!alreadyMember && myRequestStatus!=='pending'"
+            (click)="openRequestModal()"
+            [disabled]="joining"
+            class="w-full inline-flex justify-center items-center gap-2 rounded-full py-3 text-base font-semibold
+                  shadow-xl backdrop-blur bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 transition"
+          >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            {{ joining ? 'Joining…' : 'Request To Join this Team' }}
-          </ng-container>
-          <ng-template #joinedSmall>Already a Designer ✓</ng-template>
-        </button>
-      </div>
+            Request to Join this Team
+          </button>
+        </div>
+
 
       <!-- MAIN GRID -->
       <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -177,30 +197,49 @@
         <!-- RIGHT COLUMN (designers + join card) -->
         <aside class="space-y-8">
           <!-- Join card (desktop) -->
-          <div class="hidden sm:block rounded-2xl border border-slate-200 dark:border-slate-700
-                      bg-white dark:bg-slate-800 p-6 shadow-sm sticky top-24">
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-              Ready to contribute?
-            </h3>
-            <p class="text-sm text-slate-600 dark:text-slate-400 mb-5">
-              Join the team and start building this solution with others.
-            </p>
-            <button
-              (click)="joinTeam()"
-              [disabled]="joining || alreadyMember"
-              class="w-full inline-flex justify-center items-center gap-2 rounded-md py-2.5 text-sm font-semibold
-                     bg-emerald-600 text-white hover:bg-emerald-500
-                     disabled:opacity-50 transition"
-            >
-              <ng-container *ngIf="!alreadyMember; else joinedTpl">
+            <div class="hidden sm:block rounded-2xl border border-slate-200 dark:border-slate-700
+                        bg-white dark:bg-slate-800 p-6 shadow-sm sticky top-24">
+              <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-2">Ready to contribute?</h3>
+              <p class="text-sm text-slate-600 dark:text-slate-400 mb-5">
+                Join the team and start building this solution with others.
+              </p>
+
+              <!-- Already member -->
+              <button
+                *ngIf="alreadyMember"
+                class="w-full inline-flex justify-center items-center gap-2 rounded-md py-2.5 text-sm font-semibold
+                      bg-slate-400 text-white cursor-default"
+                disabled
+              >
+                Already a Designer ✓
+              </button>
+
+              <!-- Pending -->
+              <button
+                *ngIf="!alreadyMember && myRequestStatus==='pending'"
+                (click)="cancelMyRequest()"
+                [disabled]="joining"
+                class="w-full inline-flex justify-center items-center gap-2 rounded-md py-2.5 text-sm font-semibold
+                      bg-amber-500 text-white hover:bg-amber-400 disabled:opacity-60 transition"
+              >
+                {{ joining ? 'Cancelling…' : 'Cancel Join Request' }}
+              </button>
+
+              <!-- Not requested -->
+              <button
+                *ngIf="!alreadyMember && myRequestStatus!=='pending'"
+                (click)="openRequestModal()"
+                [disabled]="joining"
+                class="w-full inline-flex justify-center items-center gap-2 rounded-md py-2.5 text-sm font-semibold
+                      bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60 transition"
+              >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                {{ joining ? 'Joining…' : 'Join this Team' }}
-              </ng-container>
-              <ng-template #joinedTpl>Already a Designer ✓</ng-template>
-            </button>
-          </div>
+                Request to Join this Team
+              </button>
+            </div>
+
 
           <!-- Designers list -->
           <div class="rounded-2xl border border-slate-200 dark:border-slate-700
@@ -249,8 +288,103 @@
               </div>
             </div>
           </div>
+
+          <section *ngIf="isOwner" class="rounded-2xl border border-slate-200 dark:border-slate-700
+                                      bg-white dark:bg-slate-800 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+                Join Requests
+              </h3>
+            </div>
+
+            <ng-container *ngIf="(pendingRequests$ | async) as reqs">
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                Showing {{ reqs.length }} pending request{{ reqs.length === 1 ? '' : 's' }}.
+              </p>
+
+              <div *ngIf="reqs.length; else noReqs" class="space-y-3">
+                <div *ngFor="let r of reqs" class="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/40">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm font-medium text-slate-800 dark:text-slate-100">
+                      {{ (r.firstName || '') + ' ' + (r.lastName || '') }} 
+                      <span class="text-slate-500 dark:text-slate-300 font-normal">
+                        ({{ r.email }})
+                      </span>
+                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                      {{ r.createdAt | date: 'short' }}
+                    </div>
+                  </div>
+                  <p class="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                    {{ r.message || '—' }}
+                  </p>
+                </div>
+              </div>
+
+              <ng-template #noReqs>
+                <p class="text-sm text-slate-600 dark:text-slate-400">No pending requests.</p>
+              </ng-template>
+            </ng-container>
+          </section>
+
+
+
         </aside>
       </div>
     </main>
   </ng-template>
+</div>
+
+
+
+<!-- Request to Join Modal -->
+<div *ngIf="showRequestModal" class="fixed inset-0 z-[9999]">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" (click)="closeRequestModal()"></div>
+
+  <div class="relative mx-auto my-10 w-full max-w-lg rounded-2xl
+              bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10
+              overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Request to Join</h3>
+      <button (click)="closeRequestModal()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-6 py-5 space-y-3">
+      <p class="text-sm text-slate-600 dark:text-slate-300">
+        In a few words, tell the team why you want to join or how you can help.
+      </p>
+      <textarea
+        [(ngModel)]="requestMessage"
+        [attr.maxlength]="maxLen"
+        rows="4"
+        class="w-full rounded-md border border-slate-300 dark:border-slate-700
+               bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+               px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        placeholder="e.g., I can help with frontend and UX. Available ~5 hrs/week."
+      ></textarea>
+      <div class="text-right text-xs text-slate-500 dark:text-slate-400">
+        {{ (requestMessage || '').length }}/{{ maxLen }}
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+      <button (click)="closeRequestModal()"
+              class="px-4 py-2 rounded-md text-sm font-medium dark:text-white bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">
+        Cancel
+      </button>
+      <button (click)="sendJoinRequest()" [disabled]="joining"
+              class="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold
+                     bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-60">
+        <svg *ngIf="joining" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+        </svg>
+        {{ joining ? 'Sending…' : 'Send Request' }}
+      </button>
+    </div>
+  </div>
 </div>

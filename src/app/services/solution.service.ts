@@ -3,7 +3,13 @@ import {
   AngularFirestoreDocument,
   AngularFirestore,
 } from '@angular/fire/compat/firestore';
-import { Broadcast, Evaluation, Roles, Solution } from '../models/solution';
+import {
+  Broadcast,
+  Evaluation,
+  JoinRequest,
+  Roles,
+  Solution,
+} from '../models/solution';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import {
@@ -825,5 +831,62 @@ export class SolutionService {
       },
       { merge: true }
     );
+  }
+
+  requestToJoin(
+    solutionId: string,
+    user: { uid: string; email: string; firstName?: string; lastName?: string },
+    message: string
+  ) {
+    const docRef = this.afs.doc<JoinRequest>(
+      `solutions/${solutionId}/joinRequests/${user.uid}`
+    );
+    const data: JoinRequest = {
+      uid: user.uid,
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      message: message.trim(),
+      status: 'pending',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    return docRef.set(data, { merge: true });
+  }
+
+  cancelJoinRequest(solutionId: string, uid: string) {
+    const docRef = this.afs.doc<any>(
+      `solutions/${solutionId}/joinRequests/${uid}`
+    );
+    return docRef.set(
+      {
+        status: 'cancelled',
+        cancelledAt: Date.now(),
+        updatedAt: Date.now(),
+      } as Partial<JoinRequest>,
+      { merge: true }
+    );
+  }
+
+  getJoinRequestForUser(solutionId: string, uid: string) {
+    return this.afs
+      .doc<JoinRequest>(`solutions/${solutionId}/joinRequests/${uid}`)
+      .valueChanges();
+  }
+
+  listJoinRequests(solutionId: string) {
+    return this.afs
+      .collection<JoinRequest>(`solutions/${solutionId}/joinRequests`, (ref) =>
+        ref.orderBy('createdAt', 'desc')
+      )
+      .valueChanges({ idField: 'id' });
+  }
+
+  listPendingJoinRequests(solutionId: string) {
+    return this.afs
+      .collection<JoinRequest>(`solutions/${solutionId}/joinRequests`, (ref) =>
+        ref.where('status', '==', 'pending').orderBy('createdAt', 'desc')
+      )
+      .valueChanges({ idField: 'id' });
   }
 }

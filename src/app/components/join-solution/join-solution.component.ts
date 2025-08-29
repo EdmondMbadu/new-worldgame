@@ -1,11 +1,12 @@
-// src/app/pages/join/join.component.ts
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription, combineLatest, map, of } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
-import { Subscription } from 'rxjs';
 import { DataService } from 'src/app/services/data.service';
+
+type ReqStatus = 'none' | 'pending' | 'cancelled' | 'approved' | 'rejected';
 
 @Component({
   selector: 'app-join-solution',
@@ -15,75 +16,144 @@ import { DataService } from 'src/app/services/data.service';
 export class JoinSolutionComponent implements OnInit, OnDestroy {
   solution: Solution = {};
   loading = true;
-  joining = false;
-  alreadyMember = false;
-  sub?: Subscription;
+
+  // join state
+  joining = false; // submitting request/cancel
+  alreadyMember = false; // is in participants
+  myRequestStatus: ReqStatus = 'none';
+
+  // owner view of requests
+  pendingRequests$ = of<any[]>([]);
+  isOwner = false;
+
+  // modal
+  showRequestModal = false;
+  requestMessage = '';
+  maxLen = 280;
+
+  private sub?: Subscription;
+  private id!: string;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private solutionService: SolutionService,
     public auth: AuthService,
     public data: DataService
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id')!;
-    this.sub = this.solutionService.getSolution(id).subscribe((s: any) => {
+    this.id = this.route.snapshot.paramMap.get('id')!;
+
+    // Load solution + my request + pending list (for owner)
+    const sol$ = this.solutionService.getSolution(this.id);
+
+    const me = this.auth.currentUser;
+    const myReq$ = me?.uid
+      ? this.solutionService.getJoinRequestForUser(this.id, me.uid)
+      : of(undefined);
+
+    this.sub = combineLatest([sol$, myReq$]).subscribe(([s, r]: any[]) => {
       this.solution = s;
       this.loading = false;
-      this.alreadyMember = !!s!.participants?.[this.auth.currentUser.email];
+
+      // is owner?
+      this.isOwner =
+        !!s?.authorAccountId && s.authorAccountId === this.auth.currentUser.uid;
+
+      // am I already a member?
+      this.alreadyMember = this.isUserInParticipants(
+        s?.participants,
+        this.auth.currentUser.email
+      );
+
+      // my request status
+      this.myRequestStatus = (r?.status as ReqStatus) || 'none';
+
+      // owner sees pending requests list
+      this.pendingRequests$ = this.isOwner
+        ? this.solutionService.listPendingJoinRequests(this.id)
+        : of([]);
     });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
   }
-  // Add these helpers
-  get designersCount(): number {
-    // if you already build designersList, prefer that
-    if (this.designersList && this.designersList.length)
-      return this.designersList.length;
 
-    // fallback to participants map
-    const p = this.solution?.participants;
-    return p ? Object.keys(p).length : 0;
+  // ----- Actions -----
+  openRequestModal() {
+    this.requestMessage = '';
+    this.showRequestModal = true;
+  }
+  closeRequestModal() {
+    this.showRequestModal = false;
   }
 
-  get evaluatorsCount(): number {
-    return this.solution?.evaluators ? this.solution.evaluators.length : 0;
-  }
-
-  async joinTeam() {
-    if (this.alreadyMember || this.joining) return;
+  async sendJoinRequest() {
+    if (this.joining) return;
     this.joining = true;
     try {
-      // await this.solutionService.addParticipant(
-      //   this.solution.solutionId!,
-      //   this.auth.currentUser.email
-      // );
-      this.alreadyMember = true;
-      // Optionally navigate to dashboard/solution page:
-      // this.router.navigate(['/solution-details', this.solution.solutionId]);
+      await this.solutionService.requestToJoin(
+        this.id,
+        {
+          uid: this.auth.currentUser.uid,
+          email: this.auth.currentUser.email,
+          firstName: this.auth.currentUser.firstName,
+          lastName: this.auth.currentUser.lastName,
+        },
+        this.requestMessage || ''
+      );
+      this.myRequestStatus = 'pending';
+      this.showRequestModal = false;
     } catch (e) {
       console.error(e);
-      alert('Error joining team. Try again.');
+      alert('Could not send request. Try again.');
     } finally {
       this.joining = false;
     }
   }
 
-  get designersList() {
-    // fall back to evaluators etc. depending on your data
-    return (this.solution as any).teamMembers || []; // or build from participants map
+  async cancelMyRequest() {
+    if (this.joining) return;
+    this.joining = true;
+    try {
+      await this.solutionService.cancelJoinRequest(
+        this.id,
+        this.auth.currentUser.uid
+      );
+      this.myRequestStatus = 'cancelled';
+    } catch (e) {
+      console.error(e);
+      alert('Could not cancel request.');
+    } finally {
+      this.joining = false;
+    }
   }
 
+  // ----- Helpers -----
+  get designersCount(): number {
+    const p = this.solution?.participants;
+    if (!p) return 0;
+    return Array.isArray(p) ? p.length : Object.keys(p).length;
+  }
   get sdgs() {
-    return this.solution!.sdgs || [];
+    return this.solution?.sdgs || [];
   }
-
-  // You can expose these to template if needed:
+  get designersList() {
+    return (this.solution as any).teamMembers || [];
+  }
   trackByIndex(i: number) {
     return i;
+  }
+
+  private isUserInParticipants(participants: any, email: string): boolean {
+    if (!participants || !email) return false;
+    if (Array.isArray(participants)) {
+      return participants.some(
+        (p: any) =>
+          (p?.name || '').trim().toLowerCase() === email.trim().toLowerCase()
+      );
+    }
+    return !!participants[email] || Object.values(participants).includes(email);
   }
 }

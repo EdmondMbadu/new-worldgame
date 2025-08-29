@@ -150,3 +150,15 @@ export interface Broadcast {
   createdAt: any;
   updatedAt: any;
 }
+export interface JoinRequest {
+  id?: string;
+  uid: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  message: string;
+  status: 'pending' | 'cancelled' | 'approved' | 'rejected';
+  createdAt: number; // Date.now()
+  cancelledAt?: number;
+  updatedAt?: number;
+}
