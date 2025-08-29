@@ -214,7 +214,7 @@
                 [routerLink]="['/join', c.solutionId]"
                 class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold
                        bg-emerald-600 text-white hover:bg-emerald-500 transition"
-                >Join</a
+                >Request to Join</a
               >
               <a
                 [routerLink]="['/join', c.solutionId]"
@@ -225,7 +225,7 @@
             </div>
 
             <!-- Owner controls -->
-            <div *ngIf="c.isOwner" class="flex items-center gap-2">
+            <!-- <div *ngIf="c.isOwner" class="flex items-center gap-2">
               <button
                 (click)="togglePause(c)"
                 class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold
@@ -251,7 +251,7 @@
                 </svg>
                 Stop
               </button>
-            </div>
+            </div> -->
           </div>
         </article>
       </section>
