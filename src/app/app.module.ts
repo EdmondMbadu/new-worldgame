@@ -147,6 +147,7 @@ import { AskAnythingComponent } from './blogs/ask-anything/ask-anything.componen
 import { ManagementAskComponent } from './components/management-ask/management-ask.component';
 import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.component';
 import { FeedbackManagementComponent } from './components/feedback-management/feedback-management.component';
+import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
 
 @NgModule({
   declarations: [
@@ -269,6 +270,7 @@ import { FeedbackManagementComponent } from './components/feedback-management/fe
     ManagementAskComponent,
     AskFeedbackComponent,
     FeedbackManagementComponent,
+    BroadcastedSolutionsComponent,
   ],
   imports: [
     BrowserModule,

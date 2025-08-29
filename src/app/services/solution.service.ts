@@ -794,4 +794,36 @@ export class SolutionService {
       switchMap((ids) => this.getSolutionsByIds(ids)) // you already have this helper
     );
   }
+
+  // === Pause / Resume (optional) ===
+  async setBroadcastPaused(solutionId: string, paused: boolean): Promise<void> {
+    const snap = await firstValueFrom(
+      this.afs
+        .collection<Broadcast>('broadcasts', (ref) =>
+          ref
+            .where('solutionId', '==', solutionId)
+            .where('active', '==', true)
+            .limit(1)
+        )
+        .get()
+    );
+    if (snap.empty) return;
+
+    const status = paused ? 'paused' : 'active';
+    await snap.docs[0].ref.set(
+      {
+        status,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    await this.afs.doc(`solutions/${solutionId}`).set(
+      {
+        broadcastStatus: status,
+        broadcastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
 }

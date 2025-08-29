@@ -1,0 +1,258 @@
+<div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
+  <!-- Navbar -->
+<ng-container *ngIf="auth?.currentUser as u">
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="u.email || ''"
+    [firstName]="u.firstName || ''"
+    [lastName]="u.lastName || ''"
+    path="broadcasts"
+    current=""
+  ></app-navbar>
+</ng-container>
+
+
+  <!-- LOADING -->
+  <ng-container *ngIf="loading$ | async; else loaded">
+    <div class="flex-1 px-4 md:px-8 max-w-7xl mx-auto w-full animate-pulse pt-24 space-y-6">
+      <div class="h-36 rounded-2xl bg-slate-200 dark:bg-slate-700"></div>
+      <div class="h-8 w-2/3 rounded bg-slate-200 dark:bg-slate-700"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="h-72 rounded-2xl bg-slate-200 dark:bg-slate-700"></div>
+        <div class="h-72 rounded-2xl bg-slate-200 dark:bg-slate-700"></div>
+        <div class="h-72 rounded-2xl bg-slate-200 dark:bg-slate-700"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- CONTENT -->
+  <ng-template #loaded>
+    <main class="flex-1 pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto w-full">
+      <!-- Hero / Header -->
+      <section
+        class="rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-xl overflow-hidden"
+      >
+        <div class="p-6 md:p-8">
+          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold">Broadcasted Solutions</h1>
+              <p class="mt-1 text-white/90">
+                Discover solutions currently inviting collaborators across NewWorld Game.
+              </p>
+            </div>
+            <div class="flex items-center gap-3 text-sm">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+                </svg>
+                Active: {{ (stats$ | async)?.active || 0 }}
+              </span>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 8h12M6 12h12M6 16h12" />
+                </svg>
+                Total: {{ (stats$ | async)?.total || 0 }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div
+            class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-white/10 rounded-xl p-3 ring-1 ring-white/20"
+          >
+            <div class="col-span-1 sm:col-span-2">
+              <div class="relative">
+                <svg
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80"
+                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10 18a8 8 0 110-16 8 8 0 010 16z" />
+                </svg>
+               <input  (input)="onSearchInput($event)" 
+                  placeholder="Search by title, pitch, author…"
+                  class="w-full rounded-lg bg-white/20 placeholder-white/70 text-white px-9 py-2.5 outline-none
+                         focus:ring-2 focus:ring-white/60"
+                />
+              </div>
+            </div>
+
+            <div>
+              <select
+                class="w-full rounded-lg bg-white/20 text-white px-3 py-2.5 outline-none focus:ring-2 focus:ring-white/60"
+                [value]="(statusFilter$ | async)!"
+                (change)="onStatusChange($event)"
+              >
+                <option value="all">All statuses</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+              </select>
+            </div>
+
+            <div>
+              <select
+                class="w-full rounded-lg bg-white/20 text-white px-3 py-2.5 outline-none focus:ring-2 focus:ring-white/60"
+                [value]="(sort$ | async)!"
+                (change)="onSortChange($event)"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="title">Title (A→Z)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Empty state -->
+      <section *ngIf="(cards$ | async)?.length === 0" class="mt-8">
+        <div
+          class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center"
+        >
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">No broadcasts yet</h3>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            When a solution owner broadcasts, you’ll see it here.
+          </p>
+        </div>
+      </section>
+
+      <!-- Cards grid -->
+      <section class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <article
+          *ngFor="let c of (cards$ | async); trackBy: trackById"
+          class="group relative rounded-2xl overflow-hidden shadow-lg ring-1 ring-slate-200 dark:ring-slate-700
+                 bg-white dark:bg-slate-800 flex flex-col"
+        >
+          <!-- Cover -->
+          <div class="relative h-40">
+            <img
+              *ngIf="c.image; else generic"
+              [src]="c.image"
+              alt="cover"
+              class="w-full h-full object-cover"
+              referrerpolicy="no-referrer"
+            />
+            <ng-template #generic>
+              <img src="/assets/img/generic.webp" class="w-full h-full object-cover" alt="generic"/>
+            </ng-template>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
+
+            <!-- Status chip -->
+            <div class="absolute top-3 left-3">
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium
+                       text-white"
+                [ngClass]="{
+                  'bg-emerald-600': c.status === 'active',
+                  'bg-amber-500': c.status === 'paused'
+                }"
+              >
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-white"></span>
+                {{ c.status | titlecase }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="flex-1 p-5 space-y-3">
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white line-clamp-2">
+              {{ c.title }}
+            </h3>
+
+            <p class="text-sm text-slate-600 dark:text-slate-300 line-clamp-3">
+              {{ c.message || 'No pitch provided.' }}
+            </p>
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              <!-- Author -->
+              <span
+                class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full
+                       bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {{ c.authorName || 'Unknown' }}
+              </span>
+
+              <!-- Designers -->
+              <span
+                class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full
+                       bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8z" />
+                </svg>
+                {{ c.designersCount || 0 }} designers
+              </span>
+
+              <!-- SDGs -->
+              <span
+                *ngIf="c.sdgsCount"
+                class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full
+                       bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                </svg>
+                {{ c.sdgsCount }} SDGs
+              </span>
+
+              <!-- Channels badges -->
+              <span *ngIf="c.channels?.email" class="chip">Email</span>
+              <span *ngIf="c.channels?.broadcastFeed" class="chip">Feed</span>
+              <span *ngIf="c.channels?.social" class="chip">Social</span>
+              <span *ngIf="c.channels?.customApi" class="chip">API</span>
+            </div>
+          </div>
+
+          <!-- Footer actions -->
+          <div class="p-5 pt-0 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a
+                [routerLink]="['/join', c.solutionId]"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold
+                       bg-emerald-600 text-white hover:bg-emerald-500 transition"
+                >Join</a
+              >
+              <a
+                [routerLink]="['/solution-details', c.solutionId]"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold
+                       bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 transition"
+                >View</a
+              >
+            </div>
+
+            <!-- Owner controls -->
+            <div *ngIf="c.isOwner" class="flex items-center gap-2">
+              <button
+                (click)="togglePause(c)"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold
+                       bg-amber-500 text-white hover:bg-amber-400 transition"
+                [disabled]="busyId === c.broadcastId"
+              >
+                <svg *ngIf="c.status==='active'" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6" />
+                </svg>
+                <svg *ngIf="c.status==='paused'" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7" />
+                </svg>
+                {{ c.status === 'paused' ? 'Resume' : 'Pause' }}
+              </button>
+              <button
+                (click)="stop(c)"
+                class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold
+                       bg-rose-600 text-white hover:bg-rose-500 transition"
+                [disabled]="busyId === c.broadcastId"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                Stop
+              </button>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </ng-template>
+</div>
