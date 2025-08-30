@@ -3,11 +3,13 @@
   <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
   <div *ngIf="isLoggedIn">
     <app-navbar
+     [hoveredCollaboratePath]="'bg-gray-100 dark:bg-gray-700'"
       [sideBarSmall]="true" [sideBarBig]="false"
+      [showMoreOrLess]="true"
       [email]="auth.currentUser?.email"
       [firstName]="auth.currentUser?.firstName"
       [lastName]="auth.currentUser?.lastName"
-      [path]="'ask-anything'">
+      >
     </app-navbar>
   </div>
 

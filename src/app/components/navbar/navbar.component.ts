@@ -92,6 +92,7 @@ export class NavbarComponent implements OnInit, OnChanges {
   @Input() hoveredOtherAisPath: string = ``;
   @Input() hoveredSchoolAdmin: string = ``;
   @Input() hoveredDiscoverPath: string = ``;
+  @Input() hoveredCollaboratePath: string = '';
 
   beta: boolean = true;
   lab: boolean = true;
@@ -213,7 +214,8 @@ export class NavbarComponent implements OnInit, OnChanges {
           else if (invites.length > 0)
             this.schoolQuery = {
               sid: invites[0].id,
-            }; // or .schoolId if that's your field
+            };
+          // or .schoolId if that's your field
           else this.schoolQuery = {};
         },
         error: (err) => console.error('Invites stream error:', err),

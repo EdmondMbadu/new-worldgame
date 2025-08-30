@@ -159,6 +159,36 @@
            </a>
         </li>
 
+        <!-- Join a Solution (list of solutions seeking collaborators) -->
+        <li>
+          <a
+            routerLink="/broadcasts"  
+            class="{{hoveredCollaboratePath}} flex items-center p-2 text-gray-900 rounded-lg
+                  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+            title="Find solutions currently recruiting collaborators"
+            aria-label="Join a Solution"
+          >
+            <!-- Icon -->
+            <svg class="w-[20px] h-[20px] text-gray-800 dark:text-white" aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 20h5v-2a4 4 0 0 0-5-3.87M9 20H4v-2a4 4 0 0 1 5-3.87M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+            </svg>
+
+            <!-- Label -->
+            <span class="flex-1 ms-3 whitespace-nowrap">Join a Solution</span>
+
+            <!-- Optional: live count badge (bind to a number in your TS if available) -->
+            <!-- <span *ngIf="activeBroadcastsCount > 0"
+                  class="ml-auto inline-flex items-center justify-center text-[10px] px-2 py-0.5
+                        rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+              {{ activeBroadcastsCount }}
+            </span> -->
+          </a>
+        </li>
+
+
   
      
         <li>
@@ -366,6 +396,29 @@
           
          </a>
       </li>
+
+           <li>
+          <a
+            routerLink="/broadcasts"  
+            class="{{hoveredCollaboratePath}} flex items-center p-2 text-gray-900 rounded-lg
+                  dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+            title="Find solutions currently recruiting collaborators"
+            aria-label="Join a Solution"
+          >
+            <!-- Icon -->
+            <svg class="w-[20px] h-[20px] text-gray-800 dark:text-white" aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 20h5v-2a4 4 0 0 0-5-3.87M9 20H4v-2a4 4 0 0 1 5-3.87M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+            </svg>
+
+            <!-- Label -->
+            <!-- <span class="flex-1 ms-3 whitespace-nowrap">Join a Solution</span> -->
+
+          
+          </a>
+        </li>
       
     
      
