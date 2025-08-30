@@ -68,12 +68,16 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
   busyId: string | null = null;
 
   private sub?: Subscription;
-
+  isLoggedIn: boolean = false;
   constructor(
     public auth: AuthService,
     private solutionService: SolutionService,
     private router: Router
-  ) {}
+  ) {
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+    });
+  }
 
   ngOnInit(): void {
     // Stream of broadcasts (active=true OR paused while active=true)

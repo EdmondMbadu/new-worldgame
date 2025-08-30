@@ -1,16 +1,15 @@
 <div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
   <!-- Navbar -->
-<ng-container *ngIf="auth?.currentUser as u">
-  <app-navbar
-    [sideBarSmall]="true"
-    [sideBarBig]="false"
-    [email]="u.email || ''"
-    [firstName]="u.firstName || ''"
-    [lastName]="u.lastName || ''"
-    path="broadcasts"
-    current=""
-  ></app-navbar>
-</ng-container>
+  <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [sideBarSmall]="true" [sideBarBig]="false"
+      [email]="auth.currentUser?.email"
+      [firstName]="auth.currentUser?.firstName"
+      [lastName]="auth.currentUser?.lastName"
+      [path]="'ask-anything'">
+    </app-navbar>
+  </div>
 
  
 
@@ -38,7 +37,7 @@
         <div class="p-6 md:p-8">
           <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold">Broadcasted Solutions</h1>
+              <h1 class="text-2xl md:text-3xl font-bold">You are Invited to Join These Challenges!</h1>
               <p class="mt-1 text-white/90">
                 Discover solutions currently inviting collaborators across NewWorld Game.
               </p>
