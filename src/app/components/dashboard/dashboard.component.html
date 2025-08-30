@@ -226,26 +226,53 @@
             </span>
         </div>
               <!-- Grid Tile: Invite -->
-<div
-  (click)="toggleBroadcastModal()"
-  class="relative text-center bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200
-         text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center
-         rounded-xl p-4 shadow hover:shadow-lg hover:-translate-y-0.5 transition
-         hover-effect cursor-pointer"
->
-  <svg
-    class="w-12 h-12 mb-2"
-    fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path stroke-linecap="round" stroke-linejoin="round"
-          d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0" />
-  </svg>
-  <span>List page: Solutions Seeking Collaborators</span>
-  <span class="font-extralight text-center text-sm text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-    Bring more minds to your solution
-  </span>
-</div>
+        <div
+          (click)="toggleBroadcastModal()"
+          class="group relative h-44 w-72 cursor-pointer select-none
+                rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600
+                text-white shadow-md hover:shadow-2xl hover:-translate-y-1 transition-transform duration-300"
+        >
+          <div class="flex flex-col items-center justify-center h-full px-4 text-center">
+            <!-- Icon Badge -->
+            <div
+              class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur
+                    group-hover:bg-white/30 transition duration-300 mb-3"
+            >
+              <svg
+                class="w-7 h-7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0"
+                />
+              </svg>
+            </div>
+
+            <!-- Main Title -->
+            <h3 class="text-lg font-bold tracking-tight">
+              Invite Collaborators
+            </h3>
+
+            <!-- Subtitle -->
+            <p
+              class="mt-1 text-sm text-white/90 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+            >
+              Share your idea and rally teammates across NewWorld Game
+            </p>
+          </div>
+
+          <!-- Glow overlay -->
+          <div
+            class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></div>
+        </div>
+
         
 
 
@@ -512,9 +539,9 @@
 
     <!-- Header -->
     <header class="px-8 pt-10 pb-6 border-b border-slate-100 dark:border-slate-800 text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-        Broadcast Your Invitation
-      </h2>
+     <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+      Invite Collaborators Across NewWorld Game
+    </h2>
       <!-- inside the header, after the <h2> -->
       <div *ngIf="isBroadcasting" class="mt-3 flex justify-center">
         <span
@@ -531,7 +558,7 @@
       </div>
 
       <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        Craft the message people will see when they’re invited to join your solution.
+        Share a message that will inspire others to join your solution and work with you.
       </p>
     </header>
 
@@ -541,28 +568,53 @@
       <section class="w-full md:w-1/2 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800 overflow-y-auto p-6 md:p-8 space-y-6">
         <!-- Title -->
   <!-- Grid Tile: Broadcast / Manage -->
-<!-- If NOT broadcasting yet -->
-          <div
-            *ngIf="!isBroadcasting; else broadcastingTile"
-            (click)="toggleBroadcastModal()"
-            class="relative text-center bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200
-                  text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center
-                  rounded-xl p-4 shadow hover:shadow-lg hover:-translate-y-0.5 transition
-                  hover-effect cursor-pointer"
-          >
-            <svg
-              class="w-12 h-12 mb-2"
-              fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+        <!-- If NOT broadcasting yet -->
+      <div
+          *ngIf="!isBroadcasting; else broadcastingTile"
+          (click)="toggleBroadcastModal()"
+          class="group relative h-44 w-72 cursor-pointer select-none
+                rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600
+                text-white shadow-md hover:shadow-2xl hover:-translate-y-1 transition-transform duration-300"
+        >
+          <div class="flex flex-col items-center justify-center h-full text-center px-4">
+            <!-- Icon -->
+            <div
+              class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur
+                    group-hover:bg-white/30 transition duration-300 mb-3"
             >
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0" />
-            </svg>
-            <span>List page: Solutions Seeking Collaborators</span>
-            <span class="font-extralight text-center text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              Bring more minds to your solution
-            </span>
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0"
+                />
+              </svg>
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-lg font-bold tracking-tight">
+              Invite Collaborators
+            </h3>
+
+            <!-- Subtitle -->
+            <p class="mt-1 text-sm text-white/90 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
+              Share your vision and attract teammates across NewWorld Game
+            </p>
           </div>
+
+          <!-- Glow effect -->
+          <div
+            class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></div>
+        </div>
+
 
         <!-- If ALREADY broadcasting (active or paused) -->
         <ng-template #broadcastingTile>
