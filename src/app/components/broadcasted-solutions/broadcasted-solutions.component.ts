@@ -89,7 +89,6 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
       shareReplay(1)
     );
 
-    // Enrich with Solution docs
     const enriched$ = broadcasts$.pipe(
       switchMap((bcs: any[]) => {
         const ids = bcs.map((b) => b.solutionId);
@@ -97,13 +96,21 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
         return this.solutionService.getSolutionsByIds(ids).pipe(
           map((solutions: Solution[]) => {
             const byId = new Map(solutions.map((s) => [s.solutionId!, s]));
+
+            // ✅ Safely read current user id (null if logged out)
+            const currentUid = this.auth.currentUser?.uid ?? null;
+
             return bcs.map((b) => {
               const s = byId.get(b.solutionId);
               const designersCount = this.countParticipants(s?.participants);
               const sdgsCount = Array.isArray(s?.sdgs) ? s!.sdgs!.length : 0;
+
+              // ✅ Compare only if both sides exist
               const isOwner =
                 !!s?.authorAccountId &&
-                s.authorAccountId === this.auth.currentUser.uid;
+                !!currentUid &&
+                s.authorAccountId === currentUid;
+
               const vm: BroadcastVM = {
                 broadcastId: b.broadcastId,
                 solutionId: b.solutionId,
