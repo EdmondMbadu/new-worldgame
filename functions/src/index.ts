@@ -105,6 +105,8 @@ const TEMPLATE_ID_CHALLENGE_PAGE_NONUSER =
 const TEMPLATE_ID_COMMENT =
   functions.config()['sendgrid'].templatecommentinvite;
 const TEMPLATE_ID_WORKSHOP = functions.config()['sendgrid'].templateworkshop;
+const TEMPLATE_WEEKLY_REMINDER =
+  functions.config()['sendgrid'].templateweeklyreminder;
 // const DID_API_KEY = functions.config().did.key;
 
 const TEMPLATE_ID_EVALUTION =
@@ -133,16 +135,33 @@ export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
 
 export const genericEmail = functions.https.onCall(
   async (data: any, context: any) => {
-    //   if (!context.auth && !context.auth!.token.email) {
-    //     throw new functions.https.HttpsError(
-    //       'failed-precondition',
-    //       'Must be logged with email-address'
-    //     );
-    //   }
     const msg = {
       to: data.email,
       from: 'newworld@newworld-game.org',
       templateId: TEMPLATE_ID_SOLUTION,
+      dynamic_template_data: {
+        subject: data.subject,
+        description: data.description,
+        title: data.title,
+        path: data.path,
+        image: data.image,
+        author: data.author,
+        user: data.user,
+      },
+    };
+
+    await sgMail.send(msg);
+
+    return { success: true };
+  }
+);
+
+export const weeklyReminder = functions.https.onCall(
+  async (data: any, context: any) => {
+    const msg = {
+      to: data.email,
+      from: 'newworld@newworld-game.org',
+      templateId: TEMPLATE_WEEKLY_REMINDER,
       dynamic_template_data: {
         subject: data.subject,
         description: data.description,
