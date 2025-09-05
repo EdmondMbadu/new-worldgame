@@ -102,6 +102,7 @@ import { ManagementAskComponent } from './components/management-ask/management-a
 import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.component';
 import { FeedbackManagementComponent } from './components/feedback-management/feedback-management.component';
 import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
+import { TournamentUniversityComponent } from './blogs/tournament-university/tournament-university.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -523,6 +524,10 @@ const routes: Routes = [
   {
     path: 'tournament-landing',
     component: TournamentLandingComponent,
+  },
+  {
+    path: 'tournament-university',
+    component: TournamentUniversityComponent,
   },
   {
     path: 'ask-anything',

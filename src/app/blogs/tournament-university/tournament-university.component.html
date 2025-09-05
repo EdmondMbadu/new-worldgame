@@ -1,0 +1,671 @@
+<!-- ── WRAPPER & NAVBAR ──────────────────────────────────────── -->
+<div class="dark:bg-slate-900 min-h-screen">
+
+  <!-- Navbar (handled by parent component) -->
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar [email]="this.auth.currentUser.email"
+                [firstName]="this.auth.currentUser.firstName"
+                [lastName]="this.auth.currentUser.lastName"
+                [path]="'home'"
+                [sideBarBig]="false"
+                [sideBarSmall]="true"
+                ></app-navbar>
+  </div>
+<div class="hidden md:block sticky top-28 z-40 w-full transition-all duration-300 ease-in-out ">
+  <div class="container mx-auto flex justify-center py-2">
+    <div class="flex items-center justify-center space-x-1 rounded-full bg-white dark:bg-slate-800 p-1 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10">
+      
+      <a (click)="data.scrollTo($event, 'overview')" href="#overview" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Overview</a>
+        <a (click)="data.scrollTo($event, 'pricing')" href="#pricing" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Pricing</a>
+      
+      <a (click)="data.scrollTo($event, 'benefits')" href="#benefits" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Benefits</a>
+            <a (click)="data.scrollTo($event, 'testimonials')" href="#Testimonials" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Testimonials </a>
+          <!-- <a (click)="data.scrollTo($event, 'awards')" href="#awards" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Awards</a> -->
+      
+
+
+      <!-- <a (click)="data.scrollTo($event, 'timeline')" href="#timeline" class="px-4 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200">Timeline</a> -->
+  
+    </div>
+  </div>
+  
+</div>
+  <!-- ── HERO SECTION ─────────────────────────────────────────── -->
+  <section
+    class="relative overflow-hidden bg-center bg-cover bg-no-repeat text-white"
+    style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fnwg-trophy.png?alt=media&token=145fee70-8375-429e-b37e-24af6931d6e8');">
+    <div class="absolute inset-0 bg-black/50 z-0"></div>
+
+    <div class="relative z-10 container mx-auto px-6 py-24 lg:py-32 text-center">
+      <!-- <div class="inline-flex items-center justify-center w-20 h-20 mb-8 rounded-full bg-white/10 backdrop-blur-sm">
+        <span class="text-4xl">🌍</span>
+      </div> -->
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+        <span class="block bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">NewWorld Game</span>
+        <span class="block text-2xl sm:text-3xl lg:text-4xl font-medium">Changemakers Tournament 2025–26</span>
+      </h1>
+      <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-10">Where Global Challenges Meet Student Imagination</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">💥 Registration Now Open</div>
+        <div class="px-8 py-3 rounded-full backdrop-blur-lg bg-white/10 border border-white/20 text-xl font-semibold">$199&nbsp;Per&nbsp;School</div>
+      </div>
+        <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+        <!-- Primary CTA -->
+        <a (click)="data.scrollTo($event, 'pricing')" href="#pricing"
+          class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95">
+          Register&nbsp;Now
+        </a>
+
+        <!-- Secondary CTA -->
+        <a routerLink="/scheduler"
+          class="inline-flex items-center justify-center px-10 py-4 border border-white/30 bg-white/10 text-white font-medium rounded-full hover:bg-white/20 backdrop-blur transition-transform transform hover:-translate-y-1 active:scale-95">
+          Schedule a Demo
+        </a>
+      </div>
+
+
+    </div>
+
+  </section>
+<!-- ── NWG INTRODUCTION ───────────────────────────────────── -->
+<section class="bg-indigo-50 dark:bg-slate-800 text-slate-800 dark:text-white py-4 px-6 text-center">
+  <p class="text-base md:text-lg max-w-3xl mx-auto">
+    <strong>The NewWorld Game</strong> is a platform, an AI-empowered work- and play-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented. Its goal is to have real impact—to change the world—by providing you and millions of other like-minded creative individuals with space and tools for developing solutions to the problems and issues you care about. The NewWorld Game Changemakers Tournament is where students use the NewWorld Game platform to develop solutions to global and/or local real-world problems, enter them in the Tournament, where they compete with other students and schools for prizes, recognition and real-world impact.
+    These formally outlandish goals and the process for achieving them are made possible by the creative combination of AI and human intelligence.
+    <a routerLink="/overview" class="inline-block font-semibold text-indigo-700 dark:text-yellow-300 underline hover:text-indigo-900 dark:hover:text-yellow-200 ml-1">Learn more</a>.
+  </p>
+</section>
+
+
+<!-- ── QUICK GLANCE AT PRIZES (TOP) ────────────────────────── -->
+<!-- <section class="py-12 bg-indigo-50 dark:bg-slate-800">
+  <div class="container mx-auto px-6 flex flex-wrap justify-center gap-6 text-center">
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🥇</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Gold</span>
+      <small class="text-slate-600 dark:text-indigo-200">$5,000</small>
+    </div>
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🥈</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Silver</span>
+      <a (click)="data.scrollTo($event, 'awards')" href="#awards"
+         class="mt-1 font-medium underline underline-offset-4 decoration-2
+                text-indigo-600 hover:text-indigo-700
+                dark:text-indigo-300 dark:hover:text-indigo-200
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+                transition-colors">
+        See below
+      </a>
+
+    </div>
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🥉</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Bronze</span>
+      <a (click)="data.scrollTo($event, 'awards')" href="#awards"
+         class="mt-1 font-medium underline underline-offset-4 decoration-2
+                text-indigo-600 hover:text-indigo-700
+                dark:text-indigo-300 dark:hover:text-indigo-200
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900
+                transition-colors">
+        See below
+      </a>
+   
+    </div>
+
+    <div class="flex flex-col items-center p-4 bg-white dark:bg-slate-900 rounded-2xl shadow w-40">
+      <div class="text-3xl mb-2">🌟</div>
+      <span class="font-semibold text-slate-900 dark:text-white">Special</span>
+      <small class="text-slate-600 dark:text-indigo-200">4 Categories</small>
+     
+    </div>
+
+  </div>
+</section> -->
+
+<!-- ── WHAT'S INCLUDED ─────────────────────────────────────── -->
+<section id="overview" class="py-10 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">
+      What’s Included in Your <span class="text-indigo-600">$199</span> Fee
+    </h2>
+    <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-12">
+   Everything your students need to develop viable solutions to global and local problems
+    </p>
+
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+
+
+    
+      <!-- Unlimited Student Teams -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🏆</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Unlimited Student Teams</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+        Unlimited number of teams can develop solutions. 
+        </p>
+      </div>
+
+      <!-- Collaboration Platform -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🌐</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Collaboration Platform</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+        Video channels, messaging, and innovative peer review connect local and international teams seamlessly.
+        </p>
+      </div>
+
+      <!-- Innovation Curriculum -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🧠</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Innovation Curriculum</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+          Step‑by‑step design‑thinking resources, guides, templates, and lesson plans.
+        </p>
+      </div>
+
+      <!-- Hands-On AI Tools -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🤖</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Hands‑On AI Tools</h3>
+       <p class="text-slate-600 dark:text-slate-300 flex-grow">
+        Access a dozen custom-trained AI avatar "Colleagues” 
+        <a [routerLink]="['/tournament-landing']" fragment="avatars"
+          class="text-indigo-600 dark:text-indigo-300 underline hover:text-indigo-800 dark:hover:text-indigo-400">
+          (see below)
+        </a> 
+        and top AI platforms for research, solution development and storytelling.
+      </p>
+
+
+      </div>
+      <!-- Teacher AI Training -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🎓</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">
+          Teacher AI Training
+        </h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+       2025-26 masterclass (live + recorded) covering AI tools, classroom ideas, and Q&A—free for every NWG teacher. 
+        </p>
+      </div>
+
+
+      
+
+      <!-- Hands-On Design Tools -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🛠️</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Hands-On Design Tools</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+          Access sophisticated, easy-to-use tools for solution development—traditionally reserved for professionals.
+        </p>
+      </div>
+
+      <!-- Real-World Impact -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🌍</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Real-World Impact</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+         Solutions aren’t just ideas—they’re implementation roadmaps for schools and communities.
+        </p>
+      </div>
+
+      <!-- Interdisciplinary Learning -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">📚</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Interdisciplinary Learning</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+          Blends science, economics, ethics and tech—building systems literacy and emotional investment through real-world challenges.
+        </p>
+      </div>
+
+      <!-- Data & Solutions Access -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">📊</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Data & Solutions Access</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+         Tap into 100+ global data sets, 400+ state-of-the-world reports, and curated solution libraries for real-time insights and references.
+        </p>
+      </div>
+
+      <!-- Equity & Access -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">⚖️</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Equity & Access</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+          NWG democratizes powerful tools, making them accessible to youth and underserved communities globally.
+        </p>
+      </div>
+
+      <!-- Future-Ready Workforce -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">🚀</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Future-Ready Workforce</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+          Builds the mindset and skillset essential for solving complex 21st-century challenges.
+        </p>
+      </div>
+
+      <!-- Student Impact -->
+      <div class="flex flex-col bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 p-8 rounded-3xl shadow transition-transform hover:-translate-y-1">
+        <span class="text-3xl mb-4">💡</span>
+        <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Student Impact</h3>
+        <p class="text-slate-600 dark:text-slate-300 flex-grow">
+          Fosters informed, caring global citizens ready to take meaningful action with confidence and clarity.
+        </p>
+      </div>
+    </div>
+
+   
+  </div>
+</section>
+
+
+
+<!-- ── HEYGEN AVATAR INTRO VIDEOS ──────────────────────────── -->
+<section class="py-20 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 max-w-6xl">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-12">
+      Hear It from Our AI Colleagues
+    </h2>
+
+    <div class="grid gap-10 md:grid-cols-2 items-start">
+      <!-- For Teachers -->
+      <div class="bg-slate-100 dark:bg-slate-800 p-6 rounded-3xl shadow-lg flex flex-col items-center">
+        <h3 class="text-xl font-bold mb-4 text-slate-900 dark:text-white">For Teachers</h3>
+
+        <div class="w-full flex justify-center">
+         <video
+            controls
+            preload="none"
+            playsinline
+            poster="../../../assets/img/sofia-agent.png"
+            class="w-full max-w-[720px] rounded-2xl shadow-md mx-auto aspect-[16/9]"
+            style="aspect-ratio: 16/9;"
+          >
+            <source src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FFor%20Tachers.%20_TN.mp4?alt=media&token=3d72ed6d-9baa-46e7-b4fc-801dcaba9208" type="video/mp4" />
+          </video>
+        </div>
+
+        <p class="mt-4 text-slate-600 dark:text-slate-300 text-center text-sm md:text-base max-w-md">
+          “Get ready to change the world—literally! … Teachers, this is the project‑based learning experience your students will never forget. Are you in?”
+        </p>
+      </div>
+
+      <!-- For Students -->
+      <div class="bg-slate-100 dark:bg-slate-800 p-6 rounded-3xl shadow-lg flex flex-col items-center">
+        <h3 class="text-xl font-bold mb-4 text-slate-900 dark:text-white">For Students</h3>
+
+        <div class="w-full flex justify-center">
+          <video
+            controls
+            preload="none"
+            playsinline
+            poster="../../../assets/img/li-agent.png"
+            class="w-full max-w-[720px] rounded-2xl shadow-md mx-auto aspect-[16/9]"
+            style="aspect-ratio: 16/9;"
+          >
+            <source src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FFor%20Students%20.mp4?alt=media&token=6ebc1285-0c3e-48d1-ab07-709e27272005" type="video/mp4" />
+          </video>
+        </div>
+
+        <p class="mt-4 text-slate-600 dark:text-slate-300 text-center text-sm md:text-base max-w-md">
+          “What if your ideas could actually change the world? … Ready to build your future? Let’s go!”
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ── PRICING TABLE ────────────────────────────────────────── -->
+<section id="pricing" class="py-10 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 max-w-7xl">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">
+      Choose the Plan That Fits Your School
+    </h2>
+    <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-16">
+      Simple, transparent pricing. Cancel anytime.
+    </p>
+
+    <!-- Cards -->
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3  mx-auto">
+
+      <!-- Free Evaluation -->
+      <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+                  bg-gradient-to-br from-white via-indigo-50 to-indigo-100
+                  dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Free Evaluation</h3>
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$0</p>
+       
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+        
+         
+         <li class="flex items-start gap-2">✓ Single Player Full Access</li>
+          <li class="flex items-start gap-2">✓ Unlimited inspection & playing</li>
+           <li class="flex items-start gap-2">✓ No tournament access</li>
+          <li class="flex items-start gap-2 text-sm italic text-slate-500 dark:text-slate-400">
+            (Class, and school play requires a paid plan)
+          </li>
+    
+        </ul>
+        <a routerLink="/welcome"
+           class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
+      </div>
+
+      <!-- License-Only -->
+      <!-- <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+                  bg-gradient-to-br from-indigo-50 via-purple-50 to-purple-100
+                  dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">NWG Class</h3>
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$199</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Annual school license</p>
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+          <li class="flex items-start gap-2">✓ Unlimited student accounts</li>
+       
+          
+           <li class="flex items-start gap-2">✓ Private Dashboard for School or Class </li>
+            <li class="flex items-start gap-2">✓ Teacher Ai-training masterclass </li>
+           <li class="flex items-start gap-2">✓ Email support</li>
+
+        </ul>
+        <a [routerLink]="['/signup-school']"
+              [queryParams]="{ plan: 'class', amount: 199, currency: 'USD' }"
+           class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
+      </div> -->
+
+      <!-- Tournament (Primary Offer) -->
+      <div class="flex flex-col text-center rounded-3xl border-4 border-yellow-400 p-8 shadow-2xl
+                  bg-gradient-to-br from-indigo-600 via-purple-700 to-fuchsia-700
+                  text-white relative transform lg:-translate-y-3">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-slate-900
+                     text-xs font-bold px-3 py-0.5 rounded-full shadow">
+          MOST POPULAR
+        </span>
+        <h3 class="text-xl font-bold mb-2">NWG Class</h3>
+        <p class="text-5xl font-extrabold mb-1">$199</p>
+        
+         <p class="text-sm text-indigo-200 mb-6">Annual school license</p>
+        <ul class="space-y-2 flex-grow text-indigo-50">
+    
+          <li class="flex items-start gap-2">✓ Unlimited student accounts</li>
+          <li class="flex items-start gap-2">✓ Private Dashboard for School or Class</li>
+          <li class="flex items-start gap-2">
+           ✓ Teacher Ai-training masterclass 
+          </li>
+          <li class="flex items-start gap-2">✓ Email support</li>
+       
+
+        </ul>
+        <a [routerLink]="['/signup-school']"
+          [queryParams]="{ plan: 'class', amount: 199, currency: 'USD' }"
+           class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                  bg-yellow-300 text-slate-900 hover:bg-yellow-200 transition">Register</a>
+      </div>
+
+      <!-- Pro -->
+      <!-- <div class="flex flex-col  text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+                  bg-gradient-to-br from-fuchsia-50 via-pink-50 to-pink-100
+                  dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white"> NWG & Your Tournament</h3>
+
+        <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$349</p>
+         <p class="text-sm dark:text-indigo-200 text-indigo-600 mb-6">All NWG & Tournament features</p>
+      
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+        
+         
+          <li class="flex items-start gap-2">✓ Use of NWG in any class for any curriculum-related purpose</li>
+         
+           <li class="flex items-start gap-2">✓ Extra support & training</li>
+          <li class="flex items-start gap-2">✓ Email and video support</li>
+           <li class="flex items-start gap-2">✓ Unlimited Tournament Entries</li>
+         
+        
+          
+        </ul>
+        <a [routerLink]="['/signup-school']"
+        [queryParams]="{ plan: 'school', amount: 349, currency: 'USD' }"
+           class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Register</a>
+      </div> -->
+
+      <!-- Pro -->
+    
+
+      <!-- Enterprise -->
+      <div class="flex flex-col text-center rounded-3xl border border-indigo-100 dark:border-slate-700 p-8 shadow
+                  bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200
+                  dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
+        <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">NWG and Your College or University </h3>
+        <!-- <p class="text-5xl font-extrabold text-indigo-600 dark:text-indigo-400 mb-1">$9,999</p> -->
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">(up to 10 campuses)</p>
+        <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+             <li class="flex items-start gap-2">✓ Two-year license.     </li>
+          <li class="flex items-start gap-2">✓ Priority email and video support</li>
+          <li class="flex items-start gap-2">✓ Custom onboarding & training</li>
+           <li class="flex items-start gap-2">✓ Staff Professional Development webinar + AI‑training </li>
+          <li class="flex items-start gap-2">✓ Dedicated account manager</li>
+        </ul>
+        <a [routerLink]="['/contact-us']"
+
+           class="mt-6 inline-block text-center w-full px-4 py-2 rounded-full font-semibold
+                  bg-indigo-600 text-white hover:bg-indigo-500 transition">Contact Us</a>
+      </div>
+
+    </div>
+     <!-- Add Extra Teams -->
+    <!-- <p class="text-center mt-10">
+      <span class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-full">
+        Add extra tournament teams for just $30&nbsp;each
+      </span>
+    </p> -->
+  </div>
+</section>
+
+<!-- ── TEACHER BENEFITS ────────────────────────────────────── -->
+<section id="benefits"
+  class="relative py-20 bg-center bg-cover bg-no-repeat text-white"
+  style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Favatars.jpg?alt=media&token=d589fa9a-5738-4d81-9469-f422d650f989');"
+>
+  <!-- Dark overlay -->
+  <div class="absolute inset-0 bg-black/60 z-0"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 container mx-auto px-6 max-w-5xl">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">
+      Why Teachers & Schools Are Joining
+    </h2>
+    <ul class="space-y-5 text-lg">
+   <li class="flex items-start gap-3">
+    <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-400 text-slate-900 rounded-full font-bold">✓</span>
+    <span>
+      <strong>Open to all colleges</strong><br />
+      Entire schools—not just select programs—are eligible to participate.
+    </span>
+  </li>
+
+      
+       <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Builds global mindedness and awareness of options, problems, progress, systems, interactions, impacts
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Fosters real‑world problem solving, creativity, and systems thinking
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Builds AI literacy through hands‑on collaboration with intelligent avatars
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Complimentary AI‑training session for all participating teachers
+      </li>
+
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Encourages teamwork across borders, cultures, and classrooms
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Brings international visibility and recognition to students and schools
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Promotes equity and access by democratizing powerful problem-solving tools
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Supports interdisciplinary, project-based learning across science, ethics, and economics
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Prepares students with future-ready competencies for a rapidly evolving world
+      </li>
+      <li class="flex items-start gap-3">
+        <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-300 text-slate-900 rounded-full">✓</span>
+        Inspires civic responsibility, empathy, and global citizenship through meaningful challenges
+      </li>
+    </ul>
+  </div>
+</section>
+
+
+<!-- ── TESTIMONIALS ────────────────────────────────────────── -->
+<section id="testimonials" class="py-24 bg-white dark:bg-slate-900">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-4xl font-extrabold text-slate-900 dark:text-white mb-4">What People Are Saying</h2>
+    <p class="text-lg text-slate-600 dark:text-slate-300 mb-16">
+      Real feedback from educators, students, and collaborators of the NewWorld Game.
+    </p>
+
+    <div class="grid gap-10 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
+        <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“It’s amazing what you’ve put together in this simulation — the innovation, inclusiveness, and diversity of the AI avatars are truly inspiring.”</p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">M.B.<br><span class="text-slate-500 dark:text-slate-400">Drexel University</span></p>
+      </div>
+
+      <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
+        <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“Your tools and collaborative mindset are a perfect fit for what we’re learning. It's great to see someone so deeply connected to NewWorld Game and eager to support others.”</p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">C.B.<br><span class="text-slate-500 dark:text-slate-400">Participant</span></p>
+      </div>
+
+      <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
+        <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“What a fantastic tool. It's incredibly personable. Have you considered expanding it beyond social and sustainability?”</p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">A.R.<br><span class="text-slate-500 dark:text-slate-400">Educator</span></p>
+      </div>
+
+      <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
+        <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“Thanks so much for the help and insight you're bringing. Looking forward to learning more about NewWorld Game this quarter.”</p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">B.S.<br><span class="text-slate-500 dark:text-slate-400">Student</span></p>
+      </div>
+
+      <div class="bg-slate-100 dark:bg-slate-800 rounded-2xl p-6 shadow-md text-left">
+        <p class="text-lg italic text-slate-800 dark:text-slate-100 mb-4">“I’m excited to dive deeper into this program. I can already tell this tool has great potential — just need a little guidance to unlock more.”</p>
+        <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">S.H.<br><span class="text-slate-500 dark:text-slate-400">Participant</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+  <!-- ── CHOOSE YOUR AVATAR ─────────────────────────────────── -->
+<!-- ── CHOOSE YOUR AVATAR ─────────────────────────────────── -->
+<section id="avatars" class="py-20 bg-indigo-50 dark:bg-slate-800">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 dark:text-white mb-4">
+      Meet Your NewWorld Colleagues
+    </h2>
+    <p class="text-center text-lg text-slate-600 dark:text-slate-300 mb-10">
+     Powered by the latest AI models and fine-tuned to tackle the world’s biggest challenges, our twelve digital strategists and advisors guide both students and teachers alike on a mission to solve real-world problems. Get ready to collaborate, innovate, and architect the future—together!
+
+
+    </p>
+
+    <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div
+        *ngFor="let ai of aiOptions"
+        class="flex flex-col items-center bg-white dark:bg-slate-900 p-6 rounded-3xl shadow hover:-translate-y-1 transition"
+      >
+        <img
+          [src]="ai.avatarPath"
+          [alt]="ai.name"
+          class="w-24 h-24 rounded-full object-cover shadow-lg mb-4"
+        />
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">{{ ai.name }}</h3>
+        <span class="text-sm text-indigo-600 dark:text-indigo-300 capitalize">{{ ai.group }}</span>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300 text-center">
+          {{ ai.intro | slice:0:90 }}{{ ai.intro.length > 90 ? '…' : '' }}
+        </p>
+      </div>
+    </div>
+    <div class="mt-12 flex justify-center">
+                <a routerLink="/other-ais" class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300">
+                  Chat with NewWorld Game colleagues  
+                </a>
+    </div>
+  </div>
+</section>
+
+
+
+
+<!-- ── CALL TO ACTION ─────────────────────────────────────── -->
+<section
+  id="register"
+  class="relative py-24 bg-center bg-cover bg-no-repeat text-white text-center"
+  style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Favatars-lunch.jpg?alt=media&token=0b87dd06-251d-494a-b2cb-256ee8bb9414');"
+>
+  <!-- Dark overlay -->
+  <div class="absolute inset-0 bg-black/60 z-0"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 container mx-auto px-6 max-w-3xl">
+    <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Join?</h2>
+    <p class="text-lg md:text-xl mb-6">
+      $199 per school 
+    </p>
+   
+   
+  </div>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+  <!-- Primary CTA -->
+  <a
+   (click)="data.scrollTo($event, 'pricing')" href="#pricing"
+    target="_blank"
+    rel="noopener"
+    class="inline-flex items-center justify-center px-12 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition-transform transform hover:-translate-y-1 active:scale-95"
+  >
+    Register Today
+  </a>
+
+  <!-- Secondary CTA -->
+  <a
+    routerLink="/scheduler"
+    class="inline-flex items-center justify-center px-10 py-4 border border-white/30 bg-white/10 text-white font-medium rounded-full hover:bg-white/20 backdrop-blur transition-transform transform hover:-translate-y-1 active:scale-95"
+  >
+    Schedule a Demo
+  </a>
+</div>
+</section>
+
+  <!-- ── FOOTER ─────────────────────────────────────────────── -->
+
+ <app-footer></app-footer>
+</div>

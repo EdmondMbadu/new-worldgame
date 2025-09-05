@@ -148,6 +148,7 @@ import { ManagementAskComponent } from './components/management-ask/management-a
 import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.component';
 import { FeedbackManagementComponent } from './components/feedback-management/feedback-management.component';
 import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
+import { TournamentUniversityComponent } from './blogs/tournament-university/tournament-university.component';
 
 @NgModule({
   declarations: [
@@ -271,6 +272,7 @@ import { BroadcastedSolutionsComponent } from './components/broadcasted-solution
     AskFeedbackComponent,
     FeedbackManagementComponent,
     BroadcastedSolutionsComponent,
+    TournamentUniversityComponent,
   ],
   imports: [
     BrowserModule,
