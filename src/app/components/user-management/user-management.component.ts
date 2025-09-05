@@ -268,7 +268,7 @@ export class UserManagementComponent implements OnInit {
 
     return unfinished.map((sol) => {
       const fallbackImg =
-        'https://newworld-game.org/assets/solution-placeholder.png';
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fgeneric-image.jpg?alt=media&token=c4e8d393-50e6-4080-bfcd-923848db7007';
 
       const rawTime: any =
         (sol as any).updatedAt ?? (sol as any).createdAt ?? '';
@@ -314,7 +314,7 @@ export class UserManagementComponent implements OnInit {
       .map((p) => {
         const img =
           p.image ||
-          'https://newworld-game.org/assets/solution-placeholder.png';
+          'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fgeneric-image.jpg?alt=media&token=c4e8d393-50e6-4080-bfcd-923848db7007';
         return `
       <tr>
         <td style="padding:12px;border:1px solid #e5e7eb;border-radius:12px">
