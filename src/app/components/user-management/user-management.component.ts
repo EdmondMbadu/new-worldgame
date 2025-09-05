@@ -369,6 +369,19 @@ export class UserManagementComponent implements OnInit {
   }
 
   // Send flow: builds personalized content per recipient and calls the CF
+  private formatDateForEmail(raw: any): string {
+    // Accept ISO string or Firestore Timestamp
+    const d =
+      raw && typeof raw.toDate === 'function' ? raw.toDate() : new Date(raw);
+    if (!d || isNaN(d.getTime())) return '';
+    // e.g., Sep 4, 2025
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+
   async sendWeeklyReminders() {
     if (this.sending) return;
     this.sending = true;
@@ -377,7 +390,7 @@ export class UserManagementComponent implements OnInit {
       const pool =
         this.targetMode === 'all'
           ? this.allUsers
-          : this.allUsers.filter((u) => u.email && this.selected.has(u.email));
+          : this.allUsers.filter((u) => u.email && this.selected.has(u.email!));
 
       const weeklyReminder = this.fns.httpsCallable('weeklyReminder');
 
@@ -385,18 +398,40 @@ export class UserManagementComponent implements OnInit {
         const email = (u.email || '').trim();
         if (!email) continue;
 
-        const content = this.buildWeeklyContentHTML(u, this.reminderIntroHtml);
+        // Build the array your template expects
+        const pending = this.getPendingSolutions(email)
+          .slice(0, 8)
+          .map((p) => ({
+            title: p.title,
+            summary: p.summary,
+            image: p.image,
+            lastUpdated: p.lastUpdated
+              ? this.formatDateForEmail(p.lastUpdated)
+              : '',
+            ctaUrl: p.ctaUrl,
+          }));
 
-        const payload: any = {
+        const payload = {
           email,
           subject: this.reminderSubject,
-          content, // <-- IMPORTANT: we send full HTML content
-          user: this.firstNameOf(u) || 'there',
+          userFirstName: this.firstNameOf(u) || 'there',
+          intro_html: this.reminderIntroHtml, // rendered via {{{intro_html}}}
+          solutions: pending,
+          hasSolutions: pending.length > 0,
+          homeUrl: 'https://newworld-game.org',
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
         };
 
+        // Optional: quick sanity log
+        console.log(
+          'Send weeklyReminder ->',
+          email,
+          'solutions:',
+          pending.length
+        );
+
         await firstValueFrom(weeklyReminder(payload));
-        // Optional: tiny delay to avoid rate bursts
-        await new Promise((res) => setTimeout(res, 80));
+        await new Promise((res) => setTimeout(res, 80)); // small throttle
       }
 
       alert(`Weekly reminder sent to ${pool.length} recipient(s).`);

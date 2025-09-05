@@ -155,29 +155,33 @@ export const genericEmail = functions.https.onCall(
     return { success: true };
   }
 );
-
 export const weeklyReminder = functions.https.onCall(
-  async (data: any, context: any) => {
+  async (data: any, _context: any) => {
     const msg = {
       to: data.email,
       from: 'newworld@newworld-game.org',
       templateId: TEMPLATE_WEEKLY_REMINDER,
       dynamic_template_data: {
         subject: data.subject,
-        description: data.description,
-        title: data.title,
-        path: data.path,
-        image: data.image,
-        author: data.author,
-        user: data.user,
+
+        // === match your Handlebars template ===
+        userFirstName: data.userFirstName ?? data.user ?? '',
+        intro_html: data.intro_html ?? '',
+        hasSolutions:
+          Array.isArray(data.solutions) && data.solutions.length > 0,
+        solutions: data.solutions ?? [],
+        homeUrl: data.homeUrl ?? 'https://newworld-game.org',
+
+        // optional footer/byline
+        author: data.author ?? 'NewWorld Game',
       },
     };
 
     await sgMail.send(msg);
-
     return { success: true };
   }
 );
+
 // function buildPrompt(userPrompt: string): string {
 //   const asksForImage = /image|picture|illustration|generate\s+an\s+image/i.test(
 //     userPrompt
