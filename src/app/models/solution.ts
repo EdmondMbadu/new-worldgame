@@ -68,6 +68,8 @@ export class Solution {
 
   // broadcastStartedAt?: serverTimestamp;
   // broadcastUpdatedAt?: serverTimestam;
+  updatedAt?: string;
+  createdAt?: string;
 }
 
 export class Evaluation {

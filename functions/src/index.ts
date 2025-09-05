@@ -158,29 +158,26 @@ export const genericEmail = functions.https.onCall(
 
 export const weeklyReminder = functions.https.onCall(
   async (data: any, context: any) => {
-    // Backward compatibility: if client passed top-level fields, wrap them
-    const dynamic_template_data = data.dynamic_template_data ?? {
-      subject: data.subject,
-      intro_html: data.intro_html,
-      userFirstName: data.userFirstName ?? data.user,
-      author: data.author,
-      hasSolutions: Array.isArray(data.solutions) && data.solutions.length > 0,
-      solutions: data.solutions ?? [],
-      homeUrl: data.homeUrl ?? 'https://newworld-game.org',
-    };
-
     const msg = {
       to: data.email,
       from: 'newworld@newworld-game.org',
       templateId: TEMPLATE_WEEKLY_REMINDER,
-      dynamic_template_data,
+      dynamic_template_data: {
+        subject: data.subject,
+        description: data.description,
+        title: data.title,
+        path: data.path,
+        image: data.image,
+        author: data.author,
+        user: data.user,
+      },
     };
 
     await sgMail.send(msg);
+
     return { success: true };
   }
 );
-
 // function buildPrompt(userPrompt: string): string {
 //   const asksForImage = /image|picture|illustration|generate\s+an\s+image/i.test(
 //     userPrompt

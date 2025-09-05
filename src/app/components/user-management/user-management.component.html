@@ -10,79 +10,92 @@
         <h3 class="text-3xl font-bold dark:text-white text-center mb-4">NewWorld Game Sign Ups</h3>
             <div class="overflow-x-auto xl:overflow-x-visible">
 
-            <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
-                <div>
-                    <button (click)="toggleActionDropDown()" id="dropdownActionButton" data-dropdown-toggle="dropdownAction" class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
-                        <span class="sr-only">Action button</span>
-                        Action
-                        <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                        </svg>
-                    </button>
-                    <!-- Dropdown menu -->
-                    <div *ngIf="showActionDropDown" id="dropdownAction" class="z-10 absolute bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
-                        <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownActionButton">
-                       
-                            <li>
-                                <a (click)="downloadCSV()" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Download CSV</a>
-                            </li>
-                          
-                        </ul>
-                        <!-- <div class="py-1">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Delete User</a>
-                        </div> -->
+                        <!-- Bulk Actions / Filters -->
+                <div class="mt-2 mb-3">
+                <div
+                    class="rounded-2xl p-[1px] bg-gradient-to-br from-slate-200/70 via-white/60 to-slate-200/70
+                        dark:from-slate-800/60 dark:via-slate-900/60 dark:to-slate-800/60 shadow-md">
+                    <div
+                    class="rounded-[calc(theme(borderRadius.2xl)-1px)] bg-white/85 dark:bg-slate-900/70
+                            ring-1 ring-black/5 dark:ring-white/10 p-3 sm:p-4">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <!-- Left: Search -->
+                        <form class="flex-1">
+                        <label class="sr-only">Search by Name or Email</label>
+                        <div class="relative">
+                            <svg class="absolute left-3 top-2.5 h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                    clip-rule="evenodd"/>
+                            </svg>
+                            <input
+                            type="text"
+                            [(ngModel)]="searchTerm"
+                            name="searchTerm"
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800
+                                    pl-10 pr-3 py-2 text-sm text-slate-900 dark:text-slate-100
+                                    focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                            placeholder="Search by Name or Email" />
+                        </div>
+                        </form>
+
+                        <!-- Middle: Counts & Select all -->
+                        <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300">
+                            <span class="font-semibold">{{ filteredUsers.length }}</span> shown
+                            <span class="opacity-50">•</span>
+                            <span class="font-semibold">{{ selected.size }}</span> selected
+                        </span>
+
+                        <label class="inline-flex items-center gap-2 text-sm">
+                            <input type="checkbox"
+                                class="h-4 w-4 rounded border-slate-300 dark:border-slate-600
+                                        text-emerald-600 focus:ring-emerald-500"
+                                [ngModel]="allSelected"
+                                (ngModelChange)="toggleSelectAll($event)" />
+                            <span class="text-slate-700 dark:text-slate-200">Select all</span>
+                        </label>
+                        </div>
+
+                        <!-- Right: Actions -->
+                        <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            (click)="openReminderModal('selected')"
+                            class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold
+                                text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50"
+                            [disabled]="selected.size === 0">
+                            <!-- mail icon -->
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h13A2.5 2.5 0 0 1 21 7.5v9A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-9Z"
+                                    stroke="currentColor" stroke-width="1.5"/>
+                            <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Send Weekly Reminder
+                        </button>
+
+                        <button
+                            type="button"
+                            (click)="openReminderModal('all')"
+                            class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold
+                                text-emerald-700 bg-emerald-50 hover:bg-emerald-100
+                                dark:bg-emerald-900/30 dark:text-emerald-300">
+                            To All
+                        </button>
+
+                        <button
+                            (click)="downloadCSV()"
+                            class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold
+                                text-slate-700 bg-slate-100 hover:bg-slate-200
+                                dark:text-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700">
+                            Download CSV
+                        </button>
+                        </div>
+                    </div>
                     </div>
                 </div>
-                <div class="w-full md:w-1/2">
-                    
-                    <!-- <form class="flex items-center">
-                        <label for="simple-search" class="sr-only">Search</label>
-                        <div class="relative w-full">
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                            <input type="text" id="simple-search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Search" required="">
-                        </div>
-                    </form> -->
-                    <!-- Search bar -->
-<form class="flex items-center">
-    <label for="simple-search" class="sr-only">Search</label>
-    <div class="relative w-full">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <svg
-          aria-hidden="true"
-          class="w-5 h-5 text-gray-500 dark:text-gray-400"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-            clip-rule="evenodd"
-          />
-        </svg>
-      </div>
-      <!-- use ngModel for two-way data binding -->
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        name="searchTerm"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-               focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 
-               dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-               dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-        placeholder="Search by Name or Email"
-      />
-    </div>
-  </form>
                 </div>
-                <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
-                    <h2 class="font-bold dark:text-white">{{allUsers.length}} Users - {{everySolution.length}} Solutions</h2>
-                  
-                </div>
-            </div>
+
                 <div class="overflow-x-auto xl:overflow-x-visible">
 
                 <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -97,6 +110,11 @@
                             
                             <th scope="col" class="px-4 py-3"># Solution Started</th>
                             <th scope="col" class="px-4 py-3"># Solution Submitted</th>
+                            <th class="px-4 py-3">
+                           <input type="checkbox"
+                                [ngModel]="allSelected"
+                                (ngModelChange)="toggleSelectAll($event)" />
+                            </th>
                             <th scope="col" class="px-4 py-3">
                                 <span class="sr-only">Actions</span>
                             </th>
@@ -125,6 +143,11 @@
                                 <td class="px-4 py-3">{{user.dateJoined}}</td>
                                 <td class="px-4 py-3">{{user.tempSolutionstarted}}</td>
                                 <td class="px-4 py-3">{{user.tempSolutionSubmitted}}</td>
+                                <td class="px-4 py-3">
+                                    <input type="checkbox"
+                                    [ngModel]="selected.has(user.email!)"
+                                    (ngModelChange)="toggleSelect(user.email!, $event)" />
+                                </td>
                             
                              <!-- Actions -->
                                 <td class="px-4 py-3 flex items-center justify-end">
@@ -154,7 +177,6 @@
                                                 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
                                     {{ inProgressCount(user) }}
                                     </span>
-
 
                                     </span>
 
@@ -302,4 +324,98 @@
     </div>
     </section>
 
+</div>
+
+
+<!-- Compose / Weekly Reminder Modal -->
+<div *ngIf="reminderOpen"
+     class="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 dark:text-white">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+  <!-- Dialog -->
+  <div role="dialog" aria-modal="true" aria-labelledby="reminderTitle"
+       class="relative w-full max-w-2xl rounded-2xl shadow-2xl
+              bg-white dark:bg-slate-900 ring-1 ring-black/5 dark:ring-white/10">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b dark:border-slate-800">
+      <div>
+        <h3 id="reminderTitle" class="text-lg font-semibold text-slate-900 dark:text-white">
+          Weekly Reminder
+        </h3>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          Compose once — content is personalized per recipient.
+        </p>
+      </div>
+      <button (click)="closeReminderModal()"
+              class="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+              aria-label="Close">
+        <svg class="h-5 w-5 text-slate-500 dark:text-slate-300" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-5 py-5 space-y-4">
+      <!-- Target -->
+      <div class="flex flex-wrap items-center gap-3 text-sm">
+        <span class="text-slate-600 dark:text-slate-300">Recipients:</span>
+        <label class="inline-flex items-center gap-2">
+          <input type="radio" name="target" value="selected" [(ngModel)]="targetMode"
+                 class="h-4 w-4 text-emerald-600 focus:ring-emerald-500" />
+          <span class="text-slate-800 dark:text-slate-200">Selected ({{ selected.size }})</span>
+        </label>
+        <label class="inline-flex items-center gap-2">
+          <input type="radio" name="target" value="all" [(ngModel)]="targetMode"
+                 class="h-4 w-4 text-emerald-600 focus:ring-emerald-500" />
+          <span class="text-slate-800 dark:text-slate-200">All ({{ allUsers.length }})</span>
+        </label>
+      </div>
+
+      <!-- Subject -->
+      <label class="block">
+        <span class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+          Email subject
+        </span>
+        <input [(ngModel)]="reminderSubject"
+               class="w-full rounded-xl border border-slate-200 dark:border-slate-700
+                      bg-white dark:bg-slate-800 px-3 py-2 text-sm
+                      focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+               placeholder="Your weekly NewWorld Game progress" />
+      </label>
+
+      <!-- Intro HTML -->
+      <label class="block">
+        <span class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+          Intro (simple HTML allowed)
+        </span>
+        <textarea [(ngModel)]="reminderIntroHtml" rows="6"
+                  class="w-full rounded-xl border border-slate-200 dark:border-slate-700
+                         bg-white dark:bg-slate-800 px-3 py-2 font-mono text-xs
+                         focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                  placeholder="<p>Keep the momentum going. Here are your in-progress solutions.</p>"></textarea>
+      </label>
+
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        We’ll auto-generate the per-user section listing their pending solutions (title, image, and a “Continue” link).  
+        If a user has none, we include a friendly home-page CTA instead.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-end gap-2 px-5 py-4 border-t dark:border-slate-800">
+      <button (click)="closeReminderModal()"
+              class="rounded-xl border border-slate-200 dark:border-slate-700
+                     px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200">
+        Cancel
+      </button>
+      <button (click)="sendWeeklyReminders()"
+              class="rounded-xl bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white
+                     hover:bg-emerald-700 disabled:opacity-50"
+              [disabled]="sending">
+        {{ sending ? 'Sending…' : 'Send now' }}
+      </button>
+    </div>
+  </div>
 </div>

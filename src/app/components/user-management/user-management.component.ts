@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -18,7 +20,8 @@ export class UserManagementComponent implements OnInit {
     public auth: AuthService,
     private solution: SolutionService,
     private time: TimeService,
-    private data: DataService
+    private data: DataService,
+    private fns: AngularFireFunctions
   ) {}
   searchTerm: string = '';
   showActionDropDown: boolean = false;
@@ -29,6 +32,18 @@ export class UserManagementComponent implements OnInit {
   userUnfinishedSolutions: Solution[] = [];
   allUsers: User[] = [];
   everySolution: Solution[] = [];
+
+  selected = new Set<string>(); // emails
+  allSelected = false;
+  // ===== State for reminders =====
+  reminderOpen = false;
+  sending = false;
+  targetMode: 'selected' | 'all' = 'selected';
+
+  reminderSubject = 'Your weekly NewWorld Game progress';
+  reminderIntroHtml =
+    '<p>Keep the momentum going—here are your in-progress solutions.</p>';
+
   // component.ts
   solutionTab: ('all' | 'finished' | 'unfinished')[] = [];
   toggleSolutions(email: string, i: number) {
@@ -201,5 +216,196 @@ export class UserManagementComponent implements OnInit {
     const started = this.asNum(u?.tempSolutionstarted);
     const submitted = this.asNum(u?.tempSolutionSubmitted);
     return Math.max(0, started - submitted);
+  }
+
+  toggleSelectAll(checked: boolean) {
+    this.allSelected = checked;
+    this.selected.clear();
+    if (checked) {
+      this.filteredUsers.forEach((u) => {
+        if (u.email) this.selected.add(u.email);
+      });
+    }
+  }
+
+  toggleSelect(email: string, checked: boolean) {
+    if (checked) this.selected.add(email);
+    else this.selected.delete(email);
+
+    // keep "Select all" in sync
+    this.allSelected = this.filteredUsers.every(
+      (u) => u.email && this.selected.has(u.email)
+    );
+  }
+  getPendingSolutions(email: string) {
+    const normalized = email.trim().toLowerCase();
+
+    const mine = this.everySolution.filter((sol) => {
+      const p = sol.participants as unknown;
+
+      // Normalize participants -> string[] of emails
+      let emails: string[] = [];
+
+      if (Array.isArray(p)) {
+        // supports [{name:string}] or [string]
+        emails = p
+          .map((item: any) =>
+            typeof item === 'string' ? item : item?.name ?? ''
+          )
+          .filter(Boolean);
+      } else if (p && typeof p === 'object') {
+        // supports { [key]: string }
+        emails = Object.values(p as Record<string, string>).filter(Boolean);
+      }
+
+      return emails.some((e) => e.trim().toLowerCase() === normalized);
+    });
+
+    // finished can be 'true' or true
+    const unfinished = mine.filter(
+      (sol) => !(sol as any).finished || (sol as any).finished === 'false'
+    );
+
+    return unfinished.map((sol) => {
+      const fallbackImg =
+        'https://newworld-game.org/assets/solution-placeholder.png';
+
+      const rawTime: any =
+        (sol as any).updatedAt ?? (sol as any).createdAt ?? '';
+      // If Firestore Timestamp, convert; else pass through
+      const lastUpdated =
+        rawTime && typeof rawTime.toDate === 'function'
+          ? rawTime.toDate().toISOString()
+          : rawTime;
+
+      return {
+        title: sol.title ?? 'Untitled',
+        summary: (sol.description ?? '').slice(0, 220),
+        image: sol.image ?? fallbackImg,
+        lastUpdated,
+        ctaUrl: `https://newworld-game.org/playground-steps/${sol.solutionId}`,
+      };
+    });
+  }
+  openReminderModal(mode: 'selected' | 'all' = 'selected') {
+    this.targetMode = mode;
+    this.reminderOpen = true;
+  }
+
+  closeReminderModal() {
+    this.reminderOpen = false;
+  }
+
+  // Small helper: nice first name
+  private firstNameOf(u: any): string {
+    return (u?.firstName || (u?.displayName || '')?.split(' ')[0] || '').trim();
+  }
+
+  // Build the HTML content that your SendGrid template will inject as {{content}}
+  private buildWeeklyContentHTML(user: any, introHtml: string) {
+    const homeUrl = 'https://newworld-game.org/';
+    const pending = this.getPendingSolutions(user.email || '');
+    const fname = this.firstNameOf(user) || 'there';
+
+    const safe = (s: string) => (s || '').replace(/<script/gi, '&lt;script');
+
+    const cards = pending
+      .slice(0, 8)
+      .map((p) => {
+        const img =
+          p.image ||
+          'https://newworld-game.org/assets/solution-placeholder.png';
+        return `
+      <tr>
+        <td style="padding:12px;border:1px solid #e5e7eb;border-radius:12px">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+            <tr>
+              <td width="72" valign="top" style="padding-right:12px">
+                <img src="${img}" alt="" width="72" height="72" style="border-radius:8px;display:block;object-fit:cover"/>
+              </td>
+              <td valign="top">
+                <div style="font-weight:600;color:#0f172a">${safe(
+                  p.title
+                )}</div>
+                <div style="font-size:12px;line-height:1.5;color:#475569;margin:6px 0 10px">${safe(
+                  p.summary
+                )}</div>
+                <a href="${
+                  p.ctaUrl
+                }" style="display:inline-block;background:#059669;color:#ffffff;
+                   text-decoration:none;border-radius:8px;padding:6px 10px;font-size:12px">Continue</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`;
+      })
+      .join('');
+
+    const listSection = pending.length
+      ? `
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-collapse:separate;border-spacing:0 12px">
+        ${cards}
+      </table>`
+      : `
+      <div style="margin-top:8px;font-size:14px;color:#475569">
+        <p>You have no pending solutions — great! Explore new challenges and start something bold:</p>
+      </div>
+      <p>
+        <a href="${homeUrl}" style="display:inline-block;background:#111827;color:#ffffff;
+           text-decoration:none;border-radius:10px;padding:10px 14px;font-weight:600">Go to NewWorld Game</a>
+      </p>`;
+
+    return `
+  <div style="font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif">
+    <p style="margin:0 0 10px;color:#0f172a">Hi ${safe(fname)},</p>
+    <div style="margin-bottom:12px;color:#334155;font-size:14px;line-height:1.6">
+      ${introHtml || ''}
+    </div>
+    ${listSection}
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0"/>
+    <p style="font-size:12px;color:#64748b">Sent by NewWorld Game • <a href="${homeUrl}" style="color:#059669;text-decoration:none">newworld-game.org</a></p>
+  </div>`;
+  }
+
+  // Send flow: builds personalized content per recipient and calls the CF
+  async sendWeeklyReminders() {
+    if (this.sending) return;
+    this.sending = true;
+
+    try {
+      const pool =
+        this.targetMode === 'all'
+          ? this.allUsers
+          : this.allUsers.filter((u) => u.email && this.selected.has(u.email));
+
+      const weeklyReminder = this.fns.httpsCallable('weeklyReminder');
+
+      for (const u of pool) {
+        const email = (u.email || '').trim();
+        if (!email) continue;
+
+        const content = this.buildWeeklyContentHTML(u, this.reminderIntroHtml);
+
+        const payload: any = {
+          email,
+          subject: this.reminderSubject,
+          content, // <-- IMPORTANT: we send full HTML content
+          user: this.firstNameOf(u) || 'there',
+        };
+
+        await firstValueFrom(weeklyReminder(payload));
+        // Optional: tiny delay to avoid rate bursts
+        await new Promise((res) => setTimeout(res, 80));
+      }
+
+      alert(`Weekly reminder sent to ${pool.length} recipient(s).`);
+      this.closeReminderModal();
+    } catch (e) {
+      console.error('weekly reminder error', e);
+      alert('An error occurred while sending reminders. Check console/logs.');
+    } finally {
+      this.sending = false;
+    }
   }
 }
