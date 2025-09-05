@@ -283,7 +283,7 @@ export class UserManagementComponent implements OnInit {
         summary: (sol.description ?? '').slice(0, 220),
         image: sol.image ?? fallbackImg,
         lastUpdated,
-        ctaUrl: `https://newworld-game.org/playground-steps/${sol.solutionId}`,
+        ctaUrl: `https://newworld-game.org/dashboard/${sol.solutionId}`,
       };
     });
   }
