@@ -158,7 +158,7 @@
                    focus:ring-offset-white dark:focus:ring-offset-slate-900 transition">
             <option>Public</option>
             <option>Private</option>
-            <option>IB</option>
+            <option *ngIf="plan!='class'">IB</option>
             <option>Other</option>
           </select>
         </div>
