@@ -907,6 +907,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
       const baseByPlan: Record<string, number> = {
         free: 0,
         license: 9900,
+        class: 19900,
         // license: 100,
         tournament: 29900,
         pro: 34900,
@@ -1085,6 +1086,7 @@ export const stripeWebhook = functions.https.onRequest(
       const baseByPlan: Record<string, number> = {
         free: 0,
         license: 9900,
+        class: 19900,
         // license: 100,
         tournament: 29900,
         pro: 34900,
