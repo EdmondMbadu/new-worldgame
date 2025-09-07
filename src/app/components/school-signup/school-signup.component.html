@@ -149,20 +149,39 @@
                    focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
                    focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
         </div>
-        <div>
-          <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">School type</label>
-          <select [(ngModel)]="schoolType" name="schoolType"
-            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
-                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition">
-            <option>Public</option>
-            <option>Private</option>
-            <option *ngIf="plan!='class'">IB</option>
-             <option *ngIf="plan === 'class'">University</option>
-            <option>Other</option>
-          </select>
-        </div>
+      <div>
+  <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+    {{ plan === 'class' ? 'Region' : 'School type' }}
+  </label>
+
+  <select [(ngModel)]="schoolType" name="schoolType"
+    class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+           border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
+           focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+           focus:ring-offset-white dark:focus:ring-offset-slate-900 transition">
+
+    <!-- Non-class plans: keep your original -->
+    <ng-container *ngIf="plan !== 'class'; else regionOptions">
+      <option>Public</option>
+      <option>Private</option>
+      <!-- IB stays hidden for class already, so keep as-is -->
+      <option>IB</option>
+      <option>Other</option>
+    </ng-container>
+
+   <ng-template #regionOptions>
+  <option>Africa</option>
+  <option>Asia</option>
+  <option>Europe</option>
+  <option>North America</option>
+  <option>South America</option>
+  <option>Oceania</option>
+  <option>Antarctica</option>
+  <option>Other</option>
+</ng-template>
+  </select>
+</div>
+
       </div>
 
       <div>

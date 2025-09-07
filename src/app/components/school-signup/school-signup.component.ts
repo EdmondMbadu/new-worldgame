@@ -23,7 +23,7 @@ export class SchoolSignupComponent implements OnInit {
   // extra school info (useful for billing/ops)
   schoolCountry = '';
   // add 'University' to the union
-  schoolType: 'Public' | 'Private' | 'IB' | 'University' | 'Other' = 'Public';
+  schoolType: string = 'Public';
 
   // new fields (captured for class/university)
   courseType = '';
@@ -77,7 +77,7 @@ export class SchoolSignupComponent implements OnInit {
     // fallback from localStorage if no query params
     if (!this.plan) {
       if (this.plan === 'class') {
-        this.schoolType = 'University';
+        this.schoolType = 'U.S.';
       }
 
       const raw = localStorage.getItem('nwg.planSelection');
