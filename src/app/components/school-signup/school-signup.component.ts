@@ -22,7 +22,13 @@ export class SchoolSignupComponent implements OnInit {
 
   // extra school info (useful for billing/ops)
   schoolCountry = '';
-  schoolType: 'Public' | 'Private' | 'IB' | 'Other' = 'Public';
+  // add 'University' to the union
+  schoolType: 'Public' | 'Private' | 'IB' | 'University' | 'Other' = 'Public';
+
+  // new fields (captured for class/university)
+  courseType = '';
+  coursePurpose = '';
+
   schoolWebsite = '';
 
   /* pricing selection */
@@ -70,6 +76,10 @@ export class SchoolSignupComponent implements OnInit {
 
     // fallback from localStorage if no query params
     if (!this.plan) {
+      if (this.plan === 'class') {
+        this.schoolType = 'University';
+      }
+
       const raw = localStorage.getItem('nwg.planSelection');
       if (raw) {
         try {
@@ -185,6 +195,8 @@ export class SchoolSignupComponent implements OnInit {
           schoolCountry: this.schoolCountry,
           schoolType: this.schoolType,
           schoolWebsite: this.schoolWebsite,
+          courseType: this.courseType || '',
+          coursePurpose: this.coursePurpose || '',
         }
       );
 
@@ -246,6 +258,9 @@ export class SchoolSignupComponent implements OnInit {
         schoolCountry: this.schoolCountry || '',
         schoolType: this.schoolType || '',
         schoolWebsite: this.schoolWebsite || '',
+
+        courseType: this.courseType || '',
+        coursePurpose: this.coursePurpose || '',
       };
       const { url } = await firstValueFrom(callable(payload));
       window.location.href = url;

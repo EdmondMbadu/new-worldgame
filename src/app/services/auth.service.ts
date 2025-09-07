@@ -21,6 +21,8 @@ interface RegisterSchoolMeta {
   schoolCountry?: string;
   schoolType?: string; // 'Public' | 'Private' | 'IB' | 'Other'
   schoolWebsite?: string;
+  courseType?: string;
+  coursePurpose?: string;
 }
 
 @Injectable({
@@ -371,6 +373,8 @@ export class AuthService {
             country: meta?.schoolCountry || null,
             type: meta?.schoolType || null,
             website: meta?.schoolWebsite || null,
+            courseType: meta?.courseType || null,
+            coursePurpose: meta?.coursePurpose || null,
           },
 
           // billing snapshot at signup
