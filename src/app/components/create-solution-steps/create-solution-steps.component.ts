@@ -527,5 +527,47 @@ export class CreateSolutionStepsComponent implements OnInit {
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
+  } // Displays initials or a “First L.” label, never the raw email string.
+  // Nicely formats an email into "First L." when possible.
+  // Otherwise shows a capitalized token ("Alexbrown").
+  // If the token is literally one letter, falls back to "Reviewer A/B/C" via idx.
+  getEvaluatorDisplay(input: string, idx: number = 0): string {
+    const fallback = `Reviewer ${String.fromCharCode(65 + (idx % 26))}`; // A,B,C...
+
+    if (!input) return fallback;
+
+    // If it's already a plain name (no "@"), just return it.
+    if (!input.includes('@')) return input;
+
+    // 1) Take the local part, drop any +tag (plus addressing), and strip digits.
+    const local = input.split('@')[0];
+    const base = local.split('+')[0];
+    const cleaned = base.replace(/\d+/g, '');
+
+    // 2) Split on common separators.
+    const parts = cleaned.split(/[.\-_]+/).filter(Boolean);
+
+    const title = (s: string) =>
+      s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : '';
+
+    // Case: first + last (or multiple parts) -> "First L."
+    if (parts.length >= 2) {
+      const first = title(parts[0]);
+      const lastInitial = parts.at(-1)![0]?.toUpperCase() ?? '';
+      return lastInitial ? `${first} ${lastInitial}.` : first || fallback;
+    }
+
+    // Case: single token (no separators)
+    if (parts.length === 1) {
+      const token = parts[0];
+      if (!token) return fallback;
+
+      if (token.length >= 3) return title(token); // "Alexbrown"
+      if (token.length === 2) return token.toUpperCase(); // "AB"
+      // Single letter like "a" -> give them a friendly reviewer tag
+      return fallback;
+    }
+
+    return fallback;
   }
 }

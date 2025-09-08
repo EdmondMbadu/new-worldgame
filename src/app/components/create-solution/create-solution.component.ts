@@ -18,9 +18,10 @@ My role, as your colleague— your problem-solving partner— is to help us deve
 solution to a global problem on which you choose to work. Let’s start.`,
     `What is your NewWorld Game Solution Title.`,
     "In a few words, how would you describe the specific problem you're focusing on?",
-    'Upload the feature image for your solution.',
-    'Who are the key members of your team? Add their emails below.',
-    'Here are some randomly selected evaluators who might be interested in your project. You can add more evaluators below.',
+    'Upload an image for your solution.',
+    `List the members of your team. Add their emails below. (This enables communication between team members, 
+    and, as per NWG Privacy Policy, will remain private.`,
+    'For the NWG per-review process, below are some randomly selected evaluators who might be interested in your project. Please add others whom you would like to evaluate your strategy. Other evaluator names can be added later.',
     'Select all Sustainable Development Goals (SDGs) that interest you.',
     'Almost done! Submit to start solving your new solution.',
   ];

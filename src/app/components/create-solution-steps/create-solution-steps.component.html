@@ -56,14 +56,14 @@
             (hovered)="toggleHover($event)"
             (dropped)="startUpload($event)"
             [class.hovering]="isHovering">
-            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
                 <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
                 </svg>
-                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">  If you have an image that can represent your project <br>  <span class="font-semibold">Click to upload</span> or drag and drop that image.</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
             </div>
-            <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload feature Image</h5>
+            <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload Image</h5>
 
             <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
 
@@ -130,51 +130,65 @@
     </div>
 </form>
 <form [formGroup]="myForm" *ngIf="stepNumber==5" class="mt-10">
-    <div class="relative z-0 w-full mb-5 group">
-        <div class="flex flex-col">
-            <div *ngFor="let ev of solution.newSolution.evaluatorsHolder; let i=index">
-                <h1 class="text-gray-400 dark:text-gray-400">{{i+1}}.  {{ev.name}}</h1>
-            </div>
-                
+
+
+  <div class="relative z-0 w-full mb-5 group">
+    <div class="flex flex-col">
+      <div *ngFor="let ev of solution.newSolution.evaluatorsHolder; let i = index">
+            <h1 class="text-gray-400 dark:text-gray-400">
+                {{ i + 1 }}. {{ getEvaluatorDisplay(ev.name, i) }}
+            </h1>
+       </div>
+    </div>
+
+    <div class="mb-6 mt-4">
+      <div class="flex flex-col dark:bg-slate-800">
+        <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
+          <mat-label>Add evaluator names or emails</mat-label>
+
+          <mat-chip-grid #chipGrid aria-label="Evaluator list">
+            <mat-chip-row class="bg-white"
+                *ngFor="let email of solution.newSolution.evaluatorsHolder; let i = index"
+                (removed)="removeEvaluators(email)"
+                [editable]="true"
+                (edited)="editEvaluators(email, $event)"
+                [aria-description]="'press enter to edit evaluator'">
+
+                {{ getEvaluatorDisplay(email.name, i) }}
+
+                <button matChipRemove aria-label="remove evaluator">
+                <mat-icon>cancel</mat-icon>
+                </button>
+            </mat-chip-row>
+
+            <input placeholder="Add evaluator (name or email)…"
+              formControlName="emails"
+              [matChipInputFor]="chipGrid"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              [matChipInputAddOnBlur]="addOnBlur"
+              (matChipInputTokenEnd)="addEvaluators($event)" />
+          </mat-chip-grid>
+        </mat-form-field>
+
+        <div *ngIf="emails!.invalid && emails!.touched" class="text-red-400">
+          Make sure all emails are valid.
         </div>
-        <div class="mb-6 mt-4">
-            <!-- <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">Team Mexmbers</label> -->
-            <div class="flex flex-col dark:bg-slate-800" >
-                    <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
-                        <mat-label >Add Evaluator emails</mat-label>
-                        <mat-chip-grid #chipGrid aria-label="Add Team Members email" >
-                        <mat-chip-row class="bg-white" *ngFor="let email of solution.newSolution.evaluatorsHolder"
-                                        (removed)="removeEvaluators(email)"
-                                        [editable]="true"
-                                        (edited)="editEvaluators(email, $event)"
-                                        [aria-description]="'press enter to edit ' + email.name">
-                            {{email.name}}
-                            <button matChipRemove [attr.aria-label]="'remove ' + email.name">
-                            <mat-icon>cancel</mat-icon>
-                            </button>
-                        </mat-chip-row>
-                        <input   placeholder="email..."
-                        formControlName="emails" 
-                                [matChipInputFor]="chipGrid"
-                                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                                [matChipInputAddOnBlur]="addOnBlur"
-                                (matChipInputTokenEnd)="addEvaluators($event)"/>
-                        </mat-chip-grid>
-                    </mat-form-field>
-                    <div *ngIf="emails!.invalid && emails!.touched" class="text-red-400" >
-                    Make sure all emails are valid.
-                    </div>
-            </div>
-            
-        
-        </div> 
-       
+      </div>
     </div>
-    <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="!emails!.invalid " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="emails!.invalid " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
-    </div>
+  </div>
+
+  <div class="container flex mx-auto justify-center my-10">
+    <button *ngIf="!emails!.invalid" (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800">
+      {{ buttonText }}
+    </button>
+    <button [disabled]="true" *ngIf="emails!.invalid" (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full">
+      {{ buttonText }}
+    </button>
+  </div>
 </form>
+
 <section *ngIf="stepNumber==6" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
       <div  class="mb-4 flex items-center justify-between gap-4 md:mb-8">
