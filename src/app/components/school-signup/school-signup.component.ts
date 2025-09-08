@@ -28,6 +28,7 @@ export class SchoolSignupComponent implements OnInit {
   // new fields (captured for class/university)
   courseType = '';
   coursePurpose = '';
+  specificFocus = ''; // NEW
 
   schoolWebsite = '';
 
@@ -197,6 +198,7 @@ export class SchoolSignupComponent implements OnInit {
           schoolWebsite: this.schoolWebsite,
           courseType: this.courseType || '',
           coursePurpose: this.coursePurpose || '',
+          specificFocus: this.specificFocus || '', // NEW
         }
       );
 
@@ -261,6 +263,7 @@ export class SchoolSignupComponent implements OnInit {
 
         courseType: this.courseType || '',
         coursePurpose: this.coursePurpose || '',
+        specificFocus: this.specificFocus || '', // NEW
       };
       const { url } = await firstValueFrom(callable(payload));
       window.location.href = url;

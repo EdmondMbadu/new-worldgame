@@ -23,6 +23,7 @@ interface RegisterSchoolMeta {
   schoolWebsite?: string;
   courseType?: string;
   coursePurpose?: string;
+  specificFocus?: string;
 }
 
 @Injectable({
@@ -375,6 +376,7 @@ export class AuthService {
             website: meta?.schoolWebsite || null,
             courseType: meta?.courseType || null,
             coursePurpose: meta?.coursePurpose || null,
+            specificFocus: meta?.specificFocus || null, // NEW
           },
 
           // billing snapshot at signup

@@ -185,7 +185,7 @@
       </div>
 
       <div>
-        <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">School website (optional)</label>
+        <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">School or Class website (optional)</label>
         <input type="url" [(ngModel)]="schoolWebsite" name="schoolWebsite" autocomplete="url"
           class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
                  border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
@@ -198,7 +198,7 @@
         <div *ngIf="plan === 'class'" class="grid gap-6">
           <div>
             <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
-              Course type / code
+              Course type/subject/name
             </label>
             <input type="text" [(ngModel)]="courseType" name="courseType"
               placeholder="e.g., ENTR 201 — Entrepreneurship"
@@ -208,6 +208,20 @@
                     focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
                     focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
           </div>
+          <!-- NEW: Specific Issue / Focus Area (class only) -->
+          <div *ngIf="plan === 'class'">
+            <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+              Specific Issue / Focus Area
+            </label>
+            <input type="text" [(ngModel)]="specificFocus" name="specificFocus"
+              placeholder="e.g., climate resilience, AI in education, financial inclusion, local gov innovation"
+              class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                    border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
+                    placeholder:text-slate-400 dark:placeholder:text-slate-500
+                    focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                    focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
+          </div>
+
 
           <div>
             <label class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">

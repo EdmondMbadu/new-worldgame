@@ -877,6 +877,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
         schoolWebsite,
         courseType,
         coursePurpose,
+        specificFocus,
       } = data;
 
       if (!uid || !plan) {
@@ -960,6 +961,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
           email,
           courseType: (courseType ?? '').toString().slice(0, 500),
           coursePurpose: (coursePurpose ?? '').toString().slice(0, 500),
+          specificFocus: (specificFocus ?? '').toString().slice(0, 500),
         },
       });
       // after `const session = await stripe.checkout.sessions.create(...);`
@@ -978,6 +980,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
             status: 'pending',
             courseType: courseType || '',
             coursePurpose: coursePurpose || '',
+            specificFocus: specificFocus || '',
           },
           { merge: true }
         );
@@ -1029,6 +1032,7 @@ export const stripeWebhook = functions.https.onRequest(
         schoolWebsite,
         courseType,
         coursePurpose,
+        specificFocus,
       } = md;
 
       const paymentDoc = admin
@@ -1115,6 +1119,7 @@ export const stripeWebhook = functions.https.onRequest(
           website: schoolWebsite || null,
           courseType: courseType || null,
           coursePurpose: coursePurpose || null,
+          specificFocus: specificFocus || null,
         },
         billing: {
           plan,
