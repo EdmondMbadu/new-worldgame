@@ -19,30 +19,81 @@
 
     <div class="flex-1 flex flex-col items-center mt-20 px-4 ">
       <h1 class="text-4xl text-gray-900 dark:text-white mb-8 text-center max-w-2xl">{{ currentSolution.title }}</h1>
-      <div class="mb-8" appDropZone
-        (hovered)="toggleHover($event)"
-        (dropped)="startUpload($event)"
-        [class.hovering]="isHovering">
+    <div
+      class="relative mb-8 group max-w-xs"
+      appDropZone
+      (hovered)="toggleHover($event)"
+      (dropped)="startUpload($event)"
+      [class.hovering]="isHovering"
+    >
+      <!-- hidden file input (unchanged) -->
+      <input
+        type="file"
+        id="getFile"
+        style="display:none"
+        accept="image/*"
+        (change)="startUpload($any($event.target).files)"
+      >
 
-        <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
+      <!-- image / placeholder -->
+      <ng-container *ngIf="currentSolution.image && currentSolution.image !== ''; else placeholder">
+        <img
+          [src]="currentSolution.image"
+          alt="Solution image"
+          class="rounded-xl w-48 h-48 object-cover mx-auto shadow"
+        />
+      </ng-container>
 
-        <img *ngIf="currentSolution.image !== ''&& currentSolution.image" [src]="currentSolution.image" alt="Solution Feature"
-          class="rounded-lg w-48 h-48 object-cover mx-auto" />
+      <ng-template #placeholder>
+        <div
+          class="rounded-xl w-48 h-48 mx-auto flex flex-col items-center justify-center
+                border-2 border-dashed border-slate-300 dark:border-slate-600
+                text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800"
+        >
+          <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 5h18M3 19h18M5 7h14v10H5zM9 11l2 2 4-4"/>
+          </svg>
+          <span class="text-xs">No image yet</span>
+        </div>
+      </ng-template>
 
-        <img *ngIf="!currentSolution.image " src="../../../assets/img/generic.webp" alt="Placeholder Feature"
-          class="rounded-lg w-48 h-48 object-cover mx-auto" />
+      <!-- hover ring -->
+      <div class="absolute inset-0 rounded-xl ring-2 ring-transparent group-hover:ring-emerald-400 transition"></div>
 
-
-        <button onclick="document.getElementById('getFile').click()"
-          class="flex flex-row items-center justify-center -mt-4 ml-24 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-slate-500 dark:text-gray-200 dark:hover:bg-slate-600 px-2 py-1">
-          <svg class="w-5 h-5 hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black"
-                           viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
-                      </svg>
-          <h1 class="ml-1">Edit</h1>
-        </button>
-
+      <!-- drag & drop overlay -->
+      <div
+        *ngIf="isHovering"
+        class="absolute inset-0 rounded-xl border-2 border-dashed border-emerald-400
+              bg-emerald-500/10 flex items-center justify-center text-emerald-700
+              dark:text-emerald-300 text-sm font-medium"
+      >
+        Drop image to update
       </div>
+
+      <!-- change image chip (same behavior; opens file picker) -->
+      <button
+        onclick="document.getElementById('getFile').click()"
+        type="button"
+        aria-label="Change solution image"
+        title="Change image"
+        class="absolute bottom-2 right-2 inline-flex items-center gap-1.5
+              px-2.5 py-1.5 rounded-full text-xs font-medium
+              bg-black/70 text-white hover:bg-black/80
+              backdrop-blur shadow-sm"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM21.207 6.207a1 1 0 0 0 0-1.414L19.207 2.793a1 1 0 0 0-1.414 0L16 4.586l3.75 3.75 1.457-1.457z"/>
+        </svg>
+        Change image
+      </button>
+
+      <!-- novice hint -->
+      <p class="mt-2 text-xs text-center text-slate-500 dark:text-slate-400">
+        Drag & drop an image here, or click <span class="font-semibold">Change image</span>.
+      </p>
+    </div>
+
 
       <!-- ▼ INVITE CTA (compact, below the image) ▼ -->
 <!-- <div
