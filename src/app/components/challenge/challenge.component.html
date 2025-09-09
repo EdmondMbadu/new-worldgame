@@ -6,12 +6,19 @@
          cursor-pointer">
        
 
+<a (click)="selectChallenge()" class="cursor-pointer">
+  <div class="relative w-full h-48 bg-white dark:bg-slate-700">
+    <img
+      [src]="image || 'assets/img/generic.webp'"
+      [attr.alt]="title || 'Challenge'"
+      class="absolute inset-0 w-full h-full"
+      [ngClass]="fit === 'contain' ? 'object-contain p-2' : 'object-cover'"
+      loading="lazy"
+     
+    />
+  </div>
+</a>
 
-    <a   (click)="selectChallenge()" class="cursor-pointer"  >   
-      <img *ngIf="image !==undefined && image!==''" [src]="image" alt="Challenge" class="w-full h-48 object-cover">
-      <img   *ngIf="image ===undefined || image===''"  src="../../../assets/img/generic.webp" alt="Challenge" class="w-full h-48 object-cover">
-   
-      </a>  
     
       
     <div class="p-4">

@@ -421,4 +421,7 @@ export class HomeComponent implements OnInit {
 
     this.router.navigate(['/start-challenge/']);
   }
+  public isSdgCategory(cat: string): boolean {
+    return (cat ?? '').toLowerCase().includes('sdg'); // matches 'UN SDG', 'SDGs', etc.
+  }
 }

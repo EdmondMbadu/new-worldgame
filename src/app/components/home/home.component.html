@@ -118,7 +118,8 @@
                            [id]="ids[i]"
                            [description]="descriptions[i]"
                            [restricted]="'false'"
-                           [title]="t">
+                           [title]="t"
+                           [fit]="isSdgCategory(activeCategory) ? 'contain' : 'cover'">
             </app-challenge>
           </div>
         </div>

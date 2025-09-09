@@ -21,6 +21,8 @@ export class ChallengeComponent implements OnInit {
   @Input() id: string = '';
   @Input() restricted: string = '';
   @Input() fromChallengeSpace: boolean = false;
+  @Input() fit: 'cover' | 'contain' = 'cover';
+
   currentSolution: Solution = {};
   user?: User = {};
   alreadyParticipant = false;

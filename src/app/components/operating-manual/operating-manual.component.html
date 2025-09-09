@@ -6,7 +6,7 @@
   <div *ngIf="isLoggedIn">
     <app-navbar
       [hoveredManualPath]="'bg-gray-100 dark:bg-gray-700'"
-      [showMoreOrLess]="true"
+      [showMoreOrLess]="false"
       [sideBarSmall]="true"
       [sideBarBig]="false"
       [email]="this.auth.currentUser.email"
