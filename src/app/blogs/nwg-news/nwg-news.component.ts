@@ -14,6 +14,7 @@ interface Video {
   url: string;
   speaker?: string; // ← NEW
   thumbUrl?: string; // ← NEW (speaker photo)
+  tagline?: string;
 }
 @Component({
   selector: 'app-nwg-news',
@@ -25,6 +26,13 @@ export class NwgNewsComponent implements OnInit, AfterViewInit {
   @ViewChild('heroVideo') heroVideo?: ElementRef<HTMLVideoElement>;
   readonly DEFAULT_THUMB = '../../../assets/img/design-science.jpg'; // add a simple fallback
   showUnmute = false;
+  readonly DEFAULT_TAGLINE =
+    'Stay up to date with solutions being developed in real time';
+
+  get heroTagline(): string {
+    const t = this.mainVideo?.tagline?.trim();
+    return t ? t : this.DEFAULT_TAGLINE;
+  }
 
   ngOnInit(): void {
     window.scroll(0, 100);
@@ -58,6 +66,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit {
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FIB%20Flyer-%20Tane%20Kahu.mp4?alt=media&token=438a21d0-82a9-4043-ad20-0b004d895101',
       speaker: 'Tāne Kahu',
       thumbUrl: '../../../assets/img/tane-agent.png', // ← put your real URL
+      tagline: 'NewWorld Game AI colleague Tane Kahu',
     },
     {
       id: 'sofia-change',
