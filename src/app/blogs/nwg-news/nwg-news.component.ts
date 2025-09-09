@@ -1,4 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -15,12 +21,11 @@ interface Video {
   templateUrl: './nwg-news.component.html',
   styleUrl: './nwg-news.component.css',
 })
-export class NwgNewsComponent implements OnInit {
+export class NwgNewsComponent implements OnInit, AfterViewInit {
+  @ViewChild('heroVideo') heroVideo?: ElementRef<HTMLVideoElement>;
   readonly DEFAULT_THUMB = '../../../assets/img/design-science.jpg'; // add a simple fallback
-  @ViewChild('heroVideo') heroVideo!: ElementRef<HTMLVideoElement>;
-  isMuted = false;
-
   showUnmute = false;
+
   ngOnInit(): void {
     window.scroll(0, 100);
 
@@ -35,19 +40,18 @@ export class NwgNewsComponent implements OnInit {
       this.setMainVideo(candidate, /* updateUrl = */ false);
     });
   }
+
+  ngAfterViewInit(): void {
+    // First load (direct paste/refresh)
+    queueMicrotask(() => this.autoPlayWithAudio());
+  }
+
   // the “main” video shown up top
   mainVideo!: Video;
   previousVideos: Video[] = [];
 
   /** thumbnails under “Previous AI News”  */
   allVideos: Video[] = [
-    {
-      id: 'tane-kahu-univ',
-      title: `NewWorld Game: Changing the World`,
-      url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FIB%20Flyer-%20Tane%20Kahu.mp4?alt=media&token=438a21d0-82a9-4043-ad20-0b004d895101',
-      speaker: 'Tāne Kahu',
-      thumbUrl: '../../../assets/img/tane-agent.png', // ← put your real URL
-    },
     {
       id: 'tane-kahu',
       title: `NewWorld Game Changemakers Tournament 2025–26  `,
@@ -149,50 +153,60 @@ export class NwgNewsComponent implements OnInit {
         replaceUrl: true,
       });
     }
+    // Wait for Angular to bind new [src], then attempt autoplay+audio again
+    setTimeout(() => this.autoPlayWithAudio(), 0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-  ngAfterViewInit() {
-    const v = this.heroVideo.nativeElement;
-    v.setAttribute('playsinline', 'true');
-    v.setAttribute('webkit-playsinline', 'true');
-
-    // Try autoplay WITH sound first (Chrome may allow; Safari won’t)
-    this.tryAutoplayWithSound(v);
-
-    // Optional: if browser still requires a gesture, unmute on first click
-    const onFirstClick = () => {
-      if (this.showUnmute) this.unmute();
-      document.removeEventListener('click', onFirstClick, {
-        capture: true,
-      } as any);
-    };
-    document.addEventListener('click', onFirstClick, { capture: true } as any);
+  // Called when metadata for the current video is loaded
+  onLoadedMeta() {
+    this.autoPlayWithAudio();
   }
 
-  private async tryAutoplayWithSound(v: HTMLVideoElement) {
+  /** Try autoplay -> then unmute with sound. If blocked, arm one-gesture unlock. */
+  private async autoPlayWithAudio() {
+    const v = this.heroVideo?.nativeElement;
+    if (!v) return;
+
+    // 1) Ensure we can start anywhere (Safari/Chrome): start muted+inline
+    v.muted = true;
+    v.autoplay = true;
+    v.playsInline = true;
+
     try {
-      v.muted = false;
-      await v.play(); // ✅ Chrome (if allowed) plays with sound
-      this.showUnmute = false;
+      await v.play();
     } catch {
-      // ❌ Blocked (Safari/iOS or Chrome without engagement) → fallback muted
-      try {
-        v.muted = true;
-        await v.play(); // ✅ Autoplay muted
-        this.showUnmute = true; // show button to enable sound
-      } catch {
-        // If even muted autoplay is blocked, user will press Play controls
-        this.showUnmute = true;
-      }
+      /* ignore */
+    }
+
+    // 2) Immediately attempt to enable sound
+    v.muted = false;
+    v.volume = 1.0;
+    try {
+      await v.play(); // succeeds if browser allows sound here
+      this.showUnmute = false;
+    } catch (err) {
+      // 3) Sound blocked → require *first* user gesture anywhere
+      this.showUnmute = true;
+      const unlock = () => this.unmuteAndPlay();
+      window.addEventListener('pointerdown', unlock, { once: true });
+      window.addEventListener('keydown', unlock, { once: true });
+
+      // Retry when tab becomes visible again (e.g., from URL paste switching tabs)
+      document.addEventListener(
+        'visibilitychange',
+        () => {
+          if (document.visibilityState === 'visible') this.autoPlayWithAudio();
+        },
+        { once: true }
+      );
     }
   }
 
-  unmute() {
-    const v = this.heroVideo.nativeElement;
+  unmuteAndPlay() {
+    const v = this.heroVideo?.nativeElement;
+    if (!v) return;
     v.muted = false;
-    v.volume = 1;
-    const p = v.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
-    this.showUnmute = false;
+    v.volume = 1.0;
+    v.play().finally(() => (this.showUnmute = false));
   }
 }
