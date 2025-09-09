@@ -54,7 +54,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit {
   allVideos: Video[] = [
     {
       id: 'tane-kahu',
-      title: `NewWorld Game Changemakers Tournament 2025–26  `,
+      title: `NewWorld Game: Changing the World`,
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FIB%20Flyer-%20Tane%20Kahu.mp4?alt=media&token=438a21d0-82a9-4043-ad20-0b004d895101',
       speaker: 'Tāne Kahu',
       thumbUrl: '../../../assets/img/tane-agent.png', // ← put your real URL
