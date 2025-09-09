@@ -144,7 +144,7 @@
     <div class="mb-6 mt-4">
       <div class="flex flex-col dark:bg-slate-800">
         <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
-          <mat-label>Add evaluator names or emails</mat-label>
+          <mat-label>Add evaluator emails</mat-label>
 
           <mat-chip-grid #chipGrid aria-label="Evaluator list">
             <mat-chip-row class="bg-white"
@@ -161,7 +161,7 @@
                 </button>
             </mat-chip-row>
 
-            <input placeholder="Add evaluator (name or email)…"
+            <input placeholder="Add evaluator (email)…"
               formControlName="emails"
               [matChipInputFor]="chipGrid"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"

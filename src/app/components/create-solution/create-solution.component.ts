@@ -21,7 +21,7 @@ solution to a global problem on which you choose to work. Let’s start.`,
     'Upload an image for your solution.',
     `List the members of your team. Add their emails below. (This enables communication between team members 
     and, as per NWG Privacy Policy, their information will remain private.)`,
-    'For the NWG per-review process, below are some randomly selected evaluators who might be interested in your project. Please add others whom you would like to evaluate your strategy. Other evaluator names can be added later.',
+    'For the NWG per-review process, below are some randomly selected evaluators who might be interested in your project. Please add others whom you would like to evaluate your strategy. Other evaluator emails can be added later.',
     'Select all Sustainable Development Goals (SDGs) that interest you.',
     'Almost done! Submit to start solving your new solution.',
   ];
