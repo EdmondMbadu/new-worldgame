@@ -32,65 +32,60 @@
           </div>
         </div>
 
-  <!-- Header / Hero (compact + focused, no extra bindings) -->
-<header class="relative overflow-hidden">
-  <!-- soft background lights -->
-  <div class="pointer-events-none absolute inset-0 -z-10 opacity-70 dark:opacity-60">
-    <div class="absolute -top-24 -left-24 size-[420px] rounded-full blur-3xl bg-teal-200/40 dark:bg-teal-400/10"></div>
-    <div class="absolute -bottom-24 -right-16 size-[360px] rounded-full blur-3xl bg-cyan-200/40 dark:bg-cyan-400/10"></div>
+<!-- Header / Hero — "profile" inspired -->
+<header class="relative w-full">
+  <!-- Banner -->
+  <div class="relative h-40 sm:h-52 md:h-64 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+    <!-- If you have a banner image, show it -->
+    <img *ngIf="image"
+         [src]="image"
+         alt="Banner"
+         class="absolute inset-0 h-full w-full object-cover" />
+    <!-- Soft gradient fallback overlay (keeps a subtle glow on top of image too) -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/10 dark:to-black/30"></div>
   </div>
 
-  <div class="mx-auto max-w-screen-xl px-4 pt-14 pb-10 md:pb-14 grid md:grid-cols-12 gap-8 md:gap-10 items-center">
-    <!-- LEFT -->
-    <div class="md:col-span-7 space-y-5">
-      <!-- Logo + micro-badging (static text only) -->
-      <div class="flex items-center gap-3">
-        <img *ngIf="logoImage"
-             [src]="logoImage"
-             alt="Logo"
-             class="h-12 w-12 rounded-xl object-contain ring-1 ring-black/5 dark:ring-white/10 shadow-sm" />
-        <span class="text-xs font-medium rounded-full px-2.5 py-1 bg-slate-50 text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:ring-slate-700">
-          Solution Space
-        </span>
-      </div>
-
-      <!-- Title -->
-      <h1 class="text-balance max-w-2xl text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white">
-        {{ heading }}
-      </h1>
-
-      <!-- Subheading -->
-      <p class="text-pretty max-w-2xl text-base md:text-lg text-slate-600 dark:text-slate-400">
-        {{ subHeading }}
-      </p>
-
-      <!-- Primary action -->
-      <button
-        (click)="scrollToSolutions()"
-        class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm md:text-base font-semibold text-white
-               bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-500 hover:to-teal-600
-               shadow-lg shadow-teal-500/20 hover:shadow-xl transition-transform duration-200 hover:-translate-y-0.5
-               focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800/60">
-        Start solving
-      </button>
-    </div>
-
-    <!-- RIGHT visual -->
-    <div class="md:col-span-5">
-      <div class="mx-auto max-w-md">
-        <img *ngIf="image"
-             [src]="image"
-             alt="Feature"
-             class="w-full h-auto rounded-2xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl" />
-      </div>
-    </div>
-  </div>
-
-  <!-- subtle divider -->
+  <!-- Avatar + content bar -->
   <div class="mx-auto max-w-screen-xl px-4">
-    <div class="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent dark:via-slate-700"></div>
+    <div class="relative">
+      <!-- Avatar overlaps banner -->
+      <div class="absolute -top-10 sm:-top-12">
+        <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-full ring-4 ring-white dark:ring-slate-900 overflow-hidden bg-white dark:bg-slate-900 shadow-md">
+          <img *ngIf="logoImage"
+               [src]="logoImage"
+               alt="Logo"
+               class="h-full w-full object-cover" />
+        </div>
+      </div>
+
+      <!-- Row: title + action -->
+      <div class="pt-14 sm:pt-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div class="pr-2">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {{ heading }}
+          </h1>
+          <p class="mt-1 max-w-3xl text-sm sm:text-base text-slate-600 dark:text-slate-400">
+            {{ subHeading }}
+          </p>
+        </div>
+
+        <button
+          (click)="scrollToSolutions()"
+          class="self-start sm:self-center inline-flex items-center justify-center rounded-full px-5 py-2.5
+                 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800
+                 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200
+                 shadow-sm transition-colors focus:outline-none focus:ring-4
+                 focus:ring-slate-300/60 dark:focus:ring-slate-700/60">
+          Start solving
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="mt-4 h-px w-full bg-slate-200 dark:bg-slate-700"></div>
+    </div>
   </div>
 </header>
+
 
         <!-- Main Content Area -->
         <div class="mx-auto max-w-screen-xl py-10 px-4">
