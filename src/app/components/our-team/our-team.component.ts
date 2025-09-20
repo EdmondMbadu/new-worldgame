@@ -58,7 +58,7 @@ export class OurTeamComponent implements OnInit {
         'Baruch is a researcher who focuses on finding key contacts and uncovering valuable insights to drive outreach efforts and support strategic initiatives.',
 
       profilePicPath:
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2Fbaruc.jpg?alt=media&token=a25bba12-93b6-4e0d-9ae4-75a65b753886',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2FBaruch.png?alt=media&token=adf543ca-6fc5-4e2d-88f4-057a57357db9',
     },
   ];
 
