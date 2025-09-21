@@ -1,21 +1,206 @@
-<div class="dark:bg-slate-900 text-white min-h-screen p-4 sm:p-6 lg:p-8 font-sans">
-    <!--  Navbar (unchanged)  -->
-    <div *ngIf="!isLoggedIn">
-      <app-navbar></app-navbar>
-    </div>
-    <div *ngIf="isLoggedIn">
-      <app-navbar
-        [hoveredOtherAisPath]="'bg-gray-100 dark:bg-gray-700'"
-        [showMoreOrLess]="true"
-        [sideBarSmall]="true"
-        [sideBarBig]="false"
-        [email]="this.auth.currentUser.email"
-        [firstName]="this.auth.currentUser.firstName"
-        [lastName]="this.auth.currentUser.lastName"
-        [path]="'home'">
-      </app-navbar>
-    </div>
+<div class="dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
+  <!-- Navbars (unchanged) -->
+  <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [hoveredOtherAisPath]="'bg-gray-100 dark:bg-gray-700'"
+      [showMoreOrLess]="true"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      [path]="'home'">
+    </app-navbar>
+  </div>
 
-     <app-management-toolbar></app-management-toolbar>
+  <app-management-toolbar></app-management-toolbar>
 
+  <!-- Page body -->
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 mt-10">
+    <div class="rounded-2xl border border-slate-200 dark:border-slate-700 p-6 bg-white dark:bg-slate-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold">Bulk Mail</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Step 1 — Build your HTML email.
+          </p>
+        </div>
+
+        <button type="button"
+                (click)="openModal()"
+                class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+          Build template
+        </button>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-[100]">
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="closeModal()"></div>
+
+  <!-- Scrollable overlay wrapper -->
+  <div class="fixed inset-0 overflow-y-auto">
+    <!-- Spacing so panel isn’t glued to edges and the overlay itself can scroll -->
+    <div class="flex min-h-full items-start justify-center p-4 sm:p-6">
+      <!-- Panel -->
+      <div role="dialog" aria-modal="true" aria-labelledby="templateModalTitle"
+           class="w-full max-w-6xl rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10
+                  overflow-hidden flex flex-col max-h-screen text-slate-900 dark:text-slate-100">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 md:px-6 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
+          <div class="flex items-center gap-3">
+            <h2 id="templateModalTitle" class="text-lg md:text-xl font-semibold">Template Visualizer</h2>
+            <span class="text-xs px-2 py-1 rounded-md ring-1 ring-slate-300 dark:ring-slate-700 opacity-75">
+              Sandboxed Preview
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button"
+                    (click)="loadSample()"
+                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+              Load sample
+            </button>
+            <button type="button"
+                    (click)="closeModal()"
+                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+              Close
+            </button>
+          </div>
+        </div>
+
+        <!-- Body: columns scroll independently; whole panel capped by max-h-screen -->
+        <div class="flex-1 overflow-hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 h-full">
+            <!-- Left: Editor -->
+            <section class="p-4 md:p-6 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 overflow-auto">
+              <form [formGroup]="form" class="space-y-4">
+                <!-- Subject -->
+                <div>
+                  <label class="block text-sm font-medium mb-1">Email Subject</label>
+                  <div class="flex items-center gap-2">
+                    <input formControlName="subject" type="text"
+                           placeholder="e.g., Welcome to NewWorld Game"
+                           class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent
+                                  px-3 py-2 outline-none focus:ring-2 ring-offset-0 focus:ring-indigo-500
+                                  placeholder-slate-400 dark:placeholder-slate-400
+                                  text-slate-900 dark:text-slate-100"/>
+                    <button type="button" (click)="copySubject()"
+                            class="rounded-lg ring-1 ring-slate-300 dark:ring-slate-600 px-3 py-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800">
+                      <span *ngIf="copiedSubject">✓ Copied</span>
+                      <span *ngIf="!copiedSubject">Copy</span>
+                    </button>
+                  </div>
+                  <div class="text-xs mt-1 text-rose-500" *ngIf="form.get('subject')?.invalid && form.get('subject')?.touched">
+                    Subject is required.
+                  </div>
+                </div>
+
+                <!-- HTML -->
+                <div>
+                  <label class="block text-sm font-medium mb-1">HTML</label>
+                  <div class="relative">
+                    <textarea formControlName="html" (input)="recompute()" rows="14"
+                              placeholder="Paste full HTML here…"
+                              class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent
+                                     px-3 py-3 font-mono text-sm leading-6 outline-none focus:ring-2 ring-offset-0 focus:ring-indigo-500
+                                     placeholder-slate-400 dark:placeholder-slate-400
+                                     text-slate-900 dark:text-slate-100"></textarea>
+
+                    <div class="absolute right-2 bottom-2 flex gap-2">
+                      <button type="button" (click)="copyHtml()"
+                              class="rounded-md px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <span *ngIf="copiedHtml">✓ Copied</span>
+                        <span *ngIf="!copiedHtml">Copy</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-1 flex items-center justify-between text-xs opacity-70">
+                    <span>Chars: {{ (form.value.html || '').length | number }}</span>
+                    <span>Lines: {{ lineCount }}</span>
+                    <span>Size: {{ totalBytes | number }} B</span>
+                  </div>
+                </div>
+
+                <!-- Options -->
+                <div class="flex flex-wrap gap-3 items-center text-xs">
+                  <label class="inline-flex items-center gap-2">
+                    <input type="checkbox" class="h-4 w-4" [(ngModel)]="wrapHtml" name="wrapHtml"/>
+                    <span class="opacity-80">Wrap with boilerplate</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <span class="opacity-80">Base URL:</span>
+                    <input [(ngModel)]="baseUrl" name="baseUrl"
+                           class="px-2 py-1 rounded-md bg-transparent border border-slate-300 dark:border-slate-600 w-56
+                                  placeholder-slate-400 dark:placeholder-slate-400
+                                  text-slate-900 dark:text-slate-100"
+                           placeholder="https://example.com/"/>
+                  </label>
+                </div>
+
+                <!-- Footer actions (left column bottom) -->
+                <div class="flex items-center gap-3 pt-2">
+                  <button type="button" (click)="downloadHtml()"
+                          class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    Download .html
+                  </button>
+                  <button type="button" (click)="openInNewTab()"
+                          class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    Open in new tab
+                  </button>
+                  <button type="button" (click)="resetForm()"
+                          class="ml-auto rounded-lg px-3 py-2 text-sm bg-rose-600 text-white hover:bg-rose-700">
+                    Clear
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <!-- Right: Preview -->
+            <section class="p-4 md:p-6 overflow-auto">
+              <div class="flex items-center justify-between mb-2">
+                <div class="text-sm opacity-80">Live Preview (sandboxed)</div>
+                <div class="flex items-center gap-2 text-xs">
+                  <button type="button" class="px-3 py-1 rounded-lg ring-1 ring-slate-300 dark:ring-slate-600"
+                          [class.bg-slate-900]="previewWidth==='desktop'"
+                          [class.text-white]="previewWidth==='desktop'"
+                          (click)="setPreview('desktop')">Desktop</button>
+                  <button type="button" class="px-3 py-1 rounded-lg ring-1 ring-slate-300 dark:ring-slate-600"
+                          [class.bg-slate-900]="previewWidth==='tablet'"
+                          [class.text-white]="previewWidth==='tablet'"
+                          (click)="setPreview('tablet')">Tablet</button>
+                  <button type="button" class="px-3 py-1 rounded-lg ring-1 ring-slate-300 dark:ring-slate-600"
+                          [class.bg-slate-900]="previewWidth==='mobile'"
+                          [class.text-white]="previewWidth==='mobile'"
+                          (click)="setPreview('mobile')">Mobile</button>
+                </div>
+              </div>
+
+              <!-- Fixed-height preview container -->
+              <div class="mx-auto border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-800"
+                   [ngStyle]="previewFrameStyle">
+                <!-- Use safelist-friendly heights -->
+                <div class="h-96 md:h-[32rem] w-full">
+                  <iframe title="Email Preview"
+                          class="w-full h-full"
+                          [srcdoc]="finalHtml || placeholderHtml"
+                          sandbox="allow-forms allow-pointer-lock allow-same-origin"
+                          referrerpolicy="no-referrer">
+                  </iframe>
+                </div>
+              </div>
+
+              <p class="text-xs opacity-60 mt-3">
+                Scripts are removed and preview is sandboxed. Use Base URL for relative links.
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+      <!-- /Panel -->
+    </div>
+  </div>
+</div>
