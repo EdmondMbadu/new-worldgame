@@ -116,7 +116,7 @@ const TEMPLATE_ID_EVALUATION_COMPLETE =
 sgMail.setApiKey(API_KEY);
 const TEMPLATE_DEMO = functions.config()['sendgrid'].templatenwgdemo;
 
-const TEAMPLE_BULK = functions.config()['sendgrid'].templategenericbulk;
+// const TEAMPLE_BULK = functions.config()['sendgrid'].templategenericbulk;
 
 // Twilio credentials from config
 const accountSid = functions.config()['twilio'].account_sid;
