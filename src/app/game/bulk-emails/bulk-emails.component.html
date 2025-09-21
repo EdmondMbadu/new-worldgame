@@ -176,24 +176,54 @@
                     </form>
 
                 <!-- Sticky footer actions (always visible) -->
-                <div class="shrink-0 sticky bottom-0 left-0 right-0 pt-2
-                            bg-white/90 dark:bg-slate-900/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur
-                            border-t border-slate-200 dark:border-slate-800">
-                    <div class="flex items-center gap-3">
-                    <button type="button" (click)="downloadHtml()"
-                            class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
-                        Download .html
-                    </button>
-                    <button type="button" (click)="openInNewTab()"
-                            class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
-                        Open in new tab
-                    </button>
-                    <button type="button" (click)="resetForm()"
-                            class="ml-auto rounded-lg px-3 py-2 text-sm bg-rose-600 text-white hover:bg-rose-700">
-                        Clear
-                    </button>
+                <!-- Sticky footer actions (always visible) -->
+                    <div class="shrink-0 sticky bottom-0 left-0 right-0 pt-2
+                                bg-white/90 dark:bg-slate-900/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur
+                                border-t border-slate-200 dark:border-slate-800">
+                    <div class="flex flex-col gap-2">
+                        <!-- Send test row -->
+                        <div class="flex flex-wrap items-center gap-2">
+                        <input [(ngModel)]="testEmail" [ngModelOptions]="{standalone:true}" type="email"
+                                placeholder="Send test to: name@example.com"
+                                class="min-w-[14rem] flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent
+                                        px-3 py-2 text-sm placeholder-slate-400 dark:placeholder-slate-400
+                                        text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"/>
+
+                        <input [(ngModel)]="testPreheader" [ngModelOptions]="{standalone:true}" type="text"
+                                placeholder="Optional preheader"
+                                class="hidden sm:block min-w-[12rem] flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent
+                                        px-3 py-2 text-sm placeholder-slate-400 dark:placeholder-slate-400
+                                        text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"/>
+
+                        <button type="button" (click)="sendTest()"
+                                [disabled]="sending || !canSendTest"
+                                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm
+                                        bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
+                            <span *ngIf="!sending">Send test</span>
+                            <span *ngIf="sending">Sending…</span>
+                        </button>
+
+                        <div class="text-xs opacity-70" *ngIf="sendResult">{{ sendResult }}</div>
+                        </div>
+
+                        <!-- Existing action buttons -->
+                        <div class="flex items-center gap-3">
+                        <button type="button" (click)="downloadHtml()"
+                                class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Download .html
+                        </button>
+                        <button type="button" (click)="openInNewTab()"
+                                class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Open in new tab
+                        </button>
+                        <button type="button" (click)="resetForm()"
+                                class="ml-auto rounded-lg px-3 py-2 text-sm bg-rose-600 text-white hover:bg-rose-700">
+                            Clear
+                        </button>
+                        </div>
                     </div>
-                </div>
+                    </div>
+
             </section>
 
             <!-- Right: Preview -->

@@ -116,6 +116,8 @@ const TEMPLATE_ID_EVALUATION_COMPLETE =
 sgMail.setApiKey(API_KEY);
 const TEMPLATE_DEMO = functions.config()['sendgrid'].templatenwgdemo;
 
+const TEAMPLE_BULK = functions.config()['sendgrid'].templategenericbulk;
+
 // Twilio credentials from config
 const accountSid = functions.config()['twilio'].account_sid;
 const authToken = functions.config()['twilio'].auth_token;
@@ -241,6 +243,89 @@ async function fetchAndExtract(gcsUrl: string, mime: string): Promise<string> {
   }
   return buffer.toString('utf8'); // txt + fallback
 }
+
+// Optionally lock to project users only
+function ensureAuthed(context: functions.https.CallableContext) {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'Sign in to send emails.'
+    );
+  }
+}
+
+/**
+ * Callable to send a single test email with raw HTML
+ * data: { to: string, subject: string, html: string, preheader?: string, from?: string }
+ */
+export const sendBulkTestEmail = functions.https.onCall(
+  async (data, context) => {
+    ensureAuthed(context);
+
+    const to = (data?.to || '').trim();
+    const subject = (data?.subject || '').toString().trim();
+    let html = (data?.html || '').toString();
+    const preheader = (data?.preheader || '').toString();
+    const fromEmail = (data?.from || 'newworld@newworld-game.org').toString(); // adjust your default
+
+    if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Valid "to" email is required.'
+      );
+    }
+    if (!subject) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        '"subject" is required.'
+      );
+    }
+    if (!html) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        '"html" is required.'
+      );
+    }
+
+    // Preheader injection (kept invisible in most clients)
+    if (preheader) {
+      const preheaderSpan = `<span style="display:none!important;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>`;
+      // Put preheader right after <body> if present; else prepend
+      html =
+        html.replace(/<body([^>]*)>/i, (m: any) => `${m}${preheaderSpan}`) ||
+        preheaderSpan + html;
+    }
+
+    const msg: sgMail.MailDataRequired = {
+      to,
+      from: { email: fromEmail, name: 'NewWorld Game' }, // adjust branding
+      subject,
+      html,
+      // Optional: tracking/categorization
+      trackingSettings: {
+        clickTracking: { enable: true, enableText: true },
+        openTracking: { enable: true },
+      },
+      categories: ['bulk-mail-tester'],
+      // Optional: sandbox mode toggle if you want a dry-run
+      // mailSettings: { sandboxMode: { enable: true } },
+    };
+
+    try {
+      await sgMail.send(msg);
+      return { ok: true };
+    } catch (err: any) {
+      console.error(
+        'SendGrid error',
+        err?.response?.body || err?.message || err
+      );
+      throw new functions.https.HttpsError(
+        'internal',
+        'Failed to send test email.'
+      );
+    }
+  }
+);
 export const sendDemoInvite = functions.firestore
   .document('demoBookings/{demoId}')
   .onCreate(async (snap) => {

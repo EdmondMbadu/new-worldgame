@@ -8,6 +8,7 @@ import {
 import { AuthService } from 'src/app/services/auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 @Component({
   selector: 'app-bulk-emails',
@@ -33,6 +34,11 @@ export class BulkEmailsComponent implements OnDestroy {
   isUploading = false;
   uploadProgressText = '';
 
+  testEmail = '';
+  testPreheader = '';
+  sending = false;
+  sendResult = '';
+
   recentUploads: Array<{ url: string; name: string }> = [];
 
   readonly placeholderHtml =
@@ -47,7 +53,8 @@ export class BulkEmailsComponent implements OnDestroy {
   constructor(
     public auth: AuthService,
     private fb: FormBuilder,
-    private data: DataService
+    private data: DataService,
+    private fns: AngularFireFunctions
   ) {
     this.form = this.fb.group({
       subject: ['', [Validators.required, Validators.maxLength(200)]],
@@ -331,5 +338,44 @@ export class BulkEmailsComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.saveDraft();
+  }
+
+  get canSendTest(): boolean {
+    const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.testEmail);
+    const hasSubject = !!(this.form.value.subject || '').trim();
+    const hasHtml = !!(this.finalHtml || '').trim();
+    return emailOk && hasSubject && hasHtml;
+  }
+
+  async sendTest(): Promise<void> {
+    this.sendResult = '';
+    if (!this.canSendTest) return;
+
+    try {
+      this.sending = true;
+
+      const payload = {
+        to: this.testEmail.trim(),
+        subject: (this.form.value.subject || '').trim(),
+        html: this.finalHtml, // full wrapped HTML you preview
+        preheader: this.testPreheader || '',
+        // from: 'newworld@newworld-game.org', // optional override
+      };
+
+      // const callable = httpsCallable(this.fns, 'sendBulkTestEmail');
+      const callable = this.fns.httpsCallable('sendBulkTestEmail');
+      const res: any = await callable(payload);
+      if (res?.data?.ok) {
+        this.sendResult = '✅ Test sent.';
+      } else {
+        this.sendResult = '⚠️ Sent, but no confirmation received.';
+      }
+    } catch (e: any) {
+      console.error(e);
+      this.sendResult = '❌ Failed to send test.';
+      alert(e?.message || 'Failed to send test email.');
+    } finally {
+      this.sending = false;
+    }
   }
 }
