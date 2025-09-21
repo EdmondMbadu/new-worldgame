@@ -1,6 +1,13 @@
-import { Component, HostListener, OnDestroy } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DataService } from 'src/app/services/data.service';
 
 @Component({
   selector: 'app-bulk-emails',
@@ -18,17 +25,30 @@ export class BulkEmailsComponent implements OnDestroy {
   totalBytes = 0;
   lineCount = 0;
 
-  wrapHtml = true;
-  baseUrl = '';
+  wrapHtml = true; // uses [(ngModel)] with standalone:true
+  baseUrl = ''; // uses [(ngModel)] with standalone:true
   previewWidth: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   finalHtml = '';
+
+  isUploading = false;
+  uploadProgressText = '';
+
+  recentUploads: Array<{ url: string; name: string }> = [];
 
   readonly placeholderHtml =
     '<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;padding:24px;color:#334155"><p>Paste HTML on the left to preview.</p></body></html>';
 
   private draftKey = 'bulkEmail.templateDraft.v1';
+  private uploadsKey = 'bulkEmail.recentUploads.v1';
 
-  constructor(public auth: AuthService, private fb: FormBuilder) {
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('htmlEditor') htmlEditor!: ElementRef<HTMLTextAreaElement>;
+
+  constructor(
+    public auth: AuthService,
+    private fb: FormBuilder,
+    private data: DataService
+  ) {
     this.form = this.fb.group({
       subject: ['', [Validators.required, Validators.maxLength(200)]],
       html: ['', [Validators.required]],
@@ -38,10 +58,17 @@ export class BulkEmailsComponent implements OnDestroy {
       .getCurrentUserPromise()
       .then((user) => (this.isLoggedIn = !!user));
 
+    // Restore drafts
     const saved = localStorage.getItem(this.draftKey);
     if (saved) {
       try {
         this.form.patchValue(JSON.parse(saved), { emitEvent: false });
+      } catch {}
+    }
+    const savedUploads = localStorage.getItem(this.uploadsKey);
+    if (savedUploads) {
+      try {
+        this.recentUploads = JSON.parse(savedUploads);
       } catch {}
     }
 
@@ -53,20 +80,103 @@ export class BulkEmailsComponent implements OnDestroy {
     this.recompute();
   }
 
+  /* ---------- Modal ---------- */
   openModal(): void {
     this.showModal = true;
     this.recompute();
-    setTimeout(() => {
-      document
-        .querySelector<HTMLInputElement>('[formControlName="subject"]')
-        ?.focus();
-    }, 0);
+    setTimeout(() => this.htmlEditor?.nativeElement?.focus(), 0);
   }
   closeModal(): void {
     this.showModal = false;
   }
 
-  /* ------- Computation / preview ------- */
+  /* ---------- Upload flow ---------- */
+  onPickImage(): void {
+    this.fileInput?.nativeElement?.click();
+  }
+
+  async onImageChosen(evt: Event): Promise<void> {
+    const input = evt.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    input.value = '';
+
+    try {
+      this.isUploading = true;
+      this.uploadProgressText = file.name;
+
+      // IMPORTANT: use an EVEN number of segments so any Firestore doc write in the service is valid.
+      // Storage path: bulk-mails/{uuid}/files/{timestamp-filename}
+      const uniqueId = this.safeId();
+      const storagePath = `bulk-mails/${uniqueId}/files/${Date.now()}-${
+        file.name
+      }`;
+      const metadata = { contentType: file.type };
+
+      const url = await this.data.startUpload(file, storagePath, '', metadata);
+
+      if (url) {
+        this.insertImageAtCursor(url, file.name);
+        this.rememberUpload(url, file.name);
+      }
+    } catch (e) {
+      console.error('Upload failed', e);
+      alert('Image upload failed. Please try again.');
+    } finally {
+      this.isUploading = false;
+      this.uploadProgressText = '';
+    }
+  }
+
+  insertImageAtCursor(url: string, name = 'image'): void {
+    const snippet =
+      `<img src="${this.escapeAttr(url)}" alt="${this.escapeAttr(
+        name
+      )}" width="600" ` +
+      `style="max-width:100%; height:auto; display:block; border:0; outline:none; text-decoration:none;">`;
+    this.insertAtCursor(snippet + '\n');
+  }
+
+  private insertAtCursor(snippet: string): void {
+    const area = this.htmlEditor?.nativeElement;
+    const control = this.form.get('html');
+    const current = (control?.value || '').toString();
+
+    if (!area || !control) {
+      this.form.patchValue({ html: current + snippet });
+      this.recompute();
+      return;
+    }
+
+    const start = area.selectionStart ?? current.length;
+    const end = area.selectionEnd ?? start;
+    const next = current.slice(0, start) + snippet + current.slice(end);
+    control.setValue(next);
+    this.recompute();
+
+    const pos = start + snippet.length;
+    setTimeout(() => {
+      area.focus();
+      area.setSelectionRange(pos, pos);
+    }, 0);
+  }
+
+  private rememberUpload(url: string, name: string): void {
+    this.recentUploads.unshift({ url, name });
+    this.recentUploads = this.recentUploads.slice(0, 6);
+    localStorage.setItem(this.uploadsKey, JSON.stringify(this.recentUploads));
+  }
+
+  private safeId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return (crypto as any).randomUUID();
+    }
+    return (
+      'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)
+    );
+  }
+
+  /* ---------- Preview pipeline ---------- */
   recompute(): void {
     const subject = (this.form.value.subject || '').trim();
     const rawHtml = this.form.value.html || '';
@@ -88,7 +198,6 @@ export class BulkEmailsComponent implements OnDestroy {
       .replace(/\son\w+='[^']*'/gi, '');
     return cleaned;
   }
-
   private injectBaseTagIfNeeded(html: string, baseUrl?: string): string {
     if (!baseUrl) return html;
     if (/<base\s/i.test(html)) return html;
@@ -100,7 +209,6 @@ export class BulkEmailsComponent implements OnDestroy {
     }
     return `<head><base href="${this.escapeAttr(baseUrl)}"></head>` + html;
   }
-
   private wrapEnvelope(innerHtml: string, subject: string): string {
     return [
       '<!doctype html>',
@@ -117,7 +225,6 @@ export class BulkEmailsComponent implements OnDestroy {
       '</html>',
     ].join('');
   }
-
   private escapeHtml(s: string): string {
     return (s || '')
       .replace(/&/g, '&amp;')
@@ -130,7 +237,6 @@ export class BulkEmailsComponent implements OnDestroy {
     return this.escapeHtml(s);
   }
 
-  /* ------- Utilities ------- */
   copySubject(): void {
     const s = (this.form.value.subject || '').toString();
     navigator.clipboard.writeText(s).then(() => {
