@@ -312,8 +312,13 @@ export const sendBulkTestEmail = functions.https.onCall(
     };
 
     try {
-      await sgMail.send(msg);
-      return { ok: true };
+      const [resp] = await sgMail.send(msg);
+      const messageId =
+        (resp?.headers?.['x-message-id'] as string) ||
+        (resp?.headers?.['X-Message-Id'] as string) ||
+        '';
+
+      return { ok: true, statusCode: resp?.statusCode ?? 0, messageId };
     } catch (err: any) {
       console.error(
         'SendGrid error',

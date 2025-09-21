@@ -9,6 +9,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-bulk-emails',
@@ -357,16 +358,16 @@ export class BulkEmailsComponent implements OnDestroy {
       const payload = {
         to: this.testEmail.trim(),
         subject: (this.form.value.subject || '').trim(),
-        html: this.finalHtml, // full wrapped HTML you preview
+        html: this.finalHtml,
         preheader: this.testPreheader || '',
-        // from: 'newworld@newworld-game.org', // optional override
       };
 
-      // const callable = httpsCallable(this.fns, 'sendBulkTestEmail');
-      const callable = this.fns.httpsCallable('sendBulkTestEmail');
-      const res: any = await callable(payload);
-      if (res?.data?.ok) {
-        this.sendResult = '✅ Test sent.';
+      const callable = this.fns.httpsCallable('sendBulkTestEmail'); // compat API returns Observable
+      const res: any = await firstValueFrom(callable(payload));
+
+      if (res?.ok) {
+        const msgId = res.messageId ? ` (id: ${res.messageId})` : '';
+        this.sendResult = `✅ Test sent${msgId}`;
       } else {
         this.sendResult = '⚠️ Sent, but no confirmation received.';
       }
