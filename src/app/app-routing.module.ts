@@ -103,6 +103,7 @@ import { AskFeedbackComponent } from './blogs/ask-feedback/ask-feedback.componen
 import { FeedbackManagementComponent } from './components/feedback-management/feedback-management.component';
 import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
 import { TournamentUniversityComponent } from './blogs/tournament-university/tournament-university.component';
+import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -334,6 +335,12 @@ const routes: Routes = [
   {
     path: 'management-ask',
     component: ManagementAskComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'bulk-emails',
+    component: BulkEmailsComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
