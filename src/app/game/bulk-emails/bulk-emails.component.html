@@ -16,25 +16,35 @@
 
   <app-management-toolbar></app-management-toolbar>
 
-  <!-- Page body -->
-  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 mt-10">
-    <div class="rounded-2xl border border-slate-200 dark:border-slate-700 p-6 bg-white dark:bg-slate-800">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl md:text-2xl font-bold">Bulk Mail</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Step 1 — Build your HTML email.
-          </p>
-        </div>
+<!-- Page body (collapsible) -->
+<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 mt-10">
+  <details
+    class="group rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+    [attr.open]="builderOpen ? '' : null"
+    (toggle)="toggleSection('builderOpen')">
 
-        <button type="button"
-                (click)="openModal()"
-                class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
-          Build template
-        </button>
+    <summary class="cursor-pointer list-none select-none px-6 py-5 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold">Bulk Mail</h1>
+        <p class="text-xs opacity-60 mt-0.5 group-open:hidden">Step 1 — Build your HTML email.</p>
       </div>
+
+      <button
+        type="button"
+        (click)="openModal(); $event.preventDefault(); $event.stopPropagation();"
+        class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+        Build template
+      </button>
+    </summary>
+
+    <div class="px-6 pb-5">
+      <p class="text-sm text-slate-500 dark:text-slate-400">Step 1 — Build your HTML email.</p>
     </div>
-  </div>
+  </details>
+</div>
+
+
+ 
 
 <!-- Daily Report (Summary + Histogram) -->
 <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
@@ -271,7 +281,7 @@
   <details
     class="group rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
     [attr.open]="reportsOpen ? '' : null"
-    (toggle)="toggleReports()">
+    (toggle)="toggleSection('reportsOpen')">
 
     <!-- Summary header (click to toggle) -->
     <summary class="cursor-pointer list-none select-none px-4 py-3 flex items-center gap-3">

@@ -45,6 +45,7 @@ export class BulkEmailsComponent implements OnDestroy {
   private reportsSub?: Subscription;
 
   reportsOpen = false; // start collapsed
+  builderOpen = false;
 
   // --- View mode ---
   isMonthMode = false;
@@ -165,10 +166,10 @@ export class BulkEmailsComponent implements OnDestroy {
     this.recompute();
   }
 
-  toggleReports() {
-    this.reportsOpen = !this.reportsOpen;
+  toggleSection(key: 'reportsOpen' | 'builderOpen'): void {
+    // avoid toggling <details> twice if called from inside <summary>
+    (this as any)[key] = !(this as any)[key];
   }
-
   ngOnInit() {
     // if you have lifecycle, or put in constructor after auth if preferred
     this.subscribeReports();
