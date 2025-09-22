@@ -870,4 +870,14 @@ export class BulkEmailsComponent implements OnDestroy {
       this.summaryLoading = false;
     }
   }
+
+  get yTicks(): Array<{ y: number; label: number }> {
+    // 0..100 SVG units mapped to 0..maxBin counts
+    const steps = [0, 0.25, 0.5, 0.75, 1];
+    return steps.map((f) => {
+      const label = Math.round(this.maxBin * f);
+      const y = 110 - Math.round(100 * f); // same baseline as bars
+      return { y, label };
+    });
+  }
 }

@@ -155,6 +155,15 @@
                 class="fill-emerald-500/70">
               </rect>
             </ng-container>
+          <!-- Y axis ticks & labels -->
+          <g>
+            <ng-container *ngFor="let t of yTicks">
+              <!-- <line [attr.x1]="0" [attr.y1]="t.y" [attr.x2]="24 * 16" [attr.y2]="t.y"
+                    stroke="currentColor" class="opacity-10"></line> -->
+              <text [attr.x]="-2" [attr.y]="t.y + 3" text-anchor="end"
+                    class="fill-current opacity-60" font-size="8">{{ t.label }}</text>
+            </ng-container>
+          </g>
 
             <!-- hour tick -->
             <text [attr.x]="i * 16 + 8" y="118" text-anchor="middle" class="fill-current opacity-60" font-size="8">
