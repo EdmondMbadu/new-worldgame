@@ -59,6 +59,7 @@ export class BulkEmailsComponent implements OnDestroy {
     invalid: 0,
     duplicates: 0,
   };
+  selectedMonth = this.toMonthInputValue(new Date()); // "YYYY-MM"
 
   Math = Math;
   // --- Daily Summary State ---
@@ -915,8 +916,8 @@ export class BulkEmailsComponent implements OnDestroy {
   async loadMonthSummary(): Promise<void> {
     this.summaryLoading = true;
     try {
-      const { start, end, daysInMonth } = this.getMonthBoundsLocal(
-        this.selectedDate
+      const { start, end, daysInMonth } = this.getMonthBoundsLocalFromYYYYMM(
+        this.selectedMonth
       );
       const uid = this.auth.currentUser?.uid || '__none__';
 
@@ -930,9 +931,25 @@ export class BulkEmailsComponent implements OnDestroy {
         .get()
         .toPromise();
 
-      const runs: BulkRun[] = (snap?.docs || [])
+      const raw: BulkRun[] = (snap?.docs || [])
         .map((d) => d.data() as BulkRun)
         .filter((r) => r?.createdBy === uid);
+
+      // same "when" logic as day view (completedAt ?? createdAt)
+      const toWhen = (r: BulkRun): Date => {
+        const cAt = (r as any).completedAt;
+        const kAt = (r as any).createdAt;
+        const completed = cAt?.toDate?.() ?? (cAt instanceof Date ? cAt : null);
+        const created =
+          kAt?.toDate?.() ?? (kAt instanceof Date ? kAt : null) ?? new Date();
+        return completed ?? created;
+      };
+
+      // in-range runs by "when"
+      const runs = raw.filter((r) => {
+        const when = toWhen(r);
+        return when >= start && when < end;
+      });
 
       // init bins
       this.monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -950,13 +967,8 @@ export class BulkEmailsComponent implements OnDestroy {
         invalid += r?.totals?.invalid || 0;
         duplicates += r?.totals?.duplicates || 0;
 
-        const when: Date =
-          r.completedAt?.toDate?.() ??
-          (r.completedAt instanceof Date ? r.completedAt : null) ??
-          r.createdAt?.toDate?.() ??
-          (r.createdAt instanceof Date ? r.createdAt : new Date());
-
-        const dayIndex = when.getDate() - 1; // 0-based index within month
+        const when = toWhen(r);
+        const dayIndex = when.getDate() - 1; // 0-based
 
         const batches = Array.isArray(r.batches) ? r.batches : [];
         if (batches.length) {
@@ -997,12 +1009,59 @@ export class BulkEmailsComponent implements OnDestroy {
     }
   }
 
+  private toMonthInputValue(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  }
+
+  private getMonthBoundsLocalFromYYYYMM(yyyyMm: string): {
+    start: Date;
+    end: Date;
+    daysInMonth: number;
+  } {
+    const [yStr, mStr] = yyyyMm.split('-');
+    const y = parseInt(yStr, 10);
+    const m = parseInt(mStr, 10); // 1..12
+    const start = new Date(y, m - 1, 1, 0, 0, 0, 0);
+    const end = new Date(y, m, 1, 0, 0, 0, 0);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    return { start, end, daysInMonth };
+  }
+
+  onMonthChange(evt: Event): void {
+    const el = evt.target as HTMLInputElement;
+    const value = (el.value || '').trim(); // "YYYY-MM"
+    if (!value) return;
+    this.selectedMonth = value;
+    this.loadMonthSummary();
+  }
+
+  resetToThisMonth(): void {
+    this.selectedMonth = this.toMonthInputValue(new Date());
+    this.loadMonthSummary();
+  }
+
+  shiftMonth(deltaMonths: number): void {
+    const [y, m] = this.selectedMonth.split('-').map((n) => parseInt(n, 10));
+    const dt = new Date(y, m - 1, 1);
+    dt.setMonth(dt.getMonth() + deltaMonths);
+    this.selectedMonth = this.toMonthInputValue(dt);
+    this.loadMonthSummary();
+  }
+
   showDay(): void {
     this.isMonthMode = false;
+    // keep continuity: base day off current month selection if you want
+    // otherwise leave as-is; we’ll just refresh:
     this.loadDaySummary();
   }
+
   showMonth(): void {
     this.isMonthMode = true;
+    // seed the month selector from the current selected day for continuity
+    const [yy, mm] = this.selectedDate.split('-');
+    this.selectedMonth = `${yy}-${mm}`;
     this.loadMonthSummary();
   }
 }

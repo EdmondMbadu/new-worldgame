@@ -46,31 +46,64 @@
         <p class="text-xs opacity-70">Summary for the selected day (local time)</p>
       </div>
 
+      <!-- Controls -->
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button"
-                (click)="shiftDay(-1)"
-                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
-          ← Previous
-        </button>
+        <!-- DAY CONTROLS -->
+        <ng-container *ngIf="!isMonthMode; else monthControls">
+          <button type="button"
+                  (click)="shiftDay(-1)"
+                  class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+            ← Previous
+          </button>
 
-        <input type="date"
-               class="rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-1.5 text-sm
-                      text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"
-               [value]="selectedDate"
-               (change)="onDateChange($event)"/>
+          <input type="date"
+                class="rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-1.5 text-sm
+                        text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"
+                [value]="selectedDate"
+                (change)="onDateChange($event)"/>
 
-        <button type="button"
-                (click)="shiftDay(1)"
-                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
-          Next →
-        </button>
+          <button type="button"
+                  (click)="shiftDay(1)"
+                  class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+            Next →
+          </button>
 
-        <button type="button"
-                (click)="resetToToday()"
-                class="rounded-lg px-3 py-1.5 text-xs bg-indigo-600 text-white hover:bg-indigo-700">
-          Today
-        </button>
+          <button type="button"
+                  (click)="resetToToday()"
+                  class="rounded-lg px-3 py-1.5 text-xs bg-indigo-600 text-white hover:bg-indigo-700">
+            Today
+          </button>
+        </ng-container>
 
+        <!-- MONTH CONTROLS -->
+        <ng-template #monthControls>
+          <button type="button"
+                  (click)="shiftMonth(-1)"
+                  class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+            ← Previous
+          </button>
+
+          <!-- Month/Year selector -->
+          <input type="month"
+                class="rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-1.5 text-sm
+                        text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"
+                [value]="selectedMonth"
+                (change)="onMonthChange($event)"/>
+
+          <button type="button"
+                  (click)="shiftMonth(1)"
+                  class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+            Next →
+          </button>
+
+          <button type="button"
+                  (click)="resetToThisMonth()"
+                  class="rounded-lg px-3 py-1.5 text-xs bg-indigo-600 text-white hover:bg-indigo-700">
+            This Month
+          </button>
+        </ng-template>
+
+        <!-- View toggle -->
         <button type="button"
                 (click)="showDay()"
                 class="rounded-lg px-3 py-1.5 text-xs"
@@ -99,39 +132,27 @@
     <div *ngIf="!summaryLoading; else dayLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Requested</div>
-        <div class="text-lg font-semibold">
-          {{ (isMonthMode ? monthSummary.requested : daySummary.requested) | number }}
-        </div>
+        <div class="text-lg font-semibold">{{ (isMonthMode ? monthSummary.requested : daySummary.requested) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-emerald-200 dark:ring-emerald-900/40 p-3">
         <div class="text-[11px] opacity-70">Succeeded</div>
-        <div class="text-lg font-semibold text-emerald-600">
-          {{ (isMonthMode ? monthSummary.succeeded : daySummary.succeeded) | number }}
-        </div>
+        <div class="text-lg font-semibold text-emerald-600">{{ (isMonthMode ? monthSummary.succeeded : daySummary.succeeded) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-rose-200 dark:ring-rose-900/40 p-3">
         <div class="text-[11px] opacity-70">Failed</div>
-        <div class="text-lg font-semibold text-rose-600">
-          {{ (isMonthMode ? monthSummary.failed : daySummary.failed) | number }}
-        </div>
+        <div class="text-lg font-semibold text-rose-600">{{ (isMonthMode ? monthSummary.failed : daySummary.failed) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Invalid</div>
-        <div class="text-lg font-semibold">
-          {{ (isMonthMode ? monthSummary.invalid : daySummary.invalid) | number }}
-        </div>
+        <div class="text-lg font-semibold">{{ (isMonthMode ? monthSummary.invalid : daySummary.invalid) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Duplicates</div>
-        <div class="text-lg font-semibold">
-          {{ (isMonthMode ? monthSummary.duplicates : daySummary.duplicates) | number }}
-        </div>
+        <div class="text-lg font-semibold">{{ (isMonthMode ? monthSummary.duplicates : daySummary.duplicates) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Runs</div>
-        <div class="text-lg font-semibold">
-          {{ isMonthMode ? monthDays.length : dayRuns.length }}
-        </div>
+        <div class="text-lg font-semibold">{{ isMonthMode ? monthDays.length : dayRuns.length }}</div>
       </div>
     </div>
 
@@ -156,9 +177,9 @@
 
       <!-- DAY MODE -->
       <div class="w-full overflow-x-auto" *ngIf="!isMonthMode">
-        <!-- add a 20px left gutter for Y labels -->
+        <!-- left gutter 20px for Y labels -->
         <svg [attr.viewBox]="'0 0 ' + (24 * 16 + 24) + ' 120'" class="w-[864px] max-w-full h-32">
-          <!-- Y-axis grid + labels -->
+          <!-- Y grid + labels -->
           <g>
             <ng-container *ngFor="let t of yTicks">
               <line [attr.x1]="20" [attr.y1]="t.y" [attr.x2]="24 * 16 + 20" [attr.y2]="t.y"
@@ -198,12 +219,12 @@
 
       <!-- MONTH MODE -->
       <div class="w-full overflow-x-auto" *ngIf="isMonthMode">
-        <!-- left gutter 20px, dynamic width by days -->
+        <!-- left gutter 20px; dynamic width by number of days -->
         <svg
           [attr.viewBox]="'0 0 ' + (monthDays.length * 16 + 24) + ' 120'"
           class="max-w-full h-32"
           [style.width.px]="Math.max(864, monthDays.length * 16 + 24)">
-          <!-- Y-axis grid + labels -->
+          <!-- Y grid + labels -->
           <g>
             <ng-container *ngFor="let t of yTicks">
               <line [attr.x1]="20" [attr.y1]="t.y" [attr.x2]="monthDays.length * 16 + 20" [attr.y2]="t.y"
@@ -217,7 +238,7 @@
           <line [attr.x1]="20" [attr.y1]="110" [attr.x2]="monthDays.length * 16 + 20" [attr.y2]="110"
                 stroke="currentColor" class="opacity-20"></line>
 
-          <!-- bars + day ticks -->
+          <!-- bars + day labels -->
           <ng-container *ngFor="let d of monthDays; let idx = index">
             <ng-container *ngIf="monthMaxBin > 0">
               <rect
@@ -243,6 +264,7 @@
     </div>
   </div>
 </div>
+
 
   <!-- Reports: latest sends -->
 <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
