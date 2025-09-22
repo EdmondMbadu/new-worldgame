@@ -44,6 +44,8 @@ export class BulkEmailsComponent implements OnDestroy {
   reports: BulkRun[] = [];
   private reportsSub?: Subscription;
 
+  reportsOpen = false; // start collapsed
+
   // --- View mode ---
   isMonthMode = false;
 
@@ -161,6 +163,10 @@ export class BulkEmailsComponent implements OnDestroy {
     });
 
     this.recompute();
+  }
+
+  toggleReports() {
+    this.reportsOpen = !this.reportsOpen;
   }
 
   ngOnInit() {

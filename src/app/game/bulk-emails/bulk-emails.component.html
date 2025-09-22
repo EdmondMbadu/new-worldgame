@@ -266,73 +266,92 @@
 </div>
 
 
-  <!-- Reports: latest sends -->
+<!-- Reports: latest sends (collapsible) -->
 <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
-  <div class="rounded-2xl border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800">
-    <div class="flex items-center justify-between mb-2">
+  <details
+    class="group rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+    [attr.open]="reportsOpen ? '' : null"
+    (toggle)="toggleReports()">
+
+    <!-- Summary header (click to toggle) -->
+    <summary class="cursor-pointer list-none select-none px-4 py-3 flex items-center gap-3">
+      <span class="inline-flex h-5 w-5 items-center justify-center rounded-md ring-1 ring-slate-300 dark:ring-slate-600
+                   transition-transform duration-200 group-open:rotate-90">
+        <!-- chevron -->
+        <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 opacity-70">
+          <path fill-rule="evenodd" d="M7 5a1 1 0 0 1 1.707-.707l5 5a1 1 0 0 1 0 1.414l-5 5A1 1 0 0 1 7 14.586L11.586 10 7 5.414A1 1 0 0 1 7 5Z" clip-rule="evenodd"/>
+        </svg>
+      </span>
+
       <h2 class="text-sm font-semibold">Send Reports</h2>
-      <div class="text-xs opacity-70">Showing your latest {{ reports.length }} run(s)</div>
+
+      <div class="text-xs opacity-70 ml-auto">
+        Showing your latest {{ reports.length }} run(s)
+      </div>
+    </summary>
+
+    <!-- Collapsible body -->
+    <div class="px-4 pb-4">
+      <div *ngIf="!reports.length" class="text-xs opacity-70">No sends yet.</div>
+
+      <div class="space-y-2 mt-2">
+        <details *ngFor="let r of reports" class="group rounded-lg ring-1 ring-slate-200 dark:ring-slate-700">
+          <summary class="cursor-pointer list-none select-none px-3 py-2 flex items-center gap-3">
+            <span class="text-sm font-medium truncate">{{ r.title }}</span>
+            <span class="text-xs opacity-70">• {{ r.subject }}</span>
+            <span class="text-xs ml-auto opacity-70" *ngIf="r.createdAt as ts">
+              {{ ts.toDate() | date:'MMM d, y, h:mm a' }}
+            </span>
+            <span class="text-[10px] ml-2 px-2 py-0.5 rounded-full"
+                  [class.bg-emerald-100]="r.status==='completed'"
+                  [class.text-emerald-800]="r.status==='completed'"
+                  [class.bg-amber-100]="r.status!=='completed'"
+                  [class.text-amber-800]="r.status!=='completed'">
+              {{ r.status }}
+            </span>
+          </summary>
+
+          <div class="px-3 pb-3 text-xs">
+            <div class="flex flex-wrap gap-x-4 gap-y-1 mb-2">
+              <span>Requested: <b>{{ r.totals.requested }}</b></span>
+              <span>Valid: <b>{{ r.totals.valid }}</b></span>
+              <span>Invalid: <b>{{ r.totals.invalid }}</b></span>
+              <span>Duplicates: <b>{{ r.totals.duplicates }}</b></span>
+              <span>Batches: <b>{{ r.batches.length || 0 }}</b></span>
+            </div>
+
+            <div class="overflow-auto max-h-40 pr-1">
+              <table class="w-full text-[11px]">
+                <thead class="text-left opacity-70">
+                  <tr>
+                    <th class="py-1 pr-2">#</th>
+                    <th class="py-1 pr-2">Count</th>
+                    <th class="py-1 pr-2">Status</th>
+                    <th class="py-1 pr-2">Message Id</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let b of r.batches; let i = index" class="border-t border-slate-100 dark:border-slate-700">
+                    <td class="py-1 pr-2">{{ i + 1 }}</td>
+                    <td class="py-1 pr-2">{{ b.count }}</td>
+                    <td class="py-1 pr-2">{{ b.statusCode || '—' }}</td>
+                    <td class="py-1 pr-2 truncate">{{ b.messageId || '—' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="mt-2 flex items-center gap-2">
+              <button type="button" (click)="deleteReport(r.runId)"
+                      class="rounded px-2 py-1 ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600">
+                Delete report
+              </button>
+            </div>
+          </div>
+        </details>
+      </div>
     </div>
-
-    <div *ngIf="!reports.length" class="text-xs opacity-70">No sends yet.</div>
-
-    <div class="space-y-2">
-      <details *ngFor="let r of reports" class="group rounded-lg ring-1 ring-slate-200 dark:ring-slate-700">
-        <summary class="cursor-pointer list-none select-none px-3 py-2 flex items-center gap-3">
-          <span class="text-sm font-medium truncate">{{ r.title }}</span>
-          <span class="text-xs opacity-70">• {{ r.subject }}</span>
-          <span class="text-xs ml-auto opacity-70" *ngIf="r.createdAt as ts">
-            {{ ts.toDate() | date:'MMM d, y, h:mm a' }}
-          </span>
-          <span class="text-[10px] ml-2 px-2 py-0.5 rounded-full"
-                [class.bg-emerald-100]="r.status==='completed'"
-                [class.text-emerald-800]="r.status==='completed'"
-                [class.bg-amber-100]="r.status!=='completed'"
-                [class.text-amber-800]="r.status!=='completed'">
-            {{ r.status }}
-          </span>
-        </summary>
-
-        <div class="px-3 pb-3 text-xs">
-          <div class="flex flex-wrap gap-x-4 gap-y-1 mb-2">
-            <span>Requested: <b>{{ r.totals.requested }}</b></span>
-            <span>Valid: <b>{{ r.totals.valid }}</b></span>
-            <span>Invalid: <b>{{ r.totals.invalid }}</b></span>
-            <span>Duplicates: <b>{{ r.totals.duplicates }}</b></span>
-            <span>Batches: <b>{{ r.batches.length || 0 }}</b></span>
-          </div>
-
-          <div class="overflow-auto max-h-40 pr-1">
-            <table class="w-full text-[11px]">
-              <thead class="text-left opacity-70">
-                <tr>
-                  <th class="py-1 pr-2">#</th>
-                  <th class="py-1 pr-2">Count</th>
-                  <th class="py-1 pr-2">Status</th>
-                  <th class="py-1 pr-2">Message Id</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let b of r.batches; let i = index" class="border-t border-slate-100 dark:border-slate-700">
-                  <td class="py-1 pr-2">{{ i + 1 }}</td>
-                  <td class="py-1 pr-2">{{ b.count }}</td>
-                  <td class="py-1 pr-2">{{ b.statusCode || '—' }}</td>
-                  <td class="py-1 pr-2 truncate">{{ b.messageId || '—' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="mt-2 flex items-center gap-2">
-            <button type="button" (click)="deleteReport(r.runId)"
-                    class="rounded px-2 py-1 ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600">
-              Delete report
-            </button>
-          </div>
-        </div>
-      </details>
-    </div>
-  </div>
+  </details>
 </div>
 
 </div>
