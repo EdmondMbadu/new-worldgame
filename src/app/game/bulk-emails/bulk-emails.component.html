@@ -70,6 +70,28 @@
                 class="rounded-lg px-3 py-1.5 text-xs bg-indigo-600 text-white hover:bg-indigo-700">
           Today
         </button>
+        <button type="button"
+        (click)="showDay()"
+        class="rounded-lg px-3 py-1.5 text-xs"
+        [class.bg-indigo-600]="!isMonthMode"
+        [class.text-white]="!isMonthMode"
+        [class.ring-1]="isMonthMode"
+        [class.ring-slate-300]="isMonthMode"
+        [class.dark:ring-slate-600]="isMonthMode">
+  Day
+        </button>
+
+        <button type="button"
+                (click)="showMonth()"
+                class="rounded-lg px-3 py-1.5 text-xs"
+                [class.bg-indigo-600]="isMonthMode"
+                [class.text-white]="isMonthMode"
+                [class.ring-1]="!isMonthMode"
+                [class.ring-slate-300]="!isMonthMode"
+                [class.dark:ring-slate-600]="!isMonthMode">
+          Month
+        </button>
+
       </div>
     </div>
 
@@ -77,29 +99,30 @@
     <div *ngIf="!summaryLoading; else dayLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Requested</div>
-        <div class="text-lg font-semibold">{{ daySummary.requested | number }}</div>
+        <div class="text-lg font-semibold">{{ (isMonthMode ? monthSummary.requested : daySummary.requested) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-emerald-200 dark:ring-emerald-900/40 p-3">
         <div class="text-[11px] opacity-70">Succeeded</div>
-        <div class="text-lg font-semibold text-emerald-600">{{ daySummary.succeeded | number }}</div>
+        <div class="text-lg font-semibold text-emerald-600">{{ (isMonthMode ? monthSummary.succeeded : daySummary.succeeded) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-rose-200 dark:ring-rose-900/40 p-3">
         <div class="text-[11px] opacity-70">Failed</div>
-        <div class="text-lg font-semibold text-rose-600">{{ daySummary.failed | number }}</div>
+        <div class="text-lg font-semibold text-rose-600">{{ (isMonthMode ? monthSummary.failed : daySummary.failed) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Invalid</div>
-        <div class="text-lg font-semibold">{{ daySummary.invalid | number }}</div>
+        <div class="text-lg font-semibold">{{ (isMonthMode ? monthSummary.invalid : daySummary.invalid) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Duplicates</div>
-        <div class="text-lg font-semibold">{{ daySummary.duplicates | number }}</div>
+        <div class="text-lg font-semibold">{{ (isMonthMode ? monthSummary.duplicates : daySummary.duplicates) | number }}</div>
       </div>
       <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
         <div class="text-[11px] opacity-70">Runs</div>
-        <div class="text-lg font-semibold">{{ dayRuns.length }}</div>
+        <div class="text-lg font-semibold">{{ isMonthMode ? monthDays.length : dayRuns.length }}</div>
       </div>
     </div>
+
 
     <ng-template #dayLoading>
       <div class="text-xs opacity-70">Loading summary…</div>

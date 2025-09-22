@@ -44,6 +44,22 @@ export class BulkEmailsComponent implements OnDestroy {
   reports: BulkRun[] = [];
   private reportsSub?: Subscription;
 
+  // --- View mode ---
+  isMonthMode = false;
+
+  // Month histogram (per day 1..N)
+  monthDays: number[] = [];
+  monthBinsSucceeded: number[] = [];
+  monthBinsFailed: number[] = [];
+  monthMaxBin = 1;
+  monthSummary = {
+    requested: 0,
+    succeeded: 0,
+    failed: 0,
+    invalid: 0,
+    duplicates: 0,
+  };
+
   Math = Math;
   // --- Daily Summary State ---
   selectedDate = this.toDateInputValue(new Date()); // "YYYY-MM-DD"
@@ -173,6 +189,9 @@ export class BulkEmailsComponent implements OnDestroy {
           this.loadDaySummary();
         }
       });
+
+    if (this.isMonthMode) this.loadMonthSummary();
+    else this.loadDaySummary();
   }
 
   async deleteReport(runId: string) {
@@ -879,5 +898,111 @@ export class BulkEmailsComponent implements OnDestroy {
       const y = 110 - Math.round(100 * f); // same baseline as bars
       return { y, label };
     });
+  }
+
+  private getMonthBoundsLocal(yyyyMmDd: string): {
+    start: Date;
+    end: Date;
+    daysInMonth: number;
+  } {
+    const [y, m] = yyyyMmDd.split('-').map((n) => parseInt(n, 10)); // yyyy-mm-dd -> yyyy, mm
+    const first = new Date(y, m - 1, 1, 0, 0, 0, 0);
+    const next = new Date(y, m, 1, 0, 0, 0, 0);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    return { start: first, end: next, daysInMonth };
+  }
+
+  async loadMonthSummary(): Promise<void> {
+    this.summaryLoading = true;
+    try {
+      const { start, end, daysInMonth } = this.getMonthBoundsLocal(
+        this.selectedDate
+      );
+      const uid = this.auth.currentUser?.uid || '__none__';
+
+      const snap = await this.afs
+        .collection<BulkRun>('bulk_mail_runs', (ref) =>
+          ref
+            .where('createdAt', '>=', start)
+            .where('createdAt', '<', end)
+            .orderBy('createdAt', 'asc')
+        )
+        .get()
+        .toPromise();
+
+      const runs: BulkRun[] = (snap?.docs || [])
+        .map((d) => d.data() as BulkRun)
+        .filter((r) => r?.createdBy === uid);
+
+      // init bins
+      this.monthDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+      this.monthBinsSucceeded = new Array(daysInMonth).fill(0);
+      this.monthBinsFailed = new Array(daysInMonth).fill(0);
+
+      let requested = 0,
+        invalid = 0,
+        duplicates = 0,
+        succeeded = 0,
+        failed = 0;
+
+      for (const r of runs) {
+        requested += r?.totals?.requested || 0;
+        invalid += r?.totals?.invalid || 0;
+        duplicates += r?.totals?.duplicates || 0;
+
+        const when: Date =
+          r.completedAt?.toDate?.() ??
+          (r.completedAt instanceof Date ? r.completedAt : null) ??
+          r.createdAt?.toDate?.() ??
+          (r.createdAt instanceof Date ? r.createdAt : new Date());
+
+        const dayIndex = when.getDate() - 1; // 0-based index within month
+
+        const batches = Array.isArray(r.batches) ? r.batches : [];
+        if (batches.length) {
+          for (const b of batches) {
+            const c = b?.count || 0;
+            const code =
+              typeof b?.statusCode === 'number' ? b.statusCode : null;
+
+            if (code !== null) {
+              if (code >= 200 && code < 300) {
+                succeeded += c;
+                this.monthBinsSucceeded[dayIndex] += c;
+              } else if (code >= 400) {
+                failed += c;
+                this.monthBinsFailed[dayIndex] += c;
+              }
+            } else if (r.status === 'completed') {
+              succeeded += c;
+              this.monthBinsSucceeded[dayIndex] += c;
+            }
+          }
+        } else if (r.status === 'completed') {
+          const ok = r?.totals?.valid || 0;
+          succeeded += ok;
+          this.monthBinsSucceeded[dayIndex] += ok;
+        }
+      }
+
+      this.monthSummary = { requested, succeeded, failed, invalid, duplicates };
+      this.monthMaxBin = Math.max(
+        1,
+        ...this.monthDays.map(
+          (d) => this.monthBinsSucceeded[d - 1] + this.monthBinsFailed[d - 1]
+        )
+      );
+    } finally {
+      this.summaryLoading = false;
+    }
+  }
+
+  showDay(): void {
+    this.isMonthMode = false;
+    this.loadDaySummary();
+  }
+  showMonth(): void {
+    this.isMonthMode = true;
+    this.loadMonthSummary();
   }
 }
