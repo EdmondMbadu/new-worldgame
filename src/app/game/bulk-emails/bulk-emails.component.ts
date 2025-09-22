@@ -44,6 +44,26 @@ export class BulkEmailsComponent implements OnDestroy {
   reports: BulkRun[] = [];
   private reportsSub?: Subscription;
 
+  Math = Math;
+  // --- Daily Summary State ---
+  selectedDate = this.toDateInputValue(new Date()); // "YYYY-MM-DD"
+  summaryLoading = false;
+
+  dayRuns: BulkRun[] = [];
+  daySummary = {
+    requested: 0,
+    succeeded: 0,
+    failed: 0,
+    invalid: 0,
+    duplicates: 0,
+  };
+
+  // Histogram (per hour 0..23)
+  hours = Array.from({ length: 24 }, (_, i) => i);
+  binsSucceeded: number[] = new Array(24).fill(0);
+  binsFailed: number[] = new Array(24).fill(0);
+  maxBin = 0;
+
   isLoggedIn = false;
   showModal = false;
 
@@ -146,6 +166,12 @@ export class BulkEmailsComponent implements OnDestroy {
       )
       .subscribe((list) => {
         this.reports = list;
+        // If the selected day is today, keep the summary fresh when reports update
+        const todayStr = this.toDateInputValue(new Date());
+        if (this.selectedDate === todayStr) {
+          // Fire and forget; no await to avoid blocking stream
+          this.loadDaySummary();
+        }
       });
   }
 
@@ -690,6 +716,158 @@ export class BulkEmailsComponent implements OnDestroy {
     } finally {
       this.sendingBulk = false;
       this.bulkProgressText = '';
+    }
+  }
+
+  /** Convert Date -> "YYYY-MM-DD" in local time */
+  private toDateInputValue(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /** Parse "YYYY-MM-DD" to local day start/end */
+  private getDayBoundsLocal(yyyyMmDd: string): { start: Date; end: Date } {
+    // construct local midnight
+    const [y, m, d] = yyyyMmDd.split('-').map((x) => parseInt(x, 10));
+    const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+    const end = new Date(y, m - 1, d + 1, 0, 0, 0, 0);
+    return { start, end };
+  }
+
+  onDateChange(evt: Event): void {
+    const el = evt.target as HTMLInputElement;
+    const value = (el.value || '').trim();
+    if (!value) return;
+    this.selectedDate = value;
+    this.loadDaySummary();
+  }
+
+  resetToToday(): void {
+    this.selectedDate = this.toDateInputValue(new Date());
+    this.loadDaySummary();
+  }
+
+  shiftDay(deltaDays: number): void {
+    const [y, m, d] = this.selectedDate.split('-').map((x) => parseInt(x, 10));
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() + deltaDays);
+    this.selectedDate = this.toDateInputValue(dt);
+    this.loadDaySummary();
+  }
+
+  /**
+   * Load all runs by current user for the selected calendar day (local),
+   * then compute summary & per-hour histogram.
+   */
+  async loadDaySummary(): Promise<void> {
+    this.summaryLoading = true;
+    try {
+      const { start, end } = this.getDayBoundsLocal(this.selectedDate);
+      const uid = this.auth.currentUser?.uid || '__none__';
+
+      // widen the query window to safely include cross-midnight completes/starts
+      const startRange = new Date(start.getTime() - 24 * 60 * 60 * 1000); // -1 day
+      const endRange = new Date(end.getTime() + 24 * 60 * 60 * 1000); // +1 day
+
+      // Query by createdAt in wide range; we'll filter by "when" in code
+      const snap = await this.afs
+        .collection<BulkRun>('bulk_mail_runs', (ref) =>
+          ref
+            .where('createdAt', '>=', startRange)
+            .where('createdAt', '<', endRange)
+            .orderBy('createdAt', 'asc')
+        )
+        .get()
+        .toPromise();
+
+      const raw: BulkRun[] = (snap?.docs || []).map((d) => d.data() as BulkRun);
+
+      // Same "when" we use to bucket: completedAt ?? createdAt
+      const toWhen = (r: BulkRun): Date => {
+        const cAt = (r as any).completedAt;
+        const kAt = (r as any).createdAt;
+        const completed = cAt?.toDate?.() ?? (cAt instanceof Date ? cAt : null);
+        const created =
+          kAt?.toDate?.() ?? (kAt instanceof Date ? kAt : null) ?? new Date();
+        return completed ?? created;
+      };
+
+      // Keep only current user's runs whose "when" falls inside the selected [start, end)
+      const runs = raw
+        .filter((r) => r?.createdBy === uid)
+        .filter((r) => {
+          const when = toWhen(r);
+          return when >= start && when < end;
+        });
+
+      this.dayRuns = runs;
+
+      // Reset summary + bins
+      let requested = 0,
+        invalid = 0,
+        duplicates = 0,
+        succeeded = 0,
+        failed = 0;
+      this.binsSucceeded = new Array(24).fill(0);
+      this.binsFailed = new Array(24).fill(0);
+
+      for (const r of runs) {
+        requested += r?.totals?.requested || 0;
+        invalid += r?.totals?.invalid || 0;
+        duplicates += r?.totals?.duplicates || 0;
+
+        const when = toWhen(r);
+        const hour = when.getHours();
+
+        const batches = Array.isArray(r.batches) ? r.batches : [];
+        if (batches.length) {
+          for (const b of batches) {
+            const c = b?.count || 0;
+            const code =
+              typeof b?.statusCode === 'number' ? b.statusCode : null;
+
+            if (code !== null) {
+              if (code >= 200 && code < 300) {
+                succeeded += c;
+                this.binsSucceeded[hour] += c;
+              } else if (code >= 400) {
+                failed += c;
+                this.binsFailed[hour] += c;
+              }
+            } else if (r.status === 'completed') {
+              succeeded += c;
+              this.binsSucceeded[hour] += c;
+            }
+          }
+        } else if (r.status === 'completed') {
+          const ok = r?.totals?.valid || 0;
+          succeeded += ok;
+          this.binsSucceeded[hour] += ok;
+        }
+      }
+
+      this.daySummary = { requested, succeeded, failed, invalid, duplicates };
+      this.maxBin = Math.max(
+        1,
+        ...this.hours.map((h) => this.binsSucceeded[h] + this.binsFailed[h])
+      );
+    } catch (e) {
+      console.error('loadDaySummary error', e);
+      this.dayRuns = [];
+      this.daySummary = {
+        requested: 0,
+        succeeded: 0,
+        failed: 0,
+        invalid: 0,
+        duplicates: 0,
+      };
+      this.binsSucceeded = new Array(24).fill(0);
+      this.binsFailed = new Array(24).fill(0);
+      this.maxBin = 1;
+    } finally {
+      this.summaryLoading = false;
     }
   }
 }

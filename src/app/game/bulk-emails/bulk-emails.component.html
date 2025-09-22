@@ -36,6 +36,137 @@
     </div>
   </div>
 
+  <!-- Daily Report (Summary + Histogram) -->
+<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
+  <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 md:p-5">
+    <!-- Header / Controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-between mb-4">
+      <div>
+        <h2 class="text-base md:text-lg font-semibold">Daily Report</h2>
+        <p class="text-xs opacity-70">Summary for the selected day (local time)</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button"
+                (click)="shiftDay(-1)"
+                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+          ← Previous
+        </button>
+
+        <input type="date"
+               class="rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-1.5 text-sm
+                      text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500"
+               [value]="selectedDate"
+               (change)="onDateChange($event)"/>
+
+        <button type="button"
+                (click)="shiftDay(1)"
+                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+          Next →
+        </button>
+
+        <button type="button"
+                (click)="resetToToday()"
+                class="rounded-lg px-3 py-1.5 text-xs bg-indigo-600 text-white hover:bg-indigo-700">
+          Today
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div *ngIf="!summaryLoading; else dayLoading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+      <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
+        <div class="text-[11px] opacity-70">Requested</div>
+        <div class="text-lg font-semibold">{{ daySummary.requested | number }}</div>
+      </div>
+      <div class="rounded-xl ring-1 ring-emerald-200 dark:ring-emerald-900/40 p-3">
+        <div class="text-[11px] opacity-70">Succeeded</div>
+        <div class="text-lg font-semibold text-emerald-600">{{ daySummary.succeeded | number }}</div>
+      </div>
+      <div class="rounded-xl ring-1 ring-rose-200 dark:ring-rose-900/40 p-3">
+        <div class="text-[11px] opacity-70">Failed</div>
+        <div class="text-lg font-semibold text-rose-600">{{ daySummary.failed | number }}</div>
+      </div>
+      <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
+        <div class="text-[11px] opacity-70">Invalid</div>
+        <div class="text-lg font-semibold">{{ daySummary.invalid | number }}</div>
+      </div>
+      <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
+        <div class="text-[11px] opacity-70">Duplicates</div>
+        <div class="text-lg font-semibold">{{ daySummary.duplicates | number }}</div>
+      </div>
+      <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-3">
+        <div class="text-[11px] opacity-70">Runs</div>
+        <div class="text-lg font-semibold">{{ dayRuns.length }}</div>
+      </div>
+    </div>
+
+    <ng-template #dayLoading>
+      <div class="text-xs opacity-70">Loading summary…</div>
+    </ng-template>
+
+    <!-- Histogram -->
+    <div class="mt-4">
+      <div class="flex items-center justify-between mb-1">
+        <div class="text-xs opacity-70">Sends per hour (0–23)</div>
+        <div class="flex items-center gap-3 text-[11px] opacity-80">
+          <span class="inline-flex items-center gap-1">
+            <span class="inline-block w-3 h-3 rounded-sm bg-emerald-500/70"></span> Succeeded
+          </span>
+          <span class="inline-flex items-center gap-1">
+            <span class="inline-block w-3 h-3 rounded-sm bg-rose-500/70"></span> Failed
+          </span>
+        </div>
+      </div>
+
+      <!-- simple responsive stacked bars using SVG -->
+      <div class="w-full overflow-x-auto">
+        <svg [attr.viewBox]="'0 0 ' + (24 * 16) + ' 120'" class="w-[840px] max-w-full h-32">
+          <!-- axes/baseline -->
+        <!-- axes/baseline -->
+          <line
+            [attr.x1]="0"
+            [attr.y1]="110"
+            [attr.x2]="24 * 16"
+            [attr.y2]="110"
+            stroke="currentColor"
+            class="opacity-20">
+          </line>
+
+
+          <ng-container *ngFor="let h of hours; let i = index">
+            <!-- total bar height scale: maxBin (avoid division by zero) -->
+            <ng-container *ngIf="maxBin > 0">
+              <!-- failed segment (bottom) -->
+              <rect
+                [attr.x]="i * 16 + 2"
+                [attr.y]="110 - Math.round(100 * binsFailed[i] / maxBin)"
+                width="12"
+                [attr.height]="Math.round(100 * binsFailed[i] / maxBin)"
+                class="fill-rose-500/70">
+              </rect>
+
+              <!-- succeeded segment stacked on top -->
+              <rect
+                [attr.x]="i * 16 + 2"
+                [attr.y]="110 - Math.round(100 * (binsFailed[i] + binsSucceeded[i]) / maxBin)"
+                width="12"
+                [attr.height]="Math.round(100 * binsSucceeded[i] / maxBin)"
+                class="fill-emerald-500/70">
+              </rect>
+            </ng-container>
+
+            <!-- hour tick -->
+            <text [attr.x]="i * 16 + 8" y="118" text-anchor="middle" class="fill-current opacity-60" font-size="8">
+              {{ i }}
+            </text>
+          </ng-container>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- Reports: latest sends -->
 <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
   <div class="rounded-2xl border border-slate-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-800">
