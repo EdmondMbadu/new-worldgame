@@ -9,7 +9,31 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DataService } from 'src/app/services/data.service';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map, Subscription } from 'rxjs';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+
+type BulkRun = {
+  runId: string;
+  title: string;
+  subject: string;
+  preheader?: string;
+  createdAt: any; // Timestamp
+  createdBy: string;
+  totals: {
+    requested: number;
+    valid: number;
+    invalid: number;
+    duplicates: number;
+  };
+  status: 'running' | 'completed' | 'failed';
+  completedAt?: any;
+  batches: Array<{
+    batch: number;
+    count: number;
+    statusCode?: number;
+    messageId?: string;
+  }>;
+};
 
 @Component({
   selector: 'app-bulk-emails',
@@ -17,6 +41,9 @@ import { firstValueFrom } from 'rxjs';
   styleUrls: ['./bulk-emails.component.css'],
 })
 export class BulkEmailsComponent implements OnDestroy {
+  reports: BulkRun[] = [];
+  private reportsSub?: Subscription;
+
   isLoggedIn = false;
   showModal = false;
 
@@ -65,7 +92,8 @@ export class BulkEmailsComponent implements OnDestroy {
     public auth: AuthService,
     private fb: FormBuilder,
     private data: DataService,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private afs: AngularFirestore
   ) {
     this.form = this.fb.group({
       subject: ['', [Validators.required, Validators.maxLength(200)]],
@@ -96,6 +124,38 @@ export class BulkEmailsComponent implements OnDestroy {
     });
 
     this.recompute();
+  }
+
+  ngOnInit() {
+    // if you have lifecycle, or put in constructor after auth if preferred
+    this.subscribeReports();
+  }
+
+  private async subscribeReports() {
+    // Limit to current user’s runs; if you need server filtering, store createdBy and add a security rule.
+    this.reportsSub = this.afs
+      .collection<BulkRun>('bulk_mail_runs', (ref) =>
+        ref
+          .where('createdBy', '==', this.auth.currentUser?.uid || '__none__')
+          .orderBy('createdAt', 'desc')
+          .limit(10)
+      )
+      .valueChanges()
+      .pipe(
+        map((list) => list.map((x) => ({ ...x, batches: x.batches || [] })))
+      )
+      .subscribe((list) => {
+        this.reports = list;
+      });
+  }
+
+  async deleteReport(runId: string) {
+    try {
+      await this.afs.doc(`bulk_mail_runs/${runId}`).delete();
+    } catch (e) {
+      console.error('deleteReport', e);
+      alert('Failed to delete report.');
+    }
   }
 
   /* ---------- Modal ---------- */
@@ -613,6 +673,7 @@ export class BulkEmailsComponent implements OnDestroy {
         subject: (this.form.value.subject || '').trim(),
         html: this.finalHtml,
         preheader: this.testPreheader || '',
+        title: (this.form.value.subject || '').trim(), // or a custom title field
       };
 
       const res: any = await firstValueFrom(callable(payload));

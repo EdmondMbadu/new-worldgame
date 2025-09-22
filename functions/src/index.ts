@@ -334,8 +334,130 @@ export const sendBulkTestEmail = functions.https.onCall(
 
 // functions/src/index.ts
 
+// export const sendBulkHtml = functions.https.onCall(async (data, context) => {
+//   // require auth (same as test)
+//   if (!context.auth) {
+//     throw new functions.https.HttpsError(
+//       'unauthenticated',
+//       'Sign in to send emails.'
+//     );
+//   }
+
+//   const toList = Array.isArray(data?.recipients) ? data.recipients : [];
+//   const subject = (data?.subject || '').toString().trim();
+//   let html = (data?.html || '').toString();
+//   const preheader = (data?.preheader || '').toString();
+//   const fromEmail = (data?.from || 'newworld@newworld-game.org').toString();
+
+//   if (!toList.length) {
+//     throw new functions.https.HttpsError(
+//       'invalid-argument',
+//       'No recipients provided.'
+//     );
+//   }
+//   if (!subject) {
+//     throw new functions.https.HttpsError(
+//       'invalid-argument',
+//       '"subject" is required.'
+//     );
+//   }
+//   if (!html) {
+//     throw new functions.https.HttpsError(
+//       'invalid-argument',
+//       '"html" is required.'
+//     );
+//   }
+
+//   // very light email validation
+//   const valid = toList
+//     .map((s: any) => (typeof s === 'string' ? s.trim() : ''))
+//     .filter((s: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s));
+
+//   if (!valid.length) {
+//     throw new functions.https.HttpsError(
+//       'invalid-argument',
+//       'No valid email addresses after validation.'
+//     );
+//   }
+
+//   // Preheader injection
+//   if (preheader) {
+//     const pre = `<span style="display:none!important;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>`;
+//     html =
+//       html.replace(/<body([^>]*)>/i, (m: any) => `${m}${pre}`) || pre + html;
+//   }
+
+//   // simple text fallback
+//   const strip = (s: string) =>
+//     s
+//       .replace(/<[^>]+>/g, ' ')
+//       .replace(/\s+/g, ' ')
+//       .trim();
+//   const text = strip(html);
+
+//   // chunk into groups (SendGrid suggests up to ~1000 personalizations; we'll use 500)
+//   const chunkSize = 500;
+//   const chunks: string[][] = [];
+//   for (let i = 0; i < valid.length; i += chunkSize) {
+//     chunks.push(valid.slice(i, i + chunkSize));
+//   }
+
+//   const results: Array<{
+//     batch: number;
+//     count: number;
+//     statusCode?: number;
+//     messageId?: string;
+//   }> = [];
+
+//   for (let i = 0; i < chunks.length; i++) {
+//     const batch = chunks[i];
+//     const msg: sgMail.MailDataRequired = {
+//       from: { email: fromEmail, name: 'NewWorld Game' },
+//       subject,
+//       html,
+//       text,
+//       trackingSettings: {
+//         clickTracking: { enable: true, enableText: true },
+//         openTracking: { enable: true },
+//       },
+//       categories: ['bulk-mail-html'],
+//       // multiple personalizations; each gets its own "to"
+//       personalizations: batch.map((email) => ({ to: [{ email }] })),
+//     };
+//     try {
+//       const [resp] = await sgMail.send(msg);
+//       const messageId =
+//         (resp?.headers?.['x-message-id'] as string) ||
+//         (resp?.headers?.['X-Message-Id'] as string) ||
+//         '';
+//       results.push({
+//         batch: i + 1,
+//         count: batch.length,
+//         statusCode: resp?.statusCode ?? 0,
+//         messageId,
+//       });
+//     } catch (err: any) {
+//       // 👈 allow property access
+//       console.error(
+//         'SendGrid bulk batch error',
+//         i + 1,
+//         err?.response?.body || err?.message || err
+//       );
+//       results.push({ batch: i + 1, count: batch.length });
+//     }
+
+//     // tiny delay to be polite
+//     await new Promise((r) => setTimeout(r, 120));
+//   }
+
+//   return {
+//     ok: true,
+//     total: valid.length,
+//     batches: results,
+//   };
+// });
+
 export const sendBulkHtml = functions.https.onCall(async (data, context) => {
-  // require auth (same as test)
   if (!context.auth) {
     throw new functions.https.HttpsError(
       'unauthenticated',
@@ -343,51 +465,65 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const toList = Array.isArray(data?.recipients) ? data.recipients : [];
+  const uid = context.auth.uid;
+  const runTitle = (data?.title || '').toString().trim(); // optional "campaign title" from UI
   const subject = (data?.subject || '').toString().trim();
   let html = (data?.html || '').toString();
   const preheader = (data?.preheader || '').toString();
   const fromEmail = (data?.from || 'newworld@newworld-game.org').toString();
+  const toList = Array.isArray(data?.recipients) ? data.recipients : [];
 
-  if (!toList.length) {
+  if (!toList.length)
     throw new functions.https.HttpsError(
       'invalid-argument',
       'No recipients provided.'
     );
-  }
-  if (!subject) {
+  if (!subject)
     throw new functions.https.HttpsError(
       'invalid-argument',
       '"subject" is required.'
     );
-  }
-  if (!html) {
+  if (!html)
     throw new functions.https.HttpsError(
       'invalid-argument',
       '"html" is required.'
     );
+
+  // Normalize + validate
+  const rawTokens: string[] = [];
+  for (const v of toList) {
+    if (typeof v !== 'string') continue;
+    const parts = v
+      .split(/[;,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    rawTokens.push(...parts);
   }
-
-  // very light email validation
-  const valid = toList
-    .map((s: any) => (typeof s === 'string' ? s.trim() : ''))
-    .filter((s: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s));
-
-  if (!valid.length) {
-    throw new functions.https.HttpsError(
-      'invalid-argument',
-      'No valid email addresses after validation.'
-    );
+  const seen = new Set<string>();
+  const valid: string[] = [];
+  const invalid: string[] = [];
+  for (const token of rawTokens) {
+    const lower = token.toLowerCase();
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lower)) {
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        valid.push(lower);
+      }
+    } else {
+      invalid.push(token);
+    }
   }
+  const duplicates = Math.max(
+    0,
+    rawTokens.length - valid.length - invalid.length
+  );
 
-  // Preheader injection
+  // Preheader injection + text fallback
   if (preheader) {
     const pre = `<span style="display:none!important;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>`;
     html =
       html.replace(/<body([^>]*)>/i, (m: any) => `${m}${pre}`) || pre + html;
   }
-
-  // simple text fallback
   const strip = (s: string) =>
     s
       .replace(/<[^>]+>/g, ' ')
@@ -395,13 +531,34 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       .trim();
   const text = strip(html);
 
-  // chunk into groups (SendGrid suggests up to ~1000 personalizations; we'll use 500)
-  const chunkSize = 500;
-  const chunks: string[][] = [];
-  for (let i = 0; i < valid.length; i += chunkSize) {
-    chunks.push(valid.slice(i, i + chunkSize));
-  }
+  // Create a run doc
+  const db = admin.firestore();
+  const runRef = db.collection('bulk_mail_runs').doc(); // runId
+  const runId = runRef.id;
+  const createdAt = admin.firestore.FieldValue.serverTimestamp();
 
+  await runRef.set(
+    {
+      runId,
+      title: runTitle || subject, // fallback to subject
+      subject,
+      preheader,
+      createdAt,
+      createdBy: uid,
+      totals: {
+        requested: rawTokens.length,
+        valid: valid.length,
+        invalid: invalid.length,
+        duplicates,
+      },
+      status: 'running',
+      batches: [],
+    },
+    { merge: true }
+  );
+
+  // Chunk + send
+  const chunkSize = 500;
   const results: Array<{
     batch: number;
     count: number;
@@ -409,8 +566,8 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
     messageId?: string;
   }> = [];
 
-  for (let i = 0; i < chunks.length; i++) {
-    const batch = chunks[i];
+  for (let i = 0; i < valid.length; i += chunkSize) {
+    const batch = valid.slice(i, i + chunkSize);
     const msg: sgMail.MailDataRequired = {
       from: { email: fromEmail, name: 'NewWorld Game' },
       subject,
@@ -421,9 +578,9 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-html'],
-      // multiple personalizations; each gets its own "to"
       personalizations: batch.map((email) => ({ to: [{ email }] })),
     };
+
     try {
       const [resp] = await sgMail.send(msg);
       const messageId =
@@ -431,29 +588,43 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
         (resp?.headers?.['X-Message-Id'] as string) ||
         '';
       results.push({
-        batch: i + 1,
+        batch: i / chunkSize + 1,
         count: batch.length,
         statusCode: resp?.statusCode ?? 0,
         messageId,
       });
     } catch (err: any) {
-      // 👈 allow property access
       console.error(
         'SendGrid bulk batch error',
-        i + 1,
+        i / chunkSize + 1,
         err?.response?.body || err?.message || err
       );
-      results.push({ batch: i + 1, count: batch.length });
+      results.push({ batch: i / chunkSize + 1, count: batch.length });
     }
 
-    // tiny delay to be polite
     await new Promise((r) => setTimeout(r, 120));
   }
 
+  // Finalize run
+  await runRef.set(
+    {
+      status: 'completed',
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
+      batches: results,
+    },
+    { merge: true }
+  );
+
   return {
     ok: true,
-    total: valid.length,
-    batches: results,
+    runId,
+    summary: {
+      requested: rawTokens.length,
+      valid: valid.length,
+      invalid: invalid.length,
+      duplicates,
+      batches: results.length,
+    },
   };
 });
 
