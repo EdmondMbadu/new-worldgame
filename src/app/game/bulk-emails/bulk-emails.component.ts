@@ -47,6 +47,22 @@ export class BulkEmailsComponent implements OnDestroy {
   reportsOpen = false; // start collapsed
   builderOpen = false;
 
+  // Templates state
+  templates: Array<{
+    id: string;
+    name: string;
+    html: string;
+    createdAt: any;
+    createdBy: string;
+  }> = [];
+  private templatesSub?: Subscription;
+
+  templateName = '';
+  templateHtml = '';
+  templateSaving = false;
+  templateError = '';
+  templateModalOpen = false;
+
   // --- View mode ---
   isMonthMode = false;
 
@@ -171,8 +187,11 @@ export class BulkEmailsComponent implements OnDestroy {
     (this as any)[key] = !(this as any)[key];
   }
   ngOnInit() {
-    // if you have lifecycle, or put in constructor after auth if preferred
-    this.subscribeReports();
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+      this.subscribeReports(); // existing
+      this.subscribeTemplates(); // NEW – after auth
+    });
   }
 
   private async subscribeReports() {
@@ -462,6 +481,7 @@ export class BulkEmailsComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.saveDraft();
+    this.templatesSub?.unsubscribe();
   }
 
   get canSendTest(): boolean {
@@ -1070,5 +1090,102 @@ export class BulkEmailsComponent implements OnDestroy {
     const [yy, mm] = this.selectedDate.split('-');
     this.selectedMonth = `${yy}-${mm}`;
     this.loadMonthSummary();
+  }
+  openTemplateModal() {
+    this.templateModalOpen = true;
+  }
+  closeTemplateModal() {
+    this.templateModalOpen = false;
+  }
+
+  /** Live list of templates for current user (compat-safe with IDs) */
+  private subscribeTemplates() {
+    const uid = this.auth.currentUser?.uid || '__none__';
+    this.templatesSub = this.afs
+      .collection('email_templates', (ref) =>
+        ref.where('createdBy', '==', uid).orderBy('createdAt', 'desc')
+      )
+      .snapshotChanges()
+      .subscribe((actions) => {
+        this.templates = actions.map((a) => {
+          const data = a.payload.doc.data() as any;
+          const id = a.payload.doc.id;
+          return {
+            id,
+            name: data.name || '(untitled)',
+            html: data.html || '',
+            createdAt: data.createdAt,
+            createdBy: data.createdBy,
+          };
+        });
+      });
+  }
+
+  /** File -> read text into textarea */
+  onTemplateFile(evt: Event) {
+    const input = evt.target as HTMLInputElement;
+    if (!input.files || !input.files.length) return;
+    const file = input.files[0];
+    file
+      .text()
+      .then((txt) => {
+        this.templateHtml = txt || '';
+      })
+      .catch(() => {
+        this.templateError = 'Failed to read HTML file.';
+      })
+      .finally(() => {
+        input.value = '';
+      });
+  }
+
+  /** Save new template */
+  async saveTemplate() {
+    this.templateError = '';
+    const name = (this.templateName || '').trim();
+    const html = (this.templateHtml || '').trim();
+    if (!name || !html) return;
+
+    try {
+      this.templateSaving = true;
+      const uid = this.auth.currentUser?.uid || '__none__';
+      const id = this.afs.createId();
+      await this.afs.doc(`email_templates/${id}`).set({
+        id,
+        name,
+        html,
+        createdBy: uid,
+        createdAt: new Date(),
+      });
+
+      // Reset fields and close modal
+      this.templateName = '';
+      this.templateHtml = '';
+      this.templateModalOpen = false;
+    } catch (e) {
+      console.error(e);
+      this.templateError = 'Failed to save template.';
+    } finally {
+      this.templateSaving = false;
+    }
+  }
+
+  /** Open template in a new tab */
+  viewTemplate(t: { name: string; html: string }) {
+    const blob = new Blob([t.html || ''], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  }
+
+  /** Delete template */
+  async deleteTemplate(t: { id: string }) {
+    if (!t?.id) return;
+    try {
+      await this.afs.doc(`email_templates/${t.id}`).delete();
+    } catch (e) {
+      console.error('deleteTemplate', e);
+      alert('Failed to delete template.');
+    }
   }
 }

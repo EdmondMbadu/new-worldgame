@@ -23,10 +23,21 @@
     [attr.open]="builderOpen ? '' : null"
     (toggle)="toggleSection('builderOpen')">
 
+    <!-- Summary header -->
     <summary class="cursor-pointer list-none select-none px-6 py-5 flex items-center justify-between">
-      <div>
-        <h1 class="text-xl md:text-2xl font-bold">Bulk Mail</h1>
-        <p class="text-xs opacity-60 mt-0.5 group-open:hidden">Step 1 — Build your HTML email.</p>
+      <div class="flex items-center gap-2">
+        <!-- chevron -->
+        <span class="inline-flex h-5 w-5 items-center justify-center rounded-md ring-1 ring-slate-300 dark:ring-slate-600
+                     transition-transform duration-200 group-open:rotate-90">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="h-3.5 w-3.5 opacity-70">
+            <path fill-rule="evenodd" d="M7 5a1 1 0 0 1 1.707-.707l5 5a1 1 0 0 1 0 1.414l-5 5A1 1 0 0 1 7 14.586L11.586 10 7 5.414A1 1 0 0 1 7 5Z" clip-rule="evenodd"/>
+          </svg>
+        </span>
+
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold">Bulk Mail</h1>
+          <p class="text-xs opacity-60 mt-0.5 group-open:hidden">Step 1 — Build your HTML email.</p>
+        </div>
       </div>
 
       <button
@@ -37,10 +48,102 @@
       </button>
     </summary>
 
-    <div class="px-6 pb-5">
-      <p class="text-sm text-slate-500 dark:text-slate-400">Step 1 — Build your HTML email.</p>
+    <!-- Collapsible body -->
+    <div class="px-6 pb-6 space-y-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          Step 1 — Build your HTML email. Or manage your saved templates below.
+        </p>
+        <button type="button"
+                (click)="openTemplateModal()"
+                class="rounded-lg px-3 py-1.5 text-xs bg-indigo-600 text-white hover:bg-indigo-700">
+          Add template
+        </button>
+      </div>
+
+      <!-- Templates list -->
+      <div class="rounded-xl ring-1 ring-slate-200 dark:ring-slate-700 p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm font-medium">Your templates</div>
+          <div class="text-xs opacity-70">{{ templates.length }} total</div>
+        </div>
+
+        <div *ngIf="!templates.length" class="text-xs opacity-70">No templates yet.</div>
+
+        <ul class="divide-y divide-slate-200 dark:divide-slate-700">
+          <li *ngFor="let t of templates" class="py-2 flex items-center gap-3">
+            <div class="min-w-0">
+              <div class="text-sm font-medium truncate">{{ t.name }}</div>
+              <div class="text-[11px] opacity-70">
+                {{ (t.createdAt?.toDate?.() || t.createdAt) | date:'MMM d, y, h:mm a' }}
+              </div>
+            </div>
+
+            <div class="ml-auto flex items-center gap-2">
+              <button type="button" (click)="viewTemplate(t)"
+                      class="rounded-lg px-2.5 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                View
+              </button>
+              <button type="button" (click)="deleteTemplate(t)"
+                      class="rounded-lg px-2.5 py-1.5 text-xs ring-1 ring-rose-300 dark:ring-rose-800 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                Delete
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   </details>
+</div>
+
+<!-- Add Template Modal -->
+<div *ngIf="templateModalOpen" class="fixed inset-0 z-[100]">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="closeTemplateModal()"></div>
+  <div class="fixed inset-0 overflow-y-auto">
+    <div class="flex min-h-full items-start justify-center p-4 sm:p-6">
+      <div class="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden text-slate-900 dark:text-slate-100">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+          <h3 class="text-base md:text-lg font-semibold">Add Template</h3>
+          <button type="button"
+                  (click)="closeTemplateModal()"
+                  class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+            Close
+          </button>
+        </div>
+
+        <div class="p-5 space-y-3">
+          <input [(ngModel)]="templateName" [ngModelOptions]="{standalone:true}"
+                 type="text" placeholder="Template name (e.g., Welcome v2)"
+                 class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"/>
+
+          <div class="flex items-center gap-2">
+            <input #tplFile type="file" accept=".html,text/html" class="hidden" (change)="onTemplateFile($event)">
+            <button type="button"
+                    (click)="tplFile.click()"
+                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+              Attach .html
+            </button>
+            <span class="text-[11px] opacity-70">…or paste HTML below</span>
+          </div>
+
+          <textarea [(ngModel)]="templateHtml" [ngModelOptions]="{standalone:true}"
+                    rows="10" placeholder="Paste template HTML…"
+                    class="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 font-mono text-[12px] leading-5 outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+
+          <div class="flex items-center gap-2">
+            <!-- NOTE: removed optional chaining to avoid NG8107 warning -->
+            <button type="button" (click)="saveTemplate()"
+                    [disabled]="templateSaving || !templateName.trim() || !templateHtml.trim()"
+                    class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
+              <span *ngIf="!templateSaving">Save template</span>
+              <span *ngIf="templateSaving">Saving…</span>
+            </button>
+            <span class="text-xs opacity-70 text-rose-500" *ngIf="templateError">{{ templateError }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
