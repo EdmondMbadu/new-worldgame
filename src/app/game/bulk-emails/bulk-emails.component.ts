@@ -40,6 +40,16 @@ export class BulkEmailsComponent implements OnDestroy {
   sending = false;
   sendResult = '';
 
+  // CSV state
+  @ViewChild('csvInput') csvInput!: ElementRef<HTMLInputElement>;
+  csvValid: string[] = [];
+  csvInvalid: string[] = [];
+  csvDupes = 0;
+
+  sendingBulk = false;
+  bulkProgressText = '';
+  bulkResult = '';
+
   recentUploads: Array<{ url: string; name: string }> = [];
 
   readonly placeholderHtml =
@@ -377,6 +387,248 @@ export class BulkEmailsComponent implements OnDestroy {
       alert(e?.message || 'Failed to send test email.');
     } finally {
       this.sending = false;
+    }
+  }
+
+  // --- CSV UI helpers ---
+  pickCsv(): void {
+    this.csvInput?.nativeElement?.click();
+  }
+
+  clearCsv(): void {
+    this.csvValid = [];
+    this.csvInvalid = [];
+    this.csvDupes = 0;
+    this.bulkResult = '';
+    this.bulkProgressText = '';
+    if (this.csvInput?.nativeElement) this.csvInput.nativeElement.value = '';
+  }
+
+  async onCsvChosen(evt: Event): Promise<void> {
+    const input = evt.target as HTMLInputElement;
+    if (!input.files || !input.files.length) return;
+    const file = input.files[0];
+
+    try {
+      const text = await file.text();
+      this.parseCsv(text);
+    } catch (e) {
+      console.error('CSV read error', e);
+      alert('Failed to read CSV file.');
+    } finally {
+      input.value = '';
+    }
+  }
+
+  /**
+   * Minimal CSV parser with header detection.
+   * Handles quotes and commas inside quotes (basic).
+   */
+  parseCsv(raw: string): void {
+    // normalize newlines
+    const text = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const rows = this.csvToRows(text);
+    if (!rows.length) {
+      this.clearCsv();
+      return;
+    }
+
+    // header row
+    const header = rows[0].map((h) => h.trim().toLowerCase());
+    // try to find email column
+    const emailCandidates = [
+      'email',
+      'emails',
+      'email_address',
+      'emailaddress',
+      'e-mail',
+    ];
+    let emailIdx = -1;
+    for (const key of emailCandidates) {
+      emailIdx = header.indexOf(key);
+      if (emailIdx !== -1) break;
+    }
+
+    // if still not found, attempt fuzzy match
+    if (emailIdx === -1) {
+      emailIdx = header.findIndex((h) => /email/.test(h));
+    }
+
+    if (emailIdx === -1) {
+      alert(
+        'No "email" column found. Add a column header named "email" (or "emails").'
+      );
+      this.clearCsv();
+      return;
+    }
+
+    // collect values
+    const emails: string[] = [];
+    const invalid: string[] = [];
+    const seen = new Set<string>();
+
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i];
+      if (!cols || !cols.length) continue;
+      const value = (cols[emailIdx] || '').toString().trim();
+      if (!value) continue;
+
+      // support multiple recipients in a single cell separated by ; or ,
+      const parts = value
+        .split(/[;,]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const p of parts) {
+        const lower = p.toLowerCase();
+        if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lower)) {
+          if (!seen.has(lower)) {
+            seen.add(lower);
+            emails.push(lower);
+          }
+        } else {
+          invalid.push(`Row ${i + 1}: "${p}"`);
+        }
+      }
+    }
+
+    this.csvValid = emails;
+    this.csvInvalid = invalid;
+    // crude duplicate estimate: invalid for bad format; dupes are total unique vs total raw tokens
+    const totalTokens = rows
+      .slice(1)
+      .map((r) => (r[emailIdx] || '').toString())
+      .join(';')
+      .split(/[;,]/)
+      .map((s) => s.trim())
+      .filter(Boolean).length;
+    this.csvDupes = Math.max(0, totalTokens - emails.length - invalid.length);
+  }
+
+  /**
+   * Convert CSV text into rows of columns handling quoted fields.
+   */
+  private csvToRows(text: string): string[][] {
+    const rows: string[][] = [];
+    let i = 0,
+      field = '',
+      row: string[] = [],
+      inQuotes = false;
+
+    const pushField = () => {
+      row.push(field);
+      field = '';
+    };
+    const pushRow = () => {
+      rows.push(row);
+      row = [];
+    };
+
+    while (i < text.length) {
+      const ch = text[i];
+
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') {
+            field += '"';
+            i += 2;
+            continue;
+          } // escaped quote
+          inQuotes = false;
+          i++;
+          continue;
+        } else {
+          field += ch;
+          i++;
+          continue;
+        }
+      } else {
+        if (ch === '"') {
+          inQuotes = true;
+          i++;
+          continue;
+        }
+        if (ch === ',') {
+          pushField();
+          i++;
+          continue;
+        }
+        if (ch === '\n') {
+          pushField();
+          pushRow();
+          i++;
+          continue;
+        }
+        field += ch;
+        i++;
+        continue;
+      }
+    }
+    // last field/row
+    pushField();
+    if (row.length > 1 || row[0] !== '') pushRow();
+    return rows;
+  }
+
+  downloadSampleCsv(): void {
+    const sample = [
+      'email,first_name,last_name,company',
+      'alice@example.com,Alice,Nguyen,Acme Inc',
+      'bob@example.org,Bob,Rivera,Globex',
+      'carol@example.net,Carol,Diaz,Initech',
+      'duplicate@example.com,Dupe,One,Contoso',
+      'duplicate@example.com,Dupe,Two,Contoso',
+      'bad-email,Nope,Bad,InvalidCo',
+    ].join('\n');
+
+    const a = document.createElement('a');
+    a.download = 'recipients_sample.csv';
+    a.href = URL.createObjectURL(new Blob([sample], { type: 'text/csv' }));
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
+  }
+
+  // --- Bulk send ---
+  get canSendBulk(): boolean {
+    const hasEmails = this.csvValid.length > 0;
+    const hasSubject = !!(this.form.value.subject || '').trim();
+    const hasHtml = !!(this.finalHtml || '').trim();
+    return hasEmails && hasSubject && hasHtml && !this.sendingBulk;
+  }
+
+  async sendBulk(): Promise<void> {
+    if (!this.canSendBulk) return;
+    this.bulkResult = '';
+    this.bulkProgressText = '';
+
+    try {
+      this.sendingBulk = true;
+      this.bulkProgressText = `0 / ${this.csvValid.length}`;
+
+      // call the new callable
+      const callable = this.fns.httpsCallable('sendBulkHtml');
+      const payload = {
+        recipients: this.csvValid,
+        subject: (this.form.value.subject || '').trim(),
+        html: this.finalHtml,
+        preheader: this.testPreheader || '',
+      };
+
+      const res: any = await firstValueFrom(callable(payload));
+      if (res?.ok) {
+        this.bulkResult = `✅ Sent ${res.total} recipient(s) in ${
+          Array.isArray(res.batches) ? res.batches.length : '?'
+        } batch(es).`;
+      } else {
+        this.bulkResult = '⚠️ Bulk send completed with unknown status.';
+      }
+    } catch (e: any) {
+      console.error('bulk send error', e);
+      this.bulkResult = '❌ Bulk send failed. Check console/logs.';
+    } finally {
+      this.sendingBulk = false;
+      this.bulkProgressText = '';
     }
   }
 }

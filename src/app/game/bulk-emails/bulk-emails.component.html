@@ -155,6 +155,70 @@
                             </label>
                         </div>
                         </div>
+                        <!-- CSV Import -->
+                        <div class="shrink-0">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-medium">CSV Recipients</label>
+                            <div class="flex items-center gap-2">
+                            <button type="button" (click)="pickCsv()"
+                                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                Import CSV
+                            </button>
+                            <button type="button" (click)="downloadSampleCsv()"
+                                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                Sample CSV
+                            </button>
+                            <input #csvInput type="file" accept=".csv,text/csv" class="hidden" (change)="onCsvChosen($event)"/>
+                            </div>
+                        </div>
+
+                        <!-- Summary & actions -->
+                        <div class="text-xs opacity-80 mb-2">
+                            <span>Valid: <strong>{{ csvValid.length }}</strong></span>
+                            <span class="mx-2">•</span>
+                            <span>Invalid: <strong>{{ csvInvalid.length }}</strong></span>
+                            <span class="mx-2">•</span>
+                            <span>Duplicates removed: <strong>{{ csvDupes }}</strong></span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <button type="button"
+                                    (click)="sendBulk()"
+                                    [disabled]="sendingBulk || !canSendBulk"
+                                    class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
+                            <span *ngIf="!sendingBulk">Send bulk ({{ csvValid.length }})</span>
+                            <span *ngIf="sendingBulk">Sending… {{ bulkProgressText }}</span>
+                            </button>
+                            <button type="button" (click)="clearCsv()"
+                                    class="rounded-lg px-3 py-2 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Clear list
+                            </button>
+                            <div class="text-xs opacity-80" *ngIf="bulkResult">{{ bulkResult }}</div>
+                        </div>
+
+                        <!-- Preview list (scroll-capped) -->
+                        <div *ngIf="csvValid.length || csvInvalid.length" class="max-h-40 overflow-auto pr-1">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div>
+                                <div class="text-[11px] font-medium mb-1">Valid Emails</div>
+                                <ul class="text-[11px] space-y-0.5">
+                                <li *ngFor="let e of csvValid; let i = index">
+                                    {{ i + 1 }}. {{ e }}
+                                </li>
+                                </ul>
+                            </div>
+                            <div *ngIf="csvInvalid.length">
+                                <div class="text-[11px] font-medium mb-1 text-rose-500">Invalid Rows</div>
+                                <ul class="text-[11px] space-y-0.5 text-rose-500">
+                                <li *ngFor="let e of csvInvalid; let i = index">
+                                    {{ i + 1 }}. {{ e }}
+                                </li>
+                                </ul>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+
 
                         <!-- Recent uploads (its own scroll, capped height) -->
                         <div *ngIf="recentUploads.length" class="pt-2">
@@ -181,6 +245,42 @@
                                 bg-white/90 dark:bg-slate-900/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur
                                 border-t border-slate-200 dark:border-slate-800">
                     <div class="flex flex-col gap-2">
+                        <!-- NEW: Recipients quick controls -->
+                        <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" (click)="pickCsv()"
+                                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Import CSV
+                        </button>
+                        <button type="button" (click)="downloadSampleCsv()"
+                                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Sample CSV
+                        </button>
+
+                        <!-- hidden input lives here so it’s always present -->
+                        <input #csvInput type="file" accept=".csv,text/csv" class="hidden" (change)="onCsvChosen($event)"/>
+
+                        <span class="text-xs opacity-80">
+                            <strong>{{ csvValid.length }}</strong> valid
+                            <span *ngIf="csvInvalid.length"> • <span class="text-rose-500">{{ csvInvalid.length }}</span> invalid</span>
+                            <span *ngIf="csvDupes"> • {{ csvDupes }} dupes</span>
+                        </span>
+
+                        <button *ngIf="csvValid.length || csvInvalid.length" type="button" (click)="clearCsv()"
+                                class="ml-auto rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Clear list
+                        </button>
+
+                        <button type="button"
+                                (click)="sendBulk()"
+                                [disabled]="sendingBulk || !canSendBulk"
+                                class="rounded-lg px-3 py-1.5 text-xs bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50">
+                            <span *ngIf="!sendingBulk">Send bulk ({{ csvValid.length }})</span>
+                            <span *ngIf="sendingBulk">Sending… {{ bulkProgressText }}</span>
+                        </button>
+
+                        <span class="text-xs opacity-70" *ngIf="bulkResult">{{ bulkResult }}</span>
+                        </div>
+
                         <!-- Send test row -->
                         <div class="flex flex-wrap items-center gap-2">
                         <input [(ngModel)]="testEmail" [ngModelOptions]="{standalone:true}" type="email"
