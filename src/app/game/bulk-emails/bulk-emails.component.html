@@ -84,6 +84,13 @@
                       class="rounded-lg px-2.5 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
                 View
               </button>
+
+              <!-- NEW: Download -->
+              <button type="button" (click)="downloadTemplate(t)"
+                      class="rounded-lg px-2.5 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                Download
+              </button>
+
               <button type="button" (click)="deleteTemplate(t)"
                       class="rounded-lg px-2.5 py-1.5 text-xs ring-1 ring-rose-300 dark:ring-rose-800 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
                 Delete
@@ -91,6 +98,7 @@
             </div>
           </li>
         </ul>
+
       </div>
     </div>
   </details>

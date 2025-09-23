@@ -1188,4 +1188,19 @@ export class BulkEmailsComponent implements OnDestroy {
       alert('Failed to delete template.');
     }
   }
+
+  downloadTemplate(t: { name: string; html: string }) {
+    const name = (t.name || 'template').replace(/[^\w.\-]+/g, '_');
+    const blob = new Blob([t.html || ''], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.html`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
+  }
 }
