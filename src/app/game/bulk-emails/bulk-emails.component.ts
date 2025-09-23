@@ -44,6 +44,8 @@ export class BulkEmailsComponent implements OnDestroy {
   reports: BulkRun[] = [];
   private reportsSub?: Subscription;
 
+  selectedTemplateId: string = '';
+
   reportsOpen = false; // start collapsed
   builderOpen = false;
 
@@ -1202,5 +1204,19 @@ export class BulkEmailsComponent implements OnDestroy {
     a.remove();
 
     setTimeout(() => URL.revokeObjectURL(url), 30_000);
+  }
+
+  useSelectedTemplate(): void {
+    if (!this.selectedTemplateId) return;
+    const t = this.templates.find((x) => x.id === this.selectedTemplateId);
+    if (t) this.applyTemplate(t);
+  }
+
+  applyTemplate(t: { html: string }): void {
+    // Replace the builder HTML with the template (subject unchanged)
+    this.form.patchValue({ html: t.html || '' });
+    this.recompute();
+    // (Optional) focus the editor:
+    setTimeout(() => this.htmlEditor?.nativeElement?.focus(), 0);
   }
 }

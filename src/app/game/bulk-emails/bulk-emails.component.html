@@ -546,6 +546,23 @@
                         <div class="flex items-center justify-between mb-2">
                             <label class="block text-sm font-medium">HTML</label>
                             <div class="flex items-center gap-2">
+                              <!-- Template picker -->
+                              <div class="mb-2 flex items-center gap-2">
+                                <label class="text-xs opacity-70">Template:</label>
+                                <select [(ngModel)]="selectedTemplateId" [ngModelOptions]="{standalone:true}"
+                                        class="min-w-[14rem] rounded-md border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1 text-sm">
+                                  <option [ngValue]="''" disabled>Select a template…</option>
+                                  <option *ngFor="let t of templates" [ngValue]="t.id">{{ t.name }}</option>
+                                </select>
+
+                                <button type="button"
+                                        (click)="useSelectedTemplate()"
+                                        [disabled]="!selectedTemplateId"
+                                        class="rounded-lg px-2.5 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+                                  Use
+                                </button>
+                              </div>
+
                             <button type="button" (click)="onPickImage()"
                                     class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
                                 Insert image
