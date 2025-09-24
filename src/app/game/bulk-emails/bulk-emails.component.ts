@@ -35,12 +35,34 @@ type BulkRun = {
   }>;
 };
 
+type ContactList = {
+  id: string;
+  name: string;
+  createdAt: any; // Timestamp | Date
+  createdBy: string;
+  storagePath: string; // Firebase Storage path
+  downloadUrl: string; // public URL
+  countValid: number;
+  countInvalid: number;
+  countDupes: number;
+  note?: string; // optional helper text
+};
+
 @Component({
   selector: 'app-bulk-emails',
   templateUrl: './bulk-emails.component.html',
   styleUrls: ['./bulk-emails.component.css'],
 })
 export class BulkEmailsComponent implements OnDestroy {
+  contactListsOpen = false;
+
+  contactLists: ContactList[] = [];
+  private contactListsSub?: Subscription;
+
+  contactUploading = false;
+  contactUploadText = '';
+  contactError = '';
+
   reports: BulkRun[] = [];
   private reportsSub?: Subscription;
 
@@ -184,7 +206,7 @@ export class BulkEmailsComponent implements OnDestroy {
     this.recompute();
   }
 
-  toggleSection(key: 'reportsOpen' | 'builderOpen'): void {
+  toggleSection(key: 'reportsOpen' | 'builderOpen' | 'contactListsOpen'): void {
     // avoid toggling <details> twice if called from inside <summary>
     (this as any)[key] = !(this as any)[key];
   }
@@ -193,6 +215,7 @@ export class BulkEmailsComponent implements OnDestroy {
       this.isLoggedIn = !!user;
       this.subscribeReports(); // existing
       this.subscribeTemplates(); // NEW – after auth
+      this.subscribeContactLists();
     });
   }
 
@@ -484,6 +507,7 @@ export class BulkEmailsComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.saveDraft();
     this.templatesSub?.unsubscribe();
+    this.contactListsSub?.unsubscribe();
   }
 
   get canSendTest(): boolean {
@@ -1218,5 +1242,176 @@ export class BulkEmailsComponent implements OnDestroy {
     this.recompute();
     // (Optional) focus the editor:
     setTimeout(() => this.htmlEditor?.nativeElement?.focus(), 0);
+  }
+
+  /** Live list of contact lists for current user */
+  private subscribeContactLists() {
+    const uid = this.auth.currentUser?.uid || '__none__';
+    this.contactListsSub = this.afs
+      .collection<ContactList>('contact_lists', (ref) =>
+        ref.where('createdBy', '==', uid).orderBy('createdAt', 'desc')
+      )
+      .valueChanges()
+      .subscribe((rows) => {
+        this.contactLists = rows || [];
+      });
+  }
+
+  /** Handle file chooser */
+  async onContactFileChosen(evt: Event) {
+    const input = evt.target as HTMLInputElement;
+    if (!input.files || !input.files.length) return;
+    const file = input.files[0];
+    input.value = '';
+
+    this.contactError = '';
+    this.contactUploading = true;
+    this.contactUploadText = file.name;
+
+    try {
+      // read text for parsing stats
+      const raw = await file.text();
+      const parsed = this.parseContacts(raw, file.type || '', file.name);
+      const baseName = (file.name || 'contacts')
+        .replace(/\.[^/.]+$/, '')
+        .slice(0, 80);
+
+      // Upload original file to Storage (keep exact source)
+      const listId = this.safeId();
+      const storagePath = `contact-lists/${
+        this.auth.currentUser?.uid || 'anon'
+      }/${listId}/${Date.now()}-${file.name}`;
+      const url = await this.data.startUpload(file, storagePath, '', {
+        contentType: file.type || 'text/plain',
+      });
+
+      // Persist Firestore doc
+      const doc: ContactList = {
+        id: listId,
+        name: baseName,
+        createdAt: new Date(),
+        createdBy: this.auth.currentUser?.uid || '__none__',
+        storagePath,
+        downloadUrl: url || '',
+        countValid: parsed.valid.length,
+        countInvalid: parsed.invalid.length,
+        countDupes: parsed.dupes,
+        note: parsed.note,
+      };
+
+      await this.afs.doc(`contact_lists/${listId}`).set(doc);
+    } catch (e) {
+      console.error('onContactFileChosen', e);
+      this.contactError = 'Failed to add contact list.';
+      alert(this.contactError);
+    } finally {
+      this.contactUploading = false;
+      this.contactUploadText = '';
+    }
+  }
+
+  /** Very small parser for CSV or TXT; returns stats */
+  private parseContacts(
+    raw: string,
+    mime: string,
+    fileName: string
+  ): {
+    valid: string[];
+    invalid: string[];
+    dupes: number;
+    note?: string;
+  } {
+    const text = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    let emails: string[] = [];
+    let invalid: string[] = [];
+
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+    if (/csv/i.test(mime) || /\.csv$/i.test(fileName)) {
+      // try headered CSV using existing helper
+      const rows = this.csvToRows(text);
+      if (!rows.length)
+        return { valid: [], invalid: [], dupes: 0, note: 'Empty file' };
+      const header = rows[0].map((h) => h.trim().toLowerCase());
+      let emailIdx = header.findIndex((h) => /email/.test(h));
+      if (emailIdx === -1) {
+        // fallback: treat as single column
+        emailIdx = 0;
+      }
+
+      const rawTokens: string[] = [];
+      for (let i = 1; i < rows.length; i++) {
+        const value = (rows[i][emailIdx] || '').toString();
+        if (!value) continue;
+        value.split(/[;,]/).forEach((p) => rawTokens.push(p.trim()));
+      }
+
+      for (const token of rawTokens) {
+        if (!token) continue;
+        if (emailRegex.test(token.toLowerCase()))
+          emails.push(token.toLowerCase());
+        else invalid.push(token);
+      }
+
+      const unique = Array.from(new Set(emails));
+      const dupes = Math.max(0, emails.length - unique.length);
+      return {
+        valid: unique,
+        invalid,
+        dupes,
+        note: `Detected CSV (${header.join(', ')})`,
+      };
+    } else {
+      // TXT: one email per line (allow commas/semicolons too)
+      const tokens = text
+        .split(/[\n;,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const token of tokens) {
+        if (emailRegex.test(token.toLowerCase()))
+          emails.push(token.toLowerCase());
+        else invalid.push(token);
+      }
+      const unique = Array.from(new Set(emails));
+      const dupes = Math.max(0, emails.length - unique.length);
+      return { valid: unique, invalid, dupes, note: 'Detected TXT list' };
+    }
+  }
+
+  /** Download the original uploaded file */
+  downloadContactList(cl: ContactList) {
+    if (cl?.downloadUrl) {
+      const a = document.createElement('a');
+      a.href = cl.downloadUrl;
+      a.download = (cl.name || 'contacts') + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      alert('No download URL available.');
+    }
+  }
+
+  /** Delete Firestore doc (and try to delete Storage object if supported) */
+  async deleteContactList(cl: ContactList) {
+    if (!cl?.id) return;
+    const ok = confirm(`Delete contact list "${cl.name}"?`);
+    if (!ok) return;
+
+    try {
+      await this.afs.doc(`contact_lists/${cl.id}`).delete();
+
+      // Optional: if your DataService exposes deleteFile(storagePath)
+      if ((this.data as any)?.deleteFile && cl.storagePath) {
+        try {
+          await (this.data as any).deleteFile(cl.storagePath);
+        } catch {
+          // ignore storage deletion errors
+        }
+      }
+    } catch (e) {
+      console.error('deleteContactList', e);
+      alert('Failed to delete contact list.');
+    }
   }
 }
