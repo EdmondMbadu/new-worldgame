@@ -11,6 +11,7 @@ import { DataService } from 'src/app/services/data.service';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { firstValueFrom, map, Subscription } from 'rxjs';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 
 type BulkRun = {
   runId: string;
@@ -173,7 +174,8 @@ export class BulkEmailsComponent implements OnDestroy {
     private fb: FormBuilder,
     private data: DataService,
     private fns: AngularFireFunctions,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private storage: AngularFireStorage
   ) {
     this.form = this.fb.group({
       subject: ['', [Validators.required, Validators.maxLength(200)]],
@@ -1258,6 +1260,7 @@ export class BulkEmailsComponent implements OnDestroy {
   }
 
   /** Handle file chooser */
+  /** Handle file chooser */
   async onContactFileChosen(evt: Event) {
     const input = evt.target as HTMLInputElement;
     if (!input.files || !input.files.length) return;
@@ -1269,36 +1272,38 @@ export class BulkEmailsComponent implements OnDestroy {
     this.contactUploadText = file.name;
 
     try {
-      // read text for parsing stats
+      // 1) Parse for stats (so we show counts)
       const raw = await file.text();
       const parsed = this.parseContacts(raw, file.type || '', file.name);
       const baseName = (file.name || 'contacts')
         .replace(/\.[^/.]+$/, '')
         .slice(0, 80);
 
-      // Upload original file to Storage (keep exact source)
+      // 2) Stable storage path (even # of segments)
       const listId = this.safeId();
       const storagePath = `contact-lists/${
         this.auth.currentUser?.uid || 'anon'
       }/${listId}/${Date.now()}-${file.name}`;
+
+      // 3) Upload using your DataService (returns a URL)
       const url = await this.data.startUpload(file, storagePath, '', {
         contentType: file.type || 'text/plain',
       });
+      if (!url) throw new Error('Upload failed (no URL returned)');
 
-      // Persist Firestore doc
+      // 4) Save Firestore doc
       const doc: ContactList = {
         id: listId,
         name: baseName,
         createdAt: new Date(),
         createdBy: this.auth.currentUser?.uid || '__none__',
         storagePath,
-        downloadUrl: url || '',
+        downloadUrl: url,
         countValid: parsed.valid.length,
         countInvalid: parsed.invalid.length,
         countDupes: parsed.dupes,
         note: parsed.note,
       };
-
       await this.afs.doc(`contact_lists/${listId}`).set(doc);
     } catch (e) {
       console.error('onContactFileChosen', e);
@@ -1378,17 +1383,42 @@ export class BulkEmailsComponent implements OnDestroy {
     }
   }
 
-  /** Download the original uploaded file */
-  downloadContactList(cl: ContactList) {
-    if (cl?.downloadUrl) {
+  /** Download the original uploaded file (self-healing) */
+  async downloadContactList(cl: ContactList) {
+    try {
+      let url = cl?.downloadUrl || '';
+
+      // If missing, try to resolve from storagePath via AngularFireStorage
+      if (!url && cl?.storagePath) {
+        const ref = this.storage.ref(cl.storagePath);
+        url = await firstValueFrom(ref.getDownloadURL());
+        // Backfill so it’s instant next time
+        try {
+          await this.afs
+            .doc(`contact_lists/${cl.id}`)
+            .update({ downloadUrl: url });
+        } catch {}
+      }
+
+      if (!url) {
+        alert('No download URL available.');
+        return;
+      }
+
+      const downloadName = `${(cl.name || 'contacts').replace(
+        /[^\w.\-]+/g,
+        '_'
+      )}.csv`;
+
       const a = document.createElement('a');
-      a.href = cl.downloadUrl;
-      a.download = (cl.name || 'contacts') + '.csv';
+      a.href = url;
+      a.download = downloadName;
       document.body.appendChild(a);
       a.click();
       a.remove();
-    } else {
-      alert('No download URL available.');
+    } catch (e) {
+      console.error('downloadContactList', e);
+      alert('Failed to get a download link. Check Storage rules or path.');
     }
   }
 

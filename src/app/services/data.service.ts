@@ -217,6 +217,11 @@ meaningful, lasting impact.`,
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
     'application/vnd.ms-powerpoint',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+
+    // NEW: for contact lists
+    'text/csv',
+    'application/vnd.ms-excel', // many browsers use this for .csv
+    'text/plain', // .txt
   ];
 
   url: string = '';
