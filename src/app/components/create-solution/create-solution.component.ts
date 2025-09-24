@@ -16,13 +16,12 @@ export class CreateSolutionComponent {
     `Welcome to the NewWorld Game!
 My role, as your colleague— your problem-solving partner— is to help us develop a
 solution to a global problem on which you choose to work. Let’s start.`,
-    `What is your NewWorld Game Solution Title.`,
+    `What is the NewWorld Game Solution Title or Focus Area?`,
     "In a few words, how would you describe the specific problem you're focusing on?",
     'Upload an image for your solution.',
-    `List the members of your team. Add their emails below. (This enables communication between team members 
-    and, as per NWG Privacy Policy, their information will remain private.)`,
-    'For the NWG per-review process, below are some randomly selected evaluators who might be interested in your project. Please add others whom you would like to evaluate your strategy. Other evaluator emails can be added later.',
-    'Select all Sustainable Development Goals (SDGs) that interest you.',
+    `List the members of your Teams. Add their emails below. (This enables communication between Team members and, as per NWG Privacy Policy, their information will remain private.) `,
+    'Add below NWG members that you want to be reviewers/evaluators of your Team(s) work. (The names your supply will be supplemented by others chosen at random from other NWG members.)',
+    'Select any Sustainable Development Goals (SDGs) that are related to your chosen problem area.',
     'Almost done! Submit to start solving your new solution.',
   ];
   buttontexts = new Array(this.steps.length).fill('Continue');
