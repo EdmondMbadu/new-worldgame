@@ -150,6 +150,7 @@ import { FeedbackManagementComponent } from './components/feedback-management/fe
 import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
 import { TournamentUniversityComponent } from './blogs/tournament-university/tournament-university.component';
 import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
+import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 
 @NgModule({
   declarations: [
@@ -275,6 +276,7 @@ import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
     BroadcastedSolutionsComponent,
     TournamentUniversityComponent,
     BulkEmailsComponent,
+    UnsubscribeComponent,
   ],
   imports: [
     BrowserModule,

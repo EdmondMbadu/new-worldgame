@@ -1,0 +1,133 @@
+<div class="dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
+  <!-- Navbars (unchanged) -->
+  <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [hoveredOtherAisPath]="'bg-gray-100 dark:bg-gray-700'"
+      [showMoreOrLess]="true"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="this.auth.currentUser.email"
+      [firstName]="this.auth.currentUser.firstName"
+      [lastName]="this.auth.currentUser.lastName"
+      [path]="'home'">
+    </app-navbar>
+  </div>
+
+  <div class="relative">
+  <!-- subtle gradient bg -->
+  <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"></div>
+
+  <main class="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
+    <!-- header -->
+    <div class="text-center mb-8">
+      <h1 class="text-2xl md:text-3xl font-bold">Unsubscribe from Emails</h1>
+      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+        Enter your email and (optionally) tell us why you’re leaving.
+      </p>
+    </div>
+
+    <!-- card -->
+    <div class="rounded-2xl border border-slate-200/80 dark:border-slate-700/70 bg-white/90 dark:bg-slate-800/80 backdrop-blur p-5 md:p-7 shadow-xl">
+      <!-- Already unsubscribed banner -->
+      <div *ngIf="alreadyUnsubscribed && !success"
+           class="mb-4 rounded-xl border border-amber-200/60 bg-amber-50/70 text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-200 p-3 text-sm">
+        This email is already unsubscribed from our mailing list.
+      </div>
+
+      <!-- Success banner -->
+      <div *ngIf="success"
+           class="mb-5 rounded-xl border border-emerald-200/60 bg-emerald-50/70 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-900/20 dark:text-emerald-200 p-4">
+        <div class="flex items-start gap-3">
+          <div class="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full ring-2 ring-emerald-300 dark:ring-emerald-800">
+            <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 0 1 0 1.414l-7.5 7.5a1 1 0 0 1-1.414 0l-3-3a1 1 0 1 1 1.414-1.414L8.5 12.086l6.793-6.793a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"/></svg>
+          </div>
+          <div>
+            <div class="font-semibold">You’ve been unsubscribed.</div>
+            <div class="text-sm opacity-80">We’re sorry to see you go. You won’t receive marketing emails at <b>{{ form.value.email }}</b>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5" *ngIf="!success">
+        <!-- Email -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Email address</label>
+          <div class="flex gap-2">
+            <input formControlName="email" type="email" autocomplete="email"
+                   placeholder="you@example.com"
+                   (blur)="onEmailBlur()"
+                   class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent
+                          px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500
+                          placeholder-slate-400 dark:placeholder-slate-400">
+            <button type="button"
+                    (click)="checkStatus()"
+                    [disabled]="checking || !emailControl.valid"
+                    class="rounded-xl px-3 py-2 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50">
+              <span *ngIf="!checking">Check</span>
+              <span *ngIf="checking">Checking…</span>
+            </button>
+          </div>
+          <div class="mt-1 text-xs text-rose-500" *ngIf="emailControl.invalid && (emailControl.dirty || emailControl.touched)">
+            Enter a valid email.
+          </div>
+          <div class="mt-1 text-xs opacity-70" *ngIf="checked && !alreadyUnsubscribed">This email is currently subscribed.</div>
+          <div class="mt-1 text-xs opacity-70" *ngIf="checked && alreadyUnsubscribed">Already unsubscribed.</div>
+        </div>
+
+        <!-- Reason quick-pick -->
+        <div>
+          <label class="block text-sm font-medium mb-1">Reason (optional)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 cursor-pointer">
+              <input type="radio" formControlName="reason" class="h-4 w-4" value="Too many emails">
+              <span class="text-sm">Too many emails</span>
+            </label>
+            <label class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 cursor-pointer">
+              <input type="radio" formControlName="reason" class="h-4 w-4" value="Content not relevant">
+              <span class="text-sm">Content not relevant</span>
+            </label>
+            <label class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 cursor-pointer">
+              <input type="radio" formControlName="reason" class="h-4 w-4" value="I get updates elsewhere">
+              <span class="text-sm">I get updates elsewhere</span>
+            </label>
+            <label class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2 cursor-pointer">
+              <input type="radio" formControlName="reason" class="h-4 w-4" value="Other">
+              <span class="text-sm">Other</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Details (only if Other) -->
+        <div *ngIf="form.value.reason === 'Other'">
+          <label class="block text-sm font-medium mb-1">Tell us more (optional)</label>
+          <textarea formControlName="details" rows="4" placeholder="Anything we should improve?"
+                    class="w-full rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent
+                           px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500
+                           placeholder-slate-400 dark:placeholder-slate-400"></textarea>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex items-center gap-3 pt-2">
+          <button type="submit"
+                  [disabled]="submitting || !emailControl.valid"
+                  class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50">
+            <span *ngIf="!submitting && !alreadyUnsubscribed">Unsubscribe</span>
+            <span *ngIf="!submitting && alreadyUnsubscribed">Confirm</span>
+            <span *ngIf="submitting">Working…</span>
+          </button>
+          <span class="text-xs opacity-70" *ngIf="errorMsg">{{ errorMsg }}</span>
+        </div>
+      </form>
+
+      <!-- footer note -->
+      <p class="mt-6 text-xs text-slate-500 dark:text-slate-400">
+        We’ll keep a record of your email solely to ensure you don’t receive future marketing emails.
+      </p>
+    </div>
+  </main>
+</div>
+
+
+  </div>

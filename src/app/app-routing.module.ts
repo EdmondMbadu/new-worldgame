@@ -104,6 +104,7 @@ import { FeedbackManagementComponent } from './components/feedback-management/fe
 import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
 import { TournamentUniversityComponent } from './blogs/tournament-university/tournament-university.component';
 import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
+import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -127,6 +128,7 @@ const routes: Routes = [
   },
   // app-routing.module.ts
   { path: 'join-success', component: JoinSuccessComponent },
+  { path: 'unsubscribe', component: UnsubscribeComponent },
 
   { path: 'game', component: GameComponent },
   { path: 'mini-game', component: MiniGameComponent },
