@@ -61,6 +61,9 @@ export class BulkEmailsComponent implements OnDestroy {
     [];
   public unsubSet: Set<string> = new Set();
   autoExcludeUnsubs = true; // toggle in UI
+  // Inner-collapsible toggles (default: open CSV, collapsed Unsubs—tweak as you like)
+  showCsvLists = true;
+  showUnsubs = false;
 
   get wouldExcludeCount(): number {
     if (!this.csvValid?.length) return 0;
@@ -222,7 +225,14 @@ export class BulkEmailsComponent implements OnDestroy {
     this.recompute();
   }
 
-  toggleSection(key: 'reportsOpen' | 'builderOpen' | 'contactListsOpen'): void {
+  toggleSection(
+    key:
+      | 'reportsOpen'
+      | 'builderOpen'
+      | 'contactListsOpen'
+      | 'showCsvLists'
+      | 'showUnsubs'
+  ): void {
     // avoid toggling <details> twice if called from inside <summary>
     (this as any)[key] = !(this as any)[key];
   }
