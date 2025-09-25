@@ -304,16 +304,16 @@ we will test and first implement the solution?`,
       'What actions are needed in the next 6-12 months to get our solution implemented? Who will do what, when, where?',
 
       // i = 5
-      'What does our implemented strategy look like, in more detail? (For this task ask one of our Ai colleagues to draw a picture of what the strategy will look like when implemented).',
+      'What does our implemented strategy look like, in more detail? (For this task ask one of our AI colleagues to draw a picture of what the strategy will look like when implemented).',
 
       // i = 6
-      'Results 1. What are the results of implementing our strategy? What would be the results of providing everyone in a community ____________ (insert description of your strategy) on the local economy, jobs, environment, human health, and other social factors?',
+      'Results 1. Ask Bucky, and/or one of your AI Colleagues, "What are the results of implementing our strategy? What would be the results of providing everyone in a community ____________ (insert description of your strategy) on the local economy, jobs, environment, human health, and other social factors?"',
 
       // i = 7
-      'Results 2. What would be the results of providing everyone in the world ____________ (insert description of your strategy) on the global economy, additional jobs, environment, human health, and other social factors?',
+      'Results 2. Ask Bucky, and/or one of your AI Colleagues, "What would be the results of providing everyone in the world ____________ (insert description of your strategy) on the global economy, additional jobs, environment, human health, and other social factors?"',
 
       // i = 8
-      'What would we do with $5000 to advance the strategy towards implementation?',
+      'What would we do with $10,000 to advance the strategy towards implementation?',
 
       // i = 9
       'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
