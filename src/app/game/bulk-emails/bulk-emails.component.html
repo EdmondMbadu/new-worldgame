@@ -471,6 +471,63 @@
           </tbody>
         </table>
       </div>
+      <!-- Unsubscribed (below Contact Lists) -->
+        <div class="mt-5 rounded-2xl ring-1 ring-slate-200 dark:ring-slate-700 p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <div class="text-sm font-semibold">Unsubscribed</div>
+              <p class="text-xs opacity-70">People who opted out. We’ll exclude them from sends.</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="inline-flex items-center gap-2 text-xs">
+                <input type="checkbox" [(ngModel)]="autoExcludeUnsubs" [ngModelOptions]="{standalone:true}" />
+                <span class="opacity-80">Auto-exclude when sending</span>
+              </label>
+
+              <button type="button" (click)="copyUnsubs()"
+                      class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                Copy emails
+              </button>
+              <button type="button" (click)="downloadUnsubsTxt()"
+                      class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                Download .txt
+              </button>
+              <button type="button" (click)="downloadUnsubsCsv()"
+                      class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                Download .csv
+              </button>
+            </div>
+          </div>
+
+          <div class="text-xs opacity-70 mb-2">
+            {{ unsubscribedEmails.length }} email(s)
+            <span *ngIf="csvValid.length"> • would exclude <b>{{ wouldExcludeCount }}</b> from current CSV</span>
+          </div>
+
+          <div class="overflow-auto max-h-48 pr-1">
+            <table class="w-full text-[11px]">
+              <thead class="text-left opacity-70">
+                <tr>
+                  <th class="py-1 pr-2">Email</th>
+                  <th class="py-1 pr-2">Reason</th>
+                  <th class="py-1 pr-2">Updated</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tr *ngFor="let u of unsubscribedRows">
+                  <td class="py-1 pr-2">{{ u.email }}</td>
+                  <td class="py-1 pr-2 truncate">{{ u.reason || '—' }}</td>
+                  <td class="py-1 pr-2">{{ u.updatedAt | date:'MMM d, y, h:mm a' }}</td>
+                </tr>
+                <tr *ngIf="!unsubscribedRows.length">
+                  <td class="py-2 text-slate-500 dark:text-slate-400" colspan="3">No unsubscribes yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
 
     </div>
   </details>
@@ -752,9 +809,11 @@
                             <div>
                                 <div class="text-[11px] font-medium mb-1">Valid Emails</div>
                                 <ul class="text-[11px] space-y-0.5">
-                                <li *ngFor="let e of csvValid; let i = index">
-                                    {{ i + 1 }}. {{ e }}
-                                </li>
+                               <li *ngFor="let e of csvValid; let i = index">
+                                {{ i + 1 }}. {{ e }}
+                                <span *ngIf="unsubSet.has(e)" class="ml-1 px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">unsub</span>
+                              </li>
+
                                 </ul>
                             </div>
                             <div *ngIf="csvInvalid.length">

@@ -55,6 +55,20 @@ type ContactList = {
   styleUrls: ['./bulk-emails.component.css'],
 })
 export class BulkEmailsComponent implements OnDestroy {
+  // ===== Unsubscribed state =====
+  unsubscribedEmails: string[] = [];
+  unsubscribedRows: Array<{ email: string; reason?: string; updatedAt: Date }> =
+    [];
+  public unsubSet: Set<string> = new Set();
+  autoExcludeUnsubs = true; // toggle in UI
+
+  get wouldExcludeCount(): number {
+    if (!this.csvValid?.length) return 0;
+    let c = 0;
+    for (const e of this.csvValid) if (this.unsubSet.has(e)) c++;
+    return c;
+  }
+
   contactListsOpen = false;
 
   contactLists: ContactList[] = [];
@@ -218,6 +232,7 @@ export class BulkEmailsComponent implements OnDestroy {
       this.subscribeReports(); // existing
       this.subscribeTemplates(); // NEW – after auth
       this.subscribeContactLists();
+      this.subscribeUnsubscribes();
     });
   }
 
@@ -663,6 +678,8 @@ export class BulkEmailsComponent implements OnDestroy {
       .map((s) => s.trim())
       .filter(Boolean).length;
     this.csvDupes = Math.max(0, totalTokens - emails.length - invalid.length);
+
+    if (this.autoExcludeUnsubs) this.applyUnsubFilter(); // apply unsubscribe
   }
 
   /**
@@ -766,11 +783,19 @@ export class BulkEmailsComponent implements OnDestroy {
     try {
       this.sendingBulk = true;
       this.bulkProgressText = `0 / ${this.csvValid.length}`;
+      const recipients = this.autoExcludeUnsubs
+        ? this.csvValid.filter((e) => !this.unsubSet.has(e))
+        : this.csvValid.slice();
 
+      if (!recipients.length) {
+        this.bulkResult = 'No recipients left after excluding unsubscribes.';
+        this.sendingBulk = false;
+        return;
+      }
       // call the new callable
       const callable = this.fns.httpsCallable('sendBulkHtml');
       const payload = {
-        recipients: this.csvValid,
+        recipients,
         subject: (this.form.value.subject || '').trim(),
         html: this.finalHtml,
         preheader: this.testPreheader || '',
@@ -1443,5 +1468,94 @@ export class BulkEmailsComponent implements OnDestroy {
       console.error('deleteContactList', e);
       alert('Failed to delete contact list.');
     }
+  }
+
+  private subscribeUnsubscribes() {
+    // We’re pulling all docs; if you later scope per-project/tenant, add a where().
+    this.afs
+      .collection('mailing_unsubscribes', (ref) =>
+        ref.orderBy('updatedAt', 'desc').limit(5000)
+      )
+      .valueChanges({ idField: 'id' })
+      .subscribe((rows: any[]) => {
+        const list = (rows || []).map((r) => {
+          const updatedAt =
+            r.updatedAt?.toDate?.() ??
+            (r.updatedAt instanceof Date ? r.updatedAt : new Date());
+          const email = (r.email || '').toString().toLowerCase().trim();
+          return { email, reason: r.reason || '', updatedAt };
+        });
+
+        // normalize + dedupe by email (keep most recent)
+        const latestByEmail = new Map<
+          string,
+          { email: string; reason?: string; updatedAt: Date }
+        >();
+        for (const row of list) {
+          const prev = latestByEmail.get(row.email);
+          if (!prev || prev.updatedAt < row.updatedAt)
+            latestByEmail.set(row.email, row);
+        }
+
+        this.unsubscribedRows = Array.from(latestByEmail.values()).sort(
+          (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+        );
+        this.unsubscribedEmails = this.unsubscribedRows.map((r) => r.email);
+        this.unsubSet = new Set(this.unsubscribedEmails);
+
+        // If a CSV is already loaded and auto-exclude is on, refresh the valid list
+        if (this.autoExcludeUnsubs && this.csvValid?.length) {
+          this.applyUnsubFilter();
+        }
+      });
+  }
+  private applyUnsubFilter() {
+    if (!this.csvValid?.length) return;
+    // Keep only emails NOT in unsub set
+    this.csvValid = this.csvValid.filter((e) => !this.unsubSet.has(e));
+  }
+
+  copyUnsubs() {
+    const text = this.unsubscribedEmails.join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      alert(`Copied ${this.unsubscribedEmails.length} email(s) to clipboard.`);
+    });
+  }
+
+  downloadUnsubsTxt() {
+    const blob = new Blob([this.unsubscribedEmails.join('\n')], {
+      type: 'text/plain;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'unsubscribed_emails.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
+  }
+
+  downloadUnsubsCsv() {
+    // Minimal CSV: email,reason,updated_at
+    const header = 'email,reason,updated_at';
+    const lines = this.unsubscribedRows.map((r) => {
+      const esc = (s: string) => `"${(s || '').replace(/"/g, '""')}"`;
+      return [
+        esc(r.email),
+        esc(r.reason || ''),
+        esc(r.updatedAt.toISOString()),
+      ].join(',');
+    });
+    const csv = [header, ...lines].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'unsubscribed_emails.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30_000);
   }
 }
