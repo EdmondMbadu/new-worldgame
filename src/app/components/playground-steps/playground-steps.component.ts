@@ -229,11 +229,11 @@ export class PlaygroundStepsComponent implements OnInit {
 
   @Input() title?: string = 'World Hunger';
   steps: string[] = [
-    'Step I:  Defining the Problem State',
-    'Step II: Envisioning the Preferred State',
-    'Step III: Developing Our Solution',
-    'Step IV: Implementation',
-    'Step V: Strategy Review',
+    'Step 1:  Defining the Problem State',
+    'Step 2: Envisioning the Preferred State',
+    'Step 3: Developing Our Solution',
+    'Step 4: Implementation',
+    'Step 5: Strategy Outreach',
   ];
   subtitles: string[] = [
     'Where we are now',
@@ -318,7 +318,9 @@ we will test and first implement the solution?`,
       // i = 9
       'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
     ],
-    ['Review Your Entire Strategy and Preview it'],
+    [
+      'Review Your Entire Strategy, Preview it, Add what you think might be missing.',
+    ],
   ];
   popupStyles: any = [];
 
