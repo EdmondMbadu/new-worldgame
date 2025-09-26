@@ -16,16 +16,21 @@
           *ngFor="let t of ourTeam"
           class="group relative h-full overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/60"
         >
-          <!-- Media -->
-          <div class="relative aspect-[4/3]">
-            <img
-              [src]="t.profilePicPath"
-              [alt]="t.name + ' – ' + (t.title || 'Team member')"
-              class="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-            />
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
-          </div>
+         <!-- Media -->
+        <div
+          class="relative aspect-[4/3]"
+          [ngClass]="t.fit === 'contain' ? 'bg-white dark:bg-slate-900' : ''"
+        >
+          <img
+            [src]="t.profilePicPath"
+            [alt]="t.name + ' – ' + (t.title || 'Team member')"
+            class="absolute inset-0 h-full w-full"
+            [ngClass]="t.fit === 'contain' ? 'object-contain' : 'object-cover'"
+            loading="lazy"
+          />
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/10 via-transparent"></div>
+        </div>
+
 
           <!-- Content (POLISHED TITLE STYLE) -->
           <div class="p-6">

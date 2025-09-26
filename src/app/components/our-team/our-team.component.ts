@@ -56,10 +56,9 @@ export class OurTeamComponent implements OnInit {
       title: 'Researcher',
       description:
         'Baruch is a researcher who focuses on finding key contacts and uncovering valuable insights to drive outreach efforts and support strategic initiatives.',
-
       profilePicPath:
-        // 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2FBaruch.png?alt=media&token=adf543ca-6fc5-4e2d-88f4-057a57357db9',
-        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2FBaruch2.png?alt=media&token=1c921fa0-43ac-4cbc-9e98-8c6d4bc9d224',
+        'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2FBaruch.png?alt=media&token=cdced396-f1be-4e93-9be6-bc1a98923a87',
+      fit: 'contain', // 👈 only this card shows the full image (no crop)
     },
   ];
 
@@ -116,4 +115,5 @@ interface Team {
   profilePicPath?: string;
   twitter?: string;
   github?: string;
+  fit?: 'contain' | 'cover'; // 👈 optional per-item override
 }
