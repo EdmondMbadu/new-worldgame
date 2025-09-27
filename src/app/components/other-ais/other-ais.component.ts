@@ -31,6 +31,19 @@ export class OtherAisComponent implements OnInit {
   public sdgTiles: SDGPlus[] = [];
   singleCopyStates: string[] = []; // Initialise alongside responses
 
+  // NEW state
+  search = '';
+  activeGroup: 'all' | 'colleague' | 'elder' = 'all';
+  activeSdg: number | null = null;
+
+  visibleAvatars: any[] = [];
+  sdgNumbers = Array.from({ length: 17 }, (_, i) => i + 1);
+
+  // hero stats + mosaic
+  totalCount = 0;
+  colleagueCount = 0;
+  elderCount = 0;
+  sampleMosaic: any[] = [];
   ngOnInit(): void {
     setTimeout(() => {
       window.scrollTo(0, 0); // Ensure the scroll happens after the content is loaded
@@ -39,6 +52,10 @@ export class OtherAisComponent implements OnInit {
     this.deleteAllDocuments();
     this.splitGroups();
     this.sdgTiles = this.data.attachAvatars(this.aiOptions);
+    this.splitGroups?.();
+    this.refreshCounts();
+    this.visibleAvatars = this.filterAvatars();
+    this.sampleMosaic = this.buildMosaic();
   }
   selectedSdg?: SDGPlus;
   /** Find the AI by avatarPath and delegate to the normal selector */
@@ -247,7 +264,7 @@ meaningful, lasting impact.`,
       name: 'Mark Twain',
       group: 'elder',
       sdgs: [],
-      // requiresAdmin: true, // ⬅️ add this
+      requiresAdmin: false, // ⬅️ add this
       intro: `${name} Distinguished American author, essayist, journalist, and literary critic. He's known for his novels The Adventures of Tom Sawyer (1876) and Adventures of Huckleberry Finn (1884), which some call the "Great American Novel". `,
       collectionPath: `users/${this.auth.currentUser.uid}/twain/`,
     },
@@ -305,12 +322,7 @@ meaningful, lasting impact.`,
   //   private slugify(name: string) {
   //   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   // }
-  private slugify(name: string) {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  }
+
   selectAi(ai: any) {
     const slug = this.slugify(ai.name);
     this.router.navigate(['/avatar', slug], { state: { avatar: ai } });
@@ -476,6 +488,89 @@ meaningful, lasting impact.`,
         this.status = 'Copy failed';
         setTimeout(() => (this.status = ''), 1200);
       });
+  }
+
+  // --- NAV ---
+  private slugify(name: string) {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+  openAvatar(ai: any) {
+    const slug = this.slugify(ai.name);
+    this.router.navigate(['/avatar', slug], { state: { avatar: ai } });
+  }
+
+  // --- FILTERS ---
+  onSearch(v: string) {
+    this.search = v;
+    this.visibleAvatars = this.filterAvatars();
+  }
+  setGroup(g: 'all' | 'colleague' | 'elder') {
+    this.activeGroup = g;
+    this.visibleAvatars = this.filterAvatars();
+  }
+  setSdg(n: number | null) {
+    this.activeSdg = n;
+    this.visibleAvatars = this.filterAvatars();
+  }
+
+  private filterAvatars(): any[] {
+    const q = this.search.trim().toLowerCase();
+    const isAdmin = !!this.auth?.currentUser?.admin;
+
+    return this.aiOptions
+      .filter((a) => !a.requiresAdmin || isAdmin)
+      .filter((a) =>
+        this.activeGroup === 'all' ? true : a.group === this.activeGroup
+      )
+      .filter((a) => {
+        if (this.activeSdg === null) return true;
+        const sdgs = Array.isArray(a.sdgs) ? (a.sdgs as number[]) : [];
+        return sdgs.includes(this.activeSdg!);
+      })
+
+      .filter((a) => {
+        if (!q) return true;
+        const txt = (
+          a.name +
+          ' ' +
+          (a.intro || '') +
+          ' ' +
+          (a.sdgs || []).join(' ')
+        ).toLowerCase();
+        return txt.includes(q);
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  excerpt(html: string = '', max = 200): string {
+    const text = html
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return text.length > max ? text.slice(0, max - 1) + '…' : text;
+  }
+
+  private refreshCounts() {
+    this.totalCount = this.aiOptions.length;
+    this.colleagueCount = this.aiOptions.filter(
+      (a) => a.group === 'colleague'
+    ).length;
+    this.elderCount = this.aiOptions.filter((a) => a.group === 'elder').length;
+  }
+
+  private buildMosaic() {
+    // pick up to 9 avatars for the hero mosaic
+    return [...this.aiOptions]
+      .filter((a) => !a.requiresAdmin || !!this.auth?.currentUser?.admin)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(0, 9);
+  }
+
+  scrollTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 interface DisplayMessage {
