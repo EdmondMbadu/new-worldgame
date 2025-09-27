@@ -15,48 +15,6 @@
   >
   </app-navbar>
 
-  <!-- STICKY TOP BAR -->
-  <div
-    class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 bg-white/90 dark:bg-slate-900/90 border-b border-black/5 dark:border-white/10"
-  >
-    <div
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-3"
-    >
-      <button
-        (click)="backToPool()"
-        class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm shadow hover:opacity-90"
-      >
-        <svg
-          class="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-        All Avatars
-      </button>
-
-      <div class="ml-auto flex items-center gap-2">
-        <label class="text-xs opacity-70">Switch</label>
-        <select #sel (change)="switchAvatar(sel.value)">
-          <option
-            *ngFor="let a of allAvatars"
-            [selected]="a.slug === avatar.slug"
-            [value]="a.slug"
-          >
-            {{ a.name }}
-          </option>
-        </select>
-      </div>
-    </div>
-  </div>
-
   <!-- HERO -->
   <header class="relative">
     <div class="absolute inset-0 -z-10">
@@ -87,6 +45,48 @@
             </div>
 
             <div class="text-center md:text-left">
+              <div
+                class="flex items-center justify-center md:justify-between text-xs text-slate-600 dark:text-slate-300/80 mb-2"
+              >
+                <button
+                  type="button"
+                  (click)="backToPool()"
+                  class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 bg-white/60 dark:bg-slate-800/60 border border-black/10 dark:border-white/10 hover:bg-white/90 dark:hover:bg-slate-800/80 transition shadow-sm"
+                >
+                  <svg
+                    class="h-3.5 w-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  All avatars
+                </button>
+
+                <div class="hidden md:flex items-center gap-2">
+                  <label for="switchSel" class="opacity-70">Switch</label>
+                  <select
+                    #switchSel
+                    id="switchSel"
+                    (change)="switchAvatar(switchSel.value)"
+                    class="max-w-[14rem] truncate bg-transparent border rounded-lg px-2 py-1 border-black/10 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-xs"
+                  >
+                    <option
+                      *ngFor="let a of allAvatars"
+                      [value]="a.slug"
+                      [selected]="a.slug === avatar.slug"
+                    >
+                      {{ a.name }}
+                    </option>
+                  </select>
+                </div>
+              </div>
               <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
                 {{ avatar.name }}
               </h1>
