@@ -55,7 +55,7 @@ export class OurTeamComponent implements OnInit {
       name: 'Baruch Bashan',
       title: 'Tools Software Developer',
       description:
-        'Baruch is the tools software developer, ranging from generating interactive maps, to scouring the world for key contacts to drive outreach and funding efforts, to creating autonomous teams of software agents',
+        'Baruch is the tools software developer, ranging from generating interactive maps, to scouring the world for key contacts to drive outreach and funding efforts, to creating autonomous teams of software agents.',
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2FBaruch.png?alt=media&token=cdced396-f1be-4e93-9be6-bc1a98923a87',
       fit: 'contain', // 👈 only this card shows the full image (no crop)
