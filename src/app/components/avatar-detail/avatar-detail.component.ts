@@ -76,6 +76,20 @@ export class AvatarDetailComponent implements OnInit {
 
     // make sure viewport starts at top
     setTimeout(() => window.scrollTo({ top: 0 }), 0);
+
+    // If we saved a draft before redirecting to login, restore it now
+    const pending = sessionStorage.getItem('pendingPrompt');
+    if (pending && this.isLoggedIn) {
+      // focus the composer and prefill
+      setTimeout(() => {
+        this.scrollToChat();
+        if (this.promptInput?.nativeElement) {
+          this.promptInput.nativeElement.value = pending;
+          this.promptInput.nativeElement.focus();
+        }
+      }, 0);
+      sessionStorage.removeItem('pendingPrompt');
+    }
   }
 
   backToPool() {
@@ -89,6 +103,10 @@ export class AvatarDetailComponent implements OnInit {
   }
 
   scrollToChat() {
+    if (!this.isLoggedIn) {
+      this.goToLogin();
+      return;
+    }
     this.chatWindow?.nativeElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
@@ -124,8 +142,13 @@ export class AvatarDetailComponent implements OnInit {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // QUICK PROMPTS
+  // 3) If they click a quick prompt while logged out, stash it and route to login
   quickPromptFill(str: string) {
+    if (!this.isLoggedIn) {
+      sessionStorage.setItem('pendingPrompt', str);
+      this.goToLogin();
+      return;
+    }
     if (!this.promptInput) return;
     this.promptInput.nativeElement.value = str;
     this.promptInput.nativeElement.focus();
@@ -140,6 +163,11 @@ export class AvatarDetailComponent implements OnInit {
     const val = promptInputEl.value.trim();
     if (!val) return;
 
+    if (!this.isLoggedIn) {
+      sessionStorage.setItem('pendingPrompt', val);
+      this.goToLogin();
+      return;
+    }
     // user prompt
     promptInputEl.value = '';
     this.responses.push({ text: val, type: 'PROMPT' });
@@ -219,5 +247,13 @@ export class AvatarDetailComponent implements OnInit {
   // SDG pills (simple labels)
   sdgLabel(n: number) {
     return `SDG ${n}`;
+  }
+  get isLoggedIn(): boolean {
+    return !!this.auth?.currentUser?.email;
+  }
+
+  public goToLogin() {
+    const redirectTo = this.router.url;
+    this.router.navigate(['/login'], { queryParams: { redirectTo } });
   }
 }

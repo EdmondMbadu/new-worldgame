@@ -162,6 +162,28 @@
       #chatWindow
       class="rounded-3xl overflow-hidden bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-2xl"
     >
+      <!-- ⬇️ Login overlay (only shows when logged out) -->
+      <div
+        *ngIf="!isLoggedIn"
+        class="absolute inset-0 z-10 bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-6 text-center"
+      >
+        <div>
+          <h3 class="text-lg font-semibold">
+            Sign in to chat with {{ avatar.name }}
+          </h3>
+          <p class="mt-1 text-sm opacity-80">
+            We’ll bring you right back here.
+          </p>
+          <button
+            type="button"
+            (click)="goToLogin()"
+            class="mt-4 rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow"
+          >
+            Sign in
+          </button>
+        </div>
+      </div>
+
       <!-- quick prompts -->
       <div class="p-4 border-b border-black/5 dark:border-white/10">
         <div class="flex flex-wrap gap-2">
