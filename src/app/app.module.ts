@@ -151,6 +151,7 @@ import { BroadcastedSolutionsComponent } from './components/broadcasted-solution
 import { TournamentUniversityComponent } from './blogs/tournament-university/tournament-university.component';
 import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
 import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
+import { AvatarDetailComponent } from './components/avatar-detail/avatar-detail.component';
 
 @NgModule({
   declarations: [
@@ -277,6 +278,7 @@ import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
     TournamentUniversityComponent,
     BulkEmailsComponent,
     UnsubscribeComponent,
+    AvatarDetailComponent,
   ],
   imports: [
     BrowserModule,

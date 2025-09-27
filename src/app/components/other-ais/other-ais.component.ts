@@ -10,6 +10,7 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { BoxService } from 'src/app/services/box.service';
 import { ChatBotService } from 'src/app/services/chat-bot.service';
@@ -41,10 +42,10 @@ export class OtherAisComponent implements OnInit {
   }
   selectedSdg?: SDGPlus;
   /** Find the AI by avatarPath and delegate to the normal selector */
-  selectAvatar(path: string) {
-    const ai = this.aiOptions.find((a) => a.avatarPath === path);
-    if (ai) this.selectAi(ai); // re-uses your existing logic + scroll
-  }
+  // selectAvatar(path: string) {
+  //   const ai = this.aiOptions.find((a) => a.avatarPath === path);
+  //   if (ai) this.selectAi(ai); // re-uses your existing logic + scroll
+  // }
 
   selectSdg(tile: SDGPlus, ev: MouseEvent) {
     ev.preventDefault(); // stop link navigation
@@ -270,7 +271,8 @@ meaningful, lasting impact.`,
     private cdRef: ChangeDetectorRef,
     public chat: ChatBotService,
     private data: DataService,
-    private box: BoxService
+    private box: BoxService,
+    private router: Router
   ) {}
   checkLoginStatus(): void {
     if (
@@ -282,23 +284,44 @@ meaningful, lasting impact.`,
       this.isLoggedIn = false;
     }
   }
+  //   selectAi(ai: any) {
+  //     this.aiSelected = ai;
+  //     // scroll to chat window
+  //     setTimeout(() => {
+  //       this.chatWindow.nativeElement.scrollIntoView({
+  //         behavior: 'smooth',
+  //         block: 'start',
+  //       });
+  //     }, 0);
+  //     // this.toggleAiOptions();
+  //     this.responses = [
+  //       {
+  //         text: '',
+  //         type: 'RESPONSE',
+  //       },
+  //     ];
+  //     this.deleteAllDocuments();
+  //   }
+  //   private slugify(name: string) {
+  //   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  // }
+  private slugify(name: string) {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
   selectAi(ai: any) {
-    this.aiSelected = ai;
-    // scroll to chat window
-    setTimeout(() => {
-      this.chatWindow.nativeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 0);
-    // this.toggleAiOptions();
-    this.responses = [
-      {
-        text: '',
-        type: 'RESPONSE',
-      },
-    ];
-    this.deleteAllDocuments();
+    const slug = this.slugify(ai.name);
+    this.router.navigate(['/avatar', slug], { state: { avatar: ai } });
+  }
+
+  selectAvatar(path: string) {
+    const ai = this.aiOptions.find((a) => a.avatarPath === path);
+    if (ai) {
+      const slug = this.slugify(ai.name);
+      this.router.navigate(['/avatar', slug], { state: { avatar: ai } });
+    }
   }
   selectAiFromDropDown(ai: any) {
     this.aiSelected = ai;

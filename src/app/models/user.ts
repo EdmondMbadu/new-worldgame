@@ -43,6 +43,13 @@ export class Avatar {
   dateSorted?: number;
   formattedDateCreated?: string;
   originalFilename?: string;
+  group?: 'colleague' | 'elder';
+  sdgs?: number[];
+  intro?: string; // HTML allowed (you already use innerHTML)
+  collectionPath?: string; // Firestore collection to write prompts to
+  requiresAdmin?: boolean;
+  slug?: string;
+  avatarPath?: string;
 }
 export class Tournament {
   solutionId?: string;

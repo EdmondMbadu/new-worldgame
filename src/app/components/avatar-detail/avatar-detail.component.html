@@ -1,0 +1,346 @@
+<!-- src/app/pages/avatar-detail/avatar-detail.component.html -->
+<div
+  class="min-h-screen dark:bg-slate-950 bg-slate-50 text-slate-900 dark:text-slate-100"
+>
+  <!-- NAV -->
+  <app-navbar
+    [hoveredOtherAisPath]="'bg-gray-100 dark:bg-gray-700'"
+    [showMoreOrLess]="true"
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser?.email"
+    [firstName]="auth.currentUser?.firstName"
+    [lastName]="auth.currentUser?.lastName"
+    [path]="'home'"
+  >
+  </app-navbar>
+
+  <!-- STICKY TOP BAR -->
+  <div
+    class="sticky top-0 z-40 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60 bg-white/90 dark:bg-slate-900/90 border-b border-black/5 dark:border-white/10"
+  >
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-3"
+    >
+      <button
+        (click)="backToPool()"
+        class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm shadow hover:opacity-90"
+      >
+        <svg
+          class="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        All Avatars
+      </button>
+
+      <div class="ml-auto flex items-center gap-2">
+        <label class="text-xs opacity-70">Switch</label>
+        <select #sel (change)="switchAvatar(sel.value)">
+          <option
+            *ngFor="let a of allAvatars"
+            [selected]="a.slug === avatar.slug"
+            [value]="a.slug"
+          >
+            {{ a.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="relative">
+    <div class="absolute inset-0 -z-10">
+      <div
+        class="h-64 bg-gradient-to-br from-indigo-600 via-sky-500 to-emerald-500 blur-2xl opacity-30"
+      ></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+      <div
+        class="rounded-3xl p-[2px] bg-gradient-to-br from-indigo-500 via-sky-400 to-emerald-400 shadow-2xl"
+      >
+        <div
+          class="rounded-3xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl"
+        >
+          <div
+            class="px-6 md:px-10 py-10 md:py-12 flex flex-col md:flex-row items-center gap-8"
+          >
+            <div class="relative">
+              <span
+                class="absolute -inset-4 rounded-full bg-white/30 dark:bg-slate-800/30 blur-xl"
+              ></span>
+              <img
+                [src]="avatar.avatarPath"
+                [alt]="avatar.name"
+                class="relative h-40 w-40 md:h-48 md:w-48 rounded-full ring-8 ring-white dark:ring-slate-900 shadow-2xl object-cover"
+              />
+            </div>
+
+            <div class="text-center md:text-left">
+              <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
+                {{ avatar.name }}
+              </h1>
+              <p class="mt-3 text-lg opacity-80">
+                <span [innerHTML]="avatar.intro"></span>
+              </p>
+
+              <!-- SDG chips -->
+              <div
+                class="mt-5 flex flex-wrap gap-2 justify-center md:justify-start"
+              >
+                <span
+                  *ngFor="let s of avatar.sdgs"
+                  class="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs bg-white/60 dark:bg-slate-800/60 border-black/10 dark:border-white/10"
+                >
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                  {{ sdgLabel(s) }}
+                </span>
+              </div>
+
+              <!-- CTA -->
+              <div
+                class="mt-6 flex flex-wrap gap-3 justify-center md:justify-start"
+              >
+                <button
+                  (click)="scrollToChat()"
+                  class="rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow"
+                >
+                  Start chatting
+                </button>
+                <a
+                  href="#about"
+                  class="rounded-full px-5 py-2.5 text-sm font-semibold bg-white/70 dark:bg-slate-800/70 border border-black/10 dark:border-white/10 hover:bg-white/90"
+                >
+                  About {{ avatar.name }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin notice if needed -->
+      <div
+        *ngIf="status"
+        class="mt-3 text-center text-sm text-amber-600 dark:text-amber-400"
+      >
+        {{ status }}
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 grid gap-10">
+    <!-- ABOUT -->
+    <section
+      id="about"
+      class="rounded-3xl p-6 md:p-8 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg"
+    >
+      <h2 class="text-xl md:text-2xl font-bold mb-4">
+        About {{ avatar.name }}
+      </h2>
+      <div class="prose dark:prose-invert max-w-none">
+        <p [innerHTML]="avatar.intro"></p>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section
+      #chatWindow
+      class="rounded-3xl overflow-hidden bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-2xl"
+    >
+      <!-- quick prompts -->
+      <div class="p-4 border-b border-black/5 dark:border-white/10">
+        <div class="flex flex-wrap gap-2">
+          <button
+            class="rounded-full text-xs px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:opacity-90"
+            (click)="
+              quickPromptFill(
+                'Help me map stakeholders and risks for a local SDG project.'
+              )
+            "
+          >
+            Stakeholder map
+          </button>
+          <button
+            class="rounded-full text-xs px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:opacity-90"
+            (click)="
+              quickPromptFill(
+                'Suggest 3 actionable pilots with low cost, high impact.'
+              )
+            "
+          >
+            3 pilot ideas
+          </button>
+          <button
+            class="rounded-full text-xs px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:opacity-90"
+            (click)="
+              quickPromptFill(
+                'Turn this idea into a one-page plan with KPIs and timeline:'
+              )
+            "
+          >
+            1-page plan
+          </button>
+          <button
+            class="rounded-full text-xs px-3 py-1 bg-slate-100 dark:bg-slate-800 hover:opacity-90"
+            (click)="
+              quickPromptFill(
+                'Rewrite my draft to be clear, concise, and compelling:'
+              )
+            "
+          >
+            Polish draft
+          </button>
+          <span class="ml-auto text-xs opacity-60 hidden md:inline"
+            >Tip: press “/” to focus</span
+          >
+        </div>
+      </div>
+
+      <!-- messages -->
+      <div class="h-[70vh] flex flex-col">
+        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          <ng-container *ngFor="let resp of responses; let i = index">
+            <div
+              class="flex"
+              [ngClass]="
+                resp.type === 'PROMPT' ? 'justify-end' : 'justify-start'
+              "
+            >
+              <img
+                *ngIf="resp.type !== 'PROMPT'"
+                class="h-12 w-12 mr-2 rounded-full self-end"
+                [src]="avatar.avatarPath"
+                [alt]="avatar.name"
+              />
+              <div class="relative group max-w-[75vw]">
+                <div
+                  [ngClass]="
+                    resp.type === 'PROMPT'
+                      ? 'bg-indigo-600 text-white ml-auto'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 mr-auto'
+                  "
+                  class="rounded-2xl px-4 py-2 shadow-sm text-sm leading-relaxed"
+                >
+                  <!-- first bubble shows intro -->
+                  <p *ngIf="i === 0">
+                    <span class="font-bold">{{ avatar.name }}</span
+                    ><br /><span [innerHTML]="avatar.intro"></span>
+                  </p>
+
+                  <!-- loading -->
+                  <div
+                    *ngIf="resp.loading"
+                    class="flex items-center gap-2 text-gray-500 dark:text-gray-400"
+                  >
+                    <span
+                      class="animate-pulse h-2.5 w-2.5 rounded-full bg-gray-400"
+                    ></span>
+                    <span>preparing answer...</span>
+                  </div>
+
+                  <!-- real answer -->
+                  <p
+                    *ngIf="!resp.loading && i !== 0"
+                    class="select-text"
+                    [innerHTML]="chat.formatText(resp.text)"
+                  ></p>
+                </div>
+
+                <!-- copy -->
+                <button
+                  *ngIf="resp.type === 'RESPONSE' && !resp.loading"
+                  (click)="copySingleMessage(resp.text, i)"
+                  class="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center h-6 w-6 rounded-full bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600"
+                  [attr.aria-label]="
+                    singleCopyStates[i] === 'Copied!' ? 'Copied' : 'Copy answer'
+                  "
+                >
+                  <ng-container
+                    *ngIf="singleCopyStates[i] !== 'Copied!'; else done"
+                  >
+                    <svg
+                      class="h-4 w-4 text-gray-700 dark:text-gray-200"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                      <path
+                        d="M5 15H4a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2h9a2 2 0 0 1 2 2v1"
+                      ></path>
+                    </svg>
+                  </ng-container>
+                  <ng-template #done>
+                    <svg
+                      class="h-4 w-4 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </ng-template>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <div #bottomAnchor></div>
+        </div>
+
+        <!-- composer -->
+        <form
+          class="border-t border-black/5 dark:border-white/10 p-3 flex items-center gap-3"
+          (ngSubmit)="submitPrompt($event, promptInput)"
+        >
+          <input
+            #promptInput
+            id="promptInput"
+            type="text"
+            placeholder="Ask {{ avatar.name }} anything…"
+            class="flex-1 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 text-sm placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+          />
+          <button
+            type="submit"
+            class="shrink-0 p-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m12 18-7 3 7-18 7 18-7-3Zm0 0v-5"
+              />
+            </svg>
+          </button>
+        </form>
+        <div
+          *ngIf="status"
+          class="text-center text-sm text-gray-500 dark:text-gray-300 py-2"
+        >
+          {{ status }}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="py-10"></footer>
+</div>
