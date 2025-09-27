@@ -247,7 +247,7 @@ meaningful, lasting impact.`,
       name: 'Mark Twain',
       group: 'elder',
       sdgs: [],
-      requiresAdmin: true, // ⬅️ add this
+      // requiresAdmin: true, // ⬅️ add this
       intro: `${name} Distinguished American author, essayist, journalist, and literary critic. He's known for his novels The Adventures of Tom Sawyer (1876) and Adventures of Huckleberry Finn (1884), which some call the "Great American Novel". `,
       collectionPath: `users/${this.auth.currentUser.uid}/twain/`,
     },
