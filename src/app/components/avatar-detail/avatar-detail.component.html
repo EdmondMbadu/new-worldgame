@@ -117,12 +117,15 @@
                 >
                   Start chatting
                 </button>
-                <a
-                  href="#about"
+
+                <!-- was <a href="#about">... -->
+                <button
+                  type="button"
+                  (click)="scrollTo('about')"
                   class="rounded-full px-5 py-2.5 text-sm font-semibold bg-white/70 dark:bg-slate-800/70 border border-black/10 dark:border-white/10 hover:bg-white/90"
                 >
                   About {{ avatar.name }}
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -144,7 +147,7 @@
     <!-- ABOUT -->
     <section
       id="about"
-      class="rounded-3xl p-6 md:p-8 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg"
+      class="scroll-mt-24 md:scroll-mt-28 rounded-3xl p-6 md:p-8 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg"
     >
       <h2 class="text-xl md:text-2xl font-bold mb-4">
         About {{ avatar.name }}

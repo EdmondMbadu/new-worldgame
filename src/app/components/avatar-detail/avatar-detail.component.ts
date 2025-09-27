@@ -119,6 +119,11 @@ export class AvatarDetailComponent implements OnInit {
       .catch(() => {});
   }
 
+  scrollTo(id: string) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   // QUICK PROMPTS
   quickPromptFill(str: string) {
     if (!this.promptInput) return;
