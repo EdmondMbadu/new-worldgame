@@ -276,7 +276,7 @@ const routes: Routes = [
   {
     path: 'other-ais',
     component: OtherAisComponent,
-    canActivate: [AuthGuard],
+    // canActivate: [AuthGuard],
   },
   {
     path: 'operating-manual',
