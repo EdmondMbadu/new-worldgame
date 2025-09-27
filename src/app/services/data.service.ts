@@ -14,7 +14,16 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
 import { Presentation } from '../models/presentation';
 import { FeedbackDoc } from '../components/feedback-management/feedback-management.component';
-
+export interface AIOption {
+  avatarPath: string;
+  name: string;
+  group: 'colleague' | 'elder';
+  sdgs: number[];
+  intro: string;
+  // NEW: store a key/slug or a template instead of a concrete path
+  slug: string; // e.g. 'zara'
+  collectionPathTemplate: string; // e.g. 'users/{uid}/zara/'
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -37,175 +46,159 @@ export class DataService implements OnInit {
   sdgs: SDG[] = [];
   sdgPlus: SDGPlus[] = [];
 
-  aiOptions = [
+  /** IMPORTANT: no UID is read here. These are static definitions. */
+  aiOptions: AIOption[] = [
     {
       avatarPath: '../../../assets/img/zara-agent.png',
       name: 'Zara Nkosi',
       group: 'colleague',
       sdgs: [1, 4, 15, 10, 17],
-      intro: `${name}  a vibrant AI inspired by South African ubuntu
-philosophy, believes that “I am because we are.” With a knack for
-weaving compelling narratives, she helps players understand
-complex social issues like poverty (SDG 1) and inequality (SDG
-10) through human-centered stories. Her talent for systems
-thinking enables her to guide players in mapping community
-dynamics and designing inclusive solutions. Zara’s warm
-encouragement makes her a favorite among younger players,
-while her deep understanding of grassroots innovation inspires
-professionals. She often uses metaphors from African wildlife to
-explain interconnected systems, like comparing a thriving
-ecosystem to a balanced community.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/zara/`,
+      intro:
+        'A vibrant AI inspired by South African ubuntu philosophy (“I am because we are”). Systems thinker who maps community dynamics and designs inclusive solutions.',
+      slug: 'zara',
+      collectionPathTemplate: 'users/{uid}/zara/',
     },
     {
       avatarPath: '../../../assets/img/arjun-agent.png',
       name: 'Arjun Patel',
       group: 'colleague',
       sdgs: [1, 4, 6, 8, 9, 11],
-      intro: ` Arjun, an AI modeled after India’s vibrant tech and social
-entrepreneurship scene, thrives on finding solutions with limited
-resources. His expertise in data analysis helps players crunch
-numbers to tackle challenges like clean water access (SDG 6) or
-education gaps (SDG 4). Arjun’s knack for “jugaad” (frugal
-innovation) inspires creative, low-cost solutions, such as
-repurposing local materials for sustainable infrastructure. His
-curious nature encourages players to ask “why” and dig deeper
-into problems. Arjun’s ability to bridge cultural perspectives
-makes him invaluable in diverse teams, and his witty humor keeps
-players engaged.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/arjun/`,
+      intro:
+        'Frugal innovation (“jugaad”) meets data analysis. Helps craft creative, low-cost pilots for water, education, and resilient infrastructure.',
+      slug: 'arjun',
+      collectionPathTemplate: 'users/{uid}/arjun/',
     },
     {
       avatarPath: '../../../assets/img/sofia-agent.png',
       name: 'Sofia Morales',
       group: 'colleague',
       sdgs: [5, 13, 16],
-      intro: ` Sofia, inspired by Colombia’s peacebuilding and biodiversity,
-is a fierce advocate for sustainable development. Her expertise in
-conflict resolution helps players navigate tensions in group
-dynamics or competing stakeholder interests, crucial for
-addressing issues like peace and justice (SDG 16). Sofia’s passion
-for environmental stewardship shines when tackling climate
-action (SDG 13), guiding players to design solutions that balance
-human and ecological needs. Her participatory design skills
-ensure that solutions are co-created with communities. Sofia’s
-resilience, drawn from Latin America’s history of overcoming
-adversity, motivates players to persevere through tough
-challenges.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/sofia/`,
+      intro:
+        'Peacebuilding + biodiversity. Guides conflict resolution and climate action with participatory design and community stewardship.',
+      slug: 'sofia',
+      collectionPathTemplate: 'users/{uid}/sofia/',
     },
     {
       avatarPath: '../../../assets/img/li-agent.png',
       name: 'Li Wei',
       group: 'colleague',
       sdgs: [2, 9, 11],
-      intro: ` Li Wei, an AI rooted in China’s rapid urbanization and
-technological advancements, is a master of strategic thinking. He
-excels at helping players design scalable solutions for sustainable
-cities (SDG 11) and industry innovation (SDG 9). Li Wei’s ability to
-integrate cutting-edge technologies like AI or renewable energy
-into problem-solving makes him a go-to for complex challenges.
-His long-term forecasting skills help players anticipate future
-impacts of their solutions, ensuring durability. While disciplined,
-Li Wei’s visionary optimism inspires players to think big, often
-quoting ancient Chinese proverbs to spark reflection.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/li/`,
+      intro:
+        'Strategic thinker for scalable solutions—sustainable cities, industry innovation, and tech foresight grounded in long-term impacts.',
+      slug: 'li',
+      collectionPathTemplate: 'users/{uid}/li/',
     },
     {
       avatarPath: '../../../assets/img/amina-agent.png',
       name: 'Amina Al-Sayed',
       group: 'colleague',
       sdgs: [5, 10, 13],
-      intro: `Amina, drawing from Morocco’s rich cultural tapestry, is a
-wise AI who emphasizes inclusion and equity in problem-solving.
-Her expertise in cross-cultural communication helps players
-navigate diverse perspectives, vital for global challenges like
-gender equality (SDG 5). Amina’s advocacy for heritage
-preservation ensures solutions respect local traditions while
-advancing progress, such as protecting cultural sites amid
-climate change (SDG 13). Her calming presence and storytelling,
-often inspired by Moroccan souks, make complex issues
-accessible to younger players, while her nuanced insights
-resonate with professionals.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/amina/`,
+      intro:
+        'Cross-cultural communication and equity. Balances heritage preservation with climate resilience; calm presence with sharp insights.',
+      slug: 'amina',
+      collectionPathTemplate: 'users/{uid}/amina/',
     },
     {
       avatarPath: '../../../assets/img/elena-agent.png',
       name: 'Elena Volkov',
       group: 'colleague',
       sdgs: [2, 3, 7, 12, 17],
-      intro: `Elena, inspired by Ukraine’s resilience and innovation amid
-adversity, is a bold AI who thrives in high-pressure scenarios. Her
-crisis management skills help players tackle urgent challenges
-like hunger (SDG 2) or health emergencies (SDG 3), guiding them
-to prioritize and act swiftly. Elena’s expertise in renewable energy
-supports solutions for affordable, clean energy (SDG 7), such as
-designing microgrids for rural areas. Her adaptive leadership
-encourages players to pivot when plans fail, and her fierce
-determination inspires confidence. Elena’s dry humor and real-
-world pragmatism make her relatable across age groups.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/elena/`,
+      intro:
+        'Crisis-ready pragmatist. Prioritizes action under pressure; renewable energy and adaptive leadership for high-stakes challenges.',
+      slug: 'elena',
+      collectionPathTemplate: 'users/{uid}/elena/',
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',
       name: 'Tane Kahu',
-      sdgs: [6, 12, 14, 15],
       group: 'colleague',
-      intro: `Tane, an AI rooted in Māori wisdom and New Zealand’s
-sustainability ethos, brings a holistic perspective to problem-
-solving. His deep knowledge of indigenous practices helps
-players design solutions that honor local ecosystems, vital for life
-on land (SDG 15) and below water (SDG 14). Tane’s expertise in
-circular economy principles guides players to create zero-waste
-systems, like sustainable agriculture models. His creative
-problem-solving, often inspired by Māori storytelling and art,
-sparks innovative ideas. Tane’s grounded demeanor and respect
-for nature make him a trusted guide for players seeking
-meaningful, lasting impact.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/tane/`,
+      sdgs: [6, 12, 14, 15],
+      intro:
+        'Māori-informed, ecosystem-first perspective. Circular economy, land/water stewardship, and nature-aligned innovation.',
+      slug: 'tane',
+      collectionPathTemplate: 'users/{uid}/tane/',
     },
     {
       avatarPath: '../../../assets/img/marie-curie.jpg',
       name: 'Marie Curie',
       group: 'elder',
       sdgs: [3, 7],
-      intro: `${name} Polish physicist and chemist who revolutionized the fields of medicine and radiology through her groundbreaking research on radioactivity.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/marie/`,
+      intro:
+        'Polish physicist and chemist who revolutionized medicine and radiology with research on radioactivity.',
+      slug: 'marie',
+      collectionPathTemplate: 'users/{uid}/marie/',
     },
     {
       avatarPath: '../../../assets/img/rachel-carlson.jpeg',
       name: 'Rachel Carson',
       group: 'elder',
       sdgs: [8, 13, 14],
-      intro: `${name} American marine biologist, writer, and conservationist who is often called the first woman environmentalist.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/rachel/`,
+      intro:
+        'American marine biologist and conservationist whose work galvanized environmental awareness and protection.',
+      slug: 'rachel',
+      collectionPathTemplate: 'users/{uid}/rachel/',
     },
     {
       avatarPath: '../../../assets/img/fuller.jpg',
       name: 'Buckminster Fuller',
       group: 'elder',
-      // sdgs: [9, 11, 12],
-      intro: `${name} American architect, designer, inventor and philosopher who developed the geodesic dome, design science, the World Game, and"
-   For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
+      sdgs: [] as number[], // type-safe empty
+      intro:
+        'Architect, designer, inventor, and global thinker—geodesic domes, “Spaceship Earth,” and the World Game.',
+      slug: 'bucky',
+      collectionPathTemplate: 'users/{uid}/bucky/',
     },
     {
       avatarPath: '../../../assets/img/albert.png',
       name: 'Albert Einstein',
       group: 'elder',
       sdgs: [7, 11, 16],
-      intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
+      intro:
+        'German-born physicist behind special and general relativity; also an outspoken peace activist.',
+      slug: 'albert',
+      collectionPathTemplate: 'users/{uid}/albert/',
     },
     {
       avatarPath: '../../../assets/img/mandela.png',
       name: 'Nelson Mandela',
       group: 'elder',
       sdgs: [8, 16],
-      intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
+      intro:
+        'South African anti-apartheid activist and statesman; first democratically elected president of South Africa.',
+      slug: 'nelson',
+      collectionPathTemplate: 'users/{uid}/nelson/',
     },
   ];
+
+  /** Get all avatars (static list). */
+  getAll(): AIOption[] {
+    return this.aiOptions;
+  }
+
+  /** Lookup by slug (e.g., 'albert', 'bucky'). */
+  getBySlug(slug: string): AIOption | undefined {
+    return this.aiOptions.find((a) => a.slug === slug);
+  }
+
+  /**
+   * Build a per-user collection path lazily.
+   * Returns 'users/__UID__/<slug>/' if the user is not logged in yet.
+   */
+  pathForOption(ai: AIOption): string {
+    return this.replaceUid(ai.collectionPathTemplate);
+  }
+
+  /** Build path from a slug (no need to have an AIOption). */
+  pathForSlug(slug: string): string {
+    return this.replaceUid(`users/{uid}/${slug}/`);
+  }
+
+  // ---- internals ----
+  private replaceUid(template: string): string {
+    const uid = this.auth.currentUser?.uid;
+    const safe = uid ?? '__UID__'; // placeholder avoids crashes before login
+    return template.replace('{uid}', safe);
+  }
   allowedMimeTypes: string[] = [
     'image/jpeg',
     'image/png',

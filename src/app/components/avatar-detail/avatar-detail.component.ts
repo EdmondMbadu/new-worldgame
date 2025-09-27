@@ -253,7 +253,9 @@ export class AvatarDetailComponent implements OnInit {
   }
 
   public goToLogin() {
-    const redirectTo = this.router.url;
+    const redirectTo = this.router.url; // current full path incl. params
+    this.auth.setRedirectUrl(redirectTo); // in-memory
+    sessionStorage.setItem('redirectTo', redirectTo); // resilient to refresh
     this.router.navigate(['/login'], { queryParams: { redirectTo } });
   }
 }

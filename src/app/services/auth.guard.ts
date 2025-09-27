@@ -46,6 +46,7 @@ export class AuthGuard {
       tap((loggedIn) => {
         if (!loggedIn) {
           this.auth.setRedirectUrl(state.url);
+          sessionStorage.setItem('redirectTo', state.url);
           this.router.navigate(['/login']);
         }
       })
@@ -80,6 +81,7 @@ export class AuthGuard {
       tap((ok) => {
         if (!ok) {
           this.auth.setRedirectUrl(state.url);
+          sessionStorage.setItem('redirectTo', state.url);
           this.router.navigate(['/home']);
         }
       })
@@ -96,6 +98,7 @@ export class AuthGuard {
       switchMap((u: any) => {
         if (!u) {
           this.auth.setRedirectUrl(state.url);
+          sessionStorage.setItem('redirectTo', state.url);
           this.router.navigate(['/login']);
           return of(false);
         }
@@ -128,6 +131,7 @@ export class AuthGuard {
             tap((ok) => {
               if (!ok) {
                 this.auth.setRedirectUrl(state.url);
+                sessionStorage.setItem('redirectTo', state.url);
                 this.router.navigate(['/home']);
               }
             })
@@ -146,6 +150,7 @@ export class AuthGuard {
       switchMap((u: any) => {
         if (!u) {
           this.auth.setRedirectUrl(state.url);
+          sessionStorage.setItem('redirectTo', state.url);
           this.router.navigate(['/login']);
           return of(false);
         }
@@ -188,6 +193,7 @@ export class AuthGuard {
             tap((ok) => {
               if (!ok) {
                 this.auth.setRedirectUrl(state.url);
+                sessionStorage.setItem('redirectTo', state.url);
                 this.router.navigate(['/home']);
               }
             })
@@ -209,6 +215,7 @@ export class AuthGuard {
       switchMap((user: User | null) => {
         if (!user) {
           this.auth.setRedirectUrl(state.url);
+          sessionStorage.setItem('redirectTo', state.url);
           this.router.navigate(['/login']);
           return of(false);
         }
@@ -249,6 +256,7 @@ export class AuthGuard {
       switchMap((u: any) => {
         if (!u) {
           this.auth.setRedirectUrl(state.url);
+          sessionStorage.setItem('redirectTo', state.url);
           this.router.navigate(['/login']);
           return of(false);
         }
@@ -271,6 +279,7 @@ export class AuthGuard {
             tap((ok) => {
               if (!ok) {
                 this.auth.setRedirectUrl(state.url);
+                sessionStorage.setItem('redirectTo', state.url);
                 this.router.navigate(['/home']);
               }
             })

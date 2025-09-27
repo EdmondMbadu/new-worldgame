@@ -256,8 +256,8 @@ export class AuthService {
 
         /* ── ② normal redirect flow ─────────────────────────── */
         if (user.emailVerified) {
-          this.router.navigateByUrl(this.redirectUrl || '/home');
-          this.redirectUrl = '';
+          const dest = this.popRedirect();
+          this.router.navigateByUrl(dest);
         } else {
           this.router.navigate(['/verify-email']);
         }
@@ -476,5 +476,42 @@ export class AuthService {
 
   schoolDoc$(schoolId: string) {
     return this.afs.doc<any>(`schools/${schoolId}`).valueChanges();
+  }
+
+  // AuthService
+  private popRedirect(): string {
+    // 1) in-memory (setRedirectUrl called by guards or components)
+    let target = (this.redirectUrl || '').trim();
+
+    // 2) query param on the current URL (e.g. /login?redirectTo=/avatar/albert-einstein)
+    if (!target) {
+      const tree = this.router.parseUrl(this.router.url);
+      const qp = tree.queryParams?.['redirectTo'];
+      if (qp) {
+        try {
+          target = decodeURIComponent(qp);
+        } catch {
+          target = qp;
+        }
+      }
+    }
+
+    // 3) sessionStorage fallback (survives refresh)
+    if (!target) {
+      const ss = sessionStorage.getItem('redirectTo');
+      if (ss) {
+        try {
+          target = decodeURIComponent(ss);
+        } catch {
+          target = ss;
+        }
+        sessionStorage.removeItem('redirectTo');
+      }
+    }
+
+    // sanitize + clear
+    if (!target || !target.startsWith('/')) target = '/home';
+    this.redirectUrl = '';
+    return target;
   }
 }

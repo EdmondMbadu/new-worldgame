@@ -7,6 +7,7 @@ import {
   FormControl,
 } from '@angular/forms';
 import { of } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -19,9 +20,25 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     window.scroll(0, 0);
     this.auth.logingError = of(null);
+
+    // If someone lands on /login?redirectTo=... (from a public page or bookmark),
+    // capture it for AuthService and for refresh resilience.
+    const qp = this.route.snapshot.queryParamMap.get('redirectTo');
+    if (qp) {
+      this.auth.setRedirectUrl(qp);
+      sessionStorage.setItem('redirectTo', qp);
+    } else {
+      // If the guard already set session storage and user refreshed on /login
+      const ss = sessionStorage.getItem('redirectTo');
+      if (ss) this.auth.setRedirectUrl(ss);
+    }
   }
 
-  constructor(public auth: AuthService, private fb: FormBuilder) {
+  constructor(
+    public auth: AuthService,
+    private fb: FormBuilder,
+    private route: ActivatedRoute
+  ) {
     this.myForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
