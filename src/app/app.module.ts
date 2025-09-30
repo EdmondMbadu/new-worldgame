@@ -152,6 +152,7 @@ import { TournamentUniversityComponent } from './blogs/tournament-university/tou
 import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
 import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from './components/avatar-detail/avatar-detail.component';
+import { CareersSocialComponent } from './blogs/careers-social/careers-social.component';
 
 @NgModule({
   declarations: [
@@ -279,6 +280,7 @@ import { AvatarDetailComponent } from './components/avatar-detail/avatar-detail.
     BulkEmailsComponent,
     UnsubscribeComponent,
     AvatarDetailComponent,
+    CareersSocialComponent,
   ],
   imports: [
     BrowserModule,
