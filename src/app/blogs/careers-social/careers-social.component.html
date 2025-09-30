@@ -3,483 +3,382 @@
 >
   <app-navbar></app-navbar>
 
-  <section class="relative pt-28">
+  <!-- HERO -->
+  <section class="relative pt-28 pb-20">
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        class="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-emerald-200/40 blur-3xl dark:bg-emerald-500/10"
+        class="absolute -top-16 -left-28 h-96 w-96 rounded-full bg-emerald-200/40 blur-3xl dark:bg-emerald-500/10"
       ></div>
       <div
-        class="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-cyan-200/40 blur-3xl dark:bg-cyan-500/10"
+        class="absolute -bottom-24 -right-24 h-[28rem] w-[28rem] rounded-full bg-cyan-200/40 blur-3xl dark:bg-cyan-500/10"
       ></div>
     </div>
 
-    <div class="relative mx-auto max-w-6xl px-4">
-      <div class="mx-auto max-w-3xl text-center">
-        <div
-          class="inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-white/70 px-3 py-1 text-sm text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/20 dark:bg-white/5 dark:text-emerald-200"
-        >
-          <span class="text-lg">🧭</span> Remote • Undergrad • 6–10 hrs/wk •
-          10–12 weeks
-        </div>
-
-        <h1
-          class="mt-5 bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl md:text-6xl"
-        >
-          Social Media Outreach Fellow (Undergraduate)
-        </h1>
-        <p class="mt-3 text-lg font-medium text-slate-600 dark:text-slate-300">
-          Turn your social media skills into real-world impact at
-          <span class="font-semibold">NewWorld Game</span>.
-        </p>
-
-        <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="https://www.newworld-game.org"
-            target="_blank"
-            rel="noopener"
-            class="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-white shadow hover:opacity-90 dark:bg-white dark:text-gray-900"
-          >
-            <span>Try NewWorld Game</span> <span aria-hidden="true">↗</span>
-          </a>
-          <a
-            [href]="mailto"
-            class="inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-white/80 px-5 py-3 text-emerald-800 shadow-sm backdrop-blur hover:bg-white dark:border-emerald-500/30 dark:bg-white/10 dark:text-emerald-200"
-          >
-            Email Your Application
-          </a>
-          <button
-            (click)="copyEmail()"
-            class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white/80 px-5 py-3 text-slate-700 shadow-sm backdrop-blur hover:bg-white dark:border-slate-700/60 dark:bg-white/10 dark:text-slate-200"
-          >
-            <span *ngIf="!copied">Copy Email</span>
-            <span *ngIf="copied">Copied!</span>
-          </button>
-        </div>
-
-        <div
-          class="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400"
-        >
-          <span
-            class="rounded-lg bg-white/70 px-2 py-1 shadow-sm dark:bg-white/5"
-            >US Eastern time-friendly</span
-          >
-          <span
-            class="rounded-lg bg-white/70 px-2 py-1 shadow-sm dark:bg-white/5"
-            >AI × Education × Social Impact</span
-          >
-          <span
-            class="rounded-lg bg-white/70 px-2 py-1 shadow-sm dark:bg-white/5"
-            >SDG-aligned</span
-          >
-        </div>
+    <div class="relative mx-auto max-w-3xl px-6">
+      <div
+        class="inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-white/70 px-4 py-1.5 text-sm text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/20 dark:bg-white/5 dark:text-emerald-200"
+      >
+        Remote • Undergrad • 6–10 hrs/wk • 10–12 weeks
       </div>
 
-      <div class="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div class="lg:col-span-2 space-y-8">
-          <div
-            class="rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-          >
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white">
-              About NewWorld Game
-            </h2>
-            <p class="mt-3 text-slate-600 dark:text-slate-300">
-              NewWorld Game (NWG) is an AI-assisted, team-based platform where
-              students and communities design evidence-based, sustainable, and
-              equitable solutions to local & global challenges—aligned with the
-              UN Sustainable Development Goals (SDGs). We’re looking for
-              creative, mission-driven undergraduate students to help us spark
-              conversations and mobilize participation across our social
-              channels.
-            </p>
-            <p class="mt-3 text-slate-600 dark:text-slate-300">
-              If you love crafting posts, testing what works, blazing new
-              channels, and seeing your ideas move people to action—this is for
-              you. If you care about climate, hunger, health, education and
-              other SDG-aligned challenges—this is for you.
-            </p>
-          </div>
+      <h1
+        class="mt-6 bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl md:text-6xl"
+      >
+        Social Media Outreach Fellow (Undergraduate)
+      </h1>
 
-          <div class="grid gap-6 md:grid-cols-2">
-            <div
-              class="rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-            >
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                What you’ll do
-              </h3>
-              <ul class="mt-4 space-y-3 text-slate-600 dark:text-slate-300">
-                <li class="flex gap-3">
-                  <span>🧵</span
-                  ><span
-                    >Draft and publish posts for NWG challenges across LinkedIn,
-                    Instagram, TikTok, X (Twitter), and YouTube.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>✍️</span
-                  ><span
-                    >Translate challenge briefs into short, compelling copy,
-                    carousels, and short-form video scripts.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>📅</span
-                  ><span
-                    >Plan a weekly content calendar; repurpose one idea across
-                    multiple formats and platforms.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🤖</span
-                  ><span
-                    >Help us leverage and build our own AI Content
-                    Platform.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>💬</span
-                  ><span
-                    >Engage the community: reply to comments/DMs, highlight
-                    teams, and surface great user stories.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🎨</span
-                  ><span
-                    >Collaborate on visuals (Canva/CapCut welcome) and on-brand
-                    messaging.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>📈</span
-                  ><span
-                    >Track simple metrics (reach, clicks, sign-ups) and propose
-                    quick A/B tests.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🌍</span
-                  ><span
-                    >Spot trends and timely conversations in education, AI,
-                    climate, health, etc.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🧭</span
-                  ><span
-                    >Uphold voice & values: inclusive, optimistic, and grounded
-                    in evidence and impact.</span
-                  >
-                </li>
-              </ul>
-            </div>
+      <p class="mt-5 text-xl leading-8 text-slate-600 dark:text-slate-300">
+        Turn your social media skills into real-world impact at
+        <span class="font-semibold">NewWorld Game</span>. Craft posts, spark
+        conversations, and mobilize students to tackle SDG-aligned challenges.
+      </p>
 
-            <div
-              class="rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-            >
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                You’ll thrive here if you…
-              </h3>
-              <ul class="mt-4 space-y-3 text-slate-600 dark:text-slate-300">
-                <li class="flex gap-3">
-                  <span>🧑‍🎓</span
-                  ><span
-                    >Are currently enrolled as an undergrad and write clean,
-                    punchy copy in English.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>⚡</span
-                  ><span
-                    >Live on social and understand hooks, pacing, visuals, and
-                    CTAs.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🧩</span
-                  ><span
-                    >Care about real-world problem solving (education, climate,
-                    health, equity, cities, etc.).</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🔁</span
-                  ><span
-                    >Are organized, curious, and iterate fast based on feedback
-                    and simple analytics.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🏅</span
-                  ><span
-                    >Bonus: Canva/CapCut, basic video editing, or running
-                    IG/TikTok/LinkedIn pages.</span
-                  >
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="grid gap-6 md:grid-cols-2">
-            <div
-              class="rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-            >
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                What you’ll gain
-              </h3>
-              <ul class="mt-4 space-y-3 text-slate-600 dark:text-slate-300">
-                <li class="flex gap-3">
-                  <span>🚀</span
-                  ><span
-                    >A ship-ready portfolio of live posts, campaigns, and growth
-                    snapshots with your byline.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🤝</span
-                  ><span
-                    >Mentorship and feedback from a small, energetic team at the
-                    AI × education × social-impact edge.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🌐</span
-                  ><span
-                    >Leadership experience mobilizing students and partners
-                    around SDG-aligned challenges.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>📣</span
-                  ><span
-                    >A strong reference / LinkedIn recommendation; potential
-                    paths to future paid roles.</span
-                  >
-                </li>
-                <li class="flex gap-3">
-                  <span>🎓</span
-                  ><span
-                    >Academic credit where available (we’ll support your school
-                    paperwork).</span
-                  >
-                </li>
-              </ul>
-            </div>
-
-            <div
-              class="rounded-2xl border border-slate-200/70 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-            >
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                Details
-              </h3>
-              <dl
-                class="mt-4 grid grid-cols-1 gap-4 text-slate-600 dark:text-slate-300 sm:grid-cols-2"
-              >
-                <div>
-                  <dt class="font-semibold text-slate-800 dark:text-slate-200">
-                    Type
-                  </dt>
-                  <dd>
-                    Learning-focused, unpaid fellowship (volunteer / for-credit
-                    where available)
-                  </dd>
-                </div>
-                <div>
-                  <dt class="font-semibold text-slate-800 dark:text-slate-200">
-                    Time
-                  </dt>
-                  <dd>
-                    ~6–10 hours/week for 10–12 weeks (flexible around exams)
-                  </dd>
-                </div>
-                <div>
-                  <dt class="font-semibold text-slate-800 dark:text-slate-200">
-                    Location
-                  </dt>
-                  <dd>
-                    Remote, async-friendly; occasional live check-ins (US
-                    Eastern time friendly)
-                  </dd>
-                </div>
-                <div>
-                  <dt class="font-semibold text-slate-800 dark:text-slate-200">
-                    Tools
-                  </dt>
-                  <dd>
-                    Google Workspace, Canva/CapCut, simple schedulers; ethical
-                    use of AI tools
-                  </dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-
-          <div
-            id="apply"
-            class="rounded-2xl border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm dark:border-emerald-500/30 dark:from-emerald-900/20 dark:to-teal-900/10"
-          >
-            <h3
-              class="text-lg font-semibold text-emerald-900 dark:text-emerald-200"
-            >
-              How to apply
-            </h3>
-            <ol class="mt-4 space-y-3 text-slate-700 dark:text-slate-300">
-              <li>
-                <span class="font-semibold">1)</span> Sign up and try the
-                NewWorld Game to understand the platform:
-                <a
-                  class="text-emerald-700 underline dark:text-emerald-300"
-                  href="https://www.newworld-game.org"
-                  target="_blank"
-                  rel="noopener"
-                  >www.NewWorld-Game.org</a
-                >
-              </li>
-              <li>
-                <span class="font-semibold">2)</span> Send: your resume or
-                LinkedIn, 2–3 short samples (posts/captions/reels/class
-                projects), and 3–4 sentences on a global or local problem you
-                care about—plus a quick idea for a post to recruit students to
-                tackle it.
-              </li>
-              <li>
-                <span class="font-semibold">3)</span> Apply via LinkedIn Easy
-                Apply or email:
-                <a
-                  class="text-emerald-700 underline dark:text-emerald-300"
-                  [href]="mailto"
-                  >{{ email }}</a
-                >
-                (subject: “NWG Social Media Fellow – Your Name”).
-              </li>
-            </ol>
-            <div class="mt-6 flex flex-wrap gap-3">
-              <a
-                [href]="mailto"
-                class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white shadow hover:bg-emerald-700"
-              >
-                Email Application
-              </a>
-              <a
-                href="https://www.linkedin.com"
-                target="_blank"
-                rel="noopener"
-                class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/5"
-              >
-                Apply on LinkedIn
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <aside class="lg:col-span-1">
-          <div class="sticky top-24 space-y-6">
-            <div
-              class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-            >
-              <div class="flex items-start gap-3">
-                <div
-                  class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 text-xl text-white"
-                >
-                  🎯
-                </div>
-                <div>
-                  <h4 class="font-semibold text-slate-900 dark:text-white">
-                    Quick Apply
-                  </h4>
-                  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                    3–5 minutes to send your materials.
-                  </p>
-                </div>
-              </div>
-              <div class="mt-4 space-y-3">
-                <a
-                  [href]="mailto"
-                  class="block w-full rounded-xl bg-emerald-600 px-5 py-3 text-center font-semibold text-white shadow hover:bg-emerald-700"
-                  >Email Application</a
-                >
-                <a
-                  href="https://www.linkedin.com"
-                  target="_blank"
-                  rel="noopener"
-                  class="block w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-white/10 dark:text-slate-200"
-                  >Apply on LinkedIn</a
-                >
-                <button
-                  (click)="copyEmail()"
-                  class="block w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-white/10 dark:text-slate-200"
-                >
-                  <span *ngIf="!copied">Copy Email</span>
-                  <span *ngIf="copied">Copied!</span>
-                </button>
-              </div>
-              <div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
-                Include: resume/LinkedIn, 2–3 samples, and your quick post idea.
-              </div>
-            </div>
-
-            <div
-              class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm backdrop-blur dark:border-slate-700/60 dark:bg-white/5"
-            >
-              <h4 class="font-semibold text-slate-900 dark:text-white">
-                SDGs we care about
-              </h4>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <span
-                  class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800"
-                  >No Poverty (SDG 1)</span
-                >
-                <span
-                  class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800"
-                  >Quality Education (SDG 4)</span
-                >
-                <span
-                  class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800"
-                  >Climate Action (SDG 13)</span
-                >
-                <span
-                  class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800"
-                  >Sustainable Cities (SDG 11)</span
-                >
-                <span
-                  class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800"
-                  >Good Health (SDG 3)</span
-                >
-              </div>
-            </div>
-          </div>
-        </aside>
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a
+          [href]="mailto"
+          class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-emerald-700 transition"
+        >
+          Apply by Email
+        </a>
+        <a
+          href="https://www.newworld-game.org"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/80 px-6 py-3 text-base font-semibold text-slate-800 shadow-sm hover:bg-white transition dark:border-slate-700 dark:bg-white/10 dark:text-slate-200"
+        >
+          Explore NewWorld Game ↗
+        </a>
+        <button
+          (click)="copyEmail()"
+          class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/80 px-6 py-3 text-base font-medium text-slate-700 shadow-sm hover:bg-white transition dark:border-slate-700 dark:bg-white/10 dark:text-slate-200"
+        >
+          <span *ngIf="!copied">Copy Email</span>
+          <span *ngIf="copied">Copied!</span>
+        </button>
       </div>
     </div>
   </section>
 
-  <div
-    class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/90 px-4 py-3 backdrop-blur md:hidden dark:border-slate-800 dark:bg-slate-900/80"
+  <!-- ABOUT -->
+  <section
+    class="relative border-t border-slate-200/70 py-20 dark:border-slate-800/60"
   >
-    <div class="mx-auto flex max-w-6xl items-center gap-3">
-      <div class="min-w-0 text-sm">
-        <div class="truncate font-semibold text-slate-900 dark:text-white">
-          Apply — Social Media Outreach Fellow
+    <div class="mx-auto max-w-3xl px-6">
+      <h2
+        class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white"
+      >
+        About NewWorld Game
+      </h2>
+      <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
+        NewWorld Game (NWG) is an AI-assisted, team-based platform where
+        students and communities design evidence-based, sustainable, and
+        equitable solutions to local & global challenges—aligned with the UN
+        Sustainable Development Goals (SDGs).
+      </p>
+      <p class="mt-6 text-lg leading-8 text-slate-600 dark:text-slate-300">
+        We’re seeking creative, mission-driven undergrads who love crafting
+        posts, testing what works, and seeing ideas move people to action—
+        especially if you care about climate, hunger, health, education, and
+        more.
+      </p>
+    </div>
+  </section>
+
+  <!-- WHAT YOU'LL DO -->
+  <section
+    class="relative border-t border-slate-200/70 py-20 dark:border-slate-800/60"
+  >
+    <div class="mx-auto max-w-3xl px-6">
+      <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">
+        What you’ll do
+      </h3>
+      <ul
+        class="mt-8 space-y-5 text-lg leading-8 text-slate-700 dark:text-slate-300"
+      >
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🧵</span>
+          <span
+            >Draft and publish posts for NWG challenges across LinkedIn,
+            Instagram, TikTok, X (Twitter), and YouTube.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">✍️</span>
+          <span
+            >Translate challenge briefs into short, compelling copy, carousels,
+            and short-form video scripts.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">📅</span>
+          <span
+            >Plan a weekly content calendar; repurpose one idea across multiple
+            formats and platforms.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🤖</span>
+          <span>Help us leverage and build our own AI Content Platform.</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">💬</span>
+          <span
+            >Engage the community: reply to comments/DMs, highlight teams, and
+            surface great user stories.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🎨</span>
+          <span
+            >Collaborate on visuals (Canva/CapCut welcome) and on-brand
+            messaging.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">📈</span>
+          <span
+            >Track simple metrics (reach, clicks, sign-ups) and propose quick
+            A/B tests to improve.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🌍</span>
+          <span
+            >Spot trends and opportunities to join timely conversations in
+            education, AI, climate, health, etc.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🧭</span>
+          <span
+            >Uphold voice & values: inclusive, optimistic, and grounded in
+            evidence and impact.</span
+          >
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- YOU'LL THRIVE -->
+  <section
+    class="relative border-t border-slate-200/70 py-20 dark:border-slate-800/60"
+  >
+    <div class="mx-auto max-w-3xl px-6">
+      <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">
+        You’ll thrive here if you…
+      </h3>
+      <ul
+        class="mt-8 space-y-5 text-lg leading-8 text-slate-700 dark:text-slate-300"
+      >
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🧑‍🎓</span
+          ><span
+            >Are currently enrolled as an undergrad and write clean, punchy copy
+            in English.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">⚡</span
+          ><span
+            >Live on social and understand what stops the scroll (hooks, pacing,
+            visuals, CTAs).</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🧩</span
+          ><span
+            >Care about real-world problem solving (education, climate, health,
+            equity, cities, etc.).</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🔁</span
+          ><span
+            >Are organized, curious, and iterate fast based on feedback and
+            simple analytics.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🏅</span
+          ><span
+            >Bonus: familiarity with Canva/CapCut, basic video editing, or
+            running IG/TikTok/LinkedIn pages.</span
+          >
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- WHAT YOU'LL GAIN -->
+  <section
+    class="relative border-t border-slate-200/70 py-20 dark:border-slate-800/60"
+  >
+    <div class="mx-auto max-w-3xl px-6">
+      <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">
+        What you’ll gain
+      </h3>
+      <ul
+        class="mt-8 space-y-5 text-lg leading-8 text-slate-700 dark:text-slate-300"
+      >
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🚀</span
+          ><span
+            >A ship-ready portfolio of live posts, campaigns, and growth
+            snapshots with your byline.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🤝</span
+          ><span
+            >Mentorship and feedback from a small team at the AI × education ×
+            social-impact edge.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🌐</span
+          ><span
+            >Leadership experience mobilizing students and partners around
+            SDG-aligned challenges.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">📣</span
+          ><span
+            >A strong reference / LinkedIn recommendation, and potential
+            pathways to future paid roles.</span
+          >
+        </li>
+        <li class="flex items-start gap-4">
+          <span class="mt-1">🎓</span
+          ><span
+            >Academic credit where available (we’ll support your paperwork with
+            your school).</span
+          >
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- DETAILS -->
+  <section
+    class="relative border-t border-slate-200/70 py-20 dark:border-slate-800/60"
+  >
+    <div class="mx-auto max-w-3xl px-6">
+      <h3 class="text-2xl font-semibold text-slate-900 dark:text-white">
+        Details
+      </h3>
+      <dl
+        class="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 text-lg leading-8"
+      >
+        <div>
+          <dt class="font-semibold text-slate-800 dark:text-slate-200">Type</dt>
+          <dd class="mt-1 text-slate-700 dark:text-slate-300">
+            Learning-focused, unpaid fellowship (volunteer / for-credit where
+            available).
+          </dd>
         </div>
-        <div class="truncate text-slate-500 dark:text-slate-400">
-          {{ email }}
+        <div>
+          <dt class="font-semibold text-slate-800 dark:text-slate-200">Time</dt>
+          <dd class="mt-1 text-slate-700 dark:text-slate-300">
+            ~6–10 hours/week for 10–12 weeks (flexible around exams).
+          </dd>
         </div>
-      </div>
-      <div class="ml-auto flex gap-2">
-        <a
-          [href]="mailto"
-          class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow"
-          >Email</a
+        <div>
+          <dt class="font-semibold text-slate-800 dark:text-slate-200">
+            Location
+          </dt>
+          <dd class="mt-1 text-slate-700 dark:text-slate-300">
+            Remote, async-friendly; occasional live check-ins (US Eastern time
+            friendly).
+          </dd>
+        </div>
+        <div>
+          <dt class="font-semibold text-slate-800 dark:text-slate-200">
+            Tools
+          </dt>
+          <dd class="mt-1 text-slate-700 dark:text-slate-300">
+            Google Workspace, Canva/CapCut, simple schedulers; ethical use of AI
+            tools.
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- APPLY -->
+  <section
+    id="apply"
+    class="relative border-t border-slate-200/70 py-24 dark:border-slate-800"
+  >
+    <div class="mx-auto max-w-3xl px-6">
+      <div
+        class="rounded-3xl border p-10 shadow-md bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/70 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 dark:border-emerald-400/30"
+      >
+        <h3
+          class="text-2xl font-semibold text-emerald-900 dark:text-emerald-100"
         >
-        <a
-          href="https://www.linkedin.com"
-          target="_blank"
-          rel="noopener"
-          class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm dark:border-slate-700 dark:bg-white/10 dark:text-slate-200"
-          >LinkedIn</a
+          How to apply
+        </h3>
+
+        <ol
+          class="mt-8 space-y-5 text-lg leading-8 text-slate-700 dark:text-slate-100"
         >
+          <li>
+            <span class="font-semibold">1)</span> Sign up and try the NewWorld
+            Game to better understand the platform:
+            <a
+              class="underline underline-offset-4 decoration-emerald-300/60 text-emerald-700 dark:text-emerald-300 dark:decoration-emerald-400/50 hover:dark:text-emerald-200"
+              href="https://www.newworld-game.org"
+              target="_blank"
+              rel="noopener"
+              >www.NewWorld-Game.org</a
+            >
+          </li>
+          <li>
+            <span class="font-semibold">2)</span> Send: 1) your resume or
+            LinkedIn, 2) 2–3 short samples (posts, captions, reels, or class
+            projects), and 3) 3–4 sentences on a global or local problem you
+            care about—plus a quick idea for a post you’d create to recruit
+            students to tackle it.
+          </li>
+          <li>
+            <span class="font-semibold">3)</span> Apply via LinkedIn Easy Apply
+            or email:
+            <a
+              class="underline underline-offset-4 decoration-emerald-300/60 text-emerald-700 dark:text-emerald-300 dark:decoration-emerald-400/50 hover:dark:text-emerald-200"
+              [href]="mailto"
+              >{{ email }}</a
+            >
+            (subject: “NWG Social Media Fellow – Your Name”).
+          </li>
+        </ol>
+
+        <div class="mt-8 flex flex-wrap gap-4">
+          <a
+            [href]="mailto"
+            class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-emerald-700 transition"
+            >Email Application</a
+          >
+
+          <!-- <a
+            href="https://www.linkedin.com"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center justify-center rounded-xl border px-6 py-3 text-base font-semibold shadow-sm transition border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+            >Apply on LinkedIn</a
+          > -->
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- Floating Apply Button -->
+  <a
+    href="#apply"
+    class="fixed bottom-6 right-6 z-40 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg hover:bg-emerald-700 transition"
+  >
+    Apply
+  </a>
 
   <app-footer></app-footer>
 </div>
