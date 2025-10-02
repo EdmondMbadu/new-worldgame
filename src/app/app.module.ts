@@ -153,6 +153,7 @@ import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
 import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from './components/avatar-detail/avatar-detail.component';
 import { CareersSocialComponent } from './blogs/careers-social/careers-social.component';
+import { LandingTestComponent } from './components/landing-test/landing-test.component';
 
 @NgModule({
   declarations: [
@@ -281,6 +282,7 @@ import { CareersSocialComponent } from './blogs/careers-social/careers-social.co
     UnsubscribeComponent,
     AvatarDetailComponent,
     CareersSocialComponent,
+    LandingTestComponent,
   ],
   imports: [
     BrowserModule,

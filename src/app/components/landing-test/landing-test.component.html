@@ -1,0 +1,456 @@
+<div class="min-h-screen bg-white dark:bg-slate-950">
+  <!-- Top bar -->
+  <div
+    class="sticky top-0 z-40 w-full border-b border-slate-200/60 bg-white/75 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/70"
+  >
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
+      <a routerLink="/" class="flex items-center gap-2">
+        <span
+          class="inline-grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-teal-500 via-cyan-500 to-emerald-500 text-white font-bold"
+          >NW</span
+        >
+        <span
+          class="hidden text-sm font-semibold tracking-tight text-slate-800 dark:text-slate-100 sm:block"
+          >NewWorld Game</span
+        >
+      </a>
+      <div class="hidden items-center gap-3 sm:flex">
+        <a
+          routerLink="/overview"
+          class="text-sm font-medium text-slate-700 hover:text-teal-600 dark:text-slate-300 dark:hover:text-teal-300"
+          >How it works</a
+        >
+        <a
+          routerLink="/primer"
+          class="text-sm font-medium text-slate-700 hover:text-teal-600 dark:text-slate-300 dark:hover:text-teal-300"
+          >Primer</a
+        >
+        <a
+          routerLink="/welcome"
+          class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:focus:ring-teal-800"
+        >
+          Get started
+          <svg
+            class="h-4 w-4 -rotate-45"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <!-- ambient -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
+    ></div>
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -bottom-52 -right-44 h-[32rem] w-[32rem] rounded-full bg-gradient-to-tr from-fuchsia-400 via-indigo-400 to-teal-400 opacity-20 blur-3xl"
+    ></div>
+
+    <div
+      class="mx-auto grid max-w-7xl items-center gap-10 px-6 pt-12 md:grid-cols-2 md:pt-20"
+    >
+      <!-- Copy -->
+      <div class="space-y-6">
+        <p
+          class="inline-flex items-center gap-2 rounded-full border border-teal-300/50 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
+        >
+          Ready to build the future? — Join the Challenge
+        </p>
+
+        <h1
+          class="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white md:text-6xl"
+        >
+          Build the <span class="nw-gradient-text">Shared Future</span> — then
+          make it real.
+        </h1>
+
+        <p
+          class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
+        >
+          NewWorld Game turns bold ideas into concrete action. Join global
+          teammates, tackle real problems, and ship measurable impact—starting
+          today.
+        </p>
+
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <a
+            routerLink="/welcome"
+            class="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+          >
+            Get started free
+            <svg
+              class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          </a>
+
+          <a
+            routerLink="/overview"
+            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-teal-900/20"
+          >
+            See how it works
+          </a>
+        </div>
+
+        <!-- Social proof mini -->
+        <div class="flex flex-wrap items-center gap-4 pt-2">
+          <div class="flex -space-x-2">
+            <img
+              class="h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900"
+              src="https://i.pravatar.cc/100?img=13"
+              alt=""
+            />
+            <img
+              class="h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900"
+              src="https://i.pravatar.cc/100?img=32"
+              alt=""
+            />
+            <img
+              class="h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900"
+              src="https://i.pravatar.cc/100?img=5"
+              alt=""
+            />
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400">
+            Teams forming now across 12+ countries.
+          </p>
+        </div>
+      </div>
+
+      <!-- Visual -->
+      <div class="relative">
+        <div
+          aria-hidden="true"
+          class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/30 via-cyan-300/20 to-emerald-300/30 blur-2xl"
+        ></div>
+
+        <div
+          class="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-2xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
+        >
+          <!-- “living globe” placeholder you can swap with your image -->
+          <div class="aspect-video grid place-items-center">
+            <img
+              class="h-full w-full object-cover"
+              src="../../../assets/img/earth-triangle.png"
+              alt="A living world, shaped by your ideas"
+            />
+          </div>
+          <div
+            class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/5 via-transparent"
+          ></div>
+
+          <!-- floating badges -->
+          <div class="pointer-events-none absolute left-4 top-4">
+            <span
+              class="animate-float rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
+              >Real Challenges</span
+            >
+          </div>
+          <div class="pointer-events-none absolute bottom-4 right-4">
+            <span
+              class="animate-float-delayed rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
+              >Global Teams</span
+            >
+          </div>
+        </div>
+
+        <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+          A living world, shaped by your ideas.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY STAY (Value tiles) -->
+  <section class="relative bg-white py-20 dark:bg-slate-950">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2
+          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
+        >
+          Why people stick around
+        </h2>
+        <p class="mt-3 text-slate-600 dark:text-slate-300">
+          Concrete actions, fast feedback, meaningful wins.
+        </p>
+      </div>
+
+      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="card-tile">
+          <div class="tile-icon">🧭</div>
+          <h3 class="tile-title">Clear pathways</h3>
+          <p class="tile-copy">
+            Roadmaps that turn ambition into weekly progress.
+          </p>
+        </div>
+        <div class="card-tile">
+          <div class="tile-icon">🤝</div>
+          <h3 class="tile-title">Teammates that show up</h3>
+          <p class="tile-copy">
+            Find peers who care about the same issues—and deliver.
+          </p>
+        </div>
+        <div class="card-tile">
+          <div class="tile-icon">🎯</div>
+          <h3 class="tile-title">Measured impact</h3>
+          <p class="tile-copy">
+            Dashboards & KPIs track real outcomes, not vibes.
+          </p>
+        </div>
+        <div class="card-tile">
+          <div class="tile-icon">🏅</div>
+          <h3 class="tile-title">Badges & opportunities</h3>
+          <p class="tile-copy">
+            Earn proof of work you can share with the world.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="relative overflow-hidden py-20">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-28 -right-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
+    ></div>
+    <div class="mx-auto grid max-w-7xl items-center gap-10 px-6 md:grid-cols-2">
+      <div class="space-y-6">
+        <span class="badge">3 steps • Zero fluff</span>
+        <h2 class="section-title">From idea → shipped impact</h2>
+        <ol class="space-y-4 text-slate-700 dark:text-slate-300">
+          <li class="step">
+            <span class="step-num">1</span>
+            <div>
+              <h3 class="font-semibold">Pick a challenge</h3>
+              <p class="text-sm">
+                Select SDGs or community problems you actually care about.
+              </p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <div>
+              <h3 class="font-semibold">Form your team</h3>
+              <p class="text-sm">
+                Meet builders, analysts, designers, and local operators.
+              </p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <div>
+              <h3 class="font-semibold">Ship in sprints</h3>
+              <p class="text-sm">
+                Deliver weekly outcomes with mentorship and clear KPIs.
+              </p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="flex gap-3 pt-2">
+          <a routerLink="/welcome" class="btn-primary">Start now</a>
+          <a routerLink="/overview" class="btn-ghost">See examples</a>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div class="relative">
+        <div
+          aria-hidden="true"
+          class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
+        ></div>
+        <div
+          class="relative grid w-full gap-4 rounded-3xl border border-slate-200/70 bg-white/80 p-6 shadow-xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10 sm:grid-cols-3"
+        >
+          <div class="metric">
+            <div class="metric-value">{{ playersCount }}</div>
+            <div class="metric-label">Players</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">{{ teamsCount }}</div>
+            <div class="metric-label">Active teams</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">{{ solutionsCount }}</div>
+            <div class="metric-label">Solutions shipped</div>
+          </div>
+        </div>
+        <p class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">
+          Numbers update as people join—jump in.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED CHALLENGES -->
+  <section class="relative bg-white py-20 dark:bg-slate-950">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="flex items-end justify-between">
+        <div>
+          <h2 class="section-title">Featured challenges</h2>
+          <p class="mt-2 text-slate-600 dark:text-slate-300">
+            Pick one and start earning badges this week.
+          </p>
+        </div>
+        <a
+          routerLink="/overview"
+          class="text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
+          >View all</a
+        >
+      </div>
+
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <app-challenge-card
+          title="Clean Energy Micro-Grids"
+          tag="SDG 7 • Climate"
+          description="Design a pilot micro-grid for a clinic or school. Ship a budget, vendor list, and rollout plan."
+          cta="Join team"
+        ></app-challenge-card>
+
+        <app-challenge-card
+          title="Digital Public Services"
+          tag="GovTech • SDG 16"
+          description="Prototype an e-service that reduces queue time by 50% for citizens in your region."
+          cta="Join team"
+        ></app-challenge-card>
+
+        <app-challenge-card
+          title="Youth Employment Accelerator"
+          tag="SDG 8"
+          description="Create a training + placement track with measurable 90-day outcomes."
+          cta="Join team"
+        ></app-challenge-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHORT TESTIMONIAL BAND -->
+  <section class="relative overflow-hidden py-16">
+    <div class="mx-auto max-w-5xl px-6">
+      <figure
+        class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 p-8 ring-1 ring-black/5 shadow-xl dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
+      >
+        <div
+          class="mx-auto mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-cyan-500 text-white"
+        >
+          “
+        </div>
+        <blockquote class="text-center">
+          <p
+            class="text-xl font-medium leading-relaxed text-slate-900 dark:text-white md:text-2xl"
+          >
+            “It’s where ambition turns into real projects with real outcomes.
+            Best decision this semester.”
+          </p>
+        </blockquote>
+        <figcaption
+          class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400"
+        >
+          — Student participant
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="relative bg-white py-20 dark:bg-slate-950">
+    <div class="mx-auto grid max-w-7xl gap-12 px-6 md:grid-cols-2">
+      <div>
+        <h2 class="section-title">Questions, answered</h2>
+        <p class="mt-2 max-w-md text-slate-600 dark:text-slate-300">
+          Everything you need to know to get rolling this week.
+        </p>
+      </div>
+      <div class="space-y-4">
+        <details class="faq">
+          <summary>Is it free to start?</summary>
+          <p>
+            Yes. Join, explore challenges, and meet teammates. Upgrade only if
+            you need advanced tools.
+          </p>
+        </details>
+        <details class="faq">
+          <summary>Do I need a team?</summary>
+          <p>No—solo is fine. You can match with a team anytime.</p>
+        </details>
+        <details class="faq">
+          <summary>What do I actually ship?</summary>
+          <p>
+            Each sprint ships evidence: budgets, pilots, dashboards, policy
+            drafts, or code—tracked as KPIs.
+          </p>
+        </details>
+        <details class="faq">
+          <summary>How do badges work?</summary>
+          <p>
+            Complete milestones to earn verifiable badges you can share on
+            resumes and LinkedIn.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="relative overflow-hidden py-20">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-32 -left-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
+    ></div>
+    <div class="mx-auto max-w-3xl px-6 text-center">
+      <h2
+        class="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white md:text-5xl"
+      >
+        Join the <span class="nw-gradient-text">NewWorld Game</span>
+      </h2>
+      <p
+        class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300"
+      >
+        Pick a challenge. Meet your team. Ship impact.
+      </p>
+      <div class="mt-8 flex items-center justify-center gap-3">
+        <a routerLink="/welcome" class="btn-primary">Get started</a>
+        <a routerLink="/login" class="btn-ghost">Log in</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky mobile CTA -->
+  <div
+    class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/70 bg-white/90 p-3 shadow-2xl backdrop-blur md:hidden dark:border-slate-800/70 dark:bg-slate-950/70"
+  >
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3">
+      <div>
+        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+          Ready?
+        </p>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Start in under 2 minutes.
+        </p>
+      </div>
+      <a
+        routerLink="/welcome"
+        class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-xs font-semibold text-white shadow-sm"
+        >Get started</a
+      >
+    </div>
+  </div>
+</div>

@@ -107,6 +107,7 @@ import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
 import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from '../app/components/avatar-detail/avatar-detail.component';
 import { CareersSocialComponent } from './blogs/careers-social/careers-social.component';
+import { LandingTestComponent } from './components/landing-test/landing-test.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -539,6 +540,10 @@ const routes: Routes = [
   {
     path: 'tournament-landing',
     component: TournamentLandingComponent,
+  },
+  {
+    path: 'landing-test',
+    component: LandingTestComponent,
   },
   {
     path: 'tournament-university',
