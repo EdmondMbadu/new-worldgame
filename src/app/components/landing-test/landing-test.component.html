@@ -1,53 +1,11 @@
+<!-- PAGE WRAPPER -->
 <div class="min-h-screen bg-white dark:bg-slate-950">
-  <!-- Top bar -->
-  <div
-    class="sticky top-0 z-40 w-full border-b border-slate-200/60 bg-white/75 backdrop-blur dark:border-slate-800/70 dark:bg-slate-950/70"
-  >
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
-      <a routerLink="/" class="flex items-center gap-2">
-        <span
-          class="inline-grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-teal-500 via-cyan-500 to-emerald-500 text-white font-bold"
-          >NW</span
-        >
-        <span
-          class="hidden text-sm font-semibold tracking-tight text-slate-800 dark:text-slate-100 sm:block"
-          >NewWorld Game</span
-        >
-      </a>
-      <div class="hidden items-center gap-3 sm:flex">
-        <a
-          routerLink="/overview"
-          class="text-sm font-medium text-slate-700 hover:text-teal-600 dark:text-slate-300 dark:hover:text-teal-300"
-          >How it works</a
-        >
-        <a
-          routerLink="/primer"
-          class="text-sm font-medium text-slate-700 hover:text-teal-600 dark:text-slate-300 dark:hover:text-teal-300"
-          >Primer</a
-        >
-        <a
-          routerLink="/welcome"
-          class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:focus:ring-teal-800"
-        >
-          Get started
-          <svg
-            class="h-4 w-4 -rotate-45"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </div>
+  <!-- Uniform navbar -->
+  <app-navbar></app-navbar>
 
   <!-- HERO -->
   <section class="relative overflow-hidden">
-    <!-- ambient -->
+    <!-- Ambient glow -->
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
@@ -58,29 +16,31 @@
     ></div>
 
     <div
-      class="mx-auto grid max-w-7xl items-center gap-10 px-6 pt-12 md:grid-cols-2 md:pt-20"
+      class="mx-auto grid max-w-7xl items-center gap-10 px-6 pt-10 md:grid-cols-2 md:pt-28"
     >
       <!-- Copy -->
       <div class="space-y-6">
-        <p
+        <span
           class="inline-flex items-center gap-2 rounded-full border border-teal-300/50 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
         >
-          Ready to build the future? — Join the Challenge
-        </p>
+          NewWorld Game • Build the Shared Future
+        </span>
 
         <h1
           class="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white md:text-6xl"
         >
-          Build the <span class="nw-gradient-text">Shared Future</span> — then
-          make it real.
+          Turn bold ideas into
+          <span
+            class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
+            >real-world impact</span
+          >.
         </h1>
 
         <p
           class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
         >
-          NewWorld Game turns bold ideas into concrete action. Join global
-          teammates, tackle real problems, and ship measurable impact—starting
-          today.
+          Join global teammates, pick a challenge, and ship measurable outcomes.
+          Fast feedback, clear KPIs, and proof-of-work badges you can share.
         </p>
 
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -105,27 +65,27 @@
             routerLink="/overview"
             class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-teal-900/20"
           >
-            See how it works
+            How it works
           </a>
         </div>
 
-        <!-- Social proof mini -->
+        <!-- Social proof -->
         <div class="flex flex-wrap items-center gap-4 pt-2">
           <div class="flex -space-x-2">
             <img
               class="h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900"
               src="https://i.pravatar.cc/100?img=13"
-              alt=""
+              alt="member"
             />
             <img
               class="h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900"
               src="https://i.pravatar.cc/100?img=32"
-              alt=""
+              alt="member"
             />
             <img
               class="h-8 w-8 rounded-full ring-2 ring-white dark:ring-slate-900"
               src="https://i.pravatar.cc/100?img=5"
-              alt=""
+              alt="member"
             />
           </div>
           <p class="text-sm text-slate-600 dark:text-slate-400">
@@ -134,17 +94,15 @@
         </div>
       </div>
 
-      <!-- Visual -->
+      <!-- Visual (smaller, balanced) -->
       <div class="relative">
         <div
           aria-hidden="true"
-          class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/30 via-cyan-300/20 to-emerald-300/30 blur-2xl"
+          class="absolute -inset-5 rounded-[2rem] bg-gradient-to-tr from-teal-300/30 via-cyan-300/20 to-emerald-300/30 blur-2xl"
         ></div>
-
         <div
-          class="relative mx-auto w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-2xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
+          class="relative mx-auto w-full max-w-md overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-2xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
         >
-          <!-- “living globe” placeholder you can swap with your image -->
           <div class="aspect-video grid place-items-center">
             <img
               class="h-full w-full object-cover"
@@ -156,21 +114,20 @@
             class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/5 via-transparent"
           ></div>
 
-          <!-- floating badges -->
-          <div class="pointer-events-none absolute left-4 top-4">
+          <!-- Floating badges (built-in Tailwind animations) -->
+          <div class="pointer-events-none absolute left-3 top-3">
             <span
-              class="animate-float rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
+              class="animate-bounce rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
               >Real Challenges</span
             >
           </div>
-          <div class="pointer-events-none absolute bottom-4 right-4">
+          <div class="pointer-events-none absolute bottom-3 right-3">
             <span
-              class="animate-float-delayed rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
+              class="animate-pulse rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
               >Global Teams</span
             >
           </div>
         </div>
-
         <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
           A living world, shaped by your ideas.
         </p>
@@ -178,75 +135,106 @@
     </div>
   </section>
 
-  <!-- WHY STAY (Value tiles) -->
-  <section class="relative bg-white py-20 dark:bg-slate-950">
+  <!-- VALUE TILES -->
+  <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">
       <div class="mx-auto max-w-2xl text-center">
         <h2
           class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
         >
-          Why people stick around
+          Why people stay
         </h2>
         <p class="mt-3 text-slate-600 dark:text-slate-300">
           Concrete actions, fast feedback, meaningful wins.
         </p>
       </div>
 
-      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="card-tile">
-          <div class="tile-icon">🧭</div>
-          <h3 class="tile-title">Clear pathways</h3>
-          <p class="tile-copy">
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <article
+          class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <div class="mb-2 text-2xl">🧭</div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            Clear pathways
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
             Roadmaps that turn ambition into weekly progress.
           </p>
-        </div>
-        <div class="card-tile">
-          <div class="tile-icon">🤝</div>
-          <h3 class="tile-title">Teammates that show up</h3>
-          <p class="tile-copy">
-            Find peers who care about the same issues—and deliver.
+        </article>
+        <article
+          class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <div class="mb-2 text-2xl">🤝</div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            Teammates that show up
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            Find peers who care—and deliver.
           </p>
-        </div>
-        <div class="card-tile">
-          <div class="tile-icon">🎯</div>
-          <h3 class="tile-title">Measured impact</h3>
-          <p class="tile-copy">
+        </article>
+        <article
+          class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <div class="mb-2 text-2xl">🎯</div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            Measured impact
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
             Dashboards & KPIs track real outcomes, not vibes.
           </p>
-        </div>
-        <div class="card-tile">
-          <div class="tile-icon">🏅</div>
-          <h3 class="tile-title">Badges & opportunities</h3>
-          <p class="tile-copy">
-            Earn proof of work you can share with the world.
+        </article>
+        <article
+          class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <div class="mb-2 text-2xl">🏅</div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            Badges & opportunities
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">
+            Earn proof of work you can share.
           </p>
-        </div>
+        </article>
       </div>
     </div>
   </section>
 
   <!-- HOW IT WORKS -->
-  <section class="relative overflow-hidden py-20">
+  <section class="relative overflow-hidden py-16">
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -top-28 -right-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
     ></div>
-    <div class="mx-auto grid max-w-7xl items-center gap-10 px-6 md:grid-cols-2">
+    <div class="mx-auto grid max-w-7xl items-start gap-10 px-6 md:grid-cols-2">
       <div class="space-y-6">
-        <span class="badge">3 steps • Zero fluff</span>
-        <h2 class="section-title">From idea → shipped impact</h2>
+        <span
+          class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
+        >
+          3 steps • Zero fluff
+        </span>
+        <h2
+          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
+        >
+          From idea → shipped impact
+        </h2>
+
         <ol class="space-y-4 text-slate-700 dark:text-slate-300">
-          <li class="step">
-            <span class="step-num">1</span>
+          <li class="flex items-start gap-4">
+            <span
+              class="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-sm font-bold"
+              >1</span
+            >
             <div>
               <h3 class="font-semibold">Pick a challenge</h3>
               <p class="text-sm">
-                Select SDGs or community problems you actually care about.
+                Choose SDGs or community problems you actually care about.
               </p>
             </div>
           </li>
-          <li class="step">
-            <span class="step-num">2</span>
+          <li class="flex items-start gap-4">
+            <span
+              class="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-sm font-bold"
+              >2</span
+            >
             <div>
               <h3 class="font-semibold">Form your team</h3>
               <p class="text-sm">
@@ -254,8 +242,11 @@
               </p>
             </div>
           </li>
-          <li class="step">
-            <span class="step-num">3</span>
+          <li class="flex items-start gap-4">
+            <span
+              class="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-sm font-bold"
+              >3</span
+            >
             <div>
               <h3 class="font-semibold">Ship in sprints</h3>
               <p class="text-sm">
@@ -266,31 +257,65 @@
         </ol>
 
         <div class="flex gap-3 pt-2">
-          <a routerLink="/welcome" class="btn-primary">Start now</a>
-          <a routerLink="/overview" class="btn-ghost">See examples</a>
+          <a
+            routerLink="/welcome"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+          >
+            Start now
+          </a>
+          <a
+            routerLink="/overview"
+            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-teal-900/20"
+          >
+            See examples
+          </a>
         </div>
       </div>
 
-      <!-- Metrics -->
+      <!-- Metric snapshot -->
       <div class="relative">
         <div
           aria-hidden="true"
-          class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
+          class="absolute -inset-5 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
         ></div>
         <div
           class="relative grid w-full gap-4 rounded-3xl border border-slate-200/70 bg-white/80 p-6 shadow-xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10 sm:grid-cols-3"
         >
-          <div class="metric">
-            <div class="metric-value">{{ playersCount }}</div>
-            <div class="metric-label">Players</div>
+          <div
+            class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
+          >
+            <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
+              1.2k
+            </div>
+            <div
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+            >
+              Players
+            </div>
           </div>
-          <div class="metric">
-            <div class="metric-value">{{ teamsCount }}</div>
-            <div class="metric-label">Active teams</div>
+          <div
+            class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
+          >
+            <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
+              86
+            </div>
+            <div
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+            >
+              Active teams
+            </div>
           </div>
-          <div class="metric">
-            <div class="metric-value">{{ solutionsCount }}</div>
-            <div class="metric-label">Solutions shipped</div>
+          <div
+            class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
+          >
+            <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
+              312
+            </div>
+            <div
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+            >
+              Solutions shipped
+            </div>
           </div>
         </div>
         <p class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">
@@ -301,11 +326,15 @@
   </section>
 
   <!-- FEATURED CHALLENGES -->
-  <section class="relative bg-white py-20 dark:bg-slate-950">
+  <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">
       <div class="flex items-end justify-between">
         <div>
-          <h2 class="section-title">Featured challenges</h2>
+          <h2
+            class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
+          >
+            Featured challenges
+          </h2>
           <p class="mt-2 text-slate-600 dark:text-slate-300">
             Pick one and start earning badges this week.
           </p>
@@ -318,38 +347,116 @@
       </div>
 
       <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <app-challenge-card
-          title="Clean Energy Micro-Grids"
-          tag="SDG 7 • Climate"
-          description="Design a pilot micro-grid for a clinic or school. Ship a budget, vendor list, and rollout plan."
-          cta="Join team"
-        ></app-challenge-card>
+        <!-- Card -->
+        <article
+          class="group h-full rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <p class="text-xs font-semibold text-teal-700 dark:text-teal-300">
+            SDG 7 • Climate
+          </p>
+          <h3 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
+            Clean Energy Micro-Grids
+          </h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Design a pilot micro-grid for a clinic or school. Ship a budget,
+            vendor list, and rollout plan.
+          </p>
+          <div class="mt-4">
+            <a
+              routerLink="/welcome"
+              class="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
+            >
+              Join team
+              <svg
+                class="h-4 w-4 -rotate-45"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </article>
 
-        <app-challenge-card
-          title="Digital Public Services"
-          tag="GovTech • SDG 16"
-          description="Prototype an e-service that reduces queue time by 50% for citizens in your region."
-          cta="Join team"
-        ></app-challenge-card>
+        <article
+          class="group h-full rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <p class="text-xs font-semibold text-teal-700 dark:text-teal-300">
+            GovTech • SDG 16
+          </p>
+          <h3 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
+            Digital Public Services
+          </h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Prototype an e-service that reduces queue time by 50% for citizens
+            in your region.
+          </p>
+          <div class="mt-4">
+            <a
+              routerLink="/welcome"
+              class="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
+            >
+              Join team
+              <svg
+                class="h-4 w-4 -rotate-45"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </article>
 
-        <app-challenge-card
-          title="Youth Employment Accelerator"
-          tag="SDG 8"
-          description="Create a training + placement track with measurable 90-day outcomes."
-          cta="Join team"
-        ></app-challenge-card>
+        <article
+          class="group h-full rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <p class="text-xs font-semibold text-teal-700 dark:text-teal-300">
+            SDG 8
+          </p>
+          <h3 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
+            Youth Employment Accelerator
+          </h3>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            Create a training + placement track with measurable 90-day outcomes.
+          </p>
+          <div class="mt-4">
+            <a
+              routerLink="/welcome"
+              class="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
+            >
+              Join team
+              <svg
+                class="h-4 w-4 -rotate-45"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- SHORT TESTIMONIAL BAND -->
-  <section class="relative overflow-hidden py-16">
+  <!-- TESTIMONIAL BAND -->
+  <section class="relative overflow-hidden py-14">
     <div class="mx-auto max-w-5xl px-6">
       <figure
-        class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 p-8 ring-1 ring-black/5 shadow-xl dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
+        class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 p-8 ring-1 ring-black/5 shadow-xl dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
       >
         <div
-          class="mx-auto mb-6 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-cyan-500 text-white"
+          class="mx-auto mb-6 grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-cyan-500 text-white"
         >
           “
         </div>
@@ -371,36 +478,58 @@
   </section>
 
   <!-- FAQ -->
-  <section class="relative bg-white py-20 dark:bg-slate-950">
+  <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto grid max-w-7xl gap-12 px-6 md:grid-cols-2">
       <div>
-        <h2 class="section-title">Questions, answered</h2>
+        <h2
+          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
+        >
+          Questions, answered
+        </h2>
         <p class="mt-2 max-w-md text-slate-600 dark:text-slate-300">
-          Everything you need to know to get rolling this week.
+          Everything you need to know to start this week.
         </p>
       </div>
       <div class="space-y-4">
-        <details class="faq">
-          <summary>Is it free to start?</summary>
-          <p>
+        <details
+          class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-slate-700 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60 dark:text-slate-300"
+        >
+          <summary class="cursor-pointer select-none text-sm font-semibold">
+            Is it free to start?
+          </summary>
+          <p class="mt-3 text-sm">
             Yes. Join, explore challenges, and meet teammates. Upgrade only if
             you need advanced tools.
           </p>
         </details>
-        <details class="faq">
-          <summary>Do I need a team?</summary>
-          <p>No—solo is fine. You can match with a team anytime.</p>
+        <details
+          class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-slate-700 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60 dark:text-slate-300"
+        >
+          <summary class="cursor-pointer select-none text-sm font-semibold">
+            Do I need a team?
+          </summary>
+          <p class="mt-3 text-sm">
+            No—solo is fine. You can match with a team anytime.
+          </p>
         </details>
-        <details class="faq">
-          <summary>What do I actually ship?</summary>
-          <p>
+        <details
+          class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-slate-700 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60 dark:text-slate-300"
+        >
+          <summary class="cursor-pointer select-none text-sm font-semibold">
+            What do I actually ship?
+          </summary>
+          <p class="mt-3 text-sm">
             Each sprint ships evidence: budgets, pilots, dashboards, policy
             drafts, or code—tracked as KPIs.
           </p>
         </details>
-        <details class="faq">
-          <summary>How do badges work?</summary>
-          <p>
+        <details
+          class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-slate-700 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60 dark:text-slate-300"
+        >
+          <summary class="cursor-pointer select-none text-sm font-semibold">
+            How do badges work?
+          </summary>
+          <p class="mt-3 text-sm">
             Complete milestones to earn verifiable badges you can share on
             resumes and LinkedIn.
           </p>
@@ -410,7 +539,7 @@
   </section>
 
   <!-- FINAL CTA -->
-  <section class="relative overflow-hidden py-20">
+  <section class="relative overflow-hidden py-16">
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -top-32 -left-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
@@ -419,7 +548,11 @@
       <h2
         class="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white md:text-5xl"
       >
-        Join the <span class="nw-gradient-text">NewWorld Game</span>
+        Join the
+        <span
+          class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
+          >NewWorld Game</span
+        >
       </h2>
       <p
         class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300"
@@ -427,8 +560,18 @@
         Pick a challenge. Meet your team. Ship impact.
       </p>
       <div class="mt-8 flex items-center justify-center gap-3">
-        <a routerLink="/welcome" class="btn-primary">Get started</a>
-        <a routerLink="/login" class="btn-ghost">Log in</a>
+        <a
+          routerLink="/welcome"
+          class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-8 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+        >
+          Get started
+        </a>
+        <a
+          routerLink="/login"
+          class="inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-teal-900/20"
+        >
+          Log in
+        </a>
       </div>
     </div>
   </section>
@@ -453,4 +596,7 @@
       >
     </div>
   </div>
+
+  <!-- Uniform footer -->
+  <app-footer></app-footer>
 </div>
