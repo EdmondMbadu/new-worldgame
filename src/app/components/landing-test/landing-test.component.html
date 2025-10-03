@@ -478,20 +478,22 @@
       <!-- grid -->
       <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <!-- colleague cards -->
+        <!-- colleague cards -->
         <article
           *ngFor="let item of aiOptions"
           class="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
         >
+          <!-- Overlay must NOT eat clicks -->
           <div
-            class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             aria-hidden="true"
           >
             <div
-              class="absolute -inset-10 bg-gradient-to-br from-teal-500/10 via-emerald-500/10 to-cyan-500/10 blur-2xl"
+              class="pointer-events-none absolute -inset-10 bg-gradient-to-br from-teal-500/10 via-emerald-500/10 to-cyan-500/10 blur-2xl"
             ></div>
           </div>
 
-          <div class="flex items-center gap-4">
+          <div class="relative z-10 flex items-center gap-4">
             <img
               [src]="item.avatarPath"
               [alt]="item.name"
@@ -510,13 +512,13 @@
           </div>
 
           <p
-            class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300"
+            class="relative z-10 mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300"
           >
             {{ item.intro }}
           </p>
 
           <!-- SDG chips -->
-          <div class="mt-4 flex flex-wrap gap-2">
+          <div class="relative z-10 mt-4 flex flex-wrap gap-2">
             <span
               *ngFor="let n of item.sdgs"
               class="inline-flex items-center rounded-full border border-teal-300/60 bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
@@ -526,8 +528,9 @@
           </div>
 
           <!-- CTA -->
-          <div class="mt-6">
+          <div class="mt-6 relative z-10">
             <button
+              type="button"
               (click)="openAvatar(item)"
               class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
             >
