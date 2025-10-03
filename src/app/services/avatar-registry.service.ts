@@ -14,9 +14,33 @@ export class AvatarRegistryService {
       .replace(/(^-|-$)/g, '');
   }
 
+  /** Use explicit keys to match backend listeners ( elders by last name ) */
+  private collectionKeyFor(name: string): string {
+    const map: Record<string, string> = {
+      // elders (last name keys)
+      'Marie Curie': 'marie',
+      'Rachel Carson': 'rachel',
+      'Buckminster Fuller': 'bucky',
+      'Albert Einstein': 'albert',
+      'Nelson Mandela': 'nelson',
+      'Mahatma Gandhi': 'gandhi',
+      'Mark Twain': 'mark',
+
+      // colleagues (first name keys)
+      'Zara Nkosi': 'zara',
+      'Arjun Patel': 'arjun',
+      'Sofia Morales': 'sofia',
+      'Li Wei': 'li',
+      'Amina Al-Sayed': 'amina',
+      'Elena Volkov': 'elena',
+      'Tane Kahu': 'tane',
+    };
+    // Fallback = first token lowercased if not in map
+    return map[name] ?? name.toLowerCase().split(' ')[0];
+  }
+
   getAll(): Avatar[] {
     const uid = this.auth?.currentUser?.uid ?? 'anon';
-    // ⬇︎ Cleaned intros (no ${name} bug) + your SDGs + images
     const base: Omit<Avatar, 'slug' | 'collectionPath'>[] = [
       {
         avatarPath: '../../../assets/img/zara-agent.png',
@@ -106,24 +130,27 @@ export class AvatarRegistryService {
         avatarPath: '../../../assets/img/gandhi.jpg',
         name: 'Mahatma Gandhi',
         group: 'elder',
-        sdgs: [],
+        sdgs: [1, 3],
         intro: `Pioneer of nonviolent change—ethics, discipline, and people-powered transformation.`,
       },
       {
         avatarPath: '../../../assets/img/twain.jpg',
         name: 'Mark Twain',
         group: 'elder',
-        sdgs: [],
+        sdgs: [2, 6],
         intro: `Wry storyteller who disarms with humor and insight—perfect for cutting through noise and cliché.`,
       },
     ];
 
-    return base.map((b) => ({
-      ...b,
-      slug: this.slugify(b.name!),
-      collectionPath: `users/${uid}/${b.name!.toLowerCase().split(' ')[0]}/`,
-      requiresAdmin: b.name === 'Mark Twain' ? true : undefined,
-    }));
+    return base.map((b) => {
+      const key = this.collectionKeyFor(b.name!);
+      return {
+        ...b,
+        slug: this.slugify(b.name!),
+        collectionPath: `users/${uid}/${key}/`,
+        requiresAdmin: undefined,
+      };
+    });
   }
 
   getBySlug(slug: string): Avatar | undefined {
