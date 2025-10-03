@@ -23,7 +23,7 @@
         <span
           class="inline-flex items-center gap-2 rounded-full border border-teal-300/50 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
         >
-          NewWorld Game • Build the Shared Future
+          NewWorld Game • Design and Build the Future
         </span>
 
         <h1
@@ -39,8 +39,11 @@
         <p
           class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
         >
-          Join global teammates, pick a challenge, and ship measurable outcomes.
-          Fast feedback, clear KPIs, and proof-of-work badges you can share.
+          Join a small team, pick a real challenge, and deliver results you can
+          point to. Quick feedback, clear goals (<abbr
+            title="Key Performance Indicators"
+            >KPIs</abbr
+          >), and shareable, verifiable badges.
         </p>
 
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -89,12 +92,12 @@
             />
           </div>
           <p class="text-sm text-slate-600 dark:text-slate-400">
-            Teams forming now across 12+ countries.
+            Start or join a team — on campus or online.
           </p>
         </div>
       </div>
 
-      <!-- Visual (smaller, balanced) -->
+      <!-- Visual -->
       <div class="relative">
         <div
           aria-hidden="true"
@@ -114,7 +117,7 @@
             class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/5 via-transparent"
           ></div>
 
-          <!-- Floating badges (built-in Tailwind animations) -->
+          <!-- Floating badges -->
           <div class="pointer-events-none absolute left-3 top-3">
             <span
               class="animate-bounce rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
@@ -145,7 +148,7 @@
           Why people stay
         </h2>
         <p class="mt-3 text-slate-600 dark:text-slate-300">
-          Concrete actions, fast feedback, meaningful wins.
+          Concrete actions, quick feedback, meaningful wins.
         </p>
       </div>
 
@@ -169,7 +172,7 @@
             Teammates that show up
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            Find peers who care—and deliver.
+            Find peers who care — and deliver.
           </p>
         </article>
         <article
@@ -180,7 +183,10 @@
             Measured impact
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            Dashboards & KPIs track real outcomes, not vibes.
+            Simple dashboards and goals (<abbr
+              title="Key Performance Indicators"
+              >KPIs</abbr
+            >) track real outcomes.
           </p>
         </article>
         <article
@@ -191,7 +197,7 @@
             Badges & opportunities
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            Earn proof of work you can share.
+            Earn verifiable badges you can share.
           </p>
         </article>
       </div>
@@ -214,7 +220,7 @@
         <h2
           class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
         >
-          From idea → shipped impact
+          From idea → real impact
         </h2>
 
         <ol class="space-y-4 text-slate-700 dark:text-slate-300">
@@ -248,9 +254,9 @@
               >3</span
             >
             <div>
-              <h3 class="font-semibold">Ship in sprints</h3>
+              <h3 class="font-semibold">Work in sprints</h3>
               <p class="text-sm">
-                Deliver weekly outcomes with mentorship and clear KPIs.
+                Deliver weekly results with mentorship and clear goals.
               </p>
             </div>
           </li>
@@ -285,41 +291,41 @@
             class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
           >
             <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
-              1.2k
+              {{ playersCount | number }}
             </div>
             <div
               class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
             >
-              Players
+              Learners exploring
             </div>
           </div>
           <div
             class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
           >
             <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
-              86
+              {{ teamsCount | number }}
             </div>
             <div
               class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
             >
-              Active teams
+              Active projects
             </div>
           </div>
           <div
             class="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
           >
             <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
-              312
+              {{ solutionsCount | number }}
             </div>
             <div
               class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
             >
-              Solutions shipped
+              Artifacts published
             </div>
           </div>
         </div>
         <p class="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">
-          Numbers update as people join—jump in.
+          Live metrics update as people join — jump in.
         </p>
       </div>
     </div>
@@ -336,7 +342,7 @@
             Featured challenges
           </h2>
           <p class="mt-2 text-slate-600 dark:text-slate-300">
-            Pick one and start earning badges this week.
+            Pick one and start this week.
           </p>
         </div>
         <a
@@ -449,6 +455,105 @@
     </div>
   </section>
 
+  <!-- AI COLLEAGUES -->
+  <section id="ai" class="relative overflow-hidden py-20">
+    <!-- soft ambience -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
+    ></div>
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="mx-auto max-w-3xl text-center">
+        <h2
+          class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
+        >
+          Meet your AI colleagues
+        </h2>
+        <p class="mt-3 text-lg text-slate-600 dark:text-slate-300">
+          Mentors, strategists, and systems thinkers who coach you through each
+          sprint — from first sketch to field results.
+        </p>
+      </div>
+
+      <!-- grid -->
+      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- colleague cards -->
+        <article
+          *ngFor="let item of aiOptions"
+          class="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+        >
+          <div
+            class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            aria-hidden="true"
+          >
+            <div
+              class="absolute -inset-10 bg-gradient-to-br from-teal-500/10 via-emerald-500/10 to-cyan-500/10 blur-2xl"
+            ></div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <img
+              [src]="item.avatarPath"
+              [alt]="item.name"
+              class="h-14 w-14 rounded-2xl object-cover ring-2 ring-white dark:ring-slate-900"
+            />
+            <div>
+              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+                {{ item.name }}
+              </h3>
+              <p
+                class="text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300"
+              >
+                {{ item.group === "colleague" ? "AI Colleague" : "AI Elder" }}
+              </p>
+            </div>
+          </div>
+
+          <p
+            class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300"
+          >
+            {{ item.intro }}
+          </p>
+
+          <!-- SDG chips -->
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span
+              *ngFor="let n of item.sdgs"
+              class="inline-flex items-center rounded-full border border-teal-300/60 bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
+            >
+              SDG {{ n }}
+            </span>
+          </div>
+
+          <!-- CTA -->
+          <div class="mt-6">
+            <button
+              (click)="openAvatar(item)"
+              class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+            >
+              Ask {{ item.name }}
+              <svg
+                class="h-4 w-4 -rotate-45"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- subtle note -->
+      <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+        Tip: pick one AI colleague to co-pilot your next sprint.
+      </p>
+    </div>
+  </section>
+
   <!-- TESTIMONIAL BAND -->
   <section class="relative overflow-hidden py-14">
     <div class="mx-auto max-w-5xl px-6">
@@ -509,7 +614,7 @@
             Do I need a team?
           </summary>
           <p class="mt-3 text-sm">
-            No—solo is fine. You can match with a team anytime.
+            No — solo is fine. You can match with a team anytime.
           </p>
         </details>
         <details
@@ -520,7 +625,10 @@
           </summary>
           <p class="mt-3 text-sm">
             Each sprint ships evidence: budgets, pilots, dashboards, policy
-            drafts, or code—tracked as KPIs.
+            drafts, or code — tracked with clear goals (<abbr
+              title="Key Performance Indicators"
+              >KPIs</abbr
+            >).
           </p>
         </details>
         <details
