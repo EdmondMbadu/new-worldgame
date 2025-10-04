@@ -1,6 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Route, Router } from '@angular/router';
+import { Component, OnDestroy, OnInit, Optional } from '@angular/core';
+import { Router } from '@angular/router';
 import { AIOption, DataService } from 'src/app/services/data.service';
+import { AuthService } from 'src/app/services/auth.service';
+import { AvatarRegistryService } from 'src/app/services/avatar-registry.service';
 
 @Component({
   selector: 'app-landing-test',
@@ -14,7 +16,12 @@ export class LandingTestComponent implements OnInit, OnDestroy {
   aiOptions: AIOption[] = [];
   private rafId?: number;
 
-  constructor(private data: DataService, private router: Router) {}
+  constructor(
+    private data: DataService,
+    private router: Router,
+    @Optional() private auth?: AuthService,
+    @Optional() private avatars?: AvatarRegistryService
+  ) {}
   ngOnInit(): void {
     // Animate counters to friendly demo targets.
     this.animateCount('playersCount', 1280, 900);
@@ -32,9 +39,17 @@ export class LandingTestComponent implements OnInit, OnDestroy {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   }
-  openAvatar(ai: any) {
+  openAvatar(ai: AIOption) {
     const slug = this.slugify(ai.name);
-    this.router.navigate(['/avatar', slug], { state: { avatar: ai } });
+    const destination = `/avatar/${slug}`;
+
+    if (!this.auth?.currentUser?.uid) {
+      this.auth?.setRedirectUrl(destination);
+      sessionStorage.setItem('redirectTo', destination);
+    }
+
+    const avatarState = this.avatars?.getBySlug(slug) ?? ai;
+    this.router.navigate(['/avatar', slug], { state: { avatar: avatarState } });
   }
 
   private animateCount(

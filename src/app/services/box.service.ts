@@ -12,9 +12,17 @@ import { AuthService } from './auth.service';
 export abstract class BoxService {
   currentDisplay: boolean = false;
   display?: Observable<any> = of(false);
-  userRef: AngularFirestoreDocument<any>;
-  constructor(private auth: AuthService, private afs: AngularFirestore) {
-    this.userRef = this.afs.doc(`users/${this.auth.currentUser.uid}`);
+  protected userRef?: AngularFirestoreDocument<any>;
+
+  constructor(protected auth: AuthService, protected afs: AngularFirestore) {
+    const uid = this.auth.currentUser?.uid;
+    if (uid) {
+      this.userRef = this.afs.doc(`users/${uid}`);
+    }
+    this.auth.user$.subscribe((user) => {
+      const nextUid = user?.uid;
+      this.userRef = nextUid ? this.afs.doc(`users/${nextUid}`) : undefined;
+    });
   }
   formatText(value: string): string {
     if (!value) return '';
@@ -74,7 +82,9 @@ export class BoxProfileCredential extends BoxService implements OnInit {
     const data = {
       profileCredential: profileCred,
     };
-
+    if (!this.userRef) {
+      return Promise.reject(new Error('User must be logged in.'));
+    }
     return this.userRef.set(data, { merge: true });
   }
 }
@@ -91,6 +101,9 @@ export class BoxProfileDescription extends BoxService implements OnInit {
     const data = {
       profileDescription: description,
     };
+    if (!this.userRef) {
+      return Promise.reject(new Error('User must be logged in.'));
+    }
     return this.userRef.set(data, { merge: true });
   }
 }
@@ -107,6 +120,9 @@ export class BoxEmploymentCredential extends BoxService implements OnInit {
     const data = {
       employement: employement,
     };
+    if (!this.userRef) {
+      return Promise.reject(new Error('User must be logged in.'));
+    }
     return this.userRef.set(data, { merge: true });
   }
 }
@@ -123,6 +139,9 @@ export class BoxEducationCredential extends BoxService implements OnInit {
     const data = {
       education: education,
     };
+    if (!this.userRef) {
+      return Promise.reject(new Error('User must be logged in.'));
+    }
     return this.userRef.set(data, { merge: true });
   }
 }
@@ -139,6 +158,9 @@ export class BoxLocationCredential extends BoxService implements OnInit {
     const data = {
       location: location,
     };
+    if (!this.userRef) {
+      return Promise.reject(new Error('User must be logged in.'));
+    }
     return this.userRef.set(data, { merge: true });
   }
 }
