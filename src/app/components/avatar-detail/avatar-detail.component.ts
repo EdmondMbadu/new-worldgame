@@ -61,35 +61,20 @@ export class AvatarDetailComponent implements OnInit {
   ngOnInit(): void {
     this.allAvatars = this.registry.getAll();
 
-    const nav = this.router.getCurrentNavigation();
-    const viaState = nav?.extras?.state?.['avatar'] as Avatar | undefined;
-    const slug = this.route.snapshot.paramMap.get('slug')!;
-    this.avatar = viaState ?? this.registry.getBySlug(slug)!;
+    this.route.paramMap.subscribe((params) => {
+      const slug = params.get('slug');
+      if (!slug) {
+        this.router.navigate(['/other-ais']);
+        return;
+      }
 
-    if (!this.avatar) {
-      this.router.navigate(['/other-ais']);
-      return;
-    }
-    if (this.avatar.requiresAdmin && !this.isAdmin) {
-      this.status = 'Admin-only avatar.';
-    }
+      const state = history.state as Record<string, any> | null;
+      const candidate = state?.hasOwnProperty('avatar')
+        ? (state['avatar'] as Avatar | undefined)
+        : undefined;
 
-    // make sure viewport starts at top
-    setTimeout(() => window.scrollTo({ top: 0 }), 0);
-
-    // If we saved a draft before redirecting to login, restore it now
-    const pending = sessionStorage.getItem('pendingPrompt');
-    if (pending && this.isLoggedIn) {
-      // focus the composer and prefill
-      setTimeout(() => {
-        this.scrollToChat();
-        if (this.promptInput?.nativeElement) {
-          this.promptInput.nativeElement.value = pending;
-          this.promptInput.nativeElement.focus();
-        }
-      }, 0);
-      sessionStorage.removeItem('pendingPrompt');
-    }
+      this.loadAvatar(slug, candidate);
+    });
   }
 
   backToPool() {
@@ -100,6 +85,33 @@ export class AvatarDetailComponent implements OnInit {
     const a = this.allAvatars.find((v) => v.slug === slug);
     if (!a) return;
     this.router.navigate(['/avatar', a.slug], { state: { avatar: a } });
+  }
+
+  private loadAvatar(slug: string, stateAvatar?: Avatar) {
+    const next = stateAvatar ?? this.registry.getBySlug(slug);
+    if (!next) {
+      this.router.navigate(['/other-ais']);
+      return;
+    }
+
+    this.avatar = next;
+    this.responses = [{ text: '', type: 'RESPONSE' }];
+    this.singleCopyStates = [];
+    this.status = this.avatar.requiresAdmin && !this.isAdmin ? 'Admin-only avatar.' : '';
+
+    setTimeout(() => window.scrollTo({ top: 0 }), 0);
+
+    const pending = sessionStorage.getItem('pendingPrompt');
+    if (pending && this.isLoggedIn) {
+      setTimeout(() => {
+        this.scrollToChat();
+        if (this.promptInput?.nativeElement) {
+          this.promptInput.nativeElement.value = pending;
+          this.promptInput.nativeElement.focus();
+        }
+      }, 0);
+      sessionStorage.removeItem('pendingPrompt');
+    }
   }
 
   scrollToChat() {
