@@ -10,7 +10,7 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "main": "lib/index.js",
   "dependencies": {
@@ -30,8 +30,9 @@
     "twilio": "^5.4.0"
   },
   "devDependencies": {
+    "@types/node": "^20.19.19",
     "firebase-functions-test": "^3.1.0",
-    "typescript": "^4.9.0"
+    "typescript": "^5.9.3"
   },
   "private": true
 }

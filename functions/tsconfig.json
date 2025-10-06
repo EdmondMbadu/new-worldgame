@@ -6,7 +6,11 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "ES2022",
+    "lib": ["es2022", "esnext.disposable"],
+     "types": ["node"],
+       "skipLibCheck": true,
+
   },
   "compileOnSave": true,
   "include": [
