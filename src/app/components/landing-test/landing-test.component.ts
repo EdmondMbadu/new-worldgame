@@ -66,6 +66,8 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
   countryStats: CountryMetrics[] = [];
   totalActiveUsers = 0;
   totalCountries = 0;
+  totalNewUsers = 0;
+  totalEngagedSessions = 0;
   private csvSub?: Subscription;
   private mapInstance?: any;
   private markersLayer?: any;
@@ -145,6 +147,14 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
           this.countryStats = this.parseCsv(csv);
           this.totalActiveUsers = this.countryStats.reduce(
             (sum, item) => sum + item.activeUsers,
+            0
+          );
+          this.totalNewUsers = this.countryStats.reduce(
+            (sum, item) => sum + item.newUsers,
+            0
+          );
+          this.totalEngagedSessions = this.countryStats.reduce(
+            (sum, item) => sum + item.engagedSessions,
             0
           );
           this.totalCountries = this.countryStats.length;

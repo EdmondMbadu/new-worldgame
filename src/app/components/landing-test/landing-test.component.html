@@ -215,9 +215,8 @@
       class="pointer-events-none absolute -top-28 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
     ></div>
 
-    <div class="mx-auto grid max-w-7xl items-center gap-10 px-6 md:grid-cols-2">
-      <!-- Copy -->
-      <div class="space-y-6">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="mx-auto max-w-3xl text-center">
         <span
           class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
         >
@@ -225,56 +224,37 @@
         </span>
 
         <h2
-          class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
+          class="mt-4 text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
         >
-          Meet people from all over the world
+          Track where NewWorld Game teams are building
         </h2>
 
-        <p class="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-          Join learners, mentors, and builders across continents. Work
-          async-friendly, compare ideas, and ship outcomes together—wherever you
-          are.
+        <p class="mt-3 text-lg leading-relaxed text-slate-600 dark:text-slate-300">
+          A live atlas of active explorers. Zoom in on the communities turning
+          ideas into measurable results right now.
         </p>
-
-        <!-- Regions chips -->
-        <div class="flex flex-wrap gap-2 pt-1">
-          <span
-            class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-            >Africa</span
-          >
-          <span
-            class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-            >Americas</span
-          >
-          <span
-            class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-            >Europe</span
-          >
-          <span
-            class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-            >Asia–Pacific</span
-          >
-        </div>
-
-        <!-- CTAs -->
-        <div class="flex gap-3 pt-2">
-          <a
-            routerLink="/welcome"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
-          >
-            Join a cohort
-          </a>
-          <a
-            routerLink="/overview"
-            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-slate-900/40"
-          >
-            Explore stories
-          </a>
-        </div>
       </div>
 
-      <!-- Map visual -->
-      <div class="relative">
+      <div class="mt-4 flex flex-wrap justify-center gap-2">
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
+          >Africa</span
+        >
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
+          >Americas</span
+        >
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
+          >Europe</span
+        >
+        <span
+          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
+          >Asia–Pacific</span
+        >
+      </div>
+
+      <div class="relative mt-10">
         <div
           aria-hidden="true"
           class="absolute -inset-5 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
@@ -283,7 +263,7 @@
         <figure
           class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-2xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
         >
-          <div class="relative aspect-[16/10] md:aspect-[4/3]">
+          <div class="relative aspect-[16/10] md:aspect-[5/3] xl:aspect-[3/2]">
             <div id="demographicMap" class="absolute inset-0"></div>
           </div>
           <figcaption
@@ -293,12 +273,69 @@
               A planet-wide community—connect and build with peers anywhere.
             </span>
             <span *ngIf="totalCountries"
-              >Now spanning {{ totalCountries }} countries with
-              {{ totalActiveUsers | number }} active explorers this
-              month.</span
+              >{{ totalCountries }} countries •
+              {{ totalActiveUsers | number }} active explorers •
+              {{ totalEngagedSessions | number }} engaged sessions.</span
             >
           </figcaption>
         </figure>
+      </div>
+
+      <div
+        class="mt-8 grid gap-4 sm:grid-cols-3"
+        *ngIf="totalCountries || totalActiveUsers || totalNewUsers"
+      >
+        <div
+          class="rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
+        >
+          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
+            {{ totalCountries || 0 }}
+          </div>
+          <div
+            class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+          >
+            Countries in play
+          </div>
+        </div>
+        <div
+          class="rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
+        >
+          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
+            {{ totalActiveUsers | number }}
+          </div>
+          <div
+            class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+          >
+            Active explorers (30 days)
+          </div>
+        </div>
+        <div
+          class="rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
+        >
+          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
+            {{ totalNewUsers | number }}
+          </div>
+          <div
+            class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+          >
+            New joiners (30 days)
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <a
+          routerLink="/welcome"
+          class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+        >
+          Join a cohort
+        </a>
+        <a
+          routerLink="/overview"
+          class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-slate-900/40"
+        >
+          Explore stories
+        </a>
       </div>
     </div>
   </section>
