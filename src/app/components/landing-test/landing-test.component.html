@@ -283,19 +283,20 @@
         <figure
           class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-2xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
         >
-          <div class="aspect-[16/10] md:aspect-[4/3]">
-            <img
-              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/ai-avatars%2Fdymaxion-map.png?alt=media&token=ffa5ac5e-55c6-4bbe-8512-d4986e728dce"
-              alt="Dymaxion map of the world representing the NewWorld Game community"
-              class="h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
+          <div class="relative aspect-[16/10] md:aspect-[4/3]">
+            <div id="demographicMap" class="absolute inset-0"></div>
           </div>
           <figcaption
-            class="px-4 py-3 text-center text-xs text-slate-500 dark:text-slate-400"
+            class="flex flex-col gap-1 px-4 py-3 text-center text-xs text-slate-500 dark:text-slate-400"
           >
-            A planet-wide community—connect and build with peers anywhere.
+            <span>
+              A planet-wide community—connect and build with peers anywhere.
+            </span>
+            <span *ngIf="totalCountries"
+              >Now spanning {{ totalCountries }} countries with
+              {{ totalActiveUsers | number }} active explorers this
+              month.</span
+            >
           </figcaption>
         </figure>
       </div>

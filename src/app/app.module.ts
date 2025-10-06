@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 // import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSliderModule } from '@angular/material/slider';
@@ -286,6 +287,7 @@ import { LandingTestComponent } from './components/landing-test/landing-test.com
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     // NgxPageScrollCoreModule,
     CKEditorModule,

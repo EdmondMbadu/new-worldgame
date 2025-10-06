@@ -1,0 +1,11 @@
+#demographicMap {
+  height: 100%;
+  min-height: 320px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  line-height: 1.4;
+  margin: 0;
+}
