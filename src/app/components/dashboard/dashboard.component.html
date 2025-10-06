@@ -420,6 +420,170 @@
 
     <!-- Plans grid (scrollable body) -->
     <div class="px-8 pb-10 overflow-y-auto space-y-8">
+      <section class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/80 dark:bg-slate-800/70 p-6">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Why join & broadcast</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          Share the story that will reach new collaborators across NewWorld Game. When ready, broadcast it instantly.
+        </p>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-900 px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
+          <div class="flex-1 min-w-[220px]">
+            <p class="font-semibold text-slate-800 dark:text-slate-200">
+              Broadcast = open your team to the whole network
+            </p>
+            <p class="mt-1">
+              When a broadcast is live, your solution appears in discovery and anyone can request to join your team.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              *ngIf="!isBroadcasting"
+              (click)="sendBroadcast()"
+              [disabled]="sendingBroadcast"
+              class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+              </svg>
+              <span>{{ sendingBroadcast ? 'Sending…' : 'Start broadcast' }}</span>
+            </button>
+
+            <button
+              type="button"
+              *ngIf="isBroadcasting"
+              (click)="stopBroadcast()"
+              [disabled]="sendingBroadcast"
+              class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+              </svg>
+              <span>{{ sendingBroadcast ? 'Stopping…' : 'Stop broadcast' }}</span>
+            </button>
+
+            <span *ngIf="isBroadcasting" class="text-slate-500 dark:text-slate-400">
+              Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-5 space-y-6">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Why join (pitch)
+              </label>
+              <button
+                (click)="askBuckyForPitch()"
+                type="button"
+                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                </svg>
+                Ask Bucky for help
+              </button>
+            </div>
+            <textarea
+              [(ngModel)]="currentSolution.broadCastInviteMessage"
+              rows="4"
+              maxlength="600"
+              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Tell collaborators why they should join your team."
+            ></textarea>
+            <div class="mt-1 text-right text-xs text-slate-400 dark:text-slate-500">
+              {{ currentSolution.broadCastInviteMessage?.length || 0 }}/600
+            </div>
+          </div>
+
+          <div>
+            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+              <input type="checkbox" [(ngModel)]="includeReadMe" class="rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500" />
+              Include solution description when broadcasting
+            </label>
+            <textarea
+              *ngIf="includeReadMe"
+              [(ngModel)]="currentSolution.description"
+              rows="4"
+              class="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Optional: edit the description readers will see."
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+              Shareable link
+            </label>
+            <div class="flex flex-wrap items-center gap-2">
+              <input
+                [value]="generatedInviteLink"
+                readonly
+                class="flex-1 min-w-[200px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+              />
+              <button
+                type="button"
+                (click)="copyInviteLink()"
+                class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2 text-xs">
+            <div class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+              <p class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold">Join page</p>
+              <a routerLink="/join/{{currentSolution.solutionId}}" target="_blank" class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline">
+                /join/{{ currentSolution.solutionId || 'solution-id' }}
+              </a>
+            </div>
+            <div class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60">
+              <p class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold">Broadcasts feed</p>
+              <a routerLink="/broadcasts" target="_blank" class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline">
+                {{ allBroadcasts }}
+              </a>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              type="button"
+              (click)="sendBroadcast()"
+              *ngIf="!isBroadcasting"
+              [disabled]="sendingBroadcast"
+              class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+              </svg>
+              <span>{{ sendingBroadcast ? 'Sending…' : 'Broadcast invite' }}</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="stopBroadcast()"
+              *ngIf="isBroadcasting"
+              [disabled]="sendingBroadcast"
+              class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+              </svg>
+              <span>{{ sendingBroadcast ? 'Stopping…' : 'Stop broadcast' }}</span>
+            </button>
+
+            <span *ngIf="isBroadcasting" class="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}
+            </span>
+          </div>
+        </div>
+      </section>
+
       <section
         *ngIf="currentSolution.recruitmentProfile as profile"
         class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-6"
@@ -620,129 +784,9 @@
           </p>
         </div>
       </section>
-
-      <section class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/80 dark:bg-slate-800/70 p-6">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Why join & broadcast</h3>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-          Share the story that will reach new collaborators across NewWorld Game. When ready, broadcast it instantly.
-        </p>
-
-        <div class="mt-5 space-y-6">
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Why join (pitch)
-              </label>
-              <button
-                (click)="askBuckyForPitch()"
-                type="button"
-                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-                </svg>
-                Ask Bucky for help
-              </button>
-            </div>
-            <textarea
-              [(ngModel)]="currentSolution.broadCastInviteMessage"
-              rows="4"
-              maxlength="600"
-              class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Tell collaborators why they should join your team."
-            ></textarea>
-            <div class="mt-1 text-right text-xs text-slate-400 dark:text-slate-500">
-              {{ currentSolution.broadCastInviteMessage?.length || 0 }}/600
-            </div>
-          </div>
-
-          <div>
-            <label class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
-              <input type="checkbox" [(ngModel)]="includeReadMe" class="rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500" />
-              Include solution description when broadcasting
-            </label>
-            <textarea
-              *ngIf="includeReadMe"
-              [(ngModel)]="currentSolution.description"
-              rows="4"
-              class="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Optional: edit the description readers will see."
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-              Shareable link
-            </label>
-            <div class="flex flex-wrap items-center gap-2">
-              <input
-                [value]="generatedInviteLink"
-                readonly
-                class="flex-1 min-w-[200px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
-              />
-              <button
-                type="button"
-                (click)="copyInviteLink()"
-                class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                Copy
-              </button>
-            </div>
-          </div>
-
-          <div class="grid gap-3 sm:grid-cols-2 text-xs">
-            <div class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60">
-              <p class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold">Join page</p>
-              <a routerLink="/join/{{currentSolution.solutionId}}" target="_blank" class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline">
-                /join/{{ currentSolution.solutionId || 'solution-id' }}
-              </a>
-            </div>
-            <div class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60">
-              <p class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold">Broadcasts feed</p>
-              <a routerLink="/broadcasts" target="_blank" class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline">
-                {{ allBroadcasts }}
-              </a>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              type="button"
-              (click)="sendBroadcast()"
-              *ngIf="!isBroadcasting"
-              [disabled]="sendingBroadcast"
-              class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
-                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
-              </svg>
-              <span>{{ sendingBroadcast ? 'Sending…' : 'Broadcast invite' }}</span>
-            </button>
-
-            <button
-              type="button"
-              (click)="stopBroadcast()"
-              *ngIf="isBroadcasting"
-              [disabled]="sendingBroadcast"
-              class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
-                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
-              </svg>
-              <span>{{ sendingBroadcast ? 'Stopping…' : 'Stop broadcast' }}</span>
-            </button>
-
-            <span *ngIf="isBroadcasting" class="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}
-            </span>
-          </div>
-        </div>
-      </section>
     </div>
+
   </div>
 </div>
 <!-- ▸ END INVITE MODAL --------------------------------------------------------- -->
-
 
