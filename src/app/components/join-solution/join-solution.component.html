@@ -121,6 +121,129 @@
         <!-- LEFT COLUMN (info) -->
         <div class="lg:col-span-2 space-y-10">
 
+          <!-- Team Brief -->
+          <section class="rounded-2xl border border-slate-200 dark:border-slate-700
+                          bg-white dark:bg-slate-800 p-6 md:p-8 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-300">
+                  {{ recruitmentProfile.teamLabel }}
+                </p>
+                <h2 class="mt-1 text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+                  {{ recruitmentProfile.initiativeName }}
+                </h2>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  Focus area: {{ recruitmentProfile.focusArea }}
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <div class="rounded-xl bg-slate-100/80 dark:bg-slate-700/60 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                  <div class="uppercase tracking-[0.18em] font-semibold text-slate-500 dark:text-slate-400">Team size</div>
+                  <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    {{ recruitmentProfile.teamSizeMin || '—' }}
+                    <span class="text-slate-400">–</span>
+                    {{ recruitmentProfile.teamSizeMax || '—' }}
+                  </div>
+                </div>
+                <div class="rounded-xl bg-slate-100/80 dark:bg-slate-700/60 px-3 py-2 text-xs text-slate-600 dark:text-slate-300">
+                  <div class="uppercase tracking-[0.18em] font-semibold text-slate-500 dark:text-slate-400">Commitment</div>
+                  <div class="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    {{ recruitmentProfile.timeCommitment }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+              <div>
+                <h3 class="font-semibold text-slate-900 dark:text-white">Challenge we’re tackling</h3>
+                <p class="mt-1 whitespace-pre-line">
+                  {{ recruitmentProfile.challengeDescription || 'We are still crafting the challenge description.' }}
+                </p>
+              </div>
+
+              <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h4 class="font-semibold text-slate-900 dark:text-white">Scope of work</h4>
+                  <p class="mt-1 whitespace-pre-line">
+                    {{ recruitmentProfile.scopeOfWork || 'Outline what teammates will do.' }}
+                  </p>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-900 dark:text-white">Final product we’re aiming for</h4>
+                  <p class="mt-1 whitespace-pre-line">
+                    {{ recruitmentProfile.finalProduct || 'Share the artefact or outcome you want to build.' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="flex items-center gap-3 rounded-2xl bg-slate-100/70 dark:bg-slate-700/60 px-4 py-3">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Timeline</div>
+                    <div class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {{ recruitmentProfile.startDate || 'Start date TBD' }}
+                      <span class="text-slate-400">→</span>
+                      {{ recruitmentProfile.completionDate || 'Completion date TBD' }}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 rounded-2xl bg-slate-100/70 dark:bg-slate-700/60 px-4 py-3">
+                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4m6 0a10 10 0 11-20 0 10 10 0 0120 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Weekly rhythm</div>
+                    <div class="mt-0.5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {{ recruitmentProfile.timeCommitment }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h4 class="font-semibold text-slate-900 dark:text-white">Perspectives we value</h4>
+                  <ul class="mt-2 space-y-1">
+                    <li *ngFor="let item of splitLines(recruitmentProfile.perspectives)">• {{ item }}</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-900 dark:text-white">Interests & motivation</h4>
+                  <ul class="mt-2 space-y-1">
+                    <li *ngFor="let item of splitLines(recruitmentProfile.interests)">• {{ item }}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                  <h4 class="font-semibold text-slate-900 dark:text-white">Knowledge & lived experience</h4>
+                  <ul class="mt-2 space-y-1">
+                    <li *ngFor="let item of splitLines(recruitmentProfile.knowledge)">• {{ item }}</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-slate-900 dark:text-white">Skills that amplify the work</h4>
+                  <ul class="mt-2 space-y-1">
+                    <li *ngFor="let item of splitLines(recruitmentProfile.skills)">• {{ item }}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p *ngIf="recruitmentProfile.additionalNotes" class="text-xs text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-4">
+                {{ recruitmentProfile.additionalNotes }}
+              </p>
+            </div>
+          </section>
+
           <!-- Pitch section -->
           <section class="rounded-2xl border border-slate-200 dark:border-slate-700
                           bg-white dark:bg-slate-800 p-6 md:p-8 shadow-sm">
@@ -129,17 +252,6 @@
             </h2>
             <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
               {{ solution.broadCastInviteMessage || 'No pitch message provided yet.' }}
-            </p>
-          </section>
-
-          <!-- ReadMe/Description -->
-          <section class="rounded-2xl border border-slate-200 dark:border-slate-700
-                          bg-white dark:bg-slate-800 p-6 md:p-8 shadow-sm">
-            <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-              About the Solution
-            </h2>
-            <p class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
-              {{ solution.description || 'No description provided.' }}
             </p>
           </section>
 

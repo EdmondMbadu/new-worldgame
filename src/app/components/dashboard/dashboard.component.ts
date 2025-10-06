@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Solution } from 'src/app/models/solution';
+import {
+  Solution,
+  SolutionRecruitmentProfile,
+} from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -23,6 +26,11 @@ export class DashboardComponent implements OnInit {
   showInviteModal = false;
   toggleInviteModal() {
     this.showInviteModal = !this.showInviteModal;
+    if (this.showInviteModal) {
+      this.ensureRecruitmentProfile();
+      this.profileSaved = false;
+      this.profileMessage = '';
+    }
   }
   includeReadMe = true;
 
@@ -37,19 +45,19 @@ export class DashboardComponent implements OnInit {
   currentSolution: Solution = {};
   id: any;
   isHovering: boolean = false;
+  savingProfile = false;
+  profileSaved = false;
+  profileMessage = '';
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
     this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
+      this.ensureRecruitmentProfile();
+      this.profileSaved = false;
+      this.profileMessage = '';
     });
   }
-  // In your component
-  showBroadcastModal = false;
-  toggleBroadcastModal() {
-    this.showBroadcastModal = !this.showBroadcastModal;
-  }
-
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
@@ -69,14 +77,6 @@ export class DashboardComponent implements OnInit {
 
     const fileInput = document.getElementById('getFile') as HTMLElement;
   }
-  selectPlan(plan: 'plus' | 'pro') {
-    // TODO: redirect to checkout, or call your backend, etc.
-    console.log('Selected plan:', plan);
-    // After purchase or redirect:
-    // this.toggleInviteModal();
-  }
-  // In your TS
-
   get generatedInviteLink(): string {
     return `https://newworld-game.org/join/${
       this.currentSolution.solutionId || this.id
@@ -90,6 +90,95 @@ export class DashboardComponent implements OnInit {
   copyInviteLink() {
     navigator.clipboard.writeText(this.generatedInviteLink);
     // toast/snackbar...
+  }
+
+  ensureRecruitmentProfile() {
+    if (!this.currentSolution.recruitmentProfile) {
+      this.currentSolution.recruitmentProfile = this.createDefaultProfile();
+    } else {
+      const defaults = this.createDefaultProfile();
+      this.currentSolution.recruitmentProfile = {
+        ...defaults,
+        ...this.currentSolution.recruitmentProfile,
+      };
+    }
+  }
+
+  private createDefaultProfile(): SolutionRecruitmentProfile {
+    const participantCount = this.currentSolution.participants
+      ? Object.keys(this.currentSolution.participants).length
+      : undefined;
+
+    return {
+      teamLabel: 'Team 1',
+      initiativeName: this.currentSolution.title ?? '',
+      focusArea:
+        this.currentSolution.solutionArea || this.currentSolution.sdgs?.join(', ') || '',
+      challengeDescription: '',
+      scopeOfWork: '',
+      finalProduct: '',
+      startDate: '',
+      completionDate: '',
+      timeCommitment: '3 hours per week',
+      teamSizeMin: participantCount ?? 5,
+      teamSizeMax: participantCount ? Math.max(participantCount, 6) : 6,
+      perspectives: 'Global perspective',
+      interests:
+        'Interest in the global energy situation and the proposed challenge focus.',
+      knowledge:
+        'Experience living in or understanding non-US regions (Africa, China, India, etc.).',
+      skills:
+        'Turning data into knowledge, internet research, AI-assisted analysis, map and chart making.',
+      additionalNotes: '',
+    };
+  }
+
+  async saveRecruitmentProfile() {
+    if (!this.currentSolution?.solutionId || !this.currentSolution.recruitmentProfile) {
+      return;
+    }
+
+    this.savingProfile = true;
+    this.profileSaved = false;
+    this.profileMessage = '';
+
+    const payload: SolutionRecruitmentProfile = {
+      ...this.currentSolution.recruitmentProfile,
+      teamSizeMin: this.toNumber(this.currentSolution.recruitmentProfile.teamSizeMin),
+      teamSizeMax: this.toNumber(this.currentSolution.recruitmentProfile.teamSizeMax),
+    };
+
+    try {
+      await this.solution.updateSolutionField(
+        this.currentSolution.solutionId,
+        'recruitmentProfile',
+        payload
+      );
+      this.profileSaved = true;
+      this.profileMessage = 'Team profile saved';
+    } catch (error) {
+      console.error('Failed to save recruitment profile', error);
+      this.profileSaved = false;
+      this.profileMessage = 'Could not save details. Please try again.';
+    } finally {
+      this.savingProfile = false;
+    }
+  }
+
+  splitLines(value?: string | null): string[] {
+    if (!value) return [];
+    return value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+  }
+
+  toNumber(value: any): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const coerced = Number(value);
+    return Number.isNaN(coerced) ? null : coerced;
   }
 
   askBuckyForPitch() {
@@ -120,7 +209,7 @@ export class DashboardComponent implements OnInit {
 
       // optional toast
       alert('Broadcast sent! Your solution is now discoverable.');
-      this.toggleBroadcastModal();
+      this.toggleInviteModal();
     } catch (e) {
       console.error(e);
       alert('Sorry, broadcast failed. Please try again.');
@@ -168,9 +257,4 @@ export class DashboardComponent implements OnInit {
     return status ?? 'active';
   }
 
-  // Stop button in tile should not open modal
-  onStopTile(ev: Event) {
-    ev.stopPropagation();
-    this.stopBroadcast();
-  }
 }

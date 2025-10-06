@@ -66,10 +66,31 @@ export class Solution {
   broadcastStatus?: 'active' | 'paused' | 'stopped';
   // broadcastChannels?: {...};
 
+  recruitmentProfile?: SolutionRecruitmentProfile;
+
   // broadcastStartedAt?: serverTimestamp;
   // broadcastUpdatedAt?: serverTimestam;
   updatedAt?: string;
   createdAt?: string;
+}
+
+export interface SolutionRecruitmentProfile {
+  teamLabel?: string;
+  initiativeName?: string;
+  focusArea?: string;
+  challengeDescription?: string;
+  scopeOfWork?: string;
+  finalProduct?: string;
+  startDate?: string;
+  completionDate?: string;
+  timeCommitment?: string;
+  teamSizeMin?: number | null;
+  teamSizeMax?: number | null;
+  perspectives?: string;
+  interests?: string;
+  knowledge?: string;
+  skills?: string;
+  additionalNotes?: string;
 }
 
 export class Evaluation {

@@ -1,7 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, combineLatest, map, of, switchMap } from 'rxjs';
-import { Solution } from 'src/app/models/solution';
+import {
+  Solution,
+  SolutionRecruitmentProfile,
+} from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -149,6 +152,44 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   }
   trackByIndex(i: number) {
     return i;
+  }
+
+  get recruitmentProfile(): SolutionRecruitmentProfile {
+    const profile = this.solution?.recruitmentProfile ?? {};
+    return {
+      teamLabel: profile.teamLabel || 'Team 1',
+      initiativeName: profile.initiativeName || this.solution?.title || 'Solution initiative',
+      focusArea:
+        profile.focusArea || this.solution?.solutionArea || this.solution?.sdgs?.join(', ') || 'Focus area not provided',
+      challengeDescription: profile.challengeDescription || this.solution?.description || '',
+      scopeOfWork: profile.scopeOfWork || '',
+      finalProduct: profile.finalProduct || '',
+      startDate: profile.startDate || '',
+      completionDate: profile.completionDate || '',
+      timeCommitment: profile.timeCommitment || '3 hours per week',
+      teamSizeMin: profile.teamSizeMin ?? null,
+      teamSizeMax: profile.teamSizeMax ?? null,
+      perspectives:
+        profile.perspectives || 'Global perspective\nCross-cultural curiosity',
+      interests:
+        profile.interests ||
+        'Interest in the global energy situation and equitable solutions',
+      knowledge:
+        profile.knowledge ||
+        'Experience living in or understanding regions such as Africa, China, India, Latin America',
+      skills:
+        profile.skills ||
+        'Researching data and trends\nTurning insights into stories\nWorking with AI, maps, charts',
+      additionalNotes: profile.additionalNotes || '',
+    };
+  }
+
+  splitLines(value?: string | null): string[] {
+    if (!value) return [];
+    return value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
   }
 
   private isOwnerOf(s: any): boolean {
