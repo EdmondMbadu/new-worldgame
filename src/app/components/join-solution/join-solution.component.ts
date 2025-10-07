@@ -168,7 +168,7 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
       finalProduct: profile.finalProduct || '',
       startDate: profile.startDate || '',
       completionDate: profile.completionDate || '',
-      timeCommitment: profile.timeCommitment || '3 hours per week',
+      timeCommitment: profile.timeCommitment || '1 hour per week',
       teamSizeMin: profile.teamSizeMin ?? null,
       teamSizeMax: profile.teamSizeMax ?? null,
       perspectives:

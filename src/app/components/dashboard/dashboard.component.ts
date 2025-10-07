@@ -118,7 +118,7 @@ export class DashboardComponent implements OnInit {
       finalProduct: '',
       startDate: '',
       completionDate: '',
-      timeCommitment: '1 hours per week',
+      timeCommitment: '1 hour per week',
       teamSizeMin: participantCount ?? 5,
       teamSizeMax: participantCount ? Math.max(participantCount, 6) : 6,
       perspectives: 'Global perspective',
