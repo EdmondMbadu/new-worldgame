@@ -7,18 +7,22 @@
 </style>
 
 <div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
-    <app-navbar
-      [sideBarSmall]="true"
-      [sideBarBig]="false"
-      [email]="this.auth.currentUser.email"
-      [firstName]="this.auth.currentUser.firstName"
-      [lastName]="this.auth.currentUser.lastName"
-      path="home"
-      current=""
-    ></app-navbar>
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="this.auth.currentUser.email"
+    [firstName]="this.auth.currentUser.firstName"
+    [lastName]="this.auth.currentUser.lastName"
+    path="home"
+    current=""
+  ></app-navbar>
 
-    <div class="flex-1 flex flex-col items-center mt-20 px-4 ">
-      <h1 class="text-4xl text-gray-900 dark:text-white mb-8 text-center max-w-2xl">{{ currentSolution.title }}</h1>
+  <div class="flex-1 flex flex-col items-center mt-20 px-4">
+    <h1
+      class="text-4xl text-gray-900 dark:text-white mb-8 text-center max-w-2xl"
+    >
+      {{ currentSolution.title }}
+    </h1>
     <div
       class="relative mb-8 group max-w-xs"
       appDropZone
@@ -30,13 +34,18 @@
       <input
         type="file"
         id="getFile"
-        style="display:none"
+        style="display: none"
         accept="image/*"
         (change)="startUpload($any($event.target).files)"
-      >
+      />
 
       <!-- image / placeholder -->
-      <ng-container *ngIf="currentSolution.image && currentSolution.image !== ''; else placeholder">
+      <ng-container
+        *ngIf="
+          currentSolution.image && currentSolution.image !== '';
+          else placeholder
+        "
+      >
         <img
           [src]="currentSolution.image"
           alt="Solution image"
@@ -46,27 +55,34 @@
 
       <ng-template #placeholder>
         <div
-          class="rounded-xl w-48 h-48 mx-auto flex flex-col items-center justify-center
-                border-2 border-dashed border-slate-300 dark:border-slate-600
-                text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800"
+          class="rounded-xl w-48 h-48 mx-auto flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800"
         >
-          <svg class="w-8 h-8 mb-1" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M3 5h18M3 19h18M5 7h14v10H5zM9 11l2 2 4-4"/>
+          <svg
+            class="w-8 h-8 mb-1"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 5h18M3 19h18M5 7h14v10H5zM9 11l2 2 4-4"
+            />
           </svg>
           <span class="text-xs">No image yet</span>
         </div>
       </ng-template>
 
       <!-- hover ring -->
-      <div class="absolute inset-0 rounded-xl ring-2 ring-transparent group-hover:ring-emerald-400 transition"></div>
+      <div
+        class="absolute inset-0 rounded-xl ring-2 ring-transparent group-hover:ring-emerald-400 transition"
+      ></div>
 
       <!-- drag & drop overlay -->
       <div
         *ngIf="isHovering"
-        class="absolute inset-0 rounded-xl border-2 border-dashed border-emerald-400
-              bg-emerald-500/10 flex items-center justify-center text-emerald-700
-              dark:text-emerald-300 text-sm font-medium"
+        class="absolute inset-0 rounded-xl border-2 border-dashed border-emerald-400 bg-emerald-500/10 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-sm font-medium"
       >
         Drop image to update
       </div>
@@ -77,80 +93,98 @@
         type="button"
         aria-label="Change solution image"
         title="Change image"
-        class="absolute bottom-2 right-2 inline-flex items-center gap-1.5
-              px-2.5 py-1.5 rounded-full text-xs font-medium
-              bg-black/70 text-white hover:bg-black/80
-              backdrop-blur shadow-sm"
+        class="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-black/70 text-white hover:bg-black/80 backdrop-blur shadow-sm"
       >
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM21.207 6.207a1 1 0 0 0 0-1.414L19.207 2.793a1 1 0 0 0-1.414 0L16 4.586l3.75 3.75 1.457-1.457z"/>
+          <path
+            d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM21.207 6.207a1 1 0 0 0 0-1.414L19.207 2.793a1 1 0 0 0-1.414 0L16 4.586l3.75 3.75 1.457-1.457z"
+          />
         </svg>
         Change image
       </button>
 
       <!-- novice hint -->
       <p class="mt-2 text-xs text-center text-slate-500 dark:text-slate-400">
-        Drag & drop an image here, or click <span class="font-semibold">Change image</span>.
+        Drag & drop an image here, or click
+        <span class="font-semibold">Change image</span>.
       </p>
     </div>
 
-
-      <!-- ▼ INVITE CTA (compact, below the image) ▼ -->
+    <!-- ▼ INVITE CTA (compact, below the image) ▼ -->
+    <div
+      (click)="toggleInviteModal()"
+      class="group my-6 w-full max-w-xl mx-auto cursor-pointer rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/75 dark:bg-slate-800/70 backdrop-blur-sm shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 px-6 py-5 flex items-start gap-4"
+    >
       <div
-        (click)="toggleInviteModal()"
-        class="group my-6 w-full max-w-xl mx-auto cursor-pointer rounded-2xl
-               border border-slate-200/70 dark:border-slate-700/70
-               bg-white/75 dark:bg-slate-800/70 backdrop-blur-sm
-               shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200
-               px-6 py-5 flex items-start gap-4"
+        class="rounded-xl p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex-shrink-0 group-hover:scale-110 transition-transform duration-200"
       >
-        <div
-          class="rounded-xl p-3 bg-indigo-100 dark:bg-indigo-900/40
-                 text-indigo-600 dark:text-indigo-300 flex-shrink-0
-                 group-hover:scale-110 transition-transform duration-200"
+        <svg
+          class="w-7 h-7"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.7"
-               viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M18 8a6 6 0 01-12 0m12 0a6 6 0 00-12 0M21 17.25V21h-3.75l-2.25-2.25M3 17.25V21h3.75L9 18.75" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M18 8a6 6 0 01-12 0m12 0a6 6 0 00-12 0M21 17.25V21h-3.75l-2.25-2.25M3 17.25V21h3.75L9 18.75"
+          />
+        </svg>
+      </div>
+
+      <div class="flex-1">
+        <h3
+          class="text-lg font-semibold text-slate-900 dark:text-white leading-tight"
+        >
+          Invite collaborators • update team brief • manage broadcast
+        </h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          Open the invite workspace to refine your team profile, craft the “why
+          join” pitch, copy shareable links, and broadcast your invitation.
+        </p>
+        <div
+          class="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-300"
+        >
+          <span>Open invite workspace</span>
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </div>
-
-        <div class="flex-1">
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white leading-tight">
-            Invite collaborators • update team brief • manage broadcast
-          </h3>
-          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-            Open the invite workspace to refine your team profile, craft the “why join” pitch, copy shareable links, and broadcast your invitation.
-          </p>
-          <div class="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-300">
-            <span>Open invite workspace</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </div>
       </div>
-      <!-- ▲ END INVITE CTA ▲ -->
+    </div>
+    <!-- ▲ END INVITE CTA ▲ -->
 
-
-
-
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-8 place-items-center">
-        <div routerLink="/playground-steps/{{currentSolution.solutionId}}" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
-         <svg
-        class="w-12 h-12 mb-2 text-yellow-400"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-8 place-items-center"
+    >
+      <div
+        routerLink="/playground-steps/{{ currentSolution.solutionId }}"
+        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M11.049 2.927c.3-1.14 1.952-1.14
+        <svg
+          class="w-12 h-12 mb-2 text-yellow-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M11.049 2.927c.3-1.14 1.952-1.14
              2.252 0a1.724 1.724 0 002.591.99c1-.654
              2.29.366 1.937 1.463a1.724 1.724
              0 001.26 2.256c1.122.264 1.122 1.888
@@ -162,19 +196,26 @@
              1.724 0 00-1.26-2.256c-1.122-.264-1.122-1.888
              0-2.152a1.724 1.724 0 001.26-2.256c-.353-1.097.936-2.117
              1.937-1.463.95.623 2.218.04 2.59-.99z"
-        />
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-      <span>Develop Solution</span>
-      <span class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300">Start Solving your problem</span>
-        </div>
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <span>Develop Solution</span>
+        <span
+          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
+          >Start Solving your problem</span
+        >
+      </div>
 
-        <div   routerLink="/meeting/{{currentSolution.solutionId}}" target="_blank" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
-          <svg
+      <div
+        routerLink="/meeting/{{ currentSolution.solutionId }}"
+        target="_blank"
+        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
+      >
+        <svg
           class="w-12 h-12 mb-2 text-red-400"
           fill="none"
           stroke="currentColor"
@@ -194,13 +235,17 @@
           />
         </svg>
         <span>Video chat room</span>
-        <span class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300">meet and chat with your team live</span>
+        <span
+          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
+          >meet and chat with your team live</span
+        >
+      </div>
 
-
-        </div>
-
-        <div  routerLink="/full-discussion/{{currentSolution.solutionId}}"  class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
-          <svg
+      <div
+        routerLink="/full-discussion/{{ currentSolution.solutionId }}"
+        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
+      >
+        <svg
           class="w-12 h-12 mb-2 text-pink-400"
           fill="none"
           stroke="currentColor"
@@ -219,12 +264,17 @@
           />
         </svg>
         <span>Team discussion</span>
-        <span class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300">chat with your team via text</span>
+        <span
+          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
+          >chat with your team via text</span
+        >
+      </div>
 
-        </div>
-
-        <div routerLink="/solution-details/{{currentSolution.solutionId}}"  class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
-          <svg
+      <div
+        routerLink="/solution-details/{{ currentSolution.solutionId }}"
+        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
+      >
+        <svg
           class="w-12 h-12 mb-2 text-green-400"
           fill="none"
           stroke="currentColor"
@@ -240,87 +290,86 @@
           />
         </svg>
         <span>Solution details</span>
-          <span class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300">View and edit your solution title, readme, invite friends, etc.</span>
-        </div>
+        <span
+          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
+          >View and edit your solution title, readme, invite friends, etc.</span
+        >
+      </div>
 
       <div
-            routerLink="/document-files/{{currentSolution.solutionId}}"
-            class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer text-center"
+        routerLink="/document-files/{{ currentSolution.solutionId }}"
+        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer text-center"
+      >
+        <svg
+          class="w-12 h-12 mb-2 text-blue-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19.5 9.75L14.25 4.5H8.25a1.5 1.5 0
+                  00-1.5 1.5v12.75a1.5 1.5 0 001.5
+                  1.5h10.5a1.5 1.5 0 001.5-1.5V9.75z"
+          />
+        </svg>
+        <span class="text-center">Documents & Presentations</span>
+        <span
+          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
+        >
+          Upload and manage project files
+        </span>
+      </div>
+      <!-- Grid Tile: Invite -->
+      <div
+        (click)="toggleInviteModal()"
+        class="group relative h-44 w-72 cursor-pointer select-none rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 text-white shadow-md hover:shadow-2xl hover:-translate-y-1 transition-transform duration-300"
+      >
+        <div
+          class="flex flex-col items-center justify-center h-full px-4 text-center"
+        >
+          <!-- Icon Badge -->
+          <div
+            class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur group-hover:bg-white/30 transition duration-300 mb-3"
           >
             <svg
-              class="w-12 h-12 mb-2 text-blue-400"
+              class="w-7 h-7"
               fill="none"
               stroke="currentColor"
-              stroke-width="1.5"
+              stroke-width="2"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                d="M19.5 9.75L14.25 4.5H8.25a1.5 1.5 0
-                  00-1.5 1.5v12.75a1.5 1.5 0 001.5
-                  1.5h10.5a1.5 1.5 0 001.5-1.5V9.75z"
+                d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0"
               />
             </svg>
-            <span class="text-center">Documents & Presentations</span>
-            <span class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300">
-              Upload and manage project files
-            </span>
-        </div>
-              <!-- Grid Tile: Invite -->
-        <div
-          (click)="toggleInviteModal()"
-          class="group relative h-44 w-72 cursor-pointer select-none
-                rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600
-                text-white shadow-md hover:shadow-2xl hover:-translate-y-1 transition-transform duration-300"
-        >
-          <div class="flex flex-col items-center justify-center h-full px-4 text-center">
-            <!-- Icon Badge -->
-            <div
-              class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur
-                    group-hover:bg-white/30 transition duration-300 mb-3"
-            >
-              <svg
-                class="w-7 h-7"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0"
-                />
-              </svg>
-            </div>
-
-            <!-- Main Title -->
-            <h3 class="text-lg font-bold tracking-tight">
-              Invite Collaborators
-            </h3>
-
-            <!-- Subtitle -->
-            <p
-              class="mt-1 text-sm text-white/90 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              Share your idea and rally teammates across NewWorld Game
-            </p>
           </div>
 
-          <!-- Glow overlay -->
-          <div
-            class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          ></div>
+          <!-- Main Title -->
+          <h3 class="text-lg font-bold tracking-tight">Invite Collaborators</h3>
+
+          <!-- Subtitle -->
+          <p
+            class="mt-1 text-sm text-white/90 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            Share your idea and rally teammates across NewWorld Game
+          </p>
         </div>
 
-        
+        <!-- Glow overlay -->
+        <div
+          class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        ></div>
+      </div>
 
-
-<!-- ──────────────── Team Building tile ──────────────── -->
-        <!-- <div
+      <!-- ──────────────── Team Building tile ──────────────── -->
+      <!-- <div
           routerLink="/team-building/{{ currentSolution.solutionId }}"
           class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white
                 text-xl font-semibold h-44 w-72 flex flex-col items-center
@@ -352,32 +401,33 @@
           </span>
 </div> -->
 
-
-
-        <div routerLink="/whiteboard/{{currentSolution.solutionId}}" class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer">
-          <svg
-            class="w-12 h-12 mb-2 text-purple-400"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-            />
-          </svg>
-          <span>Whiteboard Brainstorming</span>
-          <span class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300">Collaborate visually and sketch ideas</span>
-        </div>
-        </div>
+      <div
+        routerLink="/whiteboard/{{ currentSolution.solutionId }}"
+        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
+      >
+        <svg
+          class="w-12 h-12 mb-2 text-purple-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+          />
+        </svg>
+        <span>Whiteboard Brainstorming</span>
+        <span
+          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
+          >Collaborate visually and sketch ideas</span
+        >
+      </div>
     </div>
+  </div>
 </div>
-
-
-
 
 <!-- ▸ INVITE MODAL (FULLSCREEN) ------------------------------------------------ -->
 <div *ngIf="showInviteModal" class="fixed inset-0 z-[9999]">
@@ -389,114 +439,101 @@
 
   <!-- Modal content wrapper -->
   <div
-    class="relative mx-auto mt-10 w-full max-w-5xl rounded-2xl
-           bg-white dark:bg-slate-900 shadow-2xl
-           ring-1 ring-black/10 dark:ring-white/10
-           overflow-hidden flex flex-col max-h-[90vh]"
+    class="relative mx-auto mt-10 w-full max-w-5xl rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden flex flex-col max-h-[90vh]"
   >
     <!-- Close button -->
     <button
       (click)="toggleInviteModal()"
-      class="absolute top-4 right-4 p-2 rounded-full
-             text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white
-             hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+      class="absolute top-4 right-4 p-2 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
       aria-label="Close"
     >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-        <path d="M6 18L18 6M6 6l12 12"/>
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+      >
+        <path d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
 
     <!-- Header -->
     <header class="px-8 pt-10 pb-6 text-center">
-      <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+      <h2
+        class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white"
+      >
         Spread Your Invitation
       </h2>
       <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        Choose how wide you want your invite to travel across NewWorld Game (and beyond).
+        Open your solution to anyone across NewWorld Game so they can request to join your team.
       </p>
     </header>
 
     <!-- Plans grid (scrollable body) -->
     <div class="px-8 pb-10 overflow-y-auto space-y-8">
-      <section class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/80 dark:bg-slate-800/70 p-6">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Why join & broadcast</h3>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
-          Share the story that will reach new collaborators across NewWorld Game. When ready, broadcast it instantly.
-        </p>
+            <section class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/80 dark:bg-slate-800/70 p-6 space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Why join & broadcast</h3>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Share the story that will reach new collaborators across NewWorld Game. When ready, broadcast it instantly.
+          </p>
+        </div>
 
-        <div class="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-900 px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
+        <div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-900 px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
           <div class="flex-1 min-w-[220px]">
-            <p class="font-semibold text-slate-800 dark:text-slate-200">
-              Broadcast = open your team to the whole network
-            </p>
-            <p class="mt-1">
-              When a broadcast is live, your solution appears in discovery and anyone can request to join your team.
-            </p>
+            <p class="font-semibold text-slate-800 dark:text-slate-200">Broadcast = open your team to the network</p>
+            <p class="mt-1">When a broadcast is live, your solution appears in discovery and anyone can request to join.</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              *ngIf="!isBroadcasting"
-              (click)="sendBroadcast()"
-              [disabled]="sendingBroadcast"
-              class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <button type="button" (click)="saveRecruitmentProfile()" [disabled]="savingProfile"
+              class="inline-flex items-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/60 disabled:opacity-60 disabled:cursor-not-allowed">
+              <svg *ngIf="savingProfile" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3m6.364 2.636l-2.121 2.121M21 12h-3m-2.636 6.364l-2.121-2.121M12 21v-3m-6.364-2.636l2.121-2.121M3 12h3m2.636-6.364l2.121 2.121" />
+              </svg>
+              <span>{{ savingProfile ? 'Saving…' : 'Save team profile' }}</span>
+            </button>
+            <button type="button" *ngIf="!isBroadcasting" (click)="sendBroadcast()" [disabled]="sendingBroadcast"
+              class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed">
               <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
                 <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
               </svg>
               <span>{{ sendingBroadcast ? 'Sending…' : 'Start broadcast' }}</span>
             </button>
-
-            <button
-              type="button"
-              *ngIf="isBroadcasting"
-              (click)="stopBroadcast()"
-              [disabled]="sendingBroadcast"
-              class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <button type="button" *ngIf="isBroadcasting" (click)="stopBroadcast()" [disabled]="sendingBroadcast"
+              class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed">
               <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
                 <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
               </svg>
               <span>{{ sendingBroadcast ? 'Stopping…' : 'Stop broadcast' }}</span>
             </button>
-
-            <span *ngIf="isBroadcasting" class="text-slate-500 dark:text-slate-400">
-              Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}
+            <span *ngIf="isBroadcasting" class="text-slate-500 dark:text-slate-400">Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}</span>
+            <span *ngIf="profileMessage" class="text-xs font-medium" [class.text-teal-600]="profileSaved" [class.text-rose-500]="!profileSaved">
+              {{ profileMessage }}
             </span>
           </div>
         </div>
 
-        <div class="mt-5 space-y-6">
+        <div class="space-y-6">
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Why join (pitch)
-              </label>
-              <button
-                (click)="askBuckyForPitch()"
-                type="button"
-                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
-              >
+              <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Why join (pitch)</label>
+              <button (click)="askBuckyForPitch()" type="button"
+                class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                 </svg>
                 Ask Bucky for help
               </button>
             </div>
-            <textarea
-              [(ngModel)]="currentSolution.broadCastInviteMessage"
-              rows="4"
-              maxlength="600"
+            <textarea [(ngModel)]="currentSolution.broadCastInviteMessage" rows="4" maxlength="600"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Tell collaborators why they should join your team."
-            ></textarea>
-            <div class="mt-1 text-right text-xs text-slate-400 dark:text-slate-500">
-              {{ currentSolution.broadCastInviteMessage?.length || 0 }}/600
-            </div>
+              placeholder="Tell collaborators why they should join your team."></textarea>
+            <div class="mt-1 text-right text-xs text-slate-400 dark:text-slate-500">{{ currentSolution.broadCastInviteMessage?.length || 0 }}/600</div>
           </div>
 
           <div>
@@ -504,30 +541,18 @@
               <input type="checkbox" [(ngModel)]="includeReadMe" class="rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500" />
               Include solution description when broadcasting
             </label>
-            <textarea
-              *ngIf="includeReadMe"
-              [(ngModel)]="currentSolution.description"
-              rows="4"
+            <textarea *ngIf="includeReadMe" [(ngModel)]="currentSolution.description" rows="4"
               class="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Optional: edit the description readers will see."
-            ></textarea>
+              placeholder="Optional: edit the description readers will see."></textarea>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
-              Shareable link
-            </label>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Shareable link</label>
             <div class="flex flex-wrap items-center gap-2">
-              <input
-                [value]="generatedInviteLink"
-                readonly
-                class="flex-1 min-w-[200px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
-              />
-              <button
-                type="button"
-                (click)="copyInviteLink()"
-                class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
+              <input [value]="generatedInviteLink" readonly
+                class="flex-1 min-w-[200px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none" />
+              <button type="button" (click)="copyInviteLink()"
+                class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
                 Copy
               </button>
             </div>
@@ -547,42 +572,10 @@
               </a>
             </div>
           </div>
-
-          <div class="flex flex-wrap items-center gap-3 pt-2">
-            <button
-              type="button"
-              (click)="sendBroadcast()"
-              *ngIf="!isBroadcasting"
-              [disabled]="sendingBroadcast"
-              class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
-                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
-              </svg>
-              <span>{{ sendingBroadcast ? 'Sending…' : 'Broadcast invite' }}</span>
-            </button>
-
-            <button
-              type="button"
-              (click)="stopBroadcast()"
-              *ngIf="isBroadcasting"
-              [disabled]="sendingBroadcast"
-              class="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
-                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
-              </svg>
-              <span>{{ sendingBroadcast ? 'Stopping…' : 'Stop broadcast' }}</span>
-            </button>
-
-            <span *ngIf="isBroadcasting" class="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}
-            </span>
-          </div>
         </div>
       </section>
+
+
 
       <section
         *ngIf="currentSolution.recruitmentProfile as profile"
@@ -592,13 +585,17 @@
           Team profile & invitation brief
         </h3>
         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          These details appear in your dashboard and invitations so people instantly understand what they are joining.
+          These details appear in your dashboard and invitations so people
+          instantly understand what they are joining.
         </p>
 
         <div class="mt-5 grid gap-6 lg:grid-cols-2">
           <div class="space-y-4">
             <div>
-              <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Team label</label>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Team label</label
+              >
               <input
                 type="text"
                 class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
@@ -607,7 +604,10 @@
               />
             </div>
             <div>
-              <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Project / initiative name</label>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Project / initiative name</label
+              >
               <input
                 type="text"
                 class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
@@ -616,7 +616,10 @@
               />
             </div>
             <div>
-              <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Focus area</label>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Focus area</label
+              >
               <input
                 type="text"
                 class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
@@ -628,7 +631,10 @@
           </div>
           <div class="space-y-4">
             <div>
-              <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Time commitment</label>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Time commitment</label
+              >
               <input
                 type="text"
                 class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
@@ -639,7 +645,10 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Team size min</label>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Team size min</label
+                >
                 <input
                   type="number"
                   [ngModel]="profile.teamSizeMin"
@@ -650,7 +659,10 @@
                 />
               </div>
               <div>
-                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Team size max</label>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Team size max</label
+                >
                 <input
                   type="number"
                   [ngModel]="profile.teamSizeMax"
@@ -663,7 +675,10 @@
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Start date</label>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Start date</label
+                >
                 <input
                   type="date"
                   class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
@@ -672,7 +687,10 @@
                 />
               </div>
               <div>
-                <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Completion date</label>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Completion date</label
+                >
                 <input
                   type="date"
                   class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
@@ -686,7 +704,10 @@
 
         <div class="mt-6 grid gap-6 lg:grid-cols-3">
           <div class="lg:col-span-3">
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Challenge description</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Challenge description</label
+            >
             <textarea
               rows="3"
               [(ngModel)]="profile.challengeDescription"
@@ -696,7 +717,10 @@
             ></textarea>
           </div>
           <div>
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Scope of work</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Scope of work</label
+            >
             <textarea
               rows="4"
               [(ngModel)]="profile.scopeOfWork"
@@ -706,7 +730,10 @@
             ></textarea>
           </div>
           <div>
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Envisioned final product</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Envisioned final product</label
+            >
             <textarea
               rows="4"
               [(ngModel)]="profile.finalProduct"
@@ -716,7 +743,10 @@
             ></textarea>
           </div>
           <div>
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Perspectives welcomed</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Perspectives welcomed</label
+            >
             <textarea
               rows="4"
               [(ngModel)]="profile.perspectives"
@@ -726,7 +756,10 @@
             ></textarea>
           </div>
           <div>
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Interests & motivations</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Interests & motivations</label
+            >
             <textarea
               rows="4"
               [(ngModel)]="profile.interests"
@@ -736,7 +769,10 @@
             ></textarea>
           </div>
           <div>
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Knowledge / lived experience</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Knowledge / lived experience</label
+            >
             <textarea
               rows="4"
               [(ngModel)]="profile.knowledge"
@@ -746,7 +782,10 @@
             ></textarea>
           </div>
           <div>
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Skills & craft</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Skills & craft</label
+            >
             <textarea
               rows="4"
               [(ngModel)]="profile.skills"
@@ -756,7 +795,10 @@
             ></textarea>
           </div>
           <div class="lg:col-span-3">
-            <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Additional notes</label>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Additional notes</label
+            >
             <textarea
               rows="3"
               [(ngModel)]="profile.additionalNotes"
@@ -767,26 +809,67 @@
           </div>
         </div>
 
-        <div class="mt-6 flex flex-wrap items-center gap-3">
+        <div class="mt-6 grid gap-3 sm:grid-cols-[auto_auto]">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/60 disabled:cursor-not-allowed disabled:bg-teal-500/50"
             (click)="saveRecruitmentProfile()"
             [disabled]="savingProfile"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <svg *ngIf="savingProfile" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3m6.364 2.636l-2.121 2.121M21 12h-3m-2.636 6.364l-2.121-2.121M12 21v-3m-6.364-2.636l2.121-2.121M3 12h3m2.636-6.364l2.121 2.121" />
+            <svg
+              *ngIf="savingProfile"
+              class="h-4 w-4 animate-spin"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 3v3m6.364 2.636l-2.121 2.121M21 12h-3m-2.636 6.364l-2.121-2.121M12 21v-3m-6.364-2.636l2.121-2.121M3 12h3m2.636-6.364l2.121 2.121"
+              />
             </svg>
-            {{ savingProfile ? 'Saving…' : 'Save team profile' }}
+            <span>{{ savingProfile ? 'Saving…' : 'Save team profile' }}</span>
           </button>
-          <p *ngIf="profileMessage" class="text-xs font-medium" [class.text-teal-600]="profileSaved" [class.text-rose-500]="!profileSaved">
-            {{ profileMessage }}
-          </p>
+
+          <button
+            type="button"
+            *ngIf="!isBroadcasting"
+            (click)="sendBroadcast()"
+            [disabled]="sendingBroadcast"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+            </svg>
+            <span>{{ sendingBroadcast ? 'Sending…' : 'Start broadcast' }}</span>
+          </button>
+
+          <button
+            type="button"
+            *ngIf="isBroadcasting"
+            (click)="stopBroadcast()"
+            [disabled]="sendingBroadcast"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <svg *ngIf="sendingBroadcast" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"/>
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"/>
+            </svg>
+            <span>{{ sendingBroadcast ? 'Stopping…' : 'Stop broadcast' }}</span>
+          </button>
+
+          <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <span *ngIf="isBroadcasting">Status: {{ broadcastStatus === 'paused' ? 'Paused' : 'Live' }}</span>
+            <span *ngIf="profileMessage" [class.text-teal-600]="profileSaved" [class.text-rose-500]="!profileSaved">
+              {{ profileMessage }}
+            </span>
+          </div>
         </div>
       </section>
     </div>
-
   </div>
 </div>
 <!-- ▸ END INVITE MODAL --------------------------------------------------------- -->
-
