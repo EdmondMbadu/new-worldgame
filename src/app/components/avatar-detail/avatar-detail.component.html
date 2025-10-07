@@ -90,10 +90,11 @@
               <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight break-words">
                 {{ avatar.name }}
               </h1>
-              <div
+              <p
                 class="mt-3 text-lg opacity-80 md:max-w-2xl mx-auto md:mx-0 line-clamp-5 break-words"
-                [innerHTML]="avatar.intro"
-              ></div>
+              >
+                {{ introSnippet }}
+              </p>
 
               <!-- SDG chips -->
               <div
@@ -259,12 +260,6 @@
                   "
                   class="rounded-2xl px-4 py-2 shadow-sm text-sm leading-relaxed"
                 >
-                  <!-- first bubble shows intro -->
-                  <p *ngIf="i === 0">
-                    <span class="font-bold">{{ avatar.name }}</span
-                    ><br /><span [innerHTML]="avatar.intro"></span>
-                  </p>
-
                   <!-- loading -->
                   <div
                     *ngIf="resp.loading"
@@ -278,7 +273,7 @@
 
                   <!-- real answer -->
                   <p
-                    *ngIf="!resp.loading && i !== 0"
+                    *ngIf="!resp.loading"
                     class="select-text"
                     [innerHTML]="chat.formatText(resp.text)"
                   ></p>

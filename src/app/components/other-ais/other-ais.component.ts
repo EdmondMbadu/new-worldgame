@@ -32,6 +32,13 @@ export class OtherAisComponent implements OnInit {
   public sdgTiles: SDGPlus[] = [];
   singleCopyStates: string[] = []; // Initialise alongside responses
 
+  private readonly guestUid = 'guest';
+
+  private buildCollectionPath(key: string, uid?: string | null): string {
+    const resolvedUid = uid ?? this.auth?.currentUser?.uid ?? this.guestUid;
+    return `users/${resolvedUid}/${key}/`;
+  }
+
   // NEW state
   search = '';
   activeGroup: 'all' | 'colleague' | 'elder' = 'all';
@@ -73,7 +80,7 @@ export class OtherAisComponent implements OnInit {
 
   allAIOptions: boolean = false;
   title = 'palm-api-app';
-  collectionPath = `users/${this.auth.currentUser.uid}/bucky`;
+  collectionPath = this.buildCollectionPath('bucky');
   prompt = '';
   status = '';
   /* put near other UI state */
@@ -102,7 +109,7 @@ export class OtherAisComponent implements OnInit {
   professionals. She often uses metaphors from African wildlife to
   explain interconnected systems, like comparing a thriving
   ecosystem to a balanced community.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/zara/`,
+      collectionPath: this.buildCollectionPath('zara'),
     },
     {
       avatarPath: '../../../assets/img/arjun-agent.png',
@@ -120,7 +127,7 @@ export class OtherAisComponent implements OnInit {
   into problems. Arjun’s ability to bridge cultural perspectives
   makes him invaluable in diverse teams, and his witty humor keeps
   players engaged.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/arjun/`,
+      collectionPath: this.buildCollectionPath('arjun'),
     },
     {
       avatarPath: '../../../assets/img/sofia-agent.png',
@@ -139,7 +146,7 @@ export class OtherAisComponent implements OnInit {
   resilience, drawn from Latin America’s history of overcoming
   adversity, motivates players to persevere through tough
   challenges.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/sofia/`,
+      collectionPath: this.buildCollectionPath('sofia'),
     },
     {
       avatarPath: '../../../assets/img/li-agent.png',
@@ -156,7 +163,7 @@ export class OtherAisComponent implements OnInit {
   impacts of their solutions, ensuring durability. While disciplined,
   Li Wei’s visionary optimism inspires players to think big, often
   quoting ancient Chinese proverbs to spark reflection.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/li/`,
+      collectionPath: this.buildCollectionPath('li'),
     },
     {
       avatarPath: '../../../assets/img/amina-agent.png',
@@ -174,7 +181,7 @@ export class OtherAisComponent implements OnInit {
   often inspired by Moroccan souks, make complex issues
   accessible to younger players, while her nuanced insights
   resonate with professionals.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/amina/`,
+      collectionPath: this.buildCollectionPath('amina'),
     },
     {
       avatarPath: '../../../assets/img/elena-agent.png',
@@ -191,7 +198,7 @@ export class OtherAisComponent implements OnInit {
   encourages players to pivot when plans fail, and her fierce
   determination inspires confidence. Elena’s dry humor and real-
   world pragmatism make her relatable across age groups.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/elena/`,
+      collectionPath: this.buildCollectionPath('elena'),
     },
     {
       avatarPath: '../../../assets/img/tane-agent.png',
@@ -209,7 +216,7 @@ export class OtherAisComponent implements OnInit {
   sparks innovative ideas. Tane’s grounded demeanor and respect
   for nature make him a trusted guide for players seeking
   meaningful, lasting impact.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/tane/`,
+      collectionPath: this.buildCollectionPath('tane'),
     },
     {
       avatarPath: '../../../assets/img/marie-curie.jpg',
@@ -217,7 +224,7 @@ export class OtherAisComponent implements OnInit {
       group: 'elder',
       sdgs: [3, 7],
       intro: `${name} Polish physicist and chemist who revolutionized the fields of medicine and radiology through her groundbreaking research on radioactivity.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/marie/`,
+      collectionPath: this.buildCollectionPath('marie'),
     },
     {
       avatarPath: '../../../assets/img/rachel-carlson.jpeg',
@@ -225,7 +232,7 @@ export class OtherAisComponent implements OnInit {
       group: 'elder',
       sdgs: [8, 13, 14],
       intro: `${name} American marine biologist, writer, and conservationist who is often called the first woman environmentalist.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/rachel/`,
+      collectionPath: this.buildCollectionPath('rachel'),
     },
     {
       avatarPath: '../../../assets/img/fuller.jpg',
@@ -235,7 +242,7 @@ export class OtherAisComponent implements OnInit {
       intro: `${name} was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Or as Marshall McLuhan said “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he was conviced that design and technology can continually do so much more with less that all humans can be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone. NewWorld Game is inspired by and based on his pioneering work.
      For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
 
-      collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
+      collectionPath: this.buildCollectionPath('bucky'),
     },
     {
       avatarPath: '../../../assets/img/albert.png',
@@ -243,7 +250,7 @@ export class OtherAisComponent implements OnInit {
       group: 'elder',
       sdgs: [7, 11, 16],
       intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/albert/`,
+      collectionPath: this.buildCollectionPath('albert'),
     },
     {
       avatarPath: '../../../assets/img/mandela.png',
@@ -251,7 +258,7 @@ export class OtherAisComponent implements OnInit {
       group: 'elder',
       sdgs: [8, 16],
       intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/nelson/`,
+      collectionPath: this.buildCollectionPath('nelson'),
     },
     {
       avatarPath: '../../../assets/img/gandhi.jpg',
@@ -259,7 +266,7 @@ export class OtherAisComponent implements OnInit {
       group: 'elder',
       sdgs: [],
       intro: `${name} Indian lawyer, anti-colonial nationalist, and political ethicist who employed nonviolent resistance to lead the successful campaign for India's independence from British rule.`,
-      collectionPath: `users/${this.auth.currentUser.uid}/gandhi/`,
+      collectionPath: this.buildCollectionPath('gandhi'),
     },
     {
       avatarPath: '../../../assets/img/twain.jpg',
@@ -268,7 +275,7 @@ export class OtherAisComponent implements OnInit {
       sdgs: [],
       requiresAdmin: false, // ⬅️ add this
       intro: `${name} Distinguished American author, essayist, journalist, and literary critic. He's known for his novels The Adventures of Tom Sawyer (1876) and Adventures of Huckleberry Finn (1884), which some call the "Great American Novel". `,
-      collectionPath: `users/${this.auth.currentUser.uid}/twain/`,
+      collectionPath: this.buildCollectionPath('twain'),
     },
   ];
 
@@ -280,8 +287,12 @@ export class OtherAisComponent implements OnInit {
       type: 'RESPONSE',
     },
   ];
+  private isAdminFlag(): boolean {
+    const adminRaw = this.auth?.currentUser?.admin;
+    return adminRaw === true || adminRaw === 'true';
+  }
   get isAdmin(): boolean {
-    return !!this.auth?.currentUser?.admin;
+    return this.isAdminFlag();
   }
   isLoggedIn: boolean = false;
   constructor(
@@ -295,14 +306,18 @@ export class OtherAisComponent implements OnInit {
     private avatar: AvatarRegistryService
   ) {}
   checkLoginStatus(): void {
-    if (
-      this.auth.currentUser !== null &&
-      this.auth.currentUser.email !== undefined
-    ) {
-      this.isLoggedIn = true;
-    } else {
-      this.isLoggedIn = false;
-    }
+    this.auth.getCurrentUserPromise().then((user) => {
+      this.isLoggedIn = !!user;
+      const uid = user && typeof user === 'object' && 'uid' in user
+        ? (user as { uid: string }).uid
+        : null;
+      this.updateCollectionPaths(uid);
+      if (user) {
+        void this.deleteAllDocuments();
+      }
+      this.visibleAvatars = this.filterAvatars();
+      this.sampleMosaic = this.buildMosaic();
+    });
   }
   //   selectAi(ai: any) {
   //     this.aiSelected = ai;
@@ -468,9 +483,13 @@ export class OtherAisComponent implements OnInit {
   /* ---------------- housekeeping ---------------- */
 
   async deleteAllDocuments(): Promise<void> {
+    const uid = this.auth?.currentUser?.uid;
+    if (!uid) {
+      return;
+    }
     const batch = this.afs.firestore.batch();
     const snapshot = await this.afs
-      .collection(`users/${this.auth.currentUser.uid}/bucky`)
+      .collection(`users/${uid}/bucky`)
       .ref.get();
     snapshot.forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
@@ -491,6 +510,43 @@ export class OtherAisComponent implements OnInit {
         this.status = 'Copy failed';
         setTimeout(() => (this.status = ''), 1200);
       });
+  }
+
+  private extractCollectionKey(path?: string): string | null {
+    if (!path) return null;
+    const segments = path.split('/').filter(Boolean);
+    return segments.length >= 3 ? segments[2] : segments.pop() ?? null;
+  }
+
+  private updateCollectionPaths(uid?: string | null): void {
+    const resolvedUid = uid ?? this.auth?.currentUser?.uid;
+    if (!resolvedUid) {
+      return;
+    }
+
+    const basePath = `users/${resolvedUid}/`;
+    this.collectionPath = `${basePath}bucky`;
+
+    const currentSelectionName = this.aiSelected?.name;
+
+    this.aiOptions = this.aiOptions.map((ai) => {
+      const key =
+        this.extractCollectionKey(ai.collectionPath) || this.slugify(ai.name);
+      return {
+        ...ai,
+        collectionPath: `${basePath}${key}/`,
+      };
+    });
+
+    if (this.aiOptions.length) {
+      this.aiSelected =
+        this.aiOptions.find((ai) => ai.name === currentSelectionName) ||
+        this.aiOptions[0];
+    }
+
+    this.splitGroups();
+    this.refreshCounts();
+    this.sdgTiles = this.data.attachAvatars(this.aiOptions);
   }
 
   // --- NAV ---
@@ -521,10 +577,10 @@ export class OtherAisComponent implements OnInit {
 
   private filterAvatars(): any[] {
     const q = this.search.trim().toLowerCase();
-    const isAdmin = !!this.auth?.currentUser?.admin;
+    const isAdmin = this.isAdminFlag();
 
     return this.aiOptions
-      .filter((a) => isAdmin)
+      .filter((a) => isAdmin || !a.requiresAdmin)
       .filter((a) =>
         this.activeGroup === 'all' ? true : a.group === this.activeGroup
       )
@@ -565,9 +621,10 @@ export class OtherAisComponent implements OnInit {
   }
 
   private buildMosaic() {
+    const isAdmin = this.isAdminFlag();
     // pick up to 9 avatars for the hero mosaic
     return [...this.aiOptions]
-      .filter((a) => !!this.auth?.currentUser?.admin)
+      .filter((a) => isAdmin || !a.requiresAdmin)
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 9);
   }

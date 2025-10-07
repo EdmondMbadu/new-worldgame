@@ -41,7 +41,7 @@ export class AvatarDetailComponent implements OnInit {
   status = '';
   errorMsg = '';
   singleCopyStates: string[] = [];
-  responses: DisplayMessage[] = [{ text: '', type: 'RESPONSE' }];
+  responses: DisplayMessage[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -95,9 +95,10 @@ export class AvatarDetailComponent implements OnInit {
     }
 
     this.avatar = next;
-    this.responses = [{ text: '', type: 'RESPONSE' }];
+    this.responses = [{ text: this.avatar.name || '', type: 'RESPONSE' }];
     this.singleCopyStates = [];
-    this.status = this.avatar.requiresAdmin && !this.isAdmin ? 'Admin-only avatar.' : '';
+    this.status =
+      this.avatar.requiresAdmin && !this.isAdmin ? 'Admin-only avatar.' : '';
 
     setTimeout(() => window.scrollTo({ top: 0 }), 0);
 
@@ -137,6 +138,24 @@ export class AvatarDetailComponent implements OnInit {
 
   private scrollToBottom(behavior: ScrollBehavior = 'smooth'): void {
     this.bottomAnchor?.nativeElement.scrollIntoView({ behavior });
+  }
+
+  get introSnippet(): string {
+    if (!this.avatar?.intro) return '';
+    const text = this.toPlainText(this.avatar.intro).trim();
+    if (!text) return '';
+    const words = text.split(/\s+/).filter(Boolean);
+    const limit = 30;
+    if (words.length <= limit) {
+      return words.join(' ');
+    }
+    return words.slice(0, limit).join(' ') + '…';
+  }
+
+  private toPlainText(html: string): string {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
   }
 
   copySingleMessage(text: string, idx: number): void {
