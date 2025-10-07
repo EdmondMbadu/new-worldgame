@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  Solution,
-  SolutionRecruitmentProfile,
-} from 'src/app/models/solution';
+import { Solution, SolutionRecruitmentProfile } from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -113,13 +110,15 @@ export class DashboardComponent implements OnInit {
       teamLabel: 'Team 1',
       initiativeName: this.currentSolution.title ?? '',
       focusArea:
-        this.currentSolution.solutionArea || this.currentSolution.sdgs?.join(', ') || '',
+        this.currentSolution.solutionArea ||
+        this.currentSolution.sdgs?.join(', ') ||
+        '',
       challengeDescription: '',
       scopeOfWork: '',
       finalProduct: '',
       startDate: '',
       completionDate: '',
-      timeCommitment: '3 hours per week',
+      timeCommitment: '1 hours per week',
       teamSizeMin: participantCount ?? 5,
       teamSizeMax: participantCount ? Math.max(participantCount, 6) : 6,
       perspectives: 'Global perspective',
@@ -134,7 +133,10 @@ export class DashboardComponent implements OnInit {
   }
 
   async saveRecruitmentProfile() {
-    if (!this.currentSolution?.solutionId || !this.currentSolution.recruitmentProfile) {
+    if (
+      !this.currentSolution?.solutionId ||
+      !this.currentSolution.recruitmentProfile
+    ) {
       return;
     }
 
@@ -144,8 +146,12 @@ export class DashboardComponent implements OnInit {
 
     const payload: SolutionRecruitmentProfile = {
       ...this.currentSolution.recruitmentProfile,
-      teamSizeMin: this.toNumber(this.currentSolution.recruitmentProfile.teamSizeMin),
-      teamSizeMax: this.toNumber(this.currentSolution.recruitmentProfile.teamSizeMax),
+      teamSizeMin: this.toNumber(
+        this.currentSolution.recruitmentProfile.teamSizeMin
+      ),
+      teamSizeMax: this.toNumber(
+        this.currentSolution.recruitmentProfile.teamSizeMax
+      ),
     };
 
     try {
@@ -256,5 +262,4 @@ export class DashboardComponent implements OnInit {
       | undefined;
     return status ?? 'active';
   }
-
 }
