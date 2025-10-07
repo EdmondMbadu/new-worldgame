@@ -886,6 +886,20 @@ export class SolutionService {
     );
   }
 
+  declineJoinRequest(solutionId: string, uid: string): Promise<void> {
+    const docRef = this.afs.doc<any>(
+      `solutions/${solutionId}/joinRequests/${uid}`
+    );
+    return docRef.set(
+      {
+        status: 'rejected',
+        rejectedAt: Date.now(),
+        updatedAt: Date.now(),
+      } as Partial<JoinRequest>,
+      { merge: true }
+    );
+  }
+
   getJoinRequestForUser(solutionId: string, uid: string) {
     return this.afs
       .doc<JoinRequest>(`solutions/${solutionId}/joinRequests/${uid}`)

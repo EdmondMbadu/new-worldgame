@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, combineLatest, map, of, switchMap } from 'rxjs';
 import {
@@ -26,6 +26,7 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   myRequestStatus: ReqStatus = 'none';
 
   acceptingId: string | null = null;
+  decliningId: string | null = null;
 
   // owner view of requests
   pendingRequests$ = of<any[]>([]);
@@ -35,6 +36,8 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   showRequestModal = false;
   requestMessage = '';
   maxLen = 280;
+
+  @ViewChild('requestsSection') requestsSection?: ElementRef<HTMLDivElement>;
 
   private sub?: Subscription;
   private id!: string;
@@ -192,6 +195,17 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
       .filter((line) => line.length > 0);
   }
 
+  formatRequesterLabel(request: any): string {
+    if (!request) return 'A designer';
+    const parts = [request.firstName, request.lastName]
+      .map((p: string) => (p || '').trim())
+      .filter((p: string) => p.length > 0);
+    if (parts.length) {
+      return parts.join(' ');
+    }
+    return (request.email || '').toString();
+  }
+
   private isOwnerOf(s: any): boolean {
     const uid = this.auth?.currentUser?.uid;
     const email = (this.auth?.currentUser?.email || '').toLowerCase();
@@ -237,5 +251,25 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
     } finally {
       this.acceptingId = null;
     }
+  }
+
+  async decline(r: any) {
+    if (!r?.uid) return;
+    this.decliningId = r.uid;
+    try {
+      await this.solutionService.declineJoinRequest(this.id, r.uid);
+    } catch (e) {
+      console.error(e);
+      alert('Could not decline request. Please try again.');
+    } finally {
+      this.decliningId = null;
+    }
+  }
+
+  scrollToRequests(): void {
+    this.requestsSection?.nativeElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   }
 }
