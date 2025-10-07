@@ -346,6 +346,125 @@ export const notifyJoinRequest = functions.https.onCall(
   }
 );
 
+export const notifyJoinApproved = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    if (!context.auth?.token?.email) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to send notifications.'
+      );
+    }
+
+    const solutionId = (data?.solutionId || '').toString().trim();
+    const requester = data?.requester || {};
+    const requesterEmail = (requester?.email || '').toString().trim().toLowerCase();
+    const requesterUid = (requester?.uid || '').toString().trim();
+
+    if (!solutionId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'solutionId is required.'
+      );
+    }
+
+    if (!requesterUid) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'requester uid is required.'
+      );
+    }
+
+    if (!requesterEmail || !emailRegex.test(requesterEmail)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A valid requester email is required.'
+      );
+    }
+
+    const db = admin.firestore();
+    const solutionSnap = await db.doc(`solutions/${solutionId}`).get();
+    if (!solutionSnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'Solution not found.');
+    }
+
+    const requestSnap = await db
+      .doc(`solutions/${solutionId}/joinRequests/${requesterUid}`)
+      .get();
+    if (!requestSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Join request could not be located.'
+      );
+    }
+
+    const requestData = requestSnap.data() || {};
+    if ((requestData['status'] || '').toLowerCase() !== 'approved') {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Join request is not approved yet.'
+      );
+    }
+
+    const solution = solutionSnap.data() || {};
+    const title = (solution['title'] || 'your solution').toString();
+    const dashboardUrl = `${APP_BASE_URL.replace(/\/$/, '')}/dashboard/${encodeURIComponent(
+      solutionId
+    )}`;
+
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const nameParts = [requester?.firstName, requester?.lastName, requestData['firstName'], requestData['lastName']]
+      .filter((part) => typeof part === 'string' && part.trim().length > 0)
+      .map((part: string) => part.trim());
+    const requesterName = nameParts.length
+      ? Array.from(new Set(nameParts)).slice(0, 2).join(' ')
+      : requesterEmail;
+
+    const safeTitle = escapeHtml(title);
+    const safeName = escapeHtml(requesterName);
+    const safeDashboard = escapeHtml(dashboardUrl);
+
+    const html = `
+      <div style="font-family: 'Inter', Arial, sans-serif; color:#0f172a; line-height:1.6;">
+        <span style="display:inline-block; padding:6px 12px; border-radius:999px; background:#d1fae5; color:#065f46; font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase;">Welcome aboard</span>
+        <h2 style="font-size:24px; margin:16px 0 12px;">${safeName}, your request has been approved!</h2>
+        <p style="margin:0 0 16px; font-size:15px; color:#1f2937;">
+          You’re now part of <strong>${safeTitle}</strong>. Jump back into your team space to meet collaborators and see what’s next.
+        </p>
+        <a href="${safeDashboard}" style="display:inline-block; margin:8px 0 20px; padding:12px 24px; border-radius:999px; background:#047857; color:#ffffff; font-weight:600; text-decoration:none;">Open team dashboard</a>
+        <p style="margin:0 0 20px; font-size:14px; color:#334155;">
+          Need help getting started? Reply to this email and we’ll point you toward the right resources.
+        </p>
+        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">— The NewWorld Game team</p>
+      </div>
+    `;
+
+    const text = `${requesterName}, your request to join ${title} was approved. Open your dashboard: ${dashboardUrl}`;
+
+    const mail: sgMail.MailDataRequired = {
+      to: requesterEmail,
+      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      subject: `You’re now part of ${title}`,
+      html,
+      text,
+      trackingSettings: {
+        clickTracking: { enable: true, enableText: true },
+        openTracking: { enable: true },
+      },
+    };
+
+    await sgMail.send(mail);
+
+    return { success: true };
+  }
+);
+
 // function buildPrompt(userPrompt: string): string {
 //   const asksForImage = /image|picture|illustration|generate\s+an\s+image/i.test(
 //     userPrompt

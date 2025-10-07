@@ -1,6 +1,6 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription, combineLatest, map, of, switchMap } from 'rxjs';
+import { Subscription, combineLatest, of, switchMap } from 'rxjs';
 import {
   Solution,
   SolutionRecruitmentProfile,
@@ -34,10 +34,9 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
 
   // modal
   showRequestModal = false;
+  showRequestsModal = false;
   requestMessage = '';
   maxLen = 280;
-
-  @ViewChild('requestsSection') requestsSection?: ElementRef<HTMLDivElement>;
 
   private sub?: Subscription;
   private id!: string;
@@ -242,6 +241,8 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
       await this.solutionService.approveJoinRequest(this.id, {
         uid: r.uid,
         email: r.email,
+        firstName: r.firstName,
+        lastName: r.lastName,
       });
       // Optional toast
       // alert(`${r.email} added to participants.`);
@@ -266,10 +267,11 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
     }
   }
 
-  scrollToRequests(): void {
-    this.requestsSection?.nativeElement.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    });
+  openRequestsModal(): void {
+    this.showRequestsModal = true;
+  }
+
+  closeRequestsModal(): void {
+    this.showRequestsModal = false;
   }
 }

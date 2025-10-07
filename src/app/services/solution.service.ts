@@ -944,7 +944,7 @@ export class SolutionService {
 
   async approveJoinRequest(
     solutionId: string,
-    user: { uid: string; email: string }
+    user: { uid: string; email: string; firstName?: string; lastName?: string }
   ): Promise<void> {
     const solRef = this.afs.doc(`solutions/${solutionId}`).ref;
     const reqRef = this.afs.doc(
@@ -971,5 +971,22 @@ export class SolutionService {
         approvedBy: this.auth.currentUser?.uid || null,
       });
     });
+
+    const notifyApproved = this.fns.httpsCallable('notifyJoinApproved');
+    try {
+      await firstValueFrom(
+        notifyApproved({
+          solutionId,
+          requester: {
+            uid: user.uid,
+            email: user.email,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+          },
+        })
+      );
+    } catch (error) {
+      console.error('Failed to notify requester about approval', error);
+    }
   }
 }

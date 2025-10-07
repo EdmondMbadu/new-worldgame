@@ -184,4 +184,7 @@ export interface JoinRequest {
   createdAt: number; // Date.now()
   cancelledAt?: number;
   updatedAt?: number;
+  approvedAt?: string;
+  approvedBy?: string | null;
+  rejectedAt?: number;
 }
