@@ -833,11 +833,11 @@ export class SolutionService {
     );
   }
 
-  requestToJoin(
+  async requestToJoin(
     solutionId: string,
     user: { uid: string; email: string; firstName?: string; lastName?: string },
     message: string
-  ) {
+  ): Promise<void> {
     const docRef = this.afs.doc<JoinRequest>(
       `solutions/${solutionId}/joinRequests/${user.uid}`
     );
@@ -851,7 +851,25 @@ export class SolutionService {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    return docRef.set(data, { merge: true });
+
+    await docRef.set(data, { merge: true });
+
+    const notify = this.fns.httpsCallable('notifyJoinRequest');
+    try {
+      await firstValueFrom(
+        notify({
+          solutionId,
+          requester: {
+            email: user.email,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+          },
+          message: data.message,
+        })
+      );
+    } catch (error) {
+      console.error('Failed to notify team about join request', error);
+    }
   }
 
   cancelJoinRequest(solutionId: string, uid: string) {

@@ -123,6 +123,10 @@ const accountSid = functions.config()['twilio'].account_sid;
 const authToken = functions.config()['twilio'].auth_token;
 const twilioClient = twilio(accountSid, authToken);
 
+const APP_BASE_URL =
+  ((functions.config() as any)?.app?.base_url as string) ||
+  'https://newworld-game.org';
+
 export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
   const msg = {
     to: user.email,
@@ -181,6 +185,164 @@ export const weeklyReminder = functions.https.onCall(
 
     await sgMail.send(msg);
     return { success: true };
+  }
+);
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const notifyJoinRequest = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    if (!context.auth?.token?.email) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to send notifications.'
+      );
+    }
+
+    const solutionId = (data?.solutionId || '').toString().trim();
+    const requester = data?.requester || {};
+    const rawMessage = (data?.message || '').toString();
+    const requesterEmail = (requester?.email || '').toString().trim().toLowerCase();
+
+    if (!solutionId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'solutionId is required.'
+      );
+    }
+
+    if (!requesterEmail || !emailRegex.test(requesterEmail)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A valid requester email is required.'
+      );
+    }
+
+    const db = admin.firestore();
+    const solutionSnap = await db.doc(`solutions/${solutionId}`).get();
+    if (!solutionSnap.exists) {
+      throw new functions.https.HttpsError('not-found', 'Solution not found.');
+    }
+
+    const solution = solutionSnap.data() || {};
+    const recipients = new Set<string>();
+    const addEmail = (candidate: any) => {
+      if (!candidate) return;
+      let email = '';
+      if (typeof candidate === 'string') {
+        email = candidate;
+      } else if (typeof candidate === 'object') {
+        email =
+          candidate.email ||
+          candidate.name ||
+          candidate.address ||
+          candidate.mail ||
+          '';
+      }
+      email = (email || '').toString().trim().toLowerCase();
+      if (!emailRegex.test(email)) return;
+      if (email === requesterEmail) return;
+      recipients.add(email);
+    };
+
+    const participants = solution['participants'];
+    if (Array.isArray(participants)) {
+      participants.forEach(addEmail);
+    } else if (participants && typeof participants === 'object') {
+      Object.values(participants).forEach(addEmail);
+    }
+
+    const participantsHolder = solution['participantsHolder'];
+    if (Array.isArray(participantsHolder)) {
+      participantsHolder.forEach(addEmail);
+    }
+
+    const teamMembers = solution['teamMembers'];
+    if (Array.isArray(teamMembers)) {
+      teamMembers.forEach(addEmail);
+    }
+
+    const chosenAdmins = solution['chosenAdmins'];
+    if (Array.isArray(chosenAdmins)) {
+      chosenAdmins.forEach((adminEntry: any) => addEmail(adminEntry?.authorEmail));
+    }
+
+    addEmail(solution['authorEmail']);
+    addEmail(solution['ownerEmail']);
+    addEmail(solution['createdByEmail']);
+
+    const recipientList = Array.from(recipients);
+    if (!recipientList.length) {
+      return { success: false, reason: 'no_recipients' };
+    }
+
+    const title = (solution['title'] || 'your solution').toString();
+    const requesterName = [
+      (requester?.firstName || '').toString().trim(),
+      (requester?.lastName || '').toString().trim(),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    const requesterLabel = requesterName || requesterEmail;
+
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const safeMessageHtml = rawMessage
+      ? escapeHtml(rawMessage).replace(/\r?\n/g, '<br />')
+      : '<em>No additional message was provided.</em>';
+    const cleanMessageText = rawMessage
+      ? rawMessage.replace(/\r/g, '').trim()
+      : 'No additional message was provided.';
+
+    const manageUrl = `${APP_BASE_URL.replace(/\/$/, '')}/join/${solutionId}`;
+    const safeRequester = escapeHtml(requesterLabel);
+    const safeTitle = escapeHtml(title);
+
+    const html = `
+      <div style="font-family: 'Inter', Arial, sans-serif; color:#0f172a; line-height:1.5;">
+        <h2 style="font-size:20px; margin:0 0 16px;">New request to join your solution</h2>
+        <p style="margin:0 0 16px;">
+          <strong>${safeRequester}</strong>
+          (<a href="mailto:${escapeHtml(requesterEmail)}" style="color:#0f172a;">${escapeHtml(
+      requesterEmail
+    )}</a>)
+          would like to join <strong>${safeTitle}</strong>.
+        </p>
+        <div style="margin:0 0 20px; padding:16px; border-radius:16px; background:#f1f5f9;">
+          <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:#0ea5e9; margin-bottom:8px;">Their note</div>
+          <div style="color:#334155;">${safeMessageHtml}</div>
+        </div>
+        <p style="margin:0 0 20px;">Review the request and respond from your team hub:</p>
+        <a href="${manageUrl}" style="display:inline-block; padding:12px 24px; background:#047857; color:#ffffff; border-radius:9999px; text-decoration:none; font-weight:600;">Open join requests</a>
+        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">You are receiving this notification because you are part of the ${safeTitle} team on NewWorld Game.</p>
+      </div>
+    `;
+
+    const text = `${requesterLabel} (${requesterEmail}) wants to join ${title}. Message: ${cleanMessageText}\nReview here: ${manageUrl}`;
+
+    const subject = `New join request for ${title}`;
+    const mail: sgMail.MailDataRequired = {
+      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      subject,
+      html,
+      text,
+      trackingSettings: {
+        clickTracking: { enable: true, enableText: true },
+        openTracking: { enable: true },
+      },
+      personalizations: recipientList.map((email) => ({ to: [{ email }] })),
+    };
+
+    await sgMail.send(mail);
+
+    return { success: true, recipients: recipientList.length };
   }
 );
 
