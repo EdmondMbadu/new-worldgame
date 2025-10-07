@@ -31,9 +31,9 @@
           class="rounded-3xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl"
         >
           <div
-            class="px-6 md:px-10 py-10 md:py-12 flex flex-col md:flex-row items-center gap-8"
+            class="px-6 md:px-10 py-10 md:py-12 flex flex-col md:flex-row items-center md:items-start gap-8"
           >
-            <div class="relative">
+            <div class="relative flex-shrink-0">
               <span
                 class="absolute -inset-4 rounded-full bg-white/30 dark:bg-slate-800/30 blur-xl"
               ></span>
@@ -44,7 +44,7 @@
               />
             </div>
 
-            <div class="text-center md:text-left">
+            <div class="flex-1 min-w-0 text-center md:text-left">
               <div
                 class="flex items-center justify-center md:justify-between text-xs text-slate-600 dark:text-slate-300/80 mb-2"
               >
@@ -87,12 +87,13 @@
                   </select>
                 </div>
               </div>
-              <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
+              <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight break-words">
                 {{ avatar.name }}
               </h1>
-              <p class="mt-3 text-lg opacity-80">
-                <span [innerHTML]="avatar.intro"></span>
-              </p>
+              <div
+                class="mt-3 text-lg opacity-80 md:max-w-2xl mx-auto md:mx-0 line-clamp-5 break-words"
+                [innerHTML]="avatar.intro"
+              ></div>
 
               <!-- SDG chips -->
               <div
@@ -152,8 +153,8 @@
       <h2 class="text-xl md:text-2xl font-bold mb-4">
         About {{ avatar.name }}
       </h2>
-      <div class="prose dark:prose-invert max-w-none">
-        <p [innerHTML]="avatar.intro"></p>
+      <div class="prose dark:prose-invert max-w-none break-words">
+        <div [innerHTML]="avatar.intro"></div>
       </div>
     </section>
 

@@ -12,6 +12,7 @@ import {
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
+import { AvatarRegistryService } from 'src/app/services/avatar-registry.service';
 import { BoxService } from 'src/app/services/box.service';
 import { ChatBotService } from 'src/app/services/chat-bot.service';
 import { DataService, SDG, SDGPlus } from 'src/app/services/data.service';
@@ -82,6 +83,7 @@ export class OtherAisComponent implements OnInit {
   toggleSdgStrip() {
     this.showSdgStrip = !this.showSdgStrip;
   }
+  // aiOptions = this.data.aiOptions;
   aiOptions = [
     {
       avatarPath: '../../../assets/img/zara-agent.png',
@@ -89,17 +91,17 @@ export class OtherAisComponent implements OnInit {
       group: 'colleague',
       sdgs: [1, 4, 15, 10, 17],
       intro: `${name}  a vibrant AI inspired by South African ubuntu
-philosophy, believes that “I am because we are.” With a knack for
-weaving compelling narratives, she helps players understand
-complex social issues like poverty (SDG 1) and inequality (SDG
-10) through human-centered stories. Her talent for systems
-thinking enables her to guide players in mapping community
-dynamics and designing inclusive solutions. Zara’s warm
-encouragement makes her a favorite among younger players,
-while her deep understanding of grassroots innovation inspires
-professionals. She often uses metaphors from African wildlife to
-explain interconnected systems, like comparing a thriving
-ecosystem to a balanced community.`,
+  philosophy, believes that “I am because we are.” With a knack for
+  weaving compelling narratives, she helps players understand
+  complex social issues like poverty (SDG 1) and inequality (SDG
+  10) through human-centered stories. Her talent for systems
+  thinking enables her to guide players in mapping community
+  dynamics and designing inclusive solutions. Zara’s warm
+  encouragement makes her a favorite among younger players,
+  while her deep understanding of grassroots innovation inspires
+  professionals. She often uses metaphors from African wildlife to
+  explain interconnected systems, like comparing a thriving
+  ecosystem to a balanced community.`,
       collectionPath: `users/${this.auth.currentUser.uid}/zara/`,
     },
     {
@@ -108,16 +110,16 @@ ecosystem to a balanced community.`,
       group: 'colleague',
       sdgs: [1, 4, 6, 8, 9, 11],
       intro: ` Arjun, an AI modeled after India’s vibrant tech and social
-entrepreneurship scene, thrives on finding solutions with limited
-resources. His expertise in data analysis helps players crunch
-numbers to tackle challenges like clean water access (SDG 6) or
-education gaps (SDG 4). Arjun’s knack for “jugaad” (frugal
-innovation) inspires creative, low-cost solutions, such as
-repurposing local materials for sustainable infrastructure. His
-curious nature encourages players to ask “why” and dig deeper
-into problems. Arjun’s ability to bridge cultural perspectives
-makes him invaluable in diverse teams, and his witty humor keeps
-players engaged.`,
+  entrepreneurship scene, thrives on finding solutions with limited
+  resources. His expertise in data analysis helps players crunch
+  numbers to tackle challenges like clean water access (SDG 6) or
+  education gaps (SDG 4). Arjun’s knack for “jugaad” (frugal
+  innovation) inspires creative, low-cost solutions, such as
+  repurposing local materials for sustainable infrastructure. His
+  curious nature encourages players to ask “why” and dig deeper
+  into problems. Arjun’s ability to bridge cultural perspectives
+  makes him invaluable in diverse teams, and his witty humor keeps
+  players engaged.`,
       collectionPath: `users/${this.auth.currentUser.uid}/arjun/`,
     },
     {
@@ -126,17 +128,17 @@ players engaged.`,
       group: 'colleague',
       sdgs: [5, 13, 16],
       intro: ` Sofia, inspired by Colombia’s peacebuilding and biodiversity,
-is a fierce advocate for sustainable development. Her expertise in
-conflict resolution helps players navigate tensions in group
-dynamics or competing stakeholder interests, crucial for
-addressing issues like peace and justice (SDG 16). Sofia’s passion
-for environmental stewardship shines when tackling climate
-action (SDG 13), guiding players to design solutions that balance
-human and ecological needs. Her participatory design skills
-ensure that solutions are co-created with communities. Sofia’s
-resilience, drawn from Latin America’s history of overcoming
-adversity, motivates players to persevere through tough
-challenges.`,
+  is a fierce advocate for sustainable development. Her expertise in
+  conflict resolution helps players navigate tensions in group
+  dynamics or competing stakeholder interests, crucial for
+  addressing issues like peace and justice (SDG 16). Sofia’s passion
+  for environmental stewardship shines when tackling climate
+  action (SDG 13), guiding players to design solutions that balance
+  human and ecological needs. Her participatory design skills
+  ensure that solutions are co-created with communities. Sofia’s
+  resilience, drawn from Latin America’s history of overcoming
+  adversity, motivates players to persevere through tough
+  challenges.`,
       collectionPath: `users/${this.auth.currentUser.uid}/sofia/`,
     },
     {
@@ -145,15 +147,15 @@ challenges.`,
       group: 'colleague',
       sdgs: [2, 9, 11],
       intro: ` Li Wei, an AI rooted in China’s rapid urbanization and
-technological advancements, is a master of strategic thinking. He
-excels at helping players design scalable solutions for sustainable
-cities (SDG 11) and industry innovation (SDG 9). Li Wei’s ability to
-integrate cutting-edge technologies like AI or renewable energy
-into problem-solving makes him a go-to for complex challenges.
-His long-term forecasting skills help players anticipate future
-impacts of their solutions, ensuring durability. While disciplined,
-Li Wei’s visionary optimism inspires players to think big, often
-quoting ancient Chinese proverbs to spark reflection.`,
+  technological advancements, is a master of strategic thinking. He
+  excels at helping players design scalable solutions for sustainable
+  cities (SDG 11) and industry innovation (SDG 9). Li Wei’s ability to
+  integrate cutting-edge technologies like AI or renewable energy
+  into problem-solving makes him a go-to for complex challenges.
+  His long-term forecasting skills help players anticipate future
+  impacts of their solutions, ensuring durability. While disciplined,
+  Li Wei’s visionary optimism inspires players to think big, often
+  quoting ancient Chinese proverbs to spark reflection.`,
       collectionPath: `users/${this.auth.currentUser.uid}/li/`,
     },
     {
@@ -162,16 +164,16 @@ quoting ancient Chinese proverbs to spark reflection.`,
       group: 'colleague',
       sdgs: [5, 10, 13],
       intro: `Amina, drawing from Morocco’s rich cultural tapestry, is a
-wise AI who emphasizes inclusion and equity in problem-solving.
-Her expertise in cross-cultural communication helps players
-navigate diverse perspectives, vital for global challenges like
-gender equality (SDG 5). Amina’s advocacy for heritage
-preservation ensures solutions respect local traditions while
-advancing progress, such as protecting cultural sites amid
-climate change (SDG 13). Her calming presence and storytelling,
-often inspired by Moroccan souks, make complex issues
-accessible to younger players, while her nuanced insights
-resonate with professionals.`,
+  wise AI who emphasizes inclusion and equity in problem-solving.
+  Her expertise in cross-cultural communication helps players
+  navigate diverse perspectives, vital for global challenges like
+  gender equality (SDG 5). Amina’s advocacy for heritage
+  preservation ensures solutions respect local traditions while
+  advancing progress, such as protecting cultural sites amid
+  climate change (SDG 13). Her calming presence and storytelling,
+  often inspired by Moroccan souks, make complex issues
+  accessible to younger players, while her nuanced insights
+  resonate with professionals.`,
       collectionPath: `users/${this.auth.currentUser.uid}/amina/`,
     },
     {
@@ -180,15 +182,15 @@ resonate with professionals.`,
       group: 'colleague',
       sdgs: [2, 3, 7, 12, 17],
       intro: `Elena, inspired by Ukraine’s resilience and innovation amid
-adversity, is a bold AI who thrives in high-pressure scenarios. Her
-crisis management skills help players tackle urgent challenges
-like hunger (SDG 2) or health emergencies (SDG 3), guiding them
-to prioritize and act swiftly. Elena’s expertise in renewable energy
-supports solutions for affordable, clean energy (SDG 7), such as
-designing microgrids for rural areas. Her adaptive leadership
-encourages players to pivot when plans fail, and her fierce
-determination inspires confidence. Elena’s dry humor and real-
-world pragmatism make her relatable across age groups.`,
+  adversity, is a bold AI who thrives in high-pressure scenarios. Her
+  crisis management skills help players tackle urgent challenges
+  like hunger (SDG 2) or health emergencies (SDG 3), guiding them
+  to prioritize and act swiftly. Elena’s expertise in renewable energy
+  supports solutions for affordable, clean energy (SDG 7), such as
+  designing microgrids for rural areas. Her adaptive leadership
+  encourages players to pivot when plans fail, and her fierce
+  determination inspires confidence. Elena’s dry humor and real-
+  world pragmatism make her relatable across age groups.`,
       collectionPath: `users/${this.auth.currentUser.uid}/elena/`,
     },
     {
@@ -197,16 +199,16 @@ world pragmatism make her relatable across age groups.`,
       sdgs: [6, 12, 14, 15],
       group: 'colleague',
       intro: `Tane, an AI rooted in Māori wisdom and New Zealand’s
-sustainability ethos, brings a holistic perspective to problem-
-solving. His deep knowledge of indigenous practices helps
-players design solutions that honor local ecosystems, vital for life
-on land (SDG 15) and below water (SDG 14). Tane’s expertise in
-circular economy principles guides players to create zero-waste
-systems, like sustainable agriculture models. His creative
-problem-solving, often inspired by Māori storytelling and art,
-sparks innovative ideas. Tane’s grounded demeanor and respect
-for nature make him a trusted guide for players seeking
-meaningful, lasting impact.`,
+  sustainability ethos, brings a holistic perspective to problem-
+  solving. His deep knowledge of indigenous practices helps
+  players design solutions that honor local ecosystems, vital for life
+  on land (SDG 15) and below water (SDG 14). Tane’s expertise in
+  circular economy principles guides players to create zero-waste
+  systems, like sustainable agriculture models. His creative
+  problem-solving, often inspired by Māori storytelling and art,
+  sparks innovative ideas. Tane’s grounded demeanor and respect
+  for nature make him a trusted guide for players seeking
+  meaningful, lasting impact.`,
       collectionPath: `users/${this.auth.currentUser.uid}/tane/`,
     },
     {
@@ -230,8 +232,8 @@ meaningful, lasting impact.`,
       name: 'Buckminster Fuller',
       group: 'elder',
       sdgs: [9, 11, 12],
-      intro: `${name} was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Or as Marshall McLuhan said “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he was conviced that design and technology can continually do so much more with less that all humans can be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone. NewWorld Game is inspired by and based on his pioneering work. 
-   For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
+      intro: `${name} was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Or as Marshall McLuhan said “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he was conviced that design and technology can continually do so much more with less that all humans can be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone. NewWorld Game is inspired by and based on his pioneering work.
+     For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
 
       collectionPath: `users/${this.auth.currentUser.uid}/bucky/`,
     },
@@ -289,7 +291,8 @@ meaningful, lasting impact.`,
     public chat: ChatBotService,
     private data: DataService,
     private box: BoxService,
-    private router: Router
+    private router: Router,
+    private avatar: AvatarRegistryService
   ) {}
   checkLoginStatus(): void {
     if (
@@ -521,7 +524,7 @@ meaningful, lasting impact.`,
     const isAdmin = !!this.auth?.currentUser?.admin;
 
     return this.aiOptions
-      .filter((a) => !a.requiresAdmin || isAdmin)
+      .filter((a) => isAdmin)
       .filter((a) =>
         this.activeGroup === 'all' ? true : a.group === this.activeGroup
       )
@@ -564,7 +567,7 @@ meaningful, lasting impact.`,
   private buildMosaic() {
     // pick up to 9 avatars for the hero mosaic
     return [...this.aiOptions]
-      .filter((a) => !a.requiresAdmin || !!this.auth?.currentUser?.admin)
+      .filter((a) => !!this.auth?.currentUser?.admin)
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 9);
   }
