@@ -1,144 +1,265 @@
-<div class="flex justify-center  gap-2.5 mx-4 " *ngFor="let im of imagePaths; let i= index">
-    <img *ngIf="i==stepNumber && im!==''" class="h-60 rounded-lg mb-4" [src]="im" alt="Jese image">
-
-    
-    
+<div
+  class="flex justify-center gap-2.5 mx-4"
+  *ngFor="let im of imagePaths; let i = index"
+>
+  <img
+    *ngIf="i == stepNumber && im !== ''"
+    class="h-60 rounded-lg mb-4"
+    [src]="im"
+    alt="Jese image"
+  />
 </div>
-<div class="flex justify-center  gap-2.5 mx-4 ">
-    <img class="h-12 rounded-full" src="../../../assets/img/bucky-1.png" alt="Jese image">
-    <div class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6">
-       <div class="flex items-center space-x-2 rtl:space-x-reverse">
-          <span class="text-md font-semibold text-gray-900 dark:text-white">Bucky</span>
-
-       </div>
-       <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white ">{{ result }}</p>
-      
+<div class="flex justify-center gap-2.5 mx-4">
+  <img
+    class="h-12 rounded-full"
+    src="../../../assets/img/bucky-1.png"
+    alt="Jese image"
+  />
+  <div
+    class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6"
+  >
+    <div class="flex items-center space-x-2 rtl:space-x-reverse">
+      <span class="text-md font-semibold text-gray-900 dark:text-white"
+        >Bucky</span
+      >
     </div>
-
-    
-    
+    <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white">
+      {{ result }}
+    </p>
+  </div>
 </div>
-<div *ngIf="stepNumber==1" class=" space-y-4 mt-10 mx-4">
-    <div class="relative z-0 w-full mb-5 group">
-        <input [(ngModel)]="solution.newSolution.title"   type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-        <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Solution Title</label>
-    </div>
-    <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="solution.newSolution.title!==''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="solution.newSolution.title===''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
-    </div>
-
-  
- 
+<div *ngIf="stepNumber == 1" class="space-y-4 mt-10 mx-4">
+  <div class="relative z-0 w-full mb-5 group">
+    <input
+      [(ngModel)]="solution.newSolution.solutionArea"
+      type="email"
+      name="floating_email"
+      id="floating_email"
+      class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+      placeholder=" "
+      required
+    />
+    <label
+      for="floating_email"
+      class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+      >Focus Area</label
+    >
+  </div>
+  <div class="container flex mx-auto justify-center my-10">
+    <button
+      *ngIf="solution.newSolution.solutionArea !== ''"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
+      {{ buttonText }}
+    </button>
+    <button
+      [disabled]="true"
+      *ngIf="solution.newSolution.solutionArea === ''"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+    >
+      {{ buttonText }}
+    </button>
+  </div>
 </div>
-<div *ngIf="stepNumber==2" class=" space-y-4 mt-10 mx-4">
-    <div class="relative z-0 w-full mb-5 group">
-        
-        <!-- <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Describe your problem focus in a few words</label> -->
-        <textarea [(ngModel)]="solution.newSolution.description"  id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
-
-    </div>
-    <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="solution.newSolution.description!==''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="solution.newSolution.description===''" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
-    </div>
-
-  
- 
+<div *ngIf="stepNumber == 2" class="space-y-4 mt-10 mx-4">
+  <div class="relative z-0 w-full mb-5 group">
+    <input
+      [(ngModel)]="solution.newSolution.title"
+      type="email"
+      name="floating_email"
+      id="floating_email"
+      class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+      placeholder=" "
+      required
+    />
+    <label
+      for="floating_email"
+      class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+      >Solution Title</label
+    >
+  </div>
+  <div class="container flex mx-auto justify-center my-10">
+    <button
+      *ngIf="solution.newSolution.title !== ''"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
+      {{ buttonText }}
+    </button>
+    <button
+      [disabled]="true"
+      *ngIf="solution.newSolution.title === ''"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+    >
+      {{ buttonText }}
+    </button>
+  </div>
 </div>
-<div *ngIf="stepNumber==3" class=" space-y-4 mt-10 mx-4">
-    <img *ngIf="solution.newSolution.image" [src]="solution.newSolution.image" alt="">
-    <div class="flex items-center justify-center w-full">
-        <label for="getFile" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-           
-            <div class="flex flex-col mx-auto"
-            appDropZone
-            (hovered)="toggleHover($event)"
-            (dropped)="startUpload($event)"
-            [class.hovering]="isHovering">
-            <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
-                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                </svg>
-                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">  If you have an image that can represent your project <br>  <span class="font-semibold">Click to upload</span> or drag and drop that image.</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 10MB)</p>
-            </div>
-            <h5 class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200">Upload Image</h5>
-
-            <input type="file" id="getFile" style="display:none" (change)="startUpload($any($event.target).files)">
-
-
-            </div>
-         
-        </label>
-    </div> 
-    <div class="relative z-0 w-full mb-5 group">
-        
-        <!-- <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Describe your problem focus in a few words</label> -->
-        <!-- <textarea [(ngModel)]="solution.newSolution.description"  id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea> -->
-
-    </div>
-    <div class="container flex mx-auto  justify-center my-10">
-        <button  (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <!-- <button [disabled]="true" *ngIf="solution.newSolution.image==='' || " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button> -->
-    </div>
-
-
-
-
-  
- 
+<div *ngIf="stepNumber == 3" class="space-y-4 mt-10 mx-4">
+  <div class="relative z-0 w-full mb-5 group">
+    <!-- <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Describe your problem focus in a few words</label> -->
+    <textarea
+      [(ngModel)]="solution.newSolution.description"
+      id="message"
+      rows="4"
+      class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      placeholder="Write your thoughts here..."
+    ></textarea>
+  </div>
+  <div class="container flex mx-auto justify-center my-10">
+    <button
+      *ngIf="solution.newSolution.description !== ''"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
+      {{ buttonText }}
+    </button>
+    <button
+      [disabled]="true"
+      *ngIf="solution.newSolution.description === ''"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+    >
+      {{ buttonText }}
+    </button>
+  </div>
 </div>
-<form [formGroup]="myForm" *ngIf="stepNumber==4" class="mt-10">
-    <div class="relative z-0 w-full mb-5 group">
-        <div class="mb-6 mt-4">
-            <!-- <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">Team Members</label> -->
-            <div class="flex flex-col dark:bg-slate-800" >
-                    <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
-                        <mat-label >Add Team Members email</mat-label>
-                        <mat-chip-grid #chipGrid aria-label="Add Team Members email" >
-                        <mat-chip-row class="bg-white" *ngFor="let email of solution.newSolution.participantsHolder"
-                                        (removed)="remove(email)"
-                                        [editable]="true"
-                                        (edited)="edit(email, $event)"
-                                        [aria-description]="'press enter to edit ' + email.name">
-                            {{email.name}}
-                            <button matChipRemove [attr.aria-label]="'remove ' + email.name">
-                            <mat-icon>cancel</mat-icon>
-                            </button>
-                        </mat-chip-row>
-                        <input   placeholder="email..."
-                        formControlName="emails" 
-                                [matChipInputFor]="chipGrid"
-                                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                                [matChipInputAddOnBlur]="addOnBlur"
-                                (matChipInputTokenEnd)="add($event)"/>
-                        </mat-chip-grid>
-                    </mat-form-field>
-                    <div *ngIf="emails!.invalid && emails!.touched" class="text-red-400" >
-                    Make sure all emails are valid.
-                    </div>
-            </div>
-            
-        
-        </div> 
-       
+<!-- <div *ngIf="stepNumber == 4" class="space-y-4 mt-10 mx-4">
+  <img
+    *ngIf="solution.newSolution.image"
+    [src]="solution.newSolution.image"
+    alt=""
+  />
+  <div class="flex items-center justify-center w-full">
+    <label
+      for="getFile"
+      class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+    >
+      <div
+        class="flex flex-col mx-auto"
+        appDropZone
+        (hovered)="toggleHover($event)"
+        (dropped)="startUpload($event)"
+        [class.hovering]="isHovering"
+      >
+        <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
+          <svg
+            class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 20 16"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+            />
+          </svg>
+          <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+            If you have an image that can represent your project <br />
+            <span class="font-semibold">Click to upload</span> or drag and drop
+            that image.
+          </p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            SVG, PNG, JPG or GIF (MAX. 10MB)
+          </p>
+        </div>
+        <h5
+          class="my-2 text-lg font-bold tracking-tight text-gray-900 text-center dark:text-gray-200"
+        >
+          Upload Image
+        </h5>
+
+        <input
+          type="file"
+          id="getFile"
+          style="display: none"
+          (change)="startUpload($any($event.target).files)"
+        />
+      </div>
+    </label>
+  </div>
+  <div class="relative z-0 w-full mb-5 group"></div>
+  <div class="container flex mx-auto justify-center my-10">
+    <button
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
+      {{ buttonText }}
+    </button>
+  </div>
+</div> -->
+<form [formGroup]="myForm" *ngIf="stepNumber == 4" class="mt-10">
+  <div class="relative z-0 w-full mb-5 group">
+    <div class="mb-6 mt-4">
+      <!-- <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">Team Members</label> -->
+      <div class="flex flex-col dark:bg-slate-800">
+        <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
+          <mat-label>Add Team Members email</mat-label>
+          <mat-chip-grid #chipGrid aria-label="Add Team Members email">
+            <mat-chip-row
+              class="bg-white"
+              *ngFor="let email of solution.newSolution.participantsHolder"
+              (removed)="remove(email)"
+              [editable]="true"
+              (edited)="edit(email, $event)"
+              [aria-description]="'press enter to edit ' + email.name"
+            >
+              {{ email.name }}
+              <button matChipRemove [attr.aria-label]="'remove ' + email.name">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+            <input
+              placeholder="email..."
+              formControlName="emails"
+              [matChipInputFor]="chipGrid"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              [matChipInputAddOnBlur]="addOnBlur"
+              (matChipInputTokenEnd)="add($event)"
+            />
+          </mat-chip-grid>
+        </mat-form-field>
+        <div *ngIf="emails!.invalid && emails!.touched" class="text-red-400">
+          Make sure all emails are valid.
+        </div>
+      </div>
     </div>
-    <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="!emails!.invalid " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="emails!.invalid " (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
-    </div>
+  </div>
+  <div class="container flex mx-auto justify-center my-10">
+    <button
+      *ngIf="!emails!.invalid"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
+      {{ buttonText }}
+    </button>
+    <button
+      [disabled]="true"
+      *ngIf="emails!.invalid"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+    >
+      {{ buttonText }}
+    </button>
+  </div>
 </form>
-<form [formGroup]="myForm" *ngIf="stepNumber==5" class="mt-10">
-
-
+<form [formGroup]="myForm" *ngIf="stepNumber == 5" class="mt-10">
   <div class="relative z-0 w-full mb-5 group">
     <div class="flex flex-col">
-      <div *ngFor="let ev of solution.newSolution.evaluatorsHolder; let i = index">
-            <h1 class="text-gray-400 dark:text-gray-400">
-                {{ i + 1 }}. {{ getEvaluatorDisplay(ev.name, i) }}
-            </h1>
-       </div>
+      <div
+        *ngFor="let ev of solution.newSolution.evaluatorsHolder; let i = index"
+      >
+        <h1 class="text-gray-400 dark:text-gray-400">
+          {{ i + 1 }}. {{ getEvaluatorDisplay(ev.name, i) }}
+        </h1>
+      </div>
     </div>
 
     <div class="mb-6 mt-4">
@@ -147,26 +268,32 @@
           <mat-label>Add evaluator emails</mat-label>
 
           <mat-chip-grid #chipGrid aria-label="Evaluator list">
-            <mat-chip-row class="bg-white"
-                *ngFor="let email of solution.newSolution.evaluatorsHolder; let i = index"
-                (removed)="removeEvaluators(email)"
-                [editable]="true"
-                (edited)="editEvaluators(email, $event)"
-                [aria-description]="'press enter to edit evaluator'">
+            <mat-chip-row
+              class="bg-white"
+              *ngFor="
+                let email of solution.newSolution.evaluatorsHolder;
+                let i = index
+              "
+              (removed)="removeEvaluators(email)"
+              [editable]="true"
+              (edited)="editEvaluators(email, $event)"
+              [aria-description]="'press enter to edit evaluator'"
+            >
+              {{ getEvaluatorDisplay(email.name, i) }}
 
-                {{ getEvaluatorDisplay(email.name, i) }}
-
-                <button matChipRemove aria-label="remove evaluator">
+              <button matChipRemove aria-label="remove evaluator">
                 <mat-icon>cancel</mat-icon>
-                </button>
+              </button>
             </mat-chip-row>
 
-            <input placeholder="Add evaluator (email)…"
+            <input
+              placeholder="Add evaluator (email)…"
               formControlName="emails"
               [matChipInputFor]="chipGrid"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
               [matChipInputAddOnBlur]="addOnBlur"
-              (matChipInputTokenEnd)="addEvaluators($event)" />
+              (matChipInputTokenEnd)="addEvaluators($event)"
+            />
           </mat-chip-grid>
         </mat-form-field>
 
@@ -178,147 +305,319 @@
   </div>
 
   <div class="container flex mx-auto justify-center my-10">
-    <button *ngIf="!emails!.invalid" (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800">
+    <button
+      *ngIf="!emails!.invalid"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
       {{ buttonText }}
     </button>
-    <button [disabled]="true" *ngIf="emails!.invalid" (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full">
+    <button
+      [disabled]="true"
+      *ngIf="emails!.invalid"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+    >
       {{ buttonText }}
     </button>
   </div>
 </form>
 
-<section *ngIf="stepNumber==6" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
-    <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
-      <div  class="mb-4 flex items-center justify-between gap-4 md:mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Sustainable Development Goals (SDGs)</h2>
-  
-     
-      </div>
-  
-      <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <a *ngFor="let sdg of sdgs; let i=index" (click)="chooseSDG(i)" class=" flex items-center rounded-lg border border-gray-200  px-4 py-2 hover:border-4  dark:bg-gray-800 dark:hover:bg-gray-700 {{sdg.backgroundSelected}} ">
-          <!-- <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+<section
+  *ngIf="stepNumber == 6"
+  class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4"
+>
+  <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+    <div class="mb-4 flex items-center justify-between gap-4 md:mb-8">
+      <h2
+        class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
+      >
+        Sustainable Development Goals (SDGs)
+      </h2>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <a
+        *ngFor="let sdg of sdgs; let i = index"
+        (click)="chooseSDG(i)"
+        class=" flex items-center rounded-lg border border-gray-200  px-4 py-2 hover:border-4  dark:bg-gray-800 dark:hover:bg-gray-700 {{
+          sdg.backgroundSelected
+        }} "
+      >
+        <!-- <svg class="me-2 h-4 w-4 shrink-0 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v5m-3 0h6M4 11h16M5 15h14a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1Z"></path>
           </svg> -->
-          <img  class=" me-2 h-14  shrink-0 text-gray-900 dark:text-white" [src]="sdg.imagePath" alt="">
-          <span class="text-sm font-medium text-gray-900 dark:text-white">{{ sdg.fullname }}</span>
-        </a>
-        <div class="flex  my-5">
-            <div class="flex items-center h-5">
-            <input (change)="selectAllSdgs()" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
-            </div>
-            <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Select all SDGs</label>
-        
+        <img
+          class="me-2 h-14 shrink-0 text-gray-900 dark:text-white"
+          [src]="sdg.imagePath"
+          alt=""
+        />
+        <span class="text-sm font-medium text-gray-900 dark:text-white">{{
+          sdg.fullname
+        }}</span>
+      </a>
+      <div class="flex my-5">
+        <div class="flex items-center h-5">
+          <input
+            (change)="selectAllSdgs()"
+            id="terms"
+            type="checkbox"
+            value=""
+            class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
+            required
+          />
         </div>
-        
-     
+        <label
+          for="terms"
+          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >Select all SDGs</label
+        >
       </div>
     </div>
-    <div class="container flex mx-auto  justify-center my-10">
-    
-      
-        <button *ngIf="hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="!hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
-    </div>
-    
-  </section>
-
-
- 
-
-  
-    <div class="container flex mx-auto  justify-center my-10">
-    
-      
-        <button *ngIf="stepNumber==0 || stepNumber===7" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <div id="confettiContainer"></div>
-    </div>
-   
-    
-    <div *ngIf="registrationSuccess && auth.newUser.success " id="toast-success" class="fixed inset-x-0 mx-auto top-[5rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert">
-        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg ">
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-            </svg>
-            <span class="sr-only">Check icon</span>
-        </div>
-        <div class="ml-3 text-sm font-normal">Registration was Successful</div>
-        <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 "  (click)="closeRegistrationSuccess()" >
-            <span class="sr-only">Close</span>
-            <svg class="w-3 h-3"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-            </svg>
-        </button>
-    </div>
-
-    <div id="toast-danger" class=" fixed inset-x-0 mx-auto top-10 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert" *ngIf="registrationFailure && auth.newUser.success===false">
-        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg">
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
-            </svg>
-            <span class="sr-only">Error icon</span>
-        </div>
-        <div class="ml-3 text-sm font-normal">Registration Failed. Try Again!
-            <h1 class="my-2">{{auth.newUser.errorMessage}}</h1>
-        </div>
- 
-        <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"  (click)="closeRegistrationFailure()">
-            <span class="sr-only" >Close</span>
-            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-            </svg>
-        </button>
-    </div>
-
-
-     <!-- Pop up save  -->
-     <div *ngIf="createdSolutionSuccess" id="toast-success" class="fixed inset-x-0 mx-auto top-[10rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert">
-        <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg ">
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-            </svg>
-            <span class="sr-only">Check icon</span>
-        </div>
-    <div class="ml-3 text-sm font-normal">Solution Lab Created Successfully.</div>
-        <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 "  (click)="closePopUpSucess()" >
-            <span class="sr-only">Close</span>
-            <svg class="w-3 h-3"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-            </svg>
-        </button>
-     
-    </div>
-    <!-- Spinner -->
-<div *ngIf="isLoading" class="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-gray-800">
-    <div role="status" class="flex flex-col items-center">
-      <svg aria-hidden="true" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-      </svg>
-      <span class="sr-only">Loading...</span>
-      <div class="mt-2 text-white">Processing your request...</div>
-    </div>
   </div>
- 
-<!-- Pop up error  -->
-<div id="toast-danger" class=" fixed inset-x-0 mx-auto top-10 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert" *ngIf="createdSolutionError">
-<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg">
-    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
+  <div class="container flex mx-auto justify-center my-10">
+    <button
+      *ngIf="hasSelectedSDG"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    >
+      {{ buttonText }}
+    </button>
+    <button
+      [disabled]="true"
+      *ngIf="!hasSelectedSDG"
+      (click)="updatePlayground(stepNumber)"
+      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+    >
+      {{ buttonText }}
+    </button>
+  </div>
+</section>
+
+<div class="container flex mx-auto justify-center my-10">
+  <button
+    *ngIf="stepNumber == 0 || stepNumber === 7"
+    (click)="updatePlayground(stepNumber)"
+    class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+  >
+    {{ buttonText }}
+  </button>
+  <div id="confettiContainer"></div>
+</div>
+
+<div
+  *ngIf="registrationSuccess && auth.newUser.success"
+  id="toast-success"
+  class="fixed inset-x-0 mx-auto top-[5rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow"
+  role="alert"
+>
+  <div
+    class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg"
+  >
+    <svg
+      class="w-5 h-5"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+    >
+      <path
+        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+      />
+    </svg>
+    <span class="sr-only">Check icon</span>
+  </div>
+  <div class="ml-3 text-sm font-normal">Registration was Successful</div>
+  <button
+    type="button"
+    class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8"
+    (click)="closeRegistrationSuccess()"
+  >
+    <span class="sr-only">Close</span>
+    <svg
+      class="w-3 h-3"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 14 14"
+    >
+      <path
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+      />
+    </svg>
+  </button>
+</div>
+
+<div
+  id="toast-danger"
+  class="fixed inset-x-0 mx-auto top-10 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow"
+  role="alert"
+  *ngIf="registrationFailure && auth.newUser.success === false"
+>
+  <div
+    class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg"
+  >
+    <svg
+      class="w-5 h-5"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+    >
+      <path
+        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
+      />
     </svg>
     <span class="sr-only">Error icon</span>
+  </div>
+  <div class="ml-3 text-sm font-normal">
+    Registration Failed. Try Again!
+    <h1 class="my-2">{{ auth.newUser.errorMessage }}</h1>
+  </div>
+
+  <button
+    type="button"
+    class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"
+    (click)="closeRegistrationFailure()"
+  >
+    <span class="sr-only">Close</span>
+    <svg
+      class="w-3 h-3"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 14 14"
+    >
+      <path
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+      />
+    </svg>
+  </button>
 </div>
-<div class="ml-3 text-sm font-normal">An error ocurred. Try Again.</div>
-    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white" >
-        <span class="sr-only">Close</span>
-        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-        </svg>
-    </button>   
+
+<!-- Pop up save  -->
+<div
+  *ngIf="createdSolutionSuccess"
+  id="toast-success"
+  class="fixed inset-x-0 mx-auto top-[10rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow"
+  role="alert"
+>
+  <div
+    class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg"
+  >
+    <svg
+      class="w-5 h-5"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+    >
+      <path
+        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
+      />
+    </svg>
+    <span class="sr-only">Check icon</span>
+  </div>
+  <div class="ml-3 text-sm font-normal">Solution Lab Created Successfully.</div>
+  <button
+    type="button"
+    class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8"
+    (click)="closePopUpSucess()"
+  >
+    <span class="sr-only">Close</span>
+    <svg
+      class="w-3 h-3"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 14 14"
+    >
+      <path
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+      />
+    </svg>
+  </button>
 </div>
-  
+<!-- Spinner -->
+<div
+  *ngIf="isLoading"
+  class="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-gray-800"
+>
+  <div role="status" class="flex flex-col items-center">
+    <svg
+      aria-hidden="true"
+      class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+      viewBox="0 0 100 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+        fill="currentColor"
+      />
+      <path
+        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+        fill="currentFill"
+      />
+    </svg>
+    <span class="sr-only">Loading...</span>
+    <div class="mt-2 text-white">Processing your request...</div>
+  </div>
+</div>
 
-
-
+<!-- Pop up error  -->
+<div
+  id="toast-danger"
+  class="fixed inset-x-0 mx-auto top-10 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow"
+  role="alert"
+  *ngIf="createdSolutionError"
+>
+  <div
+    class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg"
+  >
+    <svg
+      class="w-5 h-5"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      viewBox="0 0 20 20"
+    >
+      <path
+        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
+      />
+    </svg>
+    <span class="sr-only">Error icon</span>
+  </div>
+  <div class="ml-3 text-sm font-normal">An error ocurred. Try Again.</div>
+  <button
+    type="button"
+    class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"
+  >
+    <span class="sr-only">Close</span>
+    <svg
+      class="w-3 h-3"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 14 14"
+    >
+      <path
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+      />
+    </svg>
+  </button>
+</div>
