@@ -18,6 +18,7 @@ import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
+import { AngularFireFunctionsModule } from '@angular/fire/compat/functions';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -298,6 +299,7 @@ import { LandingTestComponent } from './components/landing-test/landing-test.com
     AngularFirestoreModule,
     AngularFireAuthModule,
     AngularFireStorageModule,
+    AngularFireFunctionsModule,
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,

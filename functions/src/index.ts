@@ -15,10 +15,13 @@ import { buildICS } from './ics';
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
+import { Buffer } from 'node:buffer';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore – no types published for pdf-parse
 import pdfParse from 'pdf-parse';
 import * as mammoth from 'mammoth';
+import { SpeechClient, protos as speechProtos } from '@google-cloud/speech';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 // read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
 const GEMINI_KEY = functions.config()['gemini'].key;
@@ -58,6 +61,8 @@ const storage = new Storage();
 const bucketName = 'new-worldgame.appspot.com'; // replace 'your-bucket-name' with your actual bucket name
 const bucket = storage.bucket(bucketName);
 import * as sgMail from '@sendgrid/mail';
+const speechClient = new SpeechClient();
+const textToSpeechClient = new TextToSpeechClient();
 
 // import * as corsLib from 'cors';
 
@@ -202,7 +207,10 @@ export const notifyJoinRequest = functions.https.onCall(
     const solutionId = (data?.solutionId || '').toString().trim();
     const requester = data?.requester || {};
     const rawMessage = (data?.message || '').toString();
-    const requesterEmail = (requester?.email || '').toString().trim().toLowerCase();
+    const requesterEmail = (requester?.email || '')
+      .toString()
+      .trim()
+      .toLowerCase();
 
     if (!solutionId) {
       throw new functions.https.HttpsError(
@@ -264,7 +272,9 @@ export const notifyJoinRequest = functions.https.onCall(
 
     const chosenAdmins = solution['chosenAdmins'];
     if (Array.isArray(chosenAdmins)) {
-      chosenAdmins.forEach((adminEntry: any) => addEmail(adminEntry?.authorEmail));
+      chosenAdmins.forEach((adminEntry: any) =>
+        addEmail(adminEntry?.authorEmail)
+      );
     }
 
     addEmail(solution['authorEmail']);
@@ -310,9 +320,9 @@ export const notifyJoinRequest = functions.https.onCall(
         <h2 style="font-size:20px; margin:0 0 16px;">New request to join your solution</h2>
         <p style="margin:0 0 16px;">
           <strong>${safeRequester}</strong>
-          (<a href="mailto:${escapeHtml(requesterEmail)}" style="color:#0f172a;">${escapeHtml(
-      requesterEmail
-    )}</a>)
+          (<a href="mailto:${escapeHtml(
+            requesterEmail
+          )}" style="color:#0f172a;">${escapeHtml(requesterEmail)}</a>)
           would like to join <strong>${safeTitle}</strong>.
         </p>
         <div style="margin:0 0 20px; padding:16px; border-radius:16px; background:#f1f5f9;">
@@ -357,7 +367,10 @@ export const notifyJoinApproved = functions.https.onCall(
 
     const solutionId = (data?.solutionId || '').toString().trim();
     const requester = data?.requester || {};
-    const requesterEmail = (requester?.email || '').toString().trim().toLowerCase();
+    const requesterEmail = (requester?.email || '')
+      .toString()
+      .trim()
+      .toLowerCase();
     const requesterUid = (requester?.uid || '').toString().trim();
 
     if (!solutionId) {
@@ -407,9 +420,10 @@ export const notifyJoinApproved = functions.https.onCall(
 
     const solution = solutionSnap.data() || {};
     const title = (solution['title'] || 'your solution').toString();
-    const dashboardUrl = `${APP_BASE_URL.replace(/\/$/, '')}/dashboard/${encodeURIComponent(
-      solutionId
-    )}`;
+    const dashboardUrl = `${APP_BASE_URL.replace(
+      /\/$/,
+      ''
+    )}/dashboard/${encodeURIComponent(solutionId)}`;
 
     const escapeHtml = (value: string) =>
       value
@@ -419,7 +433,12 @@ export const notifyJoinApproved = functions.https.onCall(
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 
-    const nameParts = [requester?.firstName, requester?.lastName, requestData['firstName'], requestData['lastName']]
+    const nameParts = [
+      requester?.firstName,
+      requester?.lastName,
+      requestData['firstName'],
+      requestData['lastName'],
+    ]
       .filter((part) => typeof part === 'string' && part.trim().length > 0)
       .map((part: string) => part.trim());
     const requesterName = nameParts.length
@@ -1129,6 +1148,164 @@ export const onChatPrompt = functions
         },
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
+    }
+  });
+
+const inferSpeechEncoding = (
+  mimeType?: string
+): speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding => {
+  const type = (mimeType || '').toLowerCase();
+  if (type.includes('webm'))
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.WEBM_OPUS;
+  if (type.includes('ogg'))
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.OGG_OPUS;
+  if (type.includes('mp3') || type.includes('mpeg'))
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.MP3;
+  if (type.includes('wav') || type.includes('pcm'))
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.LINEAR16;
+  return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.WEBM_OPUS;
+};
+
+export const transcribeAvatarAudio = functions
+  .region('us-central1')
+  .https.onCall(async (data: any, context) => {
+    if (!context.auth?.uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Please sign in to use voice transcription.'
+      );
+    }
+
+    const audioContent = (data?.audio || '').toString();
+    if (!audioContent) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Audio content is required.'
+      );
+    }
+
+    const mimeType = (data?.mimeType || '').toString();
+    const languageCode = (data?.languageCode || 'en-US').toString();
+    const alternativeLanguageCodes = Array.isArray(
+      data?.alternativeLanguageCodes
+    )
+      ? (data.alternativeLanguageCodes as string[])
+      : [];
+
+    try {
+      const config: speechProtos.google.cloud.speech.v1.IRecognitionConfig = {
+        encoding: inferSpeechEncoding(mimeType),
+        languageCode,
+        enableAutomaticPunctuation: true,
+        maxAlternatives: 1,
+      };
+
+      if (alternativeLanguageCodes.length) {
+        config.alternativeLanguageCodes = alternativeLanguageCodes;
+      }
+
+      const request: speechProtos.google.cloud.speech.v1.IRecognizeRequest = {
+        audio: { content: audioContent },
+        config,
+      };
+
+      const [result] = (await speechClient.recognize(request)) as [
+        speechProtos.google.cloud.speech.v1.IRecognizeResponse,
+        speechProtos.google.cloud.speech.v1.IRecognizeRequest | undefined,
+        Record<string, unknown> | undefined
+      ];
+
+      const transcript = (result.results || [])
+        .map((section: any) => section.alternatives?.[0]?.transcript || '')
+        .join(' ')
+        .trim();
+
+      return { transcript };
+    } catch (err) {
+      functions.logger.error('transcribeAvatarAudio failed', err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'string'
+          ? err
+          : 'Speech transcription failed.';
+      const details =
+        err && typeof err === 'object' ? JSON.stringify(err) : undefined;
+      throw new functions.https.HttpsError('internal', message, details);
+    }
+  });
+
+export const synthesizeAvatarSpeech = functions
+  .region('us-central1')
+  .https.onCall(async (data: any, context) => {
+    if (!context.auth?.uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Please sign in to use voice responses.'
+      );
+    }
+
+    const rawText = (data?.text || '').toString();
+    const text = rawText.trim();
+    if (!text) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Text is required to synthesize speech.'
+      );
+    }
+
+    const languageCode = (data?.languageCode || 'en-US').toString();
+    const voiceName = (data?.voiceName || '').toString();
+    const speakingRate =
+      typeof data?.speakingRate === 'number'
+        ? Math.min(Math.max(data.speakingRate, 0.7), 1.3)
+        : 1.0;
+    const pitch =
+      typeof data?.pitch === 'number'
+        ? Math.min(Math.max(data.pitch, -5.0), 5.0)
+        : 0.0;
+
+    // Gemini responses can be long; cap input to stay within API limits.
+    const maxChars = 4500;
+    const inputText = text.length > maxChars ? text.slice(0, maxChars) : text;
+
+    try {
+      const [response] = await textToSpeechClient.synthesizeSpeech({
+        input: { text: inputText },
+        voice: voiceName
+          ? { languageCode, name: voiceName }
+          : { languageCode, ssmlGender: 'FEMALE' },
+        audioConfig: {
+          audioEncoding: 'MP3',
+          speakingRate,
+          pitch,
+        },
+      });
+
+      if (!response.audioContent) {
+        throw new Error('No audio content returned by Text-to-Speech API.');
+      }
+
+      const audioData = response.audioContent;
+      let audioContentBase64: string;
+      if (audioData instanceof Uint8Array) {
+        audioContentBase64 = Buffer.from(audioData).toString('base64');
+      } else if (typeof audioData === 'string') {
+        audioContentBase64 = audioData;
+      } else {
+        throw new Error('Unsupported audio content format.');
+      }
+
+      return {
+        audioContent: audioContentBase64,
+        truncated: inputText.length !== text.length,
+      };
+    } catch (err) {
+      functions.logger.error('synthesizeAvatarSpeech failed', err);
+      throw new functions.https.HttpsError(
+        'internal',
+        err instanceof Error ? err.message : 'Speech synthesis failed.'
+      );
     }
   });
 
