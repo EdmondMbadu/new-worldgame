@@ -136,7 +136,7 @@ const routes: Routes = [
   { path: 'game', component: GameComponent },
   { path: 'mini-game', component: MiniGameComponent },
   { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
-  { path: 'discover', component: DiscoverComponent, canActivate: [AuthGuard] },
+  { path: 'discover', component: DiscoverComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   {
     path: 'create-playground',

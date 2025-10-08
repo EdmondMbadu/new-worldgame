@@ -17,7 +17,12 @@ import { TimeService } from 'src/app/services/time.service';
   styleUrl: './discover.component.css',
 })
 export class DiscoverComponent implements OnInit {
-  user: User;
+  user: User | null = null; // <-- nullable
+
+  get isLoggedIn(): boolean {
+    // <-- handy getter if you need it later
+    return !!this.auth?.currentUser;
+  }
   // Centralized data for all challenges
   challenges: {
     [key: string]: {
@@ -84,14 +89,15 @@ export class DiscoverComponent implements OnInit {
     this.user = this.auth.currentUser;
   }
   async ngOnInit() {
-    if (this.user && this.user.location) {
-      this.displayPromptLocation = false;
-    }
+    // If logged in AND has a location, hide the prompt. Guests shouldn’t see it.
+    this.displayPromptLocation = !!this.user?.location;
+
     window.scroll(0, 0);
+
+    // Public content (safe for guests)
     this.solution.getHomePageSolutions().subscribe((data) => {
       this.allSolutions = data;
       this.findCompletedSolutions();
-      /* ➌ enrich the category list with any new categories found in data */
       for (const s of this.allSolutions) {
         if (s.category && !this.categories.includes(s.category)) {
           this.categories.push(s.category);
@@ -99,22 +105,26 @@ export class DiscoverComponent implements OnInit {
       }
     });
 
-    this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
-      // console.log('this is the current user solutions', data);
-      this.currentUserSolutions = data;
-      this.findPendingSolutions();
-    });
-
-    this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
-      this.evaluationSolutions = data.filter((element) => {
-        return element.finished !== undefined && element.finished === 'true';
+    // Auth-only streams — subscribe only if logged in
+    if (this.user) {
+      this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
+        this.currentUserSolutions = data;
+        this.findPendingSolutions();
       });
 
-      this.evaluation = this.evaluationSolutions.length;
-    });
+      this.solution
+        .getAuthenticatedUserPendingEvaluations()
+        .subscribe((data) => {
+          this.evaluationSolutions = data.filter(
+            (element) =>
+              element.finished !== undefined && element.finished === 'true'
+          );
+          this.evaluation = this.evaluationSolutions.length;
+        });
 
-    if (this.user!.profilePicture && this.user.profilePicture.path) {
-      this.profilePicturePath = this.user.profilePicture.downloadURL;
+      if (this.user.profilePicture?.path) {
+        this.profilePicturePath = this.user.profilePicture.downloadURL;
+      }
     }
   }
 
@@ -205,32 +215,42 @@ export class DiscoverComponent implements OnInit {
   }
   // we might use this part.
   async submitLocation() {
+    if (!this.user?.uid) return; // guest: ignore or show a toast
     if (this.location === '') {
       alert('Enter your Location');
       return;
     }
     try {
-      await this.data.updateLocation(this.user.uid!, this.location);
+      await this.data.updateLocation(this.user.uid, this.location);
       this.closeDisplayPromptLocation();
-      // this.ngOnInit();
-    } catch (error) {
-      console.error('Error updating location:', error);
-      // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
+    } catch (err) {
+      console.error('Error updating location:', err);
     }
   }
+
+  async RejectSubmitLocation() {
+    if (!this.user?.uid) return; // guest: ignore
+    try {
+      await this.data.updateLocation(this.user.uid, 'NA');
+      this.closeDisplayPromptLocation();
+    } catch (err) {
+      console.error('Error updating location:', err);
+    }
+  }
+
   closeDisplayPromptLocation() {
     this.displayPromptLocation = !this.displayPromptLocation;
   }
-  async RejectSubmitLocation() {
-    try {
-      await this.data.updateLocation(this.user.uid!, 'NA');
-      this.closeDisplayPromptLocation();
-      // this.ngOnInit();
-    } catch (error) {
-      console.error('Error updating location:', error);
-      // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
-    }
-  }
+  // async RejectSubmitLocation() {
+  //   try {
+  //     await this.data.updateLocation(this.user!.uid!, 'NA');
+  //     this.closeDisplayPromptLocation();
+  //     // this.ngOnInit();
+  //   } catch (error) {
+  //     console.error('Error updating location:', error);
+  //     // Optionally, you can add more error handling logic here, such as displaying an error message to the user.
+  //   }
+  // }
 
   toggleAside() {
     this.isSidebarOpen = !this.isSidebarOpen;
