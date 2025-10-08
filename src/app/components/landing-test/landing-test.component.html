@@ -36,24 +36,22 @@
           >.
         </h1>
 
+        <!-- UPDATED COPY (impact vs badges) -->
         <p
           class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
         >
           Join a small team, pick a real challenge, and deliver results you can
-          point to. Quick feedback, clear goals
-          <!-- (<abbr
-            title="Key Performance Indicators"
-            >KPIs</abbr
-          >) -->
-          , and shareable, verifiable badges.
+          point to — and implement. Quick feedback, clear goals, and real
+          impact.
         </p>
 
         <div class="flex flex-col gap-3 sm:flex-row">
+          <!-- UPDATED LABEL: remove "free" -->
           <a
             routerLink="/welcome"
             class="group inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
           >
-            Get started free
+            Get started
             <svg
               class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
               viewBox="0 0 24 24"
@@ -119,19 +117,7 @@
             class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/5 via-transparent"
           ></div>
 
-          <!-- Floating badges -->
-          <div class="pointer-events-none absolute left-3 top-3">
-            <span
-              class="animate-bounce rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
-              >Real Challenges</span
-            >
-          </div>
-          <div class="pointer-events-none absolute bottom-3 right-3">
-            <span
-              class="animate-pulse rounded-full bg-white/90 px-3 py-1 text-xs font-semibold ring-1 ring-slate-200/60 dark:bg-slate-900/80 dark:ring-slate-800/70 dark:text-slate-100"
-              >Global Teams</span
-            >
-          </div>
+          <!-- REMOVED decorative 'floating badges' chips -->
         </div>
         <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
           A living world, shaped by your ideas.
@@ -144,17 +130,18 @@
   <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">
       <div class="mx-auto max-w-2xl text-center">
+        <!-- UPDATED HEADING/TAGLINE -->
         <h2
           class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
         >
-          Why people stay
+          What we get / What the world gets
         </h2>
         <p class="mt-3 text-slate-600 dark:text-slate-300">
-          Concrete actions, quick feedback, meaningful wins.
+          Meaningful, exciting work, real solutions to critical problems.
         </p>
       </div>
 
-      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <article
           class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
         >
@@ -162,19 +149,22 @@
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
             Clear pathways
           </h3>
+          <!-- UPDATED weekly -> steady -->
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            Roadmaps that turn ambition into weekly progress.
+            Roadmaps that turn ambition into steady progress.
           </p>
         </article>
         <article
           class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
         >
           <div class="mb-2 text-2xl">🤝</div>
+          <!-- UPDATED heading + copy (positive framing) -->
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-            Teammates that show up
+            Teammates that add real value
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            Find peers who care — and deliver.
+            Find peers that bring perspective, knowledge, and skills your
+            solution needs.
           </p>
         </article>
         <article
@@ -185,35 +175,19 @@
             Measured impact
           </h3>
           <p class="text-sm text-slate-600 dark:text-slate-300">
-            Simple dashboards and goals
-            <!-- (<abbr
-              title="Key Performance Indicators"
-              >KPIs</abbr
-            >)  -->
-            track real outcomes.
+            Simple dashboards and goals track real outcomes.
           </p>
         </article>
-        <article
-          class="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
-        >
-          <div class="mb-2 text-2xl">🏅</div>
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-            Badges & opportunities
-          </h3>
-          <p class="text-sm text-slate-600 dark:text-slate-300">
-            Earn verifiable badges you can share.
-          </p>
-        </article>
+        <!-- REMOVED entire “Badges & opportunities” tile -->
       </div>
     </div>
   </section>
 
-  <!-- MEET PEOPLE WORLDWIDE -->
+  <!-- MEET PEOPLE WORLDWIDE (neutral, non-claimy) -->
   <section
     id="world"
     class="relative overflow-hidden py-16 bg-white dark:bg-slate-950"
   >
-    <!-- soft ambience -->
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -top-28 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
@@ -227,39 +201,22 @@
           Community • Global
         </span>
 
+        <!-- UPDATED HEADING/COPY -->
         <h2
           class="mt-4 text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
         >
-          Track where NewWorld Game teams are building
+          Meet people from all over the world
         </h2>
 
         <p
           class="mt-3 text-lg leading-relaxed text-slate-600 dark:text-slate-300"
         >
-          A live atlas of active explorers. Zoom in on the communities turning
-          ideas into measurable results right now.
+          Connect with peers across campuses and communities. Collaborate across
+          disciplines and geographies.
         </p>
       </div>
 
-      <div class="mt-4 flex flex-wrap justify-center gap-2">
-        <span
-          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-          >Africa</span
-        >
-        <span
-          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-          >Americas</span
-        >
-        <span
-          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-          >Europe</span
-        >
-        <span
-          class="inline-flex items-center rounded-full border border-slate-200/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-800/70 dark:bg-slate-900 dark:text-slate-300"
-          >Asia–Pacific</span
-        >
-      </div>
-
+      <!-- Replace live map + counters with static image (non-claimy) -->
       <div class="relative mt-10">
         <div
           aria-hidden="true"
@@ -269,82 +226,37 @@
         <figure
           class="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-2xl ring-1 ring-black/5 dark:border-slate-800/70 dark:bg-slate-900/60 dark:ring-white/10"
         >
-          <div class="relative aspect-[16/10] md:aspect-[5/3] xl:aspect-[3/2]">
-            <div id="demographicMap" class="absolute inset-0"></div>
-          </div>
+          <img
+            class="w-full object-cover"
+            src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/ai-avatars%2Fdymaxion-map.png?alt=media&token=ffa5ac5e-55c6-4bbe-8512-d4986e728dce"
+            alt="Global community map"
+          />
           <figcaption
-            class="flex flex-col gap-1 px-4 py-3 text-center text-xs text-slate-500 dark:text-slate-400"
+            class="px-4 py-3 text-center text-xs text-slate-500 dark:text-slate-400"
           >
-            <span>
-              A planet-wide community—connect and build with peers anywhere.
-            </span>
-            <span *ngIf="totalCountries"
-              >{{ totalCountries }} countries •
-              {{ totalActiveUsers | number }} active explorers •
-              {{ totalEngagedSessions | number }} engaged sessions.</span
-            >
+            A planet-wide community — build with peers anywhere.
           </figcaption>
         </figure>
       </div>
 
-      <div
-        class="mt-8 grid gap-4 sm:grid-cols-3"
-        *ngIf="totalCountries || totalActiveUsers || totalNewUsers"
-      >
-        <div
-          class="rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
-        >
-          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
-            {{ totalCountries || 0 }}
-          </div>
-          <div
-            class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
-          >
-            Countries in play
-          </div>
-        </div>
-        <div
-          class="rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
-        >
-          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
-            {{ totalActiveUsers | number }}
-          </div>
-          <div
-            class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
-          >
-            Active explorers (30 days)
-          </div>
-        </div>
-        <div
-          class="rounded-2xl border border-slate-200/70 bg-white/80 p-5 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60"
-        >
-          <div class="text-3xl font-extrabold text-slate-900 dark:text-white">
-            {{ totalNewUsers | number }}
-          </div>
-          <div
-            class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
-          >
-            New joiners (30 days)
-          </div>
-        </div>
-      </div>
-
+      <!-- UPDATED BUTTON LABELS to match routes -->
       <div class="mt-8 flex flex-wrap justify-center gap-3">
         <a
           routerLink="/welcome"
           class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
         >
-          Join a cohort
+          Start a solution
         </a>
         <a
           routerLink="/overview"
           class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-slate-900/40"
         >
-          Explore stories
+          How it works
         </a>
       </div>
     </div>
   </section>
+
   <!-- HOW IT WORKS -->
   <section class="relative overflow-hidden py-16">
     <div
@@ -396,8 +308,10 @@
             >
             <div>
               <h3 class="font-semibold">Work in sprints</h3>
+              <!-- UPDATED weekly -> steady cadence -->
               <p class="text-sm">
-                Deliver weekly results with mentorship and clear goals.
+                Deliver results on a steady cadence with mentorship and clear
+                goals.
               </p>
             </div>
           </li>
@@ -408,7 +322,7 @@
             routerLink="/welcome"
             class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
           >
-            Start now
+            Get started
           </a>
           <a
             routerLink="/overview"
@@ -598,7 +512,6 @@
 
   <!-- AI COLLEAGUES -->
   <section id="ai" class="relative overflow-hidden py-20">
-    <!-- soft ambience -->
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
@@ -618,13 +531,10 @@
 
       <!-- grid -->
       <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- colleague cards -->
-        <!-- colleague cards -->
         <article
           *ngFor="let item of aiOptions"
           class="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
         >
-          <!-- Overlay must NOT eat clicks -->
           <div
             class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             aria-hidden="true"
@@ -691,7 +601,6 @@
         </article>
       </div>
 
-      <!-- subtle note -->
       <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
         Tip: pick one AI colleague to co-pilot your next sprint.
       </p>
@@ -740,15 +649,16 @@
         </p>
       </div>
       <div class="space-y-4">
+        <!-- UPDATED: neutralize pricing language -->
         <details
           class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-slate-700 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60 dark:text-slate-300"
         >
           <summary class="cursor-pointer select-none text-sm font-semibold">
-            Is it free to start?
+            How do I start?
           </summary>
           <p class="mt-3 text-sm">
-            Yes. Join, explore challenges, and meet teammates. Upgrade only if
-            you need advanced tools.
+            Create an account, explore challenges, and meet teammates. Pricing
+            for advanced tools is being finalized.
           </p>
         </details>
         <details
@@ -770,25 +680,9 @@
           <p class="mt-3 text-sm">
             Each sprint ships evidence: budgets, pilots, dashboards, policy
             drafts, or code — tracked with clear goals.
-            <!-- </p> (<abbr
-              title="Key Performance Indicators"
-              >KPIs</abbr
-            >). -->
-            <
           </p>
         </details>
-
-        <details
-          class="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-slate-700 shadow-sm dark:border-slate-800/70 dark:bg-slate-900/60 dark:text-slate-300"
-        >
-          <summary class="cursor-pointer select-none text-sm font-semibold">
-            How do badges work?
-          </summary>
-          <p class="mt-3 text-sm">
-            Complete milestones to earn verifiable badges you can share on
-            resumes and LinkedIn.
-          </p>
-        </details>
+        <!-- REMOVED “How do badges work?” -->
       </div>
     </div>
   </section>
