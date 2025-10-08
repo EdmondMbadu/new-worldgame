@@ -1070,7 +1070,7 @@ export const onChatPrompt = functions
 
       let answer = '';
       let imgB64 = '';
-      const STREAM_THROTTLE_MS = 500;
+      const STREAM_THROTTLE_MS = 250;
       let lastStreamUpdate = 0;
 
       for await (const chunk of streamResult.stream) {
