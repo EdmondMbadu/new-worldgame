@@ -387,6 +387,7 @@
   </section>
 
   <!-- FEATURED CHALLENGES -->
+  <!-- OPEN BROADCASTS (LIVE PREVIEW) -->
   <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">
       <div class="flex items-end justify-between">
@@ -394,40 +395,129 @@
           <h2
             class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white md:text-4xl"
           >
-            Featured challenges
+            Solutions inviting collaborators
           </h2>
           <p class="mt-2 text-slate-600 dark:text-slate-300">
-            Pick one and start this week.
+            Join a live effort now—or see them all.
           </p>
         </div>
         <a
-          routerLink="/overview"
+          routerLink="/broadcasts"
           class="text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
-          >View all</a
         >
+          View all broadcasts
+        </a>
       </div>
 
-      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <!-- Card -->
+      <!-- Empty state -->
+      <div
+        *ngIf="(broadcastsPreview$ | async)?.length === 0"
+        class="mt-10 rounded-2xl border border-slate-200/70 bg-white/90 p-6 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/70"
+      >
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+          No broadcasts yet
+        </h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          When a solution owner broadcasts, you’ll see it here.
+        </p>
+        <div class="mt-4 flex justify-center gap-3">
+          <a
+            routerLink="/welcome"
+            class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+          >
+            Start a solution
+          </a>
+          <a
+            routerLink="/broadcasts"
+            class="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-slate-900/40"
+          >
+            View all broadcasts
+          </a>
+        </div>
+      </div>
+
+      <!-- Cards grid (top 3 broadcasts) -->
+      <div
+        class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        *ngIf="(broadcastsPreview$ | async)?.length"
+      >
         <article
+          *ngFor="
+            let c of broadcastsPreview$ | async;
+            trackBy: trackByBroadcastId
+          "
           class="group h-full rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
         >
-          <p class="text-xs font-semibold text-teal-700 dark:text-teal-300">
-            SDG 7 • Climate
-          </p>
-          <h3 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
-            Clean Energy Micro-Grids
+          <div class="relative h-40 overflow-hidden rounded-xl">
+            <img
+              *ngIf="c.image; else genericImage"
+              [src]="c.image"
+              alt="Cover"
+              referrerpolicy="no-referrer"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <ng-template #genericImage>
+              <img
+                src="/assets/img/generic.webp"
+                alt="Cover"
+                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </ng-template>
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"
+            ></div>
+
+            <!-- status -->
+            <div class="absolute top-3 left-3">
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white"
+                [ngClass]="{
+                  'bg-emerald-600': c.status === 'active',
+                  'bg-amber-500': c.status === 'paused'
+                }"
+              >
+                <span
+                  class="inline-block w-1.5 h-1.5 rounded-full bg-white"
+                ></span>
+                {{ c.status | titlecase }}
+              </span>
+            </div>
+
+            <!-- author mini chip -->
+            <div
+              class="absolute bottom-3 left-3 right-3 flex items-center justify-end"
+            >
+              <span
+                class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur text-white text-xs"
+              >
+                <span
+                  class="grid place-items-center w-5 h-5 rounded-full bg-white/90 text-slate-900 font-semibold"
+                >
+                  {{ c.authorName || "U" | slice : 0 : 1 }}
+                </span>
+                {{ c.authorName || "Unknown" }}
+              </span>
+            </div>
+          </div>
+
+          <h3
+            class="mt-4 text-lg font-bold text-slate-900 dark:text-white leading-snug line-clamp-2"
+          >
+            {{ c.title }}
           </h3>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Design a pilot micro-grid for a clinic or school. Ship a budget,
-            vendor list, and rollout plan.
+
+          <p
+            class="mt-2 text-sm text-slate-600 dark:text-slate-300 line-clamp-3"
+          >
+            {{ c.message || "No pitch provided." }}
           </p>
-          <div class="mt-4">
+
+          <div class="mt-4 flex items-center justify-between">
             <a
-              routerLink="/welcome"
+              [routerLink]="['/join', c.solutionId]"
               class="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
             >
-              Join team
+              Request to Join
               <svg
                 class="h-4 w-4 -rotate-45"
                 viewBox="0 0 24 24"
@@ -439,70 +529,12 @@
                 <path d="m12 5 7 7-7 7" />
               </svg>
             </a>
-          </div>
-        </article>
 
-        <article
-          class="group h-full rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
-        >
-          <p class="text-xs font-semibold text-teal-700 dark:text-teal-300">
-            GovTech • SDG 16
-          </p>
-          <h3 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
-            Digital Public Services
-          </h3>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Prototype an e-service that reduces queue time by 50% for citizens
-            in your region.
-          </p>
-          <div class="mt-4">
             <a
-              routerLink="/welcome"
-              class="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
+              routerLink="/broadcasts"
+              class="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             >
-              Join team
-              <svg
-                class="h-4 w-4 -rotate-45"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </article>
-
-        <article
-          class="group h-full rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
-        >
-          <p class="text-xs font-semibold text-teal-700 dark:text-teal-300">
-            SDG 8
-          </p>
-          <h3 class="mt-1 text-lg font-bold text-slate-900 dark:text-white">
-            Youth Employment Accelerator
-          </h3>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-            Create a training + placement track with measurable 90-day outcomes.
-          </p>
-          <div class="mt-4">
-            <a
-              routerLink="/welcome"
-              class="inline-flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
-            >
-              Join team
-              <svg
-                class="h-4 w-4 -rotate-45"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
+              See all
             </a>
           </div>
         </article>

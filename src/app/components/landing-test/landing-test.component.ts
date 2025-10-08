@@ -10,10 +10,24 @@ import { HttpClient } from '@angular/common/http';
 import { AIOption, DataService } from 'src/app/services/data.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AvatarRegistryService } from 'src/app/services/avatar-registry.service';
-import { Subscription } from 'rxjs';
+import { map, of, shareReplay, Subscription, switchMap } from 'rxjs';
+import { SolutionService } from 'src/app/services/solution.service';
+import { Solution } from 'src/app/models/solution';
 
 declare const L: any;
 
+type Status = 'active' | 'paused' | 'stopped';
+
+interface BroadcastPreviewVM {
+  broadcastId: string;
+  solutionId: string;
+  title: string;
+  message: string;
+  status: Status;
+  image?: string;
+  authorName?: string;
+  createdAt?: any; // Firestore Timestamp
+}
 interface CountryMetrics {
   country: string;
   activeUsers: number;
@@ -72,10 +86,13 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
   private mapInstance?: any;
   private markersLayer?: any;
 
+  broadcastsPreview$ = of<BroadcastPreviewVM[]>([]);
+
   constructor(
     private data: DataService,
     private router: Router,
     private http: HttpClient,
+    private solutionService: SolutionService,
     @Optional() private auth?: AuthService,
     @Optional() private avatars?: AvatarRegistryService
   ) {}
@@ -86,8 +103,50 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
     this.animateCount('solutionsCount', 312, 650);
     this.aiOptions = this.data.aiOptions;
     this.loadCountryMetrics();
-  }
+    const broadcasts$ = this.solutionService.listActiveBroadcasts().pipe(
+      map((list: any[]) =>
+        list.filter((b) => b.status === 'active' || b.status === 'paused')
+      ),
+      shareReplay(1)
+    );
 
+    this.broadcastsPreview$ = broadcasts$.pipe(
+      switchMap((bcs: any[]) => {
+        const ids = bcs.map((b) => b.solutionId);
+        if (!ids.length) return of<BroadcastPreviewVM[]>([]);
+        return this.solutionService.getSolutionsByIds(ids).pipe(
+          map((solutions: Solution[]) => {
+            const byId = new Map(solutions.map((s) => [s.solutionId!, s]));
+            const vms: BroadcastPreviewVM[] = bcs.map((b) => {
+              const s = byId.get(b.solutionId);
+              return {
+                broadcastId: b.broadcastId,
+                solutionId: b.solutionId,
+                title: b.title || s?.title || 'Untitled Solution',
+                message: b.message || s?.broadCastInviteMessage || '',
+                status: (b.status || 'active') as Status,
+                image: s?.image,
+                authorName: s?.authorName,
+                createdAt: b.createdAt,
+              };
+            });
+
+            // newest first
+            vms.sort((a, b) => {
+              const ta = a.createdAt?.toMillis?.() ?? 0;
+              const tb = b.createdAt?.toMillis?.() ?? 0;
+              return tb - ta;
+            });
+
+            // limit to top 3 for landing preview
+            return vms.slice(0, 3);
+          })
+        );
+      }),
+      shareReplay(1)
+    );
+  }
+  trackByBroadcastId = (_: number, x: BroadcastPreviewVM) => x.broadcastId;
   ngAfterViewInit(): void {
     this.renderMap();
   }
