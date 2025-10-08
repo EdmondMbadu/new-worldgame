@@ -1066,13 +1066,39 @@ export const onChatPrompt = functions
       } as any);
 
       // ────────── 3. generate ───────────────────────────────────
-      const gem = await model.generateContent(history);
+      const streamResult = await model.generateContentStream(history);
 
       let answer = '';
       let imgB64 = '';
-      for (const part of gem.response.candidates?.[0]?.content?.parts || []) {
-        if (part.text) answer += part.text;
-        else if (part.inlineData) imgB64 = part.inlineData.data;
+      const STREAM_THROTTLE_MS = 500;
+      let lastStreamUpdate = 0;
+
+      for await (const chunk of streamResult.stream) {
+        const chunkText = chunk.text();
+        if (!chunkText) continue;
+
+        answer += chunkText;
+        const now = Date.now();
+        const shouldFlush =
+          now - lastStreamUpdate >= STREAM_THROTTLE_MS || answer.length <= 60;
+
+        if (shouldFlush) {
+          lastStreamUpdate = now;
+          await snap.ref.update({
+            status: { state: 'PROCESSING', streaming: true },
+            response: answer,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      const finalResponse = await streamResult.response;
+      for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
+        if (part.text && !answer.includes(part.text)) {
+          answer += part.text;
+        } else if (part.inlineData?.data) {
+          imgB64 = part.inlineData.data;
+        }
       }
 
       // ────────── 4. store image (if any) ───────────────────────
