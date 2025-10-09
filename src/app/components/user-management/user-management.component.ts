@@ -33,6 +33,8 @@ export class UserManagementComponent implements OnInit {
   allUsers: User[] = [];
   everySolution: Solution[] = [];
 
+  private userDirectory = new Map<string, { name: string; email: string }>();
+
   selected = new Set<string>(); // emails
   allSelected = false;
   // ===== State for reminders =====
@@ -70,6 +72,22 @@ export class UserManagementComponent implements OnInit {
         return dateB - dateA; // descending
       });
 
+      // Build directory: email -> {name,email}
+      this.userDirectory.clear();
+      for (const u of this.allUsers) {
+        const email = (u.email || '').trim().toLowerCase();
+        if (!email) continue;
+        const first = (u.firstName || '').trim();
+        const last = (u.lastName || '').trim();
+        const fullName =
+          first || last
+            ? `${first} ${last}`.trim()
+            : (u.firstName || '').trim();
+        this.userDirectory.set(email, {
+          name: fullName || email,
+          email,
+        });
+      }
       this.userDetails = Array.from(
         { length: this.allUsers.length },
         () => false
@@ -238,30 +256,13 @@ export class UserManagementComponent implements OnInit {
     );
   }
   getPendingSolutions(email: string) {
-    const normalized = email.trim().toLowerCase();
+    const normalized = (email || '').trim().toLowerCase();
 
     const mine = this.everySolution.filter((sol) => {
-      const p = sol.participants as unknown;
-
-      // Normalize participants -> string[] of emails
-      let emails: string[] = [];
-
-      if (Array.isArray(p)) {
-        // supports [{name:string}] or [string]
-        emails = p
-          .map((item: any) =>
-            typeof item === 'string' ? item : item?.name ?? ''
-          )
-          .filter(Boolean);
-      } else if (p && typeof p === 'object') {
-        // supports { [key]: string }
-        emails = Object.values(p as Record<string, string>).filter(Boolean);
-      }
-
-      return emails.some((e) => e.trim().toLowerCase() === normalized);
+      const emails = this.normalizeParticipantEmails((sol as any).participants);
+      return emails.includes(normalized);
     });
 
-    // finished can be 'true' or true
     const unfinished = mine.filter(
       (sol) => !(sol as any).finished || (sol as any).finished === 'false'
     );
@@ -272,21 +273,41 @@ export class UserManagementComponent implements OnInit {
 
       const rawTime: any =
         (sol as any).updatedAt ?? (sol as any).createdAt ?? '';
-      // If Firestore Timestamp, convert; else pass through
       const lastUpdated =
         rawTime && typeof rawTime.toDate === 'function'
           ? rawTime.toDate().toISOString()
           : rawTime;
 
+      // Resolve participants to {name,email}[]
+      const emails = this.normalizeParticipantEmails((sol as any).participants);
+      const participants = emails.map((e) => {
+        const fromDir = this.userDirectory.get(e);
+        return {
+          name: fromDir?.name || e,
+          email: e,
+        };
+      });
+
+      const meetLink =
+        (sol as any).meetLink ||
+        (sol as any).meetingLink ||
+        (sol as any).meetURL ||
+        '';
+
       return {
-        title: sol.title ?? 'Untitled',
-        summary: (sol.description ?? '').slice(0, 220),
-        image: sol.image ?? fallbackImg,
+        title: (sol as any).title ?? 'Untitled',
+        summary: ((sol as any).description ?? '').slice(0, 220),
+        image: (sol as any).image ?? fallbackImg,
         lastUpdated,
-        ctaUrl: `https://newworld-game.org/dashboard/${sol.solutionId}`,
+        ctaUrl: `https://newworld-game.org/dashboard/${
+          (sol as any).solutionId
+        }`,
+        participants, // NEW
+        meetLink: String(meetLink || ''), // NEW
       };
     });
   }
+
   openReminderModal(mode: 'selected' | 'all' = 'selected') {
     this.targetMode = mode;
     this.reminderOpen = true;
@@ -398,7 +419,6 @@ export class UserManagementComponent implements OnInit {
         const email = (u.email || '').trim();
         if (!email) continue;
 
-        // Build the array your template expects
         const pending = this.getPendingSolutions(email)
           .slice(0, 8)
           .map((p) => ({
@@ -409,29 +429,29 @@ export class UserManagementComponent implements OnInit {
               ? this.formatDateForEmail(p.lastUpdated)
               : '',
             ctaUrl: p.ctaUrl,
+            meetLink: p.meetLink || '', // NEW
+            participants: p.participants || [], // NEW [{name,email}]
           }));
 
         const payload = {
           email,
           subject: this.reminderSubject,
           userFirstName: this.firstNameOf(u) || 'there',
-          intro_html: this.reminderIntroHtml, // rendered via {{{intro_html}}}
+          intro_html: this.reminderIntroHtml,
           solutions: pending,
           hasSolutions: pending.length > 0,
           homeUrl: 'https://newworld-game.org',
           author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
         };
 
-        // Optional: quick sanity log
         console.log(
           'Send weeklyReminder ->',
           email,
           'solutions:',
           pending.length
         );
-
         await firstValueFrom(weeklyReminder(payload));
-        await new Promise((res) => setTimeout(res, 80)); // small throttle
+        await new Promise((res) => setTimeout(res, 80));
       }
 
       alert(`Weekly reminder sent to ${pool.length} recipient(s).`);
@@ -442,5 +462,33 @@ export class UserManagementComponent implements OnInit {
     } finally {
       this.sending = false;
     }
+  }
+
+  private normalizeParticipantEmails(input: unknown): string[] {
+    if (!input) return [];
+    // Array<string> or Array<{name:string}>
+    if (Array.isArray(input)) {
+      return input
+        .map((item: any) => {
+          if (typeof item === 'string') return item.trim();
+          if (
+            item &&
+            typeof item === 'object' &&
+            typeof item.name === 'string'
+          ) {
+            return item.name.trim(); // in your current data, "name" holds the email
+          }
+          return '';
+        })
+        .filter(Boolean)
+        .map((e) => e.toLowerCase());
+    }
+    // Object map { key: email }
+    if (typeof input === 'object') {
+      return Object.values(input as Record<string, string>)
+        .filter(Boolean)
+        .map((e) => e.trim().toLowerCase());
+    }
+    return [];
   }
 }
