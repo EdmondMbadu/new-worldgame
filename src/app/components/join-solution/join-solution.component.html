@@ -5,9 +5,9 @@
   <app-navbar
     [sideBarSmall]="true"
     [sideBarBig]="false"
-    [email]="auth.currentUser.email"
-    [firstName]="auth.currentUser.firstName"
-    [lastName]="auth.currentUser.lastName"
+    [email]="auth.currentUser?.email || ''"
+    [firstName]="auth.currentUser?.firstName || ''"
+    [lastName]="auth.currentUser?.lastName || ''"
     path="join"
     current=""
   ></app-navbar>

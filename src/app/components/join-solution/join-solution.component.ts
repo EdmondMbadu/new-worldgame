@@ -1,10 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, combineLatest, of, switchMap } from 'rxjs';
-import {
-  Solution,
-  SolutionRecruitmentProfile,
-} from 'src/app/models/solution';
+import { Solution, SolutionRecruitmentProfile } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -43,6 +40,7 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private solutionService: SolutionService,
     public auth: AuthService,
     public data: DataService
@@ -67,9 +65,10 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
       this.isOwner = this.isOwnerOf(s);
 
       // membership
+      const userEmail = this.auth?.currentUser?.email ?? null;
       this.alreadyMember = this.isUserInParticipants(
         s?.participants,
-        this.auth.currentUser.email
+        userEmail
       );
 
       // my request status
@@ -92,6 +91,7 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
 
   // ----- Actions -----
   openRequestModal() {
+    if (!this.ensureAuthenticated()) return;
     this.requestMessage = '';
     this.showRequestModal = true;
   }
@@ -101,15 +101,20 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
 
   async sendJoinRequest() {
     if (this.joining) return;
+    if (!this.ensureAuthenticated()) return;
     this.joining = true;
     try {
+      const user = this.auth.currentUser;
+      if (!user?.uid) {
+        throw new Error('Missing user information');
+      }
       await this.solutionService.requestToJoin(
         this.id,
         {
-          uid: this.auth.currentUser.uid,
-          email: this.auth.currentUser.email,
-          firstName: this.auth.currentUser.firstName,
-          lastName: this.auth.currentUser.lastName,
+          uid: user.uid,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
         },
         this.requestMessage || ''
       );
@@ -125,12 +130,14 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
 
   async cancelMyRequest() {
     if (this.joining) return;
+    if (!this.ensureAuthenticated()) return;
     this.joining = true;
     try {
-      await this.solutionService.cancelJoinRequest(
-        this.id,
-        this.auth.currentUser.uid
-      );
+      const user = this.auth.currentUser;
+      if (!user?.uid) {
+        throw new Error('Missing user information');
+      }
+      await this.solutionService.cancelJoinRequest(this.id, user.uid);
       this.myRequestStatus = 'cancelled';
     } catch (e) {
       console.error(e);
@@ -160,10 +167,15 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
     const profile = this.solution?.recruitmentProfile ?? {};
     return {
       teamLabel: profile.teamLabel || 'Team 1',
-      initiativeName: profile.initiativeName || this.solution?.title || 'Solution initiative',
+      initiativeName:
+        profile.initiativeName || this.solution?.title || 'Solution initiative',
       focusArea:
-        profile.focusArea || this.solution?.solutionArea || this.solution?.sdgs?.join(', ') || 'Focus area not provided',
-      challengeDescription: profile.challengeDescription || this.solution?.description || '',
+        profile.focusArea ||
+        this.solution?.solutionArea ||
+        this.solution?.sdgs?.join(', ') ||
+        'Focus area not provided',
+      challengeDescription:
+        profile.challengeDescription || this.solution?.description || '',
       scopeOfWork: profile.scopeOfWork || '',
       finalProduct: profile.finalProduct || '',
       startDate: profile.startDate || '',
@@ -205,6 +217,17 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
     return (request.email || '').toString();
   }
 
+  private ensureAuthenticated(): boolean {
+    const user = this.auth?.currentUser;
+    if (user?.uid) {
+      return true;
+    }
+    alert('Please log in to join this solution.');
+    this.auth?.setRedirectUrl?.(this.router.url);
+    this.router.navigate(['/login']);
+    return false;
+  }
+
   private isOwnerOf(s: any): boolean {
     const uid = this.auth?.currentUser?.uid;
     const email = (this.auth?.currentUser?.email || '').toLowerCase();
@@ -223,7 +246,10 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
     return !!(ownerUidMatches || ownerEmailMatches);
   }
 
-  private isUserInParticipants(participants: any, email: string): boolean {
+  private isUserInParticipants(
+    participants: any,
+    email?: string | null
+  ): boolean {
     if (!participants || !email) return false;
     if (Array.isArray(participants)) {
       return participants.some(

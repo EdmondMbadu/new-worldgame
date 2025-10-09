@@ -168,7 +168,7 @@ const routes: Routes = [
   {
     path: 'join/:id',
     component: JoinSolutionComponent,
-    canActivate: [AuthGuard],
+    // canActivate: [AuthGuard],
     // data: { requireParticipant: true },
   },
   {
