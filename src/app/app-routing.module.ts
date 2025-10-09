@@ -542,7 +542,7 @@ const routes: Routes = [
     component: TournamentLandingComponent,
   },
   {
-    path: 'landing-test',
+    path: 'landing',
     component: LandingTestComponent,
   },
   {
