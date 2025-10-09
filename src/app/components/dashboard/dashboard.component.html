@@ -777,20 +777,227 @@
           instantly understand what they are joining.
         </p>
 
-        <!-- (unchanged inputs) -->
-        <!-- … your existing Team Profile fields remain exactly the same … -->
-        <!-- Keep your original profile fields block here -->
-      </section>
+        <div class="mt-5 grid gap-6 lg:grid-cols-2">
+          <div class="space-y-4">
+            <div>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Team label</label
+              >
+              <input
+                type="text"
+                class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                [(ngModel)]="profile.teamLabel"
+                name="teamLabel"
+              />
+            </div>
+            <div>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Project / initiative name</label
+              >
+              <input
+                type="text"
+                class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                [(ngModel)]="profile.initiativeName"
+                name="initiativeName"
+              />
+            </div>
+            <div>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Focus area</label
+              >
+              <input
+                type="text"
+                class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                [(ngModel)]="profile.focusArea"
+                name="focusArea"
+                placeholder="e.g. Global energy problem / meeting the energy needs of everyone"
+              />
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label
+                class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >Time commitment</label
+              >
+              <input
+                type="text"
+                class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                [(ngModel)]="profile.timeCommitment"
+                name="timeCommitment"
+                placeholder="e.g. 1 hour per week"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Team size min</label
+                >
+                <input
+                  type="number"
+                  [ngModel]="profile.teamSizeMin"
+                  (ngModelChange)="profile.teamSizeMin = toNumber($event)"
+                  name="teamSizeMin"
+                  min="1"
+                  class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                />
+              </div>
+              <div>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Team size max</label
+                >
+                <input
+                  type="number"
+                  [ngModel]="profile.teamSizeMax"
+                  (ngModelChange)="profile.teamSizeMax = toNumber($event)"
+                  name="teamSizeMax"
+                  min="1"
+                  class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Start date</label
+                >
+                <input
+                  type="date"
+                  class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                  [(ngModel)]="profile.startDate"
+                  name="startDate"
+                />
+              </div>
+              <div>
+                <label
+                  class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                  >Completion date</label
+                >
+                <input
+                  type="date"
+                  class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+                  [(ngModel)]="profile.completionDate"
+                  name="completionDate"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <!-- STEP 3: Publish & Share -->
-      <section
-        class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/80 dark:bg-slate-800/70 p-6 space-y-6"
-      >
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-          Step 3 — Publish & share
-        </h3>
+        <div class="mt-6 grid gap-6 lg:grid-cols-3">
+          <div class="lg:col-span-3">
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Challenge description</label
+            >
+            <textarea
+              rows="3"
+              [(ngModel)]="profile.challengeDescription"
+              name="challengeDescription"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="What is the challenge you are tackling?"
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Scope of work</label
+            >
+            <textarea
+              rows="4"
+              [(ngModel)]="profile.scopeOfWork"
+              name="scopeOfWork"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="Key activities, responsibilities, deliverables."
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Envisioned final product</label
+            >
+            <textarea
+              rows="4"
+              [(ngModel)]="profile.finalProduct"
+              name="finalProduct"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="What you want to create together."
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Perspectives welcomed</label
+            >
+            <textarea
+              rows="4"
+              [(ngModel)]="profile.perspectives"
+              name="perspectives"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="Add one perspective per line."
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Interests & motivations</label
+            >
+            <textarea
+              rows="4"
+              [(ngModel)]="profile.interests"
+              name="interests"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="What should excite a future teammate?"
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Knowledge / lived experience</label
+            >
+            <textarea
+              rows="4"
+              [(ngModel)]="profile.knowledge"
+              name="knowledge"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="Regions, communities, or contexts you need represented."
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Skills & craft</label
+            >
+            <textarea
+              rows="4"
+              [(ngModel)]="profile.skills"
+              name="skills"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="Tools, analysis, storytelling, design, etc."
+            ></textarea>
+          </div>
+          <div class="lg:col-span-3">
+            <label
+              class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+              >Additional notes</label
+            >
+            <textarea
+              rows="3"
+              [(ngModel)]="profile.additionalNotes"
+              name="additionalNotes"
+              class="mt-1 w-full rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-900/80 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500/60"
+              placeholder="Anything else collaborators should know before joining."
+            ></textarea>
+          </div>
+        </div>
 
-        <div class="grid gap-3 sm:grid-cols-[auto_auto]">
+        <div class="mt-6 grid gap-3 sm:grid-cols-[auto_auto]">
           <button
             type="button"
             (click)="saveRecruitmentProfile()"
