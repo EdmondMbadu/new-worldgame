@@ -21,6 +21,15 @@ export class ListFinishedSolutionsComponent implements OnInit {
     'from-fuchsia-500 via-purple-500 to-blue-500',
     'from-blue-500 via-slate-500 to-neutral-600',
   ];
+  private readonly dateFormatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+  private readonly timeFormatter = new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
   confirmationDeleteSolution: boolean = false;
   confirmationLeaveSolution: boolean = false;
   currentSolution?: Solution;
@@ -142,18 +151,7 @@ export class ListFinishedSolutionsComponent implements OnInit {
       solution.creationDate ||
       solution.createdAt ||
       solution.updatedAt;
-    if (!raw) {
-      return 'Date unavailable';
-    }
-    const date = new Date(raw);
-    if (isNaN(date.getTime())) {
-      return raw;
-    }
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return this.formatFriendlyDate(raw);
   }
 
   participantCount(solution: Solution): number {
@@ -170,17 +168,20 @@ export class ListFinishedSolutionsComponent implements OnInit {
   previewText(solution: Solution): string {
     const text =
       solution.preview ?? solution.description ?? solution.content;
-    if (text === undefined || text === null) {
-      return 'No description provided yet.';
-    }
     if (typeof text !== 'string') {
       return 'No description provided yet.';
     }
-    const trimmed = text.trim();
-    if (!trimmed.length) {
+    const withoutTags = text.replace(/<[^>]*>/g, ' ');
+    const normalized = withoutTags.replace(/\s+/g, ' ').trim();
+    if (
+      !normalized ||
+      /^(true|false|null|undefined)$/i.test(normalized)
+    ) {
       return 'No description provided yet.';
     }
-    return trimmed.length > 160 ? `${trimmed.slice(0, 157)}…` : trimmed;
+    return normalized.length > 160
+      ? `${normalized.slice(0, 157)}…`
+      : normalized;
   }
 
   getCardAccent(index: number): string {
@@ -197,5 +198,120 @@ export class ListFinishedSolutionsComponent implements OnInit {
       return author[0].toUpperCase();
     }
     return 'S';
+  }
+
+  private formatFriendlyDate(raw: unknown): string {
+    if (raw === undefined || raw === null) {
+      return 'Date unavailable';
+    }
+    if (raw instanceof Date && !isNaN(raw.getTime())) {
+      return this.composeDate(raw, true);
+    }
+    if (typeof raw === 'object' && 'seconds' in (raw as any)) {
+      const seconds = Number((raw as any).seconds);
+      const nanoseconds = Number((raw as any).nanoseconds ?? 0);
+      const date = new Date(seconds * 1000 + nanoseconds / 1e6);
+      if (!isNaN(date.getTime())) {
+        return this.composeDate(date, true);
+      }
+    }
+    const value = String(raw).trim();
+    if (!value) {
+      return 'Date unavailable';
+    }
+    const parsed = this.normalizeDate(value);
+    if (!parsed) {
+      return value;
+    }
+    return this.composeDate(parsed, this.containsTimeInformation(value, parsed));
+  }
+
+  private normalizeDate(raw: string): Date | undefined {
+    const numeric = Number(raw);
+    if (!Number.isNaN(numeric)) {
+      const ms = raw.length === 10 ? numeric * 1000 : numeric;
+      const date = new Date(ms);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    let date = new Date(raw);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+
+    const patternMDY = raw.match(
+      /^(\d{1,2})-(\d{1,2})-(\d{4})(?:-(\d{1,2})-(\d{1,2})-(\d{1,2}))?$/
+    );
+    if (patternMDY) {
+      const [, month, day, year, hour, minute, second] = patternMDY;
+      date = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        hour ? Number(hour) : 0,
+        minute ? Number(minute) : 0,
+        second ? Number(second) : 0
+      );
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    const patternYMD = raw.match(
+      /^(\d{4})-(\d{1,2})-(\d{1,2})(?:-(\d{1,2})-(\d{1,2})-(\d{1,2}))?$/
+    );
+    if (patternYMD) {
+      const [, year, month, day, hour, minute, second] = patternYMD;
+      date = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        hour ? Number(hour) : 0,
+        minute ? Number(minute) : 0,
+        second ? Number(second) : 0
+      );
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    const patternSlash = raw.match(
+      /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/
+    );
+    if (patternSlash) {
+      const [, month, day, year, hour, minute] = patternSlash;
+      date = new Date(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        hour ? Number(hour) : 0,
+        minute ? Number(minute) : 0
+      );
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+
+    return undefined;
+  }
+
+  private containsTimeInformation(raw: string, date: Date): boolean {
+    if (/(\d{1,2}:\d{2})/.test(raw) || raw.includes('T')) {
+      return true;
+    }
+    if (raw.split('-').length >= 5) {
+      return true;
+    }
+    return date.getHours() !== 0 || date.getMinutes() !== 0 || date.getSeconds() !== 0;
+  }
+
+  private composeDate(date: Date, includeTime: boolean): string {
+    const datePart = this.dateFormatter.format(date);
+    if (!includeTime) {
+      return datePart;
+    }
+    return `${datePart} · ${this.timeFormatter.format(date)}`;
   }
 }
