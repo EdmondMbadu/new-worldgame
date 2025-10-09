@@ -138,8 +138,8 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
               return tb - ta;
             });
 
-            // limit to top 3 for landing preview
-            return vms.slice(0, 3);
+            // limit to top 3 for landing preview // updated to top 5
+            return vms.slice(0, 5);
           })
         );
       }),
