@@ -30,7 +30,7 @@ export class DashboardComponent implements OnInit {
     }
   }
   includeReadMe = true;
-
+  publishToastVisible = false;
   channels = {
     email: true,
     broadcastFeed: true,
@@ -192,7 +192,6 @@ export class DashboardComponent implements OnInit {
     // this.currentSolution.broadCastInviteMessage = await buckyService.improvePitch(...);
   }
 
-  // Update sendBroadcast()
   async sendBroadcast() {
     if (!this.currentSolution?.solutionId) return;
     try {
@@ -213,12 +212,15 @@ export class DashboardComponent implements OnInit {
 
       const id = await this.solution.startBroadcast(payload);
 
-      // optional toast
-      alert('Broadcast sent! Your solution is now discoverable.');
-      this.toggleInviteModal();
+      // Mark as live immediately in UI
+      (this.currentSolution as any).isBroadcasting = true;
+      (this.currentSolution as any).broadcastStatus = 'active';
+
+      // Show tooltip/toast instead of alert/closing modal
+      this.publishToastVisible = true;
     } catch (e) {
       console.error(e);
-      alert('Sorry, broadcast failed. Please try again.');
+      alert('Sorry, publishing failed. Please try again.');
     } finally {
       this.sendingBroadcast = false;
     }
@@ -241,8 +243,11 @@ export class DashboardComponent implements OnInit {
     }
   }
   // Helpers for broadcast state in the dashboard component class
+  dismissPublishToast() {
+    this.publishToastVisible = false;
+  }
+
   get isBroadcasting(): boolean {
-    // Treat as broadcasting when explicitly marked AND not stopped
     const status = (this.currentSolution as any)?.broadcastStatus as
       | 'active'
       | 'paused'
