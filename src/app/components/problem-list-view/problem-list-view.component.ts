@@ -27,7 +27,7 @@ export class ProblemListViewComponent implements OnInit {
   pending: number = 0;
   /** 🆕 bound to the search box */
   searchTerm = '';
-  viewMode: 'list' | 'grid' = 'list';
+  viewMode: 'list' | 'grid' = 'grid';
 
   constructor(
     public auth: AuthService,
@@ -169,11 +169,18 @@ export class ProblemListViewComponent implements OnInit {
   }
 
   previewText(solution: Solution): string {
-    const text = solution.preview || solution.description || solution.content;
-    if (!text) {
+    const text =
+      solution.preview ?? solution.description ?? solution.content;
+    if (text === undefined || text === null) {
+      return 'No description provided yet.';
+    }
+    if (typeof text !== 'string') {
       return 'No description provided yet.';
     }
     const trimmed = text.trim();
+    if (!trimmed.length) {
+      return 'No description provided yet.';
+    }
     return trimmed.length > 160 ? `${trimmed.slice(0, 157)}…` : trimmed;
   }
 

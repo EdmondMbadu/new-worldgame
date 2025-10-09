@@ -8,17 +8,28 @@ import { SolutionService } from 'src/app/services/solution.service';
   selector: 'app-list-finished-solutions',
 
   templateUrl: './list-finished-solutions.component.html',
-  styleUrl: './list-finished-solutions.component.css',
+  styleUrls: ['./list-finished-solutions.component.css'],
 })
 export class ListFinishedSolutionsComponent implements OnInit {
   solutions: Solution[] = [];
-  pendingSolutions: Solution[] = [];
   completedSolutions: Solution[] = [];
+  gradientPalette = [
+    'from-sky-500 via-indigo-500 to-purple-500',
+    'from-emerald-500 via-cyan-500 to-blue-500',
+    'from-orange-500 via-rose-500 to-pink-500',
+    'from-amber-500 via-yellow-500 to-lime-500',
+    'from-fuchsia-500 via-purple-500 to-blue-500',
+    'from-blue-500 via-slate-500 to-neutral-600',
+  ];
   confirmationDeleteSolution: boolean = false;
   confirmationLeaveSolution: boolean = false;
   currentSolution?: Solution;
 
   completed: number = 0;
+  searchTerm = '';
+  viewMode: 'list' | 'grid' = 'grid';
+  isSidebarOpen = true;
+
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -36,14 +47,9 @@ export class ListFinishedSolutionsComponent implements OnInit {
   @Input() title: string = `Submitted Solutions`;
 
   async findCompletedSolutions() {
-    this.completedSolutions = [];
-
-    for (let s of this.solutions) {
-      if (s.finished === 'true') {
-        console.log('completed solution', s);
-        this.completedSolutions.push(s);
-      }
-    }
+    this.completedSolutions = this.solutions.filter(
+      (s) => s.finished === 'true'
+    );
     this.completed = this.completedSolutions.length;
   }
 
@@ -103,5 +109,93 @@ export class ListFinishedSolutionsComponent implements OnInit {
   receiveLeaveSolution(eventData: Solution) {
     this.currentSolution = eventData;
     this.toggleConfirmationLeaveSolution();
+  }
+
+  toggleAside() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  get filteredCompletedSolutions(): Solution[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.completedSolutions;
+    }
+    return this.completedSolutions.filter((s) =>
+      s.title?.toLowerCase().includes(term)
+    );
+  }
+
+  setViewMode(mode: 'list' | 'grid') {
+    this.viewMode = mode;
+  }
+
+  openSolution(solution: Solution) {
+    if (!solution.solutionId) {
+      return;
+    }
+    this.router.navigate(['/dashboard', solution.solutionId]);
+  }
+
+  getSolutionDate(solution: Solution): string {
+    const raw =
+      solution.submissionDate ||
+      solution.creationDate ||
+      solution.createdAt ||
+      solution.updatedAt;
+    if (!raw) {
+      return 'Date unavailable';
+    }
+    const date = new Date(raw);
+    if (isNaN(date.getTime())) {
+      return raw;
+    }
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+
+  participantCount(solution: Solution): number {
+    const participants = solution.participants;
+    if (!participants) {
+      return 0;
+    }
+    if (Array.isArray(participants)) {
+      return participants.length;
+    }
+    return Object.keys(participants).length;
+  }
+
+  previewText(solution: Solution): string {
+    const text =
+      solution.preview ?? solution.description ?? solution.content;
+    if (text === undefined || text === null) {
+      return 'No description provided yet.';
+    }
+    if (typeof text !== 'string') {
+      return 'No description provided yet.';
+    }
+    const trimmed = text.trim();
+    if (!trimmed.length) {
+      return 'No description provided yet.';
+    }
+    return trimmed.length > 160 ? `${trimmed.slice(0, 157)}…` : trimmed;
+  }
+
+  getCardAccent(index: number): string {
+    return this.gradientPalette[index % this.gradientPalette.length];
+  }
+
+  tileInitial(solution: Solution): string {
+    const title = solution.title?.trim();
+    if (title) {
+      return title[0].toUpperCase();
+    }
+    const author = solution.authorName?.trim();
+    if (author) {
+      return author[0].toUpperCase();
+    }
+    return 'S';
   }
 }
