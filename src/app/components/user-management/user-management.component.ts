@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -21,7 +22,8 @@ export class UserManagementComponent implements OnInit {
     private solution: SolutionService,
     private time: TimeService,
     private data: DataService,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private afs: AngularFirestore //
   ) {}
   searchTerm: string = '';
   showActionDropDown: boolean = false;
@@ -32,6 +34,27 @@ export class UserManagementComponent implements OnInit {
   userUnfinishedSolutions: Solution[] = [];
   allUsers: User[] = [];
   everySolution: Solution[] = [];
+
+  // Unsubscribes state
+  unsubscribedRows: Array<{ email: string; reason?: string; updatedAt: Date }> =
+    [];
+  unsubscribedEmails: string[] = [];
+  unsubSet = new Set<string>();
+
+  // UI toggle: default = respect unsubscribes (do NOT send to them)
+  disregardUnsubs = false;
+
+  // Normalize helper
+  private normalizeEmail(e: unknown): string {
+    return String(e || '')
+      .trim()
+      .toLowerCase();
+  }
+
+  // Convenience
+  isUnsubscribed(email?: string | null): boolean {
+    return email ? this.unsubSet.has(this.normalizeEmail(email)) : false;
+  }
 
   private userDirectory = new Map<string, { name: string; email: string }>();
 
@@ -125,6 +148,8 @@ export class UserManagementComponent implements OnInit {
         }
       });
     });
+
+    this.subscribeUnsubscribes();
   }
 
   // A simple computed property that filters users by the search term.
@@ -241,18 +266,18 @@ export class UserManagementComponent implements OnInit {
     this.selected.clear();
     if (checked) {
       this.filteredUsers.forEach((u) => {
-        if (u.email) this.selected.add(u.email);
+        if (u.email) this.selected.add(this.normalizeEmail(u.email));
       });
     }
   }
 
   toggleSelect(email: string, checked: boolean) {
-    if (checked) this.selected.add(email);
-    else this.selected.delete(email);
+    const norm = this.normalizeEmail(email);
+    if (checked) this.selected.add(norm);
+    else this.selected.delete(norm);
 
-    // keep "Select all" in sync
     this.allSelected = this.filteredUsers.every(
-      (u) => u.email && this.selected.has(u.email)
+      (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
     );
   }
   getPendingSolutions(email: string) {
@@ -408,15 +433,24 @@ export class UserManagementComponent implements OnInit {
     this.sending = true;
 
     try {
-      const pool =
+      const basePool =
         this.targetMode === 'all'
           ? this.allUsers
-          : this.allUsers.filter((u) => u.email && this.selected.has(u.email!));
+          : this.allUsers.filter(
+              (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
+            );
+
+      // Respect unsubscribes unless explicitly overridden
+      const pool = this.disregardUnsubs
+        ? basePool
+        : basePool.filter((u) => !this.isUnsubscribed(u.email));
+
+      const skipped = basePool.length - pool.length;
 
       const weeklyReminder = this.fns.httpsCallable('weeklyReminder');
 
       for (const u of pool) {
-        const email = (u.email || '').trim();
+        const email = this.normalizeEmail(u.email);
         if (!email) continue;
 
         const pending = this.getPendingSolutions(email)
@@ -429,8 +463,8 @@ export class UserManagementComponent implements OnInit {
               ? this.formatDateForEmail(p.lastUpdated)
               : '',
             ctaUrl: p.ctaUrl,
-            meetLink: p.meetLink || '', // NEW
-            participants: p.participants || [], // NEW [{name,email}]
+            meetLink: p.meetLink || '',
+            participants: p.participants || [],
           }));
 
         const payload = {
@@ -454,7 +488,12 @@ export class UserManagementComponent implements OnInit {
         await new Promise((res) => setTimeout(res, 80));
       }
 
-      alert(`Weekly reminder sent to ${pool.length} recipient(s).`);
+      alert(
+        `Weekly reminder sent to ${pool.length} recipient(s).` +
+          (skipped > 0 && !this.disregardUnsubs
+            ? ` Skipped ${skipped} unsubscribed.`
+            : '')
+      );
       this.closeReminderModal();
     } catch (e) {
       console.error('weekly reminder error', e);
@@ -490,5 +529,60 @@ export class UserManagementComponent implements OnInit {
         .map((e) => e.trim().toLowerCase());
     }
     return [];
+  }
+
+  private subscribeUnsubscribes() {
+    this.afs
+      .collection('mailing_unsubscribes', (ref) =>
+        ref.orderBy('updatedAt', 'desc').limit(5000)
+      )
+      .valueChanges({ idField: 'id' })
+      .subscribe((rows: any[]) => {
+        const list = (rows || []).map((r) => {
+          const updatedAt =
+            r.updatedAt?.toDate?.() ??
+            (r.updatedAt instanceof Date ? r.updatedAt : new Date());
+          const email = this.normalizeEmail(r.email);
+          return { email, reason: r.reason || '', updatedAt };
+        });
+
+        // de-dupe keep most recent
+        const latestByEmail = new Map<
+          string,
+          { email: string; reason?: string; updatedAt: Date }
+        >();
+        for (const row of list) {
+          const prev = latestByEmail.get(row.email);
+          if (!prev || prev.updatedAt < row.updatedAt)
+            latestByEmail.set(row.email, row);
+        }
+
+        this.unsubscribedRows = Array.from(latestByEmail.values()).sort(
+          (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+        );
+        this.unsubscribedEmails = this.unsubscribedRows.map((r) => r.email);
+        this.unsubSet = new Set(this.unsubscribedEmails);
+      });
+  }
+  get recipientCounts() {
+    const basePool =
+      this.targetMode === 'all'
+        ? this.allUsers
+        : this.allUsers.filter(
+            (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
+          );
+
+    const unsubCount = basePool.filter((u) =>
+      this.isUnsubscribed(u.email)
+    ).length;
+    const finalCount = this.disregardUnsubs
+      ? basePool.length
+      : basePool.length - unsubCount;
+
+    return {
+      baseCount: basePool.length,
+      unsubCount,
+      finalCount,
+    };
   }
 }
