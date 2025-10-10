@@ -193,49 +193,69 @@
             <div
               class="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-400 dark:text-slate-500"
             >
-              <span class="flex-1 border-t border-slate-200/70 dark:border-slate-700"></span>
+              <span
+                class="flex-1 border-t border-slate-200/70 dark:border-slate-700"
+              ></span>
               <span>Or sign in with</span>
-              <span class="flex-1 border-t border-slate-200/70 dark:border-slate-700"></span>
+              <span
+                class="flex-1 border-t border-slate-200/70 dark:border-slate-700"
+              ></span>
             </div>
-            <div class="mt-4 flex flex-wrap justify-center gap-3">
+
+            <div class="mt-4 flex flex-wrap justify-center gap-4">
+              <!-- Google -->
               <button
                 type="button"
                 [disabled]="loading"
                 (click)="signInWithGoogle()"
-                class="group inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition hover:-translate-y-1 hover:ring-teal-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-white dark:ring-slate-700 dark:hover:ring-teal-500"
+                class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4285F4] disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="Continue with Google"
               >
-                <span
-                  aria-hidden="true"
-                  class="text-xl font-semibold text-[#4285F4] transition group-hover:scale-110"
-                  >G</span
-                >
+                <img
+                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                  alt="Google logo"
+                  class="h-6 w-6 transition-transform duration-200 group-hover:scale-110"
+                />
               </button>
+
+              <!-- Facebook -->
               <button
                 type="button"
                 [disabled]="loading"
                 (click)="signInWithFacebook()"
-                class="group inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition hover:-translate-y-1 hover:ring-[#1877F2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2] shadow-md ring-1 ring-[#1877F2]/70 transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="Continue with Facebook"
               >
-                <span
-                  aria-hidden="true"
-                  class="text-xl font-semibold text-[#1877F2] transition group-hover:scale-110"
-                  >f</span
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  class="h-6 w-6 transition-transform duration-200 group-hover:scale-110"
                 >
+                  <path
+                    d="M22.675 0H1.325A1.326 1.326 0 000 1.325v21.351A1.326 1.326 0 001.325 24h11.495V14.708h-3.13v-3.62h3.13V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.243l-1.918.001c-1.504 0-1.794.715-1.794 1.763v2.312h3.588l-.467 3.62h-3.121V24h6.116A1.326 1.326 0 0024 22.675V1.325A1.326 1.326 0 0022.675 0z"
+                  />
+                </svg>
               </button>
+
+              <!-- X (Twitter) -->
               <button
                 type="button"
                 [disabled]="loading"
                 (click)="signInWithX()"
-                class="group inline-flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition hover:-translate-y-1 hover:ring-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-white dark:ring-slate-700"
+                class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-black shadow-md ring-1 ring-slate-900/70 transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
                 aria-label="Continue with X"
               >
-                <span
-                  aria-hidden="true"
-                  class="text-xl font-semibold text-black transition group-hover:scale-110 dark:text-white"
-                  >X</span
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 1200 1227"
+                  fill="white"
+                  class="h-5 w-5 transition-transform duration-200 group-hover:scale-110"
                 >
+                  <path
+                    d="M714.163 519.284L1160.89 0H1055.01L665.063 451.873L354.31 0H0L463.089 672.909L0 1227H105.879L514.937 743.35L845.69 1227H1200L714.137 519.284H714.163ZM569.152 682.922L520.994 614.357L144.312 79.694H304.269L604.03 505.723L652.188 574.288L1055.84 1153.31H895.882L569.152 682.922Z"
+                  />
+                </svg>
               </button>
             </div>
           </div>
