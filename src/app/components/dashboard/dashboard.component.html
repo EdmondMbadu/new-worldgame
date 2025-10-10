@@ -764,20 +764,20 @@
         </div>
       </section>
 
-      <!-- STEP 2: Team profile -->
-      <section
-        *ngIf="currentSolution.recruitmentProfile as profile"
-        class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-6"
-      >
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-          Step 2 — Team profile & invitation brief
-        </h3>
-        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-          These details appear in your dashboard and invitations so people
-          instantly understand what they are joining.
-        </p>
+      <ng-container *ngIf="currentSolution.recruitmentProfile as profile">
+        <!-- STEP 2: Team profile -->
+        <section
+          class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/80 dark:bg-slate-800/50 p-6"
+        >
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            Step 2 — Team profile & invitation brief
+          </h3>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            These details appear in your dashboard and invitations so people
+            instantly understand what they are joining.
+          </p>
 
-        <div class="mt-5 grid gap-6 lg:grid-cols-2">
+          <div class="mt-5 grid gap-6 lg:grid-cols-2">
           <div class="space-y-4">
             <div>
               <label
@@ -996,198 +996,214 @@
             ></textarea>
           </div>
         </div>
+        </section>
 
-        <div class="mt-6 grid gap-3 sm:grid-cols-[auto_auto]">
-          <button
-            type="button"
-            (click)="saveRecruitmentProfile()"
-            [disabled]="savingProfile"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <svg
-              *ngIf="savingProfile"
-              class="h-4 w-4 animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 3v3m6.364 2.636l-2.121 2.121M21 12h-3m-2.636 6.364l-2.121-2.121M12 21v-3m-6.364-2.636l2.121-2.121M3 12h3m2.636-6.364l2.121 2.121"
-              />
-            </svg>
-            <span>{{ savingProfile ? "Saving…" : "Save team profile" }}</span>
-          </button>
-
-          <button
-            type="button"
-            *ngIf="!isBroadcasting"
-            (click)="sendBroadcast()"
-            [disabled]="sendingBroadcast"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-            aria-label="Publish Invite"
-          >
-            <svg
-              *ngIf="sendingBroadcast"
-              class="h-4 w-4 animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-                opacity="0.25"
-              />
-              <path
-                d="M22 12a10 10 0 0 1-10 10"
-                stroke="currentColor"
-                stroke-width="4"
-              />
-            </svg>
-            <span>{{
-              sendingBroadcast ? "Publishing…" : "Publish Invite"
-            }}</span>
-          </button>
-
-          <button
-            type="button"
-            *ngIf="isBroadcasting"
-            (click)="stopBroadcast()"
-            [disabled]="sendingBroadcast"
-            class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            <svg
-              *ngIf="sendingBroadcast"
-              class="h-4 w-4 animate-spin"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-                opacity="0.25"
-              />
-              <path
-                d="M22 12a10 10 0 0 1-10 10"
-                stroke="currentColor"
-                stroke-width="4"
-              />
-            </svg>
-            <span>{{
-              sendingBroadcast ? "Unpublishing…" : "Unpublish Invite"
-            }}</span>
-          </button>
-
-          <div
-            class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
-          >
-            <span *ngIf="isBroadcasting"
-              >Status:
-              {{ broadcastStatus === "paused" ? "Paused" : "Live" }}</span
-            >
-            <span
-              *ngIf="profileMessage"
-              [class.text-teal-600]="profileSaved"
-              [class.text-rose-500]="!profileSaved"
-              >{{ profileMessage }}</span
-            >
+        <!-- STEP 3: Publish & share -->
+        <section
+          class="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/80 dark:bg-slate-800/70 p-6 space-y-6"
+        >
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+              Step 3 — Publish & share
+            </h3>
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+              Publish your invite when ready and share the link with collaborators.
+            </p>
           </div>
-        </div>
 
-        <!-- Shareable link LAST -->
-        <div>
-          <label
-            class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1"
-            >Shareable link</label
-          >
-          <div class="flex flex-wrap items-center gap-2">
-            <input
-              [value]="generatedInviteLink"
-              readonly
-              class="flex-1 min-w-[200px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
-            />
-            <button
-              type="button"
-              (click)="copyInviteLink()"
-              class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              Copy
-            </button>
-          </div>
-        </div>
-
-        <!-- Redundant links at the end -->
-        <div class="grid gap-3 sm:grid-cols-2 text-xs">
-          <div
-            class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60"
-            [ngClass]="
-              isBroadcasting
-                ? 'ring-2 ring-emerald-500/70 bg-emerald-50 dark:bg-emerald-900/20'
-                : ''
-            "
-          >
-            <div class="flex items-center gap-2">
-              <p
-                class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold"
+          <div class="space-y-2">
+            <div class="grid gap-3 sm:grid-cols-[auto_auto]">
+              <button
+                type="button"
+                (click)="saveRecruitmentProfile()"
+                [disabled]="savingProfile"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Join page
-              </p>
-              <span
+                <svg
+                  *ngIf="savingProfile"
+                  class="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 3v3m6.364 2.636l-2.121 2.121M21 12h-3m-2.636 6.364l-2.121-2.121M12 21v-3m-6.364-2.636l2.121-2.121M3 12h3m2.636-6.364l2.121 2.121"
+                  />
+                </svg>
+                <span>{{ savingProfile ? "Saving…" : "Save team profile" }}</span>
+              </button>
+
+              <button
+                type="button"
+                *ngIf="!isBroadcasting"
+                (click)="sendBroadcast()"
+                [disabled]="sendingBroadcast"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+                aria-label="Publish Invite"
+              >
+                <svg
+                  *ngIf="sendingBroadcast"
+                  class="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                    opacity="0.25"
+                  />
+                  <path
+                    d="M22 12a10 10 0 0 1-10 10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                </svg>
+                <span>{{
+                  sendingBroadcast ? "Publishing…" : "Publish Invite"
+                }}</span>
+              </button>
+
+              <button
+                type="button"
                 *ngIf="isBroadcasting"
-                class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-600 text-white"
-                >LIVE</span
+                (click)="stopBroadcast()"
+                [disabled]="sendingBroadcast"
+                class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <svg
+                  *ngIf="sendingBroadcast"
+                  class="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                    opacity="0.25"
+                  />
+                  <path
+                    d="M22 12a10 10 0 0 1-10 10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                </svg>
+                <span>{{
+                  sendingBroadcast ? "Unpublishing…" : "Unpublish Invite"
+                }}</span>
+              </button>
+            </div>
+            <div
+              class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+            >
+              <span *ngIf="isBroadcasting"
+                >Status:
+                {{ broadcastStatus === "paused" ? "Paused" : "Live" }}</span
+              >
+              <span
+                *ngIf="profileMessage"
+                [class.text-teal-600]="profileSaved"
+                [class.text-rose-500]="!profileSaved"
+                >{{ profileMessage }}</span
               >
             </div>
-            <a
-              [routerLink]="[
-                '/join',
-                currentSolution.solutionId || 'solution-id'
-              ]"
-              target="_blank"
-              class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline"
-            >
-              /join/{{ currentSolution.solutionId || "solution-id" }}
-            </a>
           </div>
 
-          <div
-            class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60"
-            [ngClass]="
-              isBroadcasting
-                ? 'ring-2 ring-emerald-500/70 bg-emerald-50 dark:bg-emerald-900/20'
-                : ''
-            "
-          >
-            <div class="flex items-center gap-2">
-              <p
-                class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold"
-              >
-                Published Invites
-              </p>
-              <span
-                *ngIf="isBroadcasting"
-                class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-600 text-white"
-                >LIVE</span
-              >
-            </div>
-            <a
-              [routerLink]="['/broadcasts']"
-              target="_blank"
-              class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline"
+          <!-- Shareable link LAST -->
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1"
+              >Shareable link</label
             >
-              {{ allBroadcasts || "/broadcasts" }}
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+              <input
+                [value]="generatedInviteLink"
+                readonly
+                class="flex-1 min-w-[200px] rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+              />
+              <button
+                type="button"
+                (click)="copyInviteLink()"
+                class="inline-flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Copy
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+
+          <!-- Redundant links at the end -->
+          <div class="grid gap-3 sm:grid-cols-2 text-xs">
+            <div
+              class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60"
+              [ngClass]="
+                isBroadcasting
+                  ? 'ring-2 ring-emerald-500/70 bg-emerald-50 dark:bg-emerald-900/20'
+                  : ''
+              "
+            >
+              <div class="flex items-center gap-2">
+                <p
+                  class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold"
+                >
+                  Join page
+                </p>
+                <span
+                  *ngIf="isBroadcasting"
+                  class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-600 text-white"
+                  >LIVE</span
+                >
+              </div>
+              <a
+                [routerLink]="[
+                  '/join',
+                  currentSolution.solutionId || 'solution-id'
+                ]"
+                target="_blank"
+                class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline"
+              >
+                /join/{{ currentSolution.solutionId || "solution-id" }}
+              </a>
+            </div>
+
+            <div
+              class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60"
+              [ngClass]="
+                isBroadcasting
+                  ? 'ring-2 ring-emerald-500/70 bg-emerald-50 dark:bg-emerald-900/20'
+                  : ''
+              "
+            >
+              <div class="flex items-center gap-2">
+                <p
+                  class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold"
+                >
+                  Published Invites
+                </p>
+                <span
+                  *ngIf="isBroadcasting"
+                  class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-600 text-white"
+                  >LIVE</span
+                >
+              </div>
+              <a
+                [routerLink]="['/broadcasts']"
+                target="_blank"
+                class="mt-1 inline-block break-all text-emerald-700 dark:text-emerald-400 hover:underline"
+              >
+                {{ allBroadcasts || "/broadcasts" }}
+              </a>
+            </div>
+          </div>
+        </section>
+      </ng-container>
 
       <!-- Publish toast / tooltip -->
       <div
