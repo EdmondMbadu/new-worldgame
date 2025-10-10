@@ -45,9 +45,58 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  SignIn() {
+  async SignIn() {
+    if (this.myForm.invalid || this.loading) {
+      this.myForm.markAllAsTouched();
+      return;
+    }
     this.loading = true;
-    this.auth.SignIn(this.myForm.value.email, this.myForm.value.password);
+    try {
+      await this.auth.SignIn(
+        this.myForm.value.email,
+        this.myForm.value.password
+      );
+    } catch (error) {
+      console.error('Email sign-in failed', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async signInWithGoogle() {
+    if (this.loading) return;
+    this.loading = true;
+    try {
+      await this.auth.signInWithGoogle();
+    } catch (error) {
+      console.error('Google sign-in failed', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async signInWithFacebook() {
+    if (this.loading) return;
+    this.loading = true;
+    try {
+      await this.auth.signInWithFacebook();
+    } catch (error) {
+      console.error('Facebook sign-in failed', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async signInWithX() {
+    if (this.loading) return;
+    this.loading = true;
+    try {
+      await this.auth.signInWithTwitter();
+    } catch (error) {
+      console.error('X sign-in failed', error);
+    } finally {
+      this.loading = false;
+    }
   }
 
   get email() {

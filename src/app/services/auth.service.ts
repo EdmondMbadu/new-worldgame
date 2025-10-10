@@ -12,6 +12,7 @@ import { NewUser, PlanKey, PRICE_BOOK, School, User } from '../models/user';
 import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
+import firebase from 'firebase/compat/app';
 // Add this where you keep shared types (optional)
 
 interface RegisterSchoolMeta {
@@ -235,34 +236,68 @@ export class AuthService {
       });
   }
 
-  SignIn(email: string, password: string) {
-    this.fireauth
-      .signInWithEmailAndPassword(email, password)
-      .then(async (res) => {
-        const user = res.user;
-        if (!user) return;
+  async SignIn(email: string, password: string): Promise<void> {
+    this.logingError = of(null);
+    try {
+      const cred = await this.fireauth.signInWithEmailAndPassword(
+        email,
+        password
+      );
+      await this.finishInteractiveSignIn(cred.user ?? null);
+    } catch (err) {
+      this.logingError = of(err);
+      throw err;
+    }
+  }
 
-        /* ── ① write “verified” once ────────────────────────── */
-        if (user.emailVerified) {
-          const userRef = this.afs.doc<User>(`users/${user.uid}`);
-          const snap = await userRef.get().toPromise(); // one-shot read
-          if (!snap?.data()?.verified) {
-            /* field missing or false → set it */
-            await userRef.set({ verified: true } as Partial<User>, {
-              merge: true,
-            });
-          }
-        }
+  async signInWithGoogle(): Promise<void> {
+    this.logingError = of(null);
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    try {
+      const cred = await this.fireauth.signInWithPopup(provider);
+      if (cred.user) {
+        await this.ensureUserProfileDocument(cred.user);
+      }
+      await this.finishInteractiveSignIn(cred.user ?? null);
+    } catch (err) {
+      this.logingError = of(err);
+      throw err;
+    }
+  }
 
-        /* ── ② normal redirect flow ─────────────────────────── */
-        if (user.emailVerified) {
-          const dest = this.popRedirect();
-          this.router.navigateByUrl(dest);
-        } else {
-          this.router.navigate(['/verify-email']);
-        }
-      })
-      .catch((err) => (this.logingError = of(err)));
+  async signInWithFacebook(): Promise<void> {
+    this.logingError = of(null);
+    const provider = new firebase.auth.FacebookAuthProvider();
+    provider.addScope('email');
+    try {
+      const cred = await this.fireauth.signInWithPopup(provider);
+      if (cred.user) {
+        await this.ensureUserProfileDocument(cred.user);
+      }
+      await this.finishInteractiveSignIn(cred.user ?? null);
+    } catch (err) {
+      this.logingError = of(err);
+      throw err;
+    }
+  }
+
+  async signInWithTwitter(): Promise<void> {
+    this.logingError = of(null);
+    const provider = new firebase.auth.TwitterAuthProvider();
+    provider.setCustomParameters({ include_email: 'true' });
+    try {
+      const cred = await this.fireauth.signInWithPopup(provider);
+      if (cred.user) {
+        await this.ensureUserProfileDocument(cred.user);
+      }
+      await this.finishInteractiveSignIn(cred.user ?? null, {
+        fallbackVerify: true,
+      });
+    } catch (err) {
+      this.logingError = of(err);
+      throw err;
+    }
   }
 
   forgotPassword(email: string) {
@@ -469,6 +504,109 @@ export class AuthService {
 
     return cred.user!.uid;
   }
+  // Sign-in helpers
+  private async finishInteractiveSignIn(
+    user: firebase.User | null,
+    opts: { fallbackVerify?: boolean } = {}
+  ): Promise<void> {
+    if (!user) {
+      return;
+    }
+
+    const providerIds = user.providerData
+      .map((p) => p?.providerId)
+      .filter((id): id is string => !!id);
+    const isSocialProvider = providerIds.some((pid) => pid !== 'password');
+    const consideredVerified =
+      user.emailVerified || isSocialProvider || opts.fallbackVerify === true;
+
+    if (consideredVerified) {
+      await this.markUserVerified(user.uid);
+      const dest = this.popRedirect();
+      this.router.navigateByUrl(dest);
+    } else {
+      this.router.navigate(['/verify-email']);
+    }
+  }
+
+  private async markUserVerified(uid: string): Promise<void> {
+    const userRef = this.afs.doc<User>(`users/${uid}`);
+    const snap = await userRef.ref.get();
+    const data = snap.data();
+    if (!data?.verified) {
+      await userRef.set({ verified: true } as Partial<User>, { merge: true });
+    }
+  }
+
+  private async ensureUserProfileDocument(user: firebase.User): Promise<void> {
+    const userRef = this.afs.doc<User>(`users/${user.uid}`);
+    const snap = await userRef.ref.get();
+    const email =
+      user.email ||
+      user.providerData.find((p) => !!p?.email)?.email ||
+      '';
+    const displayName = user.displayName?.trim() || '';
+    const [firstRaw, ...rest] = displayName.split(' ').filter(Boolean);
+    const firstName =
+      firstRaw || this.deriveNameFromEmail(email) || 'Creator';
+    const lastName = rest.join(' ');
+
+    if (!snap.exists) {
+      await userRef.set(
+        {
+          uid: user.uid,
+          email,
+          firstName,
+          lastName,
+          followers: '0',
+          following: '0',
+          employement: '',
+          status: '',
+          profileCredential: '',
+          profileDescription: '',
+          education: '',
+          location: '',
+          profilePicture: {},
+          dateJoined: this.time.getCurrentDate(),
+          contentViews: '0',
+          goal: '',
+          sdgsSelected: [],
+          profilePicPath: '',
+        },
+        { merge: true }
+      );
+      return;
+    }
+
+    const current = snap.data() as User | undefined;
+    const updates: Partial<User> = {};
+
+    if (email && !current?.email) {
+      updates.email = email;
+    }
+    if (!current?.firstName && firstName) {
+      updates.firstName = firstName;
+    }
+    if (!current?.lastName && lastName) {
+      updates.lastName = lastName;
+    }
+
+    if (Object.keys(updates).length) {
+      await userRef.set(updates, { merge: true });
+    }
+  }
+
+  private deriveNameFromEmail(email: string): string {
+    if (!email) {
+      return '';
+    }
+    const [localPart] = email.split('@');
+    if (!localPart) {
+      return '';
+    }
+    return localPart.replace(/[._-]+/g, ' ').trim();
+  }
+
   // AuthService
   userDoc$(uid: string) {
     return this.afs.doc<any>(`users/${uid}`).valueChanges();

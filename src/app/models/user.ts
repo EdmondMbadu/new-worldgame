@@ -30,6 +30,7 @@ export class User {
   role?: string;
   schoolId?: string;
   verified?: boolean;
+  profilePicPath?: string;
 }
 
 export class Avatar {
