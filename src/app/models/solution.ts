@@ -166,12 +166,18 @@ export interface Broadcast {
   inviteLink: string;
   joinLink: string;
   active: boolean;
-  status: 'active' | 'paused' | 'stopped';
+  status: 'active' | 'paused' | 'pending' | 'stopped';
   createdByUid: string;
   createdByName: string;
   createdByEmail: string;
   createdAt: any;
   updatedAt: any;
+  approvalRequestedAt?: any;
+  approvedByUid?: string | null;
+  approvedByName?: string | null;
+  approvedAt?: any;
+  rejectedAt?: any;
+  canceledAt?: any;
 }
 export interface JoinRequest {
   id?: string;

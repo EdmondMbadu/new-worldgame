@@ -783,6 +783,139 @@ export class SolutionService {
       { merge: true }
     );
   }
+  // === Start a broadcast in PENDING state (author clicks Publish Invite) ===
+  async startBroadcastPending(params: {
+    solutionId: string;
+    title: string;
+    message: string;
+    includeReadMe: boolean;
+    readMe?: string;
+    channels: {
+      email: boolean;
+      broadcastFeed: boolean;
+      social: boolean;
+      customApi: boolean;
+    };
+    inviteLink: string;
+    joinLink: string;
+  }): Promise<string> {
+    const broadcastId = this.afs.createId();
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+
+    const payload: Broadcast = {
+      broadcastId,
+      solutionId: params.solutionId,
+      title: params.title,
+      message: params.message || '',
+      includeReadMe: !!params.includeReadMe,
+      readMe: params.includeReadMe ? params.readMe || '' : undefined,
+      channels: params.channels,
+      inviteLink: params.inviteLink,
+      joinLink: params.joinLink,
+      active: false, // not visible
+      status: 'pending', // awaiting admin approval
+      createdByUid: this.auth.currentUser.uid,
+      createdByName: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+      createdByEmail: this.auth.currentUser.email,
+      createdAt: now,
+      updatedAt: now,
+      approvalRequestedAt: now,
+      approvedByUid: null,
+      approvedByName: null,
+      approvedAt: null,
+    };
+
+    await this.afs
+      .doc(`broadcasts/${broadcastId}`)
+      .set(payload, { merge: true });
+
+    await this.afs.doc(`solutions/${params.solutionId}`).set(
+      {
+        isBroadcasting: false,
+        broadcastId,
+        broadcastStatus: 'pending',
+        broadcastChannels: params.channels,
+        broadCastInviteMessage: params.message || '',
+        broadcastStartedAt: now,
+        broadcastUpdatedAt: now,
+      },
+      { merge: true }
+    );
+
+    return broadcastId;
+  }
+
+  async approveBroadcastById(
+    broadcastId: string,
+    approver: { uid: string; name: string }
+  ) {
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+
+    const docRef = this.afs.doc<Broadcast>(`broadcasts/${broadcastId}`).ref;
+    const snap = await docRef.get();
+    if (!snap.exists) throw new Error('Broadcast not found');
+    const b = snap.data() as Broadcast;
+
+    await docRef.set(
+      {
+        active: true,
+        status: 'active',
+        updatedAt: now,
+        approvedByUid: approver.uid,
+        approvedByName: approver.name,
+        approvedAt: now,
+      },
+      { merge: true }
+    );
+
+    await this.afs.doc(`solutions/${b.solutionId}`).set(
+      {
+        isBroadcasting: true,
+        broadcastStatus: 'active',
+        broadcastUpdatedAt: now,
+      },
+      { merge: true }
+    );
+  }
+  async cancelPendingBySolutionId(solutionId: string): Promise<void> {
+    // find the most recent pending broadcast for this solution
+    const snap = await firstValueFrom(
+      this.afs
+        .collection<Broadcast>('broadcasts', (ref) =>
+          ref
+            .where('solutionId', '==', solutionId)
+            .where('status', '==', 'pending') // ⚠️ ensure index
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+        )
+        .get()
+    );
+
+    if (!snap.empty) {
+      const ref = snap.docs[0].ref;
+      await ref.set(
+        {
+          active: false,
+          status: 'stopped', // back to not published
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          canceledAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+    }
+
+    // clear mirror on solution
+    await this.afs.doc(`solutions/${solutionId}`).set(
+      {
+        isBroadcasting: false,
+        broadcastStatus: 'stopped',
+        broadcastUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        // optional: clear the broadcastId so a new submission starts fresh
+        broadcastId: null,
+      },
+      { merge: true }
+    );
+  }
 
   // === Read: active broadcasts (for your future page) ===
   listActiveBroadcasts() {

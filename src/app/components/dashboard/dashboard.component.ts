@@ -194,6 +194,7 @@ export class DashboardComponent implements OnInit {
 
   async sendBroadcast() {
     if (!this.currentSolution?.solutionId) return;
+
     try {
       this.sendingBroadcast = true;
 
@@ -210,17 +211,17 @@ export class DashboardComponent implements OnInit {
         joinLink: `/join/${this.currentSolution.solutionId}`,
       };
 
-      const id = await this.solution.startBroadcast(payload);
+      const id = await this.solution.startBroadcastPending(payload);
 
-      // Mark as live immediately in UI
-      (this.currentSolution as any).isBroadcasting = true;
-      (this.currentSolution as any).broadcastStatus = 'active';
+      // Mirror client-side “pending” (not live)
+      (this.currentSolution as any).isBroadcasting = false;
+      (this.currentSolution as any).broadcastStatus = 'pending';
+      (this.currentSolution as any).broadcastId = id;
 
-      // Show tooltip/toast instead of alert/closing modal
-      this.publishToastVisible = true;
+      this.publishToastVisible = true; // toast will show “submitted for review”
     } catch (e) {
       console.error(e);
-      alert('Sorry, publishing failed. Please try again.');
+      alert('Sorry, submission failed. Please try again.');
     } finally {
       this.sendingBroadcast = false;
     }
@@ -247,24 +248,48 @@ export class DashboardComponent implements OnInit {
     this.publishToastVisible = false;
   }
 
-  get isBroadcasting(): boolean {
-    const status = (this.currentSolution as any)?.broadcastStatus as
-      | 'active'
-      | 'paused'
-      | 'stopped'
-      | undefined;
+  get isLive(): boolean {
+    const status = (this.currentSolution as any)?.broadcastStatus;
     return (
       (this.currentSolution as any)?.isBroadcasting === true &&
-      status !== 'stopped'
+      status === 'active'
     );
   }
 
-  get broadcastStatus(): 'active' | 'paused' | 'stopped' {
-    const status = (this.currentSolution as any)?.broadcastStatus as
-      | 'active'
-      | 'paused'
-      | 'stopped'
-      | undefined;
-    return status ?? 'active';
+  get isPending(): boolean {
+    return (this.currentSolution as any)?.broadcastStatus === 'pending';
   }
+
+  // keep if other places still call it; now “broadcasting” strictly means live
+  get isBroadcasting(): boolean {
+    return this.isLive;
+  }
+
+  get broadcastStatus(): 'active' | 'paused' | 'stopped' | 'pending' {
+    const status = (this.currentSolution as any)?.broadcastStatus as any;
+    return status ?? 'stopped';
+  }
+
+  async cancelReview() {
+  if (!this.currentSolution?.solutionId) return;
+
+  try {
+    this.sendingBroadcast = true;
+    await this.solution.cancelPendingBySolutionId(this.currentSolution.solutionId);
+
+    // Reset to pre-publish state
+    (this.currentSolution as any).isBroadcasting = false;
+    (this.currentSolution as any).broadcastStatus = 'stopped';
+    (this.currentSolution as any).broadcastId = null;
+
+    this.profileMessage = 'Review canceled. Not submitted.';
+    this.profileSaved = true;
+  } catch (e) {
+    console.error(e);
+    alert('Could not cancel review.');
+  } finally {
+    this.sendingBroadcast = false;
+  }
+}
+
 }
