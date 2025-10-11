@@ -1,0 +1,276 @@
+<div class="dark:bg-slate-900 min-h-screen">
+  <!-- Navbar -->
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser?.email"
+    [firstName]="auth.currentUser?.firstName"
+    [lastName]="auth.currentUser?.lastName"
+    [path]="'admin-invite-monitor'"
+  >
+  </app-navbar>
+
+  <!-- Optional shared toolbar -->
+  <app-management-toolbar></app-management-toolbar>
+
+  <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
+    <div class="mx-auto max-w-screen-2xl px-4 lg:px-12">
+      <h3 class="text-3xl font-bold dark:text-white text-center mb-6">
+        NWG – Invite Review & Publishing
+      </h3>
+
+      <div
+        class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-2xl overflow-hidden ring-1 ring-black/5"
+      >
+        <!-- toolbar -->
+        <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+          <div
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+          >
+            <!-- Left: Search + Status filter + Sort -->
+            <div class="flex flex-1 flex-col gap-3 md:flex-row md:items-center">
+              <!-- Search -->
+              <div class="relative w-full md:max-w-md">
+                <div
+                  class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+                >
+                  <svg
+                    class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  [(ngModel)]="search"
+                  (input)="applyFilter()"
+                  placeholder="Search title, owner, email, solutionId…"
+                  class="h-11 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+                <button
+                  *ngIf="search"
+                  (click)="search = ''; applyFilter()"
+                  class="absolute inset-y-0 right-2 my-auto h-6 w-6 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <!-- Status filter -->
+              <div class="flex items-center gap-2">
+                <label
+                  class="text-sm font-medium text-slate-600 dark:text-slate-300"
+                  >Status</label
+                >
+                <select
+                  [(ngModel)]="statusFilter"
+                  (change)="refreshQuery()"
+                  class="h-11 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm text-gray-900 dark:text-white px-3"
+                >
+                  <option value="pending">
+                    Pending ({{ counts.pending }})
+                  </option>
+                  <option value="active">Active ({{ counts.active }})</option>
+                  <option value="paused">Paused ({{ counts.paused }})</option>
+                  <option value="stopped">
+                    Stopped ({{ counts.stopped }})
+                  </option>
+                  <option value="all">All ({{ rows.length }})</option>
+                </select>
+              </div>
+
+              <!-- Sort -->
+              <div class="flex items-center gap-2 md:ml-2">
+                <label
+                  class="text-sm font-medium text-slate-600 dark:text-slate-300"
+                  >Sort</label
+                >
+                <select
+                  [(ngModel)]="sortBy"
+                  (change)="applySort()"
+                  class="h-11 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm text-gray-900 dark:text-white px-3"
+                >
+                  <option value="createdAt">Newest First</option>
+                  <option value="updatedAt">Recently Updated</option>
+                  <option value="title">Title (A→Z)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Right: Counts + Export -->
+            <div class="flex items-center gap-3 justify-end">
+              <span class="text-sm text-slate-500 dark:text-slate-400">
+                Showing
+                <span class="font-medium text-slate-700 dark:text-slate-200">{{
+                  filtered.length
+                }}</span>
+                <ng-container *ngIf="statusFilter !== 'all'">
+                  of {{ countCurrentFilter }}
+                </ng-container>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- table -->
+        <div class="overflow-x-auto">
+          <table
+            class="w-full text-sm text-left text-gray-700 dark:text-gray-300"
+          >
+            <thead
+              class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300"
+            >
+              <tr>
+                <th class="px-4 py-3">#</th>
+                <th class="px-4 py-3 whitespace-nowrap">Created</th>
+                <th class="px-4 py-3">Title</th>
+                <th class="px-4 py-3">Owner</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Links</th>
+                <th class="px-4 py-3">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <ng-container
+                *ngFor="let r of filtered; let i = index; trackBy: trackById"
+              >
+                <tr class="border-b dark:border-gray-700">
+                  <td class="px-4 py-3">{{ i + 1 }}</td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    {{ r.createdAtMs ? (r.createdAtMs | date : "short") : "—" }}
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="font-medium dark:text-white">
+                      {{ r.title || "Untitled" }}
+                    </div>
+                    <div class="text-xs text-slate-500">
+                      Solution: {{ r.solutionId }}
+                    </div>
+                    <div class="text-xs text-slate-500" *ngIf="r.broadcastId">
+                      Broadcast: {{ r.broadcastId }}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="font-medium">{{ r.createdByName || "—" }}</div>
+                    <div class="text-xs">
+                      <span class="inline-flex items-center gap-1">
+                        {{ r.createdByEmail || "—" }}
+                        <button
+                          (click)="copy(r.createdByEmail)"
+                          class="text-sky-600 hover:underline"
+                        >
+                          Copy
+                        </button>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span
+                      class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                      [ngClass]="{
+                        'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200':
+                          r.status === 'pending',
+                        'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200':
+                          r.status === 'active',
+                        'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200':
+                          r.status === 'paused',
+                        'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200':
+                          r.status === 'stopped'
+                      }"
+                    >
+                      {{ r.status | titlecase }}
+                    </span>
+                    <div class="mt-1 text-xs text-slate-500">
+                      Updated:
+                      {{
+                        r.updatedAtMs ? (r.updatedAtMs | date : "short") : "—"
+                      }}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex flex-col gap-2">
+                      <a
+                        [routerLink]="['/join', r.solutionId]"
+                        target="_blank"
+                        class="inline-flex items-center gap-1 text-sky-700 dark:text-sky-300 hover:underline"
+                      >
+                        Join page
+                      </a>
+                      <a
+                        [routerLink]="['/broadcasts']"
+                        target="_blank"
+                        class="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-300 hover:underline"
+                      >
+                        Broadcasts
+                      </a>
+                      <button
+                        (click)="copy(r.inviteLink)"
+                        *ngIf="r.inviteLink"
+                        class="inline-flex items-center gap-1 text-slate-600 hover:underline"
+                      >
+                        Copy invite link
+                      </button>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="flex flex-wrap gap-2">
+                      <!-- Cycle -->
+                      <button
+                        (click)="toggleStatus(r)"
+                        class="px-3 py-1.5 text-xs rounded-lg border text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/40"
+                      >
+                        Toggle → {{ nextStatusLabel(r.status) | titlecase }}
+                      </button>
+
+                      <!-- Direct set shortcuts -->
+                      <button
+                        (click)="setStatus(r, 'active')"
+                        class="px-2 py-1 text-xs rounded-lg border border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-200 dark:hover:bg-emerald-900/20"
+                      >
+                        Set Active
+                      </button>
+                      <button
+                        (click)="setStatus(r, 'paused')"
+                        class="px-2 py-1 text-xs rounded-lg border border-sky-300 text-sky-700 hover:bg-sky-50 dark:border-sky-700 dark:text-sky-200 dark:hover:bg-sky-900/20"
+                      >
+                        Set Paused
+                      </button>
+                      <button
+                        (click)="setStatus(r, 'pending')"
+                        class="px-2 py-1 text-xs rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/20"
+                      >
+                        Set Pending
+                      </button>
+                      <button
+                        (click)="setStatus(r, 'stopped')"
+                        class="px-2 py-1 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700/30"
+                      >
+                        Set Stopped
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+
+              <tr *ngIf="filtered.length === 0">
+                <td
+                  colspan="7"
+                  class="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
+                >
+                  No broadcasts found for this filter.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

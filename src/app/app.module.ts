@@ -156,6 +156,7 @@ import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from './components/avatar-detail/avatar-detail.component';
 import { CareersSocialComponent } from './blogs/careers-social/careers-social.component';
 import { LandingTestComponent } from './components/landing-test/landing-test.component';
+import { AdminInviteMonitorComponent } from './components/admin-invite-monitor/admin-invite-monitor.component';
 
 @NgModule({
   declarations: [
@@ -285,6 +286,7 @@ import { LandingTestComponent } from './components/landing-test/landing-test.com
     AvatarDetailComponent,
     CareersSocialComponent,
     LandingTestComponent,
+    AdminInviteMonitorComponent,
   ],
   imports: [
     BrowserModule,

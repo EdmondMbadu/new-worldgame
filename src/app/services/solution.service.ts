@@ -30,7 +30,7 @@ import { Email } from '../components/create-playground/create-playground.compone
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
-
+type BroadcastStatus = 'active' | 'paused' | 'pending' | 'stopped';
 @Injectable({
   providedIn: 'root',
 })
@@ -931,6 +931,68 @@ export class SolutionService {
     return this.listActiveBroadcasts().pipe(
       map((bcs) => bcs.map((b) => b.solutionId)),
       switchMap((ids) => this.getSolutionsByIds(ids)) // you already have this helper
+    );
+  }
+  listBroadcastsByStatuses(statuses: BroadcastStatus[]) {
+    // For 1 status use equality; for many use 'in'
+    if (statuses.length === 1) {
+      const s = statuses[0];
+      return this.afs
+        .collection<Broadcast>('broadcasts', (ref) =>
+          ref.where('status', '==', s).orderBy('createdAt', 'desc').limit(500)
+        )
+        .valueChanges({ idField: 'broadcastId' });
+    } else {
+      return this.afs
+        .collection<Broadcast>('broadcasts', (ref) =>
+          ref
+            .where('status', 'in', statuses)
+            .orderBy('createdAt', 'desc')
+            .limit(500)
+        )
+        .valueChanges({ idField: 'broadcastId' });
+    }
+  }
+
+  async setBroadcastStatus(
+    broadcastId: string,
+    status: BroadcastStatus
+  ): Promise<void> {
+    const now = firebase.firestore.FieldValue.serverTimestamp();
+
+    // Load broadcast to get solutionId and current values
+    const docRef = this.afs.doc<Broadcast>(`broadcasts/${broadcastId}`).ref;
+    const snap = await docRef.get();
+    if (!snap.exists) throw new Error('Broadcast not found');
+    const b = snap.data() as Broadcast;
+
+    // Map status → active flag
+    const activeFlag = status === 'active' || status === 'paused';
+
+    // Update broadcast
+    await docRef.set(
+      {
+        status,
+        active: activeFlag,
+        updatedAt: now,
+        // Optional audits
+        approvedAt: status === 'active' ? now : (b as any).approvedAt ?? null,
+        pausedAt: status === 'paused' ? now : (b as any).pausedAt ?? null,
+        stoppedAt: status === 'stopped' ? now : (b as any).stoppedAt ?? null,
+        approvalRequestedAt: (b as any).approvalRequestedAt ?? now, // ensure present
+      },
+      { merge: true }
+    );
+
+    // Mirror to solution
+    await this.afs.doc(`solutions/${b.solutionId}`).set(
+      {
+        isBroadcasting: status === 'active', // treat "broadcasting" as live only
+        broadcastStatus: status,
+        broadcastUpdatedAt: now,
+        // keep broadcastId field in place
+      },
+      { merge: true }
     );
   }
 

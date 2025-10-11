@@ -178,6 +178,8 @@ export interface Broadcast {
   approvedAt?: any;
   rejectedAt?: any;
   canceledAt?: any;
+  pausedAt?: any;
+  stoppedAt?: any;
 }
 export interface JoinRequest {
   id?: string;

@@ -108,6 +108,7 @@ import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from '../app/components/avatar-detail/avatar-detail.component';
 import { CareersSocialComponent } from './blogs/careers-social/careers-social.component';
 import { LandingTestComponent } from './components/landing-test/landing-test.component';
+import { AdminInviteMonitorComponent } from './components/admin-invite-monitor/admin-invite-monitor.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -328,6 +329,12 @@ const routes: Routes = [
   {
     path: 'feedback-management',
     component: FeedbackManagementComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'admin-invite',
+    component: AdminInviteMonitorComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },
