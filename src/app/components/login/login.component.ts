@@ -99,6 +99,18 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  async signInWithApple() {
+    if (this.loading) return;
+    this.loading = true;
+    try {
+      await this.auth.signInWithApple();
+    } catch (error) {
+      console.error('Apple sign-in failed', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
   get email() {
     return this.myForm.get('email');
   }

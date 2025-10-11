@@ -300,6 +300,35 @@ export class AuthService {
     }
   }
 
+  async signInWithApple(): Promise<void> {
+    this.logingError = of(null);
+    const provider = new firebase.auth.OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    provider.setCustomParameters({ locale: 'en_US' });
+    try {
+      const cred = await this.fireauth.signInWithPopup(provider);
+      const givenName =
+        (cred.additionalUserInfo?.profile as { given_name?: string } | null)
+          ?.given_name || '';
+      const familyName =
+        (cred.additionalUserInfo?.profile as { family_name?: string } | null)
+          ?.family_name || '';
+      if (cred.user && !cred.user.displayName && (givenName || familyName)) {
+        await cred.user.updateProfile({
+          displayName: `${givenName} ${familyName}`.trim(),
+        });
+      }
+      if (cred.user) {
+        await this.ensureUserProfileDocument(cred.user);
+      }
+      await this.finishInteractiveSignIn(cred.user ?? null);
+    } catch (err) {
+      this.logingError = of(err);
+      throw err;
+    }
+  }
+
   forgotPassword(email: string) {
     this.fireauth
       .sendPasswordResetEmail(email)
