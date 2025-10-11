@@ -215,6 +215,30 @@
                     {{ c.sdgsCount }} SDGs
                     </span>
                 </div>
+
+                <div
+                  *ngIf="c.recruitmentProfile as profile"
+                  class="rounded-xl bg-slate-50 dark:bg-slate-700/30 px-3 py-3 space-y-2 text-xs text-slate-600 dark:text-slate-300"
+                >
+                  <div *ngIf="profile.teamLabel || profile.timeCommitment" class="flex items-center gap-2">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100">
+                      {{ profile.teamLabel || 'Team profile' }}:</span
+                    >
+                    <span *ngIf="profile.timeCommitment">{{ profile.timeCommitment }}</span>
+                  </div>
+                  <div *ngIf="profile.focusArea">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100">Focus</span>
+                    <span class="ml-1">{{ profile.focusArea }}</span>
+                  </div>
+                  <div *ngIf="profile.scopeOfWork">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100">Scope</span>
+                    <span class="ml-1">{{ profile.scopeOfWork }}</span>
+                  </div>
+                  <div *ngIf="profile.skills">
+                    <span class="font-semibold text-slate-800 dark:text-slate-100">Skills</span>
+                    <span class="ml-1">{{ profile.skills }}</span>
+                  </div>
+                </div>
                 </div>
 
                 <!-- CTA -->
@@ -242,4 +266,3 @@
 
   <app-footer></app-footer>
 </div>
-

@@ -10,7 +10,10 @@ import {
   startWith,
   combineLatest,
 } from 'rxjs';
-import { Solution } from 'src/app/models/solution';
+import {
+  Solution,
+  SolutionRecruitmentProfile,
+} from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
@@ -42,6 +45,7 @@ interface BroadcastVM {
   authorAccountId?: string;
   designersCount: number;
   sdgsCount: number;
+  recruitmentProfile?: SolutionRecruitmentProfile;
 
   // UI helpers
   isOwner: boolean;
@@ -104,6 +108,11 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
               const s = byId.get(b.solutionId);
               const designersCount = this.countParticipants(s?.participants);
               const sdgsCount = Array.isArray(s?.sdgs) ? s!.sdgs!.length : 0;
+              const profile = s?.recruitmentProfile;
+              const latestMessage =
+                s?.broadCastInviteMessage?.trim().length
+                  ? s.broadCastInviteMessage
+                  : b.message || '';
 
               // ✅ Compare only if both sides exist
               const isOwner =
@@ -115,7 +124,7 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
                 broadcastId: b.broadcastId,
                 solutionId: b.solutionId,
                 title: b.title || s?.title || 'Untitled Solution',
-                message: b.message || s?.broadCastInviteMessage || '',
+                message: latestMessage,
                 includeReadMe: !!b.includeReadMe,
                 readMe: b.readMe,
                 channels: b.channels,
@@ -131,6 +140,7 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
                 authorAccountId: s?.authorAccountId,
                 designersCount,
                 sdgsCount,
+                recruitmentProfile: profile,
 
                 isOwner,
               };
