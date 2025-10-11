@@ -50,7 +50,6 @@ export class AdminInviteMonitorComponent implements OnInit, OnDestroy {
   }
 
   refreshQuery() {
-    // choose statuses to query
     const statuses: BroadcastStatus[] =
       this.statusFilter === 'all'
         ? ['pending', 'active', 'paused', 'stopped']
@@ -60,7 +59,8 @@ export class AdminInviteMonitorComponent implements OnInit, OnDestroy {
     this.sub = this.solutions
       .listBroadcastsByStatuses(statuses)
       .subscribe((list) => {
-        this.rows = (list || []).map((b) => ({
+        // 1) raw map
+        this.rowsRaw = (list || []).map((b) => ({
           broadcastId: b.broadcastId,
           solutionId: b.solutionId,
           title: b.title || 'Untitled',
@@ -74,19 +74,24 @@ export class AdminInviteMonitorComponent implements OnInit, OnDestroy {
           createdByEmail: b.createdByEmail,
         }));
 
-        // recompute counts (from server or recalc client-side)
-        this.counts.pending = this.rows.filter(
-          (r) => r.status === 'pending'
-        ).length;
-        this.counts.active = this.rows.filter(
-          (r) => r.status === 'active'
-        ).length;
-        this.counts.paused = this.rows.filter(
-          (r) => r.status === 'paused'
-        ).length;
-        this.counts.stopped = this.rows.filter(
-          (r) => r.status === 'stopped'
-        ).length;
+        // 2) per-status counts (deduped per solution)
+        const by = (s: BroadcastStatus) =>
+          this.dedupeBySolution(this.rowsRaw.filter((r) => r.status === s))
+            .length;
+        this.counts.pending = by('pending');
+        this.counts.active = by('active');
+        this.counts.paused = by('paused');
+        this.counts.stopped = by('stopped');
+
+        // 3) dataset used for display:
+        //    - if filtering a single status → dedupe within that status
+        //    - if "all" → dedupe across all statuses (latest overall per solution)
+        const base =
+          this.statusFilter === 'all'
+            ? this.rowsRaw
+            : this.rowsRaw.filter((r) => r.status === this.statusFilter);
+
+        this.rows = this.dedupeBySolution(base);
 
         this.applySort();
         this.applyFilter();
@@ -170,6 +175,19 @@ export class AdminInviteMonitorComponent implements OnInit, OnDestroy {
       console.error('Failed to set status', e);
       alert('Failed to update status.');
     }
+  }
+  rowsRaw: AdminBroadcastRow[] = []; // <— raw from Firestore, may contain multiples
+
+  private dedupeBySolution(list: AdminBroadcastRow[]): AdminBroadcastRow[] {
+    const pickTime = (r: AdminBroadcastRow) =>
+      r.updatedAtMs ?? r.createdAtMs ?? 0;
+    const latest = new Map<string, AdminBroadcastRow>();
+    for (const r of list) {
+      const key = r.solutionId;
+      const prev = latest.get(key);
+      if (!prev || pickTime(r) > pickTime(prev)) latest.set(key, r);
+    }
+    return Array.from(latest.values());
   }
 }
 
