@@ -153,12 +153,19 @@ export class DashboardComponent implements OnInit {
         this.currentSolution.recruitmentProfile.teamSizeMax
       ),
     };
+    this.currentSolution.recruitmentProfile = payload;
+
+    const updates = {
+      recruitmentProfile: payload,
+      broadCastInviteMessage:
+        this.currentSolution.broadCastInviteMessage ?? '',
+      description: this.currentSolution.description ?? '',
+    };
 
     try {
-      await this.solution.updateSolutionField(
+      await this.solution.updateSolutionFields(
         this.currentSolution.solutionId,
-        'recruitmentProfile',
-        payload
+        updates
       );
       this.profileSaved = true;
       this.profileMessage = 'Team profile saved';

@@ -360,6 +360,13 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
 
+  updateSolutionFields(id: string, values: Partial<Solution>) {
+    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
+      `solutions/${id}`
+    );
+    return solutionRef.set(values, { merge: true });
+  }
+
   updateSolutionForTournament(solution: Solution) {
     const data = {
       tournament: 'true',
