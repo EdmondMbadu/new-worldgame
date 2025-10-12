@@ -498,7 +498,12 @@
                     d="M3 5h12M9 3v2m-4 4h8m-4-2v2m7 4h2a2 2 0 012 2v6m0 0H5a2 2 0 01-2-2v-6a2 2 0 012-2h2m10 8v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4"
                   />
                 </svg>
-                Focus: {{ recruitmentProfile.focusArea }}
+                Focus:
+                {{
+                  recruitmentProfile.focusArea.length > 50
+                    ? (recruitmentProfile.focusArea | slice : 0 : 50) + "…"
+                    : recruitmentProfile.focusArea
+                }}
               </span>
             </div>
           </div>
@@ -984,9 +989,21 @@
                   [disabled]="joining"
                   class="w-full inline-flex justify-center items-center gap-3 rounded-full px-6 py-3 text-base font-semibold bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 text-white hover:from-emerald-300 hover:via-emerald-400 hover:to-teal-400 shadow-[0_22px_50px_-20px_rgba(16,185,129,0.95)] transition transform hover:-translate-y-0.5 disabled:opacity-70 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-emerald-900/40"
                 >
-                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  <span
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
                   </span>
                   Request to Join this Team
