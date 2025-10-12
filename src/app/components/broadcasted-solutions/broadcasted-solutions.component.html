@@ -3,22 +3,22 @@
   <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
   <div *ngIf="isLoggedIn">
     <app-navbar
-     [hoveredCollaboratePath]="'bg-gray-100 dark:bg-gray-700'"
-      [sideBarSmall]="true" [sideBarBig]="false"
+      [hoveredCollaboratePath]="'bg-gray-100 dark:bg-gray-700'"
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
       [showMoreOrLess]="true"
       [email]="auth.currentUser?.email"
       [firstName]="auth.currentUser?.firstName"
       [lastName]="auth.currentUser?.lastName"
-      >
+    >
     </app-navbar>
   </div>
 
- 
-
-
   <!-- LOADING -->
   <ng-container *ngIf="loading$ | async; else loaded">
-    <div class="flex-1 px-4 md:px-8 max-w-7xl mx-auto w-full animate-pulse pt-24 space-y-6">
+    <div
+      class="flex-1 px-4 md:px-8 max-w-7xl mx-auto w-full animate-pulse pt-24 space-y-6"
+    >
       <div class="h-36 rounded-2xl bg-slate-200 dark:bg-slate-700"></div>
       <div class="h-8 w-2/3 rounded bg-slate-200 dark:bg-slate-700"></div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -37,23 +37,52 @@
         class="rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-500 text-white shadow-xl overflow-hidden"
       >
         <div class="p-6 md:p-8">
-          <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div
+            class="flex flex-col md:flex-row md:items-end md:justify-between gap-4"
+          >
             <div>
-              <h1 class="text-2xl md:text-3xl font-bold">You are Invited to Join These Challenges!</h1>
+              <h1 class="text-2xl md:text-3xl font-bold">
+                You are Invited to Join These Challenges!
+              </h1>
               <p class="mt-1 text-white/90">
-                Discover solutions currently inviting collaborators across NewWorld Game.
+                Discover solutions currently inviting collaborators across
+                NewWorld Game.
               </p>
             </div>
             <div class="flex items-center gap-3 text-sm">
-              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4" />
+              <span
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 12l2 2 4-4"
+                  />
                 </svg>
                 Active: {{ (stats$ | async)?.active || 0 }}
               </span>
-              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 8h12M6 12h12M6 16h12" />
+              <span
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M6 8h12M6 12h12M6 16h12"
+                  />
                 </svg>
                 Total: {{ (stats$ | async)?.total || 0 }}
               </span>
@@ -68,13 +97,21 @@
               <div class="relative">
                 <svg
                   class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/80"
-                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M10 18a8 8 0 110-16 8 8 0 010 16z" />
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 21l-4.35-4.35M10 18a8 8 0 110-16 8 8 0 010 16z"
+                  />
                 </svg>
-               <input  (input)="onSearchInput($event)" 
+                <input
+                  (input)="onSearchInput($event)"
                   placeholder="Search by title, pitch, author…"
-                  class="w-full rounded-lg bg-white/20 placeholder-white/70 text-white px-9 py-2.5 outline-none
-                         focus:ring-2 focus:ring-white/60"
+                  class="w-full rounded-lg bg-white/20 placeholder-white/70 text-white px-9 py-2.5 outline-none focus:ring-2 focus:ring-white/60"
                 />
               </div>
             </div>
@@ -111,7 +148,9 @@
         <div
           class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center"
         >
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">No broadcasts yet</h3>
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            No broadcasts yet
+          </h3>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
             When a solution owner broadcasts, you’ll see it here.
           </p>
@@ -119,104 +158,135 @@
       </section>
 
       <!-- Cards grid -->
-      <section class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            <article
-            *ngFor="let c of (cards$ | async); trackBy: trackById"
-            class="group relative rounded-3xl p-[1px]
-                    bg-gradient-to-br from-emerald-500/25 via-emerald-500/10 to-teal-500/25
-                    hover:from-emerald-500/50 hover:to-teal-500/50 transition"
-            >
-            <div
-                class="rounded-3xl overflow-hidden bg-white dark:bg-slate-800
-                    shadow-lg ring-1 ring-slate-200/60 dark:ring-slate-700/60
-                    group-hover:shadow-2xl transition"
-            >
-                <!-- Cover -->
-                <div class="relative h-44 overflow-hidden">
+      <section
+        class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+      >
+        <article
+          *ngFor="let c of cards$ | async; trackBy: trackById"
+          class="group relative rounded-3xl p-[1px] bg-gradient-to-br from-emerald-500/25 via-emerald-500/10 to-teal-500/25 hover:from-emerald-500/50 hover:to-teal-500/50 transition"
+        >
+          <div
+            class="rounded-3xl overflow-hidden bg-white dark:bg-slate-800 shadow-lg ring-1 ring-slate-200/60 dark:ring-slate-700/60 group-hover:shadow-2xl transition"
+          >
+            <!-- Cover -->
+            <div class="relative h-44 overflow-hidden">
+              <img
+                *ngIf="c.image; else generic"
+                [src]="c.image"
+                alt="cover"
+                referrerpolicy="no-referrer"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <ng-template #generic>
                 <img
-                    *ngIf="c.image; else generic"
-                    [src]="c.image"
-                    alt="cover"
-                    referrerpolicy="no-referrer"
-                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  src="/assets/img/generic.webp"
+                  alt="generic"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <ng-template #generic>
-                    <img src="/assets/img/generic.webp" alt="generic"
-                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                </ng-template>
+              </ng-template>
 
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+              ></div>
 
-                <!-- status -->
-                <div class="absolute top-3 left-3">
-                    <span
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white"
-                    [ngClass]="{
-                        'bg-emerald-600': c.status === 'active',
-                        'bg-amber-500': c.status === 'paused'
-                    }"
-                    >
-                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-white"></span>
-                    {{ c.status | titlecase }}
-                    </span>
-                </div>
+              <!-- status -->
+              <div class="absolute top-3 left-3">
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white"
+                  [ngClass]="{
+                    'bg-emerald-600': c.status === 'active',
+                    'bg-amber-500': c.status === 'paused'
+                  }"
+                >
+                  <span
+                    class="inline-block w-1.5 h-1.5 rounded-full bg-white"
+                  ></span>
+                  {{ c.status | titlecase }}
+                </span>
+              </div>
 
-                <!-- author mini chip -->
-                <div class="absolute bottom-3 left-3 right-3 flex items-center justify-end">
-                    <span
-                    class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full
-                            bg-white/20 backdrop-blur text-white text-xs"
-                    >
-                    <span class="grid place-items-center w-5 h-5 rounded-full bg-white/90 text-slate-900 font-semibold">
-                        {{ (c.authorName || 'U') | slice:0:1 }}
-                    </span>
-                    {{ c.authorName || 'Unknown' }}
-                    </span>
-                </div>
-                </div>
+              <!-- author mini chip -->
+              <div
+                class="absolute bottom-3 left-3 right-3 flex items-center justify-end"
+              >
+                <span
+                  class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur text-white text-xs"
+                >
+                  <span
+                    class="grid place-items-center w-5 h-5 rounded-full bg-white/90 text-slate-900 font-semibold"
+                  >
+                    {{ c.authorName || "U" | slice : 0 : 1 }}
+                  </span>
+                  {{ c.authorName || "Unknown" }}
+                </span>
+              </div>
+            </div>
 
-                <!-- Body -->
-                <div class="p-5 space-y-4">
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-white leading-snug line-clamp-2">
-                    {{ c.title }}
-                </h3>
+            <!-- Body -->
+            <div class="p-5 space-y-4">
+              <h3
+                class="text-lg font-semibold text-slate-900 dark:text-white leading-snug line-clamp-2"
+              >
+                {{ c.title }}
+              </h3>
 
-                <!-- Featured pitch block -->
-                <div class="relative rounded-xl p-4
-                            bg-slate-50 dark:bg-slate-700/40
-                            ring-1 ring-slate-200/60 dark:ring-slate-600/40">
-                    <div class="absolute inset-y-3 left-3 w-1 rounded-full
-                                bg-gradient-to-b from-emerald-500 to-teal-500"></div>
-                    <p class="pl-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 line-clamp-4">
-                    {{ c.message || 'No pitch provided.' }}
-                    </p>
-                </div>
-
-                <!-- Meta chips -->
-                <div class="flex flex-wrap gap-2">
-                    <span
-                    class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full
-                            bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
-                    >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8z" />
-                    </svg>
-                    {{ c.designersCount || 0 }} designers
-                    </span>
-
-                    <span *ngIf="c.sdgsCount"
-                    class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full
-                            bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
-                    >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                    </svg>
-                    {{ c.sdgsCount }} SDGs
-                    </span>
-                </div>
-
+              <!-- Featured pitch block -->
+              <div
+                class="relative rounded-xl p-4 bg-slate-50 dark:bg-slate-700/40 ring-1 ring-slate-200/60 dark:ring-slate-600/40"
+              >
                 <div
+                  class="absolute inset-y-3 left-3 w-1 rounded-full bg-gradient-to-b from-emerald-500 to-teal-500"
+                ></div>
+                <p
+                  class="pl-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 line-clamp-4"
+                >
+                  {{ c.message || "No pitch provided." }}
+                </p>
+              </div>
+
+              <!-- Meta chips -->
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
+                >
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8z"
+                    />
+                  </svg>
+                  {{ c.designersCount || 0 }} designers
+                </span>
+
+                <span
+                  *ngIf="c.sdgsCount"
+                  class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200"
+                >
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 14l9-5-9-5-9 5 9 5z"
+                    />
+                  </svg>
+                  {{ c.sdgsCount }} SDGs
+                </span>
+              </div>
+
+              <!-- <div
                   *ngIf="c.recruitmentProfile as profile"
                   class="rounded-xl bg-slate-50 dark:bg-slate-700/30 px-3 py-3 space-y-2 text-xs text-slate-600 dark:text-slate-300"
                 >
@@ -238,31 +308,36 @@
                     <span class="font-semibold text-slate-800 dark:text-slate-100">Skills</span>
                     <span class="ml-1">{{ profile.skills }}</span>
                   </div>
-                </div>
-                </div>
-
-                <!-- CTA -->
-                <div class="px-5 pb-5 pt-0">
-                <a
-                    [routerLink]="['/join', c.solutionId]"
-                    class="group/btn w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold
-                        bg-gradient-to-r from-emerald-600 to-teal-600 text-white
-                        hover:from-emerald-500 hover:to-teal-500 transition"
-                   
-                >
-                    <svg class="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5"
-                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                    Request to Join
-                </a>
-                </div>
+                </div> -->
             </div>
-            </article>
 
+            <!-- CTA -->
+            <div class="px-5 pb-5 pt-0">
+              <a
+                [routerLink]="['/join', c.solutionId]"
+                class="group/btn w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-500 hover:to-teal-500 transition"
+              >
+                <svg
+                  class="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+                Request to Join
+              </a>
+            </div>
+          </div>
+        </article>
       </section>
-    </main>
-  </ng-template>'
+    </main> </ng-template
+  >'
 
   <app-footer></app-footer>
 </div>
