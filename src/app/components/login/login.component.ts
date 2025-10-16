@@ -111,6 +111,18 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  async signInWithMicrosoft() {
+    if (this.loading) return;
+    this.loading = true;
+    try {
+      await this.auth.signInWithMicrosoft();
+    } catch (error) {
+      console.error('Microsoft sign-in failed', error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
   get email() {
     return this.myForm.get('email');
   }

@@ -329,6 +329,35 @@ export class AuthService {
     }
   }
 
+  async signInWithMicrosoft(): Promise<void> {
+    this.logingError = of(null);
+    const provider = new firebase.auth.OAuthProvider('microsoft.com');
+    provider.addScope('User.Read');
+    provider.setCustomParameters({
+      prompt: 'consent',
+      tenant: 'common',
+    });
+
+    try {
+      const cred = await this.fireauth.signInWithPopup(provider);
+      const profile =
+        (cred.additionalUserInfo?.profile as { displayName?: string } | null) ||
+        null;
+      if (cred.user && !cred.user.displayName && profile?.displayName) {
+        await cred.user.updateProfile({
+          displayName: profile.displayName,
+        });
+      }
+      if (cred.user) {
+        await this.ensureUserProfileDocument(cred.user);
+      }
+      await this.finishInteractiveSignIn(cred.user ?? null);
+    } catch (err) {
+      this.logingError = of(err);
+      throw err;
+    }
+  }
+
   forgotPassword(email: string) {
     this.fireauth
       .sendPasswordResetEmail(email)
