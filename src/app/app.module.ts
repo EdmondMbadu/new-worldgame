@@ -18,17 +18,11 @@ import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { PostComponent } from './components/solution/solution.component';
-import { ChatbotComponent } from './components/chatbot/chatbot.component';
-import { CreatePlaygroundComponent } from './components/create-playground/create-playground.component';
-import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
-import { PlaygroundStepsComponent } from './components/playground-steps/playground-steps.component';
-import { PlaygroundStepComponent } from './components/playground-step/playground-step.component';
 import { ProblemListComponent } from './components/problem-list/problem-list.component';
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { SliderComponent } from './components/slider/slider.component';
 import { environment } from 'environments/environments';
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { TextPopupComponent } from './components/text-popup/text-popup.component';
@@ -42,10 +36,6 @@ import { JoinTournamentComponent } from './components/join-tournament/join-tourn
 
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { TeamDiscussionComponent } from './components/team-discussion/team-discussion.component';
-import { EditorModule } from '@tinymce/tinymce-angular';
-import { CkeditorComponent } from './components/ckeditor/ckeditor.component';
-import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
-import { CreateSolutionStepsComponent } from './components/create-solution-steps/create-solution-steps.component';
 import { AudioPlayerComponent } from './components/audio-player/audio-player.component';
 import { VideoCallComponent } from './components/video-call/video-call.component';
 import { SrcObjectDirective } from './directives/src-object.directive';
@@ -95,15 +85,10 @@ import { MaterialModule } from './shared/material.module';
     HomeComponent,
     ProfileComponent,
     PostComponent,
-    ChatbotComponent,
-    CreatePlaygroundComponent,
-    PlaygroundStepsComponent,
-    PlaygroundStepComponent,
     ProblemListComponent,
     ProblemListViewComponent,
     ProblemListFeedbackComponent,
     ProblemFeedbackComponent,
-    SliderComponent,
     VerifyEmailComponent,
     TextPopupComponent,
     ForgotPasswordComponent,
@@ -115,9 +100,6 @@ import { MaterialModule } from './shared/material.module';
     JoinTournamentComponent,
     PageNotFoundComponent,
     TeamDiscussionComponent,
-    CkeditorComponent,
-    CreateSolutionComponent,
-    CreateSolutionStepsComponent,
     AudioPlayerComponent,
     VideoCallComponent,
     SrcObjectDirective,
@@ -162,7 +144,6 @@ import { MaterialModule } from './shared/material.module';
     HttpClientModule,
     AppRoutingModule,
     SharedModule,
-    CKEditorModule,
     FormsModule,
     ReactiveFormsModule,
     AngularFireModule.initializeApp(environment.firebase),
@@ -172,7 +153,6 @@ import { MaterialModule } from './shared/material.module';
     AngularFireFunctionsModule,
     BrowserAnimationsModule,
     MaterialModule,
-    EditorModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

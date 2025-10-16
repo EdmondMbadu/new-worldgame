@@ -7,8 +7,6 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-solution-preview',
@@ -474,6 +472,10 @@ export class SolutionPreviewComponent implements OnInit {
 
   async generatePdfFromHtml() {
     this.toggle('isLoading');
+    const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
     // --- 1) Build a new container with the logo, title, contributors, content ---
     const container = document.createElement('div');
     // Using Roboto Mono as requested

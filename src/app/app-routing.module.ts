@@ -1,12 +1,11 @@
 import { Component, NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { adminCanMatch } from './admin/admin-can-match.guard';
+import { playgroundCanMatch } from './playground/playground-can-match.guard';
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
 import { ProfileComponent } from './components/profile/profile.component';
-import { CreatePlaygroundComponent } from './components/create-playground/create-playground.component';
-import { PlaygroundStepsComponent } from './components/playground-steps/playground-steps.component';
 import { ProblemListViewComponent } from './components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from './components/problem-list-feedback/problem-list-feedback.component';
 import { ProblemFeedbackComponent } from './components/problem-feedback/problem-feedback.component';
@@ -19,7 +18,6 @@ import { EvaluationSummaryComponent } from './components/evaluation-summary/eval
 import { SolutionViewExternalComponent } from './components/solution-view-external/solution-view-external.component';
 import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
-import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
 import { VideoCallComponent } from './components/video-call/video-call.component';
 import { MeetingComponent } from './components/meeting/meeting.component';
 import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
@@ -43,7 +41,6 @@ import { PastTournamentsComponent } from './components/past-tournaments/past-tou
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
-import { Scheduler } from 'rxjs';
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
 import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
@@ -83,25 +80,9 @@ const routes: Routes = [
   { path: 'discover', component: DiscoverComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   {
-    path: 'create-playground',
-    component: CreatePlaygroundComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'create-solution',
-    component: CreateSolutionComponent,
-    canActivate: [AuthGuard],
-  },
-  {
     path: 'start-challenge',
     component: StartChallengeComponent,
     canActivate: [AuthGuard],
-  },
-  {
-    path: 'playground-steps/:id',
-    component: PlaygroundStepsComponent,
-    canActivate: [AuthGuard],
-    data: { requireParticipant: true },
   },
   {
     path: 'dashboard/:id',
@@ -277,6 +258,14 @@ const routes: Routes = [
   {
     path: 'avatar/:slug',
     component: AvatarDetailComponent,
+  },
+  {
+    path: '',
+    canMatch: [playgroundCanMatch],
+    loadChildren: () =>
+      import('./playground/playground.module').then(
+        (m) => m.PlaygroundModule
+      ),
   },
   {
     path: '',

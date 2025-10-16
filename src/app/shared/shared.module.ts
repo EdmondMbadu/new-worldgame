@@ -5,10 +5,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
+import { ChatbotComponent } from '../components/chatbot/chatbot.component';
 import { MaterialModule } from './material.module';
 
 @NgModule({
-  declarations: [NavbarComponent, FooterComponent],
+  declarations: [NavbarComponent, FooterComponent, ChatbotComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -16,6 +17,6 @@ import { MaterialModule } from './material.module';
     ReactiveFormsModule,
     MaterialModule,
   ],
-  exports: [NavbarComponent, FooterComponent, MaterialModule],
+  exports: [NavbarComponent, FooterComponent, ChatbotComponent, MaterialModule],
 })
 export class SharedModule {}
