@@ -1,5 +1,6 @@
 import { Component, NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { adminCanMatch } from './admin/admin-can-match.guard';
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { HomeComponent } from './components/home/home.component';
@@ -19,10 +20,7 @@ import { SolutionViewExternalComponent } from './components/solution-view-extern
 import { JoinTournamentComponent } from './components/join-tournament/join-tournament.component';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { CreateSolutionComponent } from './components/create-solution/create-solution.component';
-import { UserManagementComponent } from './components/user-management/user-management.component';
 import { VideoCallComponent } from './components/video-call/video-call.component';
-import { ManagementWorkshopComponent } from './components/management-workshop/management-workshop.component';
-import { ManagementPrimerComponent } from './components/management-primer/management-primer.component';
 import { MeetingComponent } from './components/meeting/meeting.component';
 import { StartChallengeComponent } from './components/start-challenge/start-challenge.component';
 import { GenerateChallengesComponent } from './components/generate-challenges/generate-challenges.component';
@@ -31,39 +29,30 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from './components/full-discussion/full-discussion.component';
 import { SolutionDetailsComponent } from './components/solution-details/solution-details.component';
 import { DocumentFilesComponent } from './components/document-files/document-files.component';
-import { ManagementGsl2025Component } from './components/management-gsl-2025/management-gsl-2025.component';
 import { SolutionPreviewComponent } from './components/solution-preview/solution-preview.component';
 import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
 import { ListFinishedSolutionsComponent } from './components/list-finished-solutions/list-finished-solutions.component';
 import { DiscoverComponent } from './components/discover/discover.component';
 import { GameComponent } from './game/game/game.component';
-import { SolutionPublicationComponent } from './components/solution-publication/solution-publication.component';
 import { CreateTournamentComponent } from './components/create-tournament/create-tournament.component';
 import { TournamentDetailsComponent } from './components/tournament-details/tournament-details.component';
 import { ActiveTournamentsComponent } from './components/active-tournaments/active-tournaments.component';
 import { TournamentWinComponent } from './components/tournament-win/tournament-win.component';
 import { YourTournamentsComponent } from './components/your-tournaments/your-tournaments.component';
 import { PastTournamentsComponent } from './components/past-tournaments/past-tournaments.component';
-import { TournamentManagementComponent } from './components/tournament-management/tournament-management.component';
 import { MiniGameComponent } from './game/mini-game/mini-game.component';
 import { PresentationViewerComponent } from './presentations/presentation-viewer/presentation-viewer.component';
 import { TeamBuildingComponent } from './components/team-building/team-building.component';
 import { Scheduler } from 'rxjs';
 import { SchedulerComponent } from './game/scheduler/scheduler.component';
-import { ManagementDemoComponent } from './components/management-demo/management-demo.component';
 import { JoinSolutionComponent } from './components/join-solution/join-solution.component';
 import { SchoolSignupComponent } from './components/school-signup/school-signup.component';
 import { SchoolDashboardComponent } from './components/school-dashboard/school-dashboard.component';
 import { InvitationsComponent } from './components/invitations/invitations.component';
 import { JoinSuccessComponent } from './components/join-success/join-success.component';
-import { SchoolManagementComponent } from './components/school-management/school-management.component';
-import { ManagementAskComponent } from './components/management-ask/management-ask.component';
-import { FeedbackManagementComponent } from './components/feedback-management/feedback-management.component';
 import { BroadcastedSolutionsComponent } from './components/broadcasted-solutions/broadcasted-solutions.component';
-import { BulkEmailsComponent } from './game/bulk-emails/bulk-emails.component';
 import { UnsubscribeComponent } from './game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from '../app/components/avatar-detail/avatar-detail.component';
-import { AdminInviteMonitorComponent } from './components/admin-invite-monitor/admin-invite-monitor.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -231,72 +220,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'user-management',
-    component: UserManagementComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'schools-management',
-    component: SchoolManagementComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'management-workshop',
-    component: ManagementWorkshopComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'management-gsl-2025',
-    component: ManagementGsl2025Component,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'tournament-management',
-    component: TournamentManagementComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'management-primer',
-    component: ManagementPrimerComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'feedback-management',
-    component: FeedbackManagementComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'admin-invite',
-    component: AdminInviteMonitorComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'management-demo',
-    component: ManagementDemoComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'management-ask',
-    component: ManagementAskComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
-    path: 'bulk-emails',
-    component: BulkEmailsComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
     path: 'problem-feedback/:id',
     component: ProblemFeedbackComponent,
     canActivate: [AuthGuard],
@@ -334,12 +257,6 @@ const routes: Routes = [
   },
 
   {
-    path: 'solution-publication',
-    component: SolutionPublicationComponent,
-    canActivate: [AuthGuard],
-    data: { requireAdmin: true },
-  },
-  {
     path: 'home-challenge/:id',
     component: HomeChallengeComponent,
     canActivate: [AuthGuard],
@@ -360,6 +277,12 @@ const routes: Routes = [
   {
     path: 'avatar/:slug',
     component: AvatarDetailComponent,
+  },
+  {
+    path: '',
+    canMatch: [adminCanMatch],
+    loadChildren: () =>
+      import('./admin/admin.module').then((m) => m.AdminModule),
   },
 
   { path: '**', component: PageNotFoundComponent },

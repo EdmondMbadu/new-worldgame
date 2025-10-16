@@ -5,10 +5,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
+import { MaterialModule } from './material.module';
 
 @NgModule({
   declarations: [NavbarComponent, FooterComponent],
-  imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule],
-  exports: [NavbarComponent, FooterComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MaterialModule,
+  ],
+  exports: [NavbarComponent, FooterComponent, MaterialModule],
 })
 export class SharedModule {}
