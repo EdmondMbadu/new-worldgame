@@ -35,21 +35,23 @@
             "scripts": []
           },
           "configurations": {
-            "production": { 
+            "production": {
               "aot": true,
-             
               "optimization": {
                 "scripts": true,
                 "styles": {
-                  "minify": false,
-                  "inlineCritical": false 
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": {
+                  "inline": false
                 }
               },
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "10mb"
+                  "maximumWarning": "1500kb",
+                  "maximumError": "2000kb"
                 },
                 {
                   "type": "anyComponentStyle",
