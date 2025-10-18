@@ -71,6 +71,9 @@ export class SolutionViewComponent implements OnInit {
     });
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
+      if (user) {
+        this.currentUser = user;
+      }
     });
   }
 
@@ -119,7 +122,10 @@ export class SolutionViewComponent implements OnInit {
       .getSolutionForNonAuthenticatedUser(solutionId)
       .subscribe((data: any) => {
         this.currentSolution = data[0];
-        if (this.currentSolution.authorEmail === this.auth.currentUser.email) {
+        if (
+          this.auth.currentUser &&
+          this.currentSolution.authorEmail === this.auth.currentUser.email
+        ) {
           this.iscreatorOfThisSolution = true;
         }
         if (this.currentSolution.edited === 'true') {
@@ -150,7 +156,10 @@ export class SolutionViewComponent implements OnInit {
     for (const key in this.currentSolution.participants) {
       let participant = this.currentSolution.participants[key];
       let email = Object.values(participant)[0];
-      if (email === this.auth.currentUser.email) {
+      if (
+        this.auth.currentUser &&
+        email === this.auth.currentUser.email
+      ) {
         this.isContributorOfThisSolution = true;
       }
 
@@ -200,6 +209,10 @@ export class SolutionViewComponent implements OnInit {
   }
 
   addLike() {
+    if (!this.auth.currentUser) {
+      this.redirectToLogin('like');
+      return;
+    }
     this.currentSolution.likes =
       typeof this.currentSolution.likes === 'string' ||
       this.currentSolution.likes === undefined
@@ -391,7 +404,7 @@ export class SolutionViewComponent implements OnInit {
 
   addComment() {
     if (!this.auth.currentUser) {
-      this.displayAddCommentPermission = true;
+      this.redirectToLogin('comment');
       return;
     }
     if (!this.comment || this.comment.trim() === '') {
@@ -404,6 +417,9 @@ export class SolutionViewComponent implements OnInit {
   }
 
   sendEmailForCommentNotification() {
+    if (!this.auth.currentUser) {
+      return;
+    }
     const commentNotificationEmail = this.fns.httpsCallable(
       'commentNotificationEmail'
     );
@@ -429,6 +445,10 @@ export class SolutionViewComponent implements OnInit {
     });
   }
   submitComment() {
+    if (!this.auth.currentUser) {
+      this.redirectToLogin('comment');
+      return;
+    }
     if (this.comments) {
       this.comments.push({
         authorId: this.auth.currentUser.uid,
@@ -460,5 +480,14 @@ export class SolutionViewComponent implements OnInit {
       console.log(error);
     }
     this.confirmSubmitComment = false;
+  }
+
+  redirectToLogin(action: 'like' | 'comment') {
+    this.router.navigate(['/login'], {
+      queryParams: {
+        redirectTo: this.router.url,
+        intent: action,
+      },
+    });
   }
 }
