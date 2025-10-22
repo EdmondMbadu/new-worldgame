@@ -156,10 +156,7 @@ export class SolutionViewComponent implements OnInit {
     for (const key in this.currentSolution.participants) {
       let participant = this.currentSolution.participants[key];
       let email = Object.values(participant)[0];
-      if (
-        this.auth.currentUser &&
-        email === this.auth.currentUser.email
-      ) {
+      if (this.auth.currentUser && email === this.auth.currentUser.email) {
         this.isContributorOfThisSolution = true;
       }
 
@@ -489,5 +486,22 @@ export class SolutionViewComponent implements OnInit {
         intent: action,
       },
     });
+  }
+
+  getAvatarColor(uid: string): string {
+    const colors = [
+      '#4285F4', // blue
+      '#DB4437', // red
+      '#F4B400', // yellow
+      '#0F9D58', // green
+      '#AB47BC', // purple
+      '#00ACC1', // cyan
+      '#FF7043', // orange
+    ];
+    // pick a stable color by hashing uid
+    const index =
+      Math.abs(uid.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) %
+      colors.length;
+    return colors[index];
   }
 }
