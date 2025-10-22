@@ -17,9 +17,10 @@
         <div class="container flex mx-auto  justify-center max-w-4xl" *ngFor="let s of steps; let i= index">
 
             <app-create-solution-steps
-            [text]="s"
+            [text]="s | translate"
             *ngIf="display[i]"
-            [buttonText]="buttontexts[i]"
+            [buttonTextKey]="buttonTextKeys[i]"
+            [buttonAction]="buttonActions[i]"
             (buttonInfoEvent)="updatePlayground($event)"
             [stepNumber]="currentIndexDisplay"
             [focusSelectedArray]="selected"

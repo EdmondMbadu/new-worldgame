@@ -76,6 +76,85 @@
       },
       "submit": "Ajouter le défi",
       "cancel": "Annuler"
+    },
+    "alerts": {
+      "enterLocation": "Indiquez votre localisation",
+      "uploadError": "Une erreur s’est produite lors du téléversement. Veuillez réessayer.",
+      "missingFields": "Veuillez remplir tous les champs requis avant d’ajouter le défi."
+    }
+  },
+  "createSolution": {
+    "steps": {
+      "intro": "Bienvenue dans le NewWorld Game !\nMon rôle, en tant que collègue — votre partenaire de résolution de problèmes — est de nous aider à développer une solution à un problème mondial sur lequel vous choisissez de travailler. Commençons.",
+      "focusArea": "Quel est le domaine général de la solution NewWorld Game ?",
+      "projectTitle": "Proposez un titre de départ pour votre projet. Vous pourrez le modifier plus tard au fil de vos progrès.",
+      "problemDescription": "En quelques mots, comment décririez-vous le problème spécifique sur lequel vous vous concentrez ?",
+      "teamMembers": "Listez les membres de vos équipes. Ajoutez leurs courriels ci-dessous. (Cela permet la communication entre les membres de l’équipe et, conformément à la Politique de confidentialité NWG, leurs informations resteront privées.)",
+      "evaluators": "Ajoutez ci-dessous les membres NWG que vous souhaitez voir agir en tant qu’évaluateurs de votre travail d’équipe. (Les noms que vous fournissez seront complétés par d’autres choisis au hasard parmi les membres NWG.)",
+      "sdgs": "Sélectionnez les Objectifs de développement durable (ODD) liés à votre domaine problématique.",
+      "submit": "C’est presque terminé ! Soumettez pour commencer à résoudre votre nouvelle solution."
+    },
+    "buttons": {
+      "continue": "Continuer",
+      "submit": "Soumettre"
+    }
+  },
+  "createSolutionSteps": {
+    "media": {
+      "stepImageAlt": "Illustration de l’étape de création en cours",
+      "guideAvatarAlt": "Avatar de Bucky"
+    },
+    "guideName": "Bucky",
+    "step1": {
+      "label": "Domaine d’action"
+    },
+    "step2": {
+      "label": "Titre de la solution"
+    },
+    "step3": {
+      "placeholder": "Écrivez vos idées ici..."
+    },
+    "team": {
+      "label": "Ajouter des courriels de membres d’équipe",
+      "ariaLabel": "Liste des membres de l’équipe",
+      "ariaEdit": "Appuyez sur Entrée pour modifier {{email}}",
+      "ariaRemove": "Retirer {{email}}",
+      "placeholder": "courriel..."
+    },
+    "validation": {
+      "invalidEmails": "Assurez-vous que tous les courriels sont valides."
+    },
+    "evaluators": {
+      "label": "Ajouter des courriels d’évaluateurs",
+      "ariaLabel": "Liste des évaluateurs",
+      "ariaEdit": "Appuyez sur Entrée pour modifier l’évaluateur {{index}}",
+      "ariaRemove": "Retirer l’évaluateur {{index}}",
+      "placeholder": "Ajouter un évaluateur (courriel)…"
+    },
+    "sdgs": {
+      "heading": "Objectifs de développement durable (ODD)",
+      "selectAll": "Sélectionner tous les ODD"
+    },
+    "accessibility": {
+      "checkIcon": "Icône de validation",
+      "errorIcon": "Icône d’erreur",
+      "close": "Fermer",
+      "removedEmail": "{{email}} a été retiré"
+    },
+    "toasts": {
+      "registrationSuccess": "Inscription réussie",
+      "registrationFailure": "Échec de l’inscription. Réessayez !",
+      "solutionCreated": "Solution Lab créé avec succès.",
+      "solutionError": "Une erreur s’est produite. Réessayez."
+    },
+    "loader": {
+      "loading": "Chargement...",
+      "processing": "Traitement de votre demande..."
+    },
+    "alerts": {
+      "unsupportedFileType": "Type de fichier non pris en charge. Utilisez PNG, JPEG ou WebP.",
+      "fileTooLarge": "L’image est trop volumineuse. Elle doit faire moins de 10 Mo.",
+      "uploadError": "Une erreur s’est produite lors du téléversement. Veuillez réessayer."
     }
   }
 }

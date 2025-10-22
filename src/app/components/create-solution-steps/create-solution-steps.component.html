@@ -6,24 +6,24 @@
     *ngIf="i == stepNumber && im !== ''"
     class="h-60 rounded-lg mb-4"
     [src]="im"
-    alt="Jese image"
+    [attr.alt]="'createSolutionSteps.media.stepImageAlt' | translate"
   />
 </div>
 <div class="flex justify-center gap-2.5 mx-4">
   <img
     class="h-12 rounded-full"
     src="../../../assets/img/bucky-1.png"
-    alt="Jese image"
+    [attr.alt]="'createSolutionSteps.media.guideAvatarAlt' | translate"
   />
   <div
     class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6"
   >
     <div class="flex items-center space-x-2 rtl:space-x-reverse">
-      <span class="text-md font-semibold text-gray-900 dark:text-white"
-        >Bucky</span
-      >
+      <span class="text-md font-semibold text-gray-900 dark:text-white">
+        {{ 'createSolutionSteps.guideName' | translate }}
+      </span>
     </div>
-    <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white">
+    <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white whitespace-pre-line">
       {{ result }}
     </p>
   </div>
@@ -42,7 +42,7 @@
     <label
       for="floating_email"
       class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-      >Focus Area</label
+      >{{ 'createSolutionSteps.step1.label' | translate }}</label
     >
   </div>
   <div class="container flex mx-auto justify-center my-10">
@@ -51,7 +51,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
     <button
       [disabled]="true"
@@ -59,7 +59,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </div>
@@ -77,7 +77,7 @@
     <label
       for="floating_email"
       class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-      >Solution Title</label
+      >{{ 'createSolutionSteps.step2.label' | translate }}</label
     >
   </div>
   <div class="container flex mx-auto justify-center my-10">
@@ -86,7 +86,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
     <button
       [disabled]="true"
@@ -94,7 +94,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </div>
@@ -106,7 +106,7 @@
       id="message"
       rows="4"
       class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      placeholder="Write your thoughts here..."
+      [placeholder]="'createSolutionSteps.step3.placeholder' | translate"
     ></textarea>
   </div>
   <div class="container flex mx-auto justify-center my-10">
@@ -115,7 +115,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
     <button
       [disabled]="true"
@@ -123,7 +123,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </div>
@@ -191,7 +191,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </div> -->
@@ -201,23 +201,29 @@
       <!-- <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">Team Members</label> -->
       <div class="flex flex-col dark:bg-slate-800">
         <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
-          <mat-label>Add Team Members email</mat-label>
-          <mat-chip-grid #chipGrid aria-label="Add Team Members email">
+          <mat-label>{{ 'createSolutionSteps.team.label' | translate }}</mat-label>
+          <mat-chip-grid
+            #chipGrid
+            [attr.aria-label]="'createSolutionSteps.team.ariaLabel' | translate"
+          >
             <mat-chip-row
               class="bg-white"
               *ngFor="let email of solution.newSolution.participantsHolder"
               (removed)="remove(email)"
               [editable]="true"
               (edited)="edit(email, $event)"
-              [aria-description]="'press enter to edit ' + email.name"
+              [attr.aria-description]="('createSolutionSteps.team.ariaEdit' | translate:{ email: email.name })"
             >
               {{ email.name }}
-              <button matChipRemove [attr.aria-label]="'remove ' + email.name">
+              <button
+                matChipRemove
+                [attr.aria-label]="('createSolutionSteps.team.ariaRemove' | translate:{ email: email.name })"
+              >
                 <mat-icon>cancel</mat-icon>
               </button>
             </mat-chip-row>
             <input
-              placeholder="email..."
+              [placeholder]="'createSolutionSteps.team.placeholder' | translate"
               formControlName="emails"
               [matChipInputFor]="chipGrid"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -227,7 +233,7 @@
           </mat-chip-grid>
         </mat-form-field>
         <div *ngIf="emails!.invalid && emails!.touched" class="text-red-400">
-          Make sure all emails are valid.
+          {{ 'createSolutionSteps.validation.invalidEmails' | translate }}
         </div>
       </div>
     </div>
@@ -238,7 +244,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
     <button
       [disabled]="true"
@@ -246,7 +252,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </form>
@@ -265,9 +271,12 @@
     <div class="mb-6 mt-4">
       <div class="flex flex-col dark:bg-slate-800">
         <mat-form-field class="example-chip-list bg-white dark:bg-slate-800">
-          <mat-label>Add evaluator emails</mat-label>
+          <mat-label>{{ 'createSolutionSteps.evaluators.label' | translate }}</mat-label>
 
-          <mat-chip-grid #chipGrid aria-label="Evaluator list">
+          <mat-chip-grid
+            #chipGrid
+            [attr.aria-label]="'createSolutionSteps.evaluators.ariaLabel' | translate"
+          >
             <mat-chip-row
               class="bg-white"
               *ngFor="
@@ -277,17 +286,20 @@
               (removed)="removeEvaluators(email)"
               [editable]="true"
               (edited)="editEvaluators(email, $event)"
-              [aria-description]="'press enter to edit evaluator'"
+              [attr.aria-description]="('createSolutionSteps.evaluators.ariaEdit' | translate:{ index: i + 1 })"
             >
               {{ getEvaluatorDisplay(email.name, i) }}
 
-              <button matChipRemove aria-label="remove evaluator">
+              <button
+                matChipRemove
+                [attr.aria-label]="('createSolutionSteps.evaluators.ariaRemove' | translate:{ index: i + 1 })"
+              >
                 <mat-icon>cancel</mat-icon>
               </button>
             </mat-chip-row>
 
             <input
-              placeholder="Add evaluator (email)…"
+              [placeholder]="'createSolutionSteps.evaluators.placeholder' | translate"
               formControlName="emails"
               [matChipInputFor]="chipGrid"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -310,7 +322,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
     <button
       [disabled]="true"
@@ -318,7 +330,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </form>
@@ -332,7 +344,7 @@
       <h2
         class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl"
       >
-        Sustainable Development Goals (SDGs)
+        {{ 'createSolutionSteps.sdgs.heading' | translate }}
       </h2>
     </div>
 
@@ -370,7 +382,7 @@
         <label
           for="terms"
           class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-          >Select all SDGs</label
+          >{{ 'createSolutionSteps.sdgs.selectAll' | translate }}</label
         >
       </div>
     </div>
@@ -381,7 +393,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
     <button
       [disabled]="true"
@@ -389,7 +401,7 @@
       (click)="updatePlayground(stepNumber)"
       class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
     >
-      {{ buttonText }}
+      {{ buttonTextKey | translate }}
     </button>
   </div>
 </section>
@@ -400,7 +412,7 @@
     (click)="updatePlayground(stepNumber)"
     class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
   >
-    {{ buttonText }}
+    {{ buttonTextKey | translate }}
   </button>
   <div id="confettiContainer"></div>
 </div>
@@ -425,15 +437,17 @@
         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
       />
     </svg>
-    <span class="sr-only">Check icon</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.checkIcon' | translate }}</span>
   </div>
-  <div class="ml-3 text-sm font-normal">Registration was Successful</div>
+  <div class="ml-3 text-sm font-normal">
+    {{ 'createSolutionSteps.toasts.registrationSuccess' | translate }}
+  </div>
   <button
     type="button"
     class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8"
     (click)="closeRegistrationSuccess()"
   >
-    <span class="sr-only">Close</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.close' | translate }}</span>
     <svg
       class="w-3 h-3"
       xmlns="http://www.w3.org/2000/svg"
@@ -471,10 +485,10 @@
         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
       />
     </svg>
-    <span class="sr-only">Error icon</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.errorIcon' | translate }}</span>
   </div>
   <div class="ml-3 text-sm font-normal">
-    Registration Failed. Try Again!
+    {{ 'createSolutionSteps.toasts.registrationFailure' | translate }}
     <h1 class="my-2">{{ auth.newUser.errorMessage }}</h1>
   </div>
 
@@ -483,7 +497,7 @@
     class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"
     (click)="closeRegistrationFailure()"
   >
-    <span class="sr-only">Close</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.close' | translate }}</span>
     <svg
       class="w-3 h-3"
       aria-hidden="true"
@@ -523,15 +537,17 @@
         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
       />
     </svg>
-    <span class="sr-only">Check icon</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.checkIcon' | translate }}</span>
   </div>
-  <div class="ml-3 text-sm font-normal">Solution Lab Created Successfully.</div>
+  <div class="ml-3 text-sm font-normal">
+    {{ 'createSolutionSteps.toasts.solutionCreated' | translate }}
+  </div>
   <button
     type="button"
     class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8"
     (click)="closePopUpSucess()"
   >
-    <span class="sr-only">Close</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.close' | translate }}</span>
     <svg
       class="w-3 h-3"
       xmlns="http://www.w3.org/2000/svg"
@@ -570,8 +586,10 @@
         fill="currentFill"
       />
     </svg>
-    <span class="sr-only">Loading...</span>
-    <div class="mt-2 text-white">Processing your request...</div>
+    <span class="sr-only">{{ 'createSolutionSteps.loader.loading' | translate }}</span>
+    <div class="mt-2 text-white">
+      {{ 'createSolutionSteps.loader.processing' | translate }}
+    </div>
   </div>
 </div>
 
@@ -596,14 +614,16 @@
         d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"
       />
     </svg>
-    <span class="sr-only">Error icon</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.errorIcon' | translate }}</span>
   </div>
-  <div class="ml-3 text-sm font-normal">An error ocurred. Try Again.</div>
+  <div class="ml-3 text-sm font-normal">
+    {{ 'createSolutionSteps.toasts.solutionError' | translate }}
+  </div>
   <button
     type="button"
     class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"
   >
-    <span class="sr-only">Close</span>
+    <span class="sr-only">{{ 'createSolutionSteps.accessibility.close' | translate }}</span>
     <svg
       class="w-3 h-3"
       aria-hidden="true"

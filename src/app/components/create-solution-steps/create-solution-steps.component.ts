@@ -28,6 +28,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-create-solution-steps',
@@ -92,7 +93,8 @@ export class CreateSolutionStepsComponent implements OnInit {
   createdSolutionSuccess: boolean = false;
   createdSolutionError: boolean = false;
   @Output() buttonInfoEvent = new EventEmitter<number>();
-  @Input() buttonText: string = '';
+  @Input() buttonTextKey: string = '';
+  @Input() buttonAction: 'continue' | 'submit' = 'continue';
   submitDisplay: boolean = false;
   sdgs: any = [];
   constructor(
@@ -104,7 +106,8 @@ export class CreateSolutionStepsComponent implements OnInit {
     private fb: FormBuilder,
     private fns: AngularFireFunctions,
     private storage: AngularFireStorage,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private translate: TranslateService
   ) {
     this.auth.newUser = {}; // reinitialize the new user in case it happens.
     let shuffle = (array: User[]) => {
@@ -149,6 +152,7 @@ export class CreateSolutionStepsComponent implements OnInit {
 
     this.sdgs = this.data.sdgs;
 
+    this.result = '';
     this.typewriterEffect(this.text, () => {});
   }
 
@@ -176,10 +180,10 @@ export class CreateSolutionStepsComponent implements OnInit {
   }
   async updatePlayground(current: number) {
     try {
-      if (this.buttonText === 'Continue') {
+      if (this.buttonAction === 'continue') {
         current++;
         this.buttonInfoEvent.emit(current);
-      } else if (this.buttonText === 'Submit') {
+      } else if (this.buttonAction === 'submit') {
         // Set loading to true before starting async operations
         this.isLoading = true;
 
@@ -319,7 +323,12 @@ export class CreateSolutionStepsComponent implements OnInit {
     if (index >= 0) {
       this.solution.newSolution.participantsHolder!.splice(index, 1);
 
-      this.announcer.announce(`Removed ${email}`);
+      this.announcer.announce(
+        this.translate.instant(
+          'createSolutionSteps.accessibility.removedEmail',
+          { email: email.name }
+        )
+      );
     }
   }
   edit(email: Email, event: MatChipEditedEvent) {
@@ -381,7 +390,12 @@ export class CreateSolutionStepsComponent implements OnInit {
     if (index >= 0) {
       this.evaluatorsEmails.splice(index, 1);
 
-      this.announcer.announce(`Removed ${email}`);
+      this.announcer.announce(
+        this.translate.instant(
+          'createSolutionSteps.accessibility.removedEmail',
+          { email: email.name }
+        )
+      );
     }
   }
 
@@ -492,7 +506,11 @@ export class CreateSolutionStepsComponent implements OnInit {
 
     if (file) {
       if (!this.allowedMimeTypes.includes(file.type)) {
-        alert('unsupported file type. User png, jpeg, webp for file types');
+        alert(
+          this.translate.instant(
+            'createSolutionSteps.alerts.unsupportedFileType'
+          )
+        );
         console.log('unsupported file type');
 
         return;
@@ -503,7 +521,11 @@ export class CreateSolutionStepsComponent implements OnInit {
       // Your file handling logic here
       if (file?.size >= 10000000) {
         console.log('the file is too big');
-        alert('The picture is too big. It should be less than 10MB');
+        alert(
+          this.translate.instant(
+            'createSolutionSteps.alerts.fileTooLarge'
+          )
+        );
         return;
       }
     }
@@ -513,17 +535,24 @@ export class CreateSolutionStepsComponent implements OnInit {
     console.log('the path', this.path);
 
     // this.task = await this.storage.upload(path, file);
-    const uploadTask = await this.storage.upload(this.path, file);
-    let url = await uploadTask.ref.getDownloadURL();
-    this.imageDownloadUrl = url;
-    uploadTask.totalBytes;
-    // console.log('the download url', this.url);
-    this.solution.newSolution.image = url;
-    const avatar = {
-      path: this.path,
-      downloadURL: url,
-      size: uploadTask.totalBytes.toString(),
-    };
+    try {
+      const uploadTask = await this.storage.upload(this.path, file);
+      const url = await uploadTask.ref.getDownloadURL();
+      this.imageDownloadUrl = url;
+      this.solution.newSolution.image = url;
+      const avatar = {
+        path: this.path,
+        downloadURL: url,
+        size: uploadTask.totalBytes.toString(),
+      };
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert(
+        this.translate.instant(
+          'createSolutionSteps.alerts.uploadError'
+        )
+      );
+    }
   }
   toggleHover(event: boolean) {
     this.isHovering = event;

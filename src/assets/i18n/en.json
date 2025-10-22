@@ -76,6 +76,85 @@
       },
       "submit": "Add Challenge",
       "cancel": "Cancel"
+    },
+    "alerts": {
+      "enterLocation": "Enter your location",
+      "uploadError": "Error occurred while uploading file. Please try again.",
+      "missingFields": "Please fill in all required fields before adding the challenge."
+    }
+  },
+  "createSolution": {
+    "steps": {
+      "intro": "Welcome to the NewWorld Game!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global problem on which you choose to work. Let’s start.",
+      "focusArea": "What is the NewWorld Game Solution General Focus Area?",
+      "projectTitle": "Provide a starting title to your project. You can change it later as your work progresses.",
+      "problemDescription": "In a few words, how would you describe the specific problem you're focusing on?",
+      "teamMembers": "List the members of your teams. Add their emails below. (This enables communication between team members and, as per NWG Privacy Policy, their information will remain private.)",
+      "evaluators": "Add below NWG members that you want to be reviewers/evaluators of your team’s work. (The names you supply will be supplemented by others chosen at random from other NWG members.)",
+      "sdgs": "Select any Sustainable Development Goals (SDGs) that are related to your chosen problem area.",
+      "submit": "Almost done! Submit to start solving your new solution."
+    },
+    "buttons": {
+      "continue": "Continue",
+      "submit": "Submit"
+    }
+  },
+  "createSolutionSteps": {
+    "media": {
+      "stepImageAlt": "Illustration for the current creation step",
+      "guideAvatarAlt": "Bucky guide avatar"
+    },
+    "guideName": "Bucky",
+    "step1": {
+      "label": "Focus Area"
+    },
+    "step2": {
+      "label": "Solution Title"
+    },
+    "step3": {
+      "placeholder": "Write your thoughts here..."
+    },
+    "team": {
+      "label": "Add team member emails",
+      "ariaLabel": "Team member email list",
+      "ariaEdit": "Press Enter to edit {{email}}",
+      "ariaRemove": "Remove {{email}}",
+      "placeholder": "email..."
+    },
+    "validation": {
+      "invalidEmails": "Make sure all emails are valid."
+    },
+    "evaluators": {
+      "label": "Add evaluator emails",
+      "ariaLabel": "Evaluator list",
+      "ariaEdit": "Press Enter to edit evaluator {{index}}",
+      "ariaRemove": "Remove evaluator {{index}}",
+      "placeholder": "Add evaluator (email)…"
+    },
+    "sdgs": {
+      "heading": "Sustainable Development Goals (SDGs)",
+      "selectAll": "Select all SDGs"
+    },
+    "accessibility": {
+      "checkIcon": "Check icon",
+      "errorIcon": "Error icon",
+      "close": "Close",
+      "removedEmail": "Removed {{email}}"
+    },
+    "toasts": {
+      "registrationSuccess": "Registration was successful",
+      "registrationFailure": "Registration failed. Try again!",
+      "solutionCreated": "Solution Lab created successfully.",
+      "solutionError": "An error occurred. Try again."
+    },
+    "loader": {
+      "loading": "Loading...",
+      "processing": "Processing your request..."
+    },
+    "alerts": {
+      "unsupportedFileType": "Unsupported file type. Use PNG, JPEG, or WebP.",
+      "fileTooLarge": "The picture is too big. It should be less than 10MB.",
+      "uploadError": "Error occurred while uploading file. Please try again."
     }
   }
 }

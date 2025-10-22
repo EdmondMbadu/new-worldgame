@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { TranslateService } from '@ngx-translate/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
 import { map, take } from 'rxjs/operators';
@@ -107,7 +108,8 @@ export class HomeComponent implements OnInit {
     private challenge: ChallengesService,
     private router: Router,
     private time: TimeService,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private translate: TranslateService
   ) {
     this.user = this.auth.currentUser;
   }
@@ -275,7 +277,7 @@ export class HomeComponent implements OnInit {
   // we might use this part.
   async submitLocation() {
     if (this.location === '') {
-      alert('Enter your Location');
+      alert(this.translate.instant('home.alerts.enterLocation'));
       return;
     }
     try {
@@ -372,7 +374,7 @@ export class HomeComponent implements OnInit {
       console.log('The ID is', this.challengeId);
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Error occurred while uploading file. Please try again.');
+      alert(this.translate.instant('home.alerts.uploadError'));
     }
   }
 
@@ -383,7 +385,7 @@ export class HomeComponent implements OnInit {
       !this.categoryChallenge ||
       !this.imageChallenge
     ) {
-      alert('Please fill in all required fields before adding the challenge.');
+      alert(this.translate.instant('home.alerts.missingFields'));
       return;
     }
 

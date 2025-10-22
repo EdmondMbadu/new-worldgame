@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -10,34 +10,35 @@ import { Router } from '@angular/router';
 export class CreateSolutionComponent {
   initial: number = 10;
   increment: number = 15;
-  text: string = `Welcome to the NewWorld Game Lab! Ready to kickstart your journey with the NewWorld Game Lab? I'm here to guide you through the process step by step. Together, we'll explore your ideas, build a strong team, and align your project with global goals. Let's begin by getting to know the basics of your project!`;
-  result: string = '';
   steps: string[] = [
-    `Welcome to the NewWorld Game!
-My role, as your colleague— your problem-solving partner— is to help us develop a
-solution to a global problem on which you choose to work. Let’s start.`,
-    'What is the NewWorld Game Solution General Focus Area? ',
-    'Provide a starting title to your project. You can change it later as your work progresses.',
-    // `What is the NewWorld Game Solution Title or Focus Area?`,
-    "In a few words, how would you describe the specific problem you're focusing on?",
-    // 'Upload an image for your solution.',
-    `List the members of your Teams. Add their emails below. (This enables communication between Team members and, as per NWG Privacy Policy, their information will remain private.) `,
-    'Add below NWG members that you want to be reviewers/evaluators of your Team(s) work. (The names your supply will be supplemented by others chosen at random from other NWG members.)',
-    'Select any Sustainable Development Goals (SDGs) that are related to your chosen problem area.',
-    'Almost done! Submit to start solving your new solution.',
+    'createSolution.steps.intro',
+    'createSolution.steps.focusArea',
+    'createSolution.steps.projectTitle',
+    'createSolution.steps.problemDescription',
+    'createSolution.steps.teamMembers',
+    'createSolution.steps.evaluators',
+    'createSolution.steps.sdgs',
+    'createSolution.steps.submit',
   ];
-  buttontexts = new Array(this.steps.length).fill('Continue');
+  buttonTextKeys = new Array(this.steps.length).fill(
+    'createSolution.buttons.continue'
+  );
+  buttonActions: ('continue' | 'submit')[] = new Array(this.steps.length).fill(
+    'continue'
+  );
   selected: boolean[] = new Array(this.steps.length).fill(false);
   sdgSelected: number[] = [];
   display = new Array(this.steps.length).fill(false);
   currentIndexDisplay: number = 0;
-  constructor(private cdRef: ChangeDetectorRef, private router: Router) {}
+  constructor(private router: Router) {}
 
   ngOnInit() {
     window.scrollTo(0, 0);
     this.sdgSelected = new Array(17).fill(-1);
     this.display[this.currentIndexDisplay] = true;
-    this.buttontexts[this.steps.length - 1] = 'Submit';
+    const lastIndex = this.steps.length - 1;
+    this.buttonTextKeys[lastIndex] = 'createSolution.buttons.submit';
+    this.buttonActions[lastIndex] = 'submit';
   }
   updatePlayground(current: number) {
     this.display[this.currentIndexDisplay] = false;
