@@ -18,7 +18,7 @@ import { AuthService } from '../../services/auth.service';
 import { ChatBotService } from '../../services/chat-bot.service';
 import { BoxService } from '../../services/box.service';
 import { Avatar } from 'src/app/models/user';
-import { CommonModule } from '@angular/common'; // ⬅️ add
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VoiceService } from '../../services/voice.service';
 
@@ -32,7 +32,6 @@ interface DisplayMessage {
 
 @Component({
   selector: 'app-avatar-detail',
-
   templateUrl: './avatar-detail.component.html',
 })
 export class AvatarDetailComponent implements OnInit, OnDestroy {
@@ -63,6 +62,9 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   private lastAssistantSpeechText = '';
   private lastAssistantSpeechTextNormalized = '';
 
+  /** NEW: persistent guest id for anonymous users */
+  private guestId = '';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -79,9 +81,18 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     return !!this.auth?.currentUser?.admin;
   }
 
-  ngOnInit(): void {
-    this.allAvatars = this.registry.getAll();
+  /** NEW: unify actor id so backend can attribute prompts */
+  get actorId(): string {
+    return (this.auth?.currentUser as any)?.uid || this.guestId;
+  }
+  get actorType(): 'USER' | 'GUEST' {
+    return this.isLoggedIn ? 'USER' : 'GUEST';
+  }
 
+  ngOnInit(): void {
+    this.guestId = this.ensureGuestId();
+
+    this.allAvatars = this.registry.getAll();
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
       if (!slug) {
@@ -100,6 +111,22 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.endConversation();
+  }
+
+  /** NEW: create or restore a stable guest id */
+  private ensureGuestId(): string {
+    try {
+      const k = 'nw_guest_id';
+      let id = localStorage.getItem(k) || '';
+      if (!id) {
+        id = 'guest_' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem(k, id);
+      }
+      return id;
+    } catch {
+      // If storage blocked, fall back to ephemeral id
+      return 'guest_' + Math.random().toString(36).slice(2, 10);
+    }
   }
 
   backToPool() {
@@ -132,6 +159,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
 
     setTimeout(() => window.scrollTo({ top: 0 }), 0);
 
+    // Keep pending prompt behavior for logged users; guests can just type now.
     const pending = sessionStorage.getItem('pendingPrompt');
     if (pending && this.isLoggedIn) {
       setTimeout(() => {
@@ -146,10 +174,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   }
 
   scrollToChat() {
-    if (!this.isLoggedIn) {
-      this.goToLogin();
-      return;
-    }
+    // CHANGED: allow guests (no redirect)
     this.chatWindow?.nativeElement.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
@@ -203,19 +228,14 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // 3) If they click a quick prompt while logged out, stash it and route to login
+  // CHANGED: guests can use quick prompts too (no redirect)
   quickPromptFill(str: string) {
-    if (!this.isLoggedIn) {
-      sessionStorage.setItem('pendingPrompt', str);
-      this.goToLogin();
-      return;
-    }
     if (!this.promptInput) return;
     this.promptInput.nativeElement.value = str;
     this.promptInput.nativeElement.focus();
   }
 
-  // CHAT FLOW (same logic as your existing page — scoped to avatar.collectionPath)
+  // CHAT FLOW
   async submitPrompt(
     event: Event,
     promptInputEl: HTMLInputElement
@@ -224,11 +244,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     const val = promptInputEl.value.trim();
     if (!val) return;
 
-    if (!this.isLoggedIn) {
-      sessionStorage.setItem('pendingPrompt', val);
-      this.goToLogin();
-      return;
-    }
+    // CHANGED: no login requirement
     promptInputEl.value = '';
     await this.sendPrompt(val);
   }
@@ -259,7 +275,12 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     ) as AngularFirestoreDocument<any>;
 
     try {
-      await discussionRef.set({ prompt });
+      await discussionRef.set({
+        prompt,
+        actorId: this.actorId,
+        actorType: this.actorType,
+        createdAt: new Date(),
+      });
     } catch (err) {
       this.status = 'Unable to send that. Please try again.';
       placeholder.loading = false;
@@ -275,8 +296,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
         const state = conversation.status?.state;
         const latestText: string = conversation.response || '';
         const totalRenderedLength =
-          (placeholder.text?.length || 0) +
-          (placeholder.pending?.length || 0);
+          (placeholder.text?.length || 0) + (placeholder.pending?.length || 0);
 
         if (latestText) {
           hasReceivedText = true;
@@ -386,7 +406,10 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     if (!this.autoSpeak) {
       if (this.conversationMode) {
         this.voiceStatus = 'Listening…';
-        setTimeout(() => this.beginConversationListening().catch(() => {}), 250);
+        setTimeout(
+          () => this.beginConversationListening().catch(() => {}),
+          250
+        );
       }
       return;
     }
@@ -404,8 +427,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
           this.normalizeForComparison(speechPayload);
         this.handleSpeechCompletion();
       })
-      .catch((err) => {
-        console.warn('Speech playback error', err);
+      .catch(() => {
         this.lastAssistantSpeechText = speechPayload;
         this.lastAssistantSpeechTextNormalized =
           this.normalizeForComparison(speechPayload);
@@ -422,6 +444,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   }
 
   async toggleVoiceRecording(): Promise<void> {
+    // Keep voice features behind sign-in for now (easy to open later)
     if (!this.isLoggedIn) {
       this.goToLogin();
       return;
@@ -447,7 +470,6 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
         this.isRecording = true;
         this.voiceStatus = 'Listening… tap again to send.';
       } catch (err: any) {
-        console.error('Voice recording start failed', err);
         this.voiceStatus =
           err?.message || 'Microphone access was blocked. Please allow it.';
         this.voice.cancelRecording();
@@ -470,9 +492,10 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       if (!recording) {
         if (this.conversationMode) {
           this.voiceStatus = 'Didn’t catch that. Listening…';
-          setTimeout(() =>
-            this.beginConversationListening().catch(() => {}),
-          600);
+          setTimeout(
+            () => this.beginConversationListening().catch(() => {}),
+            600
+          );
         } else {
           this.voiceStatus = 'No audio captured. Try again.';
         }
@@ -482,9 +505,10 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       if (recording.durationMs < 400) {
         if (this.conversationMode) {
           this.voiceStatus = 'Too short. Listening…';
-          setTimeout(() =>
-            this.beginConversationListening().catch(() => {}),
-          600);
+          setTimeout(
+            () => this.beginConversationListening().catch(() => {}),
+            600
+          );
         } else {
           this.voiceStatus = 'Audio was too short. Try again.';
         }
@@ -501,39 +525,29 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       if (!transcript) {
         if (this.conversationMode) {
           this.voiceStatus = 'I did not catch that. Listening…';
-          setTimeout(() => this.beginConversationListening().catch(() => {}), 600);
+          setTimeout(
+            () => this.beginConversationListening().catch(() => {}),
+            600
+          );
         } else {
           this.voiceStatus = 'I did not catch any words. Try again.';
         }
         return;
       }
 
-      if (this.conversationMode && this.isLikelyEcho(transcript)) {
-        this.voiceStatus = 'Ready when you are…';
-        setTimeout(() => this.beginConversationListening().catch(() => {}), 600);
-        return;
-      }
-
-      this.voiceStatus = this.conversationMode
-        ? 'Waiting for response…'
-        : '';
+      this.voiceStatus = this.conversationMode ? 'Waiting for response…' : '';
       await this.sendPrompt(transcript);
     } catch (err: any) {
-      console.error('Voice transcription failed', err);
+      this.voiceStatus = 'Something went wrong. Listening…';
       if (this.conversationMode) {
-        this.voiceStatus = 'Something went wrong. Listening…';
-        setTimeout(() =>
-          this.beginConversationListening().catch(() => {}),
-        1200);
-      } else {
-        this.voiceStatus =
-          err?.message || 'Something went wrong while transcribing.';
+        setTimeout(
+          () => this.beginConversationListening().catch(() => {}),
+          1200
+        );
       }
     } finally {
       this.voiceProcessing = false;
-      if (!this.conversationMode) {
-        this.suppressNextAutoListen = false;
-      }
+      if (!this.conversationMode) this.suppressNextAutoListen = false;
     }
   }
 
@@ -548,6 +562,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   }
 
   async toggleConversationMode(): Promise<void> {
+    // Keep behind sign-in for now
     if (this.conversationMode) {
       this.endConversation('Conversation ended.');
       return;
@@ -573,9 +588,9 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     try {
       await this.beginConversationListening();
     } catch (err: any) {
-      console.error('Failed to start conversation', err);
       this.voiceStatus =
-        err?.message || 'Could not access the microphone. Conversation stopped.';
+        err?.message ||
+        'Could not access the microphone. Conversation stopped.';
       this.endConversation();
     }
   }
@@ -611,18 +626,14 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   private endConversation(message?: string): void {
     this.clearConversationTimer();
     if (!this.conversationMode) {
-      if (message !== undefined) {
-        this.voiceStatus = message;
-      }
+      if (message !== undefined) this.voiceStatus = message;
       this.lastAssistantSpeechText = '';
       return;
     }
 
     this.conversationMode = false;
     this.voiceProcessing = false;
-    if (this.isRecording) {
-      this.voice.cancelRecording();
-    }
+    if (this.isRecording) this.voice.cancelRecording();
     this.isRecording = false;
     this.voice.stopPlayback();
     if (this.autoSpeakBeforeConversation !== null) {
@@ -662,10 +673,14 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
 
   private isLikelyEcho(transcript: string): boolean {
     const normTranscript = this.normalizeForComparison(transcript);
-    if (!normTranscript || !this.lastAssistantSpeechTextNormalized) return false;
+    if (!normTranscript || !this.lastAssistantSpeechTextNormalized)
+      return false;
 
     const normLast = this.lastAssistantSpeechTextNormalized;
-    if (normLast.includes(normTranscript) || normTranscript.includes(normLast)) {
+    if (
+      normLast.includes(normTranscript) ||
+      normTranscript.includes(normLast)
+    ) {
       return true;
     }
 
@@ -678,7 +693,8 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       if (lastWords.has(word)) overlap++;
     });
 
-    const overlapRatio = overlap / Math.min(transcriptWords.size, lastWords.size);
+    const overlapRatio =
+      overlap / Math.min(transcriptWords.size, lastWords.size);
     const lengthRatio =
       Math.abs(normTranscript.length - normLast.length) /
       Math.max(normTranscript.length, normLast.length);
@@ -690,14 +706,15 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   sdgLabel(n: number) {
     return `SDG ${n}`;
   }
+
   get isLoggedIn(): boolean {
     return !!this.auth?.currentUser?.email;
   }
 
   public goToLogin() {
-    const redirectTo = this.router.url; // current full path incl. params
-    this.auth.setRedirectUrl(redirectTo); // in-memory
-    sessionStorage.setItem('redirectTo', redirectTo); // resilient to refresh
+    const redirectTo = this.router.url;
+    this.auth.setRedirectUrl(redirectTo);
+    sessionStorage.setItem('redirectTo', redirectTo);
     this.router.navigate(['/login'], { queryParams: { redirectTo } });
   }
 }
