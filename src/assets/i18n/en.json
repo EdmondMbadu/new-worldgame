@@ -1,0 +1,33 @@
+{
+  "app": {
+    "language": {
+      "english": "English",
+      "french": "French"
+    }
+  },
+  "navbar": {
+    "logoAlt": "NewWorld Game logo",
+    "brand": "NewWorld Game",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "login": "Log in",
+    "home": "Home",
+    "startCustomChallenge": "Start a Custom Challenge",
+    "myWorkspace": "My Workspace",
+    "operatingManual": "Operating Manual",
+    "evaluations": "Evaluations",
+    "joinSolution": "Join a Solution",
+    "tournament": "Tournament",
+    "generalAssembly": "General Assembly",
+    "solutionTour": "NWG Solution Tour",
+    "otherAis": "Talk to Multiple AIs",
+    "myChallengeSpaces": "My Challenge Spaces",
+    "languageLabel": "Language",
+    "moreMenu": {
+      "more": "More",
+      "less": "Less"
+    }
+  }
+}

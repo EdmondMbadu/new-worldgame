@@ -1,38 +1,37 @@
 import {
   Component,
   EventEmitter,
-  Inject,
   Input,
-  OnChanges,
+  OnDestroy,
   OnInit,
   Output,
-  SimpleChanges,
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
 import {
   combineLatest,
   debounceTime,
   distinctUntilChanged,
-  filter,
   of,
   switchMap,
+  takeUntil,
+  Subject,
 } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { ChallengePage, User } from 'src/app/models/user';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
-import { use } from 'marked';
 import { SchoolService } from 'src/app/services/school.service';
+import { LanguageService } from 'src/app/services/language.service';
+import { environment } from 'environments/environments';
 
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
-export class NavbarComponent implements OnInit, OnChanges {
+export class NavbarComponent implements OnInit, OnDestroy {
   @Input() loggedOn: boolean = false;
   dark: boolean = false;
 
@@ -73,13 +72,18 @@ export class NavbarComponent implements OnInit, OnChanges {
   schoolRoute: any[] = ['/school-admin'];
   schoolQuery: any = {}; // { sid: '...' } when student only has an invite
   pendingInvitesCount = 0;
+  languageOptions: { code: string; labelKey: string }[] = [];
+  currentLanguage = 'en';
+  readonly canShowLanguageSwitcher = environment.enableLanguageSwitcher;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
     private data: DataService,
     private challenge: ChallengesService,
-    private schoolService: SchoolService
+    private schoolService: SchoolService,
+    private languageService: LanguageService
   ) {}
 
   @Input() hoveredHomePath: string = ``;
@@ -99,32 +103,26 @@ export class NavbarComponent implements OnInit, OnChanges {
   solutionDropDown = false;
   guideDropDown = false;
   @Input() showMoreOrLess!: boolean;
-  moreOrLess: string = 'More';
   @Output() showMoreOrLessChange = new EventEmitter<boolean>();
   @Output() toggleAsideEvent = new EventEmitter<void>();
 
   userChallengePages: ChallengePage[] = [];
   showMyPages: boolean = false; // Control visibility of "My Pages"
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (
-      changes['showMoreOrLess'] &&
-      changes['showMoreOrLess'].currentValue !== undefined
-    ) {
-      this.updateMoreOrLessLabel(changes['showMoreOrLess'].currentValue);
-    }
-  }
-
   toggleMoreOrLess() {
     this.showMoreOrLess = !this.showMoreOrLess;
-    this.updateMoreOrLessLabel(this.showMoreOrLess);
-  }
-
-  private updateMoreOrLessLabel(state: boolean) {
-    this.moreOrLess = state ? 'Less' : 'More';
+    this.showMoreOrLessChange.emit(this.showMoreOrLess);
   }
 
   ngOnInit(): void {
+    this.languageOptions = this.languageService.getLanguageOptions();
+    this.currentLanguage = this.languageService.currentLanguage;
+    this.languageService.languageChanges$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event) => {
+        this.currentLanguage = event.lang;
+      });
+
     // this.applyTheme();
     // // this.darkModeInitial();
     this.setThemeModeLogo();
@@ -197,7 +195,12 @@ export class NavbarComponent implements OnInit, OnChanges {
     this.isSchoolAdmin = this.auth.currentUser?.role === 'schoolAdmin';
     // Watch current user & invites to decide link visibility + query param
     // Make isSchoolAdmin reactive to the live user
-    this.auth.user$.pipe(filter((u: any) => !!u)).subscribe((u) => {
+    this.auth.user$.subscribe((u) => {
+      if (!u) {
+        this.isSchoolAdmin = false;
+        return;
+      }
+
       this.isSchoolAdmin = u?.role === 'schoolAdmin';
 
       const email = (u.email || '').toLowerCase().trim();
@@ -361,6 +364,19 @@ export class NavbarComponent implements OnInit, OnChanges {
     }
     this.applyTheme();
     this.showThemeDropDown = !this.showThemeDropDown;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  changeLanguage(language: string) {
+    this.languageService.use(language);
+  }
+
+  isActiveLanguage(language: string): boolean {
+    return this.currentLanguage === language;
   }
 
   // applyTheme() {

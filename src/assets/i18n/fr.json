@@ -1,0 +1,33 @@
+{
+  "app": {
+    "language": {
+      "english": "Anglais",
+      "french": "Français"
+    }
+  },
+  "navbar": {
+    "logoAlt": "Logo de NewWorld Game",
+    "brand": "NewWorld Game",
+    "theme": {
+      "light": "Clair",
+      "dark": "Sombre"
+    },
+    "login": "Se connecter",
+    "home": "Accueil",
+    "startCustomChallenge": "Créer un défi personnalisé",
+    "myWorkspace": "Mon espace de travail",
+    "operatingManual": "Manuel d'utilisation",
+    "evaluations": "Évaluations",
+    "joinSolution": "Rejoindre une solution",
+    "tournament": "Tournoi",
+    "generalAssembly": "Assemblée générale",
+    "solutionTour": "Visite des solutions NWG",
+    "otherAis": "Parler à plusieurs IA",
+    "myChallengeSpaces": "Mes espaces de défi",
+    "languageLabel": "Langue",
+    "moreMenu": {
+      "more": "Plus",
+      "less": "Moins"
+    }
+  }
+}
