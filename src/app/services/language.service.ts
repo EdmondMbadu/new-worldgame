@@ -32,7 +32,11 @@ export class LanguageService {
   }
 
   get currentLanguage(): string {
-    return this.translateService.currentLang || DEFAULT_LANGUAGE;
+    return (
+      this.translateService.currentLang ||
+      this.getStoredLanguage() ||
+      DEFAULT_LANGUAGE
+    );
   }
 
   get languageChanges$(): Observable<LangChangeEvent> {

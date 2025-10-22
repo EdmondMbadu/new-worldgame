@@ -40,8 +40,8 @@
           #guestLanguageSelect
           id="language-select-guest"
           class="px-3 py-2 text-sm border border-gray-300 rounded-full bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
-          [value]="currentLanguage"
-          (change)="changeLanguage(guestLanguageSelect.value)"
+          [ngModel]="currentLanguage"
+          (ngModelChange)="changeLanguage($event)"
         >
           <option *ngFor="let option of languageOptions" [value]="option.code">
             {{ option.labelKey | translate }}
@@ -1177,8 +1177,8 @@
         #authLanguageSelect
         id="language-select-auth"
         class="px-3 py-2 text-sm border border-gray-300 rounded-full bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
-        [value]="currentLanguage"
-        (change)="changeLanguage(authLanguageSelect.value)"
+        [ngModel]="currentLanguage"
+        (ngModelChange)="changeLanguage($event)"
       >
         <option *ngFor="let option of languageOptions" [value]="option.code">
           {{ option.labelKey | translate }}
@@ -1642,16 +1642,16 @@
             <label class="sr-only" for="language-select-mobile">
               {{ "navbar.languageLabel" | translate }}
             </label>
-            <select
-              #mobileLanguageSelect
-              id="language-select-mobile"
-              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-full bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
-              [value]="currentLanguage"
-              (change)="changeLanguage(mobileLanguageSelect.value)"
-            >
-              <option
-                *ngFor="let option of languageOptions"
-                [value]="option.code"
+          <select
+            #mobileLanguageSelect
+            id="language-select-mobile"
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-full bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
+            [ngModel]="currentLanguage"
+            (ngModelChange)="changeLanguage($event)"
+          >
+            <option
+              *ngFor="let option of languageOptions"
+              [value]="option.code"
               >
                 {{ option.labelKey | translate }}
               </option>
