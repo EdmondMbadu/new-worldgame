@@ -29,5 +29,53 @@
       "more": "Plus",
       "less": "Moins"
     }
+  },
+  "home": {
+    "loading": {
+      "title": "Chargement des défis…",
+      "subtitle": "Préparation de votre espace de travail"
+    },
+    "hero": {
+      "title": "Des défis qui ont besoin de vous !",
+      "highlight": "L'avenir a besoin de vous.",
+      "description": "Choisissez l'un des défis ci-dessous ou créez votre propre défi personnalisé à gauche."
+    },
+    "categories": {
+      "unSdg": "ODD de l'ONU",
+      "climate": "Climat",
+      "poverty": "Pauvreté",
+      "energy": "Énergie",
+      "food": "Alimentation",
+      "health": "Santé",
+      "forestry": "Foresterie"
+    },
+    "admin": {
+      "addChallengeTooltip": "Ajouter un défi"
+    },
+    "error": {
+      "couldNotLoad": "Impossible de charger les défis pour « {{category}} ».",
+      "retry": "Réessayer"
+    },
+    "modal": {
+      "title": "Ajouter un défi",
+      "close": "Fermer la fenêtre",
+      "form": {
+        "titleLabel": "Titre",
+        "titlePlaceholder": "Réduire les inégalités de richesse : lutter contre l'injustice",
+        "categoryLabel": "Catégorie",
+        "categoryPlaceholder": "Sélectionner",
+        "categoryAddLabel": "Ajouter une catégorie si elle n'est pas listée",
+        "categoryAddPlaceholder": "Droits humains",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Rédigez une description...",
+        "uploadClick": "Cliquer pour téléverser",
+        "uploadOrDrag": "ou faites glisser et déposez",
+        "uploadFormats": "SVG, PNG, JPG ou GIF (10 Mo max)",
+        "uploadHeading": "Téléverser l'image de présentation",
+        "uploadPreviewAlt": "Aperçu de l'image du défi"
+      },
+      "submit": "Ajouter le défi",
+      "cancel": "Annuler"
+    }
   }
 }

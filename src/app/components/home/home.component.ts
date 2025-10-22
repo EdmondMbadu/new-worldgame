@@ -88,6 +88,17 @@ export class HomeComponent implements OnInit {
   displayPromptLocation: boolean = true;
   isSidebarOpen: boolean = true;
   imageDownloadUrl: string = '';
+
+  private readonly categoryLabelKeyMap: Record<string, string> = {
+    'UN SDG': 'home.categories.unSdg',
+    Climate: 'home.categories.climate',
+    Poverty: 'home.categories.poverty',
+    Energy: 'home.categories.energy',
+    Food: 'home.categories.food',
+    Health: 'home.categories.health',
+    Forestry: 'home.categories.forestry',
+  };
+
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
@@ -423,5 +434,9 @@ export class HomeComponent implements OnInit {
   }
   public isSdgCategory(cat: string): boolean {
     return (cat ?? '').toLowerCase().includes('sdg'); // matches 'UN SDG', 'SDGs', etc.
+  }
+
+  getCategoryLabelKey(category: string): string {
+    return this.categoryLabelKeyMap[category] || category;
   }
 }

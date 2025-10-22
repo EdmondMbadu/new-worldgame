@@ -29,5 +29,53 @@
       "more": "More",
       "less": "Less"
     }
+  },
+  "home": {
+    "loading": {
+      "title": "Loading challenges…",
+      "subtitle": "Preparing your workspace"
+    },
+    "hero": {
+      "title": "Challenges That Need You!",
+      "highlight": "The future needs you.",
+      "description": "Choose one of the challenges below, or create your own custom challenge on the left."
+    },
+    "categories": {
+      "unSdg": "UN SDG",
+      "climate": "Climate",
+      "poverty": "Poverty",
+      "energy": "Energy",
+      "food": "Food",
+      "health": "Health",
+      "forestry": "Forestry"
+    },
+    "admin": {
+      "addChallengeTooltip": "Add challenge"
+    },
+    "error": {
+      "couldNotLoad": "We couldn’t load challenges for “{{category}}”.",
+      "retry": "Retry"
+    },
+    "modal": {
+      "title": "Add Challenge",
+      "close": "Close modal",
+      "form": {
+        "titleLabel": "Title",
+        "titlePlaceholder": "Bridging the Wealth Gap: Fighting Inequality",
+        "categoryLabel": "Category",
+        "categoryPlaceholder": "Choose",
+        "categoryAddLabel": "Add Category if not listed",
+        "categoryAddPlaceholder": "Human Rights",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Write a description...",
+        "uploadClick": "Click to upload",
+        "uploadOrDrag": "or drag and drop",
+        "uploadFormats": "SVG, PNG, JPG or GIF (MAX. 10MB)",
+        "uploadHeading": "Upload feature image",
+        "uploadPreviewAlt": "Challenge image preview"
+      },
+      "submit": "Add Challenge",
+      "cancel": "Cancel"
+    }
   }
 }
