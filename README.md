@@ -135,7 +135,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🌐 Learn More
 
-- Visit our [website](https://new-worldgame.com) for more information
+- Visit our [website](https://newworld-game.com) for more information
 - Explore the [Global Solutions Lab](https://designsciencelab.com/) for background on our methodology
 - Check out the [UN Sustainable Development Goals](https://sdgs.un.org/goals) to understand our focus areas
 
