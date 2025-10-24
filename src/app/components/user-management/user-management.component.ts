@@ -476,6 +476,7 @@ export class UserManagementComponent implements OnInit {
           hasSolutions: pending.length > 0,
           homeUrl: 'https://newworld-game.org',
           author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          unsubscribeUrl: this.unsubscribeUrlFor(email),
         };
 
         console.log(
@@ -584,5 +585,11 @@ export class UserManagementComponent implements OnInit {
       unsubCount,
       finalCount,
     };
+  }
+  // Build: https://newworld-game.org/unsubscribe?e=<email>
+  private unsubscribeUrlFor(email: string): string {
+    const base = 'https://newworld-game.org/unsubscribe';
+    const norm = this.normalizeEmail(email);
+    return `${base}?e=${encodeURIComponent(norm)}`;
   }
 }

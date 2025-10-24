@@ -185,6 +185,8 @@ export const weeklyReminder = functions.https.onCall(
 
         // optional footer/byline
         author: data.author ?? 'NewWorld Game',
+        unsubscribe_url: data.unsubscribeUrl,
+        year: new Date().getFullYear(), // your template already uses {{year}}
       },
     };
 
@@ -1156,14 +1158,19 @@ const inferSpeechEncoding = (
 ): speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding => {
   const type = (mimeType || '').toLowerCase();
   if (type.includes('webm'))
-    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.WEBM_OPUS;
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+      .WEBM_OPUS;
   if (type.includes('ogg'))
-    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.OGG_OPUS;
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+      .OGG_OPUS;
   if (type.includes('mp3') || type.includes('mpeg'))
-    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.MP3;
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+      .MP3;
   if (type.includes('wav') || type.includes('pcm'))
-    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.LINEAR16;
-  return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding.WEBM_OPUS;
+    return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+      .LINEAR16;
+  return speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding
+    .WEBM_OPUS;
 };
 
 export const transcribeAvatarAudio = functions
