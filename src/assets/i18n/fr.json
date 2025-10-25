@@ -158,6 +158,44 @@
     }
   }
   ,
+  "problemListView": {
+    "tabs": {
+      "pending": "Solutions en attente",
+      "submitted": "Solutions soumises"
+    },
+    "subtitle": "Basculez entre les affichages en liste et en grille pour gérer vos solutions comme vous le souhaitez.",
+    "view": {
+      "label": "Affichage",
+      "list": "Liste",
+      "grid": "Grille"
+    },
+    "searchPlaceholder": "Rechercher par titre…",
+    "empty": {
+      "title": "Aucune solution pour l'instant",
+      "desc": "Démarrez une nouvelle idée ou utilisez la recherche pour trouver une solution en attente sur laquelle vous collaborez."
+    },
+    "status": {
+      "pending": "En attente"
+    },
+    "untitled": "Solution sans titre",
+    "created": "Créé",
+    "collaborators": "{{count}} collaborateurs",
+    "actions": {
+      "delete": "Supprimer",
+      "leave": "Quitter"
+    },
+    "modal": {
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette solution ?",
+      "leaveConfirm": "Êtes-vous sûr de vouloir quitter cette solution et de ne plus faire partie de l'équipe ?",
+      "yes": "Oui, je suis sûr",
+      "no": "Non, annuler"
+    }
+  },
+  "problemList": {
+    "title": "Solutions",
+    "viewAll": "Voir tout",
+    "imageAlt": "Image ODD"
+  },
   "operatingManual": {
     "title": "Manuel d'utilisation",
     "subtitle": "Lectures rapides et guides pas à pas pour NewWorld Game.",

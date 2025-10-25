@@ -158,6 +158,44 @@
     }
   }
   ,
+  "problemListView": {
+    "tabs": {
+      "pending": "Pending Solutions",
+      "submitted": "Submitted Solutions"
+    },
+    "subtitle": "Switch between list and grid layouts to manage your solutions the way you prefer.",
+    "view": {
+      "label": "View",
+      "list": "List",
+      "grid": "Grid"
+    },
+    "searchPlaceholder": "Search by title…",
+    "empty": {
+      "title": "No solutions yet",
+      "desc": "Start a new idea or use the search to find a pending solution you are collaborating on."
+    },
+    "status": {
+      "pending": "Pending"
+    },
+    "untitled": "Untitled solution",
+    "created": "Created",
+    "collaborators": "{{count}} collaborators",
+    "actions": {
+      "delete": "Delete",
+      "leave": "Leave"
+    },
+    "modal": {
+      "deleteConfirm": "Are you sure you want to delete this solution?",
+      "leaveConfirm": "Are you sure you want to leave this solution and no longer be part of the team?",
+      "yes": "Yes, I'm sure",
+      "no": "No, cancel"
+    }
+  },
+  "problemList": {
+    "title": "Solutions",
+    "viewAll": "View all",
+    "imageAlt": "SDG image"
+  },
   "operatingManual": {
     "title": "Operating Manual",
     "subtitle": "Quick reads and walkthroughs for NewWorld Game.",

@@ -52,7 +52,7 @@ export class ProblemListViewComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
   }
-  @Input() title: string = `Pending Solutions`;
+  @Input() title: string = 'problemListView.tabs.pending';
 
   async findPendingSolutions() {
     this.pendingSolutions = [];

@@ -1,8 +1,8 @@
 <div class="w-full {{margin}} md:p-8  bg-white dark:bg-slate-800 border dark:border-gray-700 border-gray-200 rounded-lg shadow p-2">
     <div class="flex items-center justify-between mb-4">
-        <h5 class="text-md font-semibold leading-none text-gray-900 dark:text-gray-200">Solutions</h5>
+        <h5 class="text-md font-semibold leading-none text-gray-900 dark:text-gray-200">{{ 'problemList.title' | translate }}</h5>
         <a routerLink="{{viewAllPath}}" class="text-sm font-medium text-blue-600 hover:underline ">
-            View all
+            {{ 'problemList.viewAll' | translate }}
         </a>
     </div>
     <div class="flow-root" *ngIf="path==='/dashboard'">
@@ -10,8 +10,8 @@
                 <li class="py-3 sm:py-4">
                     <div class="flex items-center space-x-4">
                         <div class="flex space-x-1">
-                            <img *ngIf="data.sdgsPaths[solution.sdgs![0]]" [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="">
-                            <img *ngIf="!data.sdgsPaths[solution.sdgs![0]]" [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  src= "../../../assets/img/generic.webp" alt="">
+                            <img *ngIf="data.sdgsPaths[solution.sdgs![0]]" [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="{{ 'problemList.imageAlt' | translate }}">
+                            <img *ngIf="!data.sdgsPaths[solution.sdgs![0]]" [routerLink]="[path, solution.solutionId]" class="w-14 h-14 border-white rounded-sm"  src= "../../../assets/img/generic.webp" alt="{{ 'problemList.imageAlt' | translate }}">
                           
                         </div>
                         <div [routerLink]="[path, solution.solutionId]" class="flex-1 min-w-0">
@@ -36,8 +36,8 @@
                     <li class="py-3 sm:py-4 cursor-pointer">
                         <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
-                                <img *ngIf="data.sdgsPaths[solution.sdgs![0]]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="">
-                                <img *ngIf="!data.sdgsPaths[solution.sdgs![0]]"  class="w-14 h-14 border-white rounded-sm"  src= "../../../assets/img/generic.webp" alt="">
+                                <img *ngIf="data.sdgsPaths[solution.sdgs![0]]" class="w-14 h-14 border-white rounded-sm"  [src]="data.sdgsPaths[solution.sdgs![0]]" alt="{{ 'problemList.imageAlt' | translate }}">
+                                <img *ngIf="!data.sdgsPaths[solution.sdgs![0]]"  class="w-14 h-14 border-white rounded-sm"  src= "../../../assets/img/generic.webp" alt="{{ 'problemList.imageAlt' | translate }}">
                               
                             </div>
                             <div class="flex-1 min-w-0">
