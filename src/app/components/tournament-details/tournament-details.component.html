@@ -188,7 +188,7 @@
         <!-- Stats -->
         <div class="flex flex-wrap justify-center gap-8 mt-8
                     text-lg text-gray-800 dark:text-gray-200">
-          <div>Submitted Solutions:
+          <div>{{ 'tournament.submittedSolutions' | translate }}:
             <span class="font-semibold">{{ completedSolutions.length }}</span>
           </div>
           <div>Deadline:
@@ -225,12 +225,12 @@
         <div *ngIf="!isPostDeadline" class="relative mt-10 flex flex-col md:flex-row
                                             justify-center items-center gap-6">
           
-                <button (click)="openSolutionPicker()"  class="px-6 py-3 bg-white text-gray-900 border
-                                border-gray-300 dark:bg-transparent dark:text-white
-                                dark:border-white rounded-md text-lg font-medium
-                                italic shadow hover:scale-105 transition">
-        submit a finished solution
-        </button>
+    <button (click)="openSolutionPicker()"  class="px-6 py-3 bg-white text-gray-900 border
+        border-gray-300 dark:bg-transparent dark:text-white
+        dark:border-white rounded-md text-lg font-medium
+        italic shadow hover:scale-105 transition">
+  {{ 'tournament.submitSolution' | translate }}
+  </button>
 
           <span class="text-gray-600 dark:text-gray-400 text-lg italic">or</span>
 
@@ -239,7 +239,7 @@
                          border-gray-300 dark:bg-transparent dark:text-white
                          dark:border-white rounded-md text-lg font-medium
                          italic shadow hover:scale-105 transition">
-            create a new solution
+            {{ 'tournament.createNewSolution' | translate }}
           </button>
           <!-- Solution picker tooltip -->
             <div *ngIf="pickerOpen"
@@ -313,7 +313,7 @@
       <!-- Solutions grid -->
       <div class="text-center mt-12">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Submitted Solutions ({{ completedSolutions.length }})
+          {{ 'tournament.submittedSolutions' | translate }} ({{ completedSolutions.length }})
         </h2>
       </div>
 

@@ -196,6 +196,25 @@
     "viewAll": "Voir tout",
     "imageAlt": "Image ODD"
   },
+  "listFinished": {
+    "subtitle": "Parcourez votre travail soumis en galerie ou en vue détaillée.",
+    "empty": {
+      "title": "Aucune solution soumise pour l'instant",
+      "desc": "Une fois que vous soumettez une solution, elle apparaîtra ici avec les dernières informations et les collaborateurs."
+    },
+    "status": {
+      "submitted": "Soumis"
+    },
+    "submittedLabel": "Soumis"
+  },
+  "tournament": {
+    "submittedSolutions": "Solutions soumises",
+    "otherSubmitted": "Autres solutions soumises ({{count}})",
+    "winningSolution": "Solution gagnante",
+    "noWinner": "L'organisateur n'a pas encore choisi de gagnant.",
+    "submitSolution": "Soumettre une solution terminée",
+    "createNewSolution": "Créer une nouvelle solution"
+  },
   "operatingManual": {
     "title": "Manuel d'utilisation",
     "subtitle": "Lectures rapides et guides pas à pas pour NewWorld Game.",

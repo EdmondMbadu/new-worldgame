@@ -53,7 +53,7 @@ export class ListFinishedSolutionsComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
   }
-  @Input() title: string = `Submitted Solutions`;
+  @Input() title: string = 'problemListView.tabs.submitted';
 
   async findCompletedSolutions() {
     this.completedSolutions = this.solutions.filter(

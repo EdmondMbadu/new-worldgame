@@ -196,6 +196,25 @@
     "viewAll": "View all",
     "imageAlt": "SDG image"
   },
+  "listFinished": {
+    "subtitle": "Browse your submitted work in a gallery or detailed list view.",
+    "empty": {
+      "title": "No submitted solutions yet",
+      "desc": "Once you submit a solution, it will appear here with the latest details and collaborators."
+    },
+    "status": {
+      "submitted": "Submitted"
+    },
+    "submittedLabel": "Submitted"
+  },
+  "tournament": {
+    "submittedSolutions": "Submitted Solutions",
+    "otherSubmitted": "Other Submitted Solutions ({{count}})",
+    "winningSolution": "Winning Solution",
+    "noWinner": "The organiser has not picked a winner yet.",
+    "submitSolution": "Submit a finished solution",
+    "createNewSolution": "Create a new solution"
+  },
   "operatingManual": {
     "title": "Operating Manual",
     "subtitle": "Quick reads and walkthroughs for NewWorld Game.",

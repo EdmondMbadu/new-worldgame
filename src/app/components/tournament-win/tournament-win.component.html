@@ -55,7 +55,7 @@
         <!-- info row -->
         <div class="flex flex-wrap justify-center gap-8 mt-8 text-lg
                     text-gray-800 dark:text-gray-200">
-          <div>Submitted Solutions:
+          <div>{{ 'tournament.submittedSolutions' | translate }}:
             <span class="font-semibold">{{ completedSolutions.length }}</span>
           </div>
           <div>Deadline:
@@ -88,7 +88,7 @@
     <!-- other solutions -->
     <div class="text-center mt-12" *ngIf="otherSolutions.length">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        Other Submitted Solutions ({{ otherSolutions.length }})
+        {{ 'tournament.otherSubmitted' | translate:{count: otherSolutions.length} }}
       </h2>
     </div>
 
