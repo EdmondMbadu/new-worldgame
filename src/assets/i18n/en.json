@@ -157,4 +157,89 @@
       "uploadError": "Error occurred while uploading file. Please try again."
     }
   }
+  ,
+  "operatingManual": {
+    "title": "Operating Manual",
+    "subtitle": "Quick reads and walkthroughs for NewWorld Game.",
+    "cards": {
+      "howToUse": {
+        "title": "How To Use NewWorld Game",
+        "desc": "A cheatsheet for everything in the NewWorld Game web application.",
+        "cta": "Read in 3 minutes"
+      },
+      "about": {
+        "title": "About",
+        "desc": "A work- and play-space for developing solutions to real-world problems.",
+        "cta": "Read in 3 minutes"
+      },
+      "solutionTour": {
+        "title": "NewWorld Game Solution Tour",
+        "desc": "A step-by-step guide to solving problems on the platform.",
+        "cta": "Read in 5 minutes"
+      },
+      "globalStats": {
+        "title": "Global Statistical Data & Analysis Tools",
+        "desc": "Accurate stats are indispensable for tackling world problems."
+      },
+      "solutionLibraries": {
+        "title": "Global Solutions Libraries/Databases",
+        "desc": "Explore catalogs of ideas, tech, and precedents."
+      },
+      "samplePreferred": {
+        "title": "Sample Preferred States",
+        "desc": "Selections from Global Solutions Lab publications.",
+        "cta": "Read now"
+      },
+      "stateOfWorld": {
+        "title": "State of the World Reports",
+        "desc": "Browse 400+ reports that inform strategic design."
+      },
+      "stepsTour": {
+        "title": "Step I–V AI Tour",
+        "desc": "AI tour of Step I–V of the NewWorld Game."
+      },
+      "evaluator": {
+        "title": "NewWorld Game Evaluator",
+        "desc": "Join the design team that reviews and strengthens solutions.",
+        "cta": "Read in 2 minutes"
+      },
+      "tournament": {
+        "title": "NewWorld Tournament",
+        "desc": "An exciting option for all players/designers in the Game.",
+        "cta": "Read in 3 minutes"
+      },
+      "customGpt": {
+        "title": "Custom GPT for Design Science Storyboards",
+        "desc": "Images made with our Story Illustrator custom GPT.",
+        "cta": "Read in 5 minutes"
+      },
+      "nwgAi": {
+        "title": "NewWorld Game AI",
+        "desc": "LLMs assist across the solution design workflow.",
+        "cta": "Read in ~3 minutes"
+      },
+      "backgroundVideos": {
+        "title": "Background Videos",
+        "desc": "Previous videos from the Global Solutions Lab.",
+        "cta": "Watch on YouTube"
+      },
+      "news": {
+        "title": "NewWorld News",
+        "desc": "Weekly updates on solutions being developed."
+      },
+      "askBucky": {
+        "title": "Ask Bucky: Prompts for Implementation",
+        "desc": "Find funders, agencies, and partners for your project."
+      },
+      "primer": {
+        "title": "Tools for Changing the World— A Design Science Primer",
+        "desc": "A methodology that turns ideas into action and impact."
+      },
+      "worldGame": {
+        "title": "World Game",
+        "desc": "Predecessor and inspiration for NewWorld Game.",
+        "cta": "Read in 2 minutes"
+      }
+    }
+  }
 }

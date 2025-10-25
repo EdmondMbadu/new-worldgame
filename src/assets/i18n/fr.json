@@ -157,4 +157,89 @@
       "uploadError": "Une erreur s’est produite lors du téléversement. Veuillez réessayer."
     }
   }
+  ,
+  "operatingManual": {
+    "title": "Manuel d'utilisation",
+    "subtitle": "Lectures rapides et guides pas à pas pour NewWorld Game.",
+    "cards": {
+      "howToUse": {
+        "title": "Comment utiliser NewWorld Game",
+        "desc": "Une fiche de référence pour tout dans l'application Web NewWorld Game.",
+        "cta": "À lire en 3 minutes"
+      },
+      "about": {
+        "title": "À propos",
+        "desc": "Un espace de travail et de jeu pour développer des solutions aux problèmes réels.",
+        "cta": "À lire en 3 minutes"
+      },
+      "solutionTour": {
+        "title": "Visite guidée : Solution NewWorld Game",
+        "desc": "Un guide étape par étape pour résoudre des problèmes sur la plateforme.",
+        "cta": "À lire en 5 minutes"
+      },
+      "globalStats": {
+        "title": "Données statistiques mondiales et outils d'analyse",
+        "desc": "Des statistiques fiables indispensables pour résoudre les problèmes mondiaux."
+      },
+      "solutionLibraries": {
+        "title": "Bibliothèques/Bases de données de solutions mondiales",
+        "desc": "Explorez des catalogues d'idées, de technologies et de précédents."
+      },
+      "samplePreferred": {
+        "title": "Exemples d'états souhaités",
+        "desc": "Sélections des publications du Global Solutions Lab.",
+        "cta": "Lire maintenant"
+      },
+      "stateOfWorld": {
+        "title": "Rapports sur l'état du monde",
+        "desc": "Parcourez plus de 400 rapports qui éclairent la conception stratégique."
+      },
+      "stepsTour": {
+        "title": "Visite IA : Étapes I–V",
+        "desc": "Visite IA des étapes I–V du NewWorld Game."
+      },
+      "evaluator": {
+        "title": "Évaluateur NewWorld Game",
+        "desc": "Rejoignez l'équipe de conception qui révise et renforce les solutions.",
+        "cta": "À lire en 2 minutes"
+      },
+      "tournament": {
+        "title": "Tournoi NewWorld",
+        "desc": "Une option passionnante pour tous les joueurs/concepteurs du jeu.",
+        "cta": "À lire en 3 minutes"
+      },
+      "customGpt": {
+        "title": "GPT personnalisé pour storyboards de design scientifique",
+        "desc": "Images créées avec notre GPT personnalisé Story Illustrator.",
+        "cta": "À lire en 5 minutes"
+      },
+      "nwgAi": {
+        "title": "IA NewWorld Game",
+        "desc": "Les LLM assistent tout au long du processus de conception de solutions.",
+        "cta": "À lire en ≈3 minutes"
+      },
+      "backgroundVideos": {
+        "title": "Vidéos de fond",
+        "desc": "Vidéos précédentes du Global Solutions Lab.",
+        "cta": "Regarder sur YouTube"
+      },
+      "news": {
+        "title": "Actualités NewWorld",
+        "desc": "Mises à jour hebdomadaires sur les solutions en cours de développement."
+      },
+      "askBucky": {
+        "title": "Ask Bucky : suggestions pour l'implémentation",
+        "desc": "Trouvez des financeurs, agences et partenaires pour votre projet."
+      },
+      "primer": {
+        "title": "Outils pour changer le monde — Introduction à la science du design",
+        "desc": "Une méthodologie qui transforme des idées en actions et en impact."
+      },
+      "worldGame": {
+        "title": "World Game",
+        "desc": "Antécédent et source d'inspiration pour NewWorld Game.",
+        "cta": "À lire en 2 minutes"
+      }
+    }
+  }
 }
