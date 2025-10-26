@@ -166,17 +166,13 @@ export class ListFinishedSolutionsComponent implements OnInit {
   }
 
   previewText(solution: Solution): string {
-    const text =
-      solution.preview ?? solution.description ?? solution.content;
+    const text = solution.preview ?? solution.description ?? solution.content;
     if (typeof text !== 'string') {
       return 'No description provided yet.';
     }
     const withoutTags = text.replace(/<[^>]*>/g, ' ');
     const normalized = withoutTags.replace(/\s+/g, ' ').trim();
-    if (
-      !normalized ||
-      /^(true|false|null|undefined)$/i.test(normalized)
-    ) {
+    if (!normalized || /^(true|false|null|undefined)$/i.test(normalized)) {
       return 'No description provided yet.';
     }
     return normalized.length > 160
@@ -223,7 +219,10 @@ export class ListFinishedSolutionsComponent implements OnInit {
     if (!parsed) {
       return value;
     }
-    return this.composeDate(parsed, this.containsTimeInformation(value, parsed));
+    return this.composeDate(
+      parsed,
+      this.containsTimeInformation(value, parsed)
+    );
   }
 
   private normalizeDate(raw: string): Date | undefined {
@@ -304,7 +303,11 @@ export class ListFinishedSolutionsComponent implements OnInit {
     if (raw.split('-').length >= 5) {
       return true;
     }
-    return date.getHours() !== 0 || date.getMinutes() !== 0 || date.getSeconds() !== 0;
+    return (
+      date.getHours() !== 0 ||
+      date.getMinutes() !== 0 ||
+      date.getSeconds() !== 0
+    );
   }
 
   private composeDate(date: Date, includeTime: boolean): string {

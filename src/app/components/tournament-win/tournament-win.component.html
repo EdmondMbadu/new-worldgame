@@ -1,70 +1,92 @@
-<div class="dark:bg-slate-900 bg-gray-100 min-h-screen ">
+<div class="dark:bg-slate-900 bg-gray-100 min-h-screen">
   <!-- anonymous visitor -->
   <app-navbar *ngIf="!isLoggedIn"></app-navbar>
 
   <!-- authenticated visitor -->
   <app-navbar
-      *ngIf="isLoggedIn"
-      [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
-      [showMoreOrLess]="true"
-      [sideBarSmall]="true"
-      [sideBarBig]="false"
-      [email]="auth.currentUser?.email"
-      [firstName]="auth.currentUser?.firstName"
-      [lastName]="auth.currentUser?.lastName"
-      [path]="'home'"
-      [currentPageTournament]="true">
+    *ngIf="isLoggedIn"
+    [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
+    [showMoreOrLess]="true"
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser?.email"
+    [firstName]="auth.currentUser?.firstName"
+    [lastName]="auth.currentUser?.lastName"
+    [path]="'home'"
+    [currentPageTournament]="true"
+  >
   </app-navbar>
 
   <section class="mt-20" *ngIf="tournament">
     <div class="mx-auto max-w-5xl px-4 lg:px-8">
       <!-- banner -->
-      <div class="relative bg-gray-100 dark:bg-gray-800 rounded-lg
-                  overflow-hidden shadow-lg mb-6">
+      <div
+        class="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mb-6"
+      >
         <img [src]="bannerImage()" class="w-full h-64 object-cover" />
-        <div class="absolute inset-0 bg-gradient-to-t
-                    from-gray-900 via-gray-700/50 to-transparent
-                    flex flex-col justify-center items-center text-center">
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-700/50 to-transparent flex flex-col justify-center items-center text-center"
+        >
           <h1 class="text-4xl font-bold text-white">{{ tournament.title }}</h1>
         </div>
 
         <!-- expand / collapse -->
         <div class="absolute bottom-0 w-full flex justify-center pb-2">
-          <button (click)="showDetails = !showDetails"
-                  class="text-gray-200 italic text-sm hover:text-white transition">
-            {{ showDetails ? 'click to collapse tournament details'
-                           : 'click to expand tournament details' }}
-            <svg class="mx-auto mt-1 w-5 h-5 transition-transform duration-300"
-                 [ngClass]="{ 'rotate-180': showDetails }"
-                 fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M19 9l-7 7-7-7" />
+          <button
+            (click)="showDetails = !showDetails"
+            class="text-gray-200 italic text-sm hover:text-white transition"
+          >
+            {{
+              showDetails
+                ? "click to collapse tournament details"
+                : "click to expand tournament details"
+            }}
+            <svg
+              class="mx-auto mt-1 w-5 h-5 transition-transform duration-300"
+              [ngClass]="{ 'rotate-180': showDetails }"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
         </div>
       </div>
 
       <!-- details -->
-      <div *ngIf="showDetails"
-           class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
+      <div
+        *ngIf="showDetails"
+        class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center"
+      >
         <p class="text-gray-700 dark:text-gray-300 text-lg">
           {{ tournament.instruction || tournament.subtTitle }}
         </p>
 
         <!-- info row -->
-        <div class="flex flex-wrap justify-center gap-8 mt-8 text-lg
-                    text-gray-800 dark:text-gray-200">
-          <div>{{ 'tournament.submittedSolutions' | translate }}:
+        <div
+          class="flex flex-wrap justify-center gap-8 mt-8 text-lg text-gray-800 dark:text-gray-200"
+        >
+          <div>
+            {{ "tournament.submittedSolutions" | translate }}:
             <span class="font-semibold">{{ completedSolutions.length }}</span>
           </div>
-          <div>Deadline:
+          <div>
+            Deadline:
             <span class="font-semibold">
-              {{ tournament.deadline | date:'MMM d, y' }}
+              {{ tournament.deadline | date : "MMM d, y" }}
             </span>
           </div>
-          <div>Prize:
-            <span class="font-semibold">${{ tournament.prizeAmount || '—' }}</span>
+          <div>
+            Prize:
+            <span class="font-semibold"
+              >${{ tournament.prizeAmount || "—" }}</span
+            >
           </div>
         </div>
       </div>
@@ -88,16 +110,21 @@
     <!-- other solutions -->
     <div class="text-center mt-12" *ngIf="otherSolutions.length">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        {{ 'tournament.otherSubmitted' | translate:{count: otherSolutions.length} }}
+        {{
+          "tournament.otherSubmitted"
+            | translate : { count: otherSolutions.length }
+        }}
       </h2>
     </div>
 
     <div class="max-w-7xl mx-auto" *ngIf="otherSolutions.length">
       <section id="solutions" class="scroll-mt-16 mt-4">
         <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          <div *ngFor="let s of otherSolutions; let i = index"
-               class="transform transition-transform duration-300 hover:scale-105"
-               [ngStyle]="{'animation-delay': i * 100 + 'ms'}">
+          <div
+            *ngFor="let s of otherSolutions; let i = index"
+            class="transform transition-transform duration-300 hover:scale-105"
+            [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }"
+          >
             <app-solution [solution]="s"></app-solution>
           </div>
         </div>
