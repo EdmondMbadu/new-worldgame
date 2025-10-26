@@ -299,4 +299,51 @@
       }
     }
   }
+  ,
+  "dashboard": {
+    "placeholder": {
+      "noImage": "No image yet"
+    },
+    "changeImage": "Change image",
+    "dragDropHint": {
+      "part1": "Drag & drop an image here, or click",
+      "dropOverlay": "Drop image to update"
+    },
+    "invite": {
+      "ctaTitle": "Invite collaborators • define your team • publish your invite",
+      "openWorkspace": "Open invite workspace",
+      "modal": {
+        "title": "Open Your Team to New Collaborators",
+        "subtitle": "Craft your invitation, complete your team profile, then publish and share."
+      },
+      "joinPage": "Join page",
+      "liveBadge": "LIVE",
+      "pendingBadge": "PENDING",
+      "saving": "Saving…",
+      "saveProfile": "Save team profile",
+      "publish": "Publish Invite",
+      "publishing": "Publishing…",
+      "cancelReview": "Cancel Review",
+      "canceling": "Canceling…",
+      "unpublish": "Unpublish Invite",
+      "unpublishing": "Unpublishing…",
+      "status": {
+        "live": "Status: Live",
+        "pending": "Status: Pending review"
+      },
+      "pitchLabel": "Why join (pitch)",
+      "askBucky": "Ask Bucky for help",
+      "pitchPlaceholder": "Tell collaborators why they should join your team.",
+      "includeReadMe": "Include solution description in published invite",
+      "descriptionPlaceholder": "Optional: edit the description readers will see."
+    },
+    "tiles": {
+      "develop": { "title": "Develop Solution", "desc": "Start Solving your problem" },
+      "video": { "title": "Video chat room", "desc": "meet and chat with your team live" },
+      "discussion": { "title": "Team discussion", "desc": "chat with your team via text" },
+      "details": { "title": "Solution details", "desc": "View and edit your solution title, readme, invite friends, etc." },
+      "documents": { "title": "Documents & Presentations", "desc": "Upload and manage project files" },
+      "whiteboard": { "title": "Whiteboard Brainstorming", "desc": "Collaborate visually and sketch ideas" }
+    }
+  }
 }

@@ -70,7 +70,9 @@
               d="M3 5h18M3 19h18M5 7h14v10H5zM9 11l2 2 4-4"
             />
           </svg>
-          <span class="text-xs">No image yet</span>
+          <span class="text-xs">{{
+            "dashboard.placeholder.noImage" | translate
+          }}</span>
         </div>
       </ng-template>
 
@@ -84,7 +86,7 @@
         *ngIf="isHovering"
         class="absolute inset-0 rounded-xl border-2 border-dashed border-emerald-400 bg-emerald-500/10 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-sm font-medium"
       >
-        Drop image to update
+        {{ "dashboard.dragDropHint.dropOverlay" | translate }}
       </div>
 
       <!-- change image chip (same behavior; opens file picker) -->
@@ -92,7 +94,7 @@
         onclick="document.getElementById('getFile').click()"
         type="button"
         aria-label="Change solution image"
-        title="Change image"
+        title="{{ 'dashboard.changeImage' | translate }}"
         class="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-black/70 text-white hover:bg-black/80 backdrop-blur shadow-sm"
       >
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -100,13 +102,16 @@
             d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM21.207 6.207a1 1 0 0 0 0-1.414L19.207 2.793a1 1 0 0 0-1.414 0L16 4.586l3.75 3.75 1.457-1.457z"
           />
         </svg>
-        Change image
+        {{ "dashboard.changeImage" | translate }}
       </button>
 
       <!-- novice hint -->
       <p class="mt-2 text-xs text-center text-slate-500 dark:text-slate-400">
-        Drag & drop an image here, or click
-        <span class="font-semibold">Change image</span>.
+        {{ "dashboard.dragDropHint.part1" | translate }}
+        <span class="font-semibold">{{
+          "dashboard.changeImage" | translate
+        }}</span
+        >.
       </p>
     </div>
 
@@ -138,7 +143,7 @@
         <h3
           class="text-lg font-semibold text-slate-900 dark:text-white leading-tight"
         >
-          Invite collaborators • define your team • publish your invite
+          {{ "dashboard.invite.ctaTitle" | translate }}
         </h3>
         <!-- <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
           Open the invite workspace to refine your team profile, craft the “why
@@ -147,7 +152,7 @@
         <div
           class="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-300"
         >
-          <span>Open invite workspace</span>
+          <span>{{ "dashboard.invite.openWorkspace" | translate }}</span>
           <svg
             class="w-3.5 h-3.5"
             fill="none"
@@ -203,10 +208,10 @@
             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
-        <span>Develop Solution</span>
+        <span>{{ "dashboard.tiles.develop.title" | translate }}</span>
         <span
           class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >Start Solving your problem</span
+          >{{ "dashboard.tiles.develop.desc" | translate }}</span
         >
       </div>
 
@@ -234,10 +239,10 @@
                013 17.25V6.75z"
           />
         </svg>
-        <span>Video chat room</span>
+        <span>{{ "dashboard.tiles.video.title" | translate }}</span>
         <span
           class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >meet and chat with your team live</span
+          >{{ "dashboard.tiles.video.desc" | translate }}</span
         >
       </div>
 
@@ -263,10 +268,10 @@
                2.25-3.489"
           />
         </svg>
-        <span>Team discussion</span>
+        <span>{{ "dashboard.tiles.discussion.title" | translate }}</span>
         <span
           class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >chat with your team via text</span
+          >{{ "dashboard.tiles.discussion.desc" | translate }}</span
         >
       </div>
 
@@ -289,10 +294,10 @@
                11-18 0 9 9 0 0118 0z"
           />
         </svg>
-        <span>Solution details</span>
+        <span>{{ "dashboard.tiles.details.title" | translate }}</span>
         <span
           class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >View and edit your solution title, readme, invite friends, etc.</span
+          >{{ "dashboard.tiles.details.desc" | translate }}</span
         >
       </div>
 
@@ -316,11 +321,13 @@
                   1.5h10.5a1.5 1.5 0 001.5-1.5V9.75z"
           />
         </svg>
-        <span class="text-center">Documents & Presentations</span>
+        <span class="text-center">{{
+          "dashboard.tiles.documents.title" | translate
+        }}</span>
         <span
           class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
         >
-          Upload and manage project files
+          {{ "dashboard.tiles.documents.desc" | translate }}
         </span>
       </div>
       <!-- Grid Tile: Invite -->
@@ -419,10 +426,10 @@
             d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
           />
         </svg>
-        <span>Whiteboard Brainstorming</span>
+        <span>{{ "dashboard.tiles.whiteboard.title" | translate }}</span>
         <span
           class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >Collaborate visually and sketch ideas</span
+          >{{ "dashboard.tiles.whiteboard.desc" | translate }}</span
         >
       </div>
     </div>
@@ -465,11 +472,10 @@
       <h2
         class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white text-center"
       >
-        Open Your Team to New Collaborators
+        {{ "dashboard.invite.modal.title" | translate }}
       </h2>
       <p class="mt-2 text-sm text-slate-600 dark:text-slate-400 text-center">
-        Craft your invitation, complete your team profile, then publish and
-        share.
+        {{ "dashboard.invite.modal.subtitle" | translate }}
       </p>
 
       <!-- Quick links (redundancy at the beginning) -->
@@ -489,21 +495,21 @@
               class="text-slate-500 dark:text-slate-400 uppercase tracking-[0.18em] font-semibold"
             >
               <!-- keep the original title here ("Join page" or "Published Invites") -->
-              Join page
+              {{ "dashboard.invite.joinPage" | translate }}
             </p>
 
             <!-- LIVE badge -->
             <span
               *ngIf="isLive"
               class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-emerald-600 text-white"
-              >LIVE</span
+              >{{ "dashboard.invite.liveBadge" | translate }}</span
             >
 
             <!-- PENDING badge -->
             <span
               *ngIf="isPending"
               class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold bg-amber-500 text-white"
-              >PENDING</span
+              >{{ "dashboard.invite.pendingBadge" | translate }}</span
             >
           </div>
 
@@ -635,7 +641,11 @@
                   d="M12 3v3m6.364 2.636l-2.121 2.121M21 12h-3m-2.636 6.364l-2.121-2.121M12 21v-3m-6.364-2.636l2.121-2.121M3 12h3m2.636-6.364l2.121 2.121"
                 />
               </svg>
-              <span>{{ savingProfile ? "Saving…" : "Save team profile" }}</span>
+              <span>{{
+                savingProfile
+                  ? ("dashboard.invite.saving" | translate)
+                  : ("dashboard.invite.saveProfile" | translate)
+              }}</span>
             </button>
             <!-- Publish Invite → goes to PENDING (same CTA label as before) -->
             <button
@@ -644,7 +654,6 @@
               (click)="sendBroadcast()"
               [disabled]="sendingBroadcast"
               class="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-              aria-label="Publish Invite"
             >
               <svg
                 *ngIf="sendingBroadcast"
@@ -667,7 +676,9 @@
                 />
               </svg>
               <span>{{
-                sendingBroadcast ? "Publishing…" : "Publish Invite"
+                sendingBroadcast
+                  ? ("dashboard.invite.publishing" | translate)
+                  : ("dashboard.invite.publish" | translate)
               }}</span>
             </button>
 
@@ -700,7 +711,9 @@
                 />
               </svg>
               <span>{{
-                sendingBroadcast ? "Canceling…" : "Cancel Review"
+                sendingBroadcast
+                  ? ("dashboard.invite.canceling" | translate)
+                  : ("dashboard.invite.cancelReview" | translate)
               }}</span>
             </button>
             <!-- Unpublish (only when live) -->
@@ -732,16 +745,20 @@
                 />
               </svg>
               <span>{{
-                sendingBroadcast ? "Unpublishing…" : "Unpublish Invite"
+                sendingBroadcast
+                  ? ("dashboard.invite.unpublishing" | translate)
+                  : ("dashboard.invite.unpublish" | translate)
               }}</span>
             </button>
 
             <!-- Status line -->
-            <span class="text-slate-500 dark:text-slate-400" *ngIf="isLive"
-              >Status: Live</span
-            >
-            <span class="text-amber-700 dark:text-amber-400" *ngIf="isPending"
-              >Status: Pending review</span
+            <span class="text-slate-500 dark:text-slate-400" *ngIf="isLive">{{
+              "dashboard.invite.status.live" | translate
+            }}</span>
+            <span
+              class="text-amber-700 dark:text-amber-400"
+              *ngIf="isPending"
+              >{{ "dashboard.invite.status.pending" | translate }}</span
             >
 
             <!-- Save result -->
@@ -760,7 +777,7 @@
             <div class="flex items-center justify-between mb-1">
               <label
                 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-                >Why join (pitch)</label
+                >{{ "dashboard.invite.pitchLabel" | translate }}</label
               >
               <button
                 (click)="askBuckyForPitch()"
@@ -780,7 +797,7 @@
                     d="M8 9l4-4 4 4m0 6l-4 4-4-4"
                   />
                 </svg>
-                Ask Bucky for help
+                {{ "dashboard.invite.askBucky" | translate }}
               </button>
             </div>
             <textarea
@@ -788,7 +805,7 @@
               rows="4"
               maxlength="1000"
               class="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Tell collaborators why they should join your team."
+              [placeholder]="'dashboard.invite.pitchPlaceholder' | translate"
             ></textarea>
             <div
               class="mt-1 text-right text-xs text-slate-400 dark:text-slate-500"
@@ -806,14 +823,16 @@
                 [(ngModel)]="includeReadMe"
                 class="rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500"
               />
-              Include solution description in published invite
+              {{ "dashboard.invite.includeReadMe" | translate }}
             </label>
             <textarea
               *ngIf="includeReadMe"
               [(ngModel)]="currentSolution.description"
               rows="4"
               class="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Optional: edit the description readers will see."
+              [placeholder]="
+                'dashboard.invite.descriptionPlaceholder' | translate
+              "
             ></textarea>
           </div>
         </div>
@@ -1090,7 +1109,9 @@
                   />
                 </svg>
                 <span>{{
-                  savingProfile ? "Saving…" : "Save team profile"
+                  savingProfile
+                    ? ("dashboard.invite.saving" | translate)
+                    : ("dashboard.invite.saveProfile" | translate)
                 }}</span>
               </button>
 
@@ -1101,7 +1122,6 @@
                 (click)="sendBroadcast()"
                 [disabled]="sendingBroadcast"
                 class="inline-flex items-center gap-2 text-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 disabled:opacity-60 disabled:cursor-not-allowed"
-                aria-label="Publish Invite"
               >
                 <svg
                   *ngIf="sendingBroadcast"
@@ -1124,7 +1144,9 @@
                   />
                 </svg>
                 <span class="text-center">{{
-                  sendingBroadcast ? "Publishing…" : "Publish Invite"
+                  sendingBroadcast
+                    ? ("dashboard.invite.publishing" | translate)
+                    : ("dashboard.invite.publish" | translate)
                 }}</span>
               </button>
               <!-- Cancel Review (only while pending) -->
@@ -1156,7 +1178,9 @@
                   />
                 </svg>
                 <span>{{
-                  sendingBroadcast ? "Canceling…" : "Cancel Review"
+                  sendingBroadcast
+                    ? ("dashboard.invite.canceling" | translate)
+                    : ("dashboard.invite.cancelReview" | translate)
                 }}</span>
               </button>
 
@@ -1189,7 +1213,9 @@
                   />
                 </svg>
                 <span>{{
-                  sendingBroadcast ? "Unpublishing…" : "Unpublish Invite"
+                  sendingBroadcast
+                    ? ("dashboard.invite.unpublishing" | translate)
+                    : ("dashboard.invite.unpublish" | translate)
                 }}</span>
               </button>
             </div>
@@ -1197,11 +1223,13 @@
               class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
             >
               <!-- Status line -->
-              <span class="text-slate-500 dark:text-slate-400" *ngIf="isLive"
-                >Status: Live</span
-              >
-              <span class="text-amber-700 dark:text-amber-400" *ngIf="isPending"
-                >Status: Pending review</span
+              <span class="text-slate-500 dark:text-slate-400" *ngIf="isLive">{{
+                "dashboard.invite.status.live" | translate
+              }}</span>
+              <span
+                class="text-amber-700 dark:text-amber-400"
+                *ngIf="isPending"
+                >{{ "dashboard.invite.status.pending" | translate }}</span
               >
 
               <!-- Save result -->

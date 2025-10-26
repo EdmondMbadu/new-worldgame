@@ -299,4 +299,51 @@
       }
     }
   }
+  ,
+  "dashboard": {
+    "placeholder": {
+      "noImage": "Aucune image pour l'instant"
+    },
+    "changeImage": "Changer l'image",
+    "dragDropHint": {
+      "part1": "Faites glisser une image ici, ou cliquez",
+      "dropOverlay": "Déposez l'image pour mettre à jour"
+    },
+    "invite": {
+      "ctaTitle": "Invitez des collaborateurs • définissez votre équipe • publiez votre invitation",
+      "openWorkspace": "Ouvrir l'espace d'invitation",
+      "modal": {
+        "title": "Ouvrez votre équipe à de nouveaux collaborateurs",
+        "subtitle": "Rédigez votre invitation, complétez le profil de votre équipe, puis publiez et partagez."
+      },
+      "joinPage": "Page de participation",
+      "liveBadge": "EN DIRECT",
+      "pendingBadge": "EN ATTENTE",
+      "saving": "Enregistrement…",
+      "saveProfile": "Enregistrer le profil de l'équipe",
+      "publish": "Publier l'invitation",
+      "publishing": "Publication…",
+      "cancelReview": "Annuler la révision",
+      "canceling": "Annulation…",
+      "unpublish": "Dépublier l'invitation",
+      "unpublishing": "Dépublication…",
+      "status": {
+        "live": "Statut : Publié",
+        "pending": "Statut : En attente d'examen"
+      },
+      "pitchLabel": "Pourquoi rejoindre (argument)",
+      "askBucky": "Demander de l'aide à Bucky",
+      "pitchPlaceholder": "Dites aux collaborateurs pourquoi ils devraient rejoindre votre équipe.",
+      "includeReadMe": "Inclure la description de la solution dans l'invitation publiée",
+      "descriptionPlaceholder": "Optionnel : modifiez la description que les lecteurs verront."
+    },
+    "tiles": {
+      "develop": { "title": "Développer la solution", "desc": "Commencez à résoudre votre problème" },
+      "video": { "title": "Salle de visioconférence", "desc": "Rencontrez et discutez en direct avec votre équipe" },
+      "discussion": { "title": "Discussion d'équipe", "desc": "Discutez avec votre équipe par écrit" },
+      "details": { "title": "Détails de la solution", "desc": "Voir et modifier le titre, le readme, inviter des amis, etc." },
+      "documents": { "title": "Documents et présentations", "desc": "Téléchargez et gérez les fichiers du projet" },
+      "whiteboard": { "title": "Remue-méninges sur tableau blanc", "desc": "Collaborez visuellement et esquissez des idées" }
+    }
+  }
 }
