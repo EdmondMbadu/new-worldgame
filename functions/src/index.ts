@@ -1789,6 +1789,8 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
         free: 0,
         license: 9900,
         class: 19900,
+        trylicense: 10000,
+        tryschool: 50000,
         // license: 100,
         tournament: 29900,
         pro: 34900,

@@ -134,6 +134,155 @@
     </div>
   </section>
 
+  <!-- PRICING SECTION -->
+  <section id="pricing" class="relative overflow-hidden py-16 bg-white dark:bg-slate-950">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-28 -right-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
+    ></div>
+    
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="mx-auto max-w-3xl text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          Choose the Plan That Fits
+        </h2>
+        <p class="text-lg text-slate-600 dark:text-slate-300 mb-2">
+          NewWorld Game is open to all students and schools — public, private, IB and non‑IB alike.
+        </p>
+        <p class="text-base text-slate-600 dark:text-slate-300">
+          Entire schools—not just select programs—are eligible to participate.
+        </p>
+      </div>
+
+      <!-- Pricing Cards -->
+      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+        
+        <!-- Individual Students - FREE -->
+        <div class="flex flex-col text-center rounded-3xl border border-teal-100 dark:border-slate-700 p-8 shadow-lg
+                    bg-gradient-to-br from-white via-teal-50 to-teal-100
+                    dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
+          <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Individual Students</h3>
+          <p class="text-5xl font-extrabold text-teal-600 dark:text-teal-400 mb-1">FREE</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Access to all features</p>
+          
+          <div class="text-left mb-6">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">What you get:</p>
+            <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Access to all NWG features, including AIs, Team video channel, Peer review, Global Data and State of the World Reports, Solutions Libraries, etc.</span>
+              </li>
+            </ul>
+          </div>
+          
+          <a routerLink="/welcome"
+             class="mt-auto inline-block text-center w-full px-4 py-3 rounded-full font-semibold
+                    bg-teal-600 text-white hover:bg-teal-500 transition shadow-md">
+            Get Started Free
+          </a>
+        </div>
+
+        <!-- Class - $100 -->
+        <div class="flex flex-col text-center rounded-3xl border-2 border-teal-300 dark:border-teal-600 p-8 shadow-xl
+                    bg-gradient-to-br from-teal-50 via-teal-100 to-emerald-100
+                    dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60
+                    relative transform lg:-translate-y-2">
+          <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-teal-600 text-white
+                       text-xs font-bold px-3 py-1 rounded-full shadow">
+            POPULAR
+          </span>
+          <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">Class</h3>
+          <p class="text-5xl font-extrabold text-teal-600 dark:text-teal-400 mb-1">$100</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">per class</p>
+          
+          <div class="text-left mb-6">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">What you get:</p>
+            <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Access to all NWG features</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Private Dashboard for Class</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Email support</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Teacher AI‑training masterclass</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Teacher Guide</span>
+              </li>
+            </ul>
+          </div>
+          
+          <a [routerLink]="['/signup-school']"
+             [queryParams]="{ plan: 'trylicense', amount: 100, currency: 'USD' }"
+             class="mt-auto inline-block text-center w-full px-4 py-3 rounded-full font-semibold
+                    bg-teal-600 text-white hover:bg-teal-500 transition shadow-md">
+            Register Class
+          </a>
+        </div>
+
+        <!-- School - $500 -->
+        <div class="flex flex-col text-center rounded-3xl border border-teal-100 dark:border-slate-700 p-8 shadow-lg
+                    bg-gradient-to-br from-white via-emerald-50 to-teal-50
+                    dark:from-slate-800 dark:via-slate-800/70 dark:to-slate-900/60">
+          <h3 class="text-xl font-bold mb-2 text-slate-900 dark:text-white">School</h3>
+          <p class="text-5xl font-extrabold text-teal-600 dark:text-teal-400 mb-1">$500</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">for entire school</p>
+          
+          <div class="text-left mb-6">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">What you get:</p>
+            <ul class="space-y-2 flex-grow text-slate-700 dark:text-slate-300">
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Annual school license</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Private Dashboards for School and Classes</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Email support</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Teacher AI‑training masterclass</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Teacher Guide</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Access to Customization</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-teal-600 dark:text-teal-400 mt-0.5">•</span>
+                <span class="text-sm">Access to your own NewWorld Tournament</span>
+              </li>
+            </ul>
+          </div>
+          
+          <a [routerLink]="['/signup-school']"
+             [queryParams]="{ plan: 'tryschool', amount: 500, currency: 'USD' }"
+             class="mt-auto inline-block text-center w-full px-4 py-3 rounded-full font-semibold
+                    bg-teal-600 text-white hover:bg-teal-500 transition shadow-md">
+            Register School
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- VALUE TILES -->
   <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">

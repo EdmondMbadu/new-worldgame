@@ -115,6 +115,8 @@ export const PLAN_KEYS = [
   'pro',
   'school',
   'class',
+  'trylicense',
+  'tryschool',
 ] as const;
 
 export type PlanKey = (typeof PLAN_KEYS)[number];
@@ -126,6 +128,8 @@ export const PRICE_BOOK: Record<PlanKey, number> = {
   pro: 349,
   school: 349,
   class: 199,
+  trylicense: 100,
+  tryschool: 500,
 };
 function isPlanKey(v: unknown): v is PlanKey {
   return (
@@ -134,7 +138,9 @@ function isPlanKey(v: unknown): v is PlanKey {
     v === 'tournament' ||
     v === 'pro' ||
     v === 'school' ||
-    v === 'class'
+    v === 'class' ||
+    v === 'trylicense' ||
+    v === 'tryschool'
   );
 }
 
