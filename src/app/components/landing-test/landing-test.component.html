@@ -36,13 +36,21 @@
           >.
         </h1>
 
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+          Where the Future Meets Student Imagination
+        </p>
+
         <!-- UPDATED COPY (impact vs badges) -->
         <p
           class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
         >
-          Join a small team, pick a real challenge, and deliver results you can
+        Join as an individual or as a small team, pick a real-world problem, and deliver results you can
           point to — and implement. Quick feedback, clear goals, and real
           impact.
+        </p>
+
+        <p class="text-base font-semibold text-slate-700 dark:text-slate-200">
+          Sign Up. Free for Students.
         </p>
 
         <div class="flex flex-col gap-3 sm:flex-row">
@@ -240,7 +248,7 @@
       </div>
 
       <!-- UPDATED BUTTON LABELS to match routes -->
-      <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <!-- <div class="mt-8 flex flex-wrap justify-center gap-3">
         <a
           routerLink="/welcome"
           class="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
@@ -253,7 +261,7 @@
         >
           How it works
         </a>
-      </div>
+      </div> -->
     </div>
   </section>
 
@@ -285,8 +293,7 @@
             <div>
               <h3 class="font-semibold">Pick a challenge</h3>
               <p class="text-sm">
-                Choose a UN Sustainable Development Goal or a community problem
-                you care about.
+                Pick a global or local problem you care about, or one of the UN Sustainable Development Goals
               </p>
             </div>
           </li>
@@ -298,8 +305,7 @@
             <div>
               <h3 class="font-semibold">Form your team</h3>
               <p class="text-sm">
-                Meet designers, researchers, tech wizards, and local problem
-                solvers.
+                Meet students, designers, researchers, problem solvers
               </p>
             </div>
           </li>
@@ -390,7 +396,7 @@
 
   <!-- FEATURED CHALLENGES -->
   <!-- OPEN BROADCASTS (LIVE PREVIEW) -->
-  <section class="relative bg-white py-16 dark:bg-slate-950">
+  <!-- <section class="relative bg-white py-16 dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">
       <div class="flex items-end justify-between">
         <div>
@@ -411,7 +417,7 @@
         </a>
       </div>
 
-      <!-- Empty state -->
+     
       <div
         *ngIf="(broadcastsPreview$ | async)?.length === 0"
         class="mt-10 rounded-2xl border border-slate-200/70 bg-white/90 p-6 text-center shadow-sm dark:border-slate-800/70 dark:bg-slate-900/70"
@@ -438,7 +444,7 @@
         </div>
       </div>
 
-      <!-- Cards grid (top 3 broadcasts) -->
+    
       <div
         class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
         *ngIf="(broadcastsPreview$ | async)?.length"
@@ -469,7 +475,7 @@
               class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"
             ></div>
 
-            <!-- status -->
+          
             <div class="absolute top-3 left-3">
               <span
                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium text-white"
@@ -485,7 +491,7 @@
               </span>
             </div>
 
-            <!-- author mini chip -->
+          
             <div
               class="absolute bottom-3 left-3 right-3 flex items-center justify-end"
             >
@@ -542,7 +548,7 @@
         </article>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- AI COLLEAGUES -->
   <section id="ai" class="relative overflow-hidden py-20">
@@ -558,8 +564,7 @@
           Meet your AI colleagues
         </h2>
         <p class="mt-3 text-lg text-slate-600 dark:text-slate-300">
-          Mentors, strategists, and systems thinkers who coach you through each
-          sprint — from first sketch to field results.
+          Mentors, strategists, and systems thinkers who coach you through each stage — from first step to real-world results.
         </p>
       </div>
 
@@ -642,11 +647,11 @@
   </section>
 
   <!-- ── DESIGN SCIENCE (teal/cyan glow) ─────────────────────── -->
-  <section
+  <!-- <section
     id="design-science"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- ambient glow blobs (teal/cyan/emerald) -->
+    
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
@@ -658,9 +663,9 @@
 
     <div class="container mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 lg:grid-cols-2">
-        <!-- Visual w/ halo -->
+       
         <div class="relative order-last lg:order-first">
-          <!-- teal/cyan halo -->
+        
           <div
             aria-hidden="true"
             class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/30 via-cyan-300/20 to-emerald-300/30 blur-2xl"
@@ -680,7 +685,7 @@
           </figure>
         </div>
 
-        <!-- Copy -->
+  
         <div class="space-y-6">
           <span
             class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
@@ -715,7 +720,7 @@
             >.
           </p>
 
-          <!-- CTA -->
+ 
           <div>
             <a
               target="_blank"
@@ -741,7 +746,7 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <!-- TESTIMONIAL BAND -->
   <section class="relative overflow-hidden py-14">
@@ -793,7 +798,7 @@
             How do I start?
           </summary>
           <p class="mt-3 text-sm">
-            Create an account, explore challenges, and meet teammates.
+            Sign up, explore challenges, and meet teammates.
           </p>
         </details>
         <details
@@ -803,7 +808,7 @@
             Do I need a team?
           </summary>
           <p class="mt-3 text-sm">
-            No — solo is fine. You can match with a team anytime.
+            No — solo is fine. You can form a team anytime.
           </p>
         </details>
         <details
@@ -813,9 +818,7 @@
             What do I actually deliver?
           </summary>
           <p class="mt-3 text-sm">
-            Each team develops evidence-based solutions: designs, budgets,
-            pilots, dashboards, policy drafts, or code — aligned with clear
-            goals.
+           Each team develops evidence-based solutions, including where appropriate: designs, budgets, pilots, policy drafts, reports, articles— aligned with clear goals.
           </p>
         </details>
         <!-- REMOVED “How do badges work?” -->
@@ -842,7 +845,7 @@
       <p
         class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300"
       >
-        Pick a challenge. Meet your team. Deliver impact.
+      Pick a challenge. Form a Team, Develop your solution. Deliver impact.
       </p>
       <div class="mt-8 flex items-center justify-center gap-3">
         <a
@@ -855,7 +858,7 @@
           routerLink="/login"
           class="inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/70 hover:bg-teal-50 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-teal-900/20"
         >
-          Log in
+          Sign up
         </a>
       </div>
     </div>
