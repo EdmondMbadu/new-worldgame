@@ -97,7 +97,7 @@ export class OtherAisComponent implements OnInit {
       name: 'Zara Nkosi',
       group: 'colleague',
       sdgs: [1, 4, 15, 10, 17],
-      intro: `${name}  a vibrant AI inspired by South African ubuntu
+      intro: `${name}  A vibrant AI inspired by South African ubuntu
   philosophy, believes that “I am because we are.” With a knack for
   weaving compelling narratives, she helps players understand
   complex social issues like poverty (SDG 1) and inequality (SDG
@@ -239,7 +239,7 @@ export class OtherAisComponent implements OnInit {
       name: 'Buckminster Fuller',
       group: 'elder',
       sdgs: [9, 11, 12],
-      intro: `${name} was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Or as Marshall McLuhan said “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he was conviced that design and technology can continually do so much more with less that all humans can be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone. NewWorld Game is inspired by and based on his pioneering work.
+      intro: `${name} Was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Or as Marshall McLuhan said “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he was conviced that design and technology can continually do so much more with less that all humans can be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone. NewWorld Game is inspired by and based on his pioneering work.
      For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
 
       collectionPath: this.buildCollectionPath('bucky'),
@@ -308,9 +308,10 @@ export class OtherAisComponent implements OnInit {
   checkLoginStatus(): void {
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
-      const uid = user && typeof user === 'object' && 'uid' in user
-        ? (user as { uid: string }).uid
-        : null;
+      const uid =
+        user && typeof user === 'object' && 'uid' in user
+          ? (user as { uid: string }).uid
+          : null;
       this.updateCollectionPaths(uid);
       if (user) {
         void this.deleteAllDocuments();
@@ -488,9 +489,7 @@ export class OtherAisComponent implements OnInit {
       return;
     }
     const batch = this.afs.firestore.batch();
-    const snapshot = await this.afs
-      .collection(`users/${uid}/bucky`)
-      .ref.get();
+    const snapshot = await this.afs.collection(`users/${uid}/bucky`).ref.get();
     snapshot.forEach((doc) => batch.delete(doc.ref));
     await batch.commit();
   }
