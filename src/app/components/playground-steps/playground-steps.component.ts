@@ -271,14 +271,16 @@ export class PlaygroundStepsComponent implements OnInit {
   ];
   AllQuestions: Array<Array<string>> = [
     [
-      'What is the problem you have chosen and why is it important?',
-      'What are the symptoms of this problem? How do you measure it? (Also consider asking, after this question, What are the causes of these symptoms? This will provide deeper insight into the problem.) For further prompts for NWG solution-development, ',
-      'How many people does this problem impact in the world? Where is it most severe?',
-      'What will happen if nothing is done to deal with this problem?',
+      `What is the problem you have chosen and why is it important? 
+(Answer these two questions first from your personal knowledge. Then Ask Bucky why it is important.)`,
+      `What are the symptoms of this problem? How do you measure it? (Answer these 2 question first from your personal knowledge. Then Ask Bucky.)
+(After these questions, ask Bucky or answer from your knowledge: What are the causes of these symptoms? This will provide deeper insight into the problem.)"`,
+      `How many people does this problem impact in the world? Where is it most severe? (If you don’t know, ask Bucky, or use the data sources provided when you click on the “?" .)`,
+      `What will happen if nothing is done to deal with this problem? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
     ],
     [
-      'What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved?',
-      'How will you measure success? How will you know when you reach the preferred state?',
+      `What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved?”  (Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
+      `How will you measure success? How will you know when you reach the preferred state? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
     ],
     [
       'What does our solution do to reach the preferred state? How will it do it?',
@@ -288,9 +290,7 @@ export class PlaygroundStepsComponent implements OnInit {
     ],
     [
       // i = 0
-      `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where
-we will test and first implement the solution?`,
-
+      `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where we will test and first implement the solution?  (Answer this as best you can. Then ask Bucky. See `,
       // i = 1
       'Cost 2. How much will our strategy cost to implement at scale?',
 
