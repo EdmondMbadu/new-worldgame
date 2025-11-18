@@ -2,12 +2,12 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   Optional,
   ViewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { json } from 'express';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { AvatarRegistryService } from 'src/app/services/avatar-registry.service';
@@ -22,7 +22,7 @@ declare var am4themes_animated: any;
   templateUrl: './landing-page.component.html',
   styleUrls: ['./landing-page.component.css'],
 })
-export class LandingPageComponent implements OnInit {
+export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   themeSubscription?: Subscription;
   aiOptions: AIOption[] = [];
   constructor(
@@ -37,13 +37,50 @@ export class LandingPageComponent implements OnInit {
     window.scroll(0, 0);
     this.themeSubscription = this.data.currentTheme.subscribe((theme) => {
       document.documentElement.style.setProperty(
-        '--after-background-color',
-        theme === 'dark' ? 'rgb(15, 23, 42)' : 'white'
+        '--cursor-color',
+        theme === 'dark' ? 'rgb(45 212 191)' : 'rgb(13 148 136)'
       );
     });
-
-    // Check if dark mode was initialized before
   }
+
+  @ViewChild('typedWord', { static: true }) typedWord:
+    | ElementRef<HTMLSpanElement>
+    | undefined;
+
+  private typingTimer?: ReturnType<typeof setTimeout>;
+  private typingWords = ['Design', 'Write', 'Envision', 'Build', 'Share'];
+  private typingIndex = 0;
+  private typingCharIndex = 0;
+  private deleting = false;
+
+  ngAfterViewInit(): void {
+    this.runTypewriter();
+  }
+
+  private runTypewriter() {
+    if (!this.typedWord) {
+      return;
+    }
+
+    const currentWord = this.typingWords[this.typingIndex];
+    this.typingCharIndex += this.deleting ? -1 : 1;
+    const nextValue = currentWord.slice(0, this.typingCharIndex);
+    this.typedWord.nativeElement.textContent = nextValue;
+
+    let delay = this.deleting ? 110 : 230;
+
+    if (!this.deleting && nextValue === currentWord) {
+      delay = 1600;
+      this.deleting = true;
+    } else if (this.deleting && nextValue === '') {
+      this.deleting = false;
+      this.typingIndex = (this.typingIndex + 1) % this.typingWords.length;
+      delay = 360;
+    }
+
+    this.typingTimer = setTimeout(() => this.runTypewriter(), delay);
+  }
+
   private slugify(name: string) {
     return name
       .toLowerCase()
@@ -67,6 +104,9 @@ export class LandingPageComponent implements OnInit {
     | undefined;
 
   ngOnDestroy() {
-    this.themeSubscription!.unsubscribe();
+    this.themeSubscription?.unsubscribe();
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+    }
   }
 }

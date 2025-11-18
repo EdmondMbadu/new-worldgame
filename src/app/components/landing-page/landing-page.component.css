@@ -1,86 +1,40 @@
 
 :root {
-    --after-background-color: white; /* Default background color */
     --cursor-color: rgb(15 118 110);
 }
 
-.animated-text span {
+.typed-container {
+    display: inline-flex;
+    align-items: baseline;
+    line-height: 1.25;
+    min-width: 9ch;      /* hold layout steady to avoid column jiggle */
+    min-height: 1.2em;   /* keep vertical space constant even when empty */
+    vertical-align: middle;
+}
+
+.typed-word {
     position: relative;
     display: inline-block;
+    white-space: nowrap;
+    line-height: 1.25;
+    vertical-align: baseline;
 }
 
-.animated-text span::before {
-    content: "Design"; /* Initial content to prevent minification issues */
-    animation: words 20s infinite;
-}
-
-.animated-text span::after {
+.typed-word::after {
     content: "";
     position: absolute;
-    width: calc(100% + 8px);
-    height: 50px;
-    background-color: var(--after-background-color, white);
-    border-left: 4px solid var(--cursor-color, rgb(15 118 110));
-    color: rgb(15 118 110);
-    right: -8px;
+    left: 100%;
     top: 0;
-    animation: cursor 0.8s infinite, typing 20s steps(14) infinite;
+    margin-left: 4px;
+    width: 2px;
+    height: 100%;
+    background-color: var(--cursor-color, rgb(15 118 110));
+    animation: caret-blink 0.8s steps(2, end) infinite;
 }
 
-
-/* Styles for OS dark mode preference */
-/* @media (prefers-color-scheme: dark) {
-    .animated-text span::before,
-    .animated-text span::after {
-        background-color: rgb(15 23 42);
-        color: rgb(15 118 110);
-        border-color: rgb(15 118 110);
-    }
-} */
-
-/* Manual dark mode toggle using .dark class */
-.dark .animated-text  span::before,
-.dark .animated-text span::after {
-    background-color: black ;
-    color: rgb(15 118 110) ;
-    border-color: rgb(15 118 110) ;
-}
-
-
-@keyframes cursor {
-    0%, 50% {
-        border-left: 4px solid var(--cursor-color, rgb(15 118 110));
-    }
-    51%, 100% {
-        border-left: 4px solid transparent;
-    }
-}
-
-@keyframes words {
-    0%, 20% {
-        content: "Design";
-    }
-    21%, 40% {
-        content: "Write";
-    }
-    41%, 60% {
-        content: "Envision";
-    }
-    61%, 80% {
-        content: "Build";
-    }
-    81%, 100% {
-        content: "Share";
-    }
-}
-
-@keyframes typing {
-    0%, 10%, 15%, 30%, 35%, 50%, 55%, 70%, 75%, 90%, 95%, 100% {
-        width: 0;
-    }
-    5%, 20%, 25%, 40%, 45%, 60%, 65%, 80%, 85% {
-        width: calc(100% + 8px);
-    }
+@keyframes caret-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
 }
 
 /* .rotate {
@@ -109,4 +63,3 @@
     }
   }
   
-
