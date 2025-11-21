@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -11,14 +11,23 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { LanguageService } from 'src/app/services/language.service';
+
+type SupportedLanguage = 'en' | 'fr';
+
+interface PlaygroundLanguageContent {
+  steps: string[];
+  subtitles: string[];
+  questions: string[][];
+}
 
 @Component({
   selector: 'app-playground-steps',
   templateUrl: './playground-steps.component.html',
   styleUrls: ['./playground-steps.component.css'],
 })
-export class PlaygroundStepsComponent implements OnInit {
+export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   id: any = '';
   currentSolution: Solution = {};
   teamMembers: User[] = [];
@@ -55,13 +64,144 @@ export class PlaygroundStepsComponent implements OnInit {
   currentUserIsFacilitator: boolean = false;
   isHovering?: boolean;
 
+  private readonly defaultLanguage: SupportedLanguage = 'en';
+  private readonly localizedContent: Record<
+    SupportedLanguage,
+    PlaygroundLanguageContent
+  > = {
+    en: {
+      steps: [
+        'Step 1:  Defining the Problem State',
+        'Step 2: Envisioning the Preferred State',
+        'Step 3: Developing Our Solution',
+        'Step 4: Implementation',
+        'Step 5: Strategy Outreach',
+      ],
+      subtitles: [
+        'Where we are now',
+        'Where we want to be',
+        'How we get to the Preferred State',
+        'Actions: What, where, who, when, costs, funders, You',
+        'Final Review and update order of things',
+      ],
+      questions: [
+        [
+          `What is the problem you have chosen and why is it important? 
+(Answer these two questions first from your personal knowledge. Then Ask Bucky why it is important.)`,
+          `What are the symptoms of this problem? How do you measure it? (Answer these 2 question first from your personal knowledge. Then Ask Bucky.)
+(After these questions, ask Bucky or answer from your knowledge: What are the causes of these symptoms? This will provide deeper insight into the problem.)`,
+          `How many people does this problem impact in the world? Where is it most severe? (If you don't know, ask Bucky, or use the data sources provided when you click on the "?" .)`,
+          `What will happen if nothing is done to deal with this problem? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
+        ],
+        [
+          `What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved? (Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
+          `How will you measure success? How will you know when you reach the preferred state? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
+        ],
+        [
+          'What does our solution do to reach the preferred state? How will it do it?',
+          'What technology, programs, policies will it need?',
+          'What resources does our solution need?',
+          'How is our solution part of a circular, regenerative, more equitable economy?',
+        ],
+        [
+          `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where we will test and first implement the solution?  (Answer this as best you can. Then ask Bucky. See `,
+          'Cost 2. How much will our strategy cost to implement at scale?',
+          'Where will we get the resources and funding needed to implement our solution, to do the above?',
+          'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
+          'What actions are needed in the next 6-12 months to get our solution implemented? Who will do what, when, where?',
+          'What does our implemented strategy look like, in more detail? (For this task ask one of our AI colleagues to draw a picture of what the strategy will look like when implemented).',
+          'Results 1. Ask Bucky, and/or one of your AI Colleagues, "What are the results of implementing our strategy? What would be the results of providing everyone in a community ____________ (insert description of your strategy) on the local economy, jobs, environment, human health, and other social factors?"',
+          'Results 2. Ask Bucky, and/or one of your AI Colleagues, "What would be the results of providing everyone in the world ____________ (insert description of your strategy) on the global economy, additional jobs, environment, human health, and other social factors?"',
+          'What would we do with $10,000 to advance the strategy towards implementation?',
+          'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
+        ],
+        [
+          'Review Your Entire Strategy, Preview it, Add what you think might be missing.',
+        ],
+      ],
+    },
+    fr: {
+      steps: [
+        `Etape 1 : Definir l'etat du probleme`,
+        `Etape 2 : Imaginer l'etat souhaite`,
+        `Etape 3 : Concevoir notre solution`,
+        `Etape 4 : Mise en oeuvre`,
+        `Etape 5 : Diffusion de la strategie`,
+      ],
+      subtitles: [
+        `Ou nous en sommes aujourd'hui`,
+        `Ou nous voulons etre`,
+        `Comment atteindre l'etat souhaite`,
+        `Actions : quoi, ou, qui, quand, couts, financeurs, vous`,
+        `Relecture finale et hierarchisation`,
+      ],
+      questions: [
+        [
+          `Quel probleme avez-vous choisi et pourquoi est-il important ?
+(Rependez d'abord a ces deux questions selon vos propres connaissances. Puis demandez a Bucky pourquoi il est important.)`,
+          `Quels sont les symptomes de ce probleme ? Comment le mesurez-vous ? (Repondez d'abord a ces deux questions selon vos connaissances, puis demandez a Bucky.)
+(Apres ces questions, demandez a Bucky ou repondez selon vos connaissances : quelles sont les causes de ces symptomes ? Cela permettra de mieux comprendre le probleme.)`,
+          `Combien de personnes ce probleme touche-t-il dans le monde ? Ou est-il le plus grave ? (Si vous ne le savez pas, demandez a Bucky ou utilisez les sources de donnees proposees lorsque vous cliquez sur le " ? ".)`,
+          `Que se passera-t-il si rien n'est fait pour resoudre ce probleme ? (Repondez d'abord selon vos propres connaissances. Puis demandez a Bucky.)`,
+        ],
+        [
+          `Quel est l'etat souhaite ou ideal que vous voulez atteindre avec votre solution ? Quel est votre objectif ? A quoi ressemblera le monde si ce probleme est resolu ? (Repondez d'abord selon vos propres connaissances. Puis demandez a Bucky.)`,
+          `Comment mesurerez-vous le succes ? Comment saurez-vous que vous avez atteint l'etat souhaite ? (Repondez d'abord selon vos connaissances. Puis demandez a Bucky.)`,
+        ],
+        [
+          `Que fait notre solution pour atteindre l'etat souhaite ? Comment y parvient-elle ?`,
+          `De quelles technologies, programmes ou politiques aura-t-elle besoin ?`,
+          `De quelles ressources notre solution a-t-elle besoin ?`,
+          `En quoi notre solution participe-t-elle a une economie circulaire, regeneratrice et plus equitable ?`,
+        ],
+        [
+          `Cout 1. Combien coutera notre strategie pour etre testee, en preuve de concept, dans le pays ou nous la testerons et la mettrons en oeuvre pour la premiere fois ? (Repondez du mieux possible, puis demandez a Bucky. Voir `,
+          `Cout 2. Combien coutera notre strategie pour etre mise en oeuvre a grande echelle ?`,
+          `Ou obtiendrons-nous les ressources et le financement necessaires pour mettre en oeuvre notre solution, comme decrit ci-dessus ?`,
+          `Qui mettra en oeuvre notre solution ? Ou sera-t-elle testee (et deployee en premier) ? Qui sera notre partenaire sur le terrain/dans le pays ?`,
+          `Quelles actions sont necessaires dans les 6 a 12 prochains mois pour mettre en oeuvre notre solution ? Qui fera quoi, quand et ou ?`,
+          `A quoi ressemble, plus en detail, notre strategie une fois mise en oeuvre ? (Pour cette tache, demandez a l'un de nos collegues IA de dessiner l'aspect de la strategie une fois en place.)`,
+          `Resultats 1. Demandez a Bucky ou a l'un de vos collegues IA : " Quels sont les resultats de la mise en oeuvre de notre strategie ? Quels seraient les effets de fournir a toute une communaute ____________ (decrivez votre strategie) sur l'economie locale, l'emploi, l'environnement, la sante humaine et d'autres facteurs sociaux ? "`,
+          `Resultats 2. Demandez a Bucky ou a l'un de vos collegues IA : " Quels seraient les effets de fournir a toute la planete ____________ (decrivez votre strategie) sur l'economie mondiale, les emplois supplementaires, l'environnement, la sante humaine et d'autres facteurs sociaux ? "`,
+          `Que ferions-nous avec 10 000 $ pour faire avancer la strategie vers la mise en oeuvre ?`,
+          `Que pouvez-vous/votre equipe faire — des maintenant, avec les seules ressources auxquelles vous avez acces — pour faire progresser votre strategie ?`,
+        ],
+        [
+          `Relisez l'ensemble de votre strategie, previsualisez-la et ajoutez ce qui pourrait manquer.`,
+        ],
+      ],
+    },
+
+  };
+
+  private readonly buttonLabels: Record<
+    SupportedLanguage,
+    { next: string; preview: string }
+  > = {
+    en: { next: 'Next', preview: 'Preview Solution' },
+    fr: { next: 'Suivant', preview: 'Prévisualiser la solution' },
+  };
+
+  currentLanguage: SupportedLanguage = this.defaultLanguage;
+  steps: string[] = [...this.localizedContent[this.defaultLanguage].steps];
+  subtitles: string[] = [
+    ...this.localizedContent[this.defaultLanguage].subtitles,
+  ];
+  display: boolean[] = [];
+  buttontexts: string[] = [];
+  AllQuestions: Array<Array<string>> = this.localizedContent[
+    this.defaultLanguage
+  ].questions.map((group) => [...group]);
+  private langSub?: Subscription;
+
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
     public data: DataService,
     private router: Router,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private languageService: LanguageService
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -83,11 +223,12 @@ export class PlaygroundStepsComponent implements OnInit {
       this.getMembers();
       this.getEvaluators();
     });
+    this.initializeLanguageSupport();
   }
   ngOnInit(): void {
     window.scrollTo(0, 0);
+    this.display = new Array(this.steps.length).fill(false);
     this.display[this.currentIndexDisplay] = true;
-    this.buttontexts[this.steps.length - 1] = 'Preview Solution';
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -228,22 +369,6 @@ export class PlaygroundStepsComponent implements OnInit {
   currentIndexDisplay: number = 0;
 
   @Input() title?: string = 'World Hunger';
-  steps: string[] = [
-    'Step 1:  Defining the Problem State',
-    'Step 2: Envisioning the Preferred State',
-    'Step 3: Developing Our Solution',
-    'Step 4: Implementation',
-    'Step 5: Strategy Outreach',
-  ];
-  subtitles: string[] = [
-    'Where we are now',
-    'Where we want to be',
-    'How we get to the Preferred State',
-    'Actions: What, where, who, when, costs, funders, You',
-    'Final Review and update order of things',
-  ];
-  display = new Array(this.steps.length).fill(false);
-  buttontexts = new Array(this.steps.length).fill('Next');
   questionsTitles: Array<Array<string>> = [
     ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
     ['S2-A', 'S2-B'],
@@ -268,59 +393,6 @@ export class PlaygroundStepsComponent implements OnInit {
     'bg-gray-500 h-2',
     'bg-gray-500 h-2',
     'bg-gray-500 h-2',
-  ];
-  AllQuestions: Array<Array<string>> = [
-    [
-      `What is the problem you have chosen and why is it important? 
-(Answer these two questions first from your personal knowledge. Then Ask Bucky why it is important.)`,
-      `What are the symptoms of this problem? How do you measure it? (Answer these 2 question first from your personal knowledge. Then Ask Bucky.)
-(After these questions, ask Bucky or answer from your knowledge: What are the causes of these symptoms? This will provide deeper insight into the problem.)"`,
-      `How many people does this problem impact in the world? Where is it most severe? (If you don’t know, ask Bucky, or use the data sources provided when you click on the “?" .)`,
-      `What will happen if nothing is done to deal with this problem? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
-    ],
-    [
-      `What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved?”  (Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
-      `How will you measure success? How will you know when you reach the preferred state? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
-    ],
-    [
-      'What does our solution do to reach the preferred state? How will it do it?',
-      'What technology, programs, policies will it need?',
-      'What resources does our solution need?',
-      'How is our solution part of a circular, regenerative, more equitable economy?',
-    ],
-    [
-      // i = 0
-      `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where we will test and first implement the solution?  (Answer this as best you can. Then ask Bucky. See `,
-      // i = 1
-      'Cost 2. How much will our strategy cost to implement at scale?',
-
-      // i = 2
-      'Where will we get the resources and funding needed to implement our solution, to do the above?',
-
-      // i = 3
-      'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
-
-      // i = 4
-      'What actions are needed in the next 6-12 months to get our solution implemented? Who will do what, when, where?',
-
-      // i = 5
-      'What does our implemented strategy look like, in more detail? (For this task ask one of our AI colleagues to draw a picture of what the strategy will look like when implemented).',
-
-      // i = 6
-      'Results 1. Ask Bucky, and/or one of your AI Colleagues, "What are the results of implementing our strategy? What would be the results of providing everyone in a community ____________ (insert description of your strategy) on the local economy, jobs, environment, human health, and other social factors?"',
-
-      // i = 7
-      'Results 2. Ask Bucky, and/or one of your AI Colleagues, "What would be the results of providing everyone in the world ____________ (insert description of your strategy) on the global economy, additional jobs, environment, human health, and other social factors?"',
-
-      // i = 8
-      'What would we do with $10,000 to advance the strategy towards implementation?',
-
-      // i = 9
-      'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
-    ],
-    [
-      'Review Your Entire Strategy, Preview it, Add what you think might be missing.',
-    ],
   ];
   popupStyles: any = [];
 
@@ -574,5 +646,41 @@ export class PlaygroundStepsComponent implements OnInit {
       console.error('Error uploading file:', error);
       alert('Error occurred while uploading file. Please try again.');
     }
+  }
+
+  ngOnDestroy(): void {
+    this.langSub?.unsubscribe();
+  }
+
+  private initializeLanguageSupport() {
+    this.setLocalizedContent(this.languageService.currentLanguage);
+    this.langSub = this.languageService.languageChanges$.subscribe((event) => {
+      this.setLocalizedContent(event.lang);
+    });
+  }
+
+  private setLocalizedContent(language: string) {
+    const lang = this.isSupportedLanguage(language)
+      ? language
+      : this.defaultLanguage;
+    this.currentLanguage = lang;
+    const content = this.localizedContent[lang];
+    this.steps = [...content.steps];
+    this.subtitles = [...content.subtitles];
+    this.AllQuestions = content.questions.map((group) => [...group]);
+    this.buttontexts = this.createButtonTexts(lang);
+  }
+
+  private createButtonTexts(language: SupportedLanguage): string[] {
+    const labels = this.buttonLabels[language];
+    const values = new Array(this.steps.length).fill(labels.next);
+    if (values.length) {
+      values[values.length - 1] = labels.preview;
+    }
+    return values;
+  }
+
+  private isSupportedLanguage(language: string): language is SupportedLanguage {
+    return Object.prototype.hasOwnProperty.call(this.localizedContent, language);
   }
 }

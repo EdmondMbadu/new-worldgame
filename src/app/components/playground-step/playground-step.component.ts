@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
@@ -13,8 +20,11 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { environment } from 'environments/environments';
-import { take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { DataService } from 'src/app/services/data.service';
+import { LanguageService } from 'src/app/services/language.service';
+
+type StepSupportedLanguage = 'en' | 'fr';
 
 export interface FeedbackRequest {
   authorId?: string;
@@ -25,18 +35,43 @@ export interface FeedbackRequest {
   templateUrl: './playground-step.component.html',
   styleUrls: ['./playground-step.component.css'],
 })
-export class PlaygroundStepComponent {
+export class PlaygroundStepComponent implements OnInit, OnDestroy {
   strategyReviewSelected: boolean = false;
   defaultReviewSelected = true;
   chosenColorDefault = 'font-bold text-xl';
   chosenColorReview = '';
   loader: any;
-  titles = [
-    `<h1 class="text-left text-xl font-bold my-4"> Problem State </h1>`,
-    `<h1 class="text-left text-xl font-bold my-4"> Preferred State </h1>`,
-    `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
-    `<h1 class="text-left text-xl font-bold  my-4"> Implementation </h1>`,
-  ];
+  private readonly defaultLanguage: StepSupportedLanguage = 'en';
+  private readonly strategySectionTitles: Record<
+    StepSupportedLanguage,
+    string[]
+  > = {
+    en: [
+      `<h1 class="text-left text-xl font-bold my-4"> Problem State </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> Preferred State </h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Implementation </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> Strategy Review </h1>`,
+    ],
+    fr: [
+      `<h1 class="text-left text-xl font-bold my-4"> État du problème </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> État souhaité </h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
+      `<h1 class="text-left text-xl font-bold  my-4"> Mise en oeuvre </h1>`,
+      `<h1 class="text-left text-xl font-bold my-4"> Revue de la stratégie </h1>`,
+    ],
+  };
+  private readonly videoGuideText: Record<
+    StepSupportedLanguage,
+    { prefix: string; label: string }
+  > = {
+    en: { prefix: 'Step', label: 'Quick Video Guide' },
+    fr: { prefix: 'Étape', label: 'Guide vidéo express' },
+  };
+  private langSub?: Subscription;
+  currentLanguage: StepSupportedLanguage = this.defaultLanguage;
+  helperVideoPrefix = this.videoGuideText[this.defaultLanguage].prefix;
+  helperVideoLabel = this.videoGuideText[this.defaultLanguage].label;
   array: string[] = [];
   displayPopupInfo: boolean = false;
   displayCongrats: boolean = false;
@@ -85,7 +120,8 @@ export class PlaygroundStepComponent {
     private fns: AngularFireFunctions,
     private time: TimeService,
     private storage: AngularFireStorage,
-    private dataService: DataService
+    private dataService: DataService,
+    private languageService: LanguageService
   ) {}
   aiOptions = [
     {
@@ -163,6 +199,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   isInitialized = false;
   ngOnInit() {
     window.scrollTo(0, 0);
+    this.initializeLanguageSupport();
     // this.initializeContents();
 
     this.solution
@@ -671,14 +708,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       }
     });
 
-    // Your step headings array
-    const titles = [
-      `<h1 class="text-left text-xl font-bold my-4"> Problem State </h1>`,
-      `<h1 class="text-left text-xl font-bold my-4"> Preferred State </h1>`,
-      `<h1 class="text-left text-xl font-bold my-4"> Plan </h1>`,
-      `<h1 class="text-left text-xl font-bold my-4"> Implementation </h1>`,
-      `<h1 class="text-left text-xl font-bold my-4"> Strategy Review </h1>`,
-    ];
+    const titles = this.getLocalizedStrategyHeadings();
 
     // Now, build the result array only for the steps that have content
     let result: string[] = [];
@@ -773,5 +803,42 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   toggleCongratsAndDone() {
     this.displayCongrats = !this.displayCongrats;
     this.router.navigate(['/solution-view', this.solutionId]);
+  }
+
+  ngOnDestroy(): void {
+    this.langSub?.unsubscribe();
+  }
+
+  private initializeLanguageSupport() {
+    this.setLocalizedContent(this.languageService.currentLanguage);
+    this.langSub = this.languageService.languageChanges$.subscribe((event) => {
+      this.setLocalizedContent(event.lang);
+    });
+  }
+
+  private setLocalizedContent(language: string) {
+    const lang = this.isSupportedLanguage(language)
+      ? language
+      : this.defaultLanguage;
+    this.currentLanguage = lang;
+    const videoGuideCopy = this.videoGuideText[lang];
+    this.helperVideoPrefix = videoGuideCopy.prefix;
+    this.helperVideoLabel = videoGuideCopy.label;
+  }
+
+  private isSupportedLanguage(
+    language: string
+  ): language is StepSupportedLanguage {
+    return Object.prototype.hasOwnProperty.call(
+      this.strategySectionTitles,
+      language
+    );
+  }
+
+  private getLocalizedStrategyHeadings(): string[] {
+    return (
+      this.strategySectionTitles[this.currentLanguage] ||
+      this.strategySectionTitles[this.defaultLanguage]
+    );
   }
 }
