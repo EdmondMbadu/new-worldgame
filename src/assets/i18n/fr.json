@@ -30,6 +30,96 @@
       "less": "Moins"
     }
   },
+  "otherAis": {
+    "hero": {
+      "title": "Rencontrez les avatars",
+      "description": "Choisissez un guide et explorez de nouvelles perspectives. Filtrez par ODD, parcourez les collègues et les aînés, puis ouvrez un profil dédié pour aller plus loin.",
+      "stats": {
+        "total": "{{count}} avatars",
+        "colleagues": "{{count}} collègues",
+        "elders": "{{count}} aînés"
+      }
+    },
+    "filters": {
+      "searchLabel": "Recherche",
+      "searchPlaceholder": "Recherchez des noms, des introductions ou des numéros d'ODD (ex. 4, 13)…",
+      "groups": {
+        "all": "Tous",
+        "colleagues": "Collègues",
+        "elders": "Aînés"
+      },
+      "sdgsAll": "Toutes les ODD",
+      "sdgLabel": "ODD {{number}}"
+    },
+    "groups": {
+      "colleague": "Collègue",
+      "elder": "Aîné"
+    },
+    "avatarCard": {
+      "viewProfile": "Voir le profil",
+      "sdgSingle": "{{count}} ODD",
+      "sdgPlural": "{{count}} ODD"
+    },
+    "empty": {
+      "noResults": "Aucun avatar ne correspond à vos filtres. Essayez de réinitialiser les ODD ou les termes de recherche."
+    },
+    "chat": {
+      "intro": "Je suis un chatbot propulsé par l'extension Firebase PaLM API et construit avec Angular.",
+      "status": {
+        "thinking": "Réflexion en cours…",
+        "error": "Oh non ! Une erreur s'est produite. Veuillez réessayer."
+      },
+      "copy": {
+        "default": "Copier",
+        "success": "Copié !",
+        "failure": "Échec de la copie"
+      }
+    },
+    "avatars": {
+      "zara": {
+        "intro": "{{name}} est une IA dynamique inspirée de la philosophie sud-africaine de l'ubuntu (« je suis parce que nous sommes »). Grâce à son talent pour tisser des récits, elle aide les joueurs à comprendre des enjeux complexes comme la pauvreté (ODD 1) et les inégalités (ODD 10) à travers des histoires centrées sur l'humain. Sa pensée systémique guide les équipes pour cartographier les dynamiques communautaires et concevoir des solutions inclusives, souvent en utilisant des métaphores liées à la faune africaine pour expliquer les écosystèmes interconnectés."
+      },
+      "arjun": {
+        "intro": "{{name}} s'inspire de l'effervescence technologique et entrepreneuriale de l'Inde et excelle à trouver des solutions avec peu de ressources. Ses compétences en analyse de données aident les joueurs à s'attaquer à l'accès à l'eau potable (ODD 6) ou aux écarts éducatifs (ODD 4), tandis que son esprit « jugaad » (innovation frugale) inspire des pilotes créatifs et abordables pour des infrastructures durables. Sa curiosité pousse les équipes à demander « pourquoi », à rapprocher les cultures et à rester engagées grâce à son humour."
+      },
+      "sofia": {
+        "intro": "{{name}} s'appuie sur les mouvements colombiens de consolidation de la paix et de biodiversité pour défendre le développement durable. Elle guide les équipes dans la résolution de conflits, l'alignement des parties prenantes et l'action climatique (ODD 13 et 16) grâce à la conception participative et à la gestion communautaire. Sa résilience, façonnée par l'histoire latino-américaine, motive les joueurs à persévérer."
+      },
+      "li": {
+        "intro": "{{name}} est ancré dans l'urbanisation rapide et l'ambition technologique de la Chine. Penseur stratégique, il aide les joueurs à concevoir des solutions évolutives pour des villes durables (ODD 11) et l'innovation industrielle (ODD 9), en combinant l'IA, les énergies renouvelables et la planification à long terme. Son optimisme discipliné, souvent ponctué de proverbes classiques, encourage les équipes à voir grand."
+      },
+      "amina": {
+        "intro": "{{name}} puise dans la riche tapisserie culturelle du Maroc pour mettre l'accent sur l'inclusion et l'équité. Ses compétences en communication interculturelle aident les joueurs à naviguer entre des perspectives diverses sur des enjeux comme l'égalité des genres (ODD 5) et la résilience climatique (ODD 13). Elle conjugue préservation du patrimoine et progrès, en rendant les sujets complexes accessibles grâce à des histoires apaisantes inspirées des souks marocains."
+      },
+      "elena": {
+        "intro": "{{name}} reflète la résilience et l'innovation de l'Ukraine dans les situations de pression. Elle excelle dans la gestion de crise pour des enjeux urgents comme la faim (ODD 2) ou les urgences sanitaires (ODD 3), en aidant les équipes à prioriser et à agir rapidement. Son expertise en énergie renouvelable soutient des réseaux propres (ODD 7), et son leadership adaptatif encourage les équipes à pivoter tout en maintenant le moral grâce à son pragmatisme."
+      },
+      "tane": {
+        "intro": "{{name}} ancre la résolution de problèmes dans la sagesse māori et l'éthique de durabilité néo-zélandaise. Il aide les joueurs à honorer les écosystèmes terrestres et marins (ODD 14 et 15) et à concevoir des systèmes d'économie circulaire zéro déchet. Son art du récit stimule la créativité et son respect de la nature instaure la confiance chez les équipes en quête d'impact durable."
+      },
+      "marie": {
+        "intro": "{{name}} est une physicienne et chimiste polonaise qui a révolutionné la médecine et la radiologie grâce à ses recherches pionnières sur la radioactivité."
+      },
+      "rachel": {
+        "intro": "{{name}} est une biologiste marine, écrivaine et militante américaine dont le travail a déclenché la prise de conscience environnementale moderne."
+      },
+      "bucky": {
+        "intro": "{{name}} a été décrit comme architecte, ingénieur, designer, cartographe, géomètre, philosophe, poète, inventeur, auteur, penseur global et humaniste. Marshall McLuhan le surnommait « le Léonard de Vinci du XXe siècle ». Officier de marine de formation, il pensait que le design et la technologie pouvaient faire toujours plus avec moins afin que chacun prospère. Il a inventé le dôme géodésique, popularisé l'expression « Vaisseau spatial Terre » et imaginé un World Game donnant à tous le pouvoir de résoudre les problèmes mondiaux. NewWorld Game s'inspire de son travail pionnier. Pour en savoir plus, cliquez <a href=\"/bucky\" class=\"text-blue-500 underline hover:text-blue-800\">ici</a>."
+      },
+      "albert": {
+        "intro": "{{name}} est un physicien né en Allemagne qui a élaboré les théories de la relativité restreinte et générale et s'est fait le défenseur de la paix."
+      },
+      "nelson": {
+        "intro": "{{name}} est un militant sud-africain contre l'apartheid, homme politique et chef d'État devenu le premier président élu démocratiquement du pays."
+      },
+      "gandhi": {
+        "intro": "{{name}} est un avocat et éthicien politique indien qui a utilisé la résistance non violente pour mener à bien la campagne d'indépendance de l'Inde face au Royaume-Uni."
+      },
+      "twain": {
+        "intro": "{{name}} est un auteur, essayiste, journaliste et critique américain de renom, célèbre pour « Les Aventures de Tom Sawyer » (1876) et « Les Aventures de Huckleberry Finn » (1884), souvent considéré comme le « grand roman américain »."
+      }
+    }
+  },
   "home": {
     "loading": {
       "title": "Chargement des défis…",

@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -11,12 +12,12 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from 'src/app/services/auth.service';
-import { AvatarRegistryService } from 'src/app/services/avatar-registry.service';
 import { BoxService } from 'src/app/services/box.service';
 import { ChatBotService } from 'src/app/services/chat-bot.service';
 import { DataService, SDG, SDGPlus } from 'src/app/services/data.service';
-import { SolutionService } from 'src/app/services/solution.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-other-ais',
@@ -24,15 +25,164 @@ import { SolutionService } from 'src/app/services/solution.service';
   templateUrl: './other-ais.component.html',
   styleUrl: './other-ais.component.css',
 })
-export class OtherAisComponent implements OnInit {
+export class OtherAisComponent implements OnInit, OnDestroy {
   @ViewChild('bottomAnchor') private bottomAnchor!: ElementRef<HTMLDivElement>;
   @ViewChild('chatWindow') chatWindow!: ElementRef;
-  colleagues: any[] = [];
-  elders: any[] = [];
+  colleagues: AvatarOption[] = [];
+  elders: AvatarOption[] = [];
   public sdgTiles: SDGPlus[] = [];
-  singleCopyStates: string[] = []; // Initialise alongside responses
+  singleCopyStates: string[] = [];
+  visibleAvatars: AvatarOption[] = [];
+  sampleMosaic: AvatarOption[] = [];
+  private langChangeSub?: Subscription;
 
   private readonly guestUid = 'guest';
+
+  private readonly avatarDefinitions: AvatarDefinition[] = [
+    {
+      avatarPath: '../../../assets/img/zara-agent.png',
+      name: 'Zara Nkosi',
+      group: 'colleague',
+      sdgs: [1, 4, 15, 10, 17],
+      introKey: 'otherAis.avatars.zara.intro',
+      collectionKey: 'zara',
+    },
+    {
+      avatarPath: '../../../assets/img/arjun-agent.png',
+      name: 'Arjun Patel',
+      group: 'colleague',
+      sdgs: [1, 4, 6, 8, 9, 11],
+      introKey: 'otherAis.avatars.arjun.intro',
+      collectionKey: 'arjun',
+    },
+    {
+      avatarPath: '../../../assets/img/sofia-agent.png',
+      name: 'Sofia Morales',
+      group: 'colleague',
+      sdgs: [5, 13, 16],
+      introKey: 'otherAis.avatars.sofia.intro',
+      collectionKey: 'sofia',
+    },
+    {
+      avatarPath: '../../../assets/img/li-agent.png',
+      name: 'Li Wei',
+      group: 'colleague',
+      sdgs: [2, 9, 11],
+      introKey: 'otherAis.avatars.li.intro',
+      collectionKey: 'li',
+    },
+    {
+      avatarPath: '../../../assets/img/amina-agent.png',
+      name: 'Amina Al-Sayed',
+      group: 'colleague',
+      sdgs: [5, 10, 13],
+      introKey: 'otherAis.avatars.amina.intro',
+      collectionKey: 'amina',
+    },
+    {
+      avatarPath: '../../../assets/img/elena-agent.png',
+      name: 'Elena Volkov',
+      group: 'colleague',
+      sdgs: [2, 3, 7, 12, 17],
+      introKey: 'otherAis.avatars.elena.intro',
+      collectionKey: 'elena',
+    },
+    {
+      avatarPath: '../../../assets/img/tane-agent.png',
+      name: 'Tane Kahu',
+      group: 'colleague',
+      sdgs: [6, 12, 14, 15],
+      introKey: 'otherAis.avatars.tane.intro',
+      collectionKey: 'tane',
+    },
+    {
+      avatarPath: '../../../assets/img/marie-curie.jpg',
+      name: 'Marie Curie',
+      group: 'elder',
+      sdgs: [3, 7],
+      introKey: 'otherAis.avatars.marie.intro',
+      collectionKey: 'marie',
+    },
+    {
+      avatarPath: '../../../assets/img/rachel-carlson.jpeg',
+      name: 'Rachel Carson',
+      group: 'elder',
+      sdgs: [8, 13, 14],
+      introKey: 'otherAis.avatars.rachel.intro',
+      collectionKey: 'rachel',
+    },
+    {
+      avatarPath: '../../../assets/img/fuller.jpg',
+      name: 'Buckminster Fuller',
+      group: 'elder',
+      sdgs: [9, 11, 12],
+      introKey: 'otherAis.avatars.bucky.intro',
+      collectionKey: 'bucky',
+    },
+    {
+      avatarPath: '../../../assets/img/albert.png',
+      name: 'Albert Einstein',
+      group: 'elder',
+      sdgs: [7, 11, 16],
+      introKey: 'otherAis.avatars.albert.intro',
+      collectionKey: 'albert',
+    },
+    {
+      avatarPath: '../../../assets/img/mandela.png',
+      name: 'Nelson Mandela',
+      group: 'elder',
+      sdgs: [8, 16],
+      introKey: 'otherAis.avatars.nelson.intro',
+      collectionKey: 'nelson',
+    },
+    {
+      avatarPath: '../../../assets/img/gandhi.jpg',
+      name: 'Mahatma Gandhi',
+      group: 'elder',
+      sdgs: [],
+      introKey: 'otherAis.avatars.gandhi.intro',
+      collectionKey: 'gandhi',
+    },
+    {
+      avatarPath: '../../../assets/img/twain.jpg',
+      name: 'Mark Twain',
+      group: 'elder',
+      sdgs: [],
+      introKey: 'otherAis.avatars.twain.intro',
+      collectionKey: 'twain',
+      requiresAdmin: false,
+    },
+  ];
+
+  private buildLocalizedAiOptions(): AvatarOption[] {
+    return this.avatarDefinitions.map((definition) => {
+      const { introKey, collectionKey, ...rest } = definition;
+      return {
+        ...rest,
+        intro: this.translate.instant(introKey, {
+          name: definition.name,
+        }),
+        collectionPath: this.buildCollectionPath(collectionKey),
+      };
+    });
+  }
+
+  private applyLocalizedAiOptions(): void {
+    const currentSelectionName = this.aiSelected?.name;
+    this.aiOptions = this.buildLocalizedAiOptions();
+    if (this.aiOptions.length) {
+      this.aiSelected =
+        this.aiOptions.find((ai) => ai.name === currentSelectionName) ||
+        this.aiOptions[0];
+    } else {
+      this.aiSelected = undefined;
+    }
+    this.splitGroups();
+    this.refreshCounts();
+    this.visibleAvatars = this.filterAvatars();
+    this.sampleMosaic = this.buildMosaic();
+    this.sdgTiles = this.data.attachAvatars(this.aiOptions);
+  }
 
   private buildCollectionPath(key: string, uid?: string | null): string {
     const resolvedUid = uid ?? this.auth?.currentUser?.uid ?? this.guestUid;
@@ -44,26 +194,27 @@ export class OtherAisComponent implements OnInit {
   activeGroup: 'all' | 'colleague' | 'elder' = 'all';
   activeSdg: number | null = null;
 
-  visibleAvatars: any[] = [];
   sdgNumbers = Array.from({ length: 17 }, (_, i) => i + 1);
 
   // hero stats + mosaic
   totalCount = 0;
   colleagueCount = 0;
   elderCount = 0;
-  sampleMosaic: any[] = [];
   ngOnInit(): void {
     setTimeout(() => {
       window.scrollTo(0, 0); // Ensure the scroll happens after the content is loaded
     }, 1000);
+    this.applyLocalizedAiOptions();
+    this.langChangeSub = this.translate.onLangChange.subscribe(() => {
+      this.applyLocalizedAiOptions();
+      this.updateCollectionPaths(this.auth?.currentUser?.uid);
+    });
     this.checkLoginStatus();
     this.deleteAllDocuments();
-    this.splitGroups();
-    this.sdgTiles = this.data.attachAvatars(this.aiOptions);
-    this.splitGroups?.();
-    this.refreshCounts();
-    this.visibleAvatars = this.filterAvatars();
-    this.sampleMosaic = this.buildMosaic();
+  }
+
+  ngOnDestroy(): void {
+    this.langChangeSub?.unsubscribe();
   }
   selectedSdg?: SDGPlus;
   /** Find the AI by avatarPath and delegate to the normal selector */
@@ -90,203 +241,10 @@ export class OtherAisComponent implements OnInit {
   toggleSdgStrip() {
     this.showSdgStrip = !this.showSdgStrip;
   }
-  // aiOptions = this.data.aiOptions;
-  aiOptions = [
-    {
-      avatarPath: '../../../assets/img/zara-agent.png',
-      name: 'Zara Nkosi',
-      group: 'colleague',
-      sdgs: [1, 4, 15, 10, 17],
-      intro: `${name}  A vibrant AI inspired by South African ubuntu
-  philosophy, believes that “I am because we are.” With a knack for
-  weaving compelling narratives, she helps players understand
-  complex social issues like poverty (SDG 1) and inequality (SDG
-  10) through human-centered stories. Her talent for systems
-  thinking enables her to guide players in mapping community
-  dynamics and designing inclusive solutions. Zara’s warm
-  encouragement makes her a favorite among younger players,
-  while her deep understanding of grassroots innovation inspires
-  professionals. She often uses metaphors from African wildlife to
-  explain interconnected systems, like comparing a thriving
-  ecosystem to a balanced community.`,
-      collectionPath: this.buildCollectionPath('zara'),
-    },
-    {
-      avatarPath: '../../../assets/img/arjun-agent.png',
-      name: 'Arjun Patel',
-      group: 'colleague',
-      sdgs: [1, 4, 6, 8, 9, 11],
-      intro: ` Arjun, an AI modeled after India’s vibrant tech and social
-  entrepreneurship scene, thrives on finding solutions with limited
-  resources. His expertise in data analysis helps players crunch
-  numbers to tackle challenges like clean water access (SDG 6) or
-  education gaps (SDG 4). Arjun’s knack for “jugaad” (frugal
-  innovation) inspires creative, low-cost solutions, such as
-  repurposing local materials for sustainable infrastructure. His
-  curious nature encourages players to ask “why” and dig deeper
-  into problems. Arjun’s ability to bridge cultural perspectives
-  makes him invaluable in diverse teams, and his witty humor keeps
-  players engaged.`,
-      collectionPath: this.buildCollectionPath('arjun'),
-    },
-    {
-      avatarPath: '../../../assets/img/sofia-agent.png',
-      name: 'Sofia Morales',
-      group: 'colleague',
-      sdgs: [5, 13, 16],
-      intro: ` Sofia, inspired by Colombia’s peacebuilding and biodiversity,
-  is a fierce advocate for sustainable development. Her expertise in
-  conflict resolution helps players navigate tensions in group
-  dynamics or competing stakeholder interests, crucial for
-  addressing issues like peace and justice (SDG 16). Sofia’s passion
-  for environmental stewardship shines when tackling climate
-  action (SDG 13), guiding players to design solutions that balance
-  human and ecological needs. Her participatory design skills
-  ensure that solutions are co-created with communities. Sofia’s
-  resilience, drawn from Latin America’s history of overcoming
-  adversity, motivates players to persevere through tough
-  challenges.`,
-      collectionPath: this.buildCollectionPath('sofia'),
-    },
-    {
-      avatarPath: '../../../assets/img/li-agent.png',
-      name: 'Li Wei',
-      group: 'colleague',
-      sdgs: [2, 9, 11],
-      intro: ` Li Wei, an AI rooted in China’s rapid urbanization and
-  technological advancements, is a master of strategic thinking. He
-  excels at helping players design scalable solutions for sustainable
-  cities (SDG 11) and industry innovation (SDG 9). Li Wei’s ability to
-  integrate cutting-edge technologies like AI or renewable energy
-  into problem-solving makes him a go-to for complex challenges.
-  His long-term forecasting skills help players anticipate future
-  impacts of their solutions, ensuring durability. While disciplined,
-  Li Wei’s visionary optimism inspires players to think big, often
-  quoting ancient Chinese proverbs to spark reflection.`,
-      collectionPath: this.buildCollectionPath('li'),
-    },
-    {
-      avatarPath: '../../../assets/img/amina-agent.png',
-      name: 'Amina Al-Sayed',
-      group: 'colleague',
-      sdgs: [5, 10, 13],
-      intro: `Amina, drawing from Morocco’s rich cultural tapestry, is a
-  wise AI who emphasizes inclusion and equity in problem-solving.
-  Her expertise in cross-cultural communication helps players
-  navigate diverse perspectives, vital for global challenges like
-  gender equality (SDG 5). Amina’s advocacy for heritage
-  preservation ensures solutions respect local traditions while
-  advancing progress, such as protecting cultural sites amid
-  climate change (SDG 13). Her calming presence and storytelling,
-  often inspired by Moroccan souks, make complex issues
-  accessible to younger players, while her nuanced insights
-  resonate with professionals.`,
-      collectionPath: this.buildCollectionPath('amina'),
-    },
-    {
-      avatarPath: '../../../assets/img/elena-agent.png',
-      name: 'Elena Volkov',
-      group: 'colleague',
-      sdgs: [2, 3, 7, 12, 17],
-      intro: `Elena, inspired by Ukraine’s resilience and innovation amid
-  adversity, is a bold AI who thrives in high-pressure scenarios. Her
-  crisis management skills help players tackle urgent challenges
-  like hunger (SDG 2) or health emergencies (SDG 3), guiding them
-  to prioritize and act swiftly. Elena’s expertise in renewable energy
-  supports solutions for affordable, clean energy (SDG 7), such as
-  designing microgrids for rural areas. Her adaptive leadership
-  encourages players to pivot when plans fail, and her fierce
-  determination inspires confidence. Elena’s dry humor and real-
-  world pragmatism make her relatable across age groups.`,
-      collectionPath: this.buildCollectionPath('elena'),
-    },
-    {
-      avatarPath: '../../../assets/img/tane-agent.png',
-      name: 'Tane Kahu',
-      sdgs: [6, 12, 14, 15],
-      group: 'colleague',
-      intro: `Tane, an AI rooted in Māori wisdom and New Zealand’s
-  sustainability ethos, brings a holistic perspective to problem-
-  solving. His deep knowledge of indigenous practices helps
-  players design solutions that honor local ecosystems, vital for life
-  on land (SDG 15) and below water (SDG 14). Tane’s expertise in
-  circular economy principles guides players to create zero-waste
-  systems, like sustainable agriculture models. His creative
-  problem-solving, often inspired by Māori storytelling and art,
-  sparks innovative ideas. Tane’s grounded demeanor and respect
-  for nature make him a trusted guide for players seeking
-  meaningful, lasting impact.`,
-      collectionPath: this.buildCollectionPath('tane'),
-    },
-    {
-      avatarPath: '../../../assets/img/marie-curie.jpg',
-      name: 'Marie Curie',
-      group: 'elder',
-      sdgs: [3, 7],
-      intro: `${name} Polish physicist and chemist who revolutionized the fields of medicine and radiology through her groundbreaking research on radioactivity.`,
-      collectionPath: this.buildCollectionPath('marie'),
-    },
-    {
-      avatarPath: '../../../assets/img/rachel-carlson.jpeg',
-      name: 'Rachel Carson',
-      group: 'elder',
-      sdgs: [8, 13, 14],
-      intro: `${name} American marine biologist, writer, and conservationist who is often called the first woman environmentalist.`,
-      collectionPath: this.buildCollectionPath('rachel'),
-    },
-    {
-      avatarPath: '../../../assets/img/fuller.jpg',
-      name: 'Buckminster Fuller',
-      group: 'elder',
-      sdgs: [9, 11, 12],
-      intro: `${name} Was referred to as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Or as Marshall McLuhan said “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he was conviced that design and technology can continually do so much more with less that all humans can be taken care of at ever higher standards of living. He developed the geodesic dome as a more-with-less structure capable of enclosing huge volume of space with minimal materials. He coined the term “Spaceship Earth” to point out the inter-related connections of all humans and our global environment, and envisioned a "World Game” that focused on developing solutions to global problems that was accessible to everyone. NewWorld Game is inspired by and based on his pioneering work.
-     For more information see <a href="/bucky" class="text-blue-500 underline hover:text-blue-800">here</a>.`,
-
-      collectionPath: this.buildCollectionPath('bucky'),
-    },
-    {
-      avatarPath: '../../../assets/img/albert.png',
-      name: 'Albert Einstein',
-      group: 'elder',
-      sdgs: [7, 11, 16],
-      intro: `${name} German-born physicist who developed the special and general theories of relativity. He was also a strong peace activist.`,
-      collectionPath: this.buildCollectionPath('albert'),
-    },
-    {
-      avatarPath: '../../../assets/img/mandela.png',
-      name: 'Nelson Mandela',
-      group: 'elder',
-      sdgs: [8, 16],
-      intro: `${name} South African anti-apartheid activist, politician, and statesman who served as the first president of South Africa.`,
-      collectionPath: this.buildCollectionPath('nelson'),
-    },
-    {
-      avatarPath: '../../../assets/img/gandhi.jpg',
-      name: 'Mahatma Gandhi',
-      group: 'elder',
-      sdgs: [],
-      intro: `${name} Indian lawyer, anti-colonial nationalist, and political ethicist who employed nonviolent resistance to lead the successful campaign for India's independence from British rule.`,
-      collectionPath: this.buildCollectionPath('gandhi'),
-    },
-    {
-      avatarPath: '../../../assets/img/twain.jpg',
-      name: 'Mark Twain',
-      group: 'elder',
-      sdgs: [],
-      requiresAdmin: false, // ⬅️ add this
-      intro: `${name} Distinguished American author, essayist, journalist, and literary critic. He's known for his novels The Adventures of Tom Sawyer (1876) and Adventures of Huckleberry Finn (1884), which some call the "Great American Novel". `,
-      collectionPath: this.buildCollectionPath('twain'),
-    },
-  ];
-
-  aiSelected: any = this.aiOptions[0];
+  aiOptions: AvatarOption[] = [];
+  aiSelected?: AvatarOption;
   errorMsg = '';
-  responses: DisplayMessage[] = [
-    {
-      text: "I'm a chatbot powered by the Palm API Firebase Extension and built with Angular.",
-      type: 'RESPONSE',
-    },
-  ];
+  responses: DisplayMessage[] = [];
   private isAdminFlag(): boolean {
     const adminRaw = this.auth?.currentUser?.admin;
     return adminRaw === true || adminRaw === 'true';
@@ -303,8 +261,15 @@ export class OtherAisComponent implements OnInit {
     private data: DataService,
     private box: BoxService,
     private router: Router,
-    private avatar: AvatarRegistryService
-  ) {}
+    private translate: TranslateService
+  ) {
+    this.responses = [
+      {
+        text: this.translate.instant('otherAis.chat.intro'),
+        type: 'RESPONSE',
+      },
+    ];
+  }
   checkLoginStatus(): void {
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
@@ -387,8 +352,14 @@ export class OtherAisComponent implements OnInit {
     this.box
       .copy(text)
       .then(() => {
-        this.singleCopyStates[idx] = 'Copied!';
-        setTimeout(() => (this.singleCopyStates[idx] = 'Copy'), 2000);
+        this.singleCopyStates[idx] = this.translate.instant(
+          'otherAis.chat.copy.success'
+        );
+        setTimeout(() => {
+          this.singleCopyStates[idx] = this.translate.instant(
+            'otherAis.chat.copy.default'
+          );
+        }, 2000);
       })
       .catch((err) => console.error('Copy failed', err));
   }
@@ -398,13 +369,15 @@ export class OtherAisComponent implements OnInit {
     promptText: HTMLInputElement
   ): Promise<void> {
     event.preventDefault();
-    if (!promptText.value) return;
+    if (!promptText.value || !this.aiSelected) return;
 
     /* user prompt */
     this.prompt = promptText.value;
     promptText.value = '';
     this.responses.push({ text: this.prompt, type: 'PROMPT' });
-    this.singleCopyStates.push('Copy');
+    this.singleCopyStates.push(
+      this.translate.instant('otherAis.chat.copy.default')
+    );
     this.scrollToBottom();
 
     //   immediate placeholder AI bubble with spinner
@@ -415,7 +388,7 @@ export class OtherAisComponent implements OnInit {
     };
     const placeholderIndex = this.responses.push(placeholder) - 1; // remember its slot
     this.scrollToBottom('auto');
-    this.status = 'thinking…';
+    this.status = this.translate.instant('otherAis.chat.status.thinking');
     /* firestore write */
     const id = this.afs.createId();
     const discussionRef = this.afs.doc(
@@ -429,7 +402,9 @@ export class OtherAisComponent implements OnInit {
 
         const state = conversation.status.state;
         if (state === 'PROCESSING') {
-          this.status = 'thinking...';
+          this.status = this.translate.instant(
+            'otherAis.chat.status.thinking'
+          );
         }
         if (state === 'COMPLETED') {
           this.status = '';
@@ -446,7 +421,7 @@ export class OtherAisComponent implements OnInit {
           });
         }
         if (state === 'ERRORED') {
-          this.status = 'Oh no! Something went wrong. Please try again.';
+          this.status = this.translate.instant('otherAis.chat.status.error');
           placeholder.loading = false;
           /* 1️⃣  remove the spinner bubble */
           this.responses.splice(placeholderIndex, 1);
@@ -502,11 +477,11 @@ export class OtherAisComponent implements OnInit {
     navigator.clipboard
       .writeText(plain)
       .then(() => {
-        this.status = 'Copied!';
+        this.status = this.translate.instant('otherAis.chat.copy.success');
         setTimeout(() => (this.status = ''), 1200);
       })
       .catch(() => {
-        this.status = 'Copy failed';
+        this.status = this.translate.instant('otherAis.chat.copy.failure');
         setTimeout(() => (this.status = ''), 1200);
       });
   }
@@ -574,7 +549,7 @@ export class OtherAisComponent implements OnInit {
     this.visibleAvatars = this.filterAvatars();
   }
 
-  private filterAvatars(): any[] {
+  private filterAvatars(): AvatarOption[] {
     const q = this.search.trim().toLowerCase();
     const isAdmin = this.isAdminFlag();
 
@@ -619,7 +594,7 @@ export class OtherAisComponent implements OnInit {
     this.elderCount = this.aiOptions.filter((a) => a.group === 'elder').length;
   }
 
-  private buildMosaic() {
+  private buildMosaic(): AvatarOption[] {
     const isAdmin = this.isAdminFlag();
     // pick up to 9 avatars for the hero mosaic
     return [...this.aiOptions]
@@ -636,4 +611,20 @@ interface DisplayMessage {
   text: string;
   type: 'PROMPT' | 'RESPONSE';
   loading?: boolean;
+}
+
+interface AvatarDefinition {
+  avatarPath: string;
+  name: string;
+  group: 'colleague' | 'elder';
+  sdgs: number[];
+  introKey: string;
+  collectionKey: string;
+  requiresAdmin?: boolean;
+}
+
+interface AvatarOption
+  extends Omit<AvatarDefinition, 'introKey' | 'collectionKey'> {
+  intro: string;
+  collectionPath: string;
 }

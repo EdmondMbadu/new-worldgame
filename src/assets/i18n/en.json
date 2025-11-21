@@ -30,6 +30,96 @@
       "less": "Less"
     }
   },
+  "otherAis": {
+    "hero": {
+      "title": "Meet the Avatars",
+      "description": "Choose a guide and dive into new perspectives. Filter by SDG focus areas, browse colleagues and elders, and open a dedicated profile for deep exploration.",
+      "stats": {
+        "total": "{{count}} Avatars",
+        "colleagues": "{{count}} Colleagues",
+        "elders": "{{count}} Elders"
+      }
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search names, intros, or SDG numbers (e.g., 4, 13)…",
+      "groups": {
+        "all": "All",
+        "colleagues": "Colleagues",
+        "elders": "Elders"
+      },
+      "sdgsAll": "All SDGs",
+      "sdgLabel": "SDG {{number}}"
+    },
+    "groups": {
+      "colleague": "Colleague",
+      "elder": "Elder"
+    },
+    "avatarCard": {
+      "viewProfile": "View Profile",
+      "sdgSingle": "{{count}} SDG",
+      "sdgPlural": "{{count}} SDGs"
+    },
+    "empty": {
+      "noResults": "No avatars match your filters. Try clearing the SDG filters or search terms."
+    },
+    "chat": {
+      "intro": "I'm a chatbot powered by the PaLM API Firebase Extension and built with Angular.",
+      "status": {
+        "thinking": "Thinking…",
+        "error": "Oh no! Something went wrong. Please try again."
+      },
+      "copy": {
+        "default": "Copy",
+        "success": "Copied!",
+        "failure": "Copy failed"
+      }
+    },
+    "avatars": {
+      "zara": {
+        "intro": "{{name}} is a vibrant AI inspired by South African ubuntu philosophy (“I am because we are”). With a knack for weaving compelling narratives, she helps players understand complex issues like poverty (SDG 1) and inequality (SDG 10) through human-centered stories. Her systems thinking guides teams as they map community dynamics and design inclusive solutions, often using African wildlife metaphors to explain interconnected ecosystems."
+      },
+      "arjun": {
+        "intro": "{{name}} is modeled after India's vibrant tech and social entrepreneurship scene and thrives on finding solutions with limited resources. His data-analysis skills help players tackle clean water (SDG 6) or education gaps (SDG 4), while his “jugaad” (frugal innovation) spirit inspires creative, low-cost pilots for sustainable infrastructure. His curiosity drives teams to ask “why,” bridge cultures, and stay engaged with witty humor."
+      },
+      "sofia": {
+        "intro": "{{name}} draws on Colombia’s peacebuilding and biodiversity movements to advocate fiercely for sustainable development. She guides teams through conflict resolution, stakeholder alignment, and climate action (SDGs 13 & 16) with participatory design and community stewardship. Her resilience, shaped by Latin America’s history of overcoming adversity, motivates players to persevere through tough challenges."
+      },
+      "li": {
+        "intro": "{{name}} is rooted in China’s rapid urbanization and technological ambition. A strategic thinker, he helps players design scalable solutions for sustainable cities (SDG 11) and industry innovation (SDG 9), blending AI and renewable-energy insights with long-term forecasting. His disciplined optimism, often quoting classical proverbs, nudges teams to think big."
+      },
+      "amina": {
+        "intro": "{{name}} draws from Morocco’s rich cultural tapestry to emphasize inclusion and equity. Her cross-cultural communication skills help players navigate diverse perspectives for global challenges like gender equality (SDG 5) and climate resilience (SDG 13). She balances heritage preservation with progress, translating complex issues through calming stories inspired by Moroccan souks."
+      },
+      "elena": {
+        "intro": "{{name}} reflects Ukraine’s resilience and innovation under pressure. She excels at crisis management for urgent issues such as hunger (SDG 2) or health emergencies (SDG 3), guiding teams to prioritize and act quickly. Her renewable-energy expertise supports clean grids (SDG 7), and her adaptive leadership encourages teams to pivot while keeping morale high with pragmatic humor."
+      },
+      "tane": {
+        "intro": "{{name}} grounds problem-solving in Māori wisdom and New Zealand’s sustainability ethos. He helps players honor land and ocean ecosystems (SDGs 14 & 15) and design circular-economy systems for zero waste. His storytelling sparks creativity, and his respect for nature builds trust with teams seeking meaningful, lasting impact."
+      },
+      "marie": {
+        "intro": "{{name}} is a Polish physicist and chemist who revolutionized medicine and radiology through pioneering research on radioactivity."
+      },
+      "rachel": {
+        "intro": "{{name}} is an American marine biologist, writer, and conservationist whose work galvanized modern environmental awareness and protection."
+      },
+      "bucky": {
+        "intro": "{{name}} was described as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Marshall McLuhan called him “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he believed design and technology could continually do more with less so everyone could thrive. He developed the geodesic dome, coined “Spaceship Earth,” and envisioned a World Game that empowered everyone to solve global problems. NewWorld Game is inspired by his pioneering work. For more information see <a href=\"/bucky\" class=\"text-blue-500 underline hover:text-blue-800\">here</a>."
+      },
+      "albert": {
+        "intro": "{{name}} is a German-born physicist who developed the special and general theories of relativity and was a vocal peace activist."
+      },
+      "nelson": {
+        "intro": "{{name}} is a South African anti-apartheid activist, politician, and statesman who became the country's first democratically elected president."
+      },
+      "gandhi": {
+        "intro": "{{name}} is an Indian lawyer, anti-colonial nationalist, and political ethicist who used nonviolent resistance to lead the successful campaign for India's independence from British rule."
+      },
+      "twain": {
+        "intro": "{{name}} is a distinguished American author, essayist, journalist, and critic known for \"The Adventures of Tom Sawyer\" (1876) and \"Adventures of Huckleberry Finn\" (1884), often called the “Great American Novel.”"
+      }
+    }
+  },
   "home": {
     "loading": {
       "title": "Loading challenges…",

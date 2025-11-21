@@ -37,12 +37,10 @@
           >
             <div>
               <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
-                Meet the Avatars
+                {{ 'otherAis.hero.title' | translate }}
               </h1>
               <p class="mt-3 text-lg opacity-80">
-                Choose a guide and dive into new perspectives. Filter by focus
-                areas (SDGs), browse colleagues and elders, and open a dedicated
-                profile for deep exploration.
+                {{ 'otherAis.hero.description' | translate }}
               </p>
 
               <!-- Stats -->
@@ -51,19 +49,28 @@
                   class="inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-slate-800/70 border border-black/10 dark:border-white/10 px-3 py-1"
                 >
                   <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                  {{ totalCount }} Avatars
+                  {{
+                    'otherAis.hero.stats.total'
+                      | translate: { count: totalCount }
+                  }}
                 </span>
                 <span
                   class="inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-slate-800/70 border border-black/10 dark:border-white/10 px-3 py-1"
                 >
                   <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
-                  {{ colleagueCount }} Colleagues
+                  {{
+                    'otherAis.hero.stats.colleagues'
+                      | translate: { count: colleagueCount }
+                  }}
                 </span>
                 <span
                   class="inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-slate-800/70 border border-black/10 dark:border-white/10 px-3 py-1"
                 >
                   <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-                  {{ elderCount }} Elders
+                  {{
+                    'otherAis.hero.stats.elders'
+                      | translate: { count: elderCount }
+                  }}
                 </span>
               </div>
             </div>
@@ -97,13 +104,17 @@
           >
             <!-- Search -->
             <div class="flex-1">
-              <label class="sr-only" for="q">Search</label>
+              <label class="sr-only" for="q">
+                {{ 'otherAis.filters.searchLabel' | translate }}
+              </label>
               <div class="relative">
                 <input
                   #q
                   type="search"
                   (input)="onSearch(q.value)"
-                  placeholder="Search names, intros, or SDG numbers (e.g., 4, 13)…"
+                  [placeholder]="
+                    'otherAis.filters.searchPlaceholder' | translate
+                  "
                   class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
                 />
 
@@ -135,7 +146,7 @@
                     : 'bg-white/70 dark:bg-slate-800/70 border-black/10 dark:border-white/10'
                 "
               >
-                All
+                {{ 'otherAis.filters.groups.all' | translate }}
               </button>
               <button
                 type="button"
@@ -147,7 +158,7 @@
                     : 'bg-white/70 dark:bg-slate-800/70 border-black/10 dark:border-white/10'
                 "
               >
-                Colleagues
+                {{ 'otherAis.filters.groups.colleagues' | translate }}
               </button>
               <button
                 type="button"
@@ -159,7 +170,7 @@
                     : 'bg-white/70 dark:bg-slate-800/70 border-black/10 dark:border-white/10'
                 "
               >
-                Elders
+                {{ 'otherAis.filters.groups.elders' | translate }}
               </button>
             </div>
 
@@ -176,7 +187,7 @@
                       : 'bg-white/70 dark:bg-slate-800/70 border-black/10 dark:border-white/10'
                   "
                 >
-                  All SDGs
+                  {{ 'otherAis.filters.sdgsAll' | translate }}
                 </button>
                 <button
                   *ngFor="let n of sdgNumbers"
@@ -189,7 +200,9 @@
                       : 'bg-white/70 dark:bg-slate-800/70 border-black/10 dark:border-white/10'
                   "
                 >
-                  SDG {{ n }}
+                  {{
+                    'otherAis.filters.sdgLabel' | translate: { number: n }
+                  }}
                 </button>
               </div>
             </div>
@@ -254,7 +267,7 @@
                         ai.group === 'elder' ? 'bg-amber-500' : 'bg-indigo-500'
                       "
                     ></span>
-                    {{ ai.group | titlecase }}
+                    {{ ('otherAis.groups.' + ai.group) | translate }}
                   </span>
                   <span
                     *ngFor="let s of ai.sdgs | slice : 0 : 4"
@@ -263,7 +276,9 @@
                     <span
                       class="h-1.5 w-1.5 rounded-full bg-emerald-500"
                     ></span>
-                    SDG {{ s }}
+                    {{
+                      'otherAis.filters.sdgLabel' | translate: { number: s }
+                    }}
                   </span>
                   <span *ngIf="ai.sdgs.length > 4" class="text-xs opacity-70"
                     >+{{ ai.sdgs.length - 4 }}</span
@@ -287,11 +302,16 @@
                 (click)="openAvatar(ai)"
                 class="rounded-full px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md"
               >
-                View Profile
+                {{ 'otherAis.avatarCard.viewProfile' | translate }}
               </button>
 
               <div class="text-xs opacity-70">
-                {{ ai.sdgs.length }} SDG{{ ai.sdgs.length > 1 ? "s" : "" }}
+                {{
+                  (ai.sdgs.length === 1
+                    ? 'otherAis.avatarCard.sdgSingle'
+                    : 'otherAis.avatarCard.sdgPlural')
+                    | translate: { count: ai.sdgs.length }
+                }}
               </div>
             </div>
           </div>
@@ -304,7 +324,7 @@
       *ngIf="visibleAvatars.length === 0"
       class="mt-16 text-center opacity-70"
     >
-      No avatars match your filters. Try clearing the SDG or search terms.
+      {{ 'otherAis.empty.noResults' | translate }}
     </div>
   </main>
 
