@@ -18,6 +18,7 @@ import {
 } from '@angular/fire/compat/storage';
 import { Observable, async, finalize, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-profile',
@@ -55,7 +56,8 @@ export class ProfileComponent implements OnInit {
     public boxEducation: BoxEducationCredential,
     public boxLocation: BoxLocationCredential,
     private storage: AngularFireStorage,
-    private data: DataService
+    private data: DataService,
+    private translate: TranslateService
   ) {}
 
   toggleHover(event: boolean) {
@@ -110,7 +112,7 @@ export class ProfileComponent implements OnInit {
     // the file should not be larger than 5MB
     if (file?.size >= 5000000) {
       console.log('the file is too big');
-      alert('The picture is too big. It should be less than 5MB');
+      alert(this.translate.instant('profile.upload.errors.fileTooLarge'));
       return;
     }
     const path = `avatar/${this.auth.currentUser.uid}-${file.name}`;
@@ -161,7 +163,7 @@ export class ProfileComponent implements OnInit {
   }
   async submitLocation() {
     if (this.location === '') {
-      alert('Enter your Location');
+      alert(this.translate.instant('profile.locationModal.alerts.enterLocation'));
       return;
     }
     try {

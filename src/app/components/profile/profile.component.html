@@ -51,7 +51,7 @@
             <ng-template #avatarNonInitials>
               <ng-container *ngIf="avatarMode === 'photo'; else avatarSilhouette">
                 <img [src]="profilePicturePath"
-                     alt="Profile picture"
+                     [attr.alt]="('profile.avatar.alt' | translate)"
                      class="h-28 w-28 rounded-3xl object-cover ring-2 ring-white shadow-2xl
                             dark:ring-slate-900"/>
               </ng-container>
@@ -75,7 +75,7 @@
                 <path fill-rule="evenodd" clip-rule="evenodd"
                   d="M20.848 1.879c-1.172-1.172-3.071-1.172-4.243 0L2.447 16.036a3 3 0 00-.82 1.533l-.587 2.935A2 2 0 003.393 22.858l2.936-.587a3 3 0 001.533-.82L22.019 7.293c1.171-1.172 1.171-3.071 0-4.243l-1.171-1.171z"/>
               </svg>
-              Edit
+              {{ 'profile.buttons.edit' | translate }}
             </button>
           </div>
 
@@ -101,7 +101,9 @@
                           class="inline-flex items-center rounded-lg border border-slate-300
                                  bg-white p-2 text-xs text-slate-700 shadow-sm hover:bg-slate-50
                                  dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-                          aria-label="Edit profile credential">
+                          [attr.aria-label]="
+                            'profile.buttons.editProfileCredential' | translate
+                          ">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M20.848 1.879c-1.172-1.172-3.071-1.172-4.243 0L2.447 16.036a3 3 0 00-.82 1.533l-.587 2.935A2 2 0 003.393 22.858l2.936-.587a3 3 0 001.533-.82L22.019 7.293c1.171-1.172 1.171-3.071 0-4.243l-1.171-1.171z"/>
@@ -110,7 +112,13 @@
                 </div>
 
                 <div class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                  {{ user.followers }} followers · {{ user.following }} following
+                  {{
+                    'profile.meta.followStats'
+                      | translate: {
+                          followers: user.followers || 0,
+                          following: user.following || 0
+                        }
+                  }}
                 </div>
               </div>
             </div>
@@ -125,7 +133,7 @@
                   <ng-template #addDesc>
                     <span class="text-sky-600 hover:underline cursor-pointer"
                           (click)="toggleProfileDescription()">
-                      Write a description about yourself
+                      {{ 'profile.description.addPrompt' | translate }}
                     </span>
                   </ng-template>
                 </p>
@@ -145,29 +153,36 @@
                 *ngIf="boxDescription.display | async"
                 [updateDescription]="true"
                 [limit]="300"
-                [title]="'Profile Description'"
+                [title]="('profile.popups.description' | translate)"
                 [height]="44">
               </app-text-popup>
             </div>
 
             <!-- Achievements -->
             <div *ngIf="completedSolutions.length > 0" class="mt-6 overflow-visible">
-              <h2 class="text-lg font-bold text-slate-900 dark:text-white">Achievements</h2>
+              <h2 class="text-lg font-bold text-slate-900 dark:text-white">
+                {{ 'profile.achievements.title' | translate }}
+              </h2>
               <div class="mt-3 flex flex-wrap items-center gap-4">
                 <div class="relative">
                   <img (mouseenter)="onHoverImageToggle('solution-completed')"
                        (mouseleave)="onHoverImageToggle('solution-completed')"
                        class="h-16 w-16 cursor-pointer rounded-xl border border-slate-200 bg-white p-2 shadow-sm
                               dark:border-slate-700 dark:bg-slate-800"
-                       src="../../../assets/img/solution-completed-badge.png" alt="Solution Completed"/>
+                       src="../../../assets/img/solution-completed-badge.png"
+                       [attr.alt]="
+                         'profile.achievements.solutionCompleted.alt' | translate
+                       "/>
                   <div *ngIf="showSolutionCompletedBadge"
                        class="absolute left-20 top-1 z-50 w-72 rounded-xl border border-slate-200 bg-white p-4
                               text-sm shadow-2xl dark:border-slate-700 dark:bg-slate-900">
                     <img class="mb-3 h-24 w-full rounded-lg object-contain"
                          src="../../../assets/img/solution-completed-badge.png" alt="" />
-                    <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">Solution Completed</h3>
+                    <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">
+                      {{ 'profile.achievements.solutionCompleted.title' | translate }}
+                    </h3>
                     <p class="text-slate-600 dark:text-slate-300">
-                      This badge marks your first completed solution—keep going!
+                      {{ 'profile.achievements.solutionCompleted.description' | translate }}
                     </p>
                   </div>
                 </div>
@@ -177,15 +192,20 @@
                        (mouseleave)="onHoverImageToggle('points')"
                        class="h-16 w-16 cursor-pointer rounded-full border border-slate-200 bg-white p-2 shadow-sm
                               dark:border-slate-700 dark:bg-slate-800"
-                       src="../../../assets/img/nwg-solution-badge.png" alt="Points Badge"/>
+                       src="../../../assets/img/nwg-solution-badge.png"
+                       [attr.alt]="
+                         'profile.achievements.points.alt' | translate
+                       "/>
                   <div *ngIf="showSolutionWithPointsBadge"
                        class="absolute left-20 top-1 z-50 w-72 rounded-xl border border-slate-200 bg-white p-4
                               text-sm shadow-2xl dark:border-slate-700 dark:bg-slate-900">
                     <img class="mb-3 h-24 w-full rounded-lg object-contain"
                          src="../../../assets/img/nwg-solution-badge.png" alt="" />
-                    <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">You Got Points</h3>
+                    <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">
+                      {{ 'profile.achievements.points.title' | translate }}
+                    </h3>
                     <p class="text-slate-600 dark:text-slate-300">
-                      Earn more by improving evaluations—aim for 9 to enter the tournament.
+                      {{ 'profile.achievements.points.description' | translate }}
                     </p>
                   </div>
                 </div>
@@ -204,7 +224,9 @@
       <aside
         class="rounded-3xl border border-slate-200/70 bg-white/70 p-6 shadow-xl backdrop-blur
                dark:border-slate-800 dark:bg-slate-900/70">
-        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Credentials & Highlights</h2>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
+          {{ 'profile.sidebar.title' | translate }}
+        </h2>
 
         <ul class="mt-4 space-y-5 text-slate-700 dark:text-slate-300">
           <!-- Employment -->
@@ -223,7 +245,7 @@
             <button (click)="toggleEmployementCredential()"
                     class="ml-2 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-700 shadow-sm
                            hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-              Edit
+              {{ 'profile.buttons.edit' | translate }}
             </button>
           </li>
 
@@ -242,7 +264,7 @@
             <button (click)="toggleEducationCredential()"
                     class="ml-2 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-700 shadow-sm
                            hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-              Edit
+              {{ 'profile.buttons.edit' | translate }}
             </button>
           </li>
 
@@ -260,14 +282,17 @@
             <button (click)="toggleLocationCredential()"
                     class="ml-2 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-700 shadow-sm
                            hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
-              Edit
+              {{ 'profile.buttons.edit' | translate }}
             </button>
           </li>
 
           <!-- Points + Joined -->
           <li class="flex items-center gap-3">
             <img class="h-6 w-6 rounded-full" src="../../../assets/img/nwg-solution-badge.png" alt="">
-            <span>Points: <strong>{{ points || '__' }}</strong></span>
+            <span>
+              {{ 'profile.sidebar.pointsLabel' | translate }}
+              <strong>{{ points || '__' }}</strong>
+            </span>
           </li>
 
           <li class="flex items-start gap-3">
@@ -276,7 +301,9 @@
                        9.7 1 5 5.7 5 11.5c0 3.6 1.8 6.8 4.6 8.7l-1.1 1.9a12.5 12.5 0 0011 1.7V31h-3a.5.5 0 000 1h7a.5.5 0 000-1h-3v-3.5
                        c5.5-.1 11.5-6.2 11.5-13.7zM6.8 11.5c0-5.2 4.3-9.5 9.5-9.5s9.5 4.3 9.5 9.5-4.3 9.5-9.5 9.5-9.5-4.3-9.5-9.5z"/>
             </svg>
-            <span>Joined in {{ dateJoined }}</span>
+            <span>
+              {{ 'profile.sidebar.joined' | translate: { date: dateJoined } }}
+            </span>
           </li>
         </ul>
       </aside>
@@ -285,7 +312,10 @@
     <!-- SOLUTIONS -->
     <section class="mt-10">
       <h2 class="text-center text-2xl font-bold text-slate-900 underline underline-offset-8 dark:text-white">
-        Solutions ({{ completedSolutions.length }})
+        {{
+          'profile.solutions.title'
+            | translate: { count: completedSolutions.length }
+        }}
       </h2>
 
       <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
@@ -309,7 +339,8 @@
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          Enter Location<span class="text-red-600">*</span>
+          {{ 'profile.locationModal.title' | translate }}
+          <span class="text-red-600">*</span>
         </h3>
         <button (click)="closeDisplayPromptLocation()" type="button"
                 class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
@@ -317,23 +348,27 @@
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
           </svg>
-          <span class="sr-only">Close modal</span>
+          <span class="sr-only">
+            {{ 'profile.locationModal.close' | translate }}
+          </span>
         </button>
       </div>
 
       <div class="p-4 md:p-5">
         <label for="locationInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Location (e.g. Philadelphia, PA)
+          {{ 'profile.locationModal.label' | translate }}
         </label>
         <input id="locationInput" [(ngModel)]="location" type="text"
                class="block w-full p-2.5 bg-gray-50 border border-gray-300 text-gray-900
                       text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500
                       dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-               placeholder="Philadelphia, PA">
+               [placeholder]="
+                 'profile.locationModal.placeholder' | translate
+               ">
 
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          <span class="text-red-600">*</span> We ask for your location so we can recommend people who are nearby and to
-          help build a community showing where each solution is developed.
+          <span class="text-red-600">*</span>
+          {{ 'profile.locationModal.description' | translate }}
         </p>
 
         <div class="mt-4 flex justify-end space-x-2">
@@ -341,13 +376,13 @@
                   class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white
                          bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none
                          focus:ring-red-300 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-700">
-            Don't Share
+            {{ 'profile.locationModal.actions.dontShare' | translate }}
           </button>
           <button (click)="submitLocation()" type="button"
                   class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white
                          bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none
                          focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-700">
-            Share
+            {{ 'profile.locationModal.actions.share' | translate }}
           </button>
         </div>
       </div>
@@ -360,7 +395,7 @@
 <div *ngIf="boxProfile.display | async" class="fixed inset-0 z-[100] grid place-items-center bg-black/40">
   <app-text-popup
     [updateProfileCredential]="true"
-    [title]="'Profile Credential'"
+    [title]="('profile.popups.profileCredential' | translate)"
     [limit]="60">
   </app-text-popup>
 </div>
@@ -369,7 +404,7 @@
   <app-text-popup
     [updateEmploymentCredential]="true"
     [limit]="60"
-    [title]="'Employment Credentials'">
+    [title]="('profile.popups.employment' | translate)">
   </app-text-popup>
 </div>
 
@@ -377,7 +412,7 @@
   <app-text-popup
     [updateEducationCredential]="true"
     [limit]="60"
-    [title]="'Education Credentials'">
+    [title]="('profile.popups.education' | translate)">
   </app-text-popup>
 </div>
 
@@ -385,6 +420,6 @@
   <app-text-popup
     [updateLocationCredential]="true"
     [limit]="60"
-    [title]="'Location Credentials'">
+    [title]="('profile.popups.location' | translate)">
   </app-text-popup>
 </div>

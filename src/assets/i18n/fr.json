@@ -120,6 +120,68 @@
       }
     }
   },
+  "profile": {
+    "avatar": {
+      "alt": "Photo de profil"
+    },
+    "buttons": {
+      "edit": "Modifier",
+      "editProfileCredential": "Modifier l'élément du profil"
+    },
+    "meta": {
+      "followStats": "{{followers}} abonnés · {{following}} abonnements"
+    },
+    "description": {
+      "addPrompt": "Rédigez une description vous concernant"
+    },
+    "achievements": {
+      "title": "Réalisations",
+      "solutionCompleted": {
+        "title": "Solution terminée",
+        "description": "Cette médaille marque votre première solution terminée—continuez !",
+        "alt": "Badge de solution terminée"
+      },
+      "points": {
+        "title": "Vous avez gagné des points",
+        "description": "Gagnez-en davantage en améliorant vos évaluations—visez 9 pour entrer dans le tournoi.",
+        "alt": "Badge de points"
+      }
+    },
+    "sidebar": {
+      "title": "Certifications et faits saillants",
+      "pointsLabel": "Points :",
+      "joined": "Inscrit en {{date}}"
+    },
+    "solutions": {
+      "title": "Solutions ({{count}})"
+    },
+    "locationModal": {
+      "title": "Saisir l'emplacement",
+      "close": "Fermer la fenêtre",
+      "label": "Lieu (ex. Philadelphie, PA)",
+      "placeholder": "Philadelphie, PA",
+      "description": "Nous demandons votre emplacement pour recommander des personnes proches et mettre en valeur le lieu de développement de chaque solution.",
+      "actions": {
+        "dontShare": "Ne pas partager",
+        "share": "Partager"
+      },
+      "alerts": {
+        "enterLocation": "Indiquez votre localisation"
+      }
+    },
+    "popups": {
+      "description": "Description du profil",
+      "profileCredential": "Certificat de profil",
+      "employment": "Certificat professionnel",
+      "education": "Certificat d'études",
+      "location": "Certificat d'emplacement"
+    },
+    "upload": {
+      "errors": {
+        "fileTooLarge": "L'image est trop volumineuse. Elle doit faire moins de 5 Mo."
+      }
+    }
+  },
   "home": {
     "loading": {
       "title": "Chargement des défis…",

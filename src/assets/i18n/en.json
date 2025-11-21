@@ -120,6 +120,68 @@
       }
     }
   },
+  "profile": {
+    "avatar": {
+      "alt": "Profile picture"
+    },
+    "buttons": {
+      "edit": "Edit",
+      "editProfileCredential": "Edit profile credential"
+    },
+    "meta": {
+      "followStats": "{{followers}} followers · {{following}} following"
+    },
+    "description": {
+      "addPrompt": "Write a description about yourself"
+    },
+    "achievements": {
+      "title": "Achievements",
+      "solutionCompleted": {
+        "title": "Solution Completed",
+        "description": "This badge marks your first completed solution—keep going!",
+        "alt": "Solution Completed badge"
+      },
+      "points": {
+        "title": "You Got Points",
+        "description": "Earn more by improving evaluations—aim for 9 to enter the tournament.",
+        "alt": "Points badge"
+      }
+    },
+    "sidebar": {
+      "title": "Credentials & Highlights",
+      "pointsLabel": "Points:",
+      "joined": "Joined in {{date}}"
+    },
+    "solutions": {
+      "title": "Solutions ({{count}})"
+    },
+    "locationModal": {
+      "title": "Enter Location",
+      "close": "Close modal",
+      "label": "Location (e.g. Philadelphia, PA)",
+      "placeholder": "Philadelphia, PA",
+      "description": "We ask for your location so we can recommend people nearby and highlight where each solution is developed.",
+      "actions": {
+        "dontShare": "Don't Share",
+        "share": "Share"
+      },
+      "alerts": {
+        "enterLocation": "Enter your location"
+      }
+    },
+    "popups": {
+      "description": "Profile Description",
+      "profileCredential": "Profile Credential",
+      "employment": "Employment Credentials",
+      "education": "Education Credentials",
+      "location": "Location Credentials"
+    },
+    "upload": {
+      "errors": {
+        "fileTooLarge": "The picture is too big. It should be less than 5MB."
+      }
+    }
+  },
   "home": {
     "loading": {
       "title": "Loading challenges…",
