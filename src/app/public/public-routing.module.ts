@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NoAuthGuard } from '../services/no-auth.guard';
 import { LandingPageComponent } from '../components/landing-page/landing-page.component';
 import { LandingTestComponent } from '../components/landing-test/landing-test.component';
+import { LandingCollegeComponent } from '../components/landing-college/landing-college.component';
 import { CareersComponent } from '../blogs/careers/careers.component';
 import { PrivacyComponent } from '../blogs/privacy/privacy.component';
 import { FeaturesComponent } from '../blogs/features/features.component';
@@ -50,6 +51,7 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
   { path: 'landing', component: LandingTestComponent },
+  { path: 'landing-college', component: LandingCollegeComponent },
   { path: 'careers', component: CareersComponent },
   { path: 'privacy', component: PrivacyComponent },
   { path: 'blogs/features', component: FeaturesComponent },
