@@ -11,6 +11,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { User } from 'src/app/models/user';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import {
+  AngularFirestore,
+  AngularFirestoreDocument,
+} from '@angular/fire/compat/firestore';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
 
@@ -193,6 +197,11 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.defaultLanguage
   ].questions.map((group) => [...group]);
   private langSub?: Subscription;
+  aiFeedbackLoading = false;
+  aiFeedbackStatus = '';
+  aiFeedbackError = '';
+  aiFeedbackText = '';
+  private aiFeedbackDocSub?: Subscription;
 
   constructor(
     public auth: AuthService,
@@ -201,7 +210,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     public data: DataService,
     private router: Router,
     private fns: AngularFireFunctions,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private afs: AngularFirestore
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -439,6 +449,10 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     return this.currentIndexDisplay === index; // Replace with your current step logic
   }
 
+  isFinalStep(index: number): boolean {
+    return index === this.steps.length - 1;
+  }
+
   updateTimelineDisplay(index: number) {
     // Reset all to remove styles
     this.timelineDisplay.fill('bg-gray-500 h-1.5');
@@ -647,9 +661,69 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       alert('Error occurred while uploading file. Please try again.');
     }
   }
+  async requestAiFeedback() {
+    if (!this.auth.currentUser?.uid) {
+      this.aiFeedbackError =
+        'Please sign in to request an AI evaluation of your solution.';
+      return;
+    }
+
+    const prompt = this.buildAiPrompt();
+    if (!prompt) {
+      this.aiFeedbackError =
+        'We need more solution details before we can request AI feedback.';
+      return;
+    }
+
+    this.aiFeedbackError = '';
+    this.aiFeedbackText = '';
+    this.aiFeedbackLoading = true;
+    this.aiFeedbackStatus = 'Sending your strategy to the AI evaluator...';
+
+    const docId = this.afs.createId();
+    const docRef: AngularFirestoreDocument<any> = this.afs.doc(
+      `users/${this.auth.currentUser.uid}/discussions/${docId}`
+    );
+
+    this.aiFeedbackDocSub?.unsubscribe();
+    this.aiFeedbackDocSub = docRef.valueChanges().subscribe((snapshot) => {
+      if (!snapshot?.status) {
+        return;
+      }
+
+      const state = snapshot.status.state;
+      if (state === 'PROCESSING') {
+        this.aiFeedbackStatus = 'Evaluating your solution...';
+      } else if (state === 'COMPLETED') {
+        this.aiFeedbackLoading = false;
+        this.aiFeedbackStatus = '';
+        this.aiFeedbackText = snapshot.response ?? '';
+        this.aiFeedbackDocSub?.unsubscribe();
+      } else if (state === 'ERRORED') {
+        this.aiFeedbackLoading = false;
+        this.aiFeedbackStatus = '';
+        this.aiFeedbackError =
+          snapshot.status?.message ||
+          'We could not retrieve AI feedback. Please try again in a moment.';
+        this.aiFeedbackDocSub?.unsubscribe();
+      }
+    });
+
+    try {
+      await docRef.set({ prompt });
+    } catch (error) {
+      console.error('AI feedback request failed', error);
+      this.aiFeedbackLoading = false;
+      this.aiFeedbackStatus = '';
+      this.aiFeedbackError =
+        'Unable to reach the AI evaluator right now. Please retry.';
+      this.aiFeedbackDocSub?.unsubscribe();
+    }
+  }
 
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
+    this.aiFeedbackDocSub?.unsubscribe();
   }
 
   private initializeLanguageSupport() {
@@ -682,5 +756,201 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
 
   private isSupportedLanguage(language: string): language is SupportedLanguage {
     return Object.prototype.hasOwnProperty.call(this.localizedContent, language);
+  }
+
+  private buildAiPrompt(): string {
+    const instructions = `Role: You are the Evaluator for NewWorld Game.
+Your job is to evaluate the user’s solution using the official criteria and provide numerical scores + improvement feedback.
+
+Do the following every time:
+
+1. Score the Solution (1–10 each)
+
+Give a score for each category:
+
+Preferred State
+
+Technological Feasibility
+
+Environmental Impact
+
+Economic Viability
+
+Equity & Fairness
+
+Clarity & Understandability
+
+(1 = not viable, 5 = needs major improvement, 10 = ready to implement)
+
+2. Explain Each Score
+
+In 1–2 short sentences, explain why you gave that score.
+
+3. Provide Improvements
+
+Give 3–5 concrete, actionable recommendations that would strengthen the solution.
+
+4. Readiness Level
+
+Based on overall scoring, label the solution:
+
+Initial Conceptualization (1–3)
+
+Preliminary Design (4–6)
+
+Advanced Development (7–8)
+
+Ready to Implement (9–10)
+
+Tone
+
+Clear, constructive, helpful; no fluff.
+
+Output Format (strict)
+Scores:
+Preferred State: X/10 (reason)
+Technological Feasibility: X/10 (reason)
+Environmental Impact: X/10 (reason)
+Economic Viability: X/10 (reason)
+Equity & Fairness: X/10 (reason)
+Clarity & Understandability: X/10 (reason)
+
+Improvements:
+1.
+2.
+3.
+4. (optional)
+5. (optional)
+
+Readiness Level: ______`;
+
+    const solutionSummary = this.buildSolutionSummaryForAi();
+    return solutionSummary ? `${instructions}\n\n${solutionSummary}` : '';
+  }
+
+  private buildSolutionSummaryForAi(): string {
+    if (!this.currentSolution) {
+      return '';
+    }
+
+    const lines: string[] = [];
+    const title = this.currentSolution.title || 'Untitled Solution';
+    const author = this.currentSolution.authorName || 'Unknown team';
+    const sdgs = this.currentSolution.sdgs?.length
+      ? this.currentSolution.sdgs.join(', ')
+      : '';
+    const description = this.clampText(
+      this.toPlainText(this.currentSolution.description),
+      850
+    );
+    const strategyReview = this.clampText(
+      this.toPlainText(this.currentSolution.strategyReview),
+      1000
+    );
+    const statusSummary = this.clampText(this.extractStatusResponses(), 1600);
+
+    lines.push(`Solution Title: ${title}`);
+    lines.push(`Team: ${author}`);
+    if (sdgs) {
+      lines.push(`Focus SDGs: ${sdgs}`);
+    }
+    if (description) {
+      lines.push(`Summary: ${description}`);
+    }
+    if (strategyReview) {
+      lines.push(`Strategy Review Highlights: ${strategyReview}`);
+    }
+    if (statusSummary) {
+      lines.push('Detailed Step Notes:');
+      lines.push(statusSummary);
+    }
+
+    return lines.join('\n');
+  }
+
+  private extractStatusResponses(): string {
+    if (!this.currentSolution?.status) {
+      return '';
+    }
+
+    const grouped: Record<string, string[]> = {};
+    const questionMap = this.buildQuestionPromptMap();
+
+    Object.entries(this.currentSolution.status).forEach(([key, value]) => {
+      const plainAnswer = this.toPlainText(value);
+      if (!plainAnswer) {
+        return;
+      }
+
+      const prefix = key.split('-')[0];
+      const question = this.normalizeWhitespace(questionMap[key] || key);
+      const formatted = `${question}: ${plainAnswer}`;
+
+      if (!grouped[prefix]) {
+        grouped[prefix] = [];
+      }
+      grouped[prefix].push(formatted);
+    });
+
+    const labels: Record<string, string> = {
+      S1: 'Step 1 – Problem State',
+      S2: 'Step 2 – Preferred State',
+      S3: 'Step 3 – Plan / Solution',
+      S4: 'Step 4 – Implementation',
+      S5: 'Step 5 – Strategy Review',
+    };
+
+    const orderedPrefixes = ['S1', 'S2', 'S3', 'S4', 'S5'];
+    const sections: string[] = [];
+
+    orderedPrefixes.forEach((prefix) => {
+      if (!grouped[prefix]?.length) {
+        return;
+      }
+      sections.push(`${labels[prefix] ?? prefix}:`);
+      grouped[prefix].forEach((entry) => sections.push(`- ${entry}`));
+    });
+
+    return sections.join('\n');
+  }
+
+  private buildQuestionPromptMap(): Record<string, string> {
+    const map: Record<string, string> = {};
+
+    this.questionsTitles.forEach((titles, stepIndex) => {
+      titles.forEach((key, questionIndex) => {
+        const prompt = this.AllQuestions[stepIndex]?.[questionIndex];
+        if (prompt) {
+          map[key] = prompt;
+        }
+      });
+    });
+
+    return map;
+  }
+
+  private normalizeWhitespace(value?: string): string {
+    return (value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  private toPlainText(value?: string): string {
+    if (!value) {
+      return '';
+    }
+
+    if (typeof document !== 'undefined') {
+      const temp = document.createElement('div');
+      temp.innerHTML = value;
+      return this.normalizeWhitespace(temp.textContent || temp.innerText || '');
+    }
+
+    return this.normalizeWhitespace(value.replace(/<[^>]+>/g, ' '));
+  }
+
+  private clampText(value: string, limit: number): string {
+    if (!value) {
+      return '';
+    }
+    return value.length > limit ? `${value.slice(0, limit - 1)}…` : value;
   }
 }
