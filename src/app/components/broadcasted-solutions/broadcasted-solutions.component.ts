@@ -16,6 +16,7 @@ import {
 } from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { TranslateService } from '@ngx-translate/core';
 
 type Status = 'active' | 'paused' | 'stopped';
 
@@ -76,7 +77,8 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private solutionService: SolutionService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
@@ -123,7 +125,12 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
               const vm: BroadcastVM = {
                 broadcastId: b.broadcastId,
                 solutionId: b.solutionId,
-                title: b.title || s?.title || 'Untitled Solution',
+                title:
+                  b.title ||
+                  s?.title ||
+                  this.translate.instant(
+                    'broadcasts.cards.untitledSolution'
+                  ),
                 message: latestMessage,
                 includeReadMe: !!b.includeReadMe,
                 readMe: b.readMe,

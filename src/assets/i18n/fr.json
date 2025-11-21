@@ -156,8 +156,7 @@
       "fileTooLarge": "L’image est trop volumineuse. Elle doit faire moins de 10 Mo.",
       "uploadError": "Une erreur s’est produite lors du téléversement. Veuillez réessayer."
     }
-  }
-  ,
+  },
   "problemListView": {
     "tabs": {
       "pending": "Solutions en attente",
@@ -298,8 +297,7 @@
         "cta": "À lire en 2 minutes"
       }
     }
-  }
-  ,
+  },
   "dashboard": {
     "placeholder": {
       "noImage": "Aucune image pour l'instant"
@@ -338,12 +336,66 @@
       "descriptionPlaceholder": "Optionnel : modifiez la description que les lecteurs verront."
     },
     "tiles": {
-      "develop": { "title": "Développer la solution", "desc": "Commencez à résoudre votre problème" },
-      "video": { "title": "Salle de visioconférence", "desc": "Rencontrez et discutez en direct avec votre équipe" },
-      "discussion": { "title": "Discussion d'équipe", "desc": "Discutez avec votre équipe par écrit" },
-      "details": { "title": "Détails de la solution", "desc": "Voir et modifier le titre, le readme, inviter des amis, etc." },
-      "documents": { "title": "Documents et présentations", "desc": "Téléchargez et gérez les fichiers du projet" },
-      "whiteboard": { "title": "Remue-méninges sur tableau blanc", "desc": "Collaborez visuellement et esquissez des idées" }
+      "develop": {
+        "title": "Développer la solution",
+        "desc": "Commencez à résoudre votre problème"
+      },
+      "video": {
+        "title": "Salle de visioconférence",
+        "desc": "Rencontrez et discutez en direct avec votre équipe"
+      },
+      "discussion": {
+        "title": "Discussion d'équipe",
+        "desc": "Discutez avec votre équipe par écrit"
+      },
+      "details": {
+        "title": "Détails de la solution",
+        "desc": "Voir et modifier le titre, le readme, inviter des amis, etc."
+      },
+      "documents": {
+        "title": "Documents et présentations",
+        "desc": "Téléchargez et gérez les fichiers du projet"
+      },
+      "whiteboard": {
+        "title": "Remue-méninges sur tableau blanc",
+        "desc": "Collaborez visuellement et esquissez des idées"
+      }
+    }
+  },
+  "broadcasts": {
+    "hero": {
+      "title": "Vous êtes invité·e à rejoindre ces défis !",
+      "subtitle": "Découvrez les solutions qui recherchent actuellement des collaborateurs dans NewWorld Game.",
+      "filters": {
+        "searchPlaceholder": "Rechercher par titre, pitch, auteur…",
+        "allStatuses": "Tous les statuts",
+        "sort": {
+          "newest": "Plus récents",
+          "oldest": "Plus anciens",
+          "title": "Titre (A→Z)"
+        }
+      }
+    },
+    "statuses": {
+      "active": "Actif",
+      "paused": "En pause",
+      "stopped": "Arrêté"
+    },
+    "stats": {
+      "active": "Actifs",
+      "total": "Total"
+    },
+    "empty": {
+      "title": "Aucune diffusion pour le moment",
+      "description": "Lorsqu'un propriétaire de solution diffuse une invitation, elle apparaîtra ici."
+    },
+    "cards": {
+      "designersLabel": "designers",
+      "sdgsLabel": "ODD",
+      "noPitch": "Aucun pitch fourni.",
+      "viewDetails": "Voir les détails",
+      "unknownAuthor": "Inconnu",
+      "untitledSolution": "Solution sans titre"
     }
   }
 }

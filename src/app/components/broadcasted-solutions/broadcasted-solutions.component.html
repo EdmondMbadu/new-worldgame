@@ -42,11 +42,10 @@
           >
             <div>
               <h1 class="text-2xl md:text-3xl font-bold">
-                You are Invited to Join These Challenges!
+                {{ 'broadcasts.hero.title' | translate }}
               </h1>
               <p class="mt-1 text-white/90">
-                Discover solutions currently inviting collaborators across
-                NewWorld Game.
+                {{ 'broadcasts.hero.subtitle' | translate }}
               </p>
             </div>
             <div class="flex items-center gap-3 text-sm">
@@ -66,7 +65,8 @@
                     d="M9 12l2 2 4-4"
                   />
                 </svg>
-                Active: {{ (stats$ | async)?.active || 0 }}
+                {{ 'broadcasts.stats.active' | translate }}:
+                {{ (stats$ | async)?.active || 0 }}
               </span>
               <span
                 class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/20"
@@ -84,7 +84,8 @@
                     d="M6 8h12M6 12h12M6 16h12"
                   />
                 </svg>
-                Total: {{ (stats$ | async)?.total || 0 }}
+                {{ 'broadcasts.stats.total' | translate }}:
+                {{ (stats$ | async)?.total || 0 }}
               </span>
             </div>
           </div>
@@ -110,7 +111,9 @@
                 </svg>
                 <input
                   (input)="onSearchInput($event)"
-                  placeholder="Search by title, pitch, author…"
+                  [placeholder]="
+                    'broadcasts.hero.filters.searchPlaceholder' | translate
+                  "
                   class="w-full rounded-lg bg-white/20 placeholder-white/70 text-white px-9 py-2.5 outline-none focus:ring-2 focus:ring-white/60"
                 />
               </div>
@@ -122,9 +125,15 @@
                 [value]="(statusFilter$ | async)!"
                 (change)="onStatusChange($event)"
               >
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
+                <option value="all">
+                  {{ 'broadcasts.hero.filters.allStatuses' | translate }}
+                </option>
+                <option value="active">
+                  {{ 'broadcasts.statuses.active' | translate }}
+                </option>
+                <option value="paused">
+                  {{ 'broadcasts.statuses.paused' | translate }}
+                </option>
               </select>
             </div>
 
@@ -134,9 +143,15 @@
                 [value]="(sort$ | async)!"
                 (change)="onSortChange($event)"
               >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="title">Title (A→Z)</option>
+                <option value="newest">
+                  {{ 'broadcasts.hero.filters.sort.newest' | translate }}
+                </option>
+                <option value="oldest">
+                  {{ 'broadcasts.hero.filters.sort.oldest' | translate }}
+                </option>
+                <option value="title">
+                  {{ 'broadcasts.hero.filters.sort.title' | translate }}
+                </option>
               </select>
             </div>
           </div>
@@ -149,10 +164,10 @@
           class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center"
         >
           <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-            No broadcasts yet
+            {{ 'broadcasts.empty.title' | translate }}
           </h3>
           <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            When a solution owner broadcasts, you’ll see it here.
+            {{ 'broadcasts.empty.description' | translate }}
           </p>
         </div>
       </section>
@@ -201,7 +216,7 @@
                   <span
                     class="inline-block w-1.5 h-1.5 rounded-full bg-white"
                   ></span>
-                  {{ c.status | titlecase }}
+                  {{ ('broadcasts.statuses.' + c.status) | translate }}
                 </span>
               </div>
 
@@ -215,9 +230,16 @@
                   <span
                     class="grid place-items-center w-5 h-5 rounded-full bg-white/90 text-slate-900 font-semibold"
                   >
-                    {{ c.authorName || "U" | slice : 0 : 1 }}
+                    {{
+                      (c.authorName ||
+                        ('broadcasts.cards.unknownAuthor' | translate))
+                        | slice : 0 : 1
+                    }}
                   </span>
-                  {{ c.authorName || "Unknown" }}
+                  {{
+                    c.authorName ||
+                      ('broadcasts.cards.unknownAuthor' | translate)
+                  }}
                 </span>
               </div>
             </div>
@@ -240,7 +262,7 @@
                 <p
                   class="pl-4 text-sm leading-relaxed text-slate-700 dark:text-slate-300 line-clamp-4"
                 >
-                  {{ c.message || "No pitch provided." }}
+                  {{ c.message || ('broadcasts.cards.noPitch' | translate) }}
                 </p>
               </div>
 
@@ -262,7 +284,8 @@
                       d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8z"
                     />
                   </svg>
-                  {{ c.designersCount || 0 }} designers
+                  {{ c.designersCount || 0 }}
+                  {{ 'broadcasts.cards.designersLabel' | translate }}
                 </span>
 
                 <span
@@ -282,7 +305,8 @@
                       d="M12 14l9-5-9-5-9 5 9 5z"
                     />
                   </svg>
-                  {{ c.sdgsCount }} SDGs
+                  {{ c.sdgsCount }}
+                  {{ 'broadcasts.cards.sdgsLabel' | translate }}
                 </span>
               </div>
 
@@ -330,14 +354,14 @@
                     d="M9 5l7 7-7 7"
                   />
                 </svg>
-                View Details
+                {{ 'broadcasts.cards.viewDetails' | translate }}
               </a>
             </div>
           </div>
         </article>
       </section>
-    </main> </ng-template
-  >'
+    </main>
+  </ng-template>
 
   <app-footer></app-footer>
 </div>

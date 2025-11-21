@@ -156,8 +156,7 @@
       "fileTooLarge": "The picture is too big. It should be less than 10MB.",
       "uploadError": "Error occurred while uploading file. Please try again."
     }
-  }
-  ,
+  },
   "problemListView": {
     "tabs": {
       "pending": "Pending Solutions",
@@ -298,8 +297,7 @@
         "cta": "Read in 2 minutes"
       }
     }
-  }
-  ,
+  },
   "dashboard": {
     "placeholder": {
       "noImage": "No image yet"
@@ -338,12 +336,66 @@
       "descriptionPlaceholder": "Optional: edit the description readers will see."
     },
     "tiles": {
-      "develop": { "title": "Develop Solution", "desc": "Start Solving your problem" },
-      "video": { "title": "Video chat room", "desc": "meet and chat with your team live" },
-      "discussion": { "title": "Team discussion", "desc": "chat with your team via text" },
-      "details": { "title": "Solution details", "desc": "View and edit your solution title, readme, invite friends, etc." },
-      "documents": { "title": "Documents & Presentations", "desc": "Upload and manage project files" },
-      "whiteboard": { "title": "Whiteboard Brainstorming", "desc": "Collaborate visually and sketch ideas" }
+      "develop": {
+        "title": "Develop Solution",
+        "desc": "Start Solving your problem"
+      },
+      "video": {
+        "title": "Video chat room",
+        "desc": "meet and chat with your team live"
+      },
+      "discussion": {
+        "title": "Team discussion",
+        "desc": "chat with your team via text"
+      },
+      "details": {
+        "title": "Solution details",
+        "desc": "View and edit your solution title, readme, invite friends, etc."
+      },
+      "documents": {
+        "title": "Documents & Presentations",
+        "desc": "Upload and manage project files"
+      },
+      "whiteboard": {
+        "title": "Whiteboard Brainstorming",
+        "desc": "Collaborate visually and sketch ideas"
+      }
+    }
+  },
+  "broadcasts": {
+    "hero": {
+      "title": "You are Invited to Join These Challenges!",
+      "subtitle": "Discover solutions currently inviting collaborators across NewWorld Game.",
+      "filters": {
+        "searchPlaceholder": "Search by title, pitch, author…",
+        "allStatuses": "All statuses",
+        "sort": {
+          "newest": "Newest",
+          "oldest": "Oldest",
+          "title": "Title (A→Z)"
+        }
+      }
+    },
+    "statuses": {
+      "active": "Active",
+      "paused": "Paused",
+      "stopped": "Stopped"
+    },
+    "stats": {
+      "active": "Active",
+      "total": "Total"
+    },
+    "empty": {
+      "title": "No broadcasts yet",
+      "description": "When a solution owner broadcasts, you’ll see it here."
+    },
+    "cards": {
+      "designersLabel": "designers",
+      "sdgsLabel": "SDGs",
+      "noPitch": "No pitch provided.",
+      "viewDetails": "View Details",
+      "unknownAuthor": "Unknown",
+      "untitledSolution": "Untitled Solution"
     }
   }
 }
