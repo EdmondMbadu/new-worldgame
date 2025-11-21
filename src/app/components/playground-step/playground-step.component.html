@@ -102,17 +102,22 @@
             </p>
         </div>
         
-        <div *ngIf="step.startsWith('Step V:') && strategyReview!==''" class="flex flex-row mt-4 mx-auto">
-            <button (click)="chooseDefaultReview()" class=" {{strategyBgColor}} relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium rounded-lg group   hover:text-white text-gray-800 dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
-                <span class="{{chosenColorDefault}}   relative px-5 py-2.5 transition-all ease-in duration-75    rounded-md group-hover:bg-opacity-0">
-               Step I to IV
-                </span>
+        <div *ngIf="isStrategyReviewStep" class="flex flex-col items-center gap-3 mt-4 mx-auto">
+            <div class="flex flex-wrap justify-center gap-3">
+                <button (click)="chooseDefaultReview()" class=" {{strategyBgColor}} relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium rounded-lg group hover:text-white text-gray-800 dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
+                    <span class="{{chosenColorDefault}} relative px-5 py-2.5 transition-all ease-in duration-75 rounded-md group-hover:bg-opacity-0">
+                        Reference (Steps 1–4)
+                    </span>
                 </button>
-                <button (click)="chooseStrategyReview()" class="relative inline-flex items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm {{defaultBgColor}} font-medium  rounded-lg group  hover:text-white text-gray-800 dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
-                <span class=" {{chosenColorReview}} relative px-5 py-2.5 transition-all ease-in duration-75    rounded-md group-hover:bg-opacity-0">
-                Current
-                </span>
+                <button (click)="chooseStrategyReview()" class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm {{defaultBgColor}} font-medium rounded-lg group hover:text-white text-gray-800 dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
+                    <span class="{{chosenColorReview}} relative px-5 py-2.5 transition-all ease-in duration-75 rounded-md group-hover:bg-opacity-0">
+                        Current Draft
+                    </span>
                 </button>
+            </div>
+            <button type="button" (click)="refreshStrategyReviewFromSteps()" class="text-sm font-semibold text-teal-700 dark:text-teal-200 border border-teal-500 rounded-full px-4 py-2 hover:bg-teal-600 hover:text-white transition">
+                Refresh from Steps 1–4
+            </button>
         </div>
     </div>
 
@@ -259,7 +264,7 @@
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                     [(ngModel)]="strategyReview"
                     
-                    *ngIf="step.startsWith('Step V:') && strategyReviewSelected"
+                    *ngIf="isStrategyReviewStep && strategyReviewSelected"
                 
                     
                     
@@ -279,9 +284,10 @@
                     (ready)="onReady($event)"
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                     *ngIf="!strategyReviewSelected"
+                    [disabled]="isStrategyReviewStep && !strategyReviewSelected"
                     [(ngModel)]="contentsArray[i]"
             
-                
+                    
                     
                     
                     >
@@ -303,7 +309,7 @@
                 [init]="editorConfig"
                 [(ngModel)]="strategyReview"
                 #contentField="ngModel"
-                *ngIf="step.startsWith('Step V:') && strategyReviewSelected"
+                *ngIf="isStrategyReviewStep && strategyReviewSelected"
                 
 
                     ></editor>

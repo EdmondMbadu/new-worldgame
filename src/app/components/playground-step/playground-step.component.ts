@@ -87,6 +87,7 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
   clickedDisplayPopups: boolean[] = [];
   currentSolution: Solution = {};
   staticContentArray: string[] = [];
+  private lastSavedStrategyReview: string = '';
   saveSuccess: boolean = false;
   evaluators: Evaluator[] = [];
   saveError: boolean = false;
@@ -215,6 +216,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
           this.currentSolution.strategyReview !== undefined
             ? this.currentSolution.strategyReview
             : '';
+        this.lastSavedStrategyReview = this.strategyReview || '';
         // console.log('strategy review saved :', this.strategyReview);
         // fill the evaluator class
         this.currentSolution.evaluators?.forEach((ev: any) => {
@@ -242,6 +244,19 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     return Math.max(0, this.stepNumber);
   }
 
+  get isStrategyReviewStep(): boolean {
+    const normalizedStep = (this.step || '').toLowerCase();
+    const matchesLabel =
+      normalizedStep.startsWith('step v') ||
+      normalizedStep.startsWith('step 5');
+    const firstTitle = this.questionsTitles[0]?.toLowerCase() || '';
+    const matchesQuestionKey = firstTitle.startsWith('s5');
+    return (
+      this.questionsTitles.length === 1 &&
+      (matchesLabel || matchesQuestionKey || this.stepNumber >= 4)
+    );
+  }
+
   // ----------------------------------
   // 3)  Active helper object
   // ----------------------------------
@@ -254,8 +269,12 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.chosenColorDefault = '';
     this.chosenColorReview = 'font-bold text-xl';
     this.defaultReviewSelected = false;
-    this.staticContentArray[0] = this.strategyReview;
-    this.contentsArray[0] = this.strategyReview;
+    if (
+      (!this.strategyReview || this.strategyReview.trim() === '') &&
+      this.contentsArray.length
+    ) {
+      this.strategyReview = this.contentsArray[0];
+    }
     this.defaultBgColor = 'bg-teal-600';
     this.strategyBgColor = 'bg-gray-200 dark:bg-gray-600';
   }
@@ -337,7 +356,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
 
   hasStrategyReviewChanged() {
     return (
-      this.strategyReview !== this.staticContentArray[0] &&
+      this.strategyReview !== this.lastSavedStrategyReview &&
       this.strategyReviewSelected
     );
   }
@@ -442,11 +461,12 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     ) {
       if (
         this.strategyReviewSelected &&
-        this.strategyReview !== this.staticContentArray[0]
+        this.strategyReview !== this.lastSavedStrategyReview
       ) {
         this.solution
           .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
           .then(() => {
+            this.lastSavedStrategyReview = this.strategyReview || '';
             this.saveSuccess = true;
           })
           .catch((error) => {
@@ -465,6 +485,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
           .then(() => {
             this.staticContentArray[0] = draft;
             this.strategyReview = draft; // <‑‑ keep in sync
+            this.lastSavedStrategyReview = draft;
             this.saveSuccess = true;
           })
           .catch((error) => {
@@ -508,12 +529,12 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     ) {
       if (
         this.strategyReviewSelected &&
-        this.strategyReview !== this.staticContentArray[0]
+        this.strategyReview !== this.lastSavedStrategyReview
       ) {
         this.solution
           .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
           .then(() => {
-            this.staticContentArray[0] = this.strategyReview; // Update static content after saving
+            this.lastSavedStrategyReview = this.strategyReview || '';
             // this.saveSuccess = true;
           })
           .catch((error) => {
@@ -526,11 +547,14 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         // this.saveSuccess = true;
         // this.staticContentArray[0] = this.contentsArray[0]; // Update to prevent infinite loop
         // if (this.strategyReview === '') {
+        const draft = this.contentsArray[0];
         this.solution
-          .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
+          .saveSolutionStrategyReview(this.solutionId, draft)
           .then(() => {
             // this.saveSuccess = true;
-            this.staticContentArray[0] = this.contentsArray[0];
+            this.staticContentArray[0] = draft;
+            this.strategyReview = draft;
+            this.lastSavedStrategyReview = draft;
           })
           .catch((error) => {
             // this.saveError = true;
@@ -573,120 +597,78 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.submitDisplay = false;
   }
 
-  // initializeStrategy() {
-  //   let array: string[] = [];
-  //   this.contentsArray = [''];
-  //   this.staticContentArray = [''];
-  //   if (this.currentSolution.status) {
-  //     Object.keys(this.currentSolution.status).forEach((key) => {
-  //       array.push(key);
-  //     });
-  //   }
-  //   // console.log('current soltution status', this.currentSolution.status);
-  //   // console.log('array ', array);
-
-  //   array.sort((a, b) => {
-  //     // Split both elements by '-' and assign default values for prefix and suffix
-  //     let [aPrefix, aSuffix = ''] = a.split('-');
-  //     let [bPrefix, bSuffix = ''] = b.split('-');
-
-  //     // Compare the prefixes
-  //     const prefixComparison = aPrefix.localeCompare(bPrefix);
-  //     if (prefixComparison === 0) {
-  //       // If the prefix is the same, compare the suffixes
-  //       return aSuffix.localeCompare(bSuffix);
-  //     }
-
-  //     return prefixComparison;
-  //   });
-  //   this.array = array;
-  //   let titles = [
-  //     `<h1 class="text-left text-xl font-bold my-4"> Problem State </h1>`,
-  //     `<h1 class="text-left text-xl font-bold my-4"> Preferred State </h1>`,
-  //     `<h1 class="text-left text-xl font-bold  my-4"> Plan </h1>`,
-  //     `<h1 class="text-left text-xl font-bold  my-4"> Implementation </h1>`,
-  //   ];
-
-  //   // console.log(' all the keys', array);
-
-  //   // console.log('what is content array content', this.contentsArray);
-
-  //   let result = []; // Initialize the result array
-  //   let j = 0; // Initialize the title index
-
-  //   // Add the first title before any status
-  //   result.push(titles[0]);
-  //   for (let i = 0; i < array.length; i++) {
-  //     // Add the current status to the result
-  //     result.push(this.currentSolution.status![array[i]]);
-
-  //     // Check for the switch and add the next title accordingly
-  //     if (
-  //       i < array.length - 1 &&
-  //       !array[i].startsWith(array[i + 1].substring(0, 2))
-  //     ) {
-  //       j++; // Move to the next title
-  //       result.push(titles[j]); // Add the next title
-  //     }
-  //   }
-
-  //   // console.log('result ', result);
-  //   // Handle the last element
-  //   // result.push(this.currentSolution.status![array[array.length - 1]]);
-
-  //   // Convert result array to string or any format you need
-
-  //   this.staticContentArray[0] = result.join('\n');
-  //   this.contentsArray[0] = result.join('\n');
-
-  //   // for the very first time, we need to save the strategy review as the accumulated content
-  //   // if strategy review has not been set yet previously
-  //   if (this.strategyReview === '') {
-  //     console.log('strategy review is empty', this.strategyReview);
-  //     this.solution
-  //       .saveSolutionStrategyReview(this.solutionId, this.contentsArray[0])
-  //       .then(() => {
-  //         // this.staticContentArray[0] = this.strategyReview; // Update static content after saving
-  //         // this.saveSuccess = true;
-  //       })
-  //       .catch((error) => {
-  //         // this.saveError = true;
-  //         // alert('Error launching solution ');
-  //       });
-  //   }
-  //   // at the end choose the latest strategy review
-  //   // this.chooseStrategyReview();
-  //   this.chooseDefaultReview();
-  // }
-
   initializeStrategy() {
-    // Clear arrays
-    this.contentsArray = [''];
-    this.staticContentArray = [''];
+    const finalContent = this.buildStrategySummary();
+    this.contentsArray = [finalContent];
+    this.staticContentArray = [finalContent];
 
-    // Gather all keys from this.currentSolution.status
-    let keys: string[] = [];
-    if (this.currentSolution.status) {
-      keys = Object.keys(this.currentSolution.status);
+    if (!this.strategyReview || this.strategyReview.trim() === '') {
+      this.strategyReview = finalContent;
+      this.solution
+        .saveSolutionStrategyReview(this.solutionId, finalContent)
+        .then(() => {
+          this.lastSavedStrategyReview = finalContent;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      this.lastSavedStrategyReview = this.strategyReview;
     }
 
-    // Sort keys (optional, if you want them in e.g. S1-A, S1-B, S2-A... order)
-    keys.sort((a, b) => {
-      // Split by '-' and assign default values
-      let [aPrefix, aSuffix = ''] = a.split('-');
-      let [bPrefix, bSuffix = ''] = b.split('-');
+    if (this.isStrategyReviewStep) {
+      this.chooseStrategyReview();
+    } else {
+      this.chooseDefaultReview();
+    }
+  }
 
-      // Compare prefixes (S1 vs S2 vs S3, etc.)
+  refreshStrategyReviewFromSteps() {
+    if (!this.isStrategyReviewStep) {
+      return;
+    }
+
+    const finalContent = this.buildStrategySummary();
+    if (!this.contentsArray.length) {
+      this.contentsArray = [finalContent];
+    } else {
+      this.contentsArray[0] = finalContent;
+    }
+
+    if (!this.staticContentArray.length) {
+      this.staticContentArray = [finalContent];
+    } else {
+      this.staticContentArray[0] = finalContent;
+    }
+
+    this.strategyReview = finalContent;
+    this.chooseStrategyReview();
+
+    this.solution
+      .saveSolutionStrategyReview(this.solutionId, finalContent)
+      .then(() => {
+        this.lastSavedStrategyReview = finalContent;
+      })
+      .catch((error) => {
+        console.error('Error refreshing from steps 1-4', error);
+      });
+  }
+
+  private buildStrategySummary(): string {
+    if (!this.currentSolution.status) {
+      return '';
+    }
+
+    const keys = Object.keys(this.currentSolution.status).sort((a, b) => {
+      const [aPrefix, aSuffix = ''] = a.split('-');
+      const [bPrefix, bSuffix = ''] = b.split('-');
       const prefixComparison = aPrefix.localeCompare(bPrefix);
       if (prefixComparison === 0) {
-        // If the prefix is the same, compare suffixes (A vs B vs C)
         return aSuffix.localeCompare(bSuffix);
       }
       return prefixComparison;
     });
 
-    // Prepare a structure to hold snippets for each step
-    // e.g. stepSnippets[1] = array of strings from S1-A, S1-B, etc.
     const stepSnippets: { [step: number]: string[] } = {
       1: [],
       2: [],
@@ -695,60 +677,24 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       5: [],
     };
 
-    // Group each key's snippet into the corresponding stepSnippets bucket
     keys.forEach((key) => {
-      // Key looks like 'S1-A' or 'S4-C'
-      // Extract the step number from 'S1', 'S4', etc.
-      const prefix = key.split('-')[0]; // e.g. 'S1'
-      const stepNumber = Number(prefix.substring(1)); // e.g. 1
-
+      const prefix = key.split('-')[0];
+      const stepNumber = Number(prefix.substring(1));
       if (stepSnippets.hasOwnProperty(stepNumber)) {
-        // Add the text from that key into the stepSnippets bucket
         stepSnippets[stepNumber].push(this.currentSolution.status![key]);
       }
     });
 
     const titles = this.getLocalizedStrategyHeadings();
-
-    // Now, build the result array only for the steps that have content
-    let result: string[] = [];
+    const result: string[] = [];
     for (let step = 1; step <= 5; step++) {
       if (stepSnippets[step] && stepSnippets[step].length > 0) {
-        // Add the heading for this step
         result.push(titles[step - 1]);
-        // Add all snippets
-        stepSnippets[step].forEach((snippet) => {
-          result.push(snippet);
-        });
+        stepSnippets[step].forEach((snippet) => result.push(snippet));
       }
     }
 
-    // Convert result array to a single string
-    const finalContent = result.join('\n');
-    this.staticContentArray[0] = finalContent;
-    this.contentsArray[0] = finalContent;
-
-    // If it's the first time strategyReview is empty, save it
-    // if (this.strategyReview === '') {
-    //   this.solution
-    //     .saveSolutionStrategyReview(this.solutionId, finalContent)
-    //     .then(() => {
-    //       // ...
-    //     })
-    //     .catch((error) => {
-    //       // ...
-    //     });
-    // }
-    /*  NEW — keep the local state in sync  */
-    if (!this.strategyReview || this.strategyReview.trim() === '') {
-      this.strategyReview = finalContent; // <‑‑ add this line
-      this.solution
-        .saveSolutionStrategyReview(this.solutionId, finalContent)
-        .catch(console.error);
-    }
-
-    // Finally, choose the default review
-    this.chooseDefaultReview();
+    return result.join('\n');
   }
 
   onHoverPopup(index: number) {
