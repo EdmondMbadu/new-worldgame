@@ -26,6 +26,21 @@ interface PlaygroundLanguageContent {
   questions: string[][];
 }
 
+interface AiScoreCard {
+  label: string;
+  scoreValue?: string;
+  scoreMax?: string;
+  reason?: string;
+  raw?: string;
+}
+
+interface AiFeedbackDisplay {
+  scores: AiScoreCard[];
+  improvements: string[];
+  readinessLevel?: string;
+  readinessDetails?: string;
+}
+
 @Component({
   selector: 'app-playground-steps',
   templateUrl: './playground-steps.component.html',
@@ -201,6 +216,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   aiFeedbackStatus = '';
   aiFeedbackError = '';
   aiFeedbackText = '';
+  aiFeedbackFormatted = '';
+  aiFeedbackParsed: AiFeedbackDisplay = { scores: [], improvements: [] };
   private aiFeedbackDocSub?: Subscription;
 
   constructor(
@@ -675,7 +692,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.aiFeedbackError = '';
+    this.resetAiFeedbackState();
     this.aiFeedbackText = '';
     this.aiFeedbackLoading = true;
     this.aiFeedbackStatus = 'Sending your strategy to the AI evaluator...';
@@ -698,6 +715,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
         this.aiFeedbackLoading = false;
         this.aiFeedbackStatus = '';
         this.aiFeedbackText = snapshot.response ?? '';
+        this.aiFeedbackParsed = this.parseAiFeedback(this.aiFeedbackText);
+        this.aiFeedbackFormatted = this.formatAiFeedback(this.aiFeedbackText);
         this.aiFeedbackDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
         this.aiFeedbackLoading = false;
@@ -756,6 +775,138 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
 
   private isSupportedLanguage(language: string): language is SupportedLanguage {
     return Object.prototype.hasOwnProperty.call(this.localizedContent, language);
+  }
+
+  get hasStructuredFeedback(): boolean {
+    return (
+      this.aiFeedbackParsed.scores.length > 0 ||
+      this.aiFeedbackParsed.improvements.length > 0 ||
+      !!this.aiFeedbackParsed.readinessLevel
+    );
+  }
+
+  private resetAiFeedbackState() {
+    this.aiFeedbackError = '';
+    this.aiFeedbackParsed = { scores: [], improvements: [] };
+    this.aiFeedbackFormatted = '';
+  }
+
+  private parseAiFeedback(raw: string): AiFeedbackDisplay {
+    const result: AiFeedbackDisplay = { scores: [], improvements: [] };
+    if (!raw) {
+      return result;
+    }
+
+    const lines = raw
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length);
+
+    let section: 'scores' | 'improvements' | 'readiness' | null = null;
+
+    for (const line of lines) {
+      const normalized = line.replace(/[:：]\s*$/, '').toLowerCase();
+
+      if (normalized === 'scores') {
+        section = 'scores';
+        continue;
+      }
+      if (normalized === 'improvements') {
+        section = 'improvements';
+        continue;
+      }
+      if (line.toLowerCase().startsWith('readiness level')) {
+        section = 'readiness';
+        const [, details = ''] = line.split(/:/, 2);
+        if (details.trim()) {
+          const cleaned = this.stripMarkdown(details.trim());
+          const [label, ...rest] = cleaned.split(/[-–]/);
+          result.readinessLevel = label?.trim();
+          result.readinessDetails = rest.join('-').trim();
+        }
+        continue;
+      }
+
+      if (section === 'scores') {
+        const parsedScore = this.parseScoreLine(line);
+        if (parsedScore) {
+          result.scores.push(parsedScore);
+        }
+      } else if (section === 'improvements') {
+        const improvement = this.stripMarkdown(
+          line.replace(/^\d+\.\s*/, '').replace(/^[-•]\s*/, '')
+        );
+        if (improvement) {
+          result.improvements.push(improvement);
+        }
+      } else if (section === 'readiness') {
+        if (!result.readinessLevel) {
+          result.readinessLevel = this.stripMarkdown(line);
+        } else if (!result.readinessDetails) {
+          result.readinessDetails = this.stripMarkdown(line);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private parseScoreLine(line: string): AiScoreCard | null {
+    const match = line.match(/^([^:]+):\s*(\d{1,2})\/10\s*(.*)$/i);
+    if (!match) {
+      return { label: this.stripMarkdown(line), raw: line };
+    }
+
+    const [, label, score, reasonRaw] = match;
+    const reason = this.cleanReasonText(reasonRaw);
+
+    return {
+      label: this.stripMarkdown(label),
+      scoreValue: score,
+      scoreMax: '10',
+      reason,
+      raw: line,
+    };
+  }
+
+  private cleanReasonText(text: string): string {
+    const trimmed = text.trim();
+    const noParens = trimmed.replace(/^\((.*)\)$/, '$1');
+    return this.stripMarkdown(noParens);
+  }
+
+  private stripMarkdown(value: string): string {
+    if (!value) {
+      return '';
+    }
+    return value
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/_{2}(.*?)_{2}/g, '$1')
+      .replace(/`(.*?)`/g, '$1')
+      .trim();
+  }
+
+  private formatAiFeedback(value: string): string {
+    if (!value) {
+      return '';
+    }
+    let formatted = this.escapeHtml(value);
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/\n/g, '<br>');
+    return formatted;
+  }
+
+  private escapeHtml(value: string): string {
+    const map: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return value.replace(/[&<>"']/g, (m) => map[m]);
   }
 
   private buildAiPrompt(): string {

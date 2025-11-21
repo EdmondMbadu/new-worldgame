@@ -143,7 +143,7 @@
                 type="button"
                 (click)="requestAiFeedback()"
                 [disabled]="aiFeedbackLoading"
-                class="w-full inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-600 to-fuchsia-500 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/30 transition disabled:cursor-not-allowed disabled:opacity-60">
+                class="w-full inline-flex items-center justify-center rounded-2xl bg-teal-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/40 transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60">
                 <ng-container *ngIf="!aiFeedbackLoading; else feedbackLoading">
                   Get AI Feedback
                 </ng-container>
@@ -183,26 +183,95 @@
               </div>
               <div
                 *ngIf="aiFeedbackText"
-                class="w-full rounded-2xl border border-indigo-200 bg-white/80 p-4 shadow-md backdrop-blur dark:border-indigo-500/40 dark:bg-slate-900/60">
-                <div class="mb-2 flex items-center gap-2 text-indigo-900 dark:text-indigo-200">
-                  <svg
-                    class="h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.5">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <h3 class="text-base font-semibold">AI Evaluation</h3>
+                class="w-full rounded-3xl border border-emerald-200/60 bg-white/90 p-5 shadow-2xl shadow-emerald-500/20 backdrop-blur dark:border-teal-500/40 dark:bg-slate-900/70">
+                <div class="mb-4 flex items-center gap-3">
+                  <span class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-teal-500/20 dark:text-teal-200">
+                    <svg
+                      class="h-6 w-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="1.5">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </span>
+                  <div>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Evaluator Summary</p>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">AI Feedback</h3>
+                  </div>
                 </div>
-                <div
-                  class="text-sm leading-relaxed text-gray-800 whitespace-pre-wrap dark:text-gray-100">
-                  {{ aiFeedbackText }}
-                </div>
+
+                <ng-container *ngIf="hasStructuredFeedback; else fallbackFeedback">
+                  <div *ngIf="aiFeedbackParsed.scores.length" class="mb-5 space-y-2">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                      Scores
+                    </p>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                      <div
+                        *ngFor="let score of aiFeedbackParsed.scores"
+                        class="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/70">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                          {{ score.label }}
+                        </p>
+                        <div class="mt-1 flex items-baseline gap-1 text-slate-900 dark:text-white">
+                          <span class="text-3xl font-bold">
+                            {{ score.scoreValue || '—' }}
+                          </span>
+                          <span class="text-sm text-slate-500">
+                            /{{ score.scoreMax || '10' }}
+                          </span>
+                        </div>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-200">
+                          {{ score.reason || score.raw }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="aiFeedbackParsed.improvements.length" class="mb-5 space-y-3">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                      Improvements
+                    </p>
+                    <ul class="space-y-2">
+                      <li
+                        *ngFor="let tip of aiFeedbackParsed.improvements; let idx = index"
+                        class="flex items-start gap-3 rounded-2xl border border-emerald-100/70 bg-emerald-50/60 p-3 dark:border-teal-500/30 dark:bg-teal-500/10">
+                        <span
+                          class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-white font-semibold text-emerald-600 shadow-sm dark:bg-slate-900 dark:text-teal-200">
+                          {{ idx + 1 }}
+                        </span>
+                        <p class="text-sm text-slate-700 dark:text-slate-100">
+                          {{ tip }}
+                        </p>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div *ngIf="aiFeedbackParsed.readinessLevel" class="rounded-2xl border border-slate-200 bg-gradient-to-r from-emerald-50 to-cyan-50 p-4 dark:border-teal-500/30 dark:from-slate-800 dark:to-slate-900">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
+                      Readiness Level
+                    </p>
+                    <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
+                      {{ aiFeedbackParsed.readinessLevel }}
+                    </p>
+                    <p
+                      *ngIf="aiFeedbackParsed.readinessDetails"
+                      class="mt-1 text-sm text-slate-600 dark:text-slate-200">
+                      {{ aiFeedbackParsed.readinessDetails }}
+                    </p>
+                  </div>
+                </ng-container>
+
+                <ng-template #fallbackFeedback>
+                  <div
+                    class="text-sm leading-relaxed text-gray-800 dark:text-gray-100"
+                    [innerHTML]="aiFeedbackFormatted">
+                  </div>
+                </ng-template>
               </div>
             </div>
           </div>
