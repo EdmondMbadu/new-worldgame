@@ -6,21 +6,31 @@
     <section class="bg-white dark:bg-gray-900 mt-20">
     <div class="py-4 px-4 mx-auto max-w-screen-xl text-center lg:px-12">
     
-        <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">NewWorld Tournament: Real Solutions Start Here</h1>
-         <p class="mb-4 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">The winning team of the 2024 NewWorld Tournament has been announced — congratulations to the <span routerLink="/solution-view/o0eqjssL6yn1qZVqAY60" class="text-blue-500 underline cursor-pointer">Electrifying Health Clinics in the Democratic Republic of Congo</span>  Team!  Their solution is now moving from concept to implementation.
-
-But this is just the beginning.
-
-The NewWorld Tournament is your chance to take bold ideas from game to reality. Whether you want to join a challenge, start a new tournament, or explore past winners, this is where innovation meets action.
-
-👇 Ready to make an impact?
-Choose an option below to get started.</p>
+        <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+          {{ 'joinTournament.hero.title' | translate }}
+        </h1>
+        <div class="mb-4 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400 space-y-4">
+          <p>
+            {{ 'joinTournament.hero.announcementPrefix' | translate }}
+            <span
+              routerLink="/solution-view/o0eqjssL6yn1qZVqAY60"
+              class="text-blue-500 underline cursor-pointer"
+            >
+              {{ 'joinTournament.hero.winnerName' | translate }}
+            </span>
+            {{ 'joinTournament.hero.announcementSuffix' | translate }}
+          </p>
+          <p>{{ 'joinTournament.hero.beginning' | translate }}</p>
+          <p>{{ 'joinTournament.hero.invitation' | translate }}</p>
+          <p>{{ 'joinTournament.hero.prompt' | translate }}</p>
+          <p>{{ 'joinTournament.hero.cta' | translate }}</p>
+        </div>
              <!-- Check back soon to learn who won the first NewWorld Game Tournament.</p> -->
             <!-- <span class=" text-2xl">Join others</span> to  be considered for a <span class="text-xl text-blue-500">$5000 </span> funding prize for your solution!</p> -->
    <div class="flex flex-wrap justify-center gap-4 mb-4 max-w-lg mx-auto">
   <a routerLink="/past-tournaments"
      class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-    Past Tournaments
+    {{ 'joinTournament.buttons.past' | translate }}
     
 
 
@@ -28,7 +38,7 @@ Choose an option below to get started.</p>
 
   <a routerLink="/active-tournaments"
      class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-    Active Tournaments
+    {{ 'joinTournament.buttons.active' | translate }}
       <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-gray-800  font-extrabold dark:font-bold dark:text-gray-100">
   <path fill-rule="evenodd" d="M8.25 3.75H19.5a.75.75 0 0 1 .75.75v11.25a.75.75 0 0 1-1.5 0V6.31L5.03 20.03a.75.75 0 0 1-1.06-1.06L17.69 5.25H8.25a.75.75 0 0 1 0-1.5Z" clip-rule="evenodd" />
 </svg> -->
@@ -49,7 +59,7 @@ Choose an option below to get started.</p>
 
   <a routerLink="/your-tournaments"
      class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-    Your Tournaments
+    {{ 'joinTournament.buttons.yours' | translate }}
    
   </a>
 </div>
@@ -73,18 +83,18 @@ Choose an option below to get started.</p>
   <!-- Title -->
   <a routerLink="/create-tournament">
     <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white transition-colors duration-300 ">
-      Create a Tournament
+      {{ 'joinTournament.createCard.title' | translate }}
     </h5>
   </a>
 
   <!-- Description -->
   <p class="mb-3 font-normal text-gray-500 dark:text-gray-400">
-    Go to this step-by-step process to create a tournament.
+    {{ 'joinTournament.createCard.description' | translate }}
   </p>
 
   <!-- CTA with icon -->
   <a routerLink="/blogs/tournament" class="inline-flex items-center font-medium text-blue-600 hover:underline">
-    See our guideline
+    {{ 'joinTournament.createCard.guideline' | translate }}
     <svg class="w-3 h-3 ms-2.5 rtl:rotate-[270deg]"
          xmlns="http://www.w3.org/2000/svg"
          fill="none"
@@ -140,7 +150,7 @@ Choose an option below to get started.</p>
                             </div>
                         </div>
                     </div>
-                    <label for="table-search" class="sr-only">Search</label>
+                    <label for="table-search" class="sr-only">{{ 'joinTournament.table.searchLabel' | translate }}</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
                             <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -212,7 +222,7 @@ Choose an option below to get started.</p>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                 </svg>
-                                <span class="sr-only">Close modal</span>
+                                <span class="sr-only">{{ 'joinTournament.common.closeModal' | translate }}</span>
                             </button>
                             </div>
                          
@@ -295,7 +305,7 @@ Choose an option below to get started.</p>
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                             </svg>
                         </div>
-                        <input type="text" id="table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for solutions">
+                        <input type="text" id="table-search-users" class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [placeholder]="'joinTournament.table.searchPlaceholder' | translate">
                     </div>
                 </div>
                 <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -305,16 +315,16 @@ Choose an option below to get started.</p>
                                
                             </th>
                             <th scope="col" class="px-6 py-3">
-                               Solution Title
+                               {{ 'joinTournament.table.solutionTitle' | translate }}
                             </th>
                             <th scope="col" class="px-6 py-3">
-                               Evaluation Grade
+                               {{ 'joinTournament.table.evaluationGrade' | translate }}
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Status
+                                {{ 'joinTournament.table.status' | translate }}
                             </th>
                             <th scope="col" class="px-6 py-3">
-                                Action
+                                {{ 'joinTournament.table.action' | translate }}
                             </th>
                         </tr>
                     </thead>
@@ -337,12 +347,15 @@ Choose an option below to get started.</p>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="h-2.5 w-2.5 rounded-full bg-red-500 me-2"></div> Not Sent
+                                    <div class="h-2.5 w-2.5 rounded-full bg-red-500 me-2"></div>
+                                    {{ 'joinTournament.table.notSent' | translate }}
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 
-                                <button (click)="addSolutionToTournament(solution)"  type="button" class="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Add Solution To Tournament</button>
+                                <button (click)="addSolutionToTournament(solution)"  type="button" class="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">
+                                  {{ 'joinTournament.table.addButton' | translate }}
+                                </button>
                             </td>
                         </tr>
                    
@@ -358,16 +371,16 @@ Choose an option below to get started.</p>
                                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                 </svg>
-                                <span class="sr-only">Close modal</span>
+                                <span class="sr-only">{{ 'joinTournament.common.closeModal' | translate }}</span>
                             </button>
                             <div class="flex flex-row mx-auto my-4">
                                 <h3 class=" mx-auto text-xl font-bold text-dark-900 dark:text-white">
-                                    Solution: {{chosenSolution.title}}
+                                    {{ 'joinTournament.contactModal.solutionLabel' | translate }}: {{chosenSolution.title}}
                                   </h3>
                             </div>
                             <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                   Contact Person Information
+                                   {{ 'joinTournament.contactModal.heading' | translate }}
                                 </h3>
                                
                           
@@ -376,24 +389,24 @@ Choose an option below to get started.</p>
                             <div class="p-6 space-y-6">
                                 <div class="grid grid-cols-6 gap-6">
                                     <div class="col-span-6 sm:col-span-3">
-                                        <label for="first-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First Name</label>
+                                        <label for="first-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'joinTournament.contactModal.fields.firstName' | translate }}</label>
                                         <input type="text" name="first-name" id="first-name"  [(ngModel)]="contactInformation.firstName" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Bonnie" required="">
                                     </div>
                                     <div class="col-span-6 sm:col-span-3">
-                                        <label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last Name</label>
+                                        <label for="last-name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'joinTournament.contactModal.fields.lastName' | translate }}</label>
                                         <input type="text" name="last-name" id="last-name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [(ngModel)]="contactInformation.lastName" placeholder="Green" required="">
                                     </div>
                                     <div class="col-span-6 sm:col-span-3">
-                                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
+                                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'joinTournament.contactModal.fields.email' | translate }}</label>
                                         <input type="email" name="email" id="email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [(ngModel)]="contactInformation.email" placeholder="example@company.com" required="">
                                     </div>
                                   
                                     <div class="col-span-6 sm:col-span-3">
-                                        <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">City where you live</label>
+                                        <label for="city" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'joinTournament.contactModal.fields.city' | translate }}</label>
                                         <input type="text" name="department" [(ngModel)]="contactInformation.city" id="city" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Lagos" required="">
                                     </div>
                                     <div class="col-span-6 sm:col-span-3">
-                                        <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Country where you live</label>
+                                        <label for="country" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ 'joinTournament.contactModal.fields.country' | translate }}</label>
                                         <input type="text" name="department" [(ngModel)]="contactInformation.country" id="country" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nigeria" required="">
                                     </div>
                                     
@@ -402,10 +415,10 @@ Choose an option below to get started.</p>
                             <div class="flex flex-row mx-16">
                              
                                     <div class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
-                                        <button (click)="toggleContactPersonInfo()" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Cancel</button>
+                                        <button (click)="toggleContactPersonInfo()" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">{{ 'joinTournament.contactModal.cancel' | translate }}</button>
                                     </div>
                                     <div class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600">
-                                        <button (click)="addThisSolutionToTournament()" type="submit" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Submit</button>
+                                        <button (click)="addThisSolutionToTournament()" type="submit" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">{{ 'joinTournament.contactModal.submit' | translate }}</button>
                                     </div>
                             </div>
                          
@@ -429,14 +442,15 @@ Choose an option below to get started.</p>
                 <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                 </svg>
-                <span class="sr-only">Close modal</span>
+                <span class="sr-only">{{ 'joinTournament.common.closeModal' | translate }}</span>
             </button>
             <div class="p-6 text-center">
                 <svg class="mx-auto mb-4 text-red-400 w-12 h-12 " xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                 </svg>
-                <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-200 ">You need at least 2 evalutions with an average of 9 to submit your solution to the tournament.
-                    Submit once these requirements are met. </h3>
+                <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-200 ">
+                    {{ 'joinTournament.requirementModal.message' | translate }}
+                </h3>
                 <!-- <button  type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2" (click)="accept()">
                     Yes, I'm sure
                 </button> -->

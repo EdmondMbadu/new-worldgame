@@ -4,6 +4,7 @@ import { Tournament } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-join-tournament',
@@ -27,7 +28,8 @@ export class JoinTournamentComponent implements OnInit {
   constructor(
     private solution: SolutionService,
     public auth: AuthService,
-    public data: DataService
+    public data: DataService,
+    private translate: TranslateService
   ) {
     solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       this.completedSolutions = data.filter(
@@ -76,7 +78,7 @@ export class JoinTournamentComponent implements OnInit {
         this.reinitializeContactInfo();
       } catch (error) {
         alert(
-          'An error occured while sending the solution to the tournament. Try again.'
+          this.translate.instant('joinTournament.alerts.submitError')
         );
         console.log('error');
       }
@@ -106,7 +108,7 @@ export class JoinTournamentComponent implements OnInit {
       this.contactInformation.city === '' ||
       this.contactInformation.country === ''
     ) {
-      alert('Complete all fields!');
+      alert(this.translate.instant('joinTournament.alerts.fieldsIncomplete'));
       return false;
     }
     return true;

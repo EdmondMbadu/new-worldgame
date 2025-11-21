@@ -397,5 +397,60 @@
       "unknownAuthor": "Inconnu",
       "untitledSolution": "Solution sans titre"
     }
+  },
+  "joinTournament": {
+    "hero": {
+      "title": "Tournoi NewWorld : les solutions concrètes commencent ici",
+      "announcementPrefix": "L'équipe gagnante du Tournoi NewWorld 2024 a été annoncée — félicitations à l'équipe ",
+      "winnerName": "Electrifying Health Clinics in the Democratic Republic of Congo",
+      "announcementSuffix": " ! Leur solution passe maintenant du concept à la mise en œuvre.",
+      "beginning": "Mais ce n'est que le début.",
+      "invitation": "Le Tournoi NewWorld est votre chance de transformer des idées audacieuses en réalité. Que vous souhaitiez rejoindre un défi, lancer un nouveau tournoi ou explorer les lauréats précédents, c'est ici que l'innovation devient action.",
+      "prompt": "👇 Prêt·e à avoir un impact ?",
+      "cta": "Choisissez une option ci-dessous pour commencer."
+    },
+    "buttons": {
+      "past": "Tournois passés",
+      "active": "Tournois actifs",
+      "yours": "Vos tournois"
+    },
+    "createCard": {
+      "title": "Créer un tournoi",
+      "description": "Suivez ce processus étape par étape pour créer un tournoi.",
+      "guideline": "Consulter nos directives"
+    },
+    "table": {
+      "solutionTitle": "Titre de la solution",
+      "evaluationGrade": "Note d'évaluation",
+      "status": "Statut",
+      "action": "Action",
+      "searchLabel": "Rechercher",
+      "searchPlaceholder": "Rechercher une solution",
+      "notSent": "Non soumis",
+      "addButton": "Ajouter la solution au tournoi"
+    },
+    "contactModal": {
+      "solutionLabel": "Solution",
+      "heading": "Coordonnées du contact",
+      "fields": {
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "Courriel",
+        "city": "Ville où vous vivez",
+        "country": "Pays où vous vivez"
+      },
+      "cancel": "Annuler",
+      "submit": "Envoyer"
+    },
+    "requirementModal": {
+      "message": "Vous devez avoir au moins 2 évaluations avec une moyenne de 9 pour soumettre votre solution au tournoi. Envoyez-la une fois ces conditions remplies."
+    },
+    "alerts": {
+      "fieldsIncomplete": "Veuillez remplir tous les champs !",
+      "submitError": "Une erreur s'est produite lors de l'envoi de la solution au tournoi. Réessayez."
+    },
+    "common": {
+      "closeModal": "Fermer la fenêtre"
+    }
   }
 }

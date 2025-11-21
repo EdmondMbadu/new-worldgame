@@ -397,5 +397,60 @@
       "unknownAuthor": "Unknown",
       "untitledSolution": "Untitled Solution"
     }
+  },
+  "joinTournament": {
+    "hero": {
+      "title": "NewWorld Tournament: Real Solutions Start Here",
+      "announcementPrefix": "The winning team of the 2024 NewWorld Tournament has been announced — congratulations to the ",
+      "winnerName": "Electrifying Health Clinics in the Democratic Republic of Congo",
+      "announcementSuffix": " team! Their solution is now moving from concept to implementation.",
+      "beginning": "But this is just the beginning.",
+      "invitation": "The NewWorld Tournament is your chance to take bold ideas from game to reality. Whether you want to join a challenge, start a new tournament, or explore past winners, this is where innovation meets action.",
+      "prompt": "👇 Ready to make an impact?",
+      "cta": "Choose an option below to get started."
+    },
+    "buttons": {
+      "past": "Past Tournaments",
+      "active": "Active Tournaments",
+      "yours": "Your Tournaments"
+    },
+    "createCard": {
+      "title": "Create a Tournament",
+      "description": "Go to this step-by-step process to create a tournament.",
+      "guideline": "See our guideline"
+    },
+    "table": {
+      "solutionTitle": "Solution Title",
+      "evaluationGrade": "Evaluation Grade",
+      "status": "Status",
+      "action": "Action",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search for solutions",
+      "notSent": "Not Sent",
+      "addButton": "Add Solution To Tournament"
+    },
+    "contactModal": {
+      "solutionLabel": "Solution",
+      "heading": "Contact Person Information",
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "city": "City where you live",
+        "country": "Country where you live"
+      },
+      "cancel": "Cancel",
+      "submit": "Submit"
+    },
+    "requirementModal": {
+      "message": "You need at least 2 evaluations with an average score of 9 to submit your solution to the tournament. Submit once these requirements are met."
+    },
+    "alerts": {
+      "fieldsIncomplete": "Complete all fields!",
+      "submitError": "An error occurred while sending the solution to the tournament. Try again."
+    },
+    "common": {
+      "closeModal": "Close modal"
+    }
   }
 }
