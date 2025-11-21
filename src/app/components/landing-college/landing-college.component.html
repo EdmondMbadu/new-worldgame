@@ -80,7 +80,7 @@
           Schedule a Demo
         </a>
         <a
-          href="mailto:newworld@newworld-game.org"
+          routerLink="/contact-us"
           class="inline-flex items-center justify-center px-10 py-4 border border-white/40 text-white font-semibold rounded-full hover:bg-white/10 transition"
         >
           Contact Us
@@ -192,7 +192,7 @@
           <a routerLink="/scheduler" class="px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500">
             Schedule a Demo
           </a>
-          <a href="mailto:newworld@newworld-game.org" class="px-6 py-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <a routerLink="/contact-us" class="px-6 py-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60">
             Contact Us
           </a>
         </div>
@@ -378,6 +378,14 @@
             <li>Unlimited NewWorld Tournament Entries</li>
             <li>Customization options</li>
           </ul>
+          <div class="mt-6">
+            <a
+              routerLink="/contact-us"
+              class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
+            >
+              Contact Us
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -391,16 +399,23 @@
         Download a Guide for Exploring NWG, sign up your class, or reach out so we can walk through the platform together.
       </p>
       <div class="flex flex-wrap justify-center gap-4">
-        <button type="button" class="px-6 py-3 rounded-full bg-slate-900 text-white font-semibold hover:bg-slate-800">
+        <a
+          href="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2FNWG%20Instruction%20Sheet.pdf?alt=media&token=381f5fef-63d4-437f-b593-103bfd858319"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-slate-900 text-white font-semibold hover:bg-slate-800"
+        >
           Download a Guide for Exploring NWG
-        </button>
-        <a routerLink="/signup" class="px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
+        </a>
+        <a routerLink="/welcome" class="px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-500">
           Sign Up
         </a>
-        <a href="mailto:newworld@newworld-game.org" class="px-6 py-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60">
+        <a routerLink="/contact-us" class="px-6 py-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60">
           Contact Us
         </a>
       </div>
     </div>
   </section>
+
+  <app-footer></app-footer>
 </div>
