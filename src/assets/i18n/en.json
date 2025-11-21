@@ -452,5 +452,21 @@
     "common": {
       "closeModal": "Close modal"
     }
+  },
+  "discover": {
+    "hero": {
+      "title": "NewWorld Game General Assembly",
+      "subtitle": "Discover and support innovative solutions already developed by our community to address local and global challenges."
+    },
+    "categories": {
+      "all": "All",
+      "unSdg": "UN SDG",
+      "climate": "Climate",
+      "poverty": "Poverty",
+      "energy": "Energy",
+      "food": "Food",
+      "health": "Health",
+      "forestry": "Forestry"
+    }
   }
 }

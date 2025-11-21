@@ -22,13 +22,12 @@
         <h1
           class="font-serif text-center text-4xl font-black tracking-tight text-black dark:text-white"
         >
-          NewWorld Game General Assembly
+          {{ 'discover.hero.title' | translate }}
         </h1>
         <p
           class="mt-4 text-center text-gray-600 dark:text-gray-300 my-4 mx-auto"
         >
-          Discover and support innovative solutions already developed by our
-          community to address local and global challenges.
+          {{ 'discover.hero.subtitle' | translate }}
         </p>
       </div>
 
@@ -43,7 +42,7 @@
           }"
           class="px-4 py-2 rounded-full text-sm font-medium hover:bg-teal-600 transition"
         >
-          {{ category }}
+          {{ getCategoryLabel(category) | translate }}
         </button>
       </div>
     </header>

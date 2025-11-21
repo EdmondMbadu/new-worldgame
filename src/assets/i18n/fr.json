@@ -452,5 +452,21 @@
     "common": {
       "closeModal": "Fermer la fenêtre"
     }
+  },
+  "discover": {
+    "hero": {
+      "title": "Assemblée générale de NewWorld Game",
+      "subtitle": "Découvrez et soutenez les solutions innovantes déjà développées par notre communauté pour relever les défis locaux et mondiaux."
+    },
+    "categories": {
+      "all": "Toutes",
+      "unSdg": "Objectifs de l'ONU",
+      "climate": "Climat",
+      "poverty": "Pauvreté",
+      "energy": "Énergie",
+      "food": "Alimentation",
+      "health": "Santé",
+      "forestry": "Foresterie"
+    }
   }
 }

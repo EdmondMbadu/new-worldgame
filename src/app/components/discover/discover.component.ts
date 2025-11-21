@@ -43,6 +43,16 @@ export class DiscoverComponent implements OnInit {
     'Health',
     'Forestry',
   ];
+  private readonly categoryLabelKeyMap: Record<string, string> = {
+    All: 'discover.categories.all',
+    'UN SDG': 'discover.categories.unSdg',
+    Climate: 'discover.categories.climate',
+    Poverty: 'discover.categories.poverty',
+    Energy: 'discover.categories.energy',
+    Food: 'discover.categories.food',
+    Health: 'discover.categories.health',
+    Forestry: 'discover.categories.forestry',
+  };
   activeCategory = 'All'; // ➋ currently‑selected category
 
   titleChallenge: string = '';
@@ -145,6 +155,10 @@ export class DiscoverComponent implements OnInit {
       (s) =>
         (s.category || '').toLowerCase() === this.activeCategory.toLowerCase()
     );
+  }
+
+  getCategoryLabel(category: string): string {
+    return this.categoryLabelKeyMap[category] || category;
   }
 
   findPendingSolutions() {
