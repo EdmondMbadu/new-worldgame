@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -39,6 +39,12 @@ interface AiFeedbackDisplay {
   improvements: string[];
   readinessLevel?: string;
   readinessDetails?: string;
+}
+
+interface AiEvaluatorOption {
+  name: string;
+  avatarPath: string;
+  collectionKey: string;
 }
 
 @Component({
@@ -219,6 +225,36 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   aiFeedbackFormatted = '';
   aiFeedbackParsed: AiFeedbackDisplay = { scores: [], improvements: [] };
   private aiFeedbackDocSub?: Subscription;
+
+  // AI Evaluator selection
+  aiEvaluatorOptions: AiEvaluatorOption[] = [
+    { name: 'Buckminster Fuller', avatarPath: '../../../assets/img/fuller.jpg', collectionKey: 'bucky' },
+    { name: 'Marie Curie', avatarPath: '../../../assets/img/marie-curie.jpg', collectionKey: 'marie' },
+    { name: 'Albert Einstein', avatarPath: '../../../assets/img/albert.png', collectionKey: 'albert' },
+    { name: 'Rachel Carson', avatarPath: '../../../assets/img/rachel-carlson.jpeg', collectionKey: 'rachel' },
+    { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'mandela' },
+    { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi' },
+    { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara' },
+    { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun' },
+    { name: 'Sofia Morales', avatarPath: '../../../assets/img/sofia-agent.png', collectionKey: 'sofia' },
+    { name: 'Li Wei', avatarPath: '../../../assets/img/li-agent.png', collectionKey: 'li' },
+    { name: 'Amina Al-Sayed', avatarPath: '../../../assets/img/amina-agent.png', collectionKey: 'amina' },
+    { name: 'Elena Volkov', avatarPath: '../../../assets/img/elena-agent.png', collectionKey: 'elena' },
+    { name: 'Tane Kahu', avatarPath: '../../../assets/img/tane-agent.png', collectionKey: 'tane' },
+  ];
+  selectedAiEvaluator: AiEvaluatorOption = this.aiEvaluatorOptions[0];
+  showAiEvaluatorDropdown = false;
+  @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.showAiEvaluatorDropdown && this.aiEvaluatorDropdownRef) {
+      const clickedInside = this.aiEvaluatorDropdownRef.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.showAiEvaluatorDropdown = false;
+      }
+    }
+  }
 
   constructor(
     public auth: AuthService,
@@ -678,6 +714,15 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       alert('Error occurred while uploading file. Please try again.');
     }
   }
+  toggleAiEvaluatorDropdown() {
+    this.showAiEvaluatorDropdown = !this.showAiEvaluatorDropdown;
+  }
+
+  selectAiEvaluator(ai: AiEvaluatorOption) {
+    this.selectedAiEvaluator = ai;
+    this.showAiEvaluatorDropdown = false;
+  }
+
   async requestAiFeedback() {
     if (!this.auth.currentUser?.uid) {
       this.aiFeedbackError =
@@ -695,12 +740,11 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.resetAiFeedbackState();
     this.aiFeedbackText = '';
     this.aiFeedbackLoading = true;
-    this.aiFeedbackStatus = 'Sending your strategy to the AI evaluator...';
+    this.aiFeedbackStatus = `Sending your strategy to ${this.selectedAiEvaluator.name}...`;
 
     const docId = this.afs.createId();
-    const docRef: AngularFirestoreDocument<any> = this.afs.doc(
-      `users/${this.auth.currentUser.uid}/discussions/${docId}`
-    );
+    const collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAiEvaluator.collectionKey}/${docId}`;
+    const docRef: AngularFirestoreDocument<any> = this.afs.doc(collectionPath);
 
     this.aiFeedbackDocSub?.unsubscribe();
     this.aiFeedbackDocSub = docRef.valueChanges().subscribe((snapshot) => {
