@@ -195,9 +195,18 @@
                 type="button"
                 (click)="requestAiFeedback()"
                 [disabled]="aiFeedbackLoading"
-                class="w-full inline-flex items-center justify-center rounded-2xl bg-teal-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-teal-500/40 transition hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-60">
+                class="w-full inline-flex items-center justify-center rounded-2xl px-4 py-3 text-base font-semibold text-white shadow-lg transition disabled:cursor-not-allowed disabled:opacity-60"
+                [ngClass]="aiFeedbackText ? 'bg-slate-600 shadow-slate-500/30 hover:bg-slate-500' : 'bg-teal-600 shadow-teal-500/40 hover:bg-teal-500'">
                 <ng-container *ngIf="!aiFeedbackLoading; else feedbackLoading">
-                  Get AI Feedback
+                  <ng-container *ngIf="aiFeedbackText; else firstFeedback">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Get Another AI Feedback
+                  </ng-container>
+                  <ng-template #firstFeedback>
+                    Get AI Feedback
+                  </ng-template>
                 </ng-container>
                 <ng-template #feedbackLoading>
                   <span class="flex items-center gap-2">

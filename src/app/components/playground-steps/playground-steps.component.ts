@@ -48,6 +48,15 @@ interface AiEvaluatorOption {
   collectionKey: string;
 }
 
+interface SavedAiFeedback {
+  evaluatorName: string;
+  evaluatorKey: string;
+  evaluatorAvatar: string;
+  feedbackText: string;
+  feedbackParsed: AiFeedbackDisplay;
+  timestamp: number;
+}
+
 @Component({
   selector: 'app-playground-steps',
   templateUrl: './playground-steps.component.html',
@@ -286,6 +295,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
 
       this.getMembers();
       this.getEvaluators();
+      this.loadSavedFeedback();
     });
     this.initializeLanguageSupport();
   }
@@ -293,6 +303,55 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     window.scrollTo(0, 0);
     this.display = new Array(this.steps.length).fill(false);
     this.display[this.currentIndexDisplay] = true;
+  }
+
+  private async loadSavedFeedback() {
+    if (!this.id) return;
+
+    try {
+      const feedbackDoc = await this.afs
+        .doc<SavedAiFeedback>(`solutions/${this.id}/aiFeedback/latest`)
+        .get()
+        .toPromise();
+
+      if (feedbackDoc?.exists) {
+        const data = feedbackDoc.data() as SavedAiFeedback;
+        this.aiFeedbackText = data.feedbackText;
+        this.aiFeedbackParsed = data.feedbackParsed;
+        this.aiFeedbackFormatted = this.formatAiFeedback(data.feedbackText);
+        
+        // Restore the selected evaluator
+        const savedEvaluator = this.aiEvaluatorOptions.find(
+          ai => ai.collectionKey === data.evaluatorKey
+        );
+        if (savedEvaluator) {
+          this.selectedAiEvaluator = savedEvaluator;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved feedback:', error);
+    }
+  }
+
+  private async saveFeedbackToFirestore() {
+    if (!this.id || !this.aiFeedbackText) return;
+
+    const feedbackData: SavedAiFeedback = {
+      evaluatorName: this.selectedAiEvaluator.name,
+      evaluatorKey: this.selectedAiEvaluator.collectionKey,
+      evaluatorAvatar: this.selectedAiEvaluator.avatarPath,
+      feedbackText: this.aiFeedbackText,
+      feedbackParsed: this.aiFeedbackParsed,
+      timestamp: Date.now(),
+    };
+
+    try {
+      await this.afs
+        .doc(`solutions/${this.id}/aiFeedback/latest`)
+        .set(feedbackData);
+    } catch (error) {
+      console.error('Error saving feedback:', error);
+    }
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -762,6 +821,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
         this.aiFeedbackText = snapshot.response ?? '';
         this.aiFeedbackParsed = this.parseAiFeedback(this.aiFeedbackText);
         this.aiFeedbackFormatted = this.formatAiFeedback(this.aiFeedbackText);
+        this.saveFeedbackToFirestore();
         this.aiFeedbackDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
         this.aiFeedbackLoading = false;
