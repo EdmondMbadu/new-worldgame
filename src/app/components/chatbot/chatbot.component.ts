@@ -342,8 +342,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
   
   /**
-   * Strip markdown formatting from text for clean insertion
-   * Preserves paragraph structure, line breaks, and converts to clean readable text
+   * Convert markdown to HTML for CKEditor insertion
+   * CKEditor uses HTML, so we need to convert markdown to proper HTML tags
    */
   private stripMarkdown(text: string): string {
     if (!text) return '';
@@ -359,54 +359,135 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     // Remove images
     result = result.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1');
     
-    // Remove links but keep text
-    result = result.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    // Convert links to just text (or keep as HTML links)
+    result = result.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
     
-    // Process line by line to preserve structure
+    // Process line by line
     const lines = result.split('\n');
-    const processedLines = lines.map(line => {
-      let processedLine = line;
+    const htmlLines: string[] = [];
+    let inList = false;
+    let listType: 'ul' | 'ol' | null = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
       
-      // Remove headers (keep the text)
-      processedLine = processedLine.replace(/^#{1,6}\s+/, '');
-      
-      // Convert markdown bullets to bullet character
-      processedLine = processedLine.replace(/^(\s*)[\*\-\+]\s+/, '$1• ');
-      
-      // Keep numbered lists as-is (they look fine)
-      // processedLine = processedLine.replace(/^(\s*)\d+\.\s+/, '$1');
-      
-      // Remove blockquote markers
-      processedLine = processedLine.replace(/^>\s*/, '');
-      
-      // Remove horizontal rules
-      if (/^[-*_]{3,}\s*$/.test(processedLine)) {
-        processedLine = '';
+      // Check for headers
+      const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
+      if (headerMatch) {
+        if (inList) {
+          htmlLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+          inList = false;
+          listType = null;
+        }
+        const level = headerMatch[1].length;
+        const headerText = this.processInlineMarkdown(headerMatch[2]);
+        htmlLines.push(`<h${level}>${headerText}</h${level}>`);
+        continue;
       }
       
-      // Remove bold/italic markers (process in order: bold-italic first, then bold, then italic)
-      // ***bold italic*** or ___bold italic___
-      processedLine = processedLine.replace(/\*\*\*([^*]+)\*\*\*/g, '$1');
-      processedLine = processedLine.replace(/___([^_]+)___/g, '$1');
+      // Check for unordered list items
+      const ulMatch = line.match(/^(\s*)[\*\-\+]\s+(.+)$/);
+      if (ulMatch) {
+        if (!inList || listType !== 'ul') {
+          if (inList) htmlLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+          htmlLines.push('<ul>');
+          inList = true;
+          listType = 'ul';
+        }
+        const itemText = this.processInlineMarkdown(ulMatch[2]);
+        htmlLines.push(`<li>${itemText}</li>`);
+        continue;
+      }
       
-      // **bold** or __bold__
-      processedLine = processedLine.replace(/\*\*([^*]+)\*\*/g, '$1');
-      processedLine = processedLine.replace(/__([^_]+)__/g, '$1');
+      // Check for ordered list items
+      const olMatch = line.match(/^(\s*)\d+\.\s+(.+)$/);
+      if (olMatch) {
+        if (!inList || listType !== 'ol') {
+          if (inList) htmlLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+          htmlLines.push('<ol>');
+          inList = true;
+          listType = 'ol';
+        }
+        const itemText = this.processInlineMarkdown(olMatch[2]);
+        htmlLines.push(`<li>${itemText}</li>`);
+        continue;
+      }
       
-      // *italic* or _italic_ (be careful not to match underscores in words)
-      processedLine = processedLine.replace(/\*([^*\n]+)\*/g, '$1');
-      processedLine = processedLine.replace(/(?<![a-zA-Z])_([^_\n]+)_(?![a-zA-Z])/g, '$1');
+      // Close list if we hit a non-list line
+      if (inList && line.trim() !== '') {
+        htmlLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+        inList = false;
+        listType = null;
+      }
       
-      return processedLine;
-    });
+      // Check for blockquotes
+      const blockquoteMatch = line.match(/^>\s*(.*)$/);
+      if (blockquoteMatch) {
+        const quoteText = this.processInlineMarkdown(blockquoteMatch[1]);
+        htmlLines.push(`<blockquote>${quoteText}</blockquote>`);
+        continue;
+      }
+      
+      // Skip horizontal rules
+      if (/^[-*_]{3,}\s*$/.test(line)) {
+        htmlLines.push('<hr>');
+        continue;
+      }
+      
+      // Empty line = paragraph break
+      if (line.trim() === '') {
+        if (!inList) {
+          htmlLines.push('</p><p>');
+        }
+        continue;
+      }
+      
+      // Regular text - process inline markdown
+      const processedLine = this.processInlineMarkdown(line);
+      htmlLines.push(processedLine);
+    }
     
-    result = processedLines.join('\n');
+    // Close any open list
+    if (inList) {
+      htmlLines.push(listType === 'ul' ? '</ul>' : '</ol>');
+    }
     
-    // Clean up multiple blank lines but keep paragraph breaks
-    result = result.replace(/\n{3,}/g, '\n\n');
+    // Join and wrap in paragraph
+    let html = htmlLines.join('\n');
     
-    // Trim leading/trailing whitespace
-    result = result.trim();
+    // Clean up empty paragraphs
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    html = html.replace(/^<\/p><p>/, '');
+    html = html.replace(/<\/p><p>$/, '');
+    
+    // Wrap in paragraph if not already wrapped in block element
+    if (!html.startsWith('<h') && !html.startsWith('<ul') && !html.startsWith('<ol') && !html.startsWith('<p')) {
+      html = '<p>' + html + '</p>';
+    }
+    
+    // Fix double paragraph tags
+    html = html.replace(/<\/p>\s*<p>\s*<\/p>\s*<p>/g, '</p><p>');
+    
+    return html.trim();
+  }
+  
+  /**
+   * Process inline markdown (bold, italic) within a line
+   */
+  private processInlineMarkdown(text: string): string {
+    let result = text;
+    
+    // ***bold italic*** or ___bold italic___
+    result = result.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+    result = result.replace(/___([^_]+)___/g, '<strong><em>$1</em></strong>');
+    
+    // **bold** or __bold__
+    result = result.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    result = result.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    
+    // *italic* or _italic_
+    result = result.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+    result = result.replace(/(?<![a-zA-Z0-9])_([^_\n]+)_(?![a-zA-Z0-9])/g, '<em>$1</em>');
     
     return result;
   }
