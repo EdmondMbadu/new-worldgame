@@ -7,8 +7,10 @@ import {
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { ChatContextService, PlaygroundContext, PlaygroundQuestion } from 'src/app/services/chat-context.service';
 
 export interface DisplayMessage {
   text?: string;
@@ -16,12 +18,13 @@ export interface DisplayMessage {
   link?: { text?: string; url?: string };
   type: 'PROMPT' | 'RESPONSE' | 'IMAGE' | 'ATTACHMENT';
   streaming?: boolean;
+  insertable?: boolean;  // Can this response be inserted into a playground box?
 }
 
 export interface AiAvatar {
   id: string;
   name: string;
-  shortName?: string; // Optional short name for display (e.g., "Bucky" for Buckminster Fuller)
+  shortName?: string;
   avatarPath: string;
   collectionKey: string;
   intro: string;
@@ -69,6 +72,16 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   showAiSelector = false;
   selectedAi: AiAvatar;
   
+  // Context Integration
+  playgroundContext: PlaygroundContext | null = null;
+  private contextSub?: Subscription;
+  private insertCompleteSub?: Subscription;
+  
+  // Insert UI State
+  showInsertMenu: number | null = null;  // Index of message showing insert menu
+  insertingTo: string | null = null;     // Key of question being inserted to
+  insertSuccess: string | null = null;   // Shows success message for question key
+
   aiAvatars: AiAvatar[] = [
     {
       id: 'bucky',
@@ -190,10 +203,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private cdRef: ChangeDetectorRef,
     private storage: AngularFireStorage,
-    public router: Router
+    public router: Router,
+    public chatContext: ChatContextService
   ) {
     this.user = this.auth.currentUser;
-    this.selectedAi = this.aiAvatars[0]; // Default to Bucky
+    this.selectedAi = this.aiAvatars[0];
     this.collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAi.collectionKey}`;
     this.updateIntroMessage();
   }
@@ -206,6 +220,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopThinking();
+    this.contextSub?.unsubscribe();
+    this.insertCompleteSub?.unsubscribe();
   }
 
   ngOnInit(): void {
@@ -213,10 +229,51 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
     }
     this.deleteAllDocuments();
+    
+    // Subscribe to playground context
+    this.contextSub = this.chatContext.context$.subscribe(ctx => {
+      this.playgroundContext = ctx;
+      this.updateIntroMessage();
+      this.cdRef.detectChanges();
+    });
+    
+    // Subscribe to insert completion events
+    this.insertCompleteSub = this.chatContext.insertComplete$.subscribe(result => {
+      this.insertingTo = null;
+      if (result.success) {
+        this.insertSuccess = result.questionKey;
+        setTimeout(() => {
+          this.insertSuccess = null;
+          this.cdRef.detectChanges();
+        }, 2000);
+      }
+      this.cdRef.detectChanges();
+    });
   }
 
   private updateIntroMessage(): void {
-    this.introMessage.text = `I'm ${this.selectedAi.name}. ${this.selectedAi.intro} To learn how to interact with me efficiently see `;
+    let intro = `I'm ${this.selectedAi.name}. ${this.selectedAi.intro}`;
+    
+    // Add context-aware intro if in playground
+    if (this.playgroundContext) {
+      intro = `I'm ${this.selectedAi.name}, helping you with "${this.playgroundContext.solutionTitle}". `;
+      intro += `You're on ${this.playgroundContext.currentStepName}. `;
+      intro += `Ask me anything about this step or your solution! To learn more about how to interact with me see `;
+    } else {
+      intro += ' To learn how to interact with me efficiently see ';
+    }
+    
+    this.introMessage.text = intro;
+  }
+
+  // Check if we're in playground context
+  get hasContext(): boolean {
+    return this.playgroundContext !== null;
+  }
+
+  // Get available questions for insertion
+  get availableQuestions(): PlaygroundQuestion[] {
+    return this.playgroundContext?.questions || [];
   }
 
   selectAi(ai: AiAvatar): void {
@@ -246,7 +303,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     return this.aiAvatars.filter(a => a.group === 'elder');
   }
 
-  /** Returns short name if available, otherwise first name */
   getDisplayName(ai: AiAvatar): string {
     return ai.shortName || ai.name.split(' ')[0];
   }
@@ -261,6 +317,70 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     if (this.showBot) {
       this.showAiSelector = false;
     }
+  }
+
+  toggleInsertMenu(index: number): void {
+    if (this.showInsertMenu === index) {
+      this.showInsertMenu = null;
+    } else {
+      this.showInsertMenu = index;
+    }
+  }
+
+  insertToQuestion(questionKey: string, content: string): void {
+    // Strip markdown formatting for clean plain text insertion
+    const cleanContent = this.stripMarkdown(content);
+    console.log('insertToQuestion called:', { questionKey, contentPreview: cleanContent.slice(0, 100) });
+    this.insertingTo = questionKey;
+    this.showInsertMenu = null;
+    
+    // Check if the question already has content - if so, append
+    const existingAnswer = this.playgroundContext?.questions.find(q => q.key === questionKey)?.currentAnswer;
+    const mode = existingAnswer ? 'append' : 'replace';
+    
+    this.chatContext.requestInsert(questionKey, cleanContent, mode);
+  }
+  
+  /**
+   * Strip markdown formatting from text for clean insertion
+   */
+  private stripMarkdown(text: string): string {
+    if (!text) return '';
+    
+    return text
+      // Remove bold/italic markers
+      .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold italic***
+      .replace(/\*\*(.+?)\*\*/g, '$1')       // **bold**
+      .replace(/\*(.+?)\*/g, '$1')           // *italic*
+      .replace(/___(.+?)___/g, '$1')         // ___bold italic___
+      .replace(/__(.+?)__/g, '$1')           // __bold__
+      .replace(/_(.+?)_/g, '$1')             // _italic_
+      // Remove headers
+      .replace(/^#{1,6}\s+/gm, '')
+      // Remove bullet points but keep the text
+      .replace(/^[\*\-\+]\s+/gm, '• ')
+      // Remove numbered lists formatting but keep numbers
+      .replace(/^\d+\.\s+/gm, (match) => match)
+      // Remove inline code
+      .replace(/`([^`]+)`/g, '$1')
+      // Remove code blocks
+      .replace(/```[\s\S]*?```/g, '')
+      // Remove blockquotes
+      .replace(/^>\s+/gm, '')
+      // Remove horizontal rules
+      .replace(/^[-*_]{3,}$/gm, '')
+      // Remove links but keep text
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      // Remove images
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+      // Clean up extra whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  getQuestionLabel(key: string): string {
+    // Format like "S1-A" to "1A" for compact display
+    return key.replace('S', '').replace('-', '');
   }
 
   EXT_MIME: Record<string, string> = {
@@ -360,13 +480,29 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         'application/octet-stream',
     }));
 
+    // Build prompt with context if available
+    let fullPrompt = trimmed;
+    if (this.playgroundContext) {
+      const contextPrefix = this.chatContext.buildContextPrompt();
+      fullPrompt = contextPrefix + trimmed;
+    }
+
     const docId = this.afs.createId();
     const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
       `${this.collectionPath}/${docId}`
     );
 
+    // Debug logging
+    console.log('Chatbot Debug:', {
+      collectionPath: this.collectionPath,
+      docId,
+      promptLength: fullPrompt.length,
+      hasContext: !!this.playgroundContext,
+      selectedAi: this.selectedAi.name,
+    });
+
     await discussionRef.set({
-      prompt: trimmed,
+      prompt: fullPrompt,
       attachmentList,
     });
     this.startThinking();
@@ -396,6 +532,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
                 type: 'RESPONSE',
                 text: '',
                 streaming: true,
+                insertable: this.hasContext,  // Mark as insertable if in playground context
               };
               this.responses.push(slot);
               this.cdRef.detectChanges();
@@ -417,6 +554,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
           case 'ERRORED':
             this.stopThinking();
+            console.error('Chatbot Error:', snap.status);
             this.status = 'Oh no! Something went wrong.';
             unsub.unsubscribe();
             break;

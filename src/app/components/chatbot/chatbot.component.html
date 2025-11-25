@@ -122,6 +122,18 @@
         </div>
       </div>
 
+      <!-- Context Badge - Shows when in playground -->
+      <div *ngIf="hasContext" class="mt-2 flex items-center gap-2">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50">
+          <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <span class="text-xs font-medium text-amber-700 dark:text-amber-300 truncate max-w-[200px]">
+            {{ playgroundContext?.currentStepName }}
+          </span>
+        </div>
+      </div>
+
       <!-- Thinking indicator -->
       <div
         *ngIf="uiPhase === 'thinking'"
@@ -336,8 +348,10 @@
                   [innerHTML]="resp.streaming ? resp.text : formatText(resp.text || '')"
                 ></p>
               </div>
-              <!-- Copy button -->
-              <div class="mt-1">
+              
+              <!-- Action buttons row -->
+              <div class="mt-1.5 flex items-center gap-2 flex-wrap">
+                <!-- Copy button -->
                 <button
                   class="text-xs px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-1"
                   (click)="copySingleMessage(resp.text!, i)"
@@ -348,6 +362,69 @@
                   </svg>
                   {{ singleCopyStates[i] || 'Copy' }}
                 </button>
+
+                <!-- Insert to Solution button - Only show when in playground context and not streaming -->
+                <div *ngIf="hasContext && resp.insertable && !resp.streaming" class="relative">
+                  <button
+                    (click)="toggleInsertMenu(i)"
+                    class="text-xs px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5
+                           bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20
+                           text-amber-700 dark:text-amber-300 
+                           hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30
+                           border border-amber-200/50 dark:border-amber-700/50"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Insert to answer
+                  </button>
+
+                  <!-- Insert Menu Dropdown -->
+                  <div
+                    *ngIf="showInsertMenu === i"
+                    class="absolute bottom-full left-0 mb-1 z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[180px] max-h-[200px] overflow-y-auto"
+                  >
+                    <div class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                      Insert into
+                    </div>
+                    <button
+                      *ngFor="let q of availableQuestions"
+                      (click)="insertToQuestion(q.key, resp.text!)"
+                      class="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                      [ngClass]="{
+                        'bg-emerald-50 dark:bg-emerald-900/20': insertSuccess === q.key,
+                        'opacity-50': insertingTo === q.key
+                      }"
+                    >
+                      <span class="w-8 h-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-700 text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
+                        {{ getQuestionLabel(q.key) }}
+                      </span>
+                      <span class="flex-1 truncate text-slate-700 dark:text-slate-300">
+                        {{ q.text.slice(0, 40) }}{{ q.text.length > 40 ? '...' : '' }}
+                      </span>
+                      <!-- Loading spinner -->
+                      <svg *ngIf="insertingTo === q.key" class="w-4 h-4 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <!-- Success checkmark -->
+                      <svg *ngIf="insertSuccess === q.key" class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Success indicator (shows after insert) -->
+                <span 
+                  *ngIf="insertSuccess && showInsertMenu !== i" 
+                  class="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 animate-pulse"
+                >
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  Inserted!
+                </span>
               </div>
             </div>
           </div>
@@ -376,6 +453,16 @@
 
   <!-- Input Area -->
   <footer class="flex-shrink-0 border-t border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+    <!-- Context hint - Shows available questions when in playground -->
+    <div *ngIf="hasContext && availableQuestions.length > 0" class="px-4 pt-3">
+      <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Ask about your solution — answers can be inserted directly into your work</span>
+      </div>
+    </div>
+
     <!-- Attachment previews -->
     <div *ngIf="previews.length" class="px-4 pt-3 flex flex-wrap gap-2">
       <div

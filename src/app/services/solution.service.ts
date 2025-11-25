@@ -354,9 +354,19 @@ export class SolutionService {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${id}`
     );
-    const data = {
-      [key]: value,
-    };
+    
+    // Handle nested paths like 'status.S1-A' by building nested object
+    const parts = key.split('.');
+    let data: any;
+    
+    if (parts.length === 2) {
+      // Nested field like 'status.S1-A' -> { status: { 'S1-A': value } }
+      data = { [parts[0]]: { [parts[1]]: value } };
+    } else {
+      // Simple field
+      data = { [key]: value };
+    }
+    
     return solutionRef.set(data, { merge: true });
   }
 

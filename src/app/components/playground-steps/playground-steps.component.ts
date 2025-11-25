@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
@@ -18,6 +18,8 @@ import {
 } from '@angular/fire/compat/firestore';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
+import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
+import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
 
 type SupportedLanguage = 'en' | 'fr';
 
@@ -228,6 +230,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.defaultLanguage
   ].questions.map((group) => [...group]);
   private langSub?: Subscription;
+  private insertRequestSub?: Subscription;
   aiFeedbackLoading = false;
   aiFeedbackStatus = '';
   aiFeedbackError = '';
@@ -255,6 +258,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   selectedAiEvaluator: AiEvaluatorOption = this.aiEvaluatorOptions[0];
   showAiEvaluatorDropdown = false;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
+  @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
@@ -274,7 +278,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     private router: Router,
     private fns: AngularFireFunctions,
     private languageService: LanguageService,
-    private afs: AngularFirestore
+    private afs: AngularFirestore,
+    private chatContext: ChatContextService
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -296,6 +301,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       this.getMembers();
       this.getEvaluators();
       this.loadSavedFeedback();
+      // Set up chat context after solution loads
+      this.setupChatContext();
     });
     this.initializeLanguageSupport();
   }
@@ -303,6 +310,132 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     window.scrollTo(0, 0);
     this.display = new Array(this.steps.length).fill(false);
     this.display[this.currentIndexDisplay] = true;
+    
+    // Subscribe to chatbot insert requests
+    this.insertRequestSub = this.chatContext.insertRequest$.subscribe({
+      next: (request) => {
+        console.log('PlaygroundSteps received insert request:', request.questionKey);
+        this.handleInsertRequest(request.questionKey, request.content, request.mode);
+      },
+      error: (err) => console.error('Insert subscription error:', err),
+      complete: () => console.log('Insert subscription completed unexpectedly')
+    });
+  }
+  
+  /**
+   * Set up the chat context for the chatbot to be aware of current solution and step
+   */
+  private setupChatContext(): void {
+    if (!this.currentSolution?.solutionId) return;
+    
+    const questions = this.buildCurrentStepQuestions();
+    
+    const context: PlaygroundContext = {
+      solutionId: this.currentSolution.solutionId!,
+      solutionTitle: this.currentSolution.title || 'Untitled Solution',
+      solutionDescription: this.currentSolution.description,
+      currentStepIndex: this.currentIndexDisplay,
+      currentStepName: this.steps[this.currentIndexDisplay] || `Step ${this.currentIndexDisplay + 1}`,
+      questions,
+      allStepsData: this.currentSolution.status || {},
+    };
+    
+    this.chatContext.setContext(context);
+  }
+  
+  /**
+   * Build the list of questions for the current step
+   */
+  private buildCurrentStepQuestions(): PlaygroundQuestion[] {
+    const stepQuestions = this.AllQuestions[this.currentIndexDisplay] || [];
+    const stepKeys = this.questionsTitles[this.currentIndexDisplay] || [];
+    
+    return stepQuestions.map((text, idx) => {
+      const key = stepKeys[idx] || `S${this.currentIndexDisplay + 1}-${String.fromCharCode(65 + idx)}`;
+      return {
+        key,
+        label: key,
+        text: text.slice(0, 200), // Truncate for display
+        currentAnswer: this.currentSolution?.status?.[key] || '',
+      };
+    });
+  }
+  
+  /**
+   * Handle insert request from chatbot
+   */
+  private handleInsertRequest(questionKey: string, content: string, mode: 'replace' | 'append'): void {
+    console.log('handleInsertRequest called:', { questionKey, content: content.slice(0, 100), mode });
+    
+    if (!this.currentSolution) {
+      console.error('No currentSolution available');
+      this.chatContext.notifyInsertComplete(questionKey, false);
+      return;
+    }
+    
+    if (!this.currentSolution.status) {
+      this.currentSolution.status = {};
+    }
+    
+    // Get existing content
+    const existingContent = this.currentSolution.status[questionKey] || '';
+    
+    // Determine new content based on mode
+    let newContent: string;
+    if (mode === 'append' && existingContent) {
+      newContent = existingContent + '\n\n' + content;
+    } else {
+      newContent = content;
+    }
+    
+    // Update the solution status locally first
+    this.currentSolution.status[questionKey] = newContent;
+    
+    console.log('Saving to Firestore:', { 
+      solutionId: this.currentSolution.solutionId, 
+      questionKey, 
+      contentPreview: newContent.slice(0, 100) 
+    });
+    
+    // Save to Firestore
+    this.solution.updateSolutionField(
+      this.currentSolution.solutionId!,
+      `status.${questionKey}`,
+      newContent
+    ).then(() => {
+      console.log('Insert successful for:', questionKey);
+      
+      // Update the visible child component's content directly
+      this.updateChildComponentContent(questionKey, newContent, mode === 'append');
+      
+      // Notify chatbot of successful insert
+      this.chatContext.notifyInsertComplete(questionKey, true);
+      // Update the context with new answer
+      this.chatContext.updateQuestionAnswer(questionKey, newContent);
+    }).catch((error) => {
+      console.error('Failed to insert content:', error);
+      // Revert local change on error
+      if (this.currentSolution?.status) {
+        this.currentSolution.status[questionKey] = existingContent;
+      }
+      this.chatContext.notifyInsertComplete(questionKey, false);
+    });
+  }
+  
+  /**
+   * Update the visible child component's content directly
+   */
+  private updateChildComponentContent(questionKey: string, content: string, append: boolean): void {
+    // Find the active child component (the one currently displayed)
+    const activeStepComponent = this.playgroundStepComponents?.find((comp, index) => this.display[index]);
+    
+    if (activeStepComponent) {
+      // Don't pass append=true since we already computed the final content
+      activeStepComponent.updateContentFromExternal(questionKey, content, false);
+      console.log('Updated child component content for:', questionKey);
+    } else {
+      console.warn('No active playground-step component found');
+    }
   }
 
   private async loadSavedFeedback() {
@@ -524,6 +657,20 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.currentIndexDisplay = current;
     this.updateTimelineDisplay(current);
     this.display[this.currentIndexDisplay] = true;
+    // Update chat context with new step
+    this.updateChatContextStep();
+  }
+  
+  /**
+   * Update the chat context when step changes
+   */
+  private updateChatContextStep(): void {
+    const questions = this.buildCurrentStepQuestions();
+    this.chatContext.updateStep(
+      this.currentIndexDisplay,
+      this.steps[this.currentIndexDisplay] || `Step ${this.currentIndexDisplay + 1}`,
+      questions
+    );
   }
 
   sendRequestForEvaluation() {
@@ -557,6 +704,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.currentIndexDisplay = current;
     this.updateTimelineDisplay(current);
     this.display[this.currentIndexDisplay] = true;
+    // Update chat context with new step
+    this.updateChatContextStep();
   }
   isCurrentStep(index: number): boolean {
     return this.currentIndexDisplay === index; // Replace with your current step logic
@@ -1145,6 +1294,9 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
+    this.insertRequestSub?.unsubscribe();
+    // Clear chat context when leaving the playground
+    this.chatContext.clearContext();
   }
 
   private initializeLanguageSupport() {

@@ -597,6 +597,33 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.submitDisplay = false;
   }
 
+  /**
+   * Update content for a specific question from external source (e.g., chatbot insert)
+   * @param questionKey The question key like 'S1-A'
+   * @param content The new content to set
+   * @param append Whether to append to existing content instead of replacing
+   */
+  updateContentFromExternal(questionKey: string, content: string, append: boolean = false): void {
+    const index = this.questionsTitles.indexOf(questionKey);
+    if (index === -1) {
+      console.log('Question key not found in this step:', questionKey);
+      return;
+    }
+
+    console.log('Updating content in playground-step for:', questionKey, 'at index:', index);
+    
+    if (append && this.contentsArray[index]) {
+      this.contentsArray[index] = this.contentsArray[index] + '\n\n' + content;
+    } else {
+      this.contentsArray[index] = content;
+    }
+    
+    // Update the solution status as well
+    if (this.currentSolution.status) {
+      this.currentSolution.status[questionKey] = this.contentsArray[index];
+    }
+  }
+
   initializeStrategy() {
     const finalContent = this.buildStrategySummary();
     this.contentsArray = [finalContent];

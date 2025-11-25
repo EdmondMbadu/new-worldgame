@@ -4,6 +4,7 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatbotComponent } from 'src/app/components/chatbot/chatbot.component';
 import { AuthService } from 'src/app/services/auth.service';
+import { ChatContextService } from 'src/app/services/chat-context.service';
 
 @Component({
   selector: 'app-chabot-standalone',
@@ -22,10 +23,11 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
     cd: ChangeDetectorRef,
     storage: AngularFireStorage,
     router: Router, // keep for goBack()
-    route: ActivatedRoute
+    route: ActivatedRoute,
+    chatContext: ChatContextService
   ) {
     /* 1 ▪ real user present? */
-    super(afs, ensureUser(auth), cd, storage, router); // <— now safe
+    super(afs, ensureUser(auth), cd, storage, router, chatContext); // <— now safe
 
     /* 2 ▪ origin */
     this.cameFromWidget = route.snapshot.queryParamMap.get('from') === 'widget';
