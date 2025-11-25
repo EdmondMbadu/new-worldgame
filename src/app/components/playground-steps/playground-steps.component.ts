@@ -789,234 +789,264 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 25;
-    const marginRight = 25;
+    const marginLeft = 28;
+    const marginRight = 28;
     const contentWidth = pageWidth - marginLeft - marginRight;
     let yPos = 0;
 
-    // Color palette - professional, minimal
+    // Premium color palette
     const colors = {
-      primary: [15, 118, 110] as [number, number, number],      // teal-700
-      dark: [23, 23, 23] as [number, number, number],           // neutral-900
-      text: [38, 38, 38] as [number, number, number],           // neutral-800
-      textLight: [82, 82, 82] as [number, number, number],      // neutral-600
-      muted: [115, 115, 115] as [number, number, number],       // neutral-500
-      line: [212, 212, 212] as [number, number, number],        // neutral-300
-      background: [250, 250, 250] as [number, number, number],  // neutral-50
+      primary: [13, 110, 102] as [number, number, number],      // deep teal
+      gold: [166, 136, 85] as [number, number, number],         // muted gold accent
+      dark: [18, 18, 18] as [number, number, number],           // near black
+      text: [33, 33, 33] as [number, number, number],           // rich black for body
+      textMedium: [66, 66, 66] as [number, number, number],     // medium gray
+      textLight: [100, 100, 100] as [number, number, number],   // light gray
+      muted: [140, 140, 140] as [number, number, number],       // muted
+      line: [200, 200, 200] as [number, number, number],        // subtle line
       white: [255, 255, 255] as [number, number, number],
     };
 
     const checkPageBreak = (neededHeight: number): boolean => {
-      if (yPos + neededHeight > pageHeight - 30) {
+      if (yPos + neededHeight > pageHeight - 32) {
         pdf.addPage();
-        yPos = 30;
+        yPos = 35;
         return true;
       }
       return false;
     };
 
-    const addParagraph = (text: string, fontSize: number, color: [number, number, number], lineHeight: number = 1.8, maxWidth: number = contentWidth) => {
-      pdf.setFontSize(fontSize);
-      pdf.setTextColor(color[0], color[1], color[2]);
-      const lines = pdf.splitTextToSize(text, maxWidth);
-      const actualLineHeight = fontSize * 0.353 * lineHeight;
+    // Premium paragraph with Times font for body text
+    const addBodyText = (text: string, indent: number = 0) => {
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(11.5);
+      pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
+      const lines = pdf.splitTextToSize(text, contentWidth - indent);
+      const lineHeight = 6.2; // generous line height
       
       lines.forEach((line: string) => {
-        checkPageBreak(actualLineHeight + 2);
-        pdf.text(line, marginLeft, yPos);
-        yPos += actualLineHeight;
+        checkPageBreak(lineHeight + 2);
+        pdf.text(line, marginLeft + indent, yPos);
+        yPos += lineHeight;
       });
-      yPos += 4;
+      yPos += 5;
     };
 
     // ═══════════════════════════════════════════════════════════
-    // TITLE PAGE / HEADER
+    // ELEGANT TITLE SECTION
     // ═══════════════════════════════════════════════════════════
     
-    yPos = 40;
+    yPos = 45;
 
-    // Title - large, centered, professional
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(24);
+    // Title - elegant serif
+    pdf.setFont('times', 'bold');
+    pdf.setFontSize(26);
     pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
     const titleText = this.currentSolution.title || 'Solution';
     const titleLines = pdf.splitTextToSize(titleText, contentWidth);
     titleLines.forEach((line: string) => {
       const titleWidth = pdf.getTextWidth(line);
       pdf.text(line, (pageWidth - titleWidth) / 2, yPos);
-      yPos += 10;
+      yPos += 11;
     });
 
-    yPos += 8;
+    yPos += 6;
 
-    // Thin decorative line under title
-    pdf.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-    pdf.setLineWidth(0.8);
-    pdf.line(pageWidth / 2 - 25, yPos, pageWidth / 2 + 25, yPos);
-    yPos += 12;
+    // Elegant ornamental divider
+    pdf.setDrawColor(colors.gold[0], colors.gold[1], colors.gold[2]);
+    pdf.setLineWidth(0.6);
+    const dividerWidth = 40;
+    pdf.line(pageWidth / 2 - dividerWidth / 2, yPos, pageWidth / 2 + dividerWidth / 2, yPos);
+    // Small diamond accent
+    pdf.setFillColor(colors.gold[0], colors.gold[1], colors.gold[2]);
+    const diamondSize = 1.5;
+    pdf.circle(pageWidth / 2, yPos, diamondSize, 'F');
+    yPos += 14;
 
-    // Authors - centered
+    // Author name - prominent
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(12);
-    pdf.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2]);
+    pdf.setTextColor(colors.textMedium[0], colors.textMedium[1], colors.textMedium[2]);
     const authorText = this.currentSolution.authorName || 'Unknown';
     const authorWidth = pdf.getTextWidth(authorText);
     pdf.text(authorText, (pageWidth - authorWidth) / 2, yPos);
-    yPos += 7;
+    yPos += 8;
 
-    // Team Members - centered
+    // Team Members
     if (this.teamMembers.length > 0) {
-      const memberNames = this.teamMembers.map(m => `${m.firstName || ''} ${m.lastName || ''}`.trim() || m.email || 'Unknown').join(', ');
+      const memberNames = this.teamMembers.map(m => `${m.firstName || ''} ${m.lastName || ''}`.trim() || m.email || 'Unknown').join('  •  ');
+      pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
       pdf.setTextColor(colors.muted[0], colors.muted[1], colors.muted[2]);
-      const memberLines = pdf.splitTextToSize(memberNames, contentWidth - 40);
+      const memberLines = pdf.splitTextToSize(memberNames, contentWidth - 30);
       memberLines.forEach((line: string) => {
         const lineWidth = pdf.getTextWidth(line);
         pdf.text(line, (pageWidth - lineWidth) / 2, yPos);
         yPos += 5;
       });
+      yPos += 2;
     }
 
-    yPos += 5;
-
-    // Date - centered
+    // Date
+    pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     pdf.setTextColor(colors.muted[0], colors.muted[1], colors.muted[2]);
     const dateText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const dateWidth = pdf.getTextWidth(dateText);
     pdf.text(dateText, (pageWidth - dateWidth) / 2, yPos);
-    yPos += 20;
-
-    // Separator line
-    pdf.setDrawColor(colors.line[0], colors.line[1], colors.line[2]);
-    pdf.setLineWidth(0.3);
-    pdf.line(marginLeft, yPos, pageWidth - marginRight, yPos);
     yPos += 18;
+
+    // Separator
+    pdf.setDrawColor(colors.line[0], colors.line[1], colors.line[2]);
+    pdf.setLineWidth(0.25);
+    pdf.line(marginLeft, yPos, pageWidth - marginRight, yPos);
+    yPos += 20;
 
     // ═══════════════════════════════════════════════════════════
     // AI FEEDBACK SECTION
     // ═══════════════════════════════════════════════════════════
     
     if (this.aiFeedbackText) {
-      // Section title
+      // Section header - two lines for prominence
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(14);
+      pdf.setFontSize(13);
       pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
-      pdf.text(`AI Evaluation`, marginLeft, yPos);
+      pdf.text('AI Evaluation', marginLeft, yPos);
+      yPos += 6;
       
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(10);
-      pdf.setTextColor(colors.muted[0], colors.muted[1], colors.muted[2]);
-      pdf.text(`by ${this.selectedAiEvaluator.name}`, marginLeft + pdf.getTextWidth('AI Evaluation ') + 2, yPos);
-      yPos += 12;
+      // AI Name on its own line - italic, prominent
+      pdf.setFont('times', 'italic');
+      pdf.setFontSize(12);
+      pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      pdf.text(this.selectedAiEvaluator.name, marginLeft, yPos);
+      yPos += 14;
 
-      // Scores
+      // Scores - refined layout
       if (this.aiFeedbackParsed.scores.length > 0) {
         this.aiFeedbackParsed.scores.forEach(score => {
-          checkPageBreak(10);
+          checkPageBreak(12);
           
+          // Label
           pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(11);
-          pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
-          
-          const labelText = `${score.label}:`;
-          pdf.text(labelText, marginLeft, yPos);
+          pdf.setFontSize(10.5);
+          pdf.setTextColor(colors.textMedium[0], colors.textMedium[1], colors.textMedium[2]);
+          pdf.text(score.label, marginLeft + 4, yPos);
           
           if (score.scoreValue) {
+            // Score value - bold and prominent
             pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(11);
             pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-            pdf.text(`${score.scoreValue}/10`, marginLeft + 65, yPos);
+            pdf.text(`${score.scoreValue}/10`, marginLeft + 58, yPos);
             
+            // Reason - elegant italic
             if (score.reason) {
-              pdf.setFont('helvetica', 'normal');
+              pdf.setFont('times', 'italic');
               pdf.setFontSize(10);
               pdf.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2]);
-              const reasonText = `— ${score.reason}`;
-              const reasonLines = pdf.splitTextToSize(reasonText, contentWidth - 80);
-              pdf.text(reasonLines[0], marginLeft + 80, yPos);
+              const reasonLines = pdf.splitTextToSize(score.reason, contentWidth - 75);
+              pdf.text(reasonLines[0], marginLeft + 75, yPos);
               if (reasonLines.length > 1) {
                 yPos += 5;
                 reasonLines.slice(1).forEach((line: string) => {
-                  pdf.text(line, marginLeft, yPos);
+                  pdf.text(line, marginLeft + 4, yPos);
                   yPos += 5;
                 });
               }
             }
           }
-          yPos += 7;
+          yPos += 7.5;
         });
-        yPos += 6;
+        yPos += 8;
       }
 
-      // Improvements
+      // Recommendations
       if (this.aiFeedbackParsed.improvements.length > 0) {
-        checkPageBreak(15);
+        checkPageBreak(18);
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(11);
         pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         pdf.text('Recommendations', marginLeft, yPos);
-        yPos += 8;
+        yPos += 10;
 
         this.aiFeedbackParsed.improvements.forEach((tip, idx) => {
-          checkPageBreak(12);
-          pdf.setFont('helvetica', 'normal');
+          checkPageBreak(14);
+          
+          // Number
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(10);
+          pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+          pdf.text(`${idx + 1}.`, marginLeft + 4, yPos);
+          
+          // Tip text - Times for readability
+          pdf.setFont('times', 'normal');
           pdf.setFontSize(11);
           pdf.setTextColor(colors.text[0], colors.text[1], colors.text[2]);
-          
-          const tipLines = pdf.splitTextToSize(`${idx + 1}. ${tip}`, contentWidth - 5);
-          tipLines.forEach((line: string) => {
-            checkPageBreak(6);
-            pdf.text(line, marginLeft + 5, yPos);
-            yPos += 6;
+          const tipLines = pdf.splitTextToSize(tip, contentWidth - 18);
+          tipLines.forEach((line: string, lineIdx: number) => {
+            if (lineIdx > 0) checkPageBreak(6);
+            pdf.text(line, marginLeft + 14, yPos);
+            yPos += 5.8;
           });
-          yPos += 3;
+          yPos += 4;
         });
-        yPos += 4;
+        yPos += 5;
       }
 
-      // Readiness Level
+      // Readiness Level - highlighted
       if (this.aiFeedbackParsed.readinessLevel) {
-        checkPageBreak(15);
-        pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(11);
-        pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
-        pdf.text('Readiness Level:', marginLeft, yPos);
+        checkPageBreak(18);
         
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(10);
+        pdf.setTextColor(colors.textMedium[0], colors.textMedium[1], colors.textMedium[2]);
+        pdf.text('READINESS LEVEL', marginLeft, yPos);
+        yPos += 6;
+        
+        pdf.setFont('times', 'bold');
+        pdf.setFontSize(13);
         pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-        const readinessText = `${this.aiFeedbackParsed.readinessLevel}${this.aiFeedbackParsed.readinessDetails ? ' — ' + this.aiFeedbackParsed.readinessDetails : ''}`;
-        pdf.text(readinessText, marginLeft + pdf.getTextWidth('Readiness Level: ') + 2, yPos);
-        yPos += 15;
+        pdf.text(this.aiFeedbackParsed.readinessLevel, marginLeft, yPos);
+        
+        if (this.aiFeedbackParsed.readinessDetails) {
+          yPos += 6;
+          pdf.setFont('times', 'italic');
+          pdf.setFontSize(10.5);
+          pdf.setTextColor(colors.textLight[0], colors.textLight[1], colors.textLight[2]);
+          const detailLines = pdf.splitTextToSize(this.aiFeedbackParsed.readinessDetails, contentWidth);
+          detailLines.forEach((line: string) => {
+            pdf.text(line, marginLeft, yPos);
+            yPos += 5;
+          });
+        }
+        yPos += 12;
       }
 
-      // Separator
+      // Elegant separator
       pdf.setDrawColor(colors.line[0], colors.line[1], colors.line[2]);
-      pdf.setLineWidth(0.3);
+      pdf.setLineWidth(0.25);
       pdf.line(marginLeft, yPos, pageWidth - marginRight, yPos);
-      yPos += 18;
+      yPos += 22;
     }
 
     // ═══════════════════════════════════════════════════════════
-    // SOLUTION CONTENT - STRATEGY REVIEW ONLY
+    // STRATEGY CONTENT - PREMIUM TYPOGRAPHY
     // ═══════════════════════════════════════════════════════════
     
-    // Section title
+    // Section header
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(13);
     pdf.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
     pdf.text('Strategy Overview', marginLeft, yPos);
-    yPos += 14;
+    yPos += 12;
 
-    // Strategy Review content
+    // Content with premium Times typography
     if (this.currentSolution.strategyReview) {
-      pdf.setFont('helvetica', 'normal');
-      addParagraph(this.toPlainText(this.currentSolution.strategyReview), 12, colors.text, 1.9);
+      addBodyText(this.toPlainText(this.currentSolution.strategyReview));
     } else if (this.currentSolution.description) {
-      // Fallback to description if no strategy review
-      pdf.setFont('helvetica', 'normal');
-      addParagraph(this.toPlainText(this.currentSolution.description), 12, colors.text, 1.9);
+      addBodyText(this.toPlainText(this.currentSolution.description));
     } else {
-      pdf.setFont('helvetica', 'italic');
+      pdf.setFont('times', 'italic');
       pdf.setFontSize(11);
       pdf.setTextColor(colors.muted[0], colors.muted[1], colors.muted[2]);
       pdf.text('No strategy content available.', marginLeft, yPos);
@@ -1024,24 +1054,27 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     }
 
     // ═══════════════════════════════════════════════════════════
-    // FOOTER ON ALL PAGES
+    // ELEGANT FOOTER
     // ═══════════════════════════════════════════════════════════
     
     const totalPages = pdf.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       pdf.setPage(i);
       
-      // Footer line
+      // Subtle footer line
       pdf.setDrawColor(colors.line[0], colors.line[1], colors.line[2]);
-      pdf.setLineWidth(0.3);
-      pdf.line(marginLeft, pageHeight - 18, pageWidth - marginRight, pageHeight - 18);
+      pdf.setLineWidth(0.2);
+      pdf.line(marginLeft, pageHeight - 16, pageWidth - marginRight, pageHeight - 16);
       
-      // Footer text
+      // Footer text - refined
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(9);
+      pdf.setFontSize(8.5);
       pdf.setTextColor(colors.muted[0], colors.muted[1], colors.muted[2]);
-      pdf.text('NewWorld Game', marginLeft, pageHeight - 12);
-      pdf.text(`${i}`, pageWidth / 2, pageHeight - 12, { align: 'center' });
+      pdf.text('NewWorld Game', marginLeft, pageHeight - 10);
+      
+      // Page number - elegant format
+      pdf.setFont('times', 'italic');
+      pdf.text(`${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
     }
 
     // Download
