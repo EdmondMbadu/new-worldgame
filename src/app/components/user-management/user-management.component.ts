@@ -261,6 +261,46 @@ export class UserManagementComponent implements OnInit {
     return Math.max(0, started - submitted);
   }
 
+  // ===== Dashboard Stats =====
+  get dashboardStats() {
+    const totalUsers = this.allUsers.length;
+    const totalSolutions = this.everySolution.length;
+
+    let totalStarted = 0;
+    let totalFinished = 0;
+
+    for (const user of this.allUsers) {
+      totalStarted += this.asNum(user.tempSolutionstarted);
+      totalFinished += this.asNum(user.tempSolutionSubmitted);
+    }
+
+    const totalInProgress = Math.max(0, totalStarted - totalFinished);
+    const completionRate =
+      totalStarted > 0 ? Math.round((totalFinished / totalStarted) * 100) : 0;
+    const unsubscribedCount = this.unsubscribedEmails.length;
+
+    // Users with at least one solution
+    const activeUsers = this.allUsers.filter(
+      (u) => this.asNum(u.tempSolutionstarted) > 0
+    ).length;
+
+    // Engagement rate
+    const engagementRate =
+      totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0;
+
+    return {
+      totalUsers,
+      totalSolutions,
+      totalStarted,
+      totalFinished,
+      totalInProgress,
+      completionRate,
+      unsubscribedCount,
+      activeUsers,
+      engagementRate,
+    };
+  }
+
   toggleSelectAll(checked: boolean) {
     this.allSelected = checked;
     this.selected.clear();
