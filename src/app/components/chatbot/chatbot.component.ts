@@ -343,39 +343,72 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   
   /**
    * Strip markdown formatting from text for clean insertion
+   * Preserves paragraph structure, line breaks, and converts to clean readable text
    */
   private stripMarkdown(text: string): string {
     if (!text) return '';
     
-    return text
-      // Remove bold/italic markers
-      .replace(/\*\*\*(.+?)\*\*\*/g, '$1')  // ***bold italic***
-      .replace(/\*\*(.+?)\*\*/g, '$1')       // **bold**
-      .replace(/\*(.+?)\*/g, '$1')           // *italic*
-      .replace(/___(.+?)___/g, '$1')         // ___bold italic___
-      .replace(/__(.+?)__/g, '$1')           // __bold__
-      .replace(/_(.+?)_/g, '$1')             // _italic_
-      // Remove headers
-      .replace(/^#{1,6}\s+/gm, '')
-      // Remove bullet points but keep the text
-      .replace(/^[\*\-\+]\s+/gm, '• ')
-      // Remove numbered lists formatting but keep numbers
-      .replace(/^\d+\.\s+/gm, (match) => match)
-      // Remove inline code
-      .replace(/`([^`]+)`/g, '$1')
-      // Remove code blocks
-      .replace(/```[\s\S]*?```/g, '')
-      // Remove blockquotes
-      .replace(/^>\s+/gm, '')
+    let result = text;
+    
+    // Remove code blocks first (before other processing)
+    result = result.replace(/```[\s\S]*?```/g, '');
+    
+    // Remove inline code but keep content
+    result = result.replace(/`([^`]+)`/g, '$1');
+    
+    // Remove images
+    result = result.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1');
+    
+    // Remove links but keep text
+    result = result.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    
+    // Process line by line to preserve structure
+    const lines = result.split('\n');
+    const processedLines = lines.map(line => {
+      let processedLine = line;
+      
+      // Remove headers (keep the text)
+      processedLine = processedLine.replace(/^#{1,6}\s+/, '');
+      
+      // Convert markdown bullets to bullet character
+      processedLine = processedLine.replace(/^(\s*)[\*\-\+]\s+/, '$1• ');
+      
+      // Keep numbered lists as-is (they look fine)
+      // processedLine = processedLine.replace(/^(\s*)\d+\.\s+/, '$1');
+      
+      // Remove blockquote markers
+      processedLine = processedLine.replace(/^>\s*/, '');
+      
       // Remove horizontal rules
-      .replace(/^[-*_]{3,}$/gm, '')
-      // Remove links but keep text
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-      // Remove images
-      .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
-      // Clean up extra whitespace
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+      if (/^[-*_]{3,}\s*$/.test(processedLine)) {
+        processedLine = '';
+      }
+      
+      // Remove bold/italic markers (process in order: bold-italic first, then bold, then italic)
+      // ***bold italic*** or ___bold italic___
+      processedLine = processedLine.replace(/\*\*\*([^*]+)\*\*\*/g, '$1');
+      processedLine = processedLine.replace(/___([^_]+)___/g, '$1');
+      
+      // **bold** or __bold__
+      processedLine = processedLine.replace(/\*\*([^*]+)\*\*/g, '$1');
+      processedLine = processedLine.replace(/__([^_]+)__/g, '$1');
+      
+      // *italic* or _italic_ (be careful not to match underscores in words)
+      processedLine = processedLine.replace(/\*([^*\n]+)\*/g, '$1');
+      processedLine = processedLine.replace(/(?<![a-zA-Z])_([^_\n]+)_(?![a-zA-Z])/g, '$1');
+      
+      return processedLine;
+    });
+    
+    result = processedLines.join('\n');
+    
+    // Clean up multiple blank lines but keep paragraph breaks
+    result = result.replace(/\n{3,}/g, '\n\n');
+    
+    // Trim leading/trailing whitespace
+    result = result.trim();
+    
+    return result;
   }
 
   getQuestionLabel(key: string): string {
