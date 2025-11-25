@@ -266,17 +266,18 @@ export class UserManagementComponent implements OnInit {
     const totalUsers = this.allUsers.length;
     const totalSolutions = this.everySolution.length;
 
-    let totalStarted = 0;
-    let totalFinished = 0;
+    // Count unique finished and in-progress solutions
+    const totalFinished = this.everySolution.filter(
+      (sol) => sol.finished === 'true'
+    ).length;
+    const totalInProgress = this.everySolution.filter(
+      (sol) => sol.finished !== 'true'
+    ).length;
 
-    for (const user of this.allUsers) {
-      totalStarted += this.asNum(user.tempSolutionstarted);
-      totalFinished += this.asNum(user.tempSolutionSubmitted);
-    }
-
-    const totalInProgress = Math.max(0, totalStarted - totalFinished);
     const completionRate =
-      totalStarted > 0 ? Math.round((totalFinished / totalStarted) * 100) : 0;
+      totalSolutions > 0
+        ? Math.round((totalFinished / totalSolutions) * 100)
+        : 0;
     const unsubscribedCount = this.unsubscribedEmails.length;
 
     // Users with at least one solution
@@ -291,7 +292,6 @@ export class UserManagementComponent implements OnInit {
     return {
       totalUsers,
       totalSolutions,
-      totalStarted,
       totalFinished,
       totalInProgress,
       completionRate,
