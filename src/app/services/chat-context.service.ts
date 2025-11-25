@@ -132,14 +132,10 @@ export class ChatContextService {
     
     // Identity instruction - CRITICAL: Tell the AI it IS the avatar
     if (avatarName) {
-      prompt += `[ROLE: You ARE ${avatarName}. `;
-      if (avatarIntro) {
-        prompt += `${avatarIntro} `;
-      }
-      prompt += `Answer all questions directly as yourself (${avatarName}). `;
-      prompt += `Do NOT ask the user for your perspective or wait for the user to provide your viewpoint. `;
-      prompt += `Do NOT roleplay as a facilitator asking for character perspectives. `;
-      prompt += `Simply answer the question as ${avatarName} would, drawing on your knowledge, values, and expertise.]\n\n`;
+      prompt += `[ROLE: You ARE ${avatarName}. ${avatarIntro || ''} `;
+      prompt += `Answer all questions directly in first person as yourself. `;
+      prompt += `NEVER refer to yourself in third person. NEVER ask for perspectives. NEVER end by prompting for other viewpoints. `;
+      prompt += `Format responses with clear paragraphs, bullet points when listing items, and **bold** for key concepts.]\n\n`;
     }
     
     // Solution context (if available)
