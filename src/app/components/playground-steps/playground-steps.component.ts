@@ -231,6 +231,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ].questions.map((group) => [...group]);
   private langSub?: Subscription;
   private insertRequestSub?: Subscription;
+  private solutionSub?: Subscription;
   aiFeedbackLoading = false;
   aiFeedbackStatus = '';
   aiFeedbackError = '';
@@ -283,26 +284,40 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.solution.getSolution(this.id).subscribe((data: any) => {
+    
+    // Real-time subscription to solution data
+    this.solutionSub = this.solution.getSolution(this.id).subscribe((data: any) => {
+      if (!data) return;
+      
+      const isFirstLoad = !this.currentSolution?.solutionId;
+      
+      // Update solution data
       this.currentSolution = data;
-      this.roles =
-        this.currentSolution.roles !== undefined
-          ? this.currentSolution.roles
-          : {};
-      this.currentSolution.evaluators?.forEach((ev: any) => {
-        this.evaluators.push(ev);
-      });
-      this.etAl =
-        Object.keys(this.currentSolution.participants!).length > 1
-          ? 'Et al'
-          : '';
-      this.newReadMe = this.currentSolution.description!;
+      
+      if (isFirstLoad) {
+        // First load - initialize everything
+        this.roles =
+          this.currentSolution.roles !== undefined
+            ? this.currentSolution.roles
+            : {};
+        this.currentSolution.evaluators?.forEach((ev: any) => {
+          this.evaluators.push(ev);
+        });
+        this.etAl =
+          Object.keys(this.currentSolution.participants!).length > 1
+            ? 'Et al'
+            : '';
+        this.newReadMe = this.currentSolution.description!;
 
-      this.getMembers();
-      this.getEvaluators();
-      this.loadSavedFeedback();
-      // Set up chat context after solution loads
-      this.setupChatContext();
+        this.getMembers();
+        this.getEvaluators();
+        this.loadSavedFeedback();
+        // Set up chat context after solution loads
+        this.setupChatContext();
+      } else {
+        // Subsequent updates - update chat context with latest data
+        this.updateChatContextStep();
+      }
     });
     this.initializeLanguageSupport();
   }
@@ -1295,6 +1310,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
+    this.solutionSub?.unsubscribe();
     // Clear chat context when leaving the playground
     this.chatContext.clearContext();
   }

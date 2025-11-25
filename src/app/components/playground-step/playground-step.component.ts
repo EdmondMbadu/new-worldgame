@@ -20,7 +20,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { environment } from 'environments/environments';
-import { Subscription, take } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { DataService } from 'src/app/services/data.service';
 import { LanguageService } from 'src/app/services/language.service';
 
@@ -198,36 +198,51 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   discussion: Comment[] = [];
   hoverChangeTitle: boolean = false;
   isInitialized = false;
+  
+  // Real-time collaboration properties
+  private solutionSub?: Subscription;
+  private lastLocalEditTime: number = 0;
+  private readonly TYPING_COOLDOWN_MS = 3000; // Don't update from remote if user typed within 3 seconds
+  private isReceivingRemoteUpdate = false;
   ngOnInit() {
     window.scrollTo(0, 0);
     this.initializeLanguageSupport();
     // this.initializeContents();
 
-    this.solution
+    // Real-time subscription - no take(1), so we get continuous updates
+    this.solutionSub = this.solution
       .getSolution(this.solutionId)
-      .pipe(take(1))
       .subscribe((data: any) => {
-        this.currentSolution = data;
-        if (this.currentSolution.discussion) {
-          this.discussion = this.currentSolution.discussion;
-          this.displayTimeDiscussion();
+        if (!data) return;
+        
+        const isFirstLoad = !this.dataInitialized;
+        
+        if (isFirstLoad) {
+          // First load - initialize everything
+          this.currentSolution = data;
+          if (this.currentSolution.discussion) {
+            this.discussion = this.currentSolution.discussion;
+            this.displayTimeDiscussion();
+          }
+          this.strategyReview =
+            this.currentSolution.strategyReview !== undefined
+              ? this.currentSolution.strategyReview
+              : '';
+          this.lastSavedStrategyReview = this.strategyReview || '';
+          
+          this.currentSolution.evaluators?.forEach((ev: any) => {
+            this.evaluators.push(ev);
+          });
+          this.etAl =
+            Object.keys(this.currentSolution.participants!).length > 1
+              ? 'Et al'
+              : '';
+          this.initializeContents();
+          this.dataInitialized = true;
+        } else {
+          // Subsequent updates - handle real-time sync from other users
+          this.handleRemoteUpdate(data);
         }
-        this.strategyReview =
-          this.currentSolution.strategyReview !== undefined
-            ? this.currentSolution.strategyReview
-            : '';
-        this.lastSavedStrategyReview = this.strategyReview || '';
-        // console.log('strategy review saved :', this.strategyReview);
-        // fill the evaluator class
-        this.currentSolution.evaluators?.forEach((ev: any) => {
-          this.evaluators.push(ev);
-        });
-        this.etAl =
-          Object.keys(this.currentSolution.participants!).length > 1
-            ? 'Et al'
-            : '';
-        this.initializeContents();
-        this.dataInitialized = true; // Set flag to true
       });
 
     this.displayPopups = new Array(this.questions.length).fill(false);
@@ -332,6 +347,11 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       );
     // console.log('CKEditor5 Angular Component is ready to use!', editor.state);
     editor.model.document.on('change:data', () => {
+      // Track local edit time for real-time sync conflict prevention
+      if (!this.isReceivingRemoteUpdate) {
+        this.lastLocalEditTime = Date.now();
+      }
+      
       // console.log('Content changed:', editor.getData());
       clearTimeout(this.saveTimeout);
       this.saveTimeout = setTimeout(() => {
@@ -345,6 +365,60 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         }
       }, 2000);
     });
+  }
+  
+  /**
+   * Handle real-time updates from other users
+   * Only updates content if the user hasn't been typing recently
+   */
+  private handleRemoteUpdate(data: any): void {
+    const now = Date.now();
+    const timeSinceLastEdit = now - this.lastLocalEditTime;
+    const userIsTyping = timeSinceLastEdit < this.TYPING_COOLDOWN_MS;
+    
+    // Always update non-content fields
+    this.currentSolution = { ...this.currentSolution, ...data };
+    
+    // Update discussion if changed
+    if (data.discussion) {
+      this.discussion = data.discussion;
+      this.displayTimeDiscussion();
+    }
+    
+    // If user is actively typing, don't overwrite their content
+    if (userIsTyping) {
+      return;
+    }
+    
+    // Update content from remote changes
+    this.isReceivingRemoteUpdate = true;
+    
+    try {
+      // Update regular step content (contentsArray)
+      if (data.status && this.questionsTitles.length > 0) {
+        for (let i = 0; i < this.questionsTitles.length; i++) {
+          const key = this.questionsTitles[i];
+          const remoteValue = data.status[key];
+          if (remoteValue !== undefined && remoteValue !== this.contentsArray[i]) {
+            this.contentsArray[i] = remoteValue;
+            this.staticContentArray[i] = remoteValue;
+          }
+        }
+      }
+      
+      // Update strategy review if on that step
+      if (this.isStrategyReviewStep && data.strategyReview !== undefined) {
+        if (data.strategyReview !== this.strategyReview) {
+          this.strategyReview = data.strategyReview;
+          this.lastSavedStrategyReview = data.strategyReview;
+        }
+      }
+    } finally {
+      // Reset flag after a short delay to allow Angular change detection
+      setTimeout(() => {
+        this.isReceivingRemoteUpdate = false;
+      }, 100);
+    }
   }
 
   areContentsSame(): boolean {
@@ -780,6 +854,8 @@ complex social issues like poverty (SDG 1) and inequality (SDG
 
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
+    this.solutionSub?.unsubscribe();
+    clearTimeout(this.saveTimeout);
   }
 
   private initializeLanguageSupport() {
