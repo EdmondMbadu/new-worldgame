@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
+import jsPDF from 'jspdf';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
@@ -782,6 +783,191 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
         'Unable to reach the AI evaluator right now. Please retry.';
       this.aiFeedbackDocSub?.unsubscribe();
     }
+  }
+
+  downloadSolutionPdf() {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+    let yPos = margin;
+
+    const checkPageBreak = (neededHeight: number) => {
+      if (yPos + neededHeight > pageHeight - margin) {
+        pdf.addPage();
+        yPos = margin;
+      }
+    };
+
+    const addText = (text: string, fontSize: number, isBold: boolean = false, color: [number, number, number] = [51, 51, 51]) => {
+      pdf.setFontSize(fontSize);
+      pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+      pdf.setTextColor(color[0], color[1], color[2]);
+      const lines = pdf.splitTextToSize(text, contentWidth);
+      const lineHeight = fontSize * 0.5;
+      checkPageBreak(lines.length * lineHeight);
+      pdf.text(lines, margin, yPos);
+      yPos += lines.length * lineHeight + 2;
+    };
+
+    const addSectionHeader = (text: string) => {
+      checkPageBreak(15);
+      yPos += 5;
+      pdf.setFillColor(20, 184, 166); // teal-500
+      pdf.roundedRect(margin, yPos - 5, contentWidth, 10, 2, 2, 'F');
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(255, 255, 255);
+      pdf.text(text, margin + 4, yPos + 1);
+      yPos += 12;
+    };
+
+    const addDivider = () => {
+      yPos += 3;
+      pdf.setDrawColor(229, 231, 235);
+      pdf.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 5;
+    };
+
+    // === HEADER ===
+    pdf.setFillColor(20, 184, 166); // teal-500
+    pdf.rect(0, 0, pageWidth, 35, 'F');
+    
+    pdf.setFontSize(22);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(255, 255, 255);
+    const titleText = this.currentSolution.title || 'Solution';
+    const titleLines = pdf.splitTextToSize(titleText, contentWidth);
+    pdf.text(titleLines, margin, 15);
+    
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    const authorText = `By ${this.currentSolution.authorName || 'Unknown'}`;
+    pdf.text(authorText, margin, 28);
+
+    yPos = 45;
+
+    // === TEAM MEMBERS ===
+    if (this.teamMembers.length > 0) {
+      addText('Team Members', 11, true, [107, 114, 128]);
+      const memberNames = this.teamMembers.map(m => `${m.firstName || ''} ${m.lastName || ''}`.trim() || m.email || 'Unknown').join(', ');
+      addText(memberNames, 10, false, [75, 85, 99]);
+      yPos += 3;
+    }
+
+    // === AI FEEDBACK SECTION ===
+    if (this.aiFeedbackText) {
+      addSectionHeader(`AI Evaluation by ${this.selectedAiEvaluator.name}`);
+      
+      // Scores
+      if (this.aiFeedbackParsed.scores.length > 0) {
+        addText('Scores', 11, true, [13, 148, 136]);
+        this.aiFeedbackParsed.scores.forEach(score => {
+          const scoreText = score.scoreValue 
+            ? `${score.label}: ${score.scoreValue}/${score.scoreMax || '10'}${score.reason ? ' - ' + score.reason : ''}`
+            : `${score.label}: ${score.raw || 'N/A'}`;
+          addText(`• ${scoreText}`, 9, false, [71, 85, 105]);
+        });
+        yPos += 3;
+      }
+
+      // Improvements
+      if (this.aiFeedbackParsed.improvements.length > 0) {
+        addText('Suggested Improvements', 11, true, [13, 148, 136]);
+        this.aiFeedbackParsed.improvements.forEach((tip, idx) => {
+          addText(`${idx + 1}. ${tip}`, 9, false, [71, 85, 105]);
+        });
+        yPos += 3;
+      }
+
+      // Readiness Level
+      if (this.aiFeedbackParsed.readinessLevel) {
+        addText('Readiness Level', 11, true, [13, 148, 136]);
+        addText(`${this.aiFeedbackParsed.readinessLevel}${this.aiFeedbackParsed.readinessDetails ? ' - ' + this.aiFeedbackParsed.readinessDetails : ''}`, 10, false, [71, 85, 105]);
+      }
+
+      addDivider();
+    }
+
+    // === SOLUTION CONTENT ===
+    addSectionHeader('Solution Details');
+
+    // Description
+    if (this.currentSolution.description) {
+      addText('Overview', 11, true, [51, 65, 85]);
+      const descPlain = this.toPlainText(this.currentSolution.description);
+      addText(descPlain, 9, false, [75, 85, 99]);
+      yPos += 3;
+    }
+
+    // Step by step content
+    const stepLabels: Record<string, string> = {
+      'S1': 'Step 1: Defining the Problem State',
+      'S2': 'Step 2: Envisioning the Preferred State',
+      'S3': 'Step 3: Developing Our Solution',
+      'S4': 'Step 4: Implementation',
+      'S5': 'Step 5: Strategy Outreach'
+    };
+
+    const questionMap = this.buildQuestionPromptMap();
+    const orderedPrefixes = ['S1', 'S2', 'S3', 'S4', 'S5'];
+
+    if (this.currentSolution.status) {
+      const grouped: Record<string, { key: string; question: string; answer: string }[]> = {};
+      
+      Object.entries(this.currentSolution.status).forEach(([key, value]) => {
+        const plainAnswer = this.toPlainText(value);
+        if (!plainAnswer) return;
+        
+        const prefix = key.split('-')[0];
+        const question = this.normalizeWhitespace(questionMap[key] || key);
+        
+        if (!grouped[prefix]) grouped[prefix] = [];
+        grouped[prefix].push({ key, question, answer: plainAnswer });
+      });
+
+      orderedPrefixes.forEach(prefix => {
+        if (!grouped[prefix]?.length) return;
+        
+        checkPageBreak(20);
+        addText(stepLabels[prefix] || prefix, 11, true, [51, 65, 85]);
+        
+        grouped[prefix].forEach(item => {
+          // Truncate very long questions
+          const shortQuestion = item.question.length > 150 
+            ? item.question.substring(0, 150) + '...' 
+            : item.question;
+          addText(`Q: ${shortQuestion}`, 9, true, [107, 114, 128]);
+          addText(`A: ${item.answer}`, 9, false, [75, 85, 99]);
+          yPos += 2;
+        });
+        yPos += 3;
+      });
+    }
+
+    // Strategy Review
+    if (this.currentSolution.strategyReview) {
+      checkPageBreak(20);
+      addText('Strategy Review', 11, true, [51, 65, 85]);
+      const reviewPlain = this.toPlainText(this.currentSolution.strategyReview);
+      addText(reviewPlain, 9, false, [75, 85, 99]);
+    }
+
+    // === FOOTER ===
+    const totalPages = pdf.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(156, 163, 175);
+      pdf.text(`NewWorld Game - Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+      pdf.text(new Date().toLocaleDateString(), pageWidth - margin, pageHeight - 10, { align: 'right' });
+    }
+
+    // Download
+    const filename = `${(this.currentSolution.title || 'solution').replace(/[^a-z0-9]/gi, '_')}_feedback.pdf`;
+    pdf.save(filename);
   }
 
   ngOnDestroy(): void {
