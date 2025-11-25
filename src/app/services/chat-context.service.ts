@@ -122,31 +122,49 @@ export class ChatContextService {
 
   /**
    * Build a contextual prompt prefix for the AI
+   * @param avatarName - The name of the AI avatar (e.g., "Buckminster Fuller", "Zara Nkosi")
+   * @param avatarIntro - Brief description of the avatar's expertise
    */
-  buildContextPrompt(): string {
+  buildContextPrompt(avatarName?: string, avatarIntro?: string): string {
     const ctx = this.contextSubject.getValue();
-    if (!ctx) return '';
-
-    let prompt = `[CONTEXT: You are helping with a NewWorld Game solution called "${ctx.solutionTitle}". `;
-    prompt += `The user is currently on ${ctx.currentStepName}. `;
     
-    if (ctx.solutionDescription) {
-      prompt += `Solution overview: ${ctx.solutionDescription.slice(0, 300)}... `;
+    let prompt = '';
+    
+    // Identity instruction - CRITICAL: Tell the AI it IS the avatar
+    if (avatarName) {
+      prompt += `[ROLE: You ARE ${avatarName}. `;
+      if (avatarIntro) {
+        prompt += `${avatarIntro} `;
+      }
+      prompt += `Answer all questions directly as yourself (${avatarName}). `;
+      prompt += `Do NOT ask the user for your perspective or wait for the user to provide your viewpoint. `;
+      prompt += `Do NOT roleplay as a facilitator asking for character perspectives. `;
+      prompt += `Simply answer the question as ${avatarName} would, drawing on your knowledge, values, and expertise.]\n\n`;
     }
+    
+    // Solution context (if available)
+    if (ctx) {
+      prompt += `[CONTEXT: You are helping with a NewWorld Game solution called "${ctx.solutionTitle}". `;
+      prompt += `The user is currently on ${ctx.currentStepName}. `;
+      
+      if (ctx.solutionDescription) {
+        prompt += `Solution overview: ${ctx.solutionDescription.slice(0, 300)}... `;
+      }
 
-    // Add current step's questions and any existing answers
-    if (ctx.questions.length > 0) {
-      prompt += `\n\nCurrent step questions:\n`;
-      ctx.questions.forEach((q, i) => {
-        prompt += `${i + 1}. ${q.text.slice(0, 200)}`;
-        if (q.currentAnswer) {
-          prompt += ` [Current answer: ${q.currentAnswer.slice(0, 150)}...]`;
-        }
-        prompt += '\n';
-      });
+      // Add current step's questions and any existing answers
+      if (ctx.questions.length > 0) {
+        prompt += `\n\nCurrent step questions:\n`;
+        ctx.questions.forEach((q, i) => {
+          prompt += `${i + 1}. ${q.text.slice(0, 200)}`;
+          if (q.currentAnswer) {
+            prompt += ` [Current answer: ${q.currentAnswer.slice(0, 150)}...]`;
+          }
+          prompt += '\n';
+        });
+      }
+
+      prompt += `\nProvide helpful, specific answers related to this solution and step. If the user asks a general question, answer it but try to relate it back to their solution context when relevant.]\n\n`;
     }
-
-    prompt += `\nProvide helpful, specific answers related to this solution and step. If the user asks a general question, answer it but try to relate it back to their solution context when relevant.]\n\n`;
     
     return prompt;
   }

@@ -594,12 +594,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         'application/octet-stream',
     }));
 
-    // Build prompt with context if available
+    // Build prompt with context and avatar identity
     let fullPrompt = trimmed;
-    if (this.playgroundContext) {
-      const contextPrefix = this.chatContext.buildContextPrompt();
-      fullPrompt = contextPrefix + trimmed;
-    }
+    // Always include avatar identity to ensure AI knows who it is
+    const contextPrefix = this.chatContext.buildContextPrompt(
+      this.selectedAi.name,
+      this.selectedAi.intro
+    );
+    fullPrompt = contextPrefix + trimmed;
 
     const docId = this.afs.createId();
     const discussionRef: AngularFirestoreDocument<any> = this.afs.doc(
