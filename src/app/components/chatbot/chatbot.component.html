@@ -1,469 +1,413 @@
-<!-- Floating bubble to toggle chat (Bucky's head) -->
-<div class="fixed bottom-4 right-4 z-50">
-  <div (click)="toggleBot()" class="mx-auto">
-    <img
-      src="../../../assets/img/bucky-1.png"
-      class="w-20 rounded-full"
-      alt=""
-    />
-  </div>
+<!-- Floating trigger button - Hidden when chat is open -->
+<div 
+  *ngIf="!showBot"
+  class="fixed bottom-6 right-6 z-[100]"
+>
   <button
-    id="open-chat"
     (click)="toggleBot()"
-    class="bg-teal-700 text-white py-2 px-4 rounded-md hover:bg-teal-800 transition duration-300 flex items-center"
+    class="group relative flex items-center gap-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105
+           bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-5 py-3.5"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="w-6 h-6 mr-2"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-      ></path>
-    </svg>
-    Ask Bucky
+    <!-- Avatar thumbnail -->
+    <div class="relative">
+      <img
+        [src]="selectedAi.avatarPath"
+        class="w-10 h-10 rounded-full ring-2 ring-white/30 object-cover"
+        [alt]="selectedAi.name"
+      />
+      <span 
+        class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"
+      ></span>
+    </div>
+    
+    <!-- Button text -->
+    <span class="text-white font-semibold text-sm pr-1">
+      Ask {{ getDisplayName(selectedAi) }}
+    </span>
   </button>
 </div>
 
-<!-- The chat container -->
+<!-- Chat Panel - Integrated Side Panel Design -->
 <div
   *ngIf="showBot"
-  class="fixed bottom-16 right-4 z-50 transition-all duration-300 overflow-visible shadow-xl rounded-lg bg-white dark:bg-slate-800"
-  [ngClass]="isEnlarged ? ' top-20 bottom-0 right-0 left-64' : 'w-96 h-96'"
+  class="fixed z-[99] flex flex-col
+         bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950
+         border-l border-slate-200/50 dark:border-slate-700/50
+         shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.5)]
+         animate-slide-in transition-all duration-300"
+  [ngClass]="isFullScreen 
+    ? 'inset-0 border-l-0' 
+    : 'inset-y-0 right-0 w-full sm:w-[420px] lg:w-[480px]'"
 >
-  <!-- Main “box” -->
-  <div class="flex flex-col w-full h-full">
-    <!-- Header -->
-    <div
-      class="p-2 border-b bg-teal-700 text-white rounded-t-lg flex justify-between items-center"
-    >
-      <p class="text-lg font-semibold mx-auto">Bucky</p>
-      <!-- ░░░ HEADER (replace only the <div class="flex space-x-3 …">) ░░░ -->
-      <div class="flex space-x-3 overflow-visible">
-        <!-- ② Full screen  -->
+  <!-- Header with AI Selector -->
+  <header class="relative flex-shrink-0 border-b border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+    <!-- Gradient accent line -->
+    <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
+    
+    <div class="px-4 py-3">
+      <!-- Top row: AI selector and controls -->
+      <div class="flex items-center justify-between">
+        <!-- AI Selector Button -->
         <button
-          (click)="openFullPage()"
-          class="relative group hover:opacity-80 focus:outline-none"
+          (click)="toggleAiSelector()"
+          class="flex items-center gap-3 px-3 py-2 -ml-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors group"
         >
-          <!-- external-arrow icon for clarity -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#FFFFFF"
-          >
-            <path
-              d="M120-120v-200h80v120h120v80H120Zm520 0v-80h120v-120h80v200H640ZM120-640v-200h200v80H200v120h-80Zm640 0v-120H640v-80h200v200h-80Z"
+          <div class="relative">
+            <img
+              [src]="selectedAi.avatarPath"
+              class="w-11 h-11 rounded-xl ring-2 ring-slate-200 dark:ring-slate-700 object-cover shadow-md group-hover:ring-teal-400 dark:group-hover:ring-teal-500 transition-all"
+              [alt]="selectedAi.name"
             />
-          </svg>
-          <span
-            class="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded bg-slate-900 text-white opacity-0 group-hover:opacity-100"
-          >
-            Full screen
-          </span>
-        </button>
-        <!-- ① Enlarge / Shrink  -->
-        <button
-          (click)="toggleChatSize()"
-          class="relative group hover:opacity-80 focus:outline-none"
-        >
-          <!-- same four-arrow icon you already used -->
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="24px"
-            viewBox="0 -960 960 960"
-            width="24px"
-            fill="#FFFFFF"
-          >
-            <path
-              d="M160-80v-80h640v80H160Zm320-120L320-360l56-56 64 62v-252l-64 62-56-56 160-160 160 160-56 56-64-62v252l64-62 56 56-160 160ZM160-800v-80h640v80H160Z"
-            />
-          </svg>
-
-          <span
-            class="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded bg-slate-900 text-white opacity-0 group-hover:opacity-100"
-          >
-            {{ isEnlarged ? "Shrink" : "Enlarge" }}
-          </span>
+            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                {{ selectedAi.name }}
+              </span>
+              <svg
+                class="w-4 h-4 text-slate-400 transition-transform"
+                [ngClass]="{'rotate-180': showAiSelector}"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+            <span class="text-xs text-slate-500 dark:text-slate-400">
+              {{ selectedAi.group === 'elder' ? 'Visionary Guide' : 'SDG Specialist' }}
+            </span>
+          </div>
         </button>
 
-        <!-- ③ Close  -->
-        <button
-          (click)="toggleBot()"
-          class="relative group hover:opacity-80 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6 text-white"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
+        <!-- Action buttons -->
+        <div class="flex items-center gap-1">
+          <!-- Full screen toggle button -->
+          <button
+            (click)="toggleFullScreen()"
+            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            [title]="isFullScreen ? 'Exit full screen' : 'Full screen'"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          <span
-            class="absolute top-full mt-1 left-1/2 -translate-x-1/2 px-2 py-1 text-xs rounded bg-gray-800 text-white opacity-0 group-hover:opacity-100"
+            <svg *ngIf="!isFullScreen" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            </svg>
+            <svg *ngIf="isFullScreen" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>
+          </button>
+          
+          <!-- Open in new page button -->
+          <button
+            (click)="openFullPage()"
+            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            title="Open in new page"
           >
-            Close
-          </span>
-        </button>
-        <!-- 🔽 INSERT THE PILL RIGHT HERE, still inside this div -->
-        <span
-          *ngIf="uiPhase === 'thinking'"
-          class="ml-2 inline-flex items-center text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200 animate-pulse"
-        >
-          {{ thinkingLabel }}
-          <span
-            class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce"
-          ></span>
-          <span
-            class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.15s]"
-          ></span>
-          <span
-            class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.30s]"
-          ></span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+          </button>
+
+          <!-- Close button -->
+          <button
+            (click)="toggleBot()"
+            class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            title="Close"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Thinking indicator -->
+      <div
+        *ngIf="uiPhase === 'thinking'"
+        class="mt-2 flex items-center gap-2 text-xs text-teal-600 dark:text-teal-400"
+      >
+        <span class="flex gap-0.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:0ms]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:150ms]"></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:300ms]"></span>
         </span>
+        <span class="font-medium">{{ thinkingLabel }}...</span>
       </div>
     </div>
 
-    <!-- Chat messages area (relative, so we can absolutely-position the copy button) -->
-    <div id="chatbox" class="relative flex-1 p-4 overflow-y-auto">
-      <section class="space-y-4 mt-8">
-        <!-- Intro message from Bucky -->
-        <div class="flex items-start space-x-2">
-          <img
-            src="../../../assets/img/bucky-1.png"
-            class="w-12 h-12 rounded-full"
-            alt="Bucky"
-          />
-          <p
-            class="bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-200 py-2 px-4 rounded-lg shadow-sm"
+    <!-- AI Selector Dropdown -->
+    <div
+      *ngIf="showAiSelector"
+      class="absolute top-full left-0 right-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-xl max-h-[60vh] overflow-y-auto"
+    >
+      <!-- Elders Section -->
+      <div class="p-3">
+        <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2">
+          Visionary Guides
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            *ngFor="let ai of elderAvatars"
+            (click)="selectAi(ai)"
+            class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all"
+            [ngClass]="selectedAi.id === ai.id 
+              ? 'bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 ring-1 ring-teal-200 dark:ring-teal-700' 
+              : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'"
           >
-            {{ introMessage.text }}
-            <a
-              *ngIf="introMessage.link"
-              [routerLink]="introMessage.link.url"
-              rel="noopener noreferrer"
-              class="text-blue-500 underline"
+            <img [src]="ai.avatarPath" class="w-9 h-9 rounded-lg object-cover shadow-sm" [alt]="ai.name" />
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{{ ai.name }}</div>
+            </div>
+            <svg
+              *ngIf="selectedAi.id === ai.id"
+              class="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
             >
-              {{ introMessage.link.text }}
-            </a>
-          </p>
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
         </div>
+      </div>
 
-        <!-- Loop over user (PROMPT) + Bucky (RESPONSE) messages -->
-        <!-- 1) Add "let i = index" so we can track each message index -->
-        <ng-container *ngFor="let resp of responses; let i = index">
-          <!-- If user prompt -->
-          <div
-            *ngIf="resp.type === 'PROMPT'"
-            class="flex items-start justify-end space-x-2"
+      <!-- Colleagues Section -->
+      <div class="p-3 pt-1">
+        <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2">
+          SDG Specialists
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            *ngFor="let ai of colleagueAvatars"
+            (click)="selectAi(ai)"
+            class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all"
+            [ngClass]="selectedAi.id === ai.id 
+              ? 'bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 ring-1 ring-teal-200 dark:ring-teal-700' 
+              : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'"
           >
-            <div class="max-w-[80%] flex space-x-2">
-              <!-- user's avatar -->
-              <img
-                *ngIf="profilePicturePath !== ''"
-                [src]="profilePicturePath"
-                class="w-10 h-10 rounded-full"
-                alt="User"
-              />
-              <img
-                *ngIf="profilePicturePath === ''"
-                src="../../../assets/img/user.png"
-                class="w-10 h-10 rounded-full"
-                alt="Default user"
-              />
-              <div>
-                <!-- The message text -->
-                <p
-                  class="bg-slate-200 dark:bg-slate-500 text-gray-800 dark:text-slate-100 py-2 px-4 rounded-lg shadow-sm"
-                >
-                  {{ resp.text }}
-                </p>
+            <img [src]="ai.avatarPath" class="w-9 h-9 rounded-lg object-cover shadow-sm" [alt]="ai.name" />
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{{ ai.name }}</div>
+            </div>
+            <svg
+              *ngIf="selectedAi.id === ai.id"
+              class="w-4 h-4 text-teal-600 dark:text-teal-400 flex-shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
 
-                <!-- Single-message copy button, placed under the bubble -->
-                <div class="mt-1 flex justify-end">
-                  <button
-                    class="text-xs px-2 py-1 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-100 rounded hover:bg-gray-300 dark:hover:bg-slate-500 transition flex flex-row items-center"
-                    (click)="copySingleMessage(resp.text!, i)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke-width="1.5"
-                      stroke="currentColor"
-                      class="w-[12px] h-[12px]"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192
-                      .373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0
-                      0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424
-                      48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375
-                      0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375
-                      3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15
-                      2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1
-                      .664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621
-                      0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125
-                      1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0
-                      0 0-9-9Z"
-                      />
-                    </svg>
-                    {{ singleCopyStates[i] || "Copy" }}
-                  </button>
-                </div>
+  <!-- Messages Area -->
+  <div 
+    id="chatbox" 
+    class="flex-1 overflow-y-auto"
+    [ngClass]="isEnlarged ? 'px-6 py-5' : 'px-4 py-4'"
+  >
+    <div class="space-y-4">
+      <!-- Intro message -->
+      <div class="flex gap-3">
+        <img
+          [src]="selectedAi.avatarPath"
+          class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0 mt-0.5"
+          [alt]="selectedAi.name"
+        />
+        <div class="flex-1 min-w-0">
+          <div class="inline-block max-w-full">
+            <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50">
+              <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                {{ introMessage.text }}
+                <a
+                  *ngIf="introMessage.link"
+                  [routerLink]="introMessage.link.url"
+                  class="text-teal-600 dark:text-teal-400 hover:underline font-medium"
+                >
+                  {{ introMessage.link.text }}
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message loop -->
+      <ng-container *ngFor="let resp of responses; let i = index">
+        <!-- User prompt -->
+        <div *ngIf="resp.type === 'PROMPT'" class="flex gap-3 justify-end">
+          <div class="flex-1 min-w-0 flex justify-end">
+            <div class="inline-block max-w-[85%]">
+              <div class="px-4 py-3 rounded-2xl rounded-tr-md bg-gradient-to-br from-teal-600 to-emerald-600 shadow-md">
+                <p class="text-sm text-white leading-relaxed">{{ resp.text }}</p>
               </div>
-            </div>
-          </div>
-          <!-- If user attached a file -->
-          <div
-            *ngIf="resp.type === 'ATTACHMENT'"
-            class="flex items-start justify-end space-x-2"
-          >
-            <div class="max-w-[80%] flex space-x-2">
-              <svg
-                class="w-10 h-10 text-teal-600"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8a1.5 1.5 0 01-2.121-2.121l7.071-7.071"
-                />
-              </svg>
-              <a
-                [href]="resp.src"
-                download
-                target="_blank"
-                class="bg-slate-200 dark:bg-slate-500 px-4 py-2 rounded-lg shadow-sm text-gray-800 dark:text-slate-100 whitespace-nowrap"
-              >
-                {{ resp.text }}
-              </a>
-            </div>
-          </div>
-
-          <!-- !-- If Bucky returns an image  -->
-          <!-- If Bucky returns an image -->
-          <div *ngIf="resp.type === 'IMAGE'" class="flex items-start space-x-2">
-            <!-- Bucky avatar -->
-            <img
-              src="../../../assets/img/bucky-1.png"
-              class="w-10 h-10 rounded-full"
-              alt="Bucky"
-            />
-
-            <!-- Image + download -->
-            <div class="flex flex-col items-center">
-              <img
-                [src]="resp.src"
-                class="max-w-[250px] md:max-w-sm rounded-lg shadow-sm"
-                alt="AI generated image"
-              />
-
-              <!-- Download button -->
-              <button
-                (click)="downloadImage(resp.src!)"
-                class="mt-2 flex items-center space-x-1 text-xs font-medium bg-gray-200 dark:bg-slate-600 text-gray-800 dark:text-slate-100 px-2 py-1 rounded hover:bg-gray-300 dark:hover:bg-slate-500 transition"
-                title="Download image"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2
-             M7 10l5 5 5-5
-             M12 15V3"
-                  />
-                </svg>
-                <span>Download</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- If Bucky's response -->
-          <div
-            *ngIf="resp.type === 'RESPONSE'"
-            class="flex items-start space-x-2"
-          >
-            <img
-              src="../../../assets/img/bucky-1.png"
-              class="w-10 h-10 rounded-full"
-              alt="Bucky"
-            />
-            <div>
-              <!-- The message text -->
-              <!-- While streaming, render as plain text; once done, apply formatText -->
-              <p
-                class="bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-200 py-2 px-4 rounded-lg shadow-sm whitespace-pre-wrap"
-                [innerHTML]="
-                  resp.streaming ? resp.text : formatText(resp.text || '')
-                "
-              ></p>
-
-              <!-- Single-message copy button, placed under the bubble -->
+              <!-- Copy button for user message -->
               <div class="mt-1 flex justify-end">
                 <button
-                  class="text-xs px-2 py-1 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-100 rounded hover:bg-gray-300 dark:hover:bg-slate-500 transition flex flex-row items-center"
+                  class="text-xs px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-1 opacity-0 hover:opacity-100 focus:opacity-100"
                   (click)="copySingleMessage(resp.text!, i)"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-[12px] h-[12px]"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192
-                    .373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0
-                    0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424
-                    48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375
-                    0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375
-                    3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15
-                    2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1
-                    .664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621
-                    0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125
-                    1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0
-                    0 0-9-9Z"
-                    />
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path d="M5 15H4a2 2 0 01-2-2V4c0-1.1.9-2 2-2h9a2 2 0 012 2v1" />
                   </svg>
-                  {{ singleCopyStates[i] || "Copy" }}
+                  {{ singleCopyStates[i] || 'Copy' }}
                 </button>
               </div>
             </div>
           </div>
-        </ng-container>
-
-        <!-- Status (like 'thinking...') -->
-        <!-- Animated Thinking Bubble (Tailwind only) -->
-        <div *ngIf="uiPhase === 'thinking'" class="flex items-start space-x-2">
-          <!-- Bucky avatar with soft ping ring -->
-          <div class="relative">
-            <img
-              src="../../../assets/img/bucky-1.png"
-              class="w-10 h-10 rounded-full"
-              alt="Bucky"
-            />
-            <span
-              class="absolute inset-0 rounded-full ring-4 ring-teal-300/30 animate-ping"
-            ></span>
+          <img
+            *ngIf="profilePicturePath"
+            [src]="profilePicturePath"
+            class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0 mt-0.5"
+            alt="You"
+          />
+          <div
+            *ngIf="!profilePicturePath"
+            class="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center shadow-sm flex-shrink-0 mt-0.5"
+          >
+            <svg class="w-5 h-5 text-slate-500 dark:text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
           </div>
+        </div>
 
-          <!-- Skeleton "answer incoming" block -->
-          <div class="max-w-[75%]">
-            <div class="rounded-lg p-3 bg-white dark:bg-slate-700 shadow-sm">
-              <div
-                class="h-3 w-40 rounded mb-2 bg-slate-200 dark:bg-slate-600 animate-pulse"
-              ></div>
-              <div
-                class="h-3 w-64 rounded mb-2 bg-slate-200 dark:bg-slate-600 animate-pulse"
-              ></div>
-              <div
-                class="h-3 w-56 rounded bg-slate-200 dark:bg-slate-600 animate-pulse"
-              ></div>
-            </div>
-
-            <!-- Typing dots + rotating label -->
-            <div
-              class="mt-2 flex items-center text-xs text-slate-500 dark:text-slate-400"
+        <!-- Attachment -->
+        <div *ngIf="resp.type === 'ATTACHMENT'" class="flex gap-3 justify-end">
+          <div class="flex-1 min-w-0 flex justify-end">
+            <a
+              [href]="resp.src"
+              download
+              target="_blank"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm"
             >
-              <span>{{ thinkingLabel }}</span>
-              <span
-                class="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce"
-              ></span>
-              <span
-                class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.15s]"
-              ></span>
-              <span
-                class="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:.30s]"
-              ></span>
+              <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+              </svg>
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ resp.text }}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- AI image response -->
+        <div *ngIf="resp.type === 'IMAGE'" class="flex gap-3">
+          <img
+            [src]="selectedAi.avatarPath"
+            class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0 mt-0.5"
+            [alt]="selectedAi.name"
+          />
+          <div class="flex-1 min-w-0">
+            <div class="inline-block">
+              <div class="rounded-2xl rounded-tl-md overflow-hidden shadow-lg">
+                <img
+                  [src]="resp.src"
+                  class="max-w-[280px] md:max-w-[320px]"
+                  alt="Generated image"
+                />
+              </div>
+              <button
+                (click)="downloadImage(resp.src!)"
+                class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                Download
+              </button>
             </div>
           </div>
         </div>
-      </section>
+
+        <!-- AI text response -->
+        <div *ngIf="resp.type === 'RESPONSE'" class="flex gap-3">
+          <img
+            [src]="selectedAi.avatarPath"
+            class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0 mt-0.5"
+            [alt]="selectedAi.name"
+          />
+          <div class="flex-1 min-w-0">
+            <div class="inline-block max-w-full">
+              <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50">
+                <p
+                  class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none"
+                  [innerHTML]="resp.streaming ? resp.text : formatText(resp.text || '')"
+                ></p>
+              </div>
+              <!-- Copy button -->
+              <div class="mt-1">
+                <button
+                  class="text-xs px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-1"
+                  (click)="copySingleMessage(resp.text!, i)"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path d="M5 15H4a2 2 0 01-2-2V4c0-1.1.9-2 2-2h9a2 2 0 012 2v1" />
+                  </svg>
+                  {{ singleCopyStates[i] || 'Copy' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Thinking skeleton -->
+      <div *ngIf="uiPhase === 'thinking'" class="flex gap-3">
+        <img
+          [src]="selectedAi.avatarPath"
+          class="w-9 h-9 rounded-xl object-cover shadow-sm flex-shrink-0 mt-0.5 animate-pulse"
+          [alt]="selectedAi.name"
+        />
+        <div class="flex-1">
+          <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50 max-w-[85%]">
+            <div class="space-y-2">
+              <div class="h-3 w-40 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
+              <div class="h-3 w-56 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
+              <div class="h-3 w-32 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <footer class="flex-shrink-0 border-t border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+    <!-- Attachment previews -->
+    <div *ngIf="previews.length" class="px-4 pt-3 flex flex-wrap gap-2">
+      <div
+        *ngFor="let p of previews; let i = index"
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm"
+      >
+        <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+        </svg>
+        <span class="max-w-[120px] truncate text-slate-600 dark:text-slate-300" [title]="p.file.name">
+          {{ p.file.name }}
+        </span>
+        <span *ngIf="p.uploading" class="text-xs text-slate-400 italic">uploading...</span>
+        <button
+          (click)="removePreview(i)"
+          class="w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-300 hover:bg-red-400 hover:text-white flex items-center justify-center text-xs transition-colors"
+        >
+          ×
+        </button>
+      </div>
     </div>
 
-    <!-- Footer: input, send, end chat -->
-    <div
-      class="p-3 border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 flex flex-col space-y-2"
-    >
-      <!-- ⬅︎ 1A  PREVIEW ROW -->
-      <div *ngIf="previews.length" class="flex flex-wrap gap-2">
-        <ng-container *ngFor="let p of previews; let i = index">
-          <div
-            class="px-2 py-1 bg-slate-200 dark:bg-slate-600 rounded text-xs flex items-center space-x-1"
-          >
-            <!-- paper-clip icon -->
-            <svg
-              class="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8"
-              />
-            </svg>
-            <span class="max-w-[80px] truncate" [title]="p.file.name">{{
-              p.file.name
-            }}</span>
-            <span *ngIf="p.uploading" class="italic text-[10px]">…</span>
-            <button
-              (click)="removePreview(i)"
-              class="ml-1 text-[10px] font-bold"
-            >
-              ×
-            </button>
-          </div>
-        </ng-container>
-      </div>
-
-      <!-- ⬅︎ 1B  INPUT ROW -->
-      <div class="flex items-center space-x-2">
+    <!-- Input row -->
+    <div class="p-4">
+      <div class="flex items-end gap-2">
         <!-- Attachment button -->
-        <label class="cursor-pointer flex items-center">
-          <svg
-            class="w-5 h-5 text-slate-600 dark:text-slate-300"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8"
-            />
-          </svg>
+        <label class="flex-shrink-0 cursor-pointer">
+          <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+            <svg class="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+            </svg>
+          </div>
           <input
             type="file"
             hidden
@@ -472,47 +416,56 @@
           />
         </label>
 
-        <!-- Message input -->
-        <textarea
-          [(ngModel)]="prompt"
-          rows="2"
-          placeholder="Ask something..."
-          (keydown)="handleComposerKey($event)"
-          class="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition duration-300"
-        ></textarea>
+        <!-- Text input -->
+        <div class="flex-1 min-w-0">
+          <textarea
+            [(ngModel)]="prompt"
+            rows="1"
+            [placeholder]="'Ask ' + getDisplayName(selectedAi) + ' anything...'"
+            (keydown)="handleComposerKey($event)"
+            class="w-full px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border-0 
+                   text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/50 dark:focus:ring-teal-400/50
+                   resize-none min-h-[48px] max-h-[120px]"
+            style="field-sizing: content;"
+          ></textarea>
+        </div>
 
         <!-- Send button -->
         <button
           (click)="submitPrompt()"
-          [disabled]="uploading"
-          class="bg-teal-700 text-white px-4 py-2 rounded-full hover:bg-teal-800 transition"
+          [disabled]="uploading || (!prompt.trim() && !previews.length)"
+          class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 
+                 hover:from-teal-700 hover:to-emerald-700 
+                 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700
+                 disabled:cursor-not-allowed
+                 shadow-lg shadow-teal-500/25 disabled:shadow-none
+                 transition-all duration-200"
           title="Send"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 8l16-4-4 16-5-5L4 8z"
-            />
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
           </svg>
         </button>
 
         <!-- End chat button -->
         <button
           (click)="endChat()"
-          class="bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-800 transition"
+          class="flex-shrink-0 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 
+                 text-slate-400 hover:text-red-500 dark:hover:text-red-400
+                 transition-all duration-200"
           title="End Chat"
         >
-          ×
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
     </div>
-  </div>
+
+    <!-- Status message -->
+    <div *ngIf="status" class="px-4 pb-3 -mt-1">
+      <p class="text-xs text-slate-500 dark:text-slate-400 text-center">{{ status }}</p>
+    </div>
+  </footer>
 </div>
