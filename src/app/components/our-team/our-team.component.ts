@@ -17,45 +17,39 @@ export class OurTeamComponent implements OnInit {
   ourTeam: Team[] = [
     {
       name: 'Medard Gabel',
-      title: 'Director of EarthGame, NewWorld Game Designer',
-      description:
-        'Medard is the executive director of the non-profit research and development organization EarthGame and founding director of the World Game Institute. He also leads BigPictureSmallWorld and the Global Solutions Lab and is author of books on the global energy and food situations, multinational corporations, and strategic planning, and editor of three volumes of books on global options. ',
-
+      titleKey: 'ourTeamPage.human.members.medard.title',
+      descriptionKey: 'ourTeamPage.human.members.medard.description',
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2FNG73q08IBlW39QiC3CzwTGe6zVo2-medard-jpeg.jpeg?alt=media&token=111999e5-6382-4868-b6df-0db2d06ba419',
     },
     {
       name: 'Jim Walker',
-      title: 'Head of AI, NewWorld Game Designer',
-      description:
-        'Jim, the Head of AI at EarthGame, oversees all AI developments and is one the creative minds behind the NewWorld Game.',
+      titleKey: 'ourTeamPage.human.members.jim.title',
+      descriptionKey: 'ourTeamPage.human.members.jim.description',
 
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fjim.png?alt=media&token=e576589f-8879-48ad-be93-4c9ce1d1b677',
     },
     {
       name: 'Edmond Mbadu',
-      title: 'Lead Developer, NewWorld Game Designer',
-      description:
-        'Edmond is  the lead software developer who focuses on building scalable solutions, supporting the team, and delivering reliable software systems.',
+      titleKey: 'ourTeamPage.human.members.edmond.title',
+      descriptionKey: 'ourTeamPage.human.members.edmond.description',
 
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2Flhf54MEukyMpSfk18xVBpWs1FCH3-ed-avatar.png?alt=media&token=cdfaa91c-5e77-4a3c-a49c-8d7b8a2f5a7d',
     },
     {
       name: 'Rain White',
-      title: 'UI/UX Designer, Software Developer',
-      description:
-        'Rain is the UI/UX designer and software developer who works on creating user-friendly designs and building functional, reliable software solutions.',
+      titleKey: 'ourTeamPage.human.members.rain.title',
+      descriptionKey: 'ourTeamPage.human.members.rain.description',
 
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2Frain-white.jpg?alt=media&token=4534a5d1-3bbc-4727-99ea-edff28e6321b',
     },
     {
       name: 'Baruch Bashan',
-      title: 'Tools Software Developer',
-      description:
-        'Baruch is the tools software developer, ranging from generating interactive maps, to scouring the world for key contacts to drive outreach and funding efforts, to creating autonomous teams of software agents.',
+      titleKey: 'ourTeamPage.human.members.baruch.title',
+      descriptionKey: 'ourTeamPage.human.members.baruch.description',
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/team%2FBaruch.png?alt=media&token=cdced396-f1be-4e93-9be6-bc1a98923a87',
       fit: 'contain', // 👈 only this card shows the full image (no crop)
@@ -66,42 +60,38 @@ export class OurTeamComponent implements OnInit {
     {
       profilePicPath: '../../../assets/img/zara-agent.png',
       name: 'Zara Nkosi',
-      description: `${name}  a vibrant AI agent inspired by South African ubuntu
-philosophy. I believe that “I am because we are”. I have  a knack for
-weaving compelling narratives, and help players understand
-complex social issues like poverty (SDG 1) and inequality (SDG
-10) through human-centered stories. `,
+      descriptionKey: 'ourTeamPage.ai.members.zara.description',
       // collectionPath: `users/${this.auth.currentUser.uid}/zara/`,
     },
     {
       profilePicPath: '../../../assets/img/arjun-agent.png',
       name: 'Arjun Patel',
-      description: ` I am ${name} an AI agent inspired by India’s vibrant tech and social entrepreneurship scene. I thrive on finding smart solutions with limited resources. My strength lies in data analysis—I help players crunch numbers to tackle challenges like clean water access (SDG 6) or education gaps (SDG 4). I bring a knack for jugaad—that’s frugal innovation—finding creative, low-cost ways to repurpose local materials for sustainable infrastructure.  `,
+      descriptionKey: 'ourTeamPage.ai.members.arjun.description',
     },
     {
       profilePicPath: '../../../assets/img/sofia-agent.png',
       name: 'Sofia Morales',
-      description: ` I’m Sofia, shaped by Colombia’s peacebuilding efforts and rich biodiversity. I’m a fierce advocate for sustainable development and social justice. My strength lies in conflict resolution—I help players navigate group tensions and stakeholder conflicts, which is key when working on issues like peace and justice (SDG 16).`,
+      descriptionKey: 'ourTeamPage.ai.members.sofia.description',
     },
     {
       profilePicPath: '../../../assets/img/li-agent.png',
       name: 'Li Wei',
-      description: ` I’m Li Wei, an AI rooted in East Asia’s strategic mindset and China’s rapid urban and tech evolution. I specialize in urban planning, tech integration, and long-term thinking. I help players design scalable solutions for sustainable cities (SDG 11) and innovative industries (SDG 9).`,
+      descriptionKey: 'ourTeamPage.ai.members.li.description',
     },
     {
       profilePicPath: '../../../assets/img/amina-agent.png',
       name: 'Amina Al-Sayed',
-      description: `I’m Amina, and I draw wisdom from Morocco’s cultural richness and diversity. I focus on inclusion, equity, and cultural sensitivity in every solution. My expertise in cross-cultural communication helps players navigate different worldviews—especially critical when tackling gender equality (SDG 5).`,
+      descriptionKey: 'ourTeamPage.ai.members.amina.description',
     },
     {
       profilePicPath: '../../../assets/img/elena-agent.png',
       name: 'Elena Volkov',
-      description: `I’m Elena, forged in the fire of Ukraine’s resilience and innovation. I excel in crisis management—helping players stay calm and act fast in emergencies like food insecurity (SDG 2) or health crises (SDG 3). I bring deep knowledge in renewable energy, guiding players to build smart, sustainable solutions like microgrids for off-grid communities (SDG 7). `,
+      descriptionKey: 'ourTeamPage.ai.members.elena.description',
     },
     {
       profilePicPath: '../../../assets/img/tane-agent.png',
       name: 'Tane Kahu',
-      description: `I’m Tane, grounded in Māori knowledge and New Zealand’s deep respect for nature. I take a holistic view of every challenge, helping players design solutions that protect ecosystems—on land (SDG 15) and under water (SDG 14). `,
+      descriptionKey: 'ourTeamPage.ai.members.tane.description',
     },
   ];
   ngOnInit(): void {
@@ -112,6 +102,8 @@ interface Team {
   name?: string;
   title?: string;
   description?: string;
+  titleKey?: string;
+  descriptionKey?: string;
   profilePicPath?: string;
   twitter?: string;
   github?: string;

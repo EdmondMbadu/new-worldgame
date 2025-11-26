@@ -991,5 +991,60 @@
       "currentDraft": "Brouillon actuel",
       "refreshFromSteps": "Actualiser depuis les étapes 1–4"
     }
+  },
+  "ourTeamPage": {
+    "human": {
+      "heading": "Notre équipe humaine comprend",
+      "members": {
+        "medard": {
+          "title": "Directeur d'EarthGame, concepteur du NewWorld Game",
+          "description": "Medard dirige l’organisation de recherche et développement à but non lucratif EarthGame et a cofondé le World Game Institute. Il pilote également BigPictureSmallWorld et le Global Solutions Lab, est auteur d’ouvrages sur l’énergie, l’alimentation, les multinationales et la planification stratégique, et éditeur de trois volumes consacrés aux options globales."
+        },
+        "jim": {
+          "title": "Responsable IA, concepteur du NewWorld Game",
+          "description": "Jim supervise l’ensemble des développements IA chez EarthGame et fait partie des esprits créatifs qui façonnent l’expérience NewWorld Game."
+        },
+        "edmond": {
+          "title": "Développeur principal, concepteur du NewWorld Game",
+          "description": "Edmond dirige le développement logiciel, construit des architectures évolutives, soutient l’équipe et garantit des livraisons fiables et de haute qualité."
+        },
+        "rain": {
+          "title": "Designer UI/UX et développeur logiciel",
+          "description": "Rain conçoit des interfaces intuitives et les transforme en logiciels fonctionnels et robustes afin que chaque interaction reste fluide."
+        },
+        "baruch": {
+          "title": "Développeur d’outils logiciels",
+          "description": "Baruch crée les outils internes – cartes interactives, équipes logicielles autonomes, recherches de partenaires – qui accélèrent la sensibilisation et le financement."
+        }
+      }
+    },
+    "ai": {
+      "heading": "Notre équipe IA",
+      "subheading": "L’équipe d’IA de NewWorld Game",
+      "cta": "Discuter avec les IA",
+      "members": {
+        "zara": {
+          "description": "{{name}} s’inspire de la philosophie sud-africaine d’ubuntu – « je suis parce que nous sommes ». Elle raconte des histoires humaines qui aident les joueurs à comprendre la pauvreté (ODD 1) et les inégalités (ODD 10)."
+        },
+        "arjun": {
+          "description": "{{name}} reflète l’énergie technologique et entrepreneuriale de l’Inde. Expert en analyse de données et en frugalité (jugaad), il aide à concevoir des solutions abordables pour l’éducation (ODD 4) et l’accès à l’eau (ODD 6)."
+        },
+        "sofia": {
+          "description": "{{name}} incarne les efforts colombiens de consolidation de la paix et de protection de la biodiversité. Elle guide les équipes à travers la résolution de conflits et l’action climatique pour les ODD 13 et 16."
+        },
+        "li": {
+          "description": "{{name}} puise dans la pensée stratégique d’Asie de l’Est et l’urbanisation rapide de la Chine. Il excelle en planification urbaine, intégration technologique et prospective pour les ODD 9 et 11."
+        },
+        "amina": {
+          "description": "{{name}} s’appuie sur la richesse culturelle marocaine. Elle met l’accent sur l’inclusion, l’équité et la sensibilité interculturelle, particulièrement utiles pour avancer sur l’ODD 5."
+        },
+        "elena": {
+          "description": "{{name}} est forgée par la résilience de l’Ukraine. Elle maîtrise la gestion de crise et partage ses connaissances en énergie renouvelable pour soutenir les ODD 2, 3 et 7."
+        },
+        "tane": {
+          "description": "{{name}} s’ancre dans la sagesse maorie et le respect néo-zélandais de la nature. Il aide à concevoir des solutions qui protègent les écosystèmes terrestres (ODD 15) et marins (ODD 14)."
+        }
+      }
+    }
   }
 }

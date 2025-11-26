@@ -991,5 +991,60 @@
       "currentDraft": "Current Draft",
       "refreshFromSteps": "Refresh from Steps 1–4"
     }
+  },
+  "ourTeamPage": {
+    "human": {
+      "heading": "Our Human Team Includes",
+      "members": {
+        "medard": {
+          "title": "Director of EarthGame, NewWorld Game Designer",
+          "description": "Medard is the executive director of the non-profit research and development organization EarthGame and founding director of the World Game Institute. He also leads BigPictureSmallWorld and the Global Solutions Lab and is author of books on the global energy and food situations, multinational corporations, and strategic planning, and editor of three volumes of books on global options."
+        },
+        "jim": {
+          "title": "Head of AI, NewWorld Game Designer",
+          "description": "Jim oversees all AI development at EarthGame and is one of the creative minds shaping NewWorld Game’s experiences."
+        },
+        "edmond": {
+          "title": "Lead Developer, NewWorld Game Designer",
+          "description": "Edmond leads software development, focusing on scalable architecture, team support, and delivering reliable, high-quality releases."
+        },
+        "rain": {
+          "title": "UI/UX Designer, Software Developer",
+          "description": "Rain designs intuitive interfaces and translates them into functional, dependable software so every interaction feels effortless."
+        },
+        "baruch": {
+          "title": "Tools Software Developer",
+          "description": "Baruch builds internal tools—from interactive maps to autonomous software agents—and scouts strategic partners to accelerate outreach and funding."
+        }
+      }
+    },
+    "ai": {
+      "heading": "Our AI Team",
+      "subheading": "The AI Team from NewWorld Game",
+      "cta": "Chat with the AIs",
+      "members": {
+        "zara": {
+          "description": "{{name}} is inspired by South Africa’s ubuntu philosophy—“I am because we are.” She weaves compelling narratives that help players explore social issues like poverty (SDG 1) and inequality (SDG 10) through human-centered stories."
+        },
+        "arjun": {
+          "description": "{{name}} channels India’s vibrant tech and social entrepreneurship scene. He excels at data analysis and frugal innovation (jugaad), helping players design smart, low-cost pilots for SDG 4 and SDG 6 challenges."
+        },
+        "sofia": {
+          "description": "{{name}} reflects Colombia’s peacebuilding spirit and biodiversity leadership. She guides teams through conflict resolution and climate action, especially for SDG 13 and SDG 16."
+        },
+        "li": {
+          "description": "{{name}} draws on East Asia’s strategic mindset and China’s rapid urban evolution. He specializes in urban planning, tech integration, and long-term forecasting for SDG 9 and SDG 11."
+        },
+        "amina": {
+          "description": "{{name}} embodies Morocco’s cultural richness and focus on equity. She helps teams navigate cross-cultural collaboration and design inclusive solutions, particularly for SDG 5."
+        },
+        "elena": {
+          "description": "{{name}} brings Ukraine’s resilience to crisis management. She keeps teams calm during emergencies and shares renewable-energy know-how for SDG 2, SDG 3, and SDG 7 solutions."
+        },
+        "tane": {
+          "description": "{{name}} is grounded in Māori wisdom and New Zealand’s respect for nature, guiding teams to protect ecosystems on land (SDG 15) and under water (SDG 14)."
+        }
+      }
+    }
   }
 }
