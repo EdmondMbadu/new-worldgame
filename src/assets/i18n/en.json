@@ -494,6 +494,76 @@
       "cta": "Get Started"
     }
   },
+  "welcomeFlow": {
+    "steps": {
+      "intro": "Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.",
+      "focusQuestion": "What is your focus for using NewWorld Game?",
+      "imagePlaceholder": "",
+      "sdgPrompt": "Select all Sustainable Development Goals (SDGs) that interest you.",
+      "namePrompt": "Enter your first and last name.",
+      "emailPrompt": "Enter your email.",
+      "passwordPrompt": "Create a password to get started.",
+      "termsPrompt": "Please accept the Terms and Conditions.",
+      "verifyPrompt": "Voila! Almost done! Go to your email to verify your account. Once completed, click done below. If you don't see our verification email within 2 minutes, please double check your Spam folder."
+    },
+    "buttons": {
+      "continue": "Continue",
+      "done": "Done"
+    },
+    "focus": {
+      "options": {
+        "solutions": "Developing solutions to global and local problems",
+        "explore": "Exploring global and local issues",
+        "collaboration": "Collaborative global problem-solving",
+        "implementation": "Locating partners and funding for implementing solutions",
+        "other": "Something else"
+      }
+    },
+    "sdg": {
+      "title": "Sustainable Development Goals (SDGs)",
+      "selectAll": "Select all SDGs"
+    },
+    "forms": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "terms": {
+      "title": "Terms and Conditions",
+      "body": "NewWorld Game will not, under any circumstances, release, sell, or make available to anyone for any reason any information obtained during your interactions with NewWorld Game. The solutions written on the platform will be made public for the world to see and use for the benefit of the world.",
+      "checkboxTerms": {
+        "prefix": "I agree with the",
+        "link": "terms and conditions"
+      },
+      "checkboxEvaluator": {
+        "prefix": "I agree that by submitting this form, I sign up to be both",
+        "solverLink": "a problem solver",
+        "middle": "and",
+        "evaluatorLink": "an evaluator",
+        "suffix": "."
+      },
+      "checkboxFun": "I agree to have fun."
+    },
+    "toasts": {
+      "success": "Registration was successful",
+      "failure": "Registration failed. Try again!"
+    },
+    "alerts": {
+      "fillAllFields": "Fill all the fields"
+    },
+    "aria": {
+      "close": "Close",
+      "check": "Check icon",
+      "error": "Error icon"
+    },
+    "ai": {
+      "name": "Bucky",
+      "stepImageAlt": "Step illustration",
+      "avatarAlt": "Bucky portrait"
+    }
+  },
   "createSolution": {
     "steps": {
       "intro": "Welcome to the NewWorld Game!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global problem on which you choose to work. Let’s start.",

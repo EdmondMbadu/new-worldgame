@@ -1,15 +1,15 @@
 
 <div class="flex justify-center  gap-2.5 mx-4 " *ngFor="let im of imagePaths; let i= index">
-    <img *ngIf="i==stepNumber && im!==''" class="h-60 rounded-lg mb-4" [src]="im" alt="Jese image">
+    <img *ngIf="i==stepNumber && im!==''" class="h-60 rounded-lg mb-4" [src]="im" [attr.alt]="'welcomeFlow.ai.stepImageAlt' | translate">
 
     
     
 </div>
 <div *ngIf="stepNumber!==2" class="flex justify-center  gap-2.5 mx-4 ">
-    <img class="h-12 rounded-full " src="../../../assets/img/fuller.jpg" alt="Jese image">
+    <img class="h-12 rounded-full " src="../../../assets/img/fuller.jpg" [attr.alt]="'welcomeFlow.ai.avatarAlt' | translate">
     <div class="flex flex-col w-full max-w-[320px] lg:max-w-[30rem] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6">
        <div class="flex items-center space-x-2 rtl:space-x-reverse">
-          <span class="text-md font-semibold text-gray-900 dark:text-white">Bucky</span>
+          <span class="text-md font-semibold text-gray-900 dark:text-white">{{ 'welcomeFlow.ai.name' | translate }}</span>
 
        </div>
        <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white ">{{ result }}</p>
@@ -24,14 +24,14 @@
     <div *ngFor="let f of focus; let i=index" (click)="chooseFocus(i)" class="p-4   flex flex-row shadow-sm border-2 border-gray-400  text-md text-gray-950 rounded-lg hover:dark:border-gray-200 hover:border-gray-900 dark:bg-gray-800 dark:text-gray-300 {{f.backgroundSelected}}" role="alert">
        <img class="h-10" [src]="f.imagePath" alt="">
       
-        <h1 class="mt-2 mx-4">{{f.text}}</h1>
+        <h1 class="mt-2 mx-4">{{ f.textKey | translate }}</h1>
       </div>
 
       <div class="container flex mx-auto  justify-center my-10">
     
       
-        <button *ngIf="focusSelected>=0" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="focusSelected==-1" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        <button *ngIf="focusSelected>=0" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
+        <button [disabled]="true" *ngIf="focusSelected==-1" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
     </div>
  
 </div>
@@ -45,14 +45,16 @@
         
           
            
-            <button  (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+            <button  (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
         </div>
      
     </div>
 <section *ngIf="stepNumber==3" class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4">
     <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
       <div  class="mb-4 flex items-center justify-between gap-4 md:mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">Sustainable Development Goals (SDGs)</h2>
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+          {{ 'welcomeFlow.sdg.title' | translate }}
+        </h2>
   
      
       </div>
@@ -69,7 +71,9 @@
             <div class="flex items-center h-5">
             <input (change)="selectAllSdgs()" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
             </div>
-            <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Select all SDGs</label>
+            <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+              {{ 'welcomeFlow.sdg.selectAll' | translate }}
+            </label>
         
     </div>
         
@@ -79,8 +83,8 @@
     <div class="container flex mx-auto  justify-center my-10">
     
       
-        <button *ngIf="hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="!hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        <button *ngIf="hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
+        <button [disabled]="true" *ngIf="!hasSelectedSDG" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
     </div>
     
   </section>
@@ -89,52 +93,63 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="relative z-0 w-full mb-5 group">
                 <input  [(ngModel)]="auth.newUser.firstName"  type="text" name="floating_first_name" id="floating_first_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                <label for="floating_first_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">First name</label>
+                <label for="floating_first_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                  {{ 'welcomeFlow.forms.firstName' | translate }}
+                </label>
             </div>
             <div class="relative z-0 w-full mb-5 group">
                 <input  [(ngModel)]="auth.newUser.lastname"  type="text" name="floating_last_name" id="floating_last_name" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-                <label for="floating_last_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Last name</label>
+                <label for="floating_last_name" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                  {{ 'welcomeFlow.forms.lastName' | translate }}
+                </label>
             </div>
         </div>
         <div class="container flex mx-auto  justify-center my-10">
-            <button *ngIf="!namesFieldEmpty" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-            <button [disabled]="true" *ngIf="namesFieldEmpty" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+            <button *ngIf="!namesFieldEmpty" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
+            <button [disabled]="true" *ngIf="namesFieldEmpty" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
         </div>
   </div>
 
   <div *ngIf="stepNumber==5" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <input [(ngModel)]="auth.newUser.email"   type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-        <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
+        <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+          {{ 'welcomeFlow.forms.email' | translate }}
+        </label>
     </div>
     <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="!emailEmptyOrInvalid" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="emailEmptyOrInvalid" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        <button *ngIf="!emailEmptyOrInvalid" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
+        <button [disabled]="true" *ngIf="emailEmptyOrInvalid" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
     </div>
   </div>
 
   <div  *ngIf="stepNumber==6" class="mt-10">
     <div class="relative z-0 w-full mb-5 group">
         <input [(ngModel)]="auth.newUser.password"   type="password" name="floating_password" id="floating_password" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-        <label for="floating_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Password</label>
+        <label for="floating_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+          {{ 'welcomeFlow.forms.password' | translate }}
+        </label>
     </div>
     <div class="relative z-0 w-full mb-5 group">
         <input [(ngModel)]="rePassword"   type="password" name="repeat_password" id="floating_repeat_password" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-        <label for="floating_repeat_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Confirm password</label>
+        <label for="floating_repeat_password" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+          {{ 'welcomeFlow.forms.confirmPassword' | translate }}
+        </label>
     </div>
     <div class="container flex mx-auto  justify-center my-10">
-        <button *ngIf="!passwordEmptyOrDifferent" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-        <button [disabled]="true" *ngIf="passwordEmptyOrDifferent" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+        <button *ngIf="!passwordEmptyOrDifferent" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
+        <button [disabled]="true" *ngIf="passwordEmptyOrDifferent" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
     </div>
   </div>
 
   <div  *ngIf="stepNumber==7" class="mt-10 mx-auto max-w-xl bg-gray-100 dark:bg-gray-800 p-6">
         <div class="">
-            <h1 class="mb-4 text-xl font-bold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white">Terms and Conditions</h1>
+            <h1 class="mb-4 text-xl font-bold leading-tight text-gray-900 lg:mb-6 lg:text-4xl dark:text-white">
+              {{ 'welcomeFlow.terms.title' | translate }}
+            </h1>
 
-            <p class="mb-2 text-gray-900 dark:text-white">NewWorld Game will not, under any circumstances release, sell, or make available to anyone for any reason any information obtained during your interactions with NewWorld Game.
-
-                The solutions written in the platform will be made public for the world to see and use for the benefit of the world.
+            <p class="mb-2 text-gray-900 dark:text-white">
+              {{ 'welcomeFlow.terms.body' | translate }}
             </p>
             
         </div>
@@ -142,7 +157,12 @@
                 <div class="flex items-center h-5">
                 <input (change)="onCheckboxChangeAgree($event)" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
                 </div>
-                <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">I agree with the <a routerLink="/privacy" class="text-blue-600 hover:underline dark:text-blue-500">terms and conditions</a></label>
+                <label for="terms" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                  {{ 'welcomeFlow.terms.checkboxTerms.prefix' | translate }}&nbsp;
+                  <a routerLink="/privacy" class="text-blue-600 hover:underline dark:text-blue-500">
+                    {{ 'welcomeFlow.terms.checkboxTerms.link' | translate }}
+                  </a>
+                </label>
             
         </div>
         <div class="flex  mb-5">
@@ -150,7 +170,16 @@
                 <input (change)="onCheckboxChangeAgreeEvaluator($event)" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
             </div>
             
-                <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, I sign up to be both <a target="_blank" routerLink="/overview" class="text-blue-500  underline">a problem solver</a> and <a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">an evaluator</a>.</label>
+                <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">
+                  {{ 'welcomeFlow.terms.checkboxEvaluator.prefix' | translate }}&nbsp;
+                  <a target="_blank" routerLink="/overview" class="text-blue-500  underline">
+                    {{ 'welcomeFlow.terms.checkboxEvaluator.solverLink' | translate }}
+                  </a>&nbsp;
+                  {{ 'welcomeFlow.terms.checkboxEvaluator.middle' | translate }}&nbsp;
+                  <a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">
+                    {{ 'welcomeFlow.terms.checkboxEvaluator.evaluatorLink' | translate }}
+                  </a>{{ 'welcomeFlow.terms.checkboxEvaluator.suffix' | translate }}
+                </label>
         
         </div>
         <div class="flex  mb-5">
@@ -158,12 +187,12 @@
                 <input (change)="onCheckboxChangeAgreeFun($event)" id="terms" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800" required />
             </div>
             
-                <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree  to have fun.</label>
+                <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">{{ 'welcomeFlow.terms.checkboxFun' | translate }}</label>
         
         </div>
         <div class="container flex mx-auto  justify-center my-10">
-            <button *ngIf="agree &&solverEvaluator && agreeFun" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
-            <button [disabled]="true" *ngIf="!agree || !solverEvaluator || !agreeFun" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{buttonText}}</button>
+            <button *ngIf="agree &&solverEvaluator && agreeFun" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
+            <button [disabled]="true" *ngIf="!agree || !solverEvaluator || !agreeFun" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white  rounded-full "> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
         </div>
 
         
@@ -172,7 +201,7 @@
     <div class="container flex mx-auto  justify-center my-10">
     
       
-        <button *ngIf="stepNumber==0 || stepNumber===8" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{buttonText}}</button>
+        <button *ngIf="stepNumber==0 || stepNumber===8" (click)="updatePlayground(stepNumber)"  class="p-3 px-12  text-white  bg-teal-700 rounded-full hover:bg-teal-800"> {{ ('welcomeFlow.buttons.' + buttonKey) | translate }}</button>
        
     </div>
     
@@ -181,11 +210,11 @@
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
             </svg>
-            <span class="sr-only">Check icon</span>
+            <span class="sr-only">{{ 'welcomeFlow.aria.check' | translate }}</span>
         </div>
-        <div class="ml-3 text-sm font-normal">Registration was Successful</div>
+        <div class="ml-3 text-sm font-normal">{{ 'welcomeFlow.toasts.success' | translate }}</div>
         <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 "  (click)="closeRegistrationSuccess()" >
-            <span class="sr-only">Close</span>
+            <span class="sr-only">{{ 'welcomeFlow.aria.close' | translate }}</span>
             <svg class="w-3 h-3"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
             </svg>
@@ -197,14 +226,14 @@
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
             </svg>
-            <span class="sr-only">Error icon</span>
+            <span class="sr-only">{{ 'welcomeFlow.aria.error' | translate }}</span>
         </div>
-        <div class="ml-3 text-sm font-normal">Registration Failed. Try Again!
+        <div class="ml-3 text-sm font-normal">{{ 'welcomeFlow.toasts.failure' | translate }}
             <h1 class="my-2">{{auth.newUser.errorMessage}}</h1>
         </div>
  
         <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"  (click)="closeRegistrationFailure()">
-            <span class="sr-only" >Close</span>
+            <span class="sr-only" >{{ 'welcomeFlow.aria.close' | translate }}</span>
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
             </svg>

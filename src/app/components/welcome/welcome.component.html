@@ -14,12 +14,12 @@
         
         </div>
         <div class="mt-10"></div>
-            <div class="container flex mx-auto  justify-center max-w-4xl" *ngFor="let s of steps; let i= index">
+            <div class="container flex mx-auto  justify-center max-w-4xl" *ngFor="let key of stepKeys; let i= index">
 
                 <app-welcome-steps
-                [text]="s"
+                [textKey]="key"
                 *ngIf="display[i]"
-                [buttonText]="buttontexts[i]"
+                [buttonKey]="buttonKeys[i]"
                 (buttonInfoEvent)="updatePlayground($event)"
                 [stepNumber]="currentIndexDisplay"
                 [focusSelectedArray]="selected"

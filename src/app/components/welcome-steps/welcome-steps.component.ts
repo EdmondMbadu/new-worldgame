@@ -3,6 +3,7 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnDestroy,
   OnInit,
   Output,
 } from '@angular/core';
@@ -10,15 +11,17 @@ import { Router } from '@angular/router';
 import { NewUser } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
+import { TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-welcome-steps',
   templateUrl: './welcome-steps.component.html',
   styleUrl: './welcome-steps.component.css',
 })
-export class WelcomeStepsComponent implements OnInit {
-  @Input() result: string = '';
-  @Input() text: string = '';
+export class WelcomeStepsComponent implements OnInit, OnDestroy {
+  result: string = '';
+  @Input() textKey: string = '';
   @Input() stepNumber: number = 0;
   @Input() focusSelectedArray: boolean[] = [];
   focusSelected: number = -1;
@@ -56,46 +59,66 @@ export class WelcomeStepsComponent implements OnInit {
 
   focus: Focus[] = [
     {
-      text: 'Developing solutions to global and local problems',
+      textKey: 'welcomeFlow.focus.options.solutions',
       imagePath: '../../../assets/img/puzzle.png',
       backgroundSelected: '',
     },
     {
-      text: 'Exploring Global and Local Issues',
+      textKey: 'welcomeFlow.focus.options.explore',
       imagePath: '../../../assets/img/global.png',
       backgroundSelected: '',
     },
     {
-      text: 'Collaborative Global Problem-Solving',
+      textKey: 'welcomeFlow.focus.options.collaboration',
       imagePath: '../../../assets/img/collaborate.png',
       backgroundSelected: '',
     },
     {
-      text: 'Locating Partners and Funding for Implementing Solutions',
+      textKey: 'welcomeFlow.focus.options.implementation',
       imagePath: '../../../assets/img/implement.png',
       backgroundSelected: '',
     },
     {
-      text: 'Something else',
+      textKey: 'welcomeFlow.focus.options.other',
       imagePath: '../../../assets/img/eyes.png',
       backgroundSelected: '',
     },
   ];
 
   @Output() buttonInfoEvent = new EventEmitter<number>();
-  @Input() buttonText: string = '';
+  @Input() buttonKey: 'continue' | 'done' = 'continue';
   submitDisplay: boolean = false;
   sdgs: any = [];
+  private langSub?: Subscription;
   constructor(
     private cdRef: ChangeDetectorRef,
     private router: Router,
     public data: DataService,
-    public auth: AuthService
+    public auth: AuthService,
+    private translate: TranslateService
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.sdgs = this.data.sdgs;
-    this.typewriterEffect(this.text, () => {});
+    this.initializeTypewriter();
+    this.langSub = this.translate.onLangChange.subscribe(() => {
+      this.initializeTypewriter();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.langSub?.unsubscribe();
+  }
+
+  private initializeTypewriter(): void {
+    this.result = '';
+    if (!this.textKey) {
+      return;
+    }
+    const translated = this.translate.instant(this.textKey);
+    if (translated) {
+      this.typewriterEffect(translated, () => {});
+    }
   }
 
   typewriterEffect(text: string, callback: () => void) {
@@ -114,14 +137,14 @@ export class WelcomeStepsComponent implements OnInit {
     }, 10); // Adjust typing speed here
   }
   async updatePlayground(current: number) {
-    if (this.buttonText === 'Continue') {
+    if (this.buttonKey === 'continue') {
       current++;
       this.buttonInfoEvent.emit(current);
     }
-    if (current === 8 && this.buttonText !== 'Done') {
+    if (current === 8 && this.buttonKey !== 'done') {
       let createAccount = await this.createAccount();
     } else {
-      if (this.buttonText === 'Done') {
+      if (this.buttonKey === 'done') {
         this.router.navigate(['/login']);
       }
     }
@@ -132,13 +155,15 @@ export class WelcomeStepsComponent implements OnInit {
       this.focusSelected = index;
       this.focus[index].backgroundSelected =
         'bg-teal-100    dark:border-gray-100 dark:border-4';
-      console.log('the element chosen is', this.focus[index]);
     } else {
       this.focusSelected = index;
       this.focus[index].backgroundSelected =
         'bg-teal-100 dark:border-gray-100 dark:border-4';
-      this.auth.newUser.goal = this.focus[index].text;
     }
+
+    this.auth.newUser.goal = this.translate.instant(
+      this.focus[index].textKey
+    );
 
     this.focusSelectedArray[this.stepNumber] = true;
   }
@@ -214,7 +239,7 @@ export class WelcomeStepsComponent implements OnInit {
       this.auth.newUser.firstName === '' ||
       this.auth.newUser.lastname === ''
     ) {
-      alert('Fill all the fields');
+      alert(this.translate.instant('welcomeFlow.alerts.fillAllFields'));
       return;
     }
     console.log(
@@ -316,7 +341,7 @@ export class WelcomeStepsComponent implements OnInit {
   }
 }
 interface Focus {
-  text?: string;
+  textKey: string;
   imagePath?: string;
   backgroundSelected?: string;
 }

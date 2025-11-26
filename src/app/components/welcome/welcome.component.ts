@@ -10,23 +10,21 @@ import { Router } from '@angular/router';
 export class WelcomeComponent {
   initial: number = 11.1;
   increment: number = 11.1;
-  text: string = `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`;
-  result: string = '';
-  steps: string[] = [
-    `Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.`,
-    `What is your focus for using NewWorld Game?`,
-    '',
-    'Select all Sustainable Development Goals (SDGs) that interest you.',
-    'Enter your first and last name.',
-    'Enter Your email.',
-    'Create a password to get started',
-    'Please accept the Terms and Conditions.',
-    `Voila! Almost done! Go to your email to verify your account. Once completed, click done below. If you don't see our verification eMail within 2 minutes, please double check your Spam folder.`,
+  stepKeys: string[] = [
+    'welcomeFlow.steps.intro',
+    'welcomeFlow.steps.focusQuestion',
+    'welcomeFlow.steps.imagePlaceholder',
+    'welcomeFlow.steps.sdgPrompt',
+    'welcomeFlow.steps.namePrompt',
+    'welcomeFlow.steps.emailPrompt',
+    'welcomeFlow.steps.passwordPrompt',
+    'welcomeFlow.steps.termsPrompt',
+    'welcomeFlow.steps.verifyPrompt',
   ];
-  buttontexts = new Array(this.steps.length).fill('Continue');
-  selected: boolean[] = new Array(this.steps.length).fill(false);
+  buttonKeys: ('continue' | 'done')[] = this.stepKeys.map(() => 'continue');
+  selected: boolean[] = new Array(this.stepKeys.length).fill(false);
   sdgSelected: number[] = [];
-  display = new Array(this.steps.length).fill(false);
+  display = new Array(this.stepKeys.length).fill(false);
   currentIndexDisplay: number = 0;
   constructor(private cdRef: ChangeDetectorRef, private router: Router) {}
 
@@ -34,7 +32,7 @@ export class WelcomeComponent {
     window.scrollTo(0, 0);
     this.sdgSelected = new Array(17).fill(-1);
     this.display[this.currentIndexDisplay] = true;
-    this.buttontexts[this.steps.length - 1] = 'Done';
+    this.buttonKeys[this.stepKeys.length - 1] = 'done';
   }
   updatePlayground(current: number) {
     this.display[this.currentIndexDisplay] = false;

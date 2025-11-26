@@ -494,6 +494,76 @@
       "cta": "Commencer"
     }
   },
+  "welcomeFlow": {
+    "steps": {
+      "intro": "Salut, je suis Bucky, ton collègue IA de NewWorld Game. Pour commencer, créons un environnement de solution rien que pour toi.",
+      "focusQuestion": "Quel est ton objectif en utilisant NewWorld Game ?",
+      "imagePlaceholder": "",
+      "sdgPrompt": "Sélectionne tous les Objectifs de développement durable (ODD) qui t'intéressent.",
+      "namePrompt": "Indique ton prénom et ton nom.",
+      "emailPrompt": "Entre ton courriel.",
+      "passwordPrompt": "Crée un mot de passe pour démarrer.",
+      "termsPrompt": "Accepte les conditions générales.",
+      "verifyPrompt": "Voilà ! Presque terminé ! Consulte ton courriel pour vérifier ton compte. Une fois fait, clique sur Terminer ci-dessous. Si tu ne vois pas notre message dans les 2 minutes, vérifie ton dossier de courrier indésirable."
+    },
+    "buttons": {
+      "continue": "Continuer",
+      "done": "Terminer"
+    },
+    "focus": {
+      "options": {
+        "solutions": "Développer des solutions à des problèmes mondiaux et locaux",
+        "explore": "Explorer des enjeux mondiaux et locaux",
+        "collaboration": "Résolution collaborative de problèmes mondiaux",
+        "implementation": "Trouver des partenaires et des financements pour mettre en œuvre les solutions",
+        "other": "Autre chose"
+      }
+    },
+    "sdg": {
+      "title": "Objectifs de développement durable (ODD)",
+      "selectAll": "Sélectionner tous les ODD"
+    },
+    "forms": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Adresse courriel",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe"
+    },
+    "terms": {
+      "title": "Conditions générales",
+      "body": "NewWorld Game ne divulguera, ne vendra ni ne mettra jamais à disposition la moindre information obtenue durant tes interactions avec la plateforme. Les solutions rédigées dans l'application seront rendues publiques pour que le monde entier puisse les consulter et les utiliser au bénéfice de tous.",
+      "checkboxTerms": {
+        "prefix": "J'accepte les",
+        "link": "conditions générales"
+      },
+      "checkboxEvaluator": {
+        "prefix": "Je comprends qu'en soumettant ce formulaire, je m'inscris à la fois comme",
+        "solverLink": "solutionneur",
+        "middle": "et",
+        "evaluatorLink": "évaluateur",
+        "suffix": "."
+      },
+      "checkboxFun": "Je m'engage à m'amuser."
+    },
+    "toasts": {
+      "success": "Inscription réussie",
+      "failure": "Échec de l'inscription. Réessaie !"
+    },
+    "alerts": {
+      "fillAllFields": "Remplis tous les champs"
+    },
+    "aria": {
+      "close": "Fermer",
+      "check": "Icône de validation",
+      "error": "Icône d'erreur"
+    },
+    "ai": {
+      "name": "Bucky",
+      "stepImageAlt": "Illustration de l'étape",
+      "avatarAlt": "Portrait de Bucky"
+    }
+  },
   "createSolution": {
     "steps": {
       "intro": "Bienvenue dans le NewWorld Game !\nMon rôle, en tant que collègue — votre partenaire de résolution de problèmes — est de nous aider à développer une solution à un problème mondial sur lequel vous choisissez de travailler. Commençons.",
