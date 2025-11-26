@@ -564,6 +564,29 @@
       "avatarAlt": "Portrait de Bucky"
     }
   },
+  "overviewPage": {
+    "metadata": {
+      "authorName": "Medard Gabel",
+      "authorTitle": "Directeur d'EarthGame Inc, concepteur du NewWorld Game",
+      "date": "15 déc. 2023"
+    },
+    "intro": {
+      "heading": "Bienvenue dans le NewWorld Game.",
+      "paragraph1": "Le NewWorld Game est un jeu comme vous n’en avez jamais joué. Oui, il existe des règles (dont celle de penser hors des sentiers battus), des objectifs et des conditions de victoire (souvent fixés par les joueurs), des défis (des problèmes du monde réel), des résultats (un impact concret), de l’interaction et du plaisir. La plateforme NewWorld Game est un espace de travail et de jeu pour découvrir et développer des solutions à des problèmes réels—et faire en sorte qu’elles soient mises en œuvre. Son objectif est d’avoir un impact réel—de changer le monde—en offrant à vous et à des millions d’autres personnes créatives des outils et un espace pour développer des solutions aux problèmes qui comptent pour vous. Elle canalise votre créativité, votre expérience, vos valeurs et votre point de vue vers les enjeux essentiels—et vous fournit des outils, ainsi que la manière de les utiliser, afin d’ouvrir de nouvelles voies d’action et d’impact—vers des conceptions, plans et solutions stratégiques viables, régénératives, inclusives, résilientes et rentables—et qui se concrétisent. Qu’en plus ce soit amusant est un vrai plus.",
+      "paragraph2": "Le nom NewWorld Game rappelle son histoire : il descend directement de l’originel World Game, inspiré par la vision de Buckminster Fuller. Ses concepteurs ont travaillé avec Fuller sur les premières versions du World Game. Il souligne le besoin d’un monde nouveau, qui ne se contente pas de remplacer l’ancien, mais crée de nouvelles options et des solutions ouvrant des perspectives inédites pour chacun. Le NewWorld Game y parvient en vous donnant les moyens d’imaginer de nouvelles voies pour un avenir meilleur qui profite à toute vie sur Terre, et pas seulement à ceux qui disposent de grandes fortunes ou de l’illusion d’être aux commandes.",
+      "figureCaption": "Medard Gabel et des enfants préparent une présentation du World Game sur la plus grande carte du monde."
+    },
+    "sections": {
+      "ideasHeading": "Transformez vos idées en solutions concrètes",
+      "partsHeading": "1. Les parties et le tout",
+      "partsText": "Le NewWorld Game (NWG) s’appuie sur les avancées technologiques du XXIᵉ siècle et les associe au moteur de design science qui servait à jouer au World Game original lors d’ateliers d’un mois et des Global Solutions Labs plus courts, en présentiel ou en ligne. Il combine une interface simple avec l’IA, une méthodologie éprouvée pour créer des solutions concrètes, des ressources statistiques mondiales complètes, des bibliothèques de solutions et une communauté de résolveurs de problèmes. Il mobilise la puissance d’une communauté mondiale diverse, collaborative, interculturelle, pluridisciplinaire et intergénérationnelle, reliée à des organisations qui mettent réellement les solutions en œuvre.",
+      "roleHeading": "2. Votre rôle",
+      "roleText": "Votre rôle—et votre défi—dans le NewWorld Game est de développer des solutions à des problèmes mondiaux et locaux. Vous jouez aussi un rôle essentiel en aidant d’autres équipes à améliorer leurs solutions. Vous serez choisi au hasard pour évaluer les stratégies d’autres équipes. Vous aurez ainsi l’occasion de découvrir leurs travaux et de les renforcer. Vous gagnez (nous gagnons tous) lorsque votre solution franchit l’étape de l’évaluation par les pairs, accède au NewWorld Tournament et rejoint la NewWorld Solutions Library.<br><br>Idéalement, vous travaillez en équipe, mais il est aussi possible de jouer seul. Le fait que vous soyez ici est important—pour le monde, pour vous et pour la communauté dont vous ferez partie en agissant sur ce qui vous tient à cœur. Merci.",
+      "pdfPrefix": "Ce",
+      "pdfLink": "lien",
+      "pdfSuffix": "vous renvoie vers un PDF détaillant ce qu’est le NWG, ce qu’il permet, ses fonctionnalités, son histoire et ses usages possibles pour les organisations et les établissements scolaires."
+    }
+  },
   "createSolution": {
     "steps": {
       "intro": "Bienvenue dans le NewWorld Game !\nMon rôle, en tant que collègue — votre partenaire de résolution de problèmes — est de nous aider à développer une solution à un problème mondial sur lequel vous choisissez de travailler. Commençons.",

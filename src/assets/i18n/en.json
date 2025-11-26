@@ -564,6 +564,29 @@
       "avatarAlt": "Bucky portrait"
     }
   },
+  "overviewPage": {
+    "metadata": {
+      "authorName": "Medard Gabel",
+      "authorTitle": "EarthGame Inc Director, NewWorld Game Designer",
+      "date": "Dec. 15, 2023"
+    },
+    "intro": {
+      "heading": "Welcome to the NewWorld Game.",
+      "paragraph1": "The NewWorld Game is a game like you have never played before. Yes, there are some rules (including think outside the box), goals and winning conditions (most set by the players), challenges (real-world problems), outcomes (impacts in the real world), interaction, and fun. NewWorld Game platform is a work- and play-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented. Its goal is to have real impact—to change the world—by providing you and millions of other like-minded creative individuals with space and tools for developing solutions to the problem and issues about which you care. It is a place that focuses your creativity, experience, values, and perspective on problems and issues that matter—and provides you a set of tools, and how to use them, that lead to new paths of action and impact—to strategic designs, plans, and solutions that are viable, regenerative, inclusive, resilient, and cost-effective—and that get implemented. That it is also fun, helps.",
+      "paragraph2": "The NewWorld Game’s name draws on its history as being a direct descendant and outgrowth of the original World Game that was inspired by and based on the work and vision of Buckminster Fuller. Its developers worked with Fuller on the first iterations of the World Game. It points to the need for a new world, one that not only replaces the old world, but makes new options and solutions that engender new possibilities for everyone. The NewWorld Game does this by empowering you with ways of developing new options for a better future that works for all life on Earth, not just those with large quantities of money and the delusion of thinking they are in control.",
+      "figureCaption": "Medard Gabel and children prepare for World Game Presentation on the world’s largest world map."
+    },
+    "sections": {
+      "ideasHeading": "Turn Your Ideas into Real Solutions",
+      "partsHeading": "1. Parts and Wholes",
+      "partsText": "The NewWorld Game (NWG) takes technological advancements of the 21st century and creatively couples them with the design science engine that was used to play the original World Game “longhand” in the month-long World Game workshops and shorter in-person and online Global Solutions Labs. It couples an easy-to-use interface with AI, an empowered methodology for developing real-world solutions, comprehensive world statistical resources, solution libraries, and a community of problem solvers. It builds and leverages the power of a diverse, collaborative, cross-cultural, multi-disciplinary, and intergenerational global community with linkages to real organizations implementing solutions.",
+      "roleHeading": "2. Your Role",
+      "roleText": "Your role, and challenge, in the NewWorld Game is to develop solutions to global and local problems. You also have a critical role to play in making other teams’ solutions better. You will be chosen, at random, to be an Evaluator of other strategies. Here you will have the opportunity to learn what other teams are doing and help make their work better. You win (we all win) when your solution gets through the Peer Review process and enters the NewWorld Tournament and is added to the NewWorld Solutions Library.<br><br>Ideally, you develop your solution as part of a team, but it is possible to play the NewWorld Game alone. The fact that you are here is important. On several levels—for the world, for you, and for the community you will be a part of as you work together on what you care about. Thank you.",
+      "pdfPrefix": "This",
+      "pdfLink": "link",
+      "pdfSuffix": "will take you to a PDF that provides more details on what NWG is, can do, special features, history, and its possible uses by organizations and schools."
+    }
+  },
   "createSolution": {
     "steps": {
       "intro": "Welcome to the NewWorld Game!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global problem on which you choose to work. Let’s start.",
