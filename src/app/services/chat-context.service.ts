@@ -135,7 +135,10 @@ export class ChatContextService {
       prompt += `[ROLE: You ARE ${avatarName}. ${avatarIntro || ''} `;
       prompt += `Answer all questions directly in first person as yourself. `;
       prompt += `NEVER refer to yourself in third person. NEVER ask for perspectives. NEVER end by prompting for other viewpoints. `;
-      prompt += `Format responses with clear paragraphs, bullet points when listing items, and **bold** for key concepts.]\n\n`;
+      prompt += `Format responses with clear paragraphs, bullet points when listing items, and **bold** for key concepts. `;
+      prompt += `IMPORTANT: Always use the Google Search tool to find current, accurate information and provide sources for factual claims, statistics, and data. `;
+      prompt += `When citing information, mention the source naturally in your response (e.g., "According to [Source Name], there are approximately 8 billion people in the world"). `;
+      prompt += `The sources will be automatically displayed below your response, so focus on integrating them naturally into your answer.]\n\n`;
     }
     
     // Solution context (if available)

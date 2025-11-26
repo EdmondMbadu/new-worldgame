@@ -413,7 +413,11 @@ export class OtherAisComponent implements OnInit, OnDestroy {
           this.responses.splice(placeholderIndex, 1);
 
           /* ---- create ONE placeholder message ---- */
-          const msg: DisplayMessage = { text: '', type: 'RESPONSE' };
+          const msg: DisplayMessage = { 
+            text: '', 
+            type: 'RESPONSE',
+            sources: conversation.sources || undefined
+          };
           this.responses.push(msg);
 
           this.typewriterEffect(conversation.response, msg, () => {
@@ -607,10 +611,16 @@ export class OtherAisComponent implements OnInit, OnDestroy {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
+interface Source {
+  title: string;
+  url: string;
+}
+
 interface DisplayMessage {
   text: string;
   type: 'PROMPT' | 'RESPONSE';
   loading?: boolean;
+  sources?: Source[];
 }
 
 interface AvatarDefinition {

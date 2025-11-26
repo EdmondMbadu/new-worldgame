@@ -1122,7 +1122,37 @@ export const onChatPrompt = functions
         }
       }
 
-      // ────────── 4. store image (if any) ───────────────────────
+      // ────────── 4. extract sources from grounding metadata ───────────────────────
+      const sources: Array<{ title: string; url: string }> = [];
+      const candidate = finalResponse.candidates?.[0];
+      if (candidate?.groundingMetadata?.groundingChunks) {
+        const groundingChunks = candidate.groundingMetadata.groundingChunks;
+        const seenUrls = new Set<string>();
+        
+        for (const chunk of groundingChunks) {
+          if (chunk.web && chunk.web.uri) {
+            const url = chunk.web.uri;
+            if (!seenUrls.has(url)) {
+              seenUrls.add(url);
+              try {
+                const hostname = new URL(url).hostname;
+                sources.push({
+                  title: chunk.web.title || hostname,
+                  url: url,
+                });
+              } catch (e) {
+                // If URL parsing fails, still add it with the URI as title
+                sources.push({
+                  title: chunk.web.title || url,
+                  url: url,
+                });
+              }
+            }
+          }
+        }
+      }
+
+      // ────────── 5. store image (if any) ───────────────────────
       let imageUrl: string | undefined;
       if (imgB64) {
         const filePath = `generated/${randomUUID()}.png`;
@@ -1134,11 +1164,12 @@ export const onChatPrompt = functions
         imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
       }
 
-      // ────────── 5. final update ───────────────────────────────
+      // ────────── 6. final update ───────────────────────────────
       await snap.ref.update({
         status: { state: 'COMPLETED' },
         response: answer || null,
         imageUrl: imageUrl || null,
+        sources: sources.length > 0 ? sources : null,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     } catch (err) {

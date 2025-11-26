@@ -12,6 +12,11 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatContextService, PlaygroundContext, PlaygroundQuestion } from 'src/app/services/chat-context.service';
 
+export interface Source {
+  title: string;
+  url: string;
+}
+
 export interface DisplayMessage {
   text?: string;
   src?: string;
@@ -19,6 +24,7 @@ export interface DisplayMessage {
   type: 'PROMPT' | 'RESPONSE' | 'IMAGE' | 'ATTACHMENT';
   streaming?: boolean;
   insertable?: boolean;  // Can this response be inserted into a playground box?
+  sources?: Source[];  // Sources/citations for the response
 }
 
 export interface AiAvatar {
@@ -649,6 +655,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
                 text: '',
                 streaming: true,
                 insertable: this.hasContext,  // Mark as insertable if in playground context
+                sources: snap.sources || undefined,  // Add sources if available
               };
               this.responses.push(slot);
               this.cdRef.detectChanges();
@@ -656,6 +663,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
               this.typewriterEffect(snap.response, slot, () => {
                 slot.streaming = false;
+                // Ensure sources are set after streaming completes
+                if (snap.sources && !slot.sources) {
+                  slot.sources = snap.sources;
+                }
                 this.cdRef.detectChanges();
                 setTimeout(() => this.scrollToBottom('smooth'), 0);
               });
