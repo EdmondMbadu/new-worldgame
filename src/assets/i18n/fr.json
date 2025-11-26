@@ -620,5 +620,24 @@
       "health": "Santé",
       "forestry": "Foresterie"
     }
+  },
+  "playgroundSteps": {
+    "finalReview": {
+      "title": "Révision finale et mise à jour de l'ordre des éléments",
+      "getAiFeedback": "Obtenir un retour IA",
+      "getAnotherAiFeedback": "Obtenir un autre retour IA",
+      "reviewing": "Analyse en cours…",
+      "evaluationBy": "Évaluation par {{name}}",
+      "aiFeedback": "Retour IA",
+      "scores": "Scores",
+      "improvements": "Améliorations",
+      "readinessLevel": "Niveau de préparation",
+      "downloadSolution": "Télécharger la solution et le retour IA"
+    },
+    "strategyReview": {
+      "referenceSteps": "Référence (Étapes 1–4)",
+      "currentDraft": "Brouillon actuel",
+      "refreshFromSteps": "Actualiser depuis les étapes 1–4"
+    }
   }
 }

@@ -136,7 +136,7 @@
             <time
               *ngIf="AllQuestions[i].length == 1"
               class="block mb-2 text-xl font-normal leading-none text-gray-500 dark:text-gray-400">
-              Final Review and update order of things
+              {{ 'playgroundSteps.finalReview.title' | translate }}
             </time>
             <div *ngIf="isFinalStep(i)" class="w-full mt-4 space-y-3">
               <!-- AI Evaluator Selector -->
@@ -202,10 +202,10 @@
                     <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Get Another AI Feedback
+                    {{ 'playgroundSteps.finalReview.getAnotherAiFeedback' | translate }}
                   </ng-container>
                   <ng-template #firstFeedback>
-                    Get AI Feedback
+                    {{ 'playgroundSteps.finalReview.getAiFeedback' | translate }}
                   </ng-template>
                 </ng-container>
                 <ng-template #feedbackLoading>
@@ -228,7 +228,7 @@
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"></path>
                     </svg>
-                    <span>Reviewing…</span>
+                    <span>{{ 'playgroundSteps.finalReview.reviewing' | translate }}</span>
                   </span>
                 </ng-template>
               </button>
@@ -251,15 +251,15 @@
                     [alt]="selectedAiEvaluator.name"
                     class="h-10 w-10 rounded-full object-cover ring-2 ring-emerald-200 dark:ring-teal-500/40" />
                   <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Evaluation by {{ selectedAiEvaluator.name }}</p>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">AI Feedback</h3>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">{{ 'playgroundSteps.finalReview.evaluationBy' | translate: { name: selectedAiEvaluator.name } }}</p>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ 'playgroundSteps.finalReview.aiFeedback' | translate }}</h3>
                   </div>
                 </div>
 
                 <ng-container *ngIf="hasStructuredFeedback; else fallbackFeedback">
                   <div *ngIf="aiFeedbackParsed.scores.length" class="mb-5 space-y-2">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                      Scores
+                      {{ 'playgroundSteps.finalReview.scores' | translate }}
                     </p>
                     <div class="grid gap-3 sm:grid-cols-2">
                       <div
@@ -285,7 +285,7 @@
 
                   <div *ngIf="aiFeedbackParsed.improvements.length" class="mb-5 space-y-3">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                      Improvements
+                      {{ 'playgroundSteps.finalReview.improvements' | translate }}
                     </p>
                     <ul class="space-y-2">
                       <li
@@ -304,7 +304,7 @@
 
                   <div *ngIf="aiFeedbackParsed.readinessLevel" class="rounded-2xl border border-slate-200 bg-gradient-to-r from-emerald-50 to-cyan-50 p-4 dark:border-teal-500/30 dark:from-slate-800 dark:to-slate-900">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                      Readiness Level
+                      {{ 'playgroundSteps.finalReview.readinessLevel' | translate }}
                     </p>
                     <p class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
                       {{ aiFeedbackParsed.readinessLevel }}
@@ -338,7 +338,7 @@
                       viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Download Solution & AI Feedback
+                    {{ 'playgroundSteps.finalReview.downloadSolution' | translate }}
                   </button>
                 </div>
               </div>

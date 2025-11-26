@@ -620,5 +620,24 @@
       "health": "Health",
       "forestry": "Forestry"
     }
+  },
+  "playgroundSteps": {
+    "finalReview": {
+      "title": "Final Review and update order of things",
+      "getAiFeedback": "Get AI Feedback",
+      "getAnotherAiFeedback": "Get Another AI Feedback",
+      "reviewing": "Reviewing…",
+      "evaluationBy": "Evaluation by {{name}}",
+      "aiFeedback": "AI Feedback",
+      "scores": "Scores",
+      "improvements": "Improvements",
+      "readinessLevel": "Readiness Level",
+      "downloadSolution": "Download Solution & AI Feedback"
+    },
+    "strategyReview": {
+      "referenceSteps": "Reference (Steps 1–4)",
+      "currentDraft": "Current Draft",
+      "refreshFromSteps": "Refresh from Steps 1–4"
+    }
   }
 }

@@ -74,6 +74,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   pendingInvitesCount = 0;
   languageOptions: { code: string; labelKey: string }[] = [];
   currentLanguage = 'en';
+  showLanguageDropdown = false;
   readonly canShowLanguageSwitcher = environment.enableLanguageSwitcher;
   private readonly destroy$ = new Subject<void>();
 
