@@ -74,26 +74,24 @@
         <span
           class="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-sky-200"
         >
-          NewWorld Game for Colleges
+          {{ 'landingCollege.hero.title' | translate }}
         </span>
       </h1>
       <p class="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-10">
-        Add a Innovation Lab to your classes where design science, AI
-        colleagues, and motivated students tackle global and local issues that
-        matter.
+        {{ 'landingCollege.hero.subtitle' | translate }}
       </p>
       <div class="flex flex-col sm:flex-row justify-center gap-4">
         <a
           routerLink="/scheduler"
           class="inline-flex items-center justify-center px-10 py-4 bg-yellow-300 text-slate-900 font-bold rounded-full shadow-lg hover:bg-yellow-200 transition"
         >
-          Schedule a Demo
+          {{ 'landingCollege.cta.scheduleDemo' | translate }}
         </a>
         <a
           routerLink="/contact-us"
           class="inline-flex items-center justify-center px-10 py-4 border border-white/40 text-white font-semibold rounded-full hover:bg-white/10 transition"
         >
-          Contact Us
+          {{ 'landingCollege.cta.contact' | translate }}
         </a>
       </div>
     </div>
@@ -106,12 +104,12 @@
         <p
           class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300"
         >
-          Step-by-step pathway
+          {{ 'landingCollege.steps.badge' | translate }}
         </p>
         <h2
           class="mt-4 text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
         >
-          First three moves to launch your teams
+          {{ 'landingCollege.steps.title' | translate }}
         </h2>
       </div>
       <div class="grid gap-10 md:grid-cols-3">
@@ -121,25 +119,23 @@
         >
           <img
             src="assets/img/step-1.png"
-            alt="Step 1 illustration"
+            [attr.alt]="'landingCollege.steps.cards.one.imageAlt' | translate"
             class="w-full h-48 object-cover"
           />
           <div class="p-6 space-y-4">
             <div
               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
             >
-              Step 1
+              {{ 'landingCollege.steps.cards.one.label' | translate }}
             </div>
             <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-              What is the problem?
+              {{ 'landingCollege.steps.cards.one.title' | translate }}
             </h3>
             <p class="text-slate-600 dark:text-slate-300">
-              What is the problem we want to work on/why is it important/ How
-              big is it/ Where it it/How do we measure it/What are the
-              underlying causes
+              {{ 'landingCollege.steps.cards.one.description' | translate }}
             </p>
             <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Ask AI Colleague Bucky for help, answers, feedback, advice, causes
+              {{ 'landingCollege.steps.cards.one.aiPrompt' | translate }}
             </p>
           </div>
         </article>
@@ -150,25 +146,23 @@
         >
           <img
             src="assets/img/step-2.png"
-            alt="Step 2 illustration"
+            [attr.alt]="'landingCollege.steps.cards.two.imageAlt' | translate"
             class="w-full h-48 object-cover"
           />
           <div class="p-6 space-y-4">
             <div
               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
             >
-              Step 2
+              {{ 'landingCollege.steps.cards.two.label' | translate }}
             </div>
             <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-              Define the future you want
+              {{ 'landingCollege.steps.cards.two.title' | translate }}
             </h3>
             <p class="text-slate-600 dark:text-slate-300">
-              What’s our goal/What do we want our world to be/How do we envision
-              the future/How do we measure it
+              {{ 'landingCollege.steps.cards.two.description' | translate }}
             </p>
             <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Ask AI Colleague Bucky for help, feedback, answers, advice, what’s
-              missing.
+              {{ 'landingCollege.steps.cards.two.aiPrompt' | translate }}
             </p>
           </div>
         </article>
@@ -179,29 +173,26 @@
         >
           <img
             src="assets/img/step-3.png"
-            alt="Step 3 illustration"
+            [attr.alt]="'landingCollege.steps.cards.three.imageAlt' | translate"
             class="w-full h-48 object-cover"
           />
           <div class="p-6 space-y-4">
             <div
               class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
             >
-              Step 3
+              {{ 'landingCollege.steps.cards.three.label' | translate }}
             </div>
             <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-              Map the way forward
+              {{ 'landingCollege.steps.cards.three.title' | translate }}
             </h3>
             <p class="text-slate-600 dark:text-slate-300">
-              How do we reach our goal/ solve the problem/what do we
-              do/where/how/when?
+              {{ 'landingCollege.steps.cards.three.description' | translate }}
             </p>
             <p class="text-slate-600 dark:text-slate-300">
-              What technology, policy, programs, partners, funding are needed to
-              test, to scale?
+              {{ 'landingCollege.steps.cards.three.details' | translate }}
             </p>
             <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              Ask AI Colleagues Bucky or Amina, Li, Sofia, Arjun, Elana, Tane or
-              Zane for help, feedback, answers, advice, what’s missing.
+              {{ 'landingCollege.steps.cards.three.aiPrompt' | translate }}
             </p>
           </div>
         </article>
@@ -218,7 +209,7 @@
         <p
           class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300"
         >
-          As simple as . . .
+          {{ 'landingCollege.simple.title' | translate }}
         </p>
         <div class="mt-6 space-y-6">
           <div class="flex gap-4">
@@ -227,8 +218,7 @@
               >1</span
             >
             <p class="text-slate-700 dark:text-slate-300">
-              You: Explore, test and use the NewWorld Game— for free. See if it
-              is appropriate for your needs.
+              {{ 'landingCollege.simple.items.first' | translate }}
             </p>
           </div>
           <div class="flex gap-4">
@@ -237,7 +227,7 @@
               >2</span
             >
             <p class="text-slate-700 dark:text-slate-300">
-              SIGN UP YOUR CLASS— FOR FREE. See how easy it is.
+              {{ 'landingCollege.simple.items.second' | translate }}
             </p>
           </div>
           <div class="flex gap-4">
@@ -246,8 +236,7 @@
               >3</span
             >
             <p class="text-slate-700 dark:text-slate-300">
-              Choose a challenge, form teams, begin at Step 1 end at Step 5—and
-              transform learning into impact. Yes, for free. Have fun.
+              {{ 'landingCollege.simple.items.third' | translate }}
             </p>
           </div>
         </div>
@@ -256,13 +245,13 @@
             routerLink="/scheduler"
             class="px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-500"
           >
-            Schedule a Demo
+            {{ 'landingCollege.cta.scheduleDemo' | translate }}
           </a>
           <a
             routerLink="/contact-us"
             class="px-6 py-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60"
           >
-            Contact Us
+            {{ 'landingCollege.cta.contact' | translate }}
           </a>
         </div>
       </div>
@@ -270,34 +259,20 @@
         <p
           class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300"
         >
-          NewWorld Game is . . .
+          {{ 'landingCollege.intro.title' | translate }}
         </p>
         <div class="mt-6 space-y-6 text-slate-700 dark:text-slate-200">
+          <p>{{ 'landingCollege.intro.paragraph1' | translate }}</p>
+          <p>{{ 'landingCollege.intro.paragraph2' | translate }}</p>
+          <p>{{ 'landingCollege.intro.paragraph3' | translate }}</p>
           <p>
-            The NewWorld Game is a platform, an AI-empowered work- and
-            learning-space, for discovery and developing solutions to real-world
-            problems—and getting those solutions implemented.
-          </p>
-          <p>
-            Its goal is to have real impact—to change the world—by providing you
-            and your students with space and tools for developing solutions to
-            the problems and issues you care about.
-          </p>
-          <p>
-            The NewWorld Game is where students learn the subject matter you
-            teach while developing solutions to global and/or local real-world
-            problems and enter them in a NewWorld Tournament where they compete
-            for recognition and real-world impact.
-          </p>
-          <p>
-            This is made possible by the creative combination of AI and human
-            intelligence.
+            {{ 'landingCollege.intro.paragraph4' | translate }}
             <a
               href="https://newworld-game.org"
               target="_blank"
               rel="noopener"
               class="text-indigo-600 dark:text-indigo-300 underline underline-offset-4"
-              >Learn more.</a
+              >{{ 'landingCollege.intro.learnMore' | translate }}</a
             >
           </p>
         </div>
@@ -312,11 +287,10 @@
         <h2
           class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
         >
-          What’s Included
+          {{ 'landingCollege.included.title' | translate }}
         </h2>
         <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-          Everything your students need to turn challenges and their bold ideas
-          into opportunities with real-world impact.
+          {{ 'landingCollege.included.subtitle' | translate }}
         </p>
       </div>
       <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -324,67 +298,60 @@
           class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Full NWG Feature Access
+            {{ 'landingCollege.included.cards.fullAccess.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Access to all NWG features, including AIs, Team video channel, peer
-            review, Global Data and State of the World Reports, Solutions
-            Libraries, etc.
+            {{ 'landingCollege.included.cards.fullAccess.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Private Dashboard for Class
+            {{ 'landingCollege.included.cards.dashboard.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Keep every class organized with a dedicated workspace for teachers
-            and facilitators.
+            {{ 'landingCollege.included.cards.dashboard.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            AI Colleagues + Top Platforms
+            {{ 'landingCollege.included.cards.ai.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Access to a dozen custom-trained AI avatar “Colleagues” (see below)
-            for research, solution development and storytelling.
+            {{ 'landingCollege.included.cards.ai.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Team Collaboration Tools
+            {{ 'landingCollege.included.cards.collaboration.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Messaging boards, shared files, and peer feedback flows built
-            directly into each project.
+            {{ 'landingCollege.included.cards.collaboration.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Access to the NewWorld Tournament
+            {{ 'landingCollege.included.cards.tournament.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Move from classroom pilots to national and global recognition with
-            tournament entries.
+            {{ 'landingCollege.included.cards.tournament.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Implementation Support
+            {{ 'landingCollege.included.cards.support.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Guidance from design process and AI colleagues to push projects
-            toward real-world adoption.
+            {{ 'landingCollege.included.cards.support.description' | translate }}
           </p>
         </div>
       </div>
@@ -396,7 +363,7 @@
     <div class="container mx-auto px-6">
       <div class="text-center max-w-2xl mx-auto mb-12">
         <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
-          Other Benefits
+          {{ 'landingCollege.benefits.title' | translate }}
         </h2>
       </div>
       <div class="grid gap-8 md:grid-cols-3">
@@ -404,33 +371,30 @@
           class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Interdisciplinary Learning
+            {{ 'landingCollege.benefits.cards.interdisciplinary.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Blends science, economics, ethics and tech—building systems literacy
-            and emotional investment through real-world challenges.
+            {{ 'landingCollege.benefits.cards.interdisciplinary.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Data & Solutions Access
+            {{ 'landingCollege.benefits.cards.data.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Tap into 100+ global data sets, 400+ state-of-the-world reports, and
-            curated solution libraries for real-time insights and references.
+            {{ 'landingCollege.benefits.cards.data.description' | translate }}
           </p>
         </div>
         <div
           class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            Student Impact
+            {{ 'landingCollege.benefits.cards.impact.title' | translate }}
           </h3>
           <p class="text-slate-600 dark:text-slate-300">
-            Fosters informed, engaged global citizens ready to take meaningful
-            action with confidence and clarity.
+            {{ 'landingCollege.benefits.cards.impact.description' | translate }}
           </p>
         </div>
       </div>
@@ -444,11 +408,10 @@
         <h2
           class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
         >
-          Hear It from Our AI Colleagues
+          {{ 'landingCollege.ai.title' | translate }}
         </h2>
         <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-          Powered by the latest AI models and trained to support educators and
-          students through each phase of the NewWorld Game.
+          {{ 'landingCollege.ai.subtitle' | translate }}
         </p>
       </div>
       <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -480,22 +443,20 @@
           class="p-6 rounded-3xl bg-indigo-600/10 border border-indigo-200 dark:border-indigo-800"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            For Teachers
+            {{ 'landingCollege.ai.teacher' | translate }}
           </h3>
           <p class="text-slate-700 dark:text-slate-300">
-            Use AI partners for research prompts, lesson planning, formative
-            feedback, and quick exemplars tailored to each discipline.
+            {{ 'landingCollege.ai.teacherText' | translate }}
           </p>
         </div>
         <div
           class="p-6 rounded-3xl bg-emerald-600/10 border border-emerald-200 dark:border-emerald-800"
         >
           <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            For Students
+            {{ 'landingCollege.ai.student' | translate }}
           </h3>
           <p class="text-slate-700 dark:text-slate-300">
-            Teams collaborate with their favorite AI colleague to brainstorm,
-            test, and tell the story of their solution with confidence.
+            {{ 'landingCollege.ai.studentText' | translate }}
           </p>
         </div>
       </div>
@@ -504,7 +465,7 @@
           routerLink="/other-ais"
           class="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
         >
-          Explore All AI Colleagues
+          {{ 'landingCollege.cta.exploreAi' | translate }}
         </a>
       </div>
     </div>
@@ -520,26 +481,31 @@
           <p
             class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300 mb-4"
           >
-            COST FOR YOUR CLASS: FREE
+            {{ 'landingCollege.pricing.classPlan.badge' | translate }}
           </p>
           <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            $0
+            {{ 'landingCollege.pricing.classPlan.price' | translate }}
           </h3>
-          <p class="text-slate-600 dark:text-slate-300">To June 2026</p>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{ 'landingCollege.pricing.classPlan.note' | translate }}
+          </p>
           <ul class="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
             <li>
-              30 Students and/or up to Five Teams Full Access (If you have more
-              students, contact us)
+              {{ 'landingCollege.pricing.classPlan.features.item1' | translate }}
             </li>
-            <li>Unlimited use</li>
-            <li>Unlimited NewWorld Tournament Entries</li>
+            <li>
+              {{ 'landingCollege.pricing.classPlan.features.item2' | translate }}
+            </li>
+            <li>
+              {{ 'landingCollege.pricing.classPlan.features.item3' | translate }}
+            </li>
           </ul>
           <div class="mt-6">
             <a
               routerLink="/welcome"
               class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
             >
-              Start Free
+              {{ 'landingCollege.cta.startFree' | translate }}
             </a>
           </div>
         </div>
@@ -549,30 +515,38 @@
           <p
             class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4"
           >
-            COST FOR YOUR SCHOOL
+            {{ 'landingCollege.pricing.schoolPlan.badge' | translate }}
           </p>
           <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            Contact us
+            {{ 'landingCollege.pricing.schoolPlan.title' | translate }}
           </h3>
-          <p class="text-slate-600 dark:text-slate-300">for</p>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{ 'landingCollege.pricing.schoolPlan.subtitle' | translate }}
+          </p>
           <ul class="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
-            <li>Unlimited use</li>
-            <li>Unlimited NewWorld Tournament Entries</li>
-            <li>Customization options</li>
+            <li>
+              {{ 'landingCollege.pricing.schoolPlan.features.item1' | translate }}
+            </li>
+            <li>
+              {{ 'landingCollege.pricing.schoolPlan.features.item2' | translate }}
+            </li>
+            <li>
+              {{ 'landingCollege.pricing.schoolPlan.features.item3' | translate }}
+            </li>
           </ul>
           <div class="mt-6">
             <a
               routerLink="/contact-us"
               class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
             >
-              Contact Us
+              {{ 'landingCollege.cta.contact' | translate }}
             </a>
           </div>
         </div>
       </div>
       <div class="text-center mt-8">
         <p class="text-lg text-slate-600 dark:text-slate-300">
-          Start free, scale when you are ready.
+          {{ 'landingCollege.pricing.note' | translate }}
         </p>
       </div>
     </div>
@@ -582,11 +556,10 @@
   <section class="py-16 bg-white dark:bg-slate-900">
     <div class="container mx-auto px-6 text-center space-y-6">
       <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">
-        Ready to explore?
+        {{ 'landingCollege.finalCta.title' | translate }}
       </h2>
       <p class="text-lg text-slate-600 dark:text-slate-300">
-        Download a Guide for Exploring NWG, sign up your class, or reach out so
-        we can walk through the platform together.
+        {{ 'landingCollege.finalCta.subtitle' | translate }}
       </p>
       <div class="flex flex-wrap justify-center gap-4">
         <a
@@ -595,19 +568,19 @@
           rel="noopener noreferrer"
           class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-slate-900 text-white font-semibold hover:bg-slate-800"
         >
-          Download a Guide for Exploring NWG
+          {{ 'landingCollege.cta.downloadGuide' | translate }}
         </a>
         <a
           routerLink="/welcome"
           class="px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-500"
         >
-          Sign Up
+          {{ 'landingCollege.cta.signUp' | translate }}
         </a>
         <a
           routerLink="/contact-us"
           class="px-6 py-3 rounded-full border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60"
         >
-          Contact Us
+          {{ 'landingCollege.cta.contact' | translate }}
         </a>
       </div>
     </div>

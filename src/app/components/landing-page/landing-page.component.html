@@ -18,15 +18,17 @@
             <span #typedWord class="typed-word text-teal-700"></span>
           </span>
           <span class="block mt-2">
-            solutions to world problems with people around the world.
+            {{ 'landingHome.hero.tagline' | translate }}
           </span>
         </h1>
 
         <p
           class="max-w-md text-xl italic text-center lg:text-left text-gray-400"
         >
-          "We are called to be the architects of the future, not its victims."
-          <span class="px-2 not-italic"> - Buckminster Fuller</span>
+          &ldquo;{{ 'landingHome.hero.quote' | translate }}&rdquo;
+          <span class="px-2 not-italic">
+            {{ 'landingHome.hero.quoteAuthor' | translate }}
+          </span>
         </p>
 
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
@@ -35,7 +37,7 @@
             routerLink="/welcome"
             class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 transition"
           >
-            Get Started
+            {{ 'landingHome.hero.cta' | translate }}
             <svg
               class="h-5 w-5 -rotate-45"
               viewBox="0 0 24 24"
@@ -78,12 +80,12 @@
           <img
             class="rotate mx-auto rounded-full ring-1 ring-black/5 dark:ring-white/10"
             src="../../../assets/img/earth-triangle.png"
-            alt="Earth illustration"
+            [attr.alt]="'landingHome.hero.imageAlt' | translate"
           />
         </div>
 
         <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
-          A living world, shaped by your ideas.
+          {{ 'landingHome.hero.imageCaption' | translate }}
         </p>
       </div>
     </div>
@@ -136,8 +138,7 @@
             <p
               class="text-2xl md:text-4xl leading-tight font-semibold italic text-slate-900 dark:text-white"
             >
-              “We can’t build a future for our grandchildren with a system built
-              for our grandparents.”
+              &ldquo;{{ 'landingHome.quote.text' | translate }}&rdquo;
             </p>
           </blockquote>
 
@@ -155,10 +156,10 @@
               >
                 <cite
                   class="px-0 sm:pe-3 font-semibold text-slate-900 dark:text-white"
-                  >António Guterres</cite
+                  >{{ 'landingHome.quote.name' | translate }}</cite
                 >
                 <cite class="sm:ps-3 text-slate-600 dark:text-slate-400"
-                  >United Nations Secretary-General</cite
+                  >{{ 'landingHome.quote.title' | translate }}</cite
                 >
               </div>
             </div>
@@ -167,11 +168,12 @@
             <p
               class="mt-2 text-base md:text-lg text-slate-600 dark:text-slate-300"
             >
-              We need a
+              {{ 'landingHome.quote.taglinePrefix' | translate }}
               <span
                 class="font-semibold bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
                 >NewWorld</span
-              >. A
+              >.
+              {{ 'landingHome.quote.taglineSuffix' | translate }}
               <span
                 class="font-semibold bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
                 >NewWorld Game</span
@@ -205,7 +207,7 @@
           <span
             class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
           >
-            Watch • 2 min intro
+            {{ 'landingHome.introVideo.badge' | translate }}
           </span>
 
           <h2
@@ -214,15 +216,14 @@
             <span
               class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
             >
-              Intro Video
+              {{ 'landingHome.introVideo.title' | translate }}
             </span>
           </h2>
 
           <p
             class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
           >
-            Watch a short introduction to how NewWorld Game turns bold ideas
-            into real-world impact.
+            {{ 'landingHome.introVideo.description' | translate }}
           </p>
 
           <!-- Optional secondary action -->
@@ -233,7 +234,7 @@
               rel="noopener"
               class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition"
             >
-              Watch on YouTube
+              {{ 'landingHome.introVideo.cta' | translate }}
               <svg
                 class="h-4 w-4"
                 viewBox="0 0 24 24"
@@ -286,7 +287,7 @@
             <span
               class="pointer-events-none absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80 ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold text-teal-700 dark:text-teal-300"
             >
-              Intro Video
+              {{ 'landingHome.introVideo.cornerLabel' | translate }}
             </span>
           </div>
 
@@ -294,7 +295,7 @@
           <p
             class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
           >
-            Short, visual overview of NewWorld Game.
+            {{ 'landingHome.introVideo.caption' | translate }}
           </p>
         </div>
       </div>
@@ -329,14 +330,14 @@
           <figure class="relative mx-auto w-full max-w-md">
             <img
               src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fchallenge-landing.webp?alt=media&token=69a081df-466d-4837-b6d7-d274f61a3462"
-              alt="Participants collaborating to tackle real-world challenges"
+              [attr.alt]="'landingHome.challenge.imageAlt' | translate"
               class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl transition-transform duration-300 hover:-translate-y-1"
             />
             <!-- corner tag -->
             <span
               class="absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80 ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold text-teal-700 dark:text-teal-300"
             >
-              The Challenge
+              {{ 'landingHome.challenge.imageTag' | translate }}
             </span>
           </figure>
         </div>
@@ -346,7 +347,7 @@
           <span
             class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
           >
-            Bold ideas • Real impact
+            {{ 'landingHome.challenge.badge' | translate }}
           </span>
 
           <h2
@@ -355,40 +356,37 @@
             <span
               class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
             >
-              NewWorld Game: Shape the Future
+              {{ 'landingHome.challenge.title' | translate }}
             </span>
           </h2>
 
           <p
             class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
           >
-            NewWorld Game is a challenge like you’ve never seen—powered by
-            boldness, creativity, collaboration, and a sense of fun. It’s where
-            your vision builds the future you want. You’re not the victim—you’re
-            the challenger.
+            {{ 'landingHome.challenge.description' | translate }}
           </p>
 
           <!-- key traits as compact chips -->
           <div class="flex flex-wrap gap-2">
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >Boldness</span
+              >{{ 'landingHome.challenge.traits.boldness' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >Creativity</span
+              >{{ 'landingHome.challenge.traits.creativity' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >Collaboration</span
+              >{{ 'landingHome.challenge.traits.collaboration' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >Persistence</span
+              >{{ 'landingHome.challenge.traits.persistence' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >Playfulness</span
+              >{{ 'landingHome.challenge.traits.playfulness' | translate }}</span
             >
           </div>
 
@@ -402,19 +400,15 @@
             ></div>
             <p class="relative text-slate-700 dark:text-slate-200">
               <span class="font-semibold"
-                >It’s not a fantasy game—it's real.</span
+                >{{ 'landingHome.challenge.calloutTitle' | translate }}</span
               >
-              You don’t need luck to win. You need a clear idea of the world you
-              want and the courage to make it real. NewWorld Game will show you
-              how—and you’ll show the world what you can do.
+              {{ 'landingHome.challenge.calloutText' | translate }}
             </p>
           </div>
 
           <!-- supportive line -->
           <p class="max-w-xl text-slate-600 dark:text-slate-300">
-            Compete with the so-called “leaders” to solve the problems
-            <em>you</em> care about—political, social, economic, environmental.
-            The rewards? For you and for the world.
+            {{ 'landingHome.challenge.support' | translate }}
           </p>
 
           <!-- CTAs -->
@@ -423,7 +417,7 @@
               routerLink="/welcome"
               class="group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
             >
-              Join the Challenge
+              {{ 'landingHome.challenge.primaryCta' | translate }}
               <svg
                 class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
                 viewBox="0 0 24 24"
@@ -443,7 +437,7 @@
               routerLink="/overview"
               class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition"
             >
-              How it works
+              {{ 'landingHome.challenge.secondaryCta' | translate }}
             </a>
           </div>
         </div>
@@ -473,7 +467,7 @@
           <span
             class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
           >
-            UN SDGs • Global Impact
+            {{ 'landingHome.sdgs.badge' | translate }}
           </span>
 
           <h2
@@ -482,40 +476,37 @@
             <span
               class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
             >
-              SDGs you can achieve
+              {{ 'landingHome.sdgs.title' | translate }}
             </span>
           </h2>
 
           <p
             class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
           >
-            The UN’s Sustainable Development Goals (SDGs) aim to transform our
-            world—ending poverty and inequality, protecting the planet, and
-            ensuring health, justice, and prosperity for all. The NewWorld Game
-            helps you design concrete, actionable ways to advance them.
+            {{ 'landingHome.sdgs.description' | translate }}
           </p>
 
           <!-- tasteful SDG badges (optional; remove if not needed) -->
           <div class="flex flex-wrap gap-2 pt-2">
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >1 • No Poverty</span
+              >{{ 'landingHome.sdgs.badges.noPoverty' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >3 • Good Health</span
+              >{{ 'landingHome.sdgs.badges.goodHealth' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >4 • Quality Education</span
+              >{{ 'landingHome.sdgs.badges.education' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >7 • Clean Energy</span
+              >{{ 'landingHome.sdgs.badges.energy' | translate }}</span
             >
             <span
               class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >13 • Climate Action</span
+              >{{ 'landingHome.sdgs.badges.climate' | translate }}</span
             >
           </div>
 
@@ -526,7 +517,7 @@
               href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
               class="group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm md:text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
             >
-              Support NewWorld Game
+              {{ 'landingHome.sdgs.cta' | translate }}
               <svg
                 class="h-4 w-4 -rotate-45 transition-transform group-hover:translate-x-0.5"
                 viewBox="0 0 24 24"
@@ -555,13 +546,13 @@
           <figure class="relative mx-auto w-full max-w-md">
             <img
               src="../../../assets/img/sdgs.png"
-              alt="UN Sustainable Development Goals"
+              [attr.alt]="'landingHome.sdgs.imageAlt' | translate"
               class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-xl transition-transform duration-300 hover:-translate-y-1"
             />
             <figcaption
               class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
             >
-              Built for real-world impact with the UN SDGs in mind.
+              {{ 'landingHome.sdgs.imageCaption' | translate }}
             </figcaption>
           </figure>
         </div>
@@ -579,11 +570,10 @@
         <h2
           class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
         >
-          Meet your AI colleagues
+          {{ 'landingHome.ai.title' | translate }}
         </h2>
         <p class="mt-3 text-lg text-slate-600 dark:text-slate-300">
-          Mentors, strategists, and systems thinkers who coach you through each
-          sprint — from first sketch to field results.
+          {{ 'landingHome.ai.description' | translate }}
         </p>
       </div>
 
@@ -615,7 +605,11 @@
               <p
                 class="text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300"
               >
-                {{ item.group === "colleague" ? "AI Colleague" : "AI Elder" }}
+                {{
+                  item.group === 'colleague'
+                    ? ('landingHome.ai.groupColleague' | translate)
+                    : ('landingHome.ai.groupElder' | translate)
+                }}
               </p>
             </div>
           </div>
@@ -632,7 +626,7 @@
               *ngFor="let n of item.sdgs"
               class="inline-flex items-center rounded-full border border-teal-300/60 bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
             >
-              SDG {{ n }}
+              {{ 'landingHome.ai.sdgLabel' | translate: { number: n } }}
             </span>
           </div>
 
@@ -643,7 +637,7 @@
               (click)="openAvatar(item)"
               class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
             >
-              Ask {{ item.name }}
+              {{ 'landingHome.ai.ask' | translate: { name: item.name } }}
               <svg
                 class="h-4 w-4 -rotate-45"
                 viewBox="0 0 24 24"
@@ -660,7 +654,7 @@
       </div>
 
       <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        Tip: pick one AI colleague to co-pilot your next sprint.
+        {{ 'landingHome.ai.tip' | translate }}
       </p>
     </div>
   </section>
@@ -685,13 +679,12 @@
         <h2
           class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white"
         >
-          What People Are Saying
+          {{ 'landingHome.testimonials.title' | translate }}
         </h2>
         <p
           class="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto"
         >
-          Real feedback from educators, students, and collaborators of the
-          NewWorld Game.
+          {{ 'landingHome.testimonials.subtitle' | translate }}
         </p>
       </header>
 
@@ -714,24 +707,22 @@
           <blockquote
             class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
           >
-            “It’s amazing what you’ve put together in this simulation — the
-            innovation, inclusiveness, and diversity of the AI avatars are truly
-            inspiring.”
+            “{{ 'landingHome.testimonials.cards.one.quote' | translate }}”
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
               class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
             >
-              MB
+              {{ 'landingHome.testimonials.cards.one.initials' | translate }}
             </div>
             <div>
               <p
                 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
               >
-                M.B.
+                {{ 'landingHome.testimonials.cards.one.name' | translate }}
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-400">
-                Drexel University
+                {{ 'landingHome.testimonials.cards.one.role' | translate }}
               </p>
             </div>
           </figcaption>
@@ -754,24 +745,22 @@
           <blockquote
             class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
           >
-            “Your tools and collaborative mindset are a perfect fit for what
-            we’re learning. It's great to see someone so deeply connected to
-            NewWorld Game and eager to support others.”
+            “{{ 'landingHome.testimonials.cards.two.quote' | translate }}”
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
               class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
             >
-              CB
+              {{ 'landingHome.testimonials.cards.two.initials' | translate }}
             </div>
             <div>
               <p
                 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
               >
-                C.B.
+                {{ 'landingHome.testimonials.cards.two.name' | translate }}
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-400">
-                Participant
+                {{ 'landingHome.testimonials.cards.two.role' | translate }}
               </p>
             </div>
           </figcaption>
@@ -794,98 +783,98 @@
           <blockquote
             class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
           >
-            “What a fantastic tool. It's incredibly personable. Have you
-            considered expanding it beyond social and sustainability?”
+            “{{ 'landingHome.testimonials.cards.three.quote' | translate }}”
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
               class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
             >
-              AR
+              {{ 'landingHome.testimonials.cards.three.initials' | translate }}
             </div>
             <div>
               <p
                 class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
               >
-                A.R.
-              </p>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Educator</p>
-            </div>
-          </figcaption>
-        </figure>
-
-        <!-- Item -->
-        <figure
-          class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl"
-        >
-          <svg
-            class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"
-            />
-          </svg>
-          <blockquote
-            class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
-          >
-            “Thanks so much for the help and insight you're bringing. Looking
-            forward to learning more about NewWorld Game this quarter.”
-          </blockquote>
-          <figcaption class="mt-6 flex items-center gap-3">
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
-            >
-              BS
-            </div>
-            <div>
-              <p
-                class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
-              >
-                B.S.
-              </p>
-              <p class="text-sm text-slate-500 dark:text-slate-400">Student</p>
-            </div>
-          </figcaption>
-        </figure>
-
-        <!-- Item -->
-        <figure
-          class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl"
-        >
-          <svg
-            class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"
-            />
-          </svg>
-          <blockquote
-            class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
-          >
-            “I’m excited to dive deeper into this program. I can already tell
-            this tool has great potential — just need a little guidance to
-            unlock more.”
-          </blockquote>
-          <figcaption class="mt-6 flex items-center gap-3">
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
-            >
-              SH
-            </div>
-            <div>
-              <p
-                class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
-              >
-                S.H.
+                {{ 'landingHome.testimonials.cards.three.name' | translate }}
               </p>
               <p class="text-sm text-slate-500 dark:text-slate-400">
-                Participant
+                {{ 'landingHome.testimonials.cards.three.role' | translate }}
+              </p>
+            </div>
+          </figcaption>
+        </figure>
+
+        <!-- Item -->
+        <figure
+          class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl"
+        >
+          <svg
+            class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"
+            />
+          </svg>
+          <blockquote
+            class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
+          >
+            “{{ 'landingHome.testimonials.cards.four.quote' | translate }}”
+          </blockquote>
+          <figcaption class="mt-6 flex items-center gap-3">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+            >
+              {{ 'landingHome.testimonials.cards.four.initials' | translate }}
+            </div>
+            <div>
+              <p
+                class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
+              >
+                {{ 'landingHome.testimonials.cards.four.name' | translate }}
+              </p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">
+                {{ 'landingHome.testimonials.cards.four.role' | translate }}
+              </p>
+            </div>
+          </figcaption>
+        </figure>
+
+        <!-- Item -->
+        <figure
+          class="group relative h-full rounded-3xl bg-white/90 dark:bg-slate-800/90 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl"
+        >
+          <svg
+            class="h-8 w-8 text-indigo-500/70 dark:text-indigo-300/70"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"
+            />
+          </svg>
+          <blockquote
+            class="mt-4 text-lg italic text-slate-800 dark:text-slate-100"
+          >
+            “{{ 'landingHome.testimonials.cards.five.quote' | translate }}”
+          </blockquote>
+          <figcaption class="mt-6 flex items-center gap-3">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+            >
+              {{ 'landingHome.testimonials.cards.five.initials' | translate }}
+            </div>
+            <div>
+              <p
+                class="text-sm font-semibold text-indigo-700 dark:text-indigo-300"
+              >
+                {{ 'landingHome.testimonials.cards.five.name' | translate }}
+              </p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">
+                {{ 'landingHome.testimonials.cards.five.role' | translate }}
               </p>
             </div>
           </figcaption>
@@ -898,7 +887,7 @@
           href="https://www.youtube.com/watch?v=4kB224SeqBo&list=PLLMcZ82vC3JTzvjzWTdXEAHWWaPxH4Hsk&index=1"
           class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium ring-1 ring-indigo-200/70 dark:ring-indigo-900/40 bg-white/80 hover:bg-white dark:bg-slate-800/80 dark:hover:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-sm transition"
         >
-          Watch video testimonials
+          {{ 'landingHome.testimonials.cta' | translate }}
           <svg
             class="h-4 w-4"
             viewBox="0 0 24 24"
@@ -945,13 +934,13 @@
           <figure class="relative mx-auto w-full max-w-md">
             <img
               src="../../../assets/img/design-science.png"
-              alt="Design Science visual"
+              [attr.alt]="'landingHome.design.imageCaption' | translate"
               class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl transition-transform duration-300 hover:-translate-y-1"
             />
             <figcaption
               class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
             >
-              A practical methodology for world-changing solutions.
+              {{ 'landingHome.design.imageCaption' | translate }}
             </figcaption>
           </figure>
         </div>
@@ -961,7 +950,7 @@
           <span
             class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
           >
-            Design Science • Methodology
+            {{ 'landingHome.design.badge' | translate }}
           </span>
 
           <h2
@@ -970,25 +959,22 @@
             <span
               class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
             >
-              Design Science
+              {{ 'landingHome.design.title' | translate }}
             </span>
           </h2>
 
           <p
             class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
           >
-            Design Science is the methodology used by NewWorld Game for
-            developing life-preserving and enhancing solutions to society's
-            problems. This methodology is inspired by the work of Buckminster
-            Fuller and others through the World Game and Global Solutions Lab—on
-            which the NewWorld Game is based. For details see
+            {{ 'landingHome.design.description' | translate }}
             <a
               class="text-teal-600 dark:text-teal-300 underline decoration-teal-300/60 hover:decoration-teal-500"
               target="_blank"
               href="https://newworld-game.org/primer"
             >
-              Tools For Changing the World—A Design Science Primer </a
-            >.
+              Tools For Changing the World—A Design Science Primer
+            </a>
+            .
           </p>
 
           <!-- CTA -->
@@ -998,7 +984,7 @@
               href="https://newworld-game.org/primer"
               class="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/25 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:focus:ring-teal-800 transition-all"
             >
-              Read the Primer
+              {{ 'landingHome.design.cta' | translate }}
               <svg
                 class="h-4 w-4 -rotate-45 transition-transform group-hover:translate-x-0.5"
                 viewBox="0 0 24 24"
@@ -1039,7 +1025,7 @@
         <span
           class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
         >
-          Start solving real problems
+          {{ 'landingHome.cta.badge' | translate }}
         </span>
 
         <h2
@@ -1048,14 +1034,14 @@
           <span
             class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
           >
-            Try NewWorld Game Now
+            {{ 'landingHome.cta.title' | translate }}
           </span>
         </h2>
 
         <p
           class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300"
         >
-          Start solving problems and making a difference.
+          {{ 'landingHome.cta.description' | translate }}
         </p>
 
         <!-- CTA -->
@@ -1064,7 +1050,7 @@
             routerLink="/welcome"
             class="group inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
           >
-            Get Started
+            {{ 'landingHome.cta.cta' | translate }}
             <svg
               class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
               viewBox="0 0 24 24"

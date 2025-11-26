@@ -235,6 +235,265 @@
       "missingFields": "Veuillez remplir tous les champs requis avant d’ajouter le défi."
     }
   },
+  "landingCollege": {
+    "cta": {
+      "scheduleDemo": "Planifier une démo",
+      "contact": "Nous contacter",
+      "startFree": "Commencer gratuitement",
+      "signUp": "S'inscrire",
+      "downloadGuide": "Télécharger le guide pour explorer NWG",
+      "exploreAi": "Découvrir tous les collègues IA"
+    },
+    "hero": {
+      "title": "NewWorld Game pour les universités",
+      "subtitle": "Ajoutez un laboratoire d'innovation à vos cours où la design science, des collègues IA et des étudiants motivés s'attaquent aux enjeux mondiaux et locaux qui comptent."
+    },
+    "steps": {
+      "badge": "Parcours étape par étape",
+      "title": "Trois premières actions pour lancer vos équipes",
+      "cards": {
+        "one": {
+          "label": "Étape 1",
+          "title": "Quel est le problème ?",
+          "description": "Quel est le problème sur lequel nous voulons travailler/pourquoi est-il important/Quelle est son ampleur/Où se situe-t-il/Comment le mesurer/Quelles en sont les causes profondes",
+          "aiPrompt": "Demandez de l'aide au collègue IA Bucky : réponses, retours, conseils, causes",
+          "imageAlt": "Illustration de l'étape 1"
+        },
+        "two": {
+          "label": "Étape 2",
+          "title": "Définir l'avenir souhaité",
+          "description": "Quel est notre objectif/Quel monde voulons-nous/Comment imaginons-nous l'avenir/Comment le mesurer",
+          "aiPrompt": "Demandez au collègue IA Bucky de l'aide, des retours, des réponses, des conseils, ce qui manque.",
+          "imageAlt": "Illustration de l'étape 2"
+        },
+        "three": {
+          "label": "Étape 3",
+          "title": "Tracer la voie à suivre",
+          "description": "Comment atteignons-nous notre objectif/ comment résolvons-nous le problème/que faisons-nous/où/comment/quand ?",
+          "details": "Quelles technologies, politiques, programmes, partenaires et financements sont nécessaires pour tester, puis changer d'échelle ?",
+          "aiPrompt": "Demandez aux collègues IA Bucky, Amina, Li, Sofia, Arjun, Elana, Tane ou Zane de l'aide, des retours, des réponses, des conseils, ce qui manque.",
+          "imageAlt": "Illustration de l'étape 3"
+        }
+      }
+    },
+    "simple": {
+      "title": "Aussi simple que...",
+      "items": {
+        "first": "Vous : explorez, testez et utilisez le NewWorld Game — gratuitement. Vérifiez s'il répond à vos besoins.",
+        "second": "INSCRIVEZ VOTRE CLASSE — GRATUITEMENT. Voyez comme c'est facile.",
+        "third": "Choisissez un défi, formez des équipes, commencez à l'étape 1 et finissez à l'étape 5 — transformez l'apprentissage en impact. Oui, gratuitement. Amusez-vous."
+      }
+    },
+    "intro": {
+      "title": "NewWorld Game, c'est...",
+      "paragraph1": "NewWorld Game est une plateforme, un espace de travail et d'apprentissage dopé à l'IA, pour découvrir et développer des solutions à des problèmes réels — et les mettre en œuvre.",
+      "paragraph2": "Son objectif est d'avoir un impact réel — changer le monde — en vous offrant, à vous et à vos étudiants, l'espace et les outils pour développer des solutions aux problèmes qui vous tiennent à cœur.",
+      "paragraph3": "Dans NewWorld Game, les étudiants apprennent les contenus que vous enseignez tout en élaborant des solutions à des problèmes réels, locaux ou mondiaux, puis les inscrivent au NewWorld Tournament pour obtenir reconnaissance et impact concret.",
+      "paragraph4": "Tout cela est rendu possible par la combinaison créative de l'intelligence artificielle et de l'intelligence humaine.",
+      "learnMore": "En savoir plus."
+    },
+    "included": {
+      "title": "Ce qui est inclus",
+      "subtitle": "Tout ce dont vos étudiants ont besoin pour transformer leurs défis et leurs idées audacieuses en opportunités à impact réel.",
+      "cards": {
+        "fullAccess": {
+          "title": "Accès complet aux fonctionnalités NWG",
+          "description": "Accès à toutes les fonctionnalités NWG, y compris les IA, la chaîne vidéo d'équipe, l'évaluation par les pairs, les données mondiales, les rapports sur l'état du monde, les bibliothèques de solutions, etc."
+        },
+        "dashboard": {
+          "title": "Tableau de bord privé pour la classe",
+          "description": "Gardez chaque classe organisée grâce à un espace de travail dédié aux enseignants et animateurs."
+        },
+        "ai": {
+          "title": "Collègues IA + meilleures plateformes",
+          "description": "Accès à une douzaine d'avatars IA personnalisés (voir ci-dessous) pour la recherche, le développement de solutions et la narration."
+        },
+        "collaboration": {
+          "title": "Outils de collaboration d'équipe",
+          "description": "Tableaux de messages, fichiers partagés et boucle de retours intégrés à chaque projet."
+        },
+        "tournament": {
+          "title": "Accès au NewWorld Tournament",
+          "description": "Passez des pilotes en classe à une reconnaissance nationale et mondiale grâce aux candidatures au tournoi."
+        },
+        "support": {
+          "title": "Accompagnement à la mise en œuvre",
+          "description": "Conseils issus du processus de design et des collègues IA pour faire adopter les projets dans le monde réel."
+        }
+      }
+    },
+    "benefits": {
+      "title": "Autres avantages",
+      "cards": {
+        "interdisciplinary": {
+          "title": "Apprentissage interdisciplinaire",
+          "description": "Mêle sciences, économie, éthique et technologies pour développer la culture des systèmes et l'engagement émotionnel autour de défis concrets."
+        },
+        "data": {
+          "title": "Accès aux données et aux solutions",
+          "description": "Accédez à plus de 100 jeux de données mondiaux, 400 rapports sur l'état du monde et des bibliothèques de solutions pour disposer d'informations et de références en temps réel."
+        },
+        "impact": {
+          "title": "Impact étudiant",
+          "description": "Favorise des citoyens du monde informés et engagés, prêts à passer à l'action avec confiance et clarté."
+        }
+      }
+    },
+    "ai": {
+      "title": "La parole à nos collègues IA",
+      "subtitle": "Propulsés par les derniers modèles d'IA et entraînés pour accompagner enseignants et étudiants à chaque étape du NewWorld Game.",
+      "teacher": "Pour les enseignants",
+      "teacherText": "Utilisez des partenaires IA pour trouver des amorces de recherche, planifier des cours, fournir des retours formatifs et créer rapidement des exemples adaptés à chaque discipline.",
+      "student": "Pour les étudiants",
+      "studentText": "Les équipes collaborent avec leur collègue IA préféré pour imaginer, tester et raconter leur solution avec assurance."
+    },
+    "pricing": {
+      "classPlan": {
+        "badge": "COÛT POUR VOTRE CLASSE : GRATUIT",
+        "price": "$0",
+        "note": "Jusqu'en juin 2026",
+        "features": {
+          "item1": "30 étudiants et/ou jusqu'à cinq équipes en accès complet (si vous avez plus d'étudiants, contactez-nous)",
+          "item2": "Utilisation illimitée",
+          "item3": "Participations illimitées au NewWorld Tournament"
+        }
+      },
+      "schoolPlan": {
+        "badge": "COÛT POUR VOTRE ÉTABLISSEMENT",
+        "title": "Contactez-nous",
+        "subtitle": "pour",
+        "features": {
+          "item1": "Utilisation illimitée",
+          "item2": "Participations illimitées au NewWorld Tournament",
+          "item3": "Options de personnalisation"
+        }
+      },
+      "note": "Commencez gratuitement, évoluez quand vous êtes prêt."
+    },
+    "finalCta": {
+      "title": "Prêt à explorer ?",
+      "subtitle": "Téléchargez un guide pour explorer NWG, inscrivez votre classe ou contactez-nous afin de parcourir ensemble la plateforme."
+    }
+  },
+  "landingHome": {
+    "hero": {
+      "tagline": "des solutions aux problèmes mondiaux avec des personnes du monde entier.",
+      "quote": "Nous sommes appelés à être les architectes de l'avenir, pas ses victimes.",
+      "quoteAuthor": "- Buckminster Fuller",
+      "cta": "Commencer",
+      "imageAlt": "Illustration de la Terre",
+      "imageCaption": "Un monde vivant, façonné par vos idées."
+    },
+    "quote": {
+      "text": "Nous ne pouvons pas construire un avenir pour nos petits-enfants avec un système pensé pour nos grands-parents.",
+      "name": "António Guterres",
+      "title": "Secrétaire général des Nations Unies",
+      "tagline": "Nous avons besoin d'un NewWorld. D'un NewWorld Game.",
+      "taglinePrefix": "Nous avons besoin d'un",
+      "taglineSuffix": "D'un"
+    },
+    "introVideo": {
+      "badge": "Regarder • intro de 2 min",
+      "title": "Vidéo d'introduction",
+      "description": "Regardez une courte introduction montrant comment NewWorld Game transforme des idées audacieuses en impact réel.",
+      "cta": "Regarder sur YouTube",
+      "cornerLabel": "Vidéo d'introduction",
+      "caption": "Aperçu visuel et rapide de NewWorld Game."
+    },
+    "challenge": {
+      "badge": "Idées audacieuses • Impact réel",
+      "title": "NewWorld Game : façonnez l'avenir",
+      "description": "NewWorld Game est un défi inédit — porté par l'audace, la créativité, la collaboration et le plaisir. C'est là que votre vision construit l'avenir que vous souhaitez. Vous n'êtes pas la victime — vous êtes le challenger.",
+      "calloutTitle": "Ce n'est pas un jeu fantaisiste — c'est réel.",
+      "calloutText": "Vous n'avez pas besoin de chance pour gagner. Il vous faut une idée claire du monde que vous voulez et le courage de le réaliser. NewWorld Game vous montrera comment — et vous montrerez au monde ce dont vous êtes capable.",
+      "support": "Affrontez les soi-disant “leaders” pour résoudre les problèmes qui vous tiennent à cœur — politiques, sociaux, économiques, environnementaux. Les récompenses ? Pour vous et pour le monde.",
+      "traits": {
+        "boldness": "Audace",
+        "creativity": "Créativité",
+        "collaboration": "Collaboration",
+        "persistence": "Persévérance",
+        "playfulness": "Esprit ludique"
+      },
+      "primaryCta": "Relever le défi",
+      "secondaryCta": "Comment ça marche",
+      "imageAlt": "Des participants collaborent pour relever des défis concrets",
+      "imageTag": "Le défi"
+    },
+    "sdgs": {
+      "badge": "ODD de l'ONU • Impact mondial",
+      "title": "Des ODD à votre portée",
+      "description": "Les Objectifs de développement durable (ODD) de l'ONU visent à transformer notre monde — mettre fin à la pauvreté et aux inégalités, protéger la planète et garantir santé, justice et prospérité pour tous. NewWorld Game vous aide à concevoir des actions concrètes pour les faire progresser.",
+      "badges": {
+        "noPoverty": "1 • Pas de pauvreté",
+        "goodHealth": "3 • Bonne santé",
+        "education": "4 • Éducation de qualité",
+        "energy": "7 • Énergie propre",
+        "climate": "13 • Lutte contre les changements climatiques"
+      },
+      "cta": "Soutenir NewWorld Game",
+      "imageCaption": "Pensé pour un impact réel, en phase avec les ODD de l'ONU.",
+      "imageAlt": "Graphique des Objectifs de développement durable de l'ONU"
+    },
+    "ai": {
+      "title": "Rencontrez vos collègues IA",
+      "description": "Mentors, stratèges et penseurs systémiques qui vous accompagnent à chaque sprint — du premier croquis aux résultats sur le terrain.",
+      "groupColleague": "Collègue IA",
+      "groupElder": "Aîné IA",
+      "ask": "Demander à {{name}}",
+      "sdgLabel": "ODD {{number}}",
+      "tip": "Astuce : choisissez un collègue IA pour copiloter votre prochain sprint."
+    },
+    "testimonials": {
+      "title": "Ce que l'on en dit",
+      "subtitle": "Des retours authentiques d'enseignants, d'étudiants et de partenaires de NewWorld Game.",
+      "cta": "Voir les témoignages vidéo",
+      "cards": {
+        "one": {
+          "quote": "Ce que vous avez construit dans cette simulation est incroyable — l'innovation, l'inclusion et la diversité des avatars IA sont vraiment inspirantes.",
+          "initials": "MB",
+          "name": "M.B.",
+          "role": "Université Drexel"
+        },
+        "two": {
+          "quote": "Vos outils et votre esprit collaboratif correspondent parfaitement à ce que nous apprenons. C'est formidable de voir quelqu'un d'aussi connecté à NewWorld Game et prêt à aider les autres.",
+          "initials": "CB",
+          "name": "C.B.",
+          "role": "Participant"
+        },
+        "three": {
+          "quote": "Quel outil fantastique. Il est incroyablement accessible. Avez-vous envisagé de l'étendre au-delà du social et du développement durable ?",
+          "initials": "AR",
+          "name": "A.R.",
+          "role": "Enseignante"
+        },
+        "four": {
+          "quote": "Merci pour l'aide et les idées que vous apportez. Hâte d'en savoir plus sur NewWorld Game ce trimestre.",
+          "initials": "BS",
+          "name": "B.S.",
+          "role": "Étudiante"
+        },
+        "five": {
+          "quote": "J'ai hâte d'aller plus loin dans ce programme. Je vois déjà le potentiel de cet outil — il me faut juste un peu d'accompagnement pour en tirer encore plus.",
+          "initials": "SH",
+          "name": "S.H.",
+          "role": "Participant"
+        }
+      }
+    },
+    "design": {
+      "badge": "Design Science • Méthodologie",
+      "title": "Design Science",
+      "description": "La Design Science est la méthodologie utilisée par NewWorld Game pour développer des solutions qui préservent et améliorent la vie. Elle s'inspire des travaux de Buckminster Fuller et d'autres via le World Game et le Global Solutions Lab — fondements du NewWorld Game. Pour en savoir plus, consultez Tools For Changing the World—A Design Science Primer.",
+      "imageCaption": "Une méthodologie concrète pour changer le monde.",
+      "cta": "Lire le primer"
+    },
+    "cta": {
+      "badge": "Commencez à résoudre de vrais problèmes",
+      "title": "Essayez NewWorld Game",
+      "description": "Commencez à résoudre des problèmes et à faire la différence.",
+      "cta": "Commencer"
+    }
+  },
   "createSolution": {
     "steps": {
       "intro": "Bienvenue dans le NewWorld Game !\nMon rôle, en tant que collègue — votre partenaire de résolution de problèmes — est de nous aider à développer une solution à un problème mondial sur lequel vous choisissez de travailler. Commençons.",
