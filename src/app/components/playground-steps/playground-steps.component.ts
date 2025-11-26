@@ -1377,15 +1377,18 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     for (const line of lines) {
       const normalized = line.replace(/[:：]\s*$/, '').toLowerCase();
 
+      // Support both English and French section headers
       if (normalized === 'scores') {
         section = 'scores';
         continue;
       }
-      if (normalized === 'improvements') {
+      if (normalized === 'improvements' || normalized === 'améliorations') {
         section = 'improvements';
         continue;
       }
-      if (line.toLowerCase().startsWith('readiness level')) {
+      // Check for readiness level in English or French
+      const lowerLine = line.toLowerCase();
+      if (lowerLine.startsWith('readiness level') || lowerLine.startsWith('niveau de préparation')) {
         section = 'readiness';
         const [, details = ''] = line.split(/:/, 2);
         if (details.trim()) {
@@ -1480,8 +1483,10 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   }
 
   private buildAiPrompt(): string {
-    const instructions = `Role: You are the Evaluator for NewWorld Game.
-Your job is to evaluate the user’s solution using the official criteria and provide numerical scores + improvement feedback.
+    const useFrench = this.currentLanguage === 'fr';
+    
+    const instructionsEn = `Role: You are the Evaluator for NewWorld Game.
+Your job is to evaluate the user's solution using the official criteria and provide numerical scores + improvement feedback.
 
 Do the following every time:
 
@@ -1545,6 +1550,74 @@ Improvements:
 
 Readiness Level: ______`;
 
+    const instructionsFr = `Rôle : Vous êtes l'Évaluateur du NewWorld Game.
+Votre mission est d'évaluer la solution de l'utilisateur selon les critères officiels et de fournir des scores numériques + un retour d'amélioration.
+
+IMPORTANT : Répondez ENTIÈREMENT en français.
+
+Faites ce qui suit à chaque fois :
+
+1. Notez la Solution (1–10 pour chaque catégorie)
+
+Donnez une note pour chaque catégorie :
+
+État souhaité
+
+Faisabilité technologique
+
+Impact environnemental
+
+Viabilité économique
+
+Équité et justice
+
+Clarté et compréhensibilité
+
+(1 = non viable, 5 = nécessite une amélioration majeure, 10 = prêt à mettre en œuvre)
+
+2. Expliquez chaque note
+
+En 1–2 phrases courtes, expliquez pourquoi vous avez donné cette note.
+
+3. Proposez des améliorations
+
+Donnez 3–5 recommandations concrètes et réalisables pour renforcer la solution.
+
+4. Niveau de préparation
+
+Selon la notation globale, qualifiez la solution :
+
+Conceptualisation initiale (1–3)
+
+Conception préliminaire (4–6)
+
+Développement avancé (7–8)
+
+Prêt à mettre en œuvre (9–10)
+
+Ton
+
+Clair, constructif, utile ; sans superflu.
+
+Format de sortie (strict)
+Scores:
+État souhaité: X/10 (raison)
+Faisabilité technologique: X/10 (raison)
+Impact environnemental: X/10 (raison)
+Viabilité économique: X/10 (raison)
+Équité et justice: X/10 (raison)
+Clarté et compréhensibilité: X/10 (raison)
+
+Améliorations:
+1.
+2.
+3.
+4. (optionnel)
+5. (optionnel)
+
+Niveau de préparation: ______`;
+
+    const instructions = useFrench ? instructionsFr : instructionsEn;
     const solutionSummary = this.buildSolutionSummaryForAi();
     return solutionSummary ? `${instructions}\n\n${solutionSummary}` : '';
   }
