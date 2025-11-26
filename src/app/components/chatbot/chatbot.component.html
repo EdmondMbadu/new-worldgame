@@ -1,12 +1,8 @@
 <!-- Floating trigger button - Hidden when chat is open -->
-<div 
-  *ngIf="!showBot"
-  class="fixed bottom-6 right-6 z-[100]"
->
+<div *ngIf="!showBot" class="fixed bottom-6 right-6 z-[100]">
   <button
     (click)="toggleBot()"
-    class="group relative flex items-center gap-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105
-           bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-5 py-3.5"
+    class="group relative flex items-center gap-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-5 py-3.5"
   >
     <!-- Avatar thumbnail -->
     <div class="relative">
@@ -15,11 +11,11 @@
         class="w-10 h-10 rounded-full ring-2 ring-white/30 object-cover"
         [alt]="selectedAi.name"
       />
-      <span 
+      <span
         class="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-white animate-pulse"
       ></span>
     </div>
-    
+
     <!-- Button text -->
     <span class="text-white font-semibold text-sm pr-1">
       Ask {{ getDisplayName(selectedAi) }}
@@ -30,20 +26,22 @@
 <!-- Chat Panel - Integrated Side Panel Design -->
 <div
   *ngIf="showBot"
-  class="fixed z-[99] flex flex-col
-         bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950
-         border-l border-slate-200/50 dark:border-slate-700/50
-         shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.5)]
-         animate-slide-in transition-all duration-300"
-  [ngClass]="isFullScreen 
-    ? 'inset-0 border-l-0' 
-    : 'inset-y-0 right-0 w-full sm:w-[420px] lg:w-[480px]'"
+  class="fixed z-[99] flex flex-col bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950 border-l border-slate-200/50 dark:border-slate-700/50 shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.15)] dark:shadow-[-20px_0_60px_-15px_rgba(0,0,0,0.5)] animate-slide-in transition-all duration-300"
+  [ngClass]="
+    isFullScreen
+      ? 'inset-0 border-l-0'
+      : 'inset-y-0 right-0 w-full sm:w-[420px] lg:w-[480px]'
+  "
 >
   <!-- Header with AI Selector -->
-  <header class="relative flex-shrink-0 border-b border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+  <header
+    class="relative flex-shrink-0 border-b border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl"
+  >
     <!-- Gradient accent line -->
-    <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
-    
+    <div
+      class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"
+    ></div>
+
     <div class="px-4 py-3">
       <!-- Top row: AI selector and controls -->
       <div class="flex items-center justify-between">
@@ -58,26 +56,38 @@
               class="w-11 h-11 rounded-xl ring-2 ring-slate-200 dark:ring-slate-700 object-cover shadow-md group-hover:ring-teal-400 dark:group-hover:ring-teal-500 transition-all"
               [alt]="selectedAi.name"
             />
-            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+            <span
+              class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full ring-2 ring-white dark:ring-slate-900"
+            ></span>
           </div>
           <div class="text-left">
             <div class="flex items-center gap-1.5">
-              <span class="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+              <span
+                class="font-semibold text-slate-900 dark:text-slate-100 text-sm"
+              >
                 {{ selectedAi.name }}
               </span>
               <svg
                 class="w-4 h-4 text-slate-400 transition-transform"
-                [ngClass]="{'rotate-180': showAiSelector}"
+                [ngClass]="{ 'rotate-180': showAiSelector }"
                 fill="none"
                 stroke="currentColor"
                 stroke-width="2"
                 viewBox="0 0 24 24"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
             <span class="text-xs text-slate-500 dark:text-slate-400">
-              {{ selectedAi.group === 'elder' ? 'Visionary Guide' : 'SDG Specialist' }}
+              {{
+                selectedAi.group === "elder"
+                  ? "Visionary Guide"
+                  : "SDG Specialist"
+              }}
             </span>
           </div>
         </button>
@@ -90,22 +100,54 @@
             class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
             [title]="isFullScreen ? 'Exit full screen' : 'Full screen'"
           >
-            <svg *ngIf="!isFullScreen" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+            <svg
+              *ngIf="!isFullScreen"
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
+              />
             </svg>
-            <svg *ngIf="isFullScreen" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            <svg
+              *ngIf="isFullScreen"
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"
+              />
             </svg>
           </button>
-          
+
           <!-- Open in new page button -->
           <button
             (click)="openFullPage()"
             class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
             title="Open in new page"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+              />
             </svg>
           </button>
 
@@ -115,8 +157,18 @@
             class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
             title="Close"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -124,11 +176,25 @@
 
       <!-- Context Badge - Shows when in playground -->
       <div *ngIf="hasContext" class="mt-2 flex items-center gap-2">
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50">
-          <svg class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        <div
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-700/50"
+        >
+          <svg
+            class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+            />
           </svg>
-          <span class="text-xs font-medium text-amber-700 dark:text-amber-300 truncate max-w-[200px]">
+          <span
+            class="text-xs font-medium text-amber-700 dark:text-amber-300 truncate max-w-[200px]"
+          >
             {{ playgroundContext?.currentStepName }}
           </span>
         </div>
@@ -140,9 +206,15 @@
         class="mt-2 flex items-center gap-2 text-xs text-teal-600 dark:text-teal-400"
       >
         <span class="flex gap-0.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:0ms]"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:150ms]"></span>
-          <span class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:300ms]"></span>
+          <span
+            class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:0ms]"
+          ></span>
+          <span
+            class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:150ms]"
+          ></span>
+          <span
+            class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:300ms]"
+          ></span>
         </span>
         <span class="font-medium">{{ thinkingLabel }}...</span>
       </div>
@@ -155,7 +227,9 @@
     >
       <!-- Elders Section -->
       <div class="p-3">
-        <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2">
+        <h3
+          class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2"
+        >
           Visionary Guides
         </h3>
         <div class="grid grid-cols-2 gap-2">
@@ -163,13 +237,23 @@
             *ngFor="let ai of elderAvatars"
             (click)="selectAi(ai)"
             class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all"
-            [ngClass]="selectedAi.id === ai.id 
-              ? 'bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 ring-1 ring-teal-200 dark:ring-teal-700' 
-              : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'"
+            [ngClass]="
+              selectedAi.id === ai.id
+                ? 'bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 ring-1 ring-teal-200 dark:ring-teal-700'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+            "
           >
-            <img [src]="ai.avatarPath" class="w-9 h-9 rounded-lg object-cover shadow-sm" [alt]="ai.name" />
+            <img
+              [src]="ai.avatarPath"
+              class="w-9 h-9 rounded-lg object-cover shadow-sm"
+              [alt]="ai.name"
+            />
             <div class="min-w-0 flex-1">
-              <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{{ ai.name }}</div>
+              <div
+                class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate"
+              >
+                {{ ai.name }}
+              </div>
             </div>
             <svg
               *ngIf="selectedAi.id === ai.id"
@@ -177,7 +261,11 @@
               fill="currentColor"
               viewBox="0 0 20 20"
             >
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              <path
+                fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </div>
@@ -185,7 +273,9 @@
 
       <!-- Colleagues Section -->
       <div class="p-3 pt-1">
-        <h3 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2">
+        <h3
+          class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2"
+        >
           SDG Specialists
         </h3>
         <div class="grid grid-cols-2 gap-2">
@@ -193,13 +283,23 @@
             *ngFor="let ai of colleagueAvatars"
             (click)="selectAi(ai)"
             class="flex items-center gap-2.5 p-2.5 rounded-xl text-left transition-all"
-            [ngClass]="selectedAi.id === ai.id 
-              ? 'bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 ring-1 ring-teal-200 dark:ring-teal-700' 
-              : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'"
+            [ngClass]="
+              selectedAi.id === ai.id
+                ? 'bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 ring-1 ring-teal-200 dark:ring-teal-700'
+                : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+            "
           >
-            <img [src]="ai.avatarPath" class="w-9 h-9 rounded-lg object-cover shadow-sm" [alt]="ai.name" />
+            <img
+              [src]="ai.avatarPath"
+              class="w-9 h-9 rounded-lg object-cover shadow-sm"
+              [alt]="ai.name"
+            />
             <div class="min-w-0 flex-1">
-              <div class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{{ ai.name }}</div>
+              <div
+                class="text-sm font-medium text-slate-800 dark:text-slate-200 truncate"
+              >
+                {{ ai.name }}
+              </div>
             </div>
             <svg
               *ngIf="selectedAi.id === ai.id"
@@ -207,7 +307,11 @@
               fill="currentColor"
               viewBox="0 0 20 20"
             >
-              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              <path
+                fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
             </svg>
           </button>
         </div>
@@ -216,8 +320,8 @@
   </header>
 
   <!-- Messages Area -->
-  <div 
-    id="chatbox" 
+  <div
+    id="chatbox"
     class="flex-1 overflow-y-auto"
     [ngClass]="isEnlarged ? 'px-6 py-5' : 'px-4 py-4'"
   >
@@ -231,8 +335,12 @@
         />
         <div class="flex-1 min-w-0">
           <div class="inline-block max-w-full">
-            <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50">
-              <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            <div
+              class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50"
+            >
+              <p
+                class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed"
+              >
                 {{ introMessage.text }}
                 <a
                   *ngIf="introMessage.link"
@@ -253,8 +361,12 @@
         <div *ngIf="resp.type === 'PROMPT'" class="flex gap-3 justify-end">
           <div class="flex-1 min-w-0 flex justify-end">
             <div class="inline-block max-w-[85%]">
-              <div class="px-4 py-3 rounded-2xl rounded-tr-md bg-gradient-to-br from-teal-600 to-emerald-600 shadow-md">
-                <p class="text-sm text-white leading-relaxed">{{ resp.text }}</p>
+              <div
+                class="px-4 py-3 rounded-2xl rounded-tr-md bg-gradient-to-br from-teal-600 to-emerald-600 shadow-md"
+              >
+                <p class="text-sm text-white leading-relaxed">
+                  {{ resp.text }}
+                </p>
               </div>
               <!-- Copy button for user message -->
               <div class="mt-1 flex justify-end">
@@ -262,11 +374,19 @@
                   class="text-xs px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-1 opacity-0 hover:opacity-100 focus:opacity-100"
                   (click)="copySingleMessage(resp.text!, i)"
                 >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
                     <rect x="9" y="9" width="13" height="13" rx="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4c0-1.1.9-2 2-2h9a2 2 0 012 2v1" />
+                    <path
+                      d="M5 15H4a2 2 0 01-2-2V4c0-1.1.9-2 2-2h9a2 2 0 012 2v1"
+                    />
                   </svg>
-                  {{ singleCopyStates[i] || 'Copy' }}
+                  {{ singleCopyStates[i] || "Copy" }}
                 </button>
               </div>
             </div>
@@ -281,8 +401,16 @@
             *ngIf="!profilePicturePath"
             class="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center shadow-sm flex-shrink-0 mt-0.5"
           >
-            <svg class="w-5 h-5 text-slate-500 dark:text-slate-300" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            <svg
+              class="w-5 h-5 text-slate-500 dark:text-slate-300"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
         </div>
@@ -296,10 +424,23 @@
               target="_blank"
               class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm"
             >
-              <svg class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+              <svg
+                class="w-5 h-5 text-teal-600 dark:text-teal-400"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                />
               </svg>
-              <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ resp.text }}</span>
+              <span
+                class="text-sm font-medium text-slate-700 dark:text-slate-300"
+                >{{ resp.text }}</span
+              >
             </a>
           </div>
         </div>
@@ -324,8 +465,18 @@
                 (click)="downloadImage(resp.src!)"
                 class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400 transition-colors"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"
+                  />
                 </svg>
                 Download
               </button>
@@ -342,20 +493,42 @@
           />
           <div class="flex-1 min-w-0">
             <div class="inline-block max-w-full">
-              <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50">
+              <div
+                class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50"
+              >
                 <p
                   class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none"
-                  [innerHTML]="resp.streaming ? resp.text : formatText(resp.text || '')"
+                  [innerHTML]="
+                    resp.streaming ? resp.text : formatText(resp.text || '')
+                  "
                 ></p>
               </div>
-              
+
               <!-- Sources section - Google-like format -->
-              <div *ngIf="resp.sources && resp.sources.length > 0 && !resp.streaming" class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+              <div
+                *ngIf="
+                  resp.sources && resp.sources.length > 0 && !resp.streaming
+                "
+                class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700"
+              >
                 <div class="flex items-center gap-1.5 mb-2">
-                  <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  <svg
+                    class="w-4 h-4 text-slate-500 dark:text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    />
                   </svg>
-                  <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Sources</span>
+                  <span
+                    class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide"
+                    >Sources</span
+                  >
                 </div>
                 <div class="space-y-2">
                   <a
@@ -367,24 +540,50 @@
                   >
                     <!-- Source icon (Google-like) -->
                     <div class="flex-shrink-0 mt-0.5">
-                      <div class="w-5 h-5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 flex items-center justify-center group-hover:border-teal-500 dark:group-hover:border-teal-400 transition-colors">
-                        <svg class="w-3 h-3 text-slate-500 dark:text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      <div
+                        class="w-5 h-5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 flex items-center justify-center group-hover:border-teal-500 dark:group-hover:border-teal-400 transition-colors"
+                      >
+                        <svg
+                          class="w-3 h-3 text-slate-500 dark:text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                          />
                         </svg>
                       </div>
                     </div>
                     <!-- Source content -->
                     <div class="flex-1 min-w-0">
-                      <div class="text-xs font-medium text-slate-700 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400 line-clamp-2 transition-colors">
+                      <div
+                        class="text-xs font-medium text-slate-700 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400 line-clamp-2 transition-colors"
+                      >
                         {{ source.title }}
                       </div>
-                      <div class="text-xs text-slate-500 dark:text-slate-500 mt-0.5 truncate">
+                      <div
+                        class="text-xs text-slate-500 dark:text-slate-500 mt-0.5 truncate"
+                      >
                         {{ source.url }}
                       </div>
                     </div>
                     <!-- External link icon -->
-                    <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <svg
+                      class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
                     </svg>
                   </a>
                 </div>
@@ -397,25 +596,42 @@
                   class="text-xs px-2 py-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors flex items-center gap-1"
                   (click)="copySingleMessage(resp.text!, i)"
                 >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <svg
+                    class="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
                     <rect x="9" y="9" width="13" height="13" rx="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4c0-1.1.9-2 2-2h9a2 2 0 012 2v1" />
+                    <path
+                      d="M5 15H4a2 2 0 01-2-2V4c0-1.1.9-2 2-2h9a2 2 0 012 2v1"
+                    />
                   </svg>
-                  {{ singleCopyStates[i] || 'Copy' }}
+                  {{ singleCopyStates[i] || "Copy" }}
                 </button>
 
                 <!-- Insert to Solution button - Only show when in playground context and not streaming -->
-                <div *ngIf="hasContext && resp.insertable && !resp.streaming" class="relative">
+                <div
+                  *ngIf="hasContext && resp.insertable && !resp.streaming"
+                  class="relative"
+                >
                   <button
                     (click)="toggleInsertMenu(i)"
-                    class="text-xs px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5
-                           bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20
-                           text-amber-700 dark:text-amber-300 
-                           hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30
-                           border border-amber-200/50 dark:border-amber-700/50"
+                    class="text-xs px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 text-amber-700 dark:text-amber-300 hover:from-amber-100 hover:to-orange-100 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 border border-amber-200/50 dark:border-amber-700/50"
                   >
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    <svg
+                      class="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 4.5v15m7.5-7.5h-15"
+                      />
                     </svg>
                     Insert to answer
                   </button>
@@ -425,7 +641,9 @@
                     *ngIf="showInsertMenu === i"
                     class="absolute bottom-full left-0 mb-1 z-50 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 min-w-[180px] max-h-[200px] overflow-y-auto"
                   >
-                    <div class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    <div
+                      class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider"
+                    >
                       Insert into
                     </div>
                     <button
@@ -433,36 +651,75 @@
                       (click)="insertToQuestion(q.key, resp.text!)"
                       class="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center gap-2"
                       [ngClass]="{
-                        'bg-emerald-50 dark:bg-emerald-900/20': insertSuccess === q.key,
+                        'bg-emerald-50 dark:bg-emerald-900/20':
+                          insertSuccess === q.key,
                         'opacity-50': insertingTo === q.key
                       }"
                     >
-                      <span class="w-8 h-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-700 text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
+                      <span
+                        class="w-8 h-6 flex items-center justify-center rounded bg-slate-100 dark:bg-slate-700 text-xs font-mono font-bold text-slate-600 dark:text-slate-300"
+                      >
                         {{ getQuestionLabel(q.key) }}
                       </span>
-                      <span class="flex-1 truncate text-slate-700 dark:text-slate-300">
-                        {{ q.text.slice(0, 40) }}{{ q.text.length > 40 ? '...' : '' }}
+                      <span
+                        class="flex-1 truncate text-slate-700 dark:text-slate-300"
+                      >
+                        {{ q.text.slice(0, 40)
+                        }}{{ q.text.length > 40 ? "..." : "" }}
                       </span>
                       <!-- Loading spinner -->
-                      <svg *ngIf="insertingTo === q.key" class="w-4 h-4 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        *ngIf="insertingTo === q.key"
+                        class="w-4 h-4 animate-spin text-teal-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          class="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                        ></circle>
+                        <path
+                          class="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       <!-- Success checkmark -->
-                      <svg *ngIf="insertSuccess === q.key" class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      <svg
+                        *ngIf="insertSuccess === q.key"
+                        class="w-4 h-4 text-emerald-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clip-rule="evenodd"
+                        />
                       </svg>
                     </button>
                   </div>
                 </div>
 
                 <!-- Success indicator (shows after insert) -->
-                <span 
-                  *ngIf="insertSuccess && showInsertMenu !== i" 
+                <span
+                  *ngIf="insertSuccess && showInsertMenu !== i"
                   class="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 animate-pulse"
                 >
-                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clip-rule="evenodd"
+                    />
                   </svg>
                   Inserted!
                 </span>
@@ -480,11 +737,19 @@
           [alt]="selectedAi.name"
         />
         <div class="flex-1">
-          <div class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50 max-w-[85%]">
+          <div
+            class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50 max-w-[85%]"
+          >
             <div class="space-y-2">
-              <div class="h-3 w-40 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
-              <div class="h-3 w-56 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
-              <div class="h-3 w-32 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"></div>
+              <div
+                class="h-3 w-40 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"
+              ></div>
+              <div
+                class="h-3 w-56 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"
+              ></div>
+              <div
+                class="h-3 w-32 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse"
+              ></div>
             </div>
           </div>
         </div>
@@ -493,14 +758,31 @@
   </div>
 
   <!-- Input Area -->
-  <footer class="flex-shrink-0 border-t border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+  <footer
+    class="flex-shrink-0 border-t border-slate-200/80 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl"
+  >
     <!-- Context hint - Shows available questions when in playground -->
     <div *ngIf="hasContext && availableQuestions.length > 0" class="px-4 pt-3">
-      <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-        <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div
+        class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
+      >
+        <svg
+          class="w-3.5 h-3.5 text-amber-500"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
-        <span>Ask about your solution — answers can be inserted directly into your work</span>
+        <span
+          >Ask about your solution — answers can be inserted directly into your
+          work</span
+        >
       </div>
     </div>
 
@@ -510,13 +792,28 @@
         *ngFor="let p of previews; let i = index"
         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm"
       >
-        <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+        <svg
+          class="w-4 h-4 text-teal-600 dark:text-teal-400"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+          />
         </svg>
-        <span class="max-w-[120px] truncate text-slate-600 dark:text-slate-300" [title]="p.file.name">
+        <span
+          class="max-w-[120px] truncate text-slate-600 dark:text-slate-300"
+          [title]="p.file.name"
+        >
           {{ p.file.name }}
         </span>
-        <span *ngIf="p.uploading" class="text-xs text-slate-400 italic">uploading...</span>
+        <span *ngIf="p.uploading" class="text-xs text-slate-400 italic"
+          >uploading...</span
+        >
         <button
           (click)="removePreview(i)"
           class="w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-300 hover:bg-red-400 hover:text-white flex items-center justify-center text-xs transition-colors"
@@ -531,9 +828,21 @@
       <div class="flex items-end gap-2">
         <!-- Attachment button -->
         <label class="flex-shrink-0 cursor-pointer">
-          <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-            <svg class="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
+          <div
+            class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          >
+            <svg
+              class="w-5 h-5 text-slate-500 dark:text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+              />
             </svg>
           </div>
           <input
@@ -551,11 +860,8 @@
             rows="1"
             [placeholder]="'Ask ' + getDisplayName(selectedAi) + ' anything...'"
             (keydown)="handleComposerKey($event)"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border-0 
-                   text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500/50 dark:focus:ring-teal-400/50
-                   resize-none min-h-[48px] max-h-[120px]"
-            style="field-sizing: content;"
+            class="w-full px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border-0 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50 dark:focus:ring-teal-400/50 resize-none min-h-[48px] max-h-[120px]"
+            style="field-sizing: content"
           ></textarea>
         </div>
 
@@ -563,29 +869,42 @@
         <button
           (click)="submitPrompt()"
           [disabled]="uploading || (!prompt.trim() && !previews.length)"
-          class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 
-                 hover:from-teal-700 hover:to-emerald-700 
-                 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700
-                 disabled:cursor-not-allowed
-                 shadow-lg shadow-teal-500/25 disabled:shadow-none
-                 transition-all duration-200"
+          class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:from-slate-300 disabled:to-slate-400 dark:disabled:from-slate-600 dark:disabled:to-slate-700 disabled:cursor-not-allowed shadow-lg shadow-teal-500/25 disabled:shadow-none transition-all duration-200"
           title="Send"
         >
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          <svg
+            class="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+            />
           </svg>
         </button>
 
         <!-- End chat button -->
         <button
           (click)="endChat()"
-          class="flex-shrink-0 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 
-                 text-slate-400 hover:text-red-500 dark:hover:text-red-400
-                 transition-all duration-200"
+          class="flex-shrink-0 p-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200"
           title="End Chat"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -593,7 +912,9 @@
 
     <!-- Status message -->
     <div *ngIf="status" class="px-4 pb-3 -mt-1">
-      <p class="text-xs text-slate-500 dark:text-slate-400 text-center">{{ status }}</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400 text-center">
+        {{ status }}
+      </p>
     </div>
   </footer>
 </div>

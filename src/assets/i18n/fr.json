@@ -1046,5 +1046,20 @@
         }
       }
     }
+  },
+  "contactPage": {
+    "heading": "Contactez-nous",
+    "description": "Un problème technique ? Envie de nous faire part d’un retour sur une fonctionnalité bêta ? Besoin de précisions pour soutenir NewWorld Game ? Dites-le-nous.",
+    "emailPrompt": "Écrivez-nous à",
+    "alerts": {
+      "completeFields": "Remplissez tous les champs",
+      "invalidEmail": "Saisissez une adresse courriel valide"
+    }
+  },
+  "privacyPage": {
+    "heading": "Politique de confidentialité",
+    "paragraph1": "NewWorld Game ne divulguera, ne vendra ni ne mettra jamais à disposition des tiers les informations personnelles obtenues lors de vos interactions avec la plateforme.",
+    "paragraph2": "Les solutions rédigées dans la plateforme seront rendues publiques afin que le monde entier puisse les consulter et les utiliser au bénéfice de tous.",
+    "imageAlt": "Illustration sur la confidentialité"
   }
 }

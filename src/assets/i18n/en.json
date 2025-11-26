@@ -1046,5 +1046,20 @@
         }
       }
     }
+  },
+  "contactPage": {
+    "heading": "Contact Us",
+    "description": "Got a technical issue? Want to send feedback about a beta feature? Need details about supporting NewWorld Game? Let us know.",
+    "emailPrompt": "Send us an email at",
+    "alerts": {
+      "completeFields": "Complete all fields",
+      "invalidEmail": "Enter a valid email"
+    }
+  },
+  "privacyPage": {
+    "heading": "Privacy Policy",
+    "paragraph1": "NewWorld Game will not, under any circumstances, release, sell, or make available to anyone for any reason any personal information obtained during your interactions with NewWorld Game.",
+    "paragraph2": "The solutions written on the platform will be made public for the world to see and use for the benefit of the world.",
+    "imageAlt": "Privacy illustration"
   }
 }

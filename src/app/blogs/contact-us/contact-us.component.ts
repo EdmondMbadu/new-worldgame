@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-contact-us',
@@ -15,7 +16,7 @@ export class ContactUsComponent implements OnInit {
     window.scroll(0, 0);
   }
   ourEmail: string = 'newworld@newworld-game.org';
-  constructor(private data: DataService) {}
+  constructor(private data: DataService, private translate: TranslateService) {}
 
   sendMessage() {
     if (
@@ -24,11 +25,11 @@ export class ContactUsComponent implements OnInit {
       this.customerEmail === '' ||
       this.message === ''
     ) {
-      alert('Complete all fiends');
+      alert(this.translate.instant('contactPage.alerts.completeFields'));
       return;
     } else {
       if (this.data.isValidEmail(this.customerEmail)) {
-        alert('Enter a valid email');
+        alert(this.translate.instant('contactPage.alerts.invalidEmail'));
         return;
       }
     }
