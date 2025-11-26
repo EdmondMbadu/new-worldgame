@@ -1061,5 +1061,31 @@
     "paragraph1": "NewWorld Game will not, under any circumstances, release, sell, or make available to anyone for any reason any personal information obtained during your interactions with NewWorld Game.",
     "paragraph2": "The solutions written on the platform will be made public for the world to see and use for the benefit of the world.",
     "imageAlt": "Privacy illustration"
+  },
+  "careersPage": {
+    "heading": "Internship at NewWorld Game",
+    "intro": "At NewWorld Game, we are on the lookout for talented individuals passionate about shaping the future. Our team is growing, and we invite professionals and enthusiasts from various backgrounds to contribute their unique skills and perspectives.",
+    "seeking": "We Are Seeking:",
+    "roles": {
+      "engineering": "Software Engineers with a robust understanding of web frameworks, such as Angular.",
+      "design": "UI/UX Designers who are creative and have an eye for designing intuitive and user-friendly interfaces.",
+      "research": "Researchers who want to expand NewWorld Game resources—solutions, statistical data, AI tools, and more.",
+      "education": "Educators and Marketing Professionals interested in growing the NewWorld Game community across schools, NGOs, communities, and governments.",
+      "students": "Students eager to learn and ready to tackle complex challenges."
+    },
+    "cta": "If you align with any of the above, send your résumé (and optional cover letter) to",
+    "closing": "Join us at NewWorld Game, where innovation meets collaboration. Together, we can create solutions that make a difference.",
+    "imageAlt1": "Team collaboration illustration",
+    "imageAlt2": "Team working illustration"
+  },
+  "archivePictures": {
+    "eyebrow": "Archive",
+    "heading": "GSL Archive Pictures",
+    "description": "Previous Lab participants have come from:",
+    "countries": "Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania, Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Senegal, Ivory Coast, Kenya, Uganda, Zimbabwe, South Africa, DR Congo, Congo, Mozambique, Gabon, Togo, Haiti, Canada, Mexico, Honduras, Venezuela, China, Hong Kong, Vietnam, Singapore, Thailand, Japan, New Zealand, Australia, India, Pakistan, Bangladesh, Palestine, United Arab Emirates, Saudi Arabia, Nepal, Turkey, and across the United States.",
+    "viewLabel": "View",
+    "galleryAlt": "Archive participant",
+    "modalCloseLabel": "Close full screen image",
+    "modalAlt": "Full screen archive view"
   }
 }

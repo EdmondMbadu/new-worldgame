@@ -1061,5 +1061,31 @@
     "paragraph1": "NewWorld Game ne divulguera, ne vendra ni ne mettra jamais à disposition des tiers les informations personnelles obtenues lors de vos interactions avec la plateforme.",
     "paragraph2": "Les solutions rédigées dans la plateforme seront rendues publiques afin que le monde entier puisse les consulter et les utiliser au bénéfice de tous.",
     "imageAlt": "Illustration sur la confidentialité"
+  },
+  "careersPage": {
+    "heading": "Stage chez NewWorld Game",
+    "intro": "Chez NewWorld Game, nous recherchons des talents passionnés par la construction du futur. Notre équipe grandit et nous invitons des profils variés à partager leurs compétences et leur vision.",
+    "seeking": "Profils recherchés :",
+    "roles": {
+      "engineering": "Ingénieurs logiciels maîtrisant des frameworks web comme Angular.",
+      "design": "Designers UI/UX créatifs, capables de concevoir des interfaces intuitives.",
+      "research": "Chercheurs souhaitant enrichir les ressources NewWorld Game : solutions, données statistiques, outils IA, etc.",
+      "education": "Éducateurs et professionnels du marketing prêts à développer notre communauté dans les écoles, ONG, collectivités, gouvernements, etc.",
+      "students": "Étudiants curieux, motivés par la résolution de problèmes complexes."
+    },
+    "cta": "Intéressé(e) ? Envoyez votre CV (et, si vous le souhaitez, une lettre de motivation) à",
+    "closing": "Rejoignez NewWorld Game, là où l’innovation rencontre la collaboration. Ensemble, changeons la donne.",
+    "imageAlt1": "Illustration de collaboration d’équipe",
+    "imageAlt2": "Illustration d’équipe au travail"
+  },
+  "archivePictures": {
+    "eyebrow": "Archives",
+    "heading": "Archive photo du GSL",
+    "description": "Les participants précédents du Lab venaient de :",
+    "countries": "Espagne, France, Allemagne, Angleterre, Irlande, Pologne, Géorgie, Lituanie, Ukraine, Tanzanie, Nigeria, Ghana, Cameroun, Soudan, Soudan du Sud, Sénégal, Côte d’Ivoire, Kenya, Ouganda, Zimbabwe, Afrique du Sud, RD Congo, Congo, Mozambique, Gabon, Togo, Haïti, Canada, Mexique, Honduras, Venezuela, Chine, Hong Kong, Vietnam, Singapour, Thaïlande, Japon, Nouvelle-Zélande, Australie, Inde, Pakistan, Bangladesh, Palestine, Émirats arabes unis, Arabie saoudite, Népal, Turquie, ainsi que de nombreux États américains.",
+    "viewLabel": "Voir",
+    "galleryAlt": "Participant des archives",
+    "modalCloseLabel": "Fermer l’image plein écran",
+    "modalAlt": "Affichage plein écran des archives"
   }
 }

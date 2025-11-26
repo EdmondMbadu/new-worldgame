@@ -3,22 +3,25 @@
     <section class="bg-white dark:bg-gray-900 mt-24">
         <div class="gap-16 items-center py-8 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6">
             <div class="font-light text-gray-500 sm:text-lg dark:text-gray-400">
-                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Internship at NewWorld Game</h2>
-                <p class="mb-4">At NewWorld Game, we are on the lookout for talented individuals passionate about shaping the future. Our team is growing, and we invite professionals and enthusiasts from various backgrounds to contribute their unique skills and perspectives.</p>
-                <p class="mb-4"><strong>We Are Seeking:</strong></p>
+                <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">{{ 'careersPage.heading' | translate }}</h2>
+                <p class="mb-4">{{ 'careersPage.intro' | translate }}</p>
+                <p class="mb-4"><strong>{{ 'careersPage.seeking' | translate }}</strong></p>
                 <ul class="mb-4 list-disc">
-                    <li><strong class="font-semibold">Software Engineers</strong> with a robust understanding of web frameworks, such as Angular.</li>
-                    <li><strong class="font-semibold">UI/UX Designers</strong> who are creative and have an eye for designing intuitive and user-friendly interfaces.</li>
-                    <li><strong class="font-semibold">Researchers</strong> with an interest in adding to the resources available to New WorldGame players— including our inventory of solutions, statistical data sources, useful AI applications, and a few new items.</li>
-                    <li><strong class="font-semibold">Educators and Marketing Professionals </strong> who are interested in helping us expand the user communities playing the NewWorld Game— to schools, NGOs, communities, governments and more.</li>
-                    <li><strong class="font-semibold">Students</strong> who are eager to learn, with a keen interest in tackling and solving complex problems.</li>
+                    <li>{{ 'careersPage.roles.engineering' | translate }}</li>
+                    <li>{{ 'careersPage.roles.design' | translate }}</li>
+                    <li>{{ 'careersPage.roles.research' | translate }}</li>
+                    <li>{{ 'careersPage.roles.education' | translate }}</li>
+                    <li>{{ 'careersPage.roles.students' | translate }}</li>
                 </ul>
-                <p>If you align with any of the above roles and are interested in exploring opportunities with us, we would love to hear from you. Please submit your resume and, optionally, a cover letter detailing your experience and what you hope to bring to our team to <a href="mailto:newworld@newworld-game.org" class="text-blue-600 hover:underline dark:text-blue-400">{{email}}</a>.</p>
-                <p>Join us at NewWorld Game, where innovation meets collaboration. Together, we can create solutions that make a difference.</p>
+                <p>
+                    {{ 'careersPage.cta' | translate }}
+                    <a href="mailto:newworld@newworld-game.org" class="text-blue-600 hover:underline dark:text-blue-400">{{ email }}</a>.
+                </p>
+                <p>{{ 'careersPage.closing' | translate }}</p>
             </div>
             <div class="grid grid-cols-2 gap-4 mt-8">
-                <img class="w-full rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fworking-2.png?alt=media&token=746b59ea-ec56-4ef4-b7ff-7b22dcec506b" alt="office content 1">
-                <img class="mt-4 w-full lg:mt-10 rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fworking.png?alt=media&token=3a53ff53-6386-4b95-9d76-a5f2927b07bd" alt="office content 2">
+                <img class="w-full rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fworking-2.png?alt=media&token=746b59ea-ec56-4ef4-b7ff-7b22dcec506b" [attr.alt]="'careersPage.imageAlt1' | translate">
+                <img class="mt-4 w-full lg:mt-10 rounded-lg" src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fworking.png?alt=media&token=3a53ff53-6386-4b95-9d76-a5f2927b07bd" [attr.alt]="'careersPage.imageAlt2' | translate">
             </div>
         </div>
     </section>
