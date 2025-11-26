@@ -27,6 +27,13 @@ export class EvaluationSummaryComponent {
   numberOfcomments: number = 0;
   commentUserNames: any;
   commentUserProfilePicturePath: any;
+  private readonly greenPalette: string[] = [
+    '#064E3B',
+    '#047857',
+    '#059669',
+    '#10B981',
+    '#34D399',
+  ];
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -113,5 +120,76 @@ export class EvaluationSummaryComponent {
         }
       }
     }
+  }
+
+  /**
+   * Formats a number to one decimal place
+   * @param value - The value to format (can be string or number)
+   * @returns Formatted string with one decimal place
+   */
+  formatToOneDecimal(value: string | number | undefined): string {
+    if (value === undefined || value === null) {
+      return '0.0';
+    }
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numValue)) {
+      return '0.0';
+    }
+    return numValue.toFixed(1);
+  }
+
+  /**
+   * Gets the first letter of a name (uppercase)
+   * @param name - The name to get the initial from
+   * @returns The first letter in uppercase, or '?' if name is invalid
+   */
+  getInitial(name: string | undefined): string {
+    if (!name || name.trim().length === 0) {
+      return '?';
+    }
+    return name.trim().charAt(0).toUpperCase();
+  }
+
+  /**
+   * Returns the best available evaluator display name for index
+   */
+  getEvaluatorDisplayName(index: number, evaluation: Evaluation): string {
+    const evaluatorUser = this.evaluators[index];
+    if (evaluatorUser) {
+      const fullName = `${evaluatorUser.firstName ?? ''} ${
+        evaluatorUser.lastName ?? ''
+      }`.trim();
+      return fullName || evaluatorUser.email || 'Evaluator';
+    }
+
+    if (evaluation?.evaluator) {
+      const evaluationName = `${evaluation.evaluator.firstName ?? ''} ${
+        evaluation.evaluator.lastName ?? ''
+      }`.trim();
+      return evaluationName || evaluation.evaluator.email || 'Evaluator';
+    }
+
+    const fallbackName = this.currentSolution.evaluators?.[index]?.name;
+    if (fallbackName && fallbackName.trim().length > 0) {
+      return fallbackName;
+    }
+
+    return 'Evaluator';
+  }
+
+  /**
+   * Generates a consistent green badge color for the user's initial
+   * @param name - The name to generate a color for
+   * @returns A solid color string
+   */
+  getInitialColor(name: string | undefined): string {
+    if (!name || name.trim().length === 0) {
+      return this.greenPalette[0];
+    }
+    
+    const initial = name.trim().charAt(0).toUpperCase();
+    const charCode = initial.charCodeAt(0);
+    const colorIndex = charCode % this.greenPalette.length;
+    return this.greenPalette[colorIndex];
   }
 }

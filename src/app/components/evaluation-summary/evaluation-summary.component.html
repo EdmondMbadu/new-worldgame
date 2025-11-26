@@ -1,161 +1,315 @@
 
-<div class="dark:bg-slate-900 min-h-screen min-w-max">
-    <app-navbar  [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"[firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'" current="''"></app-navbar>
-        
-    <div class=" container flex flex-col lg:flex-row mx-auto justify-center lg:justify-between mt-16 ">
+<div class="min-h-screen brand-gradient">
+    <app-navbar [sideBarSmall]="true" [sideBarBig]="false" [email]="this.auth.currentUser.email"
+        [firstName]="this.auth.currentUser.firstName" [lastName]="this.auth.currentUser.lastName" [path]="'home'"
+        current="''"></app-navbar>
 
-
-
-
-            <div class=" flex flex-col lg:flex-row justify-between mx-auto ">
-
-                <div class=" container flex flex-col max-w-2xl  my-14">
-                    <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-10 dark:text-gray-200">Evaluation Summary</h1>
-            
-                    <div class="mx-auto " >
-
-                        <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[30rem]  mb-10 dark:bg-slate-800" *ngIf=" currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
-                            <div class="p-3 space-y-2">
-                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 ">Evaluation Summary: {{currentSolution.numberofTimesEvaluated}} evaluator(s) </h3>
-                                <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{currentSolution.evaluationSummary!.average}} </p>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
-                                    <div class="{{color.average}} h-2.5  rounded-full " style="width: {{evaluationSummary.average}}%"></div>
-                                </div>
-                                <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
-                                <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                                </svg></a> -->
-                                <div>
-                                    <h1 class="mb-2 dark:text-gray-200">Achievable: {{currentSolution.evaluationSummary!.achievable}}</h1>
-                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                    
-                                        <div class="{{color.achievable}} h-1  rounded-full" style="width: {{evaluationSummary.achievable}}%" > </div>
-                                    
-                                    </div>
-                                    <h1 class="mb-2 dark:text-gray-200">Feasible: {{currentSolution.evaluationSummary!.feasible}}</h1>
-                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                        
-                                        <div class="{{color.feasible}} h-1  rounded-full  " style="width: {{evaluationSummary.feasible}}%"> </div>
-                                    
-                                    </div>
-                                    <h1 class="mb-2 dark:text-gray-200">Economical: {{currentSolution.evaluationSummary!.economical}}</h1>
-                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                        
-                                        <div class="{{color.economical}} h-1  rounded-full "style="width: {{evaluationSummary.economical}}%"> </div>
-                                    
-                                    </div>
-                                    <h1 class="mb-2 dark:text-gray-200">Ecological: {{currentSolution.evaluationSummary!.ecological}}</h1>
-                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                        
-                                        <div class="{{color.ecological}} h-1  rounded-full " style="width: {{evaluationSummary.ecological}}%" > </div>
-                                    
-                                    </div>
-                                    <h1 class="mb-2 dark:text-gray-200">Equitable: {{currentSolution.evaluationSummary!.equitable}}</h1>
-                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                        
-                                        <div class="{{color.equitable}} h-1  rounded-full  " style="width: {{evaluationSummary.equitable}}%" > </div>
-                                    
-                                    </div>
-                                    <h1 class="mb-2 dark:text-gray-200">Understandable: {{currentSolution.evaluationSummary!.understandable}}</h1>
-                                    <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                        
-                                        <div class="{{color.understandable}} h-1  rounded-full"style="width: {{evaluationSummary.understandable}}%" > </div>
-                                    
-                                    </div>
-                                </div>
-                                
-                            </div>
-                            <div data-popper-arrow></div>
-                        </div>
-                
-
-                        <div  id="popover-description" role="tooltip" class=" p-2 inline-block text-sm text-gray-500  bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow-md w-96 dark:bg-slate-800" *ngIf="!currentSolution.evaluationDetails || currentSolution.evaluationDetails.length==0 ">
-                        <h1 class="text-2xl dark:text-gray-200">No Evaluations Submitted</h1>
-                        </div>
-
-                        <div *ngIf="currentSolution.evaluationDetails &&  currentSolution.evaluationDetails!.length>0">
-                            <h1 class="text-xl dark:text-gray-200 mb-4">Evaluators</h1>
-                            <div  id="popover-description" role="tooltip" class="  inline-block text-sm text-gray-500  bg-white border border-gray-200 rounded-lg shadow-md w-[25rem]  dark:bg-slate-800" *ngFor="let ev of currentSolution.evaluationDetails; let i=index">
-                                <div class="p-3 space-y-2">
-                                <div class="flex flex-row space-x-4 items-center">
-                                        <img *ngIf="evaluators[i] && evaluators[i].profilePicture" [src]="evaluators[i].profilePicture?.downloadURL" class="w-20 rounded-lg" alt="">
-                                        <img *ngIf="evaluators[i]  && !evaluators[i].profilePicture" src="../../../assets/img/user.png"class="w-20 rounded-lg" alt="">
-                                        <h3 *ngIf="evaluators[i]" class="font-semibold text-gray-900 dark:text-gray-200">Evaluation by {{evaluators[i].firstName}} {{evaluators[i].lastName}} </h3>
-                                    </div>
-                                    <p class="font-bold dark:text-gray-200">Avarage:  <span class="font-semibold text-gray-900 "> </span>  {{ev.average}} </p>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4 dark:bg-gray-700">
-                                        <div class="{{colors[i].average}} h-2.5  rounded-full " style="width: {{evaluations[i].average}}%"></div>
-                                    </div>
-                                    <!-- <a  class="flex items-center font-medium text-gray-700 pt-2">Evaluation breakdown by criteria <svg class="w-2 h-2 ml-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10"> -->
-                                    <!-- <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-                                    </svg></a> -->
-                                    <div>
-                                        <h1 class="mb-2  dark:text-gray-200">Achievable: {{ev.achievable}}</h1>
-                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                        
-                                            <div class="{{colors[i].achievable}} h-1  rounded-full" style="width: {{evaluations[i].achievable}}%" > </div>
-                                        
-                                        </div>
-                                        <h1 class="mb-2  dark:text-gray-200">Feasible: {{ev.feasible}}</h1>
-                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                            
-                                            <div class="{{colors[i].feasible}} h-1  rounded-full  " style="width: {{evaluations[i].feasible}}%"> </div>
-                                        
-                                        </div>
-                                        <h1 class="mb-2  dark:text-gray-200">Economical: {{ev.economical}}</h1>
-                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                            
-                                            <div class="{{colors[i].economical}} h-1  rounded-full "style="width: {{evaluations[i].economical}}%"> </div>
-                                        
-                                        </div>
-                                        <h1 class="mb-2  dark:text-gray-200">Ecological: {{ev.ecological}}</h1>
-                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                            
-                                            <div class="{{colors[i].ecological}} h-1  rounded-full " style="width: {{evaluations[i].ecological}}%" > </div>
-                                        
-                                        </div>
-                                        <h1 class="mb-2  dark:text-gray-200">Equitable: {{ev.equitable}}</h1>
-                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                            
-                                            <div class="{{colors[i].equitable}} h-1  rounded-full  " style="width: {{evaluations[i].equitable}}%" > </div>
-                                        
-                                        </div>
-                                        <h1 class="mb-2  dark:text-gray-200">Understandable: {{ev.understandable}}</h1>
-                                        <div class="w-full bg-gray-200 rounded-full h-1 mb-2 dark:bg-gray-700">
-                                            
-                                            <div class="{{colors[i].understandable}} h-1  rounded-full"style="width: {{evaluations[i].understandable}}%" > </div>
-                                        
-                                        </div>
-                                        <h1 class="mb-2  dark:text-gray-200">Comment: {{ev.comment}}</h1>
-                                    </div>
-                                    
-                                </div>
-                                <div data-popper-arrow></div>
-                            </div>
-                        </div>
-                    
-                </div>
-
-
-
-            </div>
-
-            <div class=" flex flex-col lg:flex-row  justify-between mx-auto my-14">
-
-                <div class=" container flex flex-col max-w-2xl">
-                    <h1 class="text-center text-2xl font-bold underline underline-offset-8 mb-6 dark:text-gray-200"> Solution</h1>
-                    <app-solution class=" ml-20 w-[36rem]" *ngIf="currentSolution.finished"
-                    [solution]="currentSolution" 
-                    ></app-solution>
-                    
-                </div>
-
-
-
-            </div>
-
-
+    <div class="container mx-auto px-4 py-8 mt-16">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-emerald-800 dark:text-emerald-200 flex items-center gap-3">
+                <span class="text-emerald-700 dark:text-emerald-300">
+                    Evaluation Dashboard
+                </span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium brand-badge">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                    </svg>
+                    {{currentSolution.numberofTimesEvaluated || 0}} Evaluations
+                </span>
+            </h1>
+            <p class="mt-2 text-slate-600 dark:text-slate-400">Comprehensive analysis of solution evaluations and
+                feedback</p>
         </div>
-        <app-footer class="md:hidden"></app-footer>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <!-- Left Column: Summary & Evaluators -->
+            <div class="space-y-6">
+                <!-- Overall Summary Card -->
+                <div class="evaluation-card" *ngIf="currentSolution.evaluationDetails && currentSolution.evaluationDetails!.length > 0">
+                    <div class="card-header">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-emerald-700 dark:text-white flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-lg brand-icon flex items-center justify-center text-white">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                </span>
+                                Overall Summary
+                            </h2>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Average Score Circle -->
+                        <div class="flex items-center justify-center mb-6">
+                            <div class="relative">
+                                <svg class="score-ring" viewBox="0 0 100 100">
+                                    <circle class="score-ring-bg" cx="50" cy="50" r="42" />
+                                    <circle class="score-ring-progress" cx="50" cy="50" r="42"
+                                        [style.strokeDasharray]="'264 264'"
+                                        [style.strokeDashoffset]="264 - (264 * evaluationSummary.average / 100)" />
+                                </svg>
+                                <div class="score-value">
+                                    <span class="text-3xl font-bold text-emerald-700 dark:text-white">
+                                        {{formatToOneDecimal(currentSolution.evaluationSummary!.average)}}
+                                    </span>
+                                    <span class="text-sm text-slate-500 dark:text-slate-400">/10</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Criteria Breakdown -->
+                        <div class="space-y-4">
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <span class="criteria-label">
+                                        <span class="criteria-icon achievable">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                        Achievable
+                                    </span>
+                                    <span class="criteria-value">{{formatToOneDecimal(currentSolution.evaluationSummary!.achievable)}}</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar {{color.achievable}}" [style.width.%]="evaluationSummary.achievable"></div>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <span class="criteria-label">
+                                        <span class="criteria-icon feasible">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
+                                            </svg>
+                                        </span>
+                                        Feasible
+                                    </span>
+                                    <span class="criteria-value">{{formatToOneDecimal(currentSolution.evaluationSummary!.feasible)}}</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar {{color.feasible}}" [style.width.%]="evaluationSummary.feasible"></div>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <span class="criteria-label">
+                                        <span class="criteria-icon economical">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                        Economical
+                                    </span>
+                                    <span class="criteria-value">{{formatToOneDecimal(currentSolution.evaluationSummary!.economical)}}</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar {{color.economical}}" [style.width.%]="evaluationSummary.economical"></div>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <span class="criteria-label">
+                                        <span class="criteria-icon ecological">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                        Ecological
+                                    </span>
+                                    <span class="criteria-value">{{formatToOneDecimal(currentSolution.evaluationSummary!.ecological)}}</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar {{color.ecological}}" [style.width.%]="evaluationSummary.ecological"></div>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <span class="criteria-label">
+                                        <span class="criteria-icon equitable">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
+                                            </svg>
+                                        </span>
+                                        Equitable
+                                    </span>
+                                    <span class="criteria-value">{{formatToOneDecimal(currentSolution.evaluationSummary!.equitable)}}</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar {{color.equitable}}" [style.width.%]="evaluationSummary.equitable"></div>
+                                </div>
+                            </div>
+
+                            <div class="criteria-item">
+                                <div class="criteria-header">
+                                    <span class="criteria-label">
+                                        <span class="criteria-icon understandable">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
+                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                        Understandable
+                                    </span>
+                                    <span class="criteria-value">{{formatToOneDecimal(currentSolution.evaluationSummary!.understandable)}}</span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar {{color.understandable}}" [style.width.%]="evaluationSummary.understandable"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Evaluations Card -->
+                <div class="evaluation-card empty-state" *ngIf="!currentSolution.evaluationDetails || currentSolution.evaluationDetails.length == 0">
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                            <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-emerald-700 dark:text-emerald-200 mb-2">No Evaluations Yet</h3>
+                        <p class="text-slate-500 dark:text-slate-400 max-w-xs">This solution hasn't received any evaluations. Check back later!</p>
+                    </div>
+                </div>
+
+                <!-- Individual Evaluators Section -->
+                <div *ngIf="currentSolution.evaluationDetails && currentSolution.evaluationDetails!.length > 0" class="space-y-4">
+                    <h2 class="text-lg font-semibold text-emerald-700 dark:text-white flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg brand-icon flex items-center justify-center text-white">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </span>
+                        Evaluator Breakdown
+                    </h2>
+
+                    <!-- Evaluator Cards -->
+                    <div class="space-y-4" *ngFor="let ev of currentSolution.evaluationDetails; let i = index">
+                        <div class="evaluator-card">
+                            <div class="evaluator-header">
+                                <div class="flex items-center gap-4">
+                                    <div class="evaluator-avatar">
+                                        <ng-container *ngIf="evaluators[i]?.profilePicture?.downloadURL; else evaluatorInitial">
+                                            <img [src]="evaluators[i].profilePicture?.downloadURL"
+                                                class="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-slate-700"
+                                                alt="Evaluator">
+                                        </ng-container>
+                                        <ng-template #evaluatorInitial>
+                                            <div
+                                                class="w-12 h-12 rounded-full ring-2 ring-white dark:ring-slate-700 avatar-initial flex items-center justify-center text-white font-semibold text-lg"
+                                                [style.background]="getInitialColor(getEvaluatorDisplayName(i, ev))">
+                                                {{getInitial(getEvaluatorDisplayName(i, ev))}}
+                                            </div>
+                                        </ng-template>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-emerald-700 dark:text-white">
+                                            {{getEvaluatorDisplayName(i, ev)}}
+                                        </h3>
+                                        <span class="text-sm text-slate-500 dark:text-slate-400">Evaluator</span>
+                                    </div>
+                                </div>
+                                <div class="evaluator-score">
+                                    <span class="text-2xl font-bold text-emerald-700 dark:text-white">{{formatToOneDecimal(ev.average)}}</span>
+                                    <span class="text-xs text-slate-500 dark:text-slate-400">/10</span>
+                                </div>
+                            </div>
+
+                            <div class="evaluator-body">
+                                <!-- Mini Progress Bars -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="mini-criteria">
+                                        <span class="mini-label">Achievable</span>
+                                        <div class="mini-bar-container">
+                                            <div class="mini-bar {{colors[i].achievable}}" [style.width.%]="evaluations[i].achievable"></div>
+                                        </div>
+                                        <span class="mini-value">{{formatToOneDecimal(ev.achievable)}}</span>
+                                    </div>
+                                    <div class="mini-criteria">
+                                        <span class="mini-label">Feasible</span>
+                                        <div class="mini-bar-container">
+                                            <div class="mini-bar {{colors[i].feasible}}" [style.width.%]="evaluations[i].feasible"></div>
+                                        </div>
+                                        <span class="mini-value">{{formatToOneDecimal(ev.feasible)}}</span>
+                                    </div>
+                                    <div class="mini-criteria">
+                                        <span class="mini-label">Economical</span>
+                                        <div class="mini-bar-container">
+                                            <div class="mini-bar {{colors[i].economical}}" [style.width.%]="evaluations[i].economical"></div>
+                                        </div>
+                                        <span class="mini-value">{{formatToOneDecimal(ev.economical)}}</span>
+                                    </div>
+                                    <div class="mini-criteria">
+                                        <span class="mini-label">Ecological</span>
+                                        <div class="mini-bar-container">
+                                            <div class="mini-bar {{colors[i].ecological}}" [style.width.%]="evaluations[i].ecological"></div>
+                                        </div>
+                                        <span class="mini-value">{{formatToOneDecimal(ev.ecological)}}</span>
+                                    </div>
+                                    <div class="mini-criteria">
+                                        <span class="mini-label">Equitable</span>
+                                        <div class="mini-bar-container">
+                                            <div class="mini-bar {{colors[i].equitable}}" [style.width.%]="evaluations[i].equitable"></div>
+                                        </div>
+                                        <span class="mini-value">{{formatToOneDecimal(ev.equitable)}}</span>
+                                    </div>
+                                    <div class="mini-criteria">
+                                        <span class="mini-label">Understandable</span>
+                                        <div class="mini-bar-container">
+                                            <div class="mini-bar {{colors[i].understandable}}" [style.width.%]="evaluations[i].understandable"></div>
+                                        </div>
+                                        <span class="mini-value">{{formatToOneDecimal(ev.understandable)}}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Comment Section -->
+                                <div *ngIf="ev.comment" class="comment-section">
+                                    <div class="flex items-start gap-2">
+                                        <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        <p class="text-sm text-slate-600 dark:text-slate-300 italic">"{{ev.comment}}"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Solution Preview -->
+            <div class="space-y-6">
+                <div class="evaluation-card">
+                    <div class="card-header">
+                        <h2 class="text-lg font-semibold text-emerald-700 dark:text-white flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-lg brand-icon-light flex items-center justify-center text-emerald-700">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </span>
+                            Solution Preview
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <app-solution class="block" *ngIf="currentSolution.finished"
+                            [solution]="currentSolution"></app-solution>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <app-footer class="md:hidden"></app-footer>
 </div>
 
 <app-chatbot></app-chatbot>

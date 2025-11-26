@@ -1,0 +1,305 @@
+:host {
+    --brand-primary: #059669;
+    --brand-primary-dark: #047857;
+    --brand-light: #ecfdf5;
+    --brand-light-soft: #d1fae5;
+}
+
+.brand-gradient {
+    background: linear-gradient(135deg, var(--brand-light) 0%, #ffffff 45%, var(--brand-light-soft) 100%);
+}
+
+:host-context(.dark) .brand-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #0b1120 100%);
+}
+
+.brand-icon {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+    box-shadow: 0 8px 16px rgba(4, 120, 87, 0.35);
+}
+
+.brand-icon-light {
+    background: linear-gradient(135deg, rgba(209, 250, 229, 0.95), rgba(167, 243, 208, 0.95));
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    color: var(--brand-primary-dark);
+}
+
+.brand-badge {
+    background-color: rgba(209, 250, 229, 0.85);
+    color: var(--brand-primary);
+    border: 1px solid rgba(4, 120, 87, 0.2);
+}
+
+:host-context(.dark) .brand-badge {
+    background-color: rgba(15, 23, 42, 0.7);
+    color: var(--brand-light);
+    border-color: rgba(209, 250, 229, 0.25);
+}
+
+/* Evaluation Summary Dashboard Styles */
+
+/* Card Base Styles */
+.evaluation-card {
+    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 overflow-hidden;
+    @apply border border-slate-100 dark:border-slate-700/50;
+    @apply transition-all duration-300 ease-out;
+    border-color: rgba(4, 120, 87, 0.15);
+}
+
+.evaluation-card:hover {
+    @apply shadow-xl shadow-slate-200/70 dark:shadow-slate-900/70;
+    transform: translateY(-2px);
+    border-color: rgba(4, 120, 87, 0.35);
+}
+
+.evaluation-card.empty-state {
+    background: linear-gradient(135deg, rgba(209, 250, 229, 0.95), #ffffff);
+}
+
+:host-context(.dark) .evaluation-card.empty-state {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+.card-header {
+    @apply px-6 py-4 border-b border-slate-100 dark:border-slate-700/50;
+    background: linear-gradient(90deg, rgba(209, 250, 229, 0.6), transparent);
+}
+
+:host-context(.dark) .card-header {
+    background: linear-gradient(90deg, rgba(15, 23, 42, 0.7), transparent);
+}
+
+.card-body {
+    @apply p-6;
+}
+
+/* Score Ring */
+.score-ring {
+    @apply w-32 h-32;
+    transform: rotate(-90deg);
+}
+
+.score-ring-bg {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 8;
+}
+
+:host-context(.dark) .score-ring-bg {
+    stroke: #334155;
+}
+
+.score-ring-progress {
+    fill: none;
+    stroke: url(#gradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-ring-progress {
+    stroke: var(--brand-primary);
+}
+
+.score-value {
+    @apply absolute inset-0 flex items-center justify-center flex-col;
+}
+
+.relative {
+    position: relative;
+}
+
+/* Criteria Items */
+.criteria-item {
+    @apply space-y-2;
+}
+
+.criteria-header {
+    @apply flex items-center justify-between;
+}
+
+.criteria-label {
+    @apply flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300;
+}
+
+.criteria-icon {
+    @apply w-6 h-6 rounded-md flex items-center justify-center text-white;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+}
+
+.criteria-value {
+    @apply text-sm font-bold text-emerald-700 dark:text-white tabular-nums;
+}
+
+/* Progress Bars */
+.progress-bar-bg {
+    @apply w-full h-2 rounded-full overflow-hidden;
+    background-color: rgba(16, 185, 129, 0.15);
+}
+
+:host-context(.dark) .progress-bar-bg {
+    background-color: rgba(51, 65, 85, 0.6);
+}
+
+.progress-bar {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+}
+
+/* Evaluator Cards */
+.evaluator-card {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-md shadow-slate-200/50 dark:shadow-slate-900/50;
+    @apply border border-slate-100 dark:border-slate-700/50;
+    @apply overflow-hidden transition-all duration-300;
+    border-color: rgba(4, 120, 87, 0.15);
+}
+
+.evaluator-card:hover {
+    @apply shadow-lg;
+    border-color: rgba(4, 120, 87, 0.35);
+}
+
+.evaluator-header {
+    @apply flex items-center justify-between p-4;
+    background: linear-gradient(90deg, rgba(209, 250, 229, 0.6), transparent);
+    @apply border-b border-slate-100 dark:border-slate-700/50;
+}
+
+.evaluator-avatar {
+    @apply relative;
+}
+
+.evaluator-avatar::after {
+    content: '';
+    @apply absolute inset-0 rounded-full;
+    box-shadow: 0 0 0 2px rgba(209, 250, 229, 1);
+}
+
+:host-context(.dark) .evaluator-avatar::after {
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.5);
+}
+
+.avatar-initial {
+    @apply flex-shrink-0;
+    font-weight: 600;
+    letter-spacing: 0;
+    user-select: none;
+}
+
+.evaluator-score {
+    @apply flex items-baseline gap-0.5;
+}
+
+.evaluator-body {
+    @apply p-4 space-y-4;
+}
+
+/* Mini Criteria for Evaluator Cards */
+.mini-criteria {
+    @apply flex items-center gap-2;
+}
+
+.mini-label {
+    @apply text-xs text-slate-500 dark:text-slate-400 w-24 truncate;
+}
+
+.mini-bar-container {
+    @apply flex-1 h-1.5 rounded-full overflow-hidden;
+    background-color: rgba(16, 185, 129, 0.15);
+}
+
+.mini-bar {
+    @apply h-full rounded-full transition-all duration-500;
+}
+
+.mini-value {
+    @apply text-xs font-semibold text-emerald-700 dark:text-slate-300 w-6 text-right tabular-nums;
+}
+
+/* Comment Section */
+.comment-section {
+    @apply mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50;
+    border-color: rgba(4, 120, 87, 0.15);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.evaluation-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.evaluator-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.evaluator-card:nth-child(1) { animation-delay: 0.1s; }
+.evaluator-card:nth-child(2) { animation-delay: 0.2s; }
+.evaluator-card:nth-child(3) { animation-delay: 0.3s; }
+.evaluator-card:nth-child(4) { animation-delay: 0.4s; }
+.evaluator-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Progress bar animation */
+@keyframes progressFill {
+    from {
+        width: 0;
+    }
+}
+
+.progress-bar {
+    animation: progressFill 1s ease-out forwards;
+    animation-delay: 0.3s;
+}
+
+.mini-bar {
+    animation: progressFill 0.8s ease-out forwards;
+    animation-delay: 0.2s;
+}
+
+/* Hover effects for interactive elements */
+.criteria-item:hover .criteria-label {
+    @apply text-emerald-700 dark:text-emerald-300;
+}
+
+.criteria-item:hover .progress-bar {
+    @apply opacity-90;
+    filter: brightness(1.1);
+}
+
+/* Color utilities for dynamic classes - These are already Tailwind classes, no need to redefine */
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .mini-criteria {
+        @apply flex-wrap;
+    }
+    
+    .mini-label {
+        @apply w-full mb-1;
+    }
+    
+    .mini-bar-container {
+        @apply flex-grow;
+    }
+}
+
+/* Glass morphism effect for cards */
+@supports (backdrop-filter: blur(10px)) {
+    .evaluation-card {
+        @apply bg-white/80 dark:bg-slate-800/80;
+        backdrop-filter: blur(10px);
+    }
+    
+    .evaluator-card {
+        @apply bg-white/80 dark:bg-slate-800/80;
+        backdrop-filter: blur(10px);
+    }
+}
