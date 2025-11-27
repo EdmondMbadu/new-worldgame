@@ -269,8 +269,7 @@
         "three": {
           "label": "Étape 3",
           "title": "Tracer la voie à suivre",
-          "description": "Comment atteignons-nous notre objectif/ comment résolvons-nous le problème/que faisons-nous/où/comment/quand ?",
-          "details": "Quelles technologies, politiques, programmes, partenaires et financements sont nécessaires pour tester, puis changer d'échelle ?",
+          "description": "Comment atteignons-nous notre objectif/comment résolvons-nous le problème/que faisons-nous/où/comment/quand/Quelles technologies, politiques, programmes, partenaires et financements sont nécessaires pour tester, puis changer d'échelle",
           "aiPrompt": "Demandez aux collègues IA Bucky, Amina, Li, Sofia, Arjun, Elana, Tane ou Zane de l'aide, des retours, des réponses, des conseils, ce qui manque.",
           "imageAlt": "Illustration de l'étape 3"
         }
