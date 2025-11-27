@@ -1078,47 +1078,61 @@ export const onChatPrompt = functions
         : 'gemini-2.5-flash';
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        tools: [{ google_search: {} }],
-        generationConfig: wantsImage
-          ? { responseModalities: ['TEXT', 'IMAGE'] }
-          : {},
-      } as any);
+      const modelConfig: Record<string, unknown> = { model: modelName };
+      if (!wantsImage) {
+        modelConfig['tools'] = [{ google_search: {} }];
+      } else {
+        modelConfig['generationConfig'] = { responseModalities: ['TEXT', 'IMAGE'] };
+      }
+      const model = genAI.getGenerativeModel(modelConfig as any);
 
       // ────────── 3. generate ───────────────────────────────────
-      const streamResult = await model.generateContentStream(history);
-
       let answer = '';
       let imgB64 = '';
-      const STREAM_THROTTLE_MS = 250;
-      let lastStreamUpdate = 0;
+      let finalResponse: any;
 
-      for await (const chunk of streamResult.stream) {
-        const chunkText = chunk.text();
-        if (!chunkText) continue;
-
-        answer += chunkText;
-        const now = Date.now();
-        const shouldFlush =
-          now - lastStreamUpdate >= STREAM_THROTTLE_MS || answer.length <= 60;
-
-        if (shouldFlush) {
-          lastStreamUpdate = now;
-          await snap.ref.update({
-            status: { state: 'PROCESSING', streaming: true },
-            response: answer,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
+      if (wantsImage) {
+        // Image model does not support streaming; do one-shot generation.
+        const result = await model.generateContent(history);
+        finalResponse = await result.response;
+        for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
+          if (part.text) {
+            answer += part.text;
+          } else if (part.inlineData?.data) {
+            imgB64 = part.inlineData.data;
+          }
         }
-      }
+      } else {
+        const streamResult = await model.generateContentStream(history);
+        const STREAM_THROTTLE_MS = 250;
+        let lastStreamUpdate = 0;
 
-      const finalResponse = await streamResult.response;
-      for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
-        if (part.text && !answer.includes(part.text)) {
-          answer += part.text;
-        } else if (part.inlineData?.data) {
-          imgB64 = part.inlineData.data;
+        for await (const chunk of streamResult.stream) {
+          const chunkText = chunk.text();
+          if (!chunkText) continue;
+
+          answer += chunkText;
+          const now = Date.now();
+          const shouldFlush =
+            now - lastStreamUpdate >= STREAM_THROTTLE_MS || answer.length <= 60;
+
+          if (shouldFlush) {
+            lastStreamUpdate = now;
+            await snap.ref.update({
+              status: { state: 'PROCESSING', streaming: true },
+              response: answer,
+              updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
+          }
+        }
+
+        finalResponse = await streamResult.response;
+        for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
+          if (part.text && !answer.includes(part.text)) {
+            answer += part.text;
+          } else if (part.inlineData?.data) {
+            imgB64 = part.inlineData.data;
+          }
         }
       }
 
