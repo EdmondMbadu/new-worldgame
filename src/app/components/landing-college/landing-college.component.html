@@ -98,104 +98,134 @@
   </section>
 
   <!-- Step cards -->
-  <section id="steps" class="py-16 bg-white dark:bg-slate-950">
-    <div class="container mx-auto px-6">
-      <div class="text-center max-w-3xl mx-auto mb-12">
-        <p
-          class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300"
-        >
-          {{ 'landingCollege.steps.badge' | translate }}
-        </p>
-        <h2
-          class="mt-4 text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
-        >
-          {{ 'landingCollege.steps.title' | translate }}
-        </h2>
-      </div>
-      <div class="grid gap-10 md:grid-cols-3">
-        <!-- Step 1 -->
-        <article
-          class="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden"
-        >
-          <img
-            src="assets/img/step-1.png"
-            [attr.alt]="'landingCollege.steps.cards.one.imageAlt' | translate"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-6 space-y-4">
-            <div
-              class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
-            >
-              {{ 'landingCollege.steps.cards.one.label' | translate }}
+  @defer (on viewport; prefetch on idle) {
+    <section id="steps" class="py-16 bg-white dark:bg-slate-950">
+      <div class="container mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <p
+            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300"
+          >
+            {{ 'landingCollege.steps.badge' | translate }}
+          </p>
+          <h2
+            class="mt-4 text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
+          >
+            {{ 'landingCollege.steps.title' | translate }}
+          </h2>
+        </div>
+        <div class="grid gap-10 md:grid-cols-3">
+          <!-- Step 1 -->
+          <article
+            class="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden"
+          >
+            <img
+              ngSrc="assets/img/step-1.png"
+              [attr.alt]="
+                'landingCollege.steps.cards.one.imageAlt' | translate
+              "
+              width="693"
+              height="959"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6 space-y-4">
+              <div
+                class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
+              >
+                {{ 'landingCollege.steps.cards.one.label' | translate }}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+                {{ 'landingCollege.steps.cards.one.title' | translate }}
+              </h3>
+              <p class="text-slate-600 dark:text-slate-300">
+                {{ 'landingCollege.steps.cards.one.description' | translate }}
+              </p>
+              <p
+                class="text-sm font-semibold text-slate-800 dark:text-slate-100"
+              >
+                {{ 'landingCollege.steps.cards.one.aiPrompt' | translate }}
+              </p>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-              {{ 'landingCollege.steps.cards.one.title' | translate }}
-            </h3>
-            <p class="text-slate-600 dark:text-slate-300">
-              {{ 'landingCollege.steps.cards.one.description' | translate }}
-            </p>
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              {{ 'landingCollege.steps.cards.one.aiPrompt' | translate }}
-            </p>
-          </div>
-        </article>
+          </article>
 
-        <!-- Step 2 -->
-        <article
-          class="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden"
-        >
-          <img
-            src="assets/img/step-2.png"
-            [attr.alt]="'landingCollege.steps.cards.two.imageAlt' | translate"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-6 space-y-4">
-            <div
-              class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
-            >
-              {{ 'landingCollege.steps.cards.two.label' | translate }}
+          <!-- Step 2 -->
+          <article
+            class="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden"
+          >
+            <img
+              ngSrc="assets/img/step-2.png"
+              [attr.alt]="
+                'landingCollege.steps.cards.two.imageAlt' | translate
+              "
+              width="696"
+              height="1022"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6 space-y-4">
+              <div
+                class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
+              >
+                {{ 'landingCollege.steps.cards.two.label' | translate }}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+                {{ 'landingCollege.steps.cards.two.title' | translate }}
+              </h3>
+              <p class="text-slate-600 dark:text-slate-300">
+                {{ 'landingCollege.steps.cards.two.description' | translate }}
+              </p>
+              <p
+                class="text-sm font-semibold text-slate-800 dark:text-slate-100"
+              >
+                {{ 'landingCollege.steps.cards.two.aiPrompt' | translate }}
+              </p>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-              {{ 'landingCollege.steps.cards.two.title' | translate }}
-            </h3>
-            <p class="text-slate-600 dark:text-slate-300">
-              {{ 'landingCollege.steps.cards.two.description' | translate }}
-            </p>
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              {{ 'landingCollege.steps.cards.two.aiPrompt' | translate }}
-            </p>
-          </div>
-        </article>
+          </article>
 
-        <!-- Step 3 -->
-        <article
-          class="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden"
-        >
-          <img
-            src="assets/img/step-3.png"
-            [attr.alt]="'landingCollege.steps.cards.three.imageAlt' | translate"
-            class="w-full h-48 object-cover"
-          />
-          <div class="p-6 space-y-4">
-            <div
-              class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
-            >
-              {{ 'landingCollege.steps.cards.three.label' | translate }}
+          <!-- Step 3 -->
+          <article
+            class="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden"
+          >
+            <img
+              ngSrc="assets/img/step-3.png"
+              [attr.alt]="
+                'landingCollege.steps.cards.three.imageAlt' | translate
+              "
+              width="690"
+              height="917"
+              class="w-full h-48 object-cover"
+            />
+            <div class="p-6 space-y-4">
+              <div
+                class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-300 uppercase tracking-widest"
+              >
+                {{ 'landingCollege.steps.cards.three.label' | translate }}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+                {{ 'landingCollege.steps.cards.three.title' | translate }}
+              </h3>
+              <p class="text-slate-600 dark:text-slate-300">
+                {{ 'landingCollege.steps.cards.three.description' | translate }}
+              </p>
+              <p
+                class="text-sm font-semibold text-slate-800 dark:text-slate-100"
+              >
+                {{ 'landingCollege.steps.cards.three.aiPrompt' | translate }}
+              </p>
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-              {{ 'landingCollege.steps.cards.three.title' | translate }}
-            </h3>
-            <p class="text-slate-600 dark:text-slate-300">
-              {{ 'landingCollege.steps.cards.three.description' | translate }}
-            </p>
-            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-              {{ 'landingCollege.steps.cards.three.aiPrompt' | translate }}
-            </p>
-          </div>
-        </article>
+          </article>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  } @placeholder {
+    <section
+      id="steps"
+      class="py-16 bg-white dark:bg-slate-950 animate-pulse"
+      aria-busy="true"
+    >
+      <div class="container mx-auto px-6">
+        <div class="h-64 rounded-3xl bg-slate-200/40 dark:bg-slate-800/40"></div>
+      </div>
+    </section>
+  }
 
   <!-- Simple steps & intro -->
   <section
@@ -278,276 +308,383 @@
   </section>
 
   <!-- What's included -->
-  <section id="overview" class="py-16 bg-white dark:bg-slate-900">
-    <div class="container mx-auto px-6">
-      <div class="text-center max-w-3xl mx-auto mb-10">
-        <h2
-          class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
-        >
-          {{ 'landingCollege.included.title' | translate }}
-        </h2>
-        <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-          {{ 'landingCollege.included.subtitle' | translate }}
-        </p>
+  @defer (on viewport; prefetch on idle) {
+    <section id="overview" class="py-16 bg-white dark:bg-slate-900">
+      <div class="container mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-10">
+          <h2
+            class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
+          >
+            {{ 'landingCollege.included.title' | translate }}
+          </h2>
+          <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+            {{ 'landingCollege.included.subtitle' | translate }}
+          </p>
+        </div>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{
+                'landingCollege.included.cards.fullAccess.title' | translate
+              }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{
+                'landingCollege.included.cards.fullAccess.description'
+                  | translate
+              }}
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{ 'landingCollege.included.cards.dashboard.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{
+                'landingCollege.included.cards.dashboard.description'
+                  | translate
+              }}
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{ 'landingCollege.included.cards.ai.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{ 'landingCollege.included.cards.ai.description' | translate }}
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{
+                'landingCollege.included.cards.collaboration.title' | translate
+              }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{
+                'landingCollege.included.cards.collaboration.description'
+                  | translate
+              }}
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{ 'landingCollege.included.cards.tournament.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{
+                'landingCollege.included.cards.tournament.description'
+                  | translate
+              }}
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{ 'landingCollege.included.cards.support.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{
+                'landingCollege.included.cards.support.description' | translate
+              }}
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        <div
-          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.included.cards.fullAccess.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.included.cards.fullAccess.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.included.cards.dashboard.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.included.cards.dashboard.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.included.cards.ai.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.included.cards.ai.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.included.cards.collaboration.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.included.cards.collaboration.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.included.cards.tournament.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.included.cards.tournament.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.included.cards.support.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.included.cards.support.description' | translate }}
-          </p>
-        </div>
+    </section>
+  } @placeholder {
+    <section
+      id="overview"
+      class="py-16 bg-white dark:bg-slate-900 animate-pulse"
+      aria-busy="true"
+    >
+      <div class="container mx-auto px-6">
+        <div class="h-48 rounded-3xl bg-slate-200/40 dark:bg-slate-800/40"></div>
       </div>
-    </div>
-  </section>
+    </section>
+  }
 
   <!-- Other benefits -->
-  <section id="benefits" class="py-16 bg-slate-50 dark:bg-slate-950">
-    <div class="container mx-auto px-6">
-      <div class="text-center max-w-2xl mx-auto mb-12">
-        <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
-          {{ 'landingCollege.benefits.title' | translate }}
-        </h2>
+  @defer (on viewport; prefetch on idle) {
+    <section id="benefits" class="py-16 bg-slate-50 dark:bg-slate-950">
+      <div class="container mx-auto px-6">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+          <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
+            {{ 'landingCollege.benefits.title' | translate }}
+          </h2>
+        </div>
+        <div class="grid gap-8 md:grid-cols-3">
+          <div
+            class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{
+                'landingCollege.benefits.cards.interdisciplinary.title'
+                  | translate
+              }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{
+                'landingCollege.benefits.cards.interdisciplinary.description'
+                  | translate
+              }}
+            </p>
+          </div>
+          <div
+            class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{ 'landingCollege.benefits.cards.data.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{ 'landingCollege.benefits.cards.data.description' | translate }}
+            </p>
+          </div>
+          <div
+            class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+          >
+            <h3
+              class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+            >
+              {{ 'landingCollege.benefits.cards.impact.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{ 'landingCollege.benefits.cards.impact.description' | translate }}
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="grid gap-8 md:grid-cols-3">
-        <div
-          class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.benefits.cards.interdisciplinary.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.benefits.cards.interdisciplinary.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.benefits.cards.data.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.benefits.cards.data.description' | translate }}
-          </p>
-        </div>
-        <div
-          class="p-6 h-full rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.benefits.cards.impact.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.benefits.cards.impact.description' | translate }}
-          </p>
-        </div>
+    </section>
+  } @placeholder {
+    <section
+      id="benefits"
+      class="py-16 bg-slate-50 dark:bg-slate-950 animate-pulse"
+      aria-busy="true"
+    >
+      <div class="container mx-auto px-6">
+        <div class="h-48 rounded-3xl bg-slate-200/40 dark:bg-slate-800/40"></div>
       </div>
-    </div>
-  </section>
+    </section>
+  }
 
   <!-- AI colleagues -->
-  <section id="colleagues" class="py-16 bg-white dark:bg-slate-900">
-    <div class="container mx-auto px-6">
-      <div class="text-center max-w-3xl mx-auto mb-12">
-        <h2
-          class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
-        >
-          {{ 'landingCollege.ai.title' | translate }}
-        </h2>
-        <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-          {{ 'landingCollege.ai.subtitle' | translate }}
-        </p>
-      </div>
-      <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <article
-          *ngFor="let ai of aiOptions; trackBy: trackByIndex"
-          class="flex flex-col items-center bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm"
-        >
-          <img
-            [src]="ai.avatarPath"
-            [alt]="ai.name"
-            class="w-24 h-24 rounded-full object-cover shadow mb-4"
-          />
-          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-            {{ ai.name }}
-          </h3>
-          <p
-            class="text-sm text-indigo-600 dark:text-indigo-300 capitalize mb-2"
+  @defer (on viewport; prefetch on idle) {
+    <section id="colleagues" class="py-16 bg-white dark:bg-slate-900">
+      <div class="container mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <h2
+            class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white"
           >
-            {{ ai.group }}
-          </p>
-          <p class="text-sm text-slate-600 dark:text-slate-300 text-center">
-            {{ ai.intro | slice : 0 : 100
-            }}{{ ai.intro.length > 100 ? "…" : "" }}
-          </p>
-        </article>
-      </div>
-      <div class="mt-12 grid gap-6 md:grid-cols-2">
-        <div
-          class="p-6 rounded-3xl bg-indigo-600/10 border border-indigo-200 dark:border-indigo-800"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.ai.teacher' | translate }}
-          </h3>
-          <p class="text-slate-700 dark:text-slate-300">
-            {{ 'landingCollege.ai.teacherText' | translate }}
+            {{ 'landingCollege.ai.title' | translate }}
+          </h2>
+          <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+            {{ 'landingCollege.ai.subtitle' | translate }}
           </p>
         </div>
-        <div
-          class="p-6 rounded-3xl bg-emerald-600/10 border border-emerald-200 dark:border-emerald-800"
-        >
-          <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-            {{ 'landingCollege.ai.student' | translate }}
-          </h3>
-          <p class="text-slate-700 dark:text-slate-300">
-            {{ 'landingCollege.ai.studentText' | translate }}
-          </p>
+        <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <article
+            *ngFor="let ai of aiOptions; trackBy: trackByIndex"
+            class="flex flex-col items-center bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm"
+          >
+            <img
+              [ngSrc]="ai.avatarPath"
+              [alt]="ai.name"
+              width="96"
+              height="96"
+              class="w-24 h-24 rounded-full object-cover shadow mb-4"
+            />
+            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+              {{ ai.name }}
+            </h3>
+            <p
+              class="text-sm text-indigo-600 dark:text-indigo-300 capitalize mb-2"
+            >
+              {{ ai.group }}
+            </p>
+            <p class="text-sm text-slate-600 dark:text-slate-300 text-center">
+              {{ ai.intro | slice : 0 : 100
+              }}{{ ai.intro.length > 100 ? "…" : "" }}
+            </p>
+          </article>
+        </div>
+        <div class="mt-12 grid gap-6 md:grid-cols-2">
+          <div
+            class="p-6 rounded-3xl bg-indigo-600/10 border border-indigo-200 dark:border-indigo-800"
+          >
+            <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
+              {{ 'landingCollege.ai.teacher' | translate }}
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300">
+              {{ 'landingCollege.ai.teacherText' | translate }}
+            </p>
+          </div>
+          <div
+            class="p-6 rounded-3xl bg-emerald-600/10 border border-emerald-200 dark:border-emerald-800"
+          >
+            <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
+              {{ 'landingCollege.ai.student' | translate }}
+            </h3>
+            <p class="text-slate-700 dark:text-slate-300">
+              {{ 'landingCollege.ai.studentText' | translate }}
+            </p>
+          </div>
+        </div>
+        <div class="mt-8 text-center">
+          <a
+            routerLink="/other-ais"
+            class="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
+          >
+            {{ 'landingCollege.cta.exploreAi' | translate }}
+          </a>
         </div>
       </div>
-      <div class="mt-8 text-center">
-        <a
-          routerLink="/other-ais"
-          class="inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
-        >
-          {{ 'landingCollege.cta.exploreAi' | translate }}
-        </a>
+    </section>
+  } @placeholder {
+    <section
+      id="colleagues"
+      class="py-16 bg-white dark:bg-slate-900 animate-pulse"
+      aria-busy="true"
+    >
+      <div class="container mx-auto px-6">
+        <div class="h-64 rounded-3xl bg-slate-200/40 dark:bg-slate-800/40"></div>
       </div>
-    </div>
-  </section>
+    </section>
+  }
 
   <!-- Pricing -->
-  <section id="pricing" class="py-16 bg-slate-50 dark:bg-slate-950">
-    <div class="container mx-auto px-6">
-      <div class="grid gap-8 md:grid-cols-2">
-        <div
-          class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg"
-        >
-          <p
-            class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300 mb-4"
+  @defer (on viewport; prefetch on idle) {
+    <section id="pricing" class="py-16 bg-slate-50 dark:bg-slate-950">
+      <div class="container mx-auto px-6">
+        <div class="grid gap-8 md:grid-cols-2">
+          <div
+            class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg"
           >
-            {{ 'landingCollege.pricing.classPlan.badge' | translate }}
-          </p>
-          <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            {{ 'landingCollege.pricing.classPlan.price' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.pricing.classPlan.note' | translate }}
-          </p>
-          <ul class="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
-            <li>
-              {{ 'landingCollege.pricing.classPlan.features.item1' | translate }}
-            </li>
-            <li>
-              {{ 'landingCollege.pricing.classPlan.features.item2' | translate }}
-            </li>
-            <li>
-              {{ 'landingCollege.pricing.classPlan.features.item3' | translate }}
-            </li>
-          </ul>
-          <div class="mt-6">
-            <a
-              routerLink="/welcome"
-              class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
+            <p
+              class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300 mb-4"
             >
-              {{ 'landingCollege.cta.startFree' | translate }}
-            </a>
+              {{ 'landingCollege.pricing.classPlan.badge' | translate }}
+            </p>
+            <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">
+              {{ 'landingCollege.pricing.classPlan.price' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{ 'landingCollege.pricing.classPlan.note' | translate }}
+            </p>
+            <ul class="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
+              <li>
+                {{
+                  'landingCollege.pricing.classPlan.features.item1' | translate
+                }}
+              </li>
+              <li>
+                {{
+                  'landingCollege.pricing.classPlan.features.item2' | translate
+                }}
+              </li>
+              <li>
+                {{
+                  'landingCollege.pricing.classPlan.features.item3' | translate
+                }}
+              </li>
+            </ul>
+            <div class="mt-6">
+              <a
+                routerLink="/welcome"
+                class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
+              >
+                {{ 'landingCollege.cta.startFree' | translate }}
+              </a>
+            </div>
+          </div>
+          <div
+            class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg"
+          >
+            <p
+              class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4"
+            >
+              {{ 'landingCollege.pricing.schoolPlan.badge' | translate }}
+            </p>
+            <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">
+              {{ 'landingCollege.pricing.schoolPlan.title' | translate }}
+            </h3>
+            <p class="text-slate-600 dark:text-slate-300">
+              {{ 'landingCollege.pricing.schoolPlan.subtitle' | translate }}
+            </p>
+            <ul class="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
+              <li>
+                {{
+                  'landingCollege.pricing.schoolPlan.features.item1'
+                    | translate
+                }}
+              </li>
+              <li>
+                {{
+                  'landingCollege.pricing.schoolPlan.features.item2'
+                    | translate
+                }}
+              </li>
+              <li>
+                {{
+                  'landingCollege.pricing.schoolPlan.features.item3'
+                    | translate
+                }}
+              </li>
+            </ul>
+            <div class="mt-6">
+              <a
+                routerLink="/contact-us"
+                class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
+              >
+                {{ 'landingCollege.cta.contact' | translate }}
+              </a>
+            </div>
           </div>
         </div>
-        <div
-          class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg"
-        >
-          <p
-            class="text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-4"
-          >
-            {{ 'landingCollege.pricing.schoolPlan.badge' | translate }}
+        <div class="text-center mt-8">
+          <p class="text-lg text-slate-600 dark:text-slate-300">
+            {{ 'landingCollege.pricing.note' | translate }}
           </p>
-          <h3 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">
-            {{ 'landingCollege.pricing.schoolPlan.title' | translate }}
-          </h3>
-          <p class="text-slate-600 dark:text-slate-300">
-            {{ 'landingCollege.pricing.schoolPlan.subtitle' | translate }}
-          </p>
-          <ul class="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
-            <li>
-              {{ 'landingCollege.pricing.schoolPlan.features.item1' | translate }}
-            </li>
-            <li>
-              {{ 'landingCollege.pricing.schoolPlan.features.item2' | translate }}
-            </li>
-            <li>
-              {{ 'landingCollege.pricing.schoolPlan.features.item3' | translate }}
-            </li>
-          </ul>
-          <div class="mt-6">
-            <a
-              routerLink="/contact-us"
-              class="inline-flex items-center justify-center w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow hover:bg-indigo-500 transition"
-            >
-              {{ 'landingCollege.cta.contact' | translate }}
-            </a>
-          </div>
         </div>
       </div>
-      <div class="text-center mt-8">
-        <p class="text-lg text-slate-600 dark:text-slate-300">
-          {{ 'landingCollege.pricing.note' | translate }}
-        </p>
+    </section>
+  } @placeholder {
+    <section
+      id="pricing"
+      class="py-16 bg-slate-50 dark:bg-slate-950 animate-pulse"
+      aria-busy="true"
+    >
+      <div class="container mx-auto px-6">
+        <div class="h-64 rounded-3xl bg-slate-200/40 dark:bg-slate-800/40"></div>
       </div>
-    </div>
-  </section>
+    </section>
+  }
 
   <!-- Final CTA -->
   <section class="py-16 bg-white dark:bg-slate-900">

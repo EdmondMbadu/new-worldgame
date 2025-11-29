@@ -1,4 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+} from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { AIOption, DataService } from 'src/app/services/data.service';
 
@@ -6,18 +11,26 @@ import { AIOption, DataService } from 'src/app/services/data.service';
   selector: 'app-landing-college',
   templateUrl: './landing-college.component.html',
   styleUrls: ['./landing-college.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingCollegeComponent implements OnInit {
   aiOptions: AIOption[] = [];
   isLoggedIn = false;
 
-  constructor(public data: DataService, public auth: AuthService) {}
+  constructor(
+    public data: DataService,
+    public auth: AuthService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   async ngOnInit(): Promise<void> {
-    window.scrollTo(0, 0);
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
     this.aiOptions = this.data.getAll();
     const user = await this.auth.getCurrentUserPromise();
     this.isLoggedIn = !!user;
+    this.cdr.markForCheck();
   }
 
   trackByIndex(index: number): number {

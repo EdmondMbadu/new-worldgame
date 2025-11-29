@@ -11,7 +11,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
             "allowedCommonJsDependencies": [
               "@ckeditor/ckeditor5-build-classic",
@@ -112,6 +112,10 @@
     }
   },
   "cli": {
+    "cache": {
+      "enabled": true,
+      "path": ".angular/cache"
+    },
     "analytics": "fc5bafdb-d268-4410-9ce0-530ade7036cc"
   }
 }

@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { PublicRoutingModule } from './public-routing.module';
@@ -103,6 +103,7 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
   ],
   imports: [
     CommonModule,
+    NgOptimizedImage,
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
