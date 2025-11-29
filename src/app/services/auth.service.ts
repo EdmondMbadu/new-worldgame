@@ -706,7 +706,14 @@ export class AuthService {
     }
 
     // sanitize + clear
-    if (!target || !target.startsWith('/')) target = '/home';
+    if (!target || !target.startsWith('/')) {
+      // Check if user is school admin and redirect accordingly
+      if (this.currentUser?.role === 'schoolAdmin') {
+        target = '/school-admin';
+      } else {
+        target = '/home';
+      }
+    }
     this.redirectUrl = '';
     return target;
   }

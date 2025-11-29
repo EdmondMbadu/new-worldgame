@@ -39,15 +39,27 @@ export class AuthGuard {
     if (requireSchoolAdmin) return this.checkSchoolAdmin(route, state);
     if (requireAdmin) return this.checkPlatformAdmin(state); // strict admin
 
-    // default: must be logged in
+    // default: must be logged in and verified
     return this.auth.user$.pipe(
       take(1),
-      map((u: User | null) => !!u),
-      tap((loggedIn) => {
-        if (!loggedIn) {
-          this.auth.setRedirectUrl(state.url);
-          sessionStorage.setItem('redirectTo', state.url);
-          this.router.navigate(['/login']);
+      map((u: User | null) => {
+        if (!u) return false; // not logged in
+        return u.verified === true; // must be verified
+      }),
+      tap((canAccess) => {
+        if (!canAccess) {
+          // Check if user is logged in but not verified
+          this.auth.user$.pipe(take(1)).subscribe(u => {
+            if (u && u.verified !== true) {
+              // User is logged in but not verified
+              this.router.navigate(['/verify-email']);
+            } else {
+              // User is not logged in
+              this.auth.setRedirectUrl(state.url);
+              sessionStorage.setItem('redirectTo', state.url);
+              this.router.navigate(['/login']);
+            }
+          });
         }
       })
     );

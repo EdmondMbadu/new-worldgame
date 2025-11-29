@@ -7,7 +7,8 @@ import {
   FormControl,
 } from '@angular/forms';
 import { of } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Component({
   selector: 'app-login',
@@ -32,12 +33,26 @@ export class LoginComponent implements OnInit {
       const ss = sessionStorage.getItem('redirectTo');
       if (ss) this.auth.setRedirectUrl(ss);
     }
+
+    // Check if user is already logged in and redirect if needed
+    this.afAuth.authState.subscribe(user => {
+      if (user && (qp || sessionStorage.getItem('redirectTo'))) {
+        // User is already logged in and has a redirect URL, so redirect them
+        const redirectUrl = qp || sessionStorage.getItem('redirectTo');
+        if (redirectUrl) {
+          sessionStorage.removeItem('redirectTo'); // Clean up
+          this.router.navigateByUrl(redirectUrl);
+        }
+      }
+    });
   }
 
   constructor(
     public auth: AuthService,
     private fb: FormBuilder,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
+    private afAuth: AngularFireAuth
   ) {
     this.myForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

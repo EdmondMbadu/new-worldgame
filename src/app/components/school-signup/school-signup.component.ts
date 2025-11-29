@@ -121,9 +121,9 @@ export class SchoolSignupComponent implements OnInit {
           school?.ownerUid === userDoc?.uid
         ) {
           this.blocked = true;
-          this.blockedReason = `You already manage “${school.name}”.`;
+          this.blockedReason = `You already manage "${school.name}".`;
           // Optionally redirect:
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/school-admin']);
         }
       });
   }

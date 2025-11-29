@@ -74,9 +74,9 @@ export class SchoolSignupFreeComponent implements OnInit {
           school?.ownerUid === userDoc?.uid
         ) {
           this.blocked = true;
-          this.blockedReason = `You already manage “${school.name}”.`;
+          this.blockedReason = `You already manage "${school.name}".`;
           // Optionally redirect:
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/school-admin']);
         }
       });
   }
@@ -155,7 +155,11 @@ export class SchoolSignupFreeComponent implements OnInit {
       );
 
       this.success = true;
-      setTimeout(() => this.router.navigate(['/login']), 4000);
+      this.auth.setRedirectUrl('/school-admin');
+      await this.afAuth.signOut();
+      this.router.navigate(['/verify-email'], {
+        queryParams: { redirectTo: '/school-admin', email: this.email },
+      });
     } catch (err: any) {
       console.error(err);
       this.errorMsg = this.friendly(err?.message || '');
