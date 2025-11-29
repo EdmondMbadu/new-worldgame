@@ -11,6 +11,7 @@ import { SignupComponent } from '../components/signup/signup.component';
 import { ForgotPasswordComponent } from '../components/forgot-password/forgot-password.component';
 import { VerifyEmailComponent } from '../components/verify-email/verify-email.component';
 import { SchoolSignupComponent } from '../components/school-signup/school-signup.component';
+import { SchoolSignupFreeComponent } from '../components/school-signup-free/school-signup-free.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import { SchoolSignupComponent } from '../components/school-signup/school-signup
     ForgotPasswordComponent,
     VerifyEmailComponent,
     SchoolSignupComponent,
+    SchoolSignupFreeComponent,
   ],
   imports: [
     CommonModule,

@@ -6,6 +6,7 @@ const AUTH_SEGMENTS = new Set([
   'forgot-password',
   'verify-email',
   'signup-school',
+  'signup-school-free',
 ]);
 
 export const authPathsCanMatch: CanMatchFn = (
