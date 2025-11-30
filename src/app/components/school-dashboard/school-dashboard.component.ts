@@ -239,6 +239,37 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  async deleteClass(c: ClassRow) {
+    if (!confirm(`Delete "${c.name}"? This will remove the class from this school.`)) {
+      return;
+    }
+
+    try {
+      const schoolId = (this.auth.currentUser as any)?.schoolId;
+      if (!schoolId) throw new Error('No school ID');
+
+      const batch = this.afs.firestore.batch();
+
+      // Delete from school's classes subcollection
+      const schoolClassRef = this.afs.firestore.doc(
+        `schools/${schoolId}/classes/${c.challengePageId}`
+      );
+      batch.delete(schoolClassRef);
+
+      // Also delete the main challengePage document
+      const challengePageRef = this.afs.firestore.doc(
+        `challengePages/${c.challengePageId}`
+      );
+      batch.delete(challengePageRef);
+
+      await batch.commit();
+      console.log('Class deleted successfully');
+    } catch (err) {
+      console.error('Error deleting class:', err);
+      alert('Failed to delete class. Please try again.');
+    }
+  }
+
   async sendInvites() {
     const emails = Array.from(new Set(this.parseEmails(this.inviteRaw)));
     if (emails.length === 0) {

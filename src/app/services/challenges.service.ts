@@ -184,7 +184,7 @@ export class ChallengesService {
   async createChallengePage(challengePage: ChallengePage): Promise<void> {
     const user = this.auth.currentUser;
     if (user && user.uid) {
-      const data = {
+      const data: any = {
         challengePageId: challengePage.challengePageId,
         name: challengePage.name,
         heading: challengePage.heading,
@@ -197,6 +197,11 @@ export class ChallengesService {
         participants: challengePage.participants,
         creationDate: this.time.todaysDate(),
       };
+      
+      // Save schoolId if provided (for class mode)
+      if ((challengePage as any).schoolId) {
+        data.schoolId = (challengePage as any).schoolId;
+      }
 
       const challengePageRef: AngularFirestoreDocument<ChallengePage> =
         this.afs.doc(`challengePages/${challengePage.challengePageId}`);

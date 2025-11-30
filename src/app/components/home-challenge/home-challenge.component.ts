@@ -442,6 +442,15 @@ export class HomeChallengeComponent {
     // Delete the challenge page
     batch.delete(challengePageRef);
 
+    // Also delete the denormalized copy under schools if it exists
+    const schoolId = (this.challengePage as any)?.schoolId;
+    if (schoolId) {
+      const schoolClassRef = this.afs.doc(
+        `schools/${schoolId}/classes/${this.challengePageId}`
+      ).ref;
+      batch.delete(schoolClassRef);
+    }
+
     // Fetch and delete all user challenges where `authorId` matches the current user ID
     const userId = this.auth.currentUser.uid;
     this.afs
