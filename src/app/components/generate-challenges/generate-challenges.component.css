@@ -1,0 +1,26 @@
+/* Subtle entrance animation */
+:host {
+    display: block;
+}
+
+/* Upload hover state */
+.hovering {
+    border-color: rgb(20, 184, 166) !important;
+    background-color: rgba(20, 184, 166, 0.05) !important;
+}
+
+/* Input focus glow */
+input:focus,
+textarea:focus {
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.1);
+}
+
+/* Button hover lift effect */
+button[type="submit"]:hover {
+    transform: translateY(-1px);
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+}
+
