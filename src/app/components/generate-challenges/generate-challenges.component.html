@@ -10,35 +10,35 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Create Challenge Page</h1>
-                <p class="mt-2 text-gray-500 dark:text-gray-400">Set up a new challenge page for your community</p>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{{ pageTitle }}</h1>
+                <p class="mt-2 text-gray-500 dark:text-gray-400">{{ pageSubtitle }}</p>
             </div>
 
             <!-- Form Card -->
             <div class="bg-white dark:bg-gray-800/50 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700/50 backdrop-blur-sm overflow-hidden">
                 <div class="p-6 sm:p-8">
                     <div class="space-y-6">
-                        <!-- Page Name -->
+                        <!-- Page/Class Name -->
                         <div class="group">
-                            <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Page Name</label>
+                            <label for="name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ nameLabel }}</label>
                             <input type="text" name="name" id="name" 
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:focus:border-teal-400 outline-none"
                                 [(ngModel)]="name" 
-                                placeholder="e.g., Charles D. Close School of Entrepreneurship">
+                                [placeholder]="namePlaceholder">
                         </div>
 
-                        <!-- Page Heading -->
+                        <!-- Page/Class Heading -->
                         <div class="group">
-                            <label for="heading" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Page Heading</label>
+                            <label for="heading" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ headingLabel }}</label>
                             <input type="text" name="heading" id="heading" 
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:focus:border-teal-400 outline-none"
                                 [(ngModel)]="heading" 
                                 placeholder="e.g., Challenges That Need You and Me!">
                         </div>
 
-                        <!-- Page SubHeading -->
+                        <!-- Page/Class SubHeading -->
                         <div class="group">
-                            <label for="subheading" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Page Subheading</label>
+                            <label for="subheading" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ subheadingLabel }}</label>
                             <input type="text" name="subheading" id="subheading" 
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:focus:border-teal-400 outline-none"
                                 [(ngModel)]="subHeading" 
@@ -128,7 +128,7 @@
                     </button>
                     <button (click)="createChallengePage()" type="submit" 
                         class="px-8 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all duration-200 order-1 sm:order-2">
-                        Create Page
+                        {{ buttonText }}
                     </button>
                 </div>
             </div>

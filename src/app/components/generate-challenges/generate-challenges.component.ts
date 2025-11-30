@@ -25,6 +25,17 @@ export class GenerateChallengesComponent implements OnInit {
   challengePage: ChallengePage = new ChallengePage();
 
   private schoolId: string | null = null;
+  
+  // Mode-based display text
+  isClassMode: boolean = false;
+  pageTitle: string = 'Create Challenge Page';
+  pageSubtitle: string = 'Set up a new challenge page for your community';
+  nameLabel: string = 'Page Name';
+  namePlaceholder: string = 'e.g., Charles D. Close School of Entrepreneurship';
+  headingLabel: string = 'Page Heading';
+  subheadingLabel: string = 'Page Subheading';
+  buttonText: string = 'Create Page';
+
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
@@ -36,10 +47,24 @@ export class GenerateChallengesComponent implements OnInit {
     private challenge: ChallengesService
   ) {}
   ngOnInit(): void {
-    // read sid from query params; fallback to user’s schoolId if exists
+    // read sid and mode from query params
     this.activatedRoute.queryParamMap.subscribe((p) => {
       this.schoolId =
         p.get('sid') || (this.auth.currentUser as any)?.schoolId || null;
+      
+      // Check if we're in "class" mode
+      const mode = p.get('mode');
+      this.isClassMode = mode === 'class';
+      
+      if (this.isClassMode) {
+        this.pageTitle = 'Create Class';
+        this.pageSubtitle = 'Set up a new class for your school';
+        this.nameLabel = 'Class Name';
+        this.namePlaceholder = 'e.g., Introduction to Entrepreneurship';
+        this.headingLabel = 'Class Heading';
+        this.subheadingLabel = 'Class Subheading';
+        this.buttonText = 'Create Class';
+      }
     });
   }
   toggleHover(event: boolean) {

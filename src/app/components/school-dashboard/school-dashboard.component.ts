@@ -233,9 +233,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   }
 
   createClass() {
-    // open the generator and carry the schoolId along
+    // open the generator and carry the schoolId along with class mode
     this.router.navigate(['/generate-challenges'], {
-      queryParams: { sid: (this.auth.currentUser as any)?.schoolId },
+      queryParams: { sid: (this.auth.currentUser as any)?.schoolId, mode: 'class' },
     });
   }
 
