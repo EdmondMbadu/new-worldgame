@@ -18,7 +18,6 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 import { ActivatedRoute, Router } from '@angular/router';
-import * as SimplePeer from 'simple-peer';
 import { Comment, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -63,7 +62,6 @@ export class VideoCallComponent
   isVideoMuted = false;
   solutionTitle: string = '';
   private negotiationLock: boolean = false;
-  private peers: { [id: string]: SimplePeer.Instance } = {};
   localStream: MediaStream | null = null;
   private participantSessions: { [id: string]: string } = {};
 
@@ -156,14 +154,11 @@ export class VideoCallComponent
         (result: { iceServers: RTCIceServer[] }) => {
           this.iceServers = result.iceServers;
           console.log('Fetched ICE servers:', this.iceServers);
-          // After we have iceServers, we can set up signaling
-          this.setupSignaling();
         },
         (error: any) => {
           console.error('Error fetching ICE servers:', error);
           // fallback to default STUN server if needed
           this.iceServers = [{ urls: 'stun:stun.l.google.com:19302' }];
-          this.setupSignaling();
         }
       );
     } catch (err) {
@@ -208,204 +203,9 @@ export class VideoCallComponent
   }
 
   setupSignaling() {
-    // Listen for participants
-    this.solution.getParticipants(this.solutionId).subscribe(
-      (participants) => {
-        const participantMap = new Map<string, string>();
-        participants.forEach((p) => {
-          participantMap.set(p.userId, p.sessionId);
-        });
-
-        // Add new participants or participants with new sessions
-        participantMap.forEach((sessionId, participantId) => {
-          if (participantId === this.userId) return;
-
-          const peerKey = `${participantId}_${sessionId}`;
-
-          if (!this.peers[peerKey]) {
-            console.log(
-              `Adding participant ${participantId} with session ${sessionId}`
-            );
-            this.peers[peerKey] = this.createPeer(
-              participantId,
-              sessionId,
-              this.maxConnectionRetries
-            );
-          }
-        });
-
-        // Remove participants who have left or restarted their session
-        Object.keys(this.peers).forEach((peerKey) => {
-          const [peerId, peerSessionId] = peerKey.split('_');
-          const currentSessionId = participantMap.get(peerId);
-
-          if (!currentSessionId || currentSessionId !== peerSessionId) {
-            console.log(
-              `Participant ${peerId} with session ${peerSessionId} has left or restarted`
-            );
-            this.peers[peerKey].destroy();
-            delete this.peers[peerKey];
-            this.participants = this.participants.filter(
-              (p) => p.id !== peerId || p.sessionId !== peerSessionId
-            );
-          }
-        });
-      },
-      (error) => console.error('Error fetching participants:', error)
-    );
-
-    // Listen for signals intended for us
-    this.solution
-      .getSignals(this.solutionId, this.userId, this.sessionId)
-      .subscribe(
-        (signals) => {
-          signals.forEach((signal) => {
-            const senderId = signal.senderId;
-            const senderSessionId = signal.senderSessionId;
-            const peerKey = `${senderId}_${senderSessionId}`;
-
-            if (!this.peers[peerKey] || this.peers[peerKey].destroyed) {
-              console.warn(
-                `Cannot signal destroyed or nonexistent peer: ${senderId} with session ${senderSessionId}`
-              );
-              this.solution.deleteSignal(this.solutionId, signal.id);
-              return;
-            }
-            try {
-              this.peers[peerKey].signal(signal.signal);
-            } catch (error) {
-              console.error(`Error signaling peer ${senderId}:`, error);
-            }
-
-            // Clean up the signal
-            this.solution.deleteSignal(this.solutionId, signal.id);
-          });
-        },
-        (error) => {
-          console.error('Error fetching signals:', error);
-          // Handle the error appropriately
-        }
-      );
+    // Signaling functionality removed - SimplePeer no longer used
   }
 
-  createPeer(
-    remoteUserId: string,
-    remoteSessionId: string,
-    maxRetries = this.maxConnectionRetries
-  ): SimplePeer.Instance {
-    const userIds = [this.userId, remoteUserId].sort();
-    // const initiator = this.userId === userIds[0];
-    const initiator = this.userId < remoteUserId;
-
-    console.log(
-      `Creating peer with ${remoteUserId}, initiator: ${initiator}, retries left: ${maxRetries}`
-    );
-
-    const peer = new SimplePeer({
-      initiator: initiator,
-      trickle: false,
-      stream: this.localStream!,
-      config: {
-        iceServers: this.iceServers, // Use the dynamically fetched servers
-      },
-    });
-
-    peer.on('signal', (data) => {
-      const sanitizedSignal = this.sanitizeSignal(data);
-      this.solution.sendSignal(this.solutionId, {
-        senderId: this.userId,
-        senderSessionId: this.sessionId,
-        receiverId: remoteUserId,
-        receiverSessionId: remoteSessionId,
-        signal: sanitizedSignal,
-      });
-    });
-
-    peer.on('stream', (stream) => {
-      // Check if participant already exists
-      const existingParticipant = this.participants.find(
-        (p) => p.id === remoteUserId && p.sessionId === remoteSessionId
-      );
-      // Determine if this is likely a screen share
-      const track = stream.getVideoTracks()[0];
-      const isRemoteScreenShare = track && track.label.includes('screen');
-
-      if (!existingParticipant) {
-        // Fetch user details and add participant
-        this.auth.getAUser(remoteUserId).subscribe((data) => {
-          const currentUser = data;
-
-          // Ensure no duplicate participants are added (double-check before pushing)
-          const alreadyExists = this.participants.some(
-            (p) => p.id === remoteUserId && p.sessionId === remoteSessionId
-          );
-
-          if (!alreadyExists) {
-            const newParticipant: Participant = {
-              id: remoteUserId,
-              sessionId: remoteSessionId,
-              stream: stream,
-              firstName: currentUser?.firstName,
-              lastName: currentUser?.lastName,
-            };
-            this.participants.push(newParticipant);
-            if (isRemoteScreenShare) {
-              this.activeScreenSharer = newParticipant;
-            }
-            // Force UI refresh if needed (Angular Change Detection)
-            this.cdr.detectChanges();
-          }
-        });
-      } else {
-        // Update the stream for the existing participant
-        existingParticipant.stream = stream;
-        if (isRemoteScreenShare) {
-          this.activeScreenSharer = existingParticipant;
-        } else if (
-          this.activeScreenSharer &&
-          this.activeScreenSharer.id === remoteUserId
-        ) {
-          // They were screen sharing before, now replaced with normal video
-          this.activeScreenSharer = null;
-        }
-      }
-    });
-
-    peer.on('connect', () => {
-      console.log('Connected to peer:', remoteUserId);
-    });
-
-    peer.on('error', (err) => {
-      console.error('Peer error with', remoteUserId, err);
-      if (maxRetries > 0) {
-        console.warn(
-          `Retrying connection with ${remoteUserId}, attempts left: ${
-            maxRetries - 1
-          }`
-        );
-        peer.destroy();
-        this.peers[`${remoteUserId}_${remoteSessionId}`] = this.createPeer(
-          remoteUserId,
-          remoteSessionId,
-          maxRetries - 1
-        );
-      } else {
-        console.error(`Max retries reached for ${remoteUserId}. Giving up.`);
-        // At this point, you may want to remove the participant from the UI or handle gracefully
-      }
-    });
-
-    peer.on('close', () => {
-      console.log('Connection closed with', remoteUserId);
-      // If the connection closes unexpectedly and we still have retries, try again
-      // this.cleanUpPeer(remoteUserId, remoteSessionId, maxRetries);
-    });
-
-    return peer;
-  }
-  sanitizeSignal(signal: any): any {
-    return JSON.parse(JSON.stringify(signal));
-  }
 
   toggleAudio() {
     this.isAudioMuted = !this.isAudioMuted;
@@ -434,7 +234,6 @@ export class VideoCallComponent
           this.localStream.removeTrack(this.originalVideoTrack);
           this.localStream.addTrack(this.screenTrack!);
 
-          this.replaceTrackInPeers(this.originalVideoTrack, this.screenTrack!);
           this.isScreenSharing = true;
 
           // Update Firestore to indicate current sharer
@@ -462,8 +261,6 @@ export class VideoCallComponent
       this.localStream.removeTrack(this.screenTrack);
       this.localStream.addTrack(this.originalVideoTrack);
 
-      this.replaceTrackInPeers(this.screenTrack, this.originalVideoTrack);
-
       this.screenTrack.stop();
       this.screenTrack = null;
       this.originalVideoTrack = null;
@@ -483,16 +280,6 @@ export class VideoCallComponent
     }
   }
 
-  replaceTrackInPeers(oldTrack: MediaStreamTrack, newTrack: MediaStreamTrack) {
-    Object.values(this.peers).forEach((peer: any) => {
-      const senders = peer._pc
-        .getSenders()
-        .filter((s: any) => s.track === oldTrack);
-      if (senders.length > 0) {
-        senders[0].replaceTrack(newTrack);
-      }
-    });
-  }
 
   leaveCall() {
     this.cleanup();
@@ -503,10 +290,6 @@ export class VideoCallComponent
     return `${participant.id}_${participant.sessionId}`;
   }
   cleanup() {
-    // Close all peer connections
-    Object.values(this.peers).forEach((peer) => peer.destroy());
-    this.peers = {};
-
     // Stop local media tracks
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => track.stop());

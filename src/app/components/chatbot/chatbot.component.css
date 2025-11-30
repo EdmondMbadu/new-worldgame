@@ -192,7 +192,7 @@ img[class*="rounded-xl"], img[class*="rounded-full"] {
 }
 
 /* Panel resize transition */
-.sm\\:w-\\[420px\\], .lg\\:w-\\[480px\\] {
+[class*="w-[420px]"], [class*="w-[480px]"] {
   transition: width 0.3s ease;
 }
 
