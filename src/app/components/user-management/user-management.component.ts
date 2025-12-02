@@ -89,7 +89,13 @@ export class UserManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.auth.getALlUsers().subscribe((data) => {
-      this.allUsers = data.sort((a, b) => {
+      // Filter out invalid/empty users (no email or empty email)
+      const validUsers = data.filter((user) => {
+        const email = (user.email || '').trim();
+        return email.length > 0; // Only include users with a valid email
+      });
+
+      this.allUsers = validUsers.sort((a, b) => {
         const dateA = this.data.parseDateMMDDYYYY(a.dateJoined!);
         const dateB = this.data.parseDateMMDDYYYY(b.dateJoined!);
         return dateB - dateA; // descending
