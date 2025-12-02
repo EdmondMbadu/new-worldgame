@@ -69,6 +69,41 @@
         </p>
       </header>
 
+      <!-- ◈ email (first field to detect existing users) -->
+      <div>
+        <label for="email_top" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+          Admin email
+        </label>
+        <div class="relative">
+          <input id="email_top" type="email" name="email" [(ngModel)]="email" required autocomplete="email"
+            (ngModelChange)="onEmailChange($event)"
+            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
+                   placeholder:text-slate-400 dark:placeholder:text-slate-500
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
+                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition"
+            placeholder="Enter your email address" />
+          <div *ngIf="checkingEmail" class="absolute right-3 top-1/2 -translate-y-1/2">
+            <svg class="animate-spin h-5 w-5 text-teal-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+              <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path>
+            </svg>
+          </div>
+        </div>
+        <!-- Existing user notice -->
+        <div *ngIf="isExistingUser && !blocked" class="mt-2 flex items-center gap-2 text-sm text-teal-700 dark:text-teal-300 
+                    bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-700/50 
+                    p-3 rounded-lg">
+          <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span>
+            <strong>Welcome back, {{ firstName }}!</strong> We found your account. 
+            Your school will be added to your existing profile.
+          </span>
+        </div>
+      </div>
+
       <!-- ◈ admin names -->
       <div class="grid gap-6 md:grid-cols-2">
         <div>
@@ -77,11 +112,10 @@
           </label>
           <input id="first_name" type="text" name="firstName" [(ngModel)]="firstName" required
             autocomplete="given-name"
-            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
-                   placeholder:text-slate-400 dark:placeholder:text-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
+            [readonly]="isExistingUser"
+            [class]="isExistingUser 
+              ? 'w-full rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 px-4 py-2.5 text-sm cursor-not-allowed'
+              : 'w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 transition'" />
         </div>
 
         <div>
@@ -90,11 +124,10 @@
           </label>
           <input id="last_name" type="text" name="lastName" [(ngModel)]="lastName" required
             autocomplete="family-name"
-            class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                   border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
-                   placeholder:text-slate-400 dark:placeholder:text-slate-500
-                   focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
-                   focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
+            [readonly]="isExistingUser"
+            [class]="isExistingUser 
+              ? 'w-full rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 px-4 py-2.5 text-sm cursor-not-allowed'
+              : 'w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900 transition'" />
         </div>
       </div>
 
@@ -212,21 +245,8 @@
         </div>
 
 
-      <!-- ◈ email -->
-      <div>
-        <label for="email" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
-          Admin email
-        </label>
-        <input id="email" type="email" name="email" [(ngModel)]="email" required autocomplete="email"
-          class="w-full rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                 border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm
-                 placeholder:text-slate-400 dark:placeholder:text-slate-500
-                 focus:outline-none focus:ring-2 focus:ring-teal-500/80 focus:ring-offset-2
-                 focus:ring-offset-white dark:focus:ring-offset-slate-900 transition" />
-      </div>
-
-      <!-- ◈ passwords -->
-      <div class="grid gap-6 md:grid-cols-2">
+      <!-- ◈ passwords (hidden for existing users) -->
+      <div *ngIf="!isExistingUser" class="grid gap-6 md:grid-cols-2">
         <div>
           <label for="pwd" class="block mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">Password</label>
           <input id="pwd" type="password" name="password" [(ngModel)]="password" required autocomplete="new-password"
@@ -278,7 +298,8 @@
         <svg *ngIf="loading" class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" opacity="0.25"></circle>
           <path d="M22 12a10 10 0 0 1-10 10" opacity="0.75" stroke-linecap="round"></path></svg>
-        <span>{{ loading ? 'Creating…' : 'Create school account' }}</span>
+        <span *ngIf="!loading">{{ isExistingUser ? 'Add school to my account' : 'Create school account' }}</span>
+        <span *ngIf="loading">{{ isExistingUser ? 'Adding school…' : 'Creating…' }}</span>
       </button>
     </div>
 
@@ -291,7 +312,8 @@
         <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path d="M10 18a8 8 0 1 0-8-8 8 8 0 0 0 8 8zm3.54-10.79-4 4a1 1 0 0 1-1.42 0l-2-2a1 1 0 1 1 1.42-1.42L9 9.59l3.29-3.3a1 1 0 0 1 1.42 1.42Z"/>
         </svg>
-        <span>School registered! Check your inbox to verify the email.</span>
+        <span *ngIf="isExistingUser">School added to your account! Please log in to access your school dashboard.</span>
+        <span *ngIf="!isExistingUser">School registered! Check your inbox to verify the email.</span>
       </div>
 
       <!-- ◈ toast: error -->

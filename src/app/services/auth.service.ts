@@ -674,6 +674,93 @@ export class AuthService {
     return this.afs.doc<any>(`schools/${schoolId}`).valueChanges();
   }
 
+  /**
+   * Check if a user exists by email and return their data (first match).
+   * Returns null if no user found.
+   */
+  async getUserByEmail(email: string): Promise<User | null> {
+    const snapshot = await this.afs
+      .collection<User>('users', (ref) => ref.where('email', '==', email))
+      .get()
+      .toPromise();
+    if (!snapshot || snapshot.empty) {
+      return null;
+    }
+    return snapshot.docs[0].data() as User;
+  }
+
+  /**
+   * Upgrade an existing user to school admin and create a school for them.
+   * The user must already exist and have a verified email.
+   * Returns the school ID on success.
+   */
+  async upgradeToSchoolAdmin(
+    uid: string,
+    schoolName: string,
+    meta?: RegisterSchoolMeta
+  ): Promise<string> {
+    // Check if user already has a school
+    const userRef = this.afs.doc<User>(`users/${uid}`);
+    const userSnap = await userRef.ref.get();
+    const userData = userSnap.data() as User | undefined;
+
+    if (userData?.schoolId) {
+      // Check if they own a school already
+      const schoolSnap = await this.afs
+        .doc(`schools/${userData.schoolId}`)
+        .ref.get();
+      const schoolData = schoolSnap.data() as any;
+      if (schoolData?.ownerUid === uid) {
+        throw new Error('You already own a school account.');
+      }
+    }
+
+    // Derive pricing (same logic as registerSchool)
+    const plan: PlanKey = meta?.plan ?? 'tournament';
+    const basePrice = PRICE_BOOK[plan];
+    const extraTeams = Math.max(0, meta?.extraTeams ?? 0);
+    const currency = meta?.currency || 'USD';
+    const addOns = extraTeams * 30;
+    const total = basePrice + addOns;
+
+    // Create school doc
+    const schoolRef = this.afs.collection('schools').doc();
+    await schoolRef.set({
+      id: schoolRef.ref.id,
+      name: schoolName,
+      ownerUid: uid,
+      createdAt: this.time.getCurrentDate(),
+      meta: {
+        country: meta?.schoolCountry || null,
+        type: meta?.schoolType || null,
+        website: meta?.schoolWebsite || null,
+        courseType: meta?.courseType || null,
+        coursePurpose: meta?.coursePurpose || null,
+        specificFocus: meta?.specificFocus || null,
+      },
+      billing: {
+        plan,
+        currency,
+        basePrice,
+        extraTeams,
+        addOns,
+        total,
+        paymentStatus: basePrice === 0 ? 'paid' : 'pending',
+      },
+    });
+
+    // Update user to be schoolAdmin and link to school
+    await userRef.set(
+      {
+        role: 'schoolAdmin',
+        schoolId: schoolRef.ref.id,
+      },
+      { merge: true }
+    );
+
+    return schoolRef.ref.id;
+  }
+
   // AuthService
   private popRedirect(): string {
     // 1) in-memory (setRedirectUrl called by guards or components)
