@@ -189,17 +189,21 @@ export class HomeChallengeComponent {
     const customUrlObservable = this.challenge.getChallengePageByCustomUrl(idOrSlug);
     const idObservable = this.challenge.getChallengePageById(idOrSlug);
 
+    // Track if we loaded by custom URL to avoid unnecessary redirects
+    let loadedByCustomUrl = false;
+
     // Combine both observables - try custom URL first, then ID
     customUrlObservable.subscribe((customUrlData: any) => {
       if (customUrlData) {
         this.challengePageId = customUrlData.challengePageId || idOrSlug;
-        this.processChallengePageData(customUrlData);
+        loadedByCustomUrl = true;
+        this.processChallengePageData(customUrlData, loadedByCustomUrl);
       } else {
         // Fall back to ID lookup
         idObservable.subscribe((idData: any) => {
           if (idData) {
             this.challengePageId = idOrSlug;
-            this.processChallengePageData(idData);
+            this.processChallengePageData(idData, loadedByCustomUrl);
           } else {
             console.error('Challenge page not found');
             this.pageReady = true;
@@ -209,7 +213,7 @@ export class HomeChallengeComponent {
     });
   }
 
-  private processChallengePageData(data: any): void {
+  private processChallengePageData(data: any, loadedByCustomUrl: boolean = false): void {
         this.challengePage = data;
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
@@ -217,6 +221,17 @@ export class HomeChallengeComponent {
         this.pageReady = true;
         this.participantsHidden = !!data.participantsHidden; // default = false
         this.showParticipantsList = !this.participantsHidden; // sync UI
+
+        // Update URL to use custom URL if available and we loaded by ID (not custom URL)
+        if (this.challengePage.customUrl && !loadedByCustomUrl) {
+          const currentIdOrSlug = this.activatedRoute.snapshot.paramMap.get('id');
+          // Only update if we're currently using the ID, not the custom URL
+          if (currentIdOrSlug === this.challengePageId && currentIdOrSlug !== this.challengePage.customUrl) {
+            this.router.navigate(['/home-challenge', this.challengePage.customUrl], {
+              replaceUrl: true
+            });
+          }
+        }
 
         if (Array.isArray(data.adminEmails))
           this.adminEmails = data.adminEmails.map((e: string) =>
@@ -1466,11 +1481,15 @@ export class HomeChallengeComponent {
       this.subHeading = this.editSubHeading?.trim() || '';
       if (updates.customUrl) {
         this.challengePage.customUrl = updates.customUrl;
+        // Update the browser URL to use the custom URL
+        this.router.navigate(['/home-challenge', updates.customUrl], {
+          replaceUrl: true
+        });
       }
 
       this.showEditPageContent = false;
       if (updates.customUrl) {
-        alert('Page content updated successfully! You can now access this page using the custom URL.');
+        alert('Page content updated successfully! The URL has been updated to use your custom URL.');
       } else {
         alert('Page content updated successfully!');
       }
