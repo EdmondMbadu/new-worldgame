@@ -98,6 +98,7 @@ export class ChallengePage {
   participantsHidden?: boolean;
   handouts?: { name: string; url: string }[];
   programPDF?: { title: string; url: string } | null = null;
+  customUrl?: string; // Custom URL slug for the page
 }
 // models/school.ts
 export interface School {

@@ -4,6 +4,7 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ChallengePage } from '../models/user';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
@@ -266,6 +267,54 @@ export class ChallengesService {
   getChallengePageById(challengePageId: string) {
     return this.afs.doc(`challengePages/${challengePageId}`).valueChanges();
   }
+
+  getChallengePageByCustomUrl(customUrl: string): Observable<ChallengePage | null> {
+    return this.afs
+      .collection<ChallengePage>('challengePages', (ref) =>
+        ref.where('customUrl', '==', customUrl).limit(1)
+      )
+      .valueChanges()
+      .pipe(
+        map((pages) => (pages && pages.length > 0 ? pages[0] : null))
+      );
+  }
+
+  async checkCustomUrlExists(customUrl: string, excludePageId?: string): Promise<boolean> {
+    if (!customUrl || !customUrl.trim()) {
+      return false;
+    }
+    
+    const normalizedUrl = this.normalizeCustomUrl(customUrl);
+    
+    return new Promise((resolve) => {
+      this.afs.collection<ChallengePage>('challengePages', (ref) =>
+        ref.where('customUrl', '==', normalizedUrl)
+      ).get().subscribe((snapshot) => {
+        if (snapshot.empty) {
+          resolve(false);
+          return;
+        }
+
+        // If we're checking for an existing page (updating), exclude it from the check
+        if (excludePageId) {
+          const docs = snapshot.docs.filter(doc => doc.id !== excludePageId);
+          resolve(docs.length > 0);
+        } else {
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  normalizeCustomUrl(url: string): string {
+    return url
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9-]/g, '-') // Replace non-alphanumeric with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  }
+
   deleteChallengePage(challengePageId: string): Promise<void> {
     const challengePageRef: AngularFirestoreDocument<ChallengePage> =
       this.afs.doc(`challengePages/${challengePageId}`);

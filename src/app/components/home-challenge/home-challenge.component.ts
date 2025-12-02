@@ -111,10 +111,15 @@ export class HomeChallengeComponent {
   showEditPageContent = false;
   editHeading = '';
   editSubHeading = '';
+  editCustomUrl = '';
   editLogoFile: File | null = null;
   editHeroFile: File | null = null;
   editLogoPreview = '';
   editHeroPreview = '';
+  customUrlError = '';
+  isCheckingUrl = false;
+  customUrlValid = true;
+  private customUrlCheckTimeout: any;
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -147,10 +152,15 @@ export class HomeChallengeComponent {
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.activatedRoute.paramMap.subscribe((params) => {
-      this.challengePageId = params.get('id');
+      const idOrSlug = params.get('id');
+      if (!idOrSlug) {
+        console.error('No challenge page ID or slug provided');
+        this.pageReady = true;
+        return;
+      }
       window.scrollTo(0, 0);
       this.pageReady = false;
-      this.loadChallengePage();
+      this.loadChallengePage(idOrSlug);
     });
   }
   private resetPageState(): void {
@@ -164,7 +174,7 @@ export class HomeChallengeComponent {
     this.logoImage = '';
     this.image = '';
   }
-  loadChallengePage(): void {
+  loadChallengePage(idOrSlug: string): void {
     // Reset challenge-related data before fetching new ones
     this.resetPageState();
     this.categories = [];
@@ -175,9 +185,31 @@ export class HomeChallengeComponent {
     this.challengeImages = [];
     this.ids = [];
 
-    this.challenge
-      .getChallengePageById(this.challengePageId)
-      .subscribe((data: any) => {
+    // Try to load by custom URL first, then fall back to ID
+    const customUrlObservable = this.challenge.getChallengePageByCustomUrl(idOrSlug);
+    const idObservable = this.challenge.getChallengePageById(idOrSlug);
+
+    // Combine both observables - try custom URL first, then ID
+    customUrlObservable.subscribe((customUrlData: any) => {
+      if (customUrlData) {
+        this.challengePageId = customUrlData.challengePageId || idOrSlug;
+        this.processChallengePageData(customUrlData);
+      } else {
+        // Fall back to ID lookup
+        idObservable.subscribe((idData: any) => {
+          if (idData) {
+            this.challengePageId = idOrSlug;
+            this.processChallengePageData(idData);
+          } else {
+            console.error('Challenge page not found');
+            this.pageReady = true;
+          }
+        });
+      }
+    });
+  }
+
+  private processChallengePageData(data: any): void {
         this.challengePage = data;
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
@@ -247,7 +279,6 @@ export class HomeChallengeComponent {
             this.activeCategory = this.categories[0] || ''; // Set to first category if available
             this.fetchChallenges(this.activeCategory);
           });
-      });
   }
   private checkAccess(): void {
     // author always gets in
@@ -1284,11 +1315,62 @@ export class HomeChallengeComponent {
   openEditPageContent() {
     this.editHeading = this.heading;
     this.editSubHeading = this.subHeading;
+    this.editCustomUrl = this.challengePage.customUrl || '';
     this.editLogoPreview = this.logoImage;
     this.editHeroPreview = this.image;
     this.editLogoFile = null;
     this.editHeroFile = null;
+    this.customUrlError = '';
+    this.customUrlValid = true;
     this.showEditPageContent = true;
+  }
+
+  async checkCustomUrlAvailability() {
+    const normalized = this.challenge.normalizeCustomUrl(this.editCustomUrl);
+    
+    // If empty or same as current, it's valid
+    if (!normalized) {
+      this.customUrlError = '';
+      this.customUrlValid = true;
+      return;
+    }
+
+    // If it's the same as the current URL, it's valid
+    if (normalized === this.challengePage.customUrl) {
+      this.customUrlError = '';
+      this.customUrlValid = true;
+      return;
+    }
+
+    this.isCheckingUrl = true;
+    this.customUrlError = '';
+
+    try {
+      const exists = await this.challenge.checkCustomUrlExists(normalized, this.challengePageId);
+      if (exists) {
+        this.customUrlError = 'This URL is already taken';
+        this.customUrlValid = false;
+      } else {
+        this.customUrlError = '';
+        this.customUrlValid = true;
+      }
+    } catch (err) {
+      console.error('Error checking URL:', err);
+      this.customUrlError = 'Error checking availability';
+      this.customUrlValid = false;
+    } finally {
+      this.isCheckingUrl = false;
+    }
+  }
+
+  onCustomUrlChange() {
+    // Debounce the check
+    if (this.customUrlCheckTimeout) {
+      clearTimeout(this.customUrlCheckTimeout);
+    }
+    this.customUrlCheckTimeout = setTimeout(() => {
+      this.checkCustomUrlAvailability();
+    }, 500);
   }
 
   onLogoFileSelected(event: any) {
@@ -1328,6 +1410,26 @@ export class HomeChallengeComponent {
         subHeading: this.editSubHeading?.trim() || null,
       };
 
+      // Validate and update custom URL if provided
+      if (this.editCustomUrl?.trim()) {
+        const normalized = this.challenge.normalizeCustomUrl(this.editCustomUrl.trim());
+        if (!normalized) {
+          alert('Custom URL must contain at least one letter or number');
+          this.isLoading = false;
+          return;
+        }
+
+        // Final duplicate check before saving
+        const exists = await this.challenge.checkCustomUrlExists(normalized, this.challengePageId);
+        if (exists) {
+          alert('This custom URL is already taken. Please choose another.');
+          this.isLoading = false;
+          return;
+        }
+
+        updates.customUrl = normalized;
+      }
+
       // Upload logo if changed
       if (this.editLogoFile) {
         const logoUrl = await this.data.startUpload(
@@ -1362,9 +1464,16 @@ export class HomeChallengeComponent {
       // Update local state
       this.heading = this.editHeading.trim();
       this.subHeading = this.editSubHeading?.trim() || '';
+      if (updates.customUrl) {
+        this.challengePage.customUrl = updates.customUrl;
+      }
 
       this.showEditPageContent = false;
-      alert('Page content updated successfully!');
+      if (updates.customUrl) {
+        alert('Page content updated successfully! You can now access this page using the custom URL.');
+      } else {
+        alert('Page content updated successfully!');
+      }
     } catch (err) {
       console.error('Error updating page content:', err);
       alert('Could not update page content—try again.');
