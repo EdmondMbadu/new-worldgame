@@ -198,7 +198,7 @@ export class SchoolSignupFreeComponent implements OnInit {
     }
 
     if (!this.agreed) {
-      this.errorMsg = 'You must accept the terms.';
+      this.errorMsg = 'You must agree to the Privacy Policy.';
       return;
     }
 

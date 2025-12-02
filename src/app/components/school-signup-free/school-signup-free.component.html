@@ -270,22 +270,26 @@
         </div>
       </div>
 
-      <!-- ◈ terms -->
-      <label class="flex items-start gap-3 text-sm select-none">
-        <input
-          type="checkbox"
-          class="accent-teal-600 shrink-0 mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600
-                 focus:ring-teal-500/70"
-          (change)="agreed = !agreed"
-        />
-        <span class="text-slate-700 dark:text-slate-300">
-          I agree to the
-          <a routerLink="/privacy" target="_blank"
-             class="text-teal-700 dark:text-teal-300 font-semibold underline underline-offset-2">
-             terms &amp; conditions
-          </a>.
-        </span>
-      </label>
+      <!-- ◈ Privacy Policy -->
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 text-sm select-none">
+          <input
+            type="checkbox"
+            class="accent-teal-600 shrink-0 mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600
+                   focus:ring-teal-500/70"
+            (change)="agreed = !agreed"
+          />
+          <span class="text-slate-700 dark:text-slate-300 font-medium">
+            I agree with NWG's Privacy Policy
+          </span>
+        </label>
+        
+        <div class="ml-7 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            <strong class="text-slate-900 dark:text-slate-100">NWG's Privacy Policy is:</strong> NewWorld Game will not, under any circumstances, release, sell, or make available to anyone for any reason any personal information obtained during your interactions with NewWorld Game. And, the finished solutions written on the platform will be made public for the world to see and use for the benefit of the world.
+          </p>
+        </div>
+      </div>
 
     <!-- Submit area -->
     <div class="flex flex-col gap-3">
