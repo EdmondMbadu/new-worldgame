@@ -1,6 +1,7 @@
 /* school-dashboard.component.ts */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { firstValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { User, School } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -69,7 +70,8 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     private afs: AngularFirestore,
     private time: TimeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private fns: AngularFireFunctions
   ) {}
 
   ngOnInit(): void {
@@ -284,10 +286,25 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       const admin = await firstValueFrom(this.auth.user$); // ← key change
       if (!admin?.schoolId) throw new Error('schoolId missing');
 
+      // Get school info for email
+      const schoolDoc = await firstValueFrom(
+        this.afs.doc(`schools/${admin.schoolId}`).get()
+      );
+      const schoolData = schoolDoc.data() as any;
+      const schoolName = schoolData?.name || 'New World Game School';
+      const schoolWebsite = schoolData?.website || schoolData?.meta?.website || '';
+
+      // Build the school page URL
+      const schoolPageUrl = `${window.location.origin}/school-admin?sid=${admin.schoolId}`;
+
       const batch = this.afs.firestore.batch();
       const colRef = this.afs.collection(
         `schools/${admin.schoolId}/students`
       ).ref;
+
+      // Prepare email sending
+      const genericEmail = this.fns.httpsCallable('genericEmail');
+      const nonUserEmail = this.fns.httpsCallable('nonUserEmail');
 
       emails.forEach((rawEmail) => {
         const email = rawEmail.toLowerCase().trim();
@@ -308,6 +325,50 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       });
 
       await batch.commit();
+
+      // Send emails to all invited students
+      const emailPromises = emails.map(async (rawEmail) => {
+        const email = rawEmail.toLowerCase().trim();
+        if (email.includes('/')) return;
+
+        try {
+          // Check if user exists
+          const users = await firstValueFrom(
+            this.auth.getUserFromEmail(email)
+          );
+
+          const adminName = admin.firstName && admin.lastName
+            ? `${admin.firstName} ${admin.lastName}`
+            : admin.email || 'School Administrator';
+
+          const emailData = {
+            email,
+            subject: `You've been invited to join ${schoolName} on New World Game`,
+            title: `Welcome to ${schoolName}`,
+            description: `You have been invited by ${adminName} to join ${schoolName} on New World Game. New World Game is an innovative platform for collaborative problem-solving and learning.`,
+            path: schoolPageUrl,
+            image: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/emails-hero%2Fhero-college-2.png?alt=media&token=3242573b-13b5-40ef-a29d-8a46f9ed2812',
+            author: adminName,
+            user: users && users.length > 0
+              ? `${users[0].firstName || ''} ${users[0].lastName || ''}`.trim() || email
+              : undefined,
+          };
+
+          // Use genericEmail if user exists, nonUserEmail if not
+          if (users && users.length > 0) {
+            await firstValueFrom(genericEmail(emailData));
+          } else {
+            await firstValueFrom(nonUserEmail(emailData));
+          }
+        } catch (emailErr) {
+          console.error(`Failed to send email to ${email}:`, emailErr);
+          // Don't throw - continue with other emails
+        }
+      });
+
+      // Wait for all emails to be sent (or fail silently)
+      await Promise.allSettled(emailPromises);
+
       this.closeInvite();
     } catch (err: any) {
       console.error(err);
