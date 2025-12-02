@@ -107,6 +107,15 @@ export class HomeChallengeComponent {
   authorEmail = '';
   visibleAdminEmails: string[] = [];
 
+  // Edit page content
+  showEditPageContent = false;
+  editHeading = '';
+  editSubHeading = '';
+  editLogoFile: File | null = null;
+  editHeroFile: File | null = null;
+  editLogoPreview = '';
+  editHeroPreview = '';
+
   // home-challenge.component.ts
   goToChallengeDiscussion() {
     this.router.navigate(['/challenge-discussion', this.challengePageId], {
@@ -1270,5 +1279,97 @@ export class HomeChallengeComponent {
     const set = new Set<string>(base);
     if (extra) set.add(extra);
     this.visibleAdminEmails = Array.from(set);
+  }
+
+  openEditPageContent() {
+    this.editHeading = this.heading;
+    this.editSubHeading = this.subHeading;
+    this.editLogoPreview = this.logoImage;
+    this.editHeroPreview = this.image;
+    this.editLogoFile = null;
+    this.editHeroFile = null;
+    this.showEditPageContent = true;
+  }
+
+  onLogoFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.editLogoFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editLogoPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onHeroFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.editHeroFile = file;
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.editHeroPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  async savePageContent() {
+    if (!this.editHeading?.trim()) {
+      alert('Heading is required');
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      const updates: any = {
+        heading: this.editHeading.trim(),
+        subHeading: this.editSubHeading?.trim() || null,
+      };
+
+      // Upload logo if changed
+      if (this.editLogoFile) {
+        const logoUrl = await this.data.startUpload(
+          this.editLogoFile,
+          `challengePages/${this.challengePageId}/logo`,
+          'false'
+        );
+        if (logoUrl) {
+          updates.logoImage = logoUrl;
+          this.logoImage = logoUrl;
+        }
+      }
+
+      // Upload hero image if changed
+      if (this.editHeroFile) {
+        const heroUrl = await this.data.startUpload(
+          this.editHeroFile,
+          `challengePages/${this.challengePageId}/hero`,
+          'false'
+        );
+        if (heroUrl) {
+          updates.imageChallenge = heroUrl;
+          this.image = heroUrl;
+        }
+      }
+
+      // Save to Firestore
+      await this.afs
+        .doc(`challengePages/${this.challengePageId}`)
+        .update(updates);
+
+      // Update local state
+      this.heading = this.editHeading.trim();
+      this.subHeading = this.editSubHeading?.trim() || '';
+
+      this.showEditPageContent = false;
+      alert('Page content updated successfully!');
+    } catch (err) {
+      console.error('Error updating page content:', err);
+      alert('Could not update page content—try again.');
+    } finally {
+      this.isLoading = false;
+    }
   }
 }
