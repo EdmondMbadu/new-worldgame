@@ -1,6 +1,7 @@
 /* schools-management.component.ts */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import firebase from 'firebase/compat/app';
 import { combineLatest, map, switchMap, Subscription, of } from 'rxjs';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -30,6 +31,11 @@ export class SchoolManagementComponent implements OnInit, OnDestroy {
 
   allSchools: SchoolRow[] = [];
   sub?: Subscription;
+
+  // Delete confirmation state
+  schoolToDelete: SchoolRow | null = null;
+  showDeleteConfirm = false;
+  deleting = false;
 
   totalSchools = 0;
   totalMRR = 0; // sum of amounts
@@ -214,5 +220,54 @@ export class SchoolManagementComponent implements OnInit, OnDestroy {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  // ---------- Delete school ----------
+  openDeleteConfirm(school: SchoolRow): void {
+    this.schoolToDelete = school;
+    this.showDeleteConfirm = true;
+  }
+
+  cancelDelete(): void {
+    this.schoolToDelete = null;
+    this.showDeleteConfirm = false;
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (!this.schoolToDelete) return;
+
+    this.deleting = true;
+    const school = this.schoolToDelete;
+
+    try {
+      // 1. Delete the school document first
+      await this.afs.doc(`schools/${school.id}`).delete();
+
+      // 2. If the school has an owner, remove the schoolId and reset role on the user
+      // Using set with merge to be more permissive, and FieldValue.delete() to remove the field
+      if (school.ownerUid) {
+        try {
+          await this.afs.doc(`users/${school.ownerUid}`).set(
+            {
+              schoolId: firebase.firestore.FieldValue.delete(),
+              role: 'individual',
+            },
+            { merge: true }
+          );
+        } catch (userErr) {
+          // Log but don't fail - the school is already deleted
+          console.warn('Could not update user document:', userErr);
+        }
+      }
+
+      // Close the modal
+      this.showDeleteConfirm = false;
+      this.schoolToDelete = null;
+    } catch (err: any) {
+      console.error('Error deleting school:', err);
+      alert(`Failed to delete school: ${err?.message || 'Unknown error'}`);
+    } finally {
+      this.deleting = false;
+    }
   }
 }
