@@ -58,6 +58,10 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
   removingEmail: string | null = null;
 
+  // Delete school state
+  showDeleteConfirm = false;
+  deleting = false;
+
   private authSub?: Subscription;
   private rosterSub?: Subscription;
   private schoolSub?: Subscription;
@@ -430,6 +434,108 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       alert('Failed to remove student. Please try again.');
     } finally {
       this.removingEmail = null;
+    }
+  }
+
+  // ===== Delete School Functionality =====
+  openDeleteConfirm(): void {
+    this.showDeleteConfirm = true;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm = false;
+  }
+
+  async confirmDelete(): Promise<void> {
+    if (this.deleting) return;
+
+    const me = await firstValueFrom(this.auth.user$);
+    if (!me?.schoolId) {
+      alert('No school ID found.');
+      return;
+    }
+
+    this.deleting = true;
+
+    try {
+      const schoolId = me.schoolId;
+
+      // Get school document to find owner and all admins
+      const schoolDoc = await firstValueFrom(
+        this.afs.doc(`schools/${schoolId}`).get()
+      );
+      const schoolData = schoolDoc.data() as SchoolDoc;
+      const ownerUid = schoolData?.ownerUid;
+      const adminUids = Array.isArray(schoolData?.adminUids)
+        ? schoolData.adminUids
+        : [];
+
+      // 1. Delete the school document
+      await this.afs.doc(`schools/${schoolId}`).delete();
+
+      // 2. Find all users with this schoolId and remove it
+      const usersWithSchoolId = await firstValueFrom(
+        this.afs
+          .collection<User>('users', (ref) =>
+            ref.where('schoolId', '==', schoolId).limit(100)
+          )
+          .get()
+      );
+
+      const batch = this.afs.firestore.batch();
+      const processedUids = new Set<string>();
+
+      // Update all users found in the query
+      usersWithSchoolId.docs.forEach((doc) => {
+        const userRef = doc.ref;
+        processedUids.add(doc.id);
+        batch.update(userRef, {
+          schoolId: firebase.firestore.FieldValue.delete(),
+          role: 'individual',
+        });
+      });
+
+      // Also update owner if not already processed
+      if (ownerUid && !processedUids.has(ownerUid)) {
+        const ownerRef = this.afs.firestore.doc(`users/${ownerUid}`);
+        // Use set with merge to avoid errors if document doesn't exist
+        batch.set(
+          ownerRef,
+          {
+            schoolId: firebase.firestore.FieldValue.delete(),
+            role: 'individual',
+          },
+          { merge: true }
+        );
+      }
+
+      // Update all admin users if not already processed
+      adminUids.forEach((adminUid) => {
+        if (adminUid && !processedUids.has(adminUid)) {
+          const adminRef = this.afs.firestore.doc(`users/${adminUid}`);
+          batch.set(
+            adminRef,
+            {
+              schoolId: firebase.firestore.FieldValue.delete(),
+              role: 'individual',
+            },
+            { merge: true }
+          );
+        }
+      });
+
+      if (processedUids.size > 0 || ownerUid || adminUids.length > 0) {
+        await batch.commit();
+      }
+
+      // Close modal and navigate away
+      this.showDeleteConfirm = false;
+      this.router.navigate(['/home']);
+    } catch (err: any) {
+      console.error('Error deleting school:', err);
+      alert(`Failed to delete school: ${err?.message || 'Unknown error'}`);
+    } finally {
+      this.deleting = false;
     }
   }
 }
