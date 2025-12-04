@@ -203,7 +203,8 @@
       <!-- Thinking indicator -->
       <div
         *ngIf="uiPhase === 'thinking'"
-        class="mt-2 flex items-center gap-2 text-xs text-teal-600 dark:text-teal-400"
+        class="mt-2 flex items-center gap-2 text-xs"
+        [ngClass]="isGeneratingImage ? 'text-purple-600 dark:text-purple-400' : 'text-teal-600 dark:text-teal-400'"
       >
         <span class="flex gap-0.5">
           <span
@@ -216,6 +217,10 @@
             class="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:300ms]"
           ></span>
         </span>
+        <!-- Image generation icon -->
+        <svg *ngIf="isGeneratingImage" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
         <span class="font-medium">{{ thinkingLabel }}...</span>
       </div>
     </div>
@@ -453,33 +458,50 @@
             [alt]="selectedAi.name"
           />
           <div class="flex-1 min-w-0">
-            <div class="inline-block">
-              <div class="rounded-2xl rounded-tl-md overflow-hidden shadow-lg">
-                <img
-                  [src]="resp.src"
-                  class="max-w-[280px] md:max-w-[320px]"
-                  alt="Generated image"
-                />
-              </div>
-              <button
-                (click)="downloadImage(resp.src!)"
-                class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400 transition-colors"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"
+            <div class="inline-block max-w-full">
+              <!-- Image container with gradient border for generated images -->
+              <div class="relative group">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
+                <div class="relative rounded-2xl rounded-tl-md overflow-hidden bg-white dark:bg-slate-900">
+                  <img
+                    [src]="resp.src"
+                    class="max-w-[300px] md:max-w-[360px] block"
+                    alt="Generated image"
                   />
-                </svg>
-                Download
-              </button>
+                </div>
+              </div>
+              
+              <!-- Label and actions -->
+              <div class="mt-2 flex items-center gap-3 flex-wrap">
+                <!-- AI Generated badge -->
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 text-purple-700 dark:text-purple-300 border border-purple-200/50 dark:border-purple-700/50">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                  </svg>
+                  AI Generated
+                </span>
+                
+                <!-- Download button -->
+                <button
+                  (click)="downloadImage(resp.src!)"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-teal-100 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-400 transition-all shadow-sm"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"
+                    />
+                  </svg>
+                  Download Image
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -737,7 +759,29 @@
           [alt]="selectedAi.name"
         />
         <div class="flex-1">
+          <!-- Image generation skeleton -->
+          <div *ngIf="isGeneratingImage" class="max-w-[300px]">
+            <div class="relative">
+              <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl opacity-50 animate-pulse blur"></div>
+              <div class="relative rounded-2xl bg-slate-100 dark:bg-slate-800 aspect-square flex flex-col items-center justify-center gap-3 p-6">
+                <svg class="w-12 h-12 text-purple-400 dark:text-purple-500 animate-pulse" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                <div class="text-sm text-slate-500 dark:text-slate-400 text-center">
+                  {{ thinkingLabel }}...
+                </div>
+                <div class="flex gap-1">
+                  <span class="w-2 h-2 rounded-full bg-purple-400 animate-bounce [animation-delay:0ms]"></span>
+                  <span class="w-2 h-2 rounded-full bg-pink-400 animate-bounce [animation-delay:150ms]"></span>
+                  <span class="w-2 h-2 rounded-full bg-orange-400 animate-bounce [animation-delay:300ms]"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Text response skeleton -->
           <div
+            *ngIf="!isGeneratingImage"
             class="px-4 py-3 rounded-2xl rounded-tl-md bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700/50 max-w-[85%]"
           >
             <div class="space-y-2">
@@ -830,6 +874,7 @@
         <label class="flex-shrink-0 cursor-pointer">
           <div
             class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            title="Attach document"
           >
             <svg
               class="w-5 h-5 text-slate-500 dark:text-slate-400"
@@ -852,6 +897,23 @@
             accept=".pdf,.doc,.docx,.txt"
           />
         </label>
+        
+        <!-- Generate Image button -->
+        <button
+          (click)="insertImagePrompt()"
+          class="flex-shrink-0 p-2.5 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/30 dark:hover:to-pink-900/30 border border-purple-200/50 dark:border-purple-700/50 transition-all"
+          title="Generate an image"
+        >
+          <svg
+            class="w-5 h-5 text-purple-600 dark:text-purple-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+          </svg>
+        </button>
 
         <!-- Text input -->
         <div class="flex-1 min-w-0">

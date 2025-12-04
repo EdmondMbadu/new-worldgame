@@ -1071,18 +1071,39 @@ export const onChatPrompt = functions
       history += `User: ${prompt}\nAssistant:`;
 
       // ────────── 2. pick model ─────────────────────────────────
-      const wantsImage =
-        /\b(image|picture|photo|illustration|draw|generate).*?\b/i.test(prompt);
+      // Enhanced detection for image generation requests
+      const imagePatterns = [
+        /\b(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)/i,
+        /\b(image|picture|photo|illustration|artwork|visual|graphic)\s+(of|for|showing|depicting|illustrating)/i,
+        /\bshow\s+me\s+(an?\s+)?(image|picture|visual)/i,
+        /\bvisualize\b/i,
+        /\billustrate\b/i,
+        /\bcreate\s+(a\s+)?visual/i,
+        /\b(can you|please|could you)\s+(generate|create|make|draw)\s+(an?\s+)?(image|picture)/i,
+      ];
+      const wantsImage = imagePatterns.some((pattern) => pattern.test(prompt));
+
+      // Use gemini-2.0-flash-exp for image generation (supports TEXT and IMAGE output)
+      // Use gemini-2.5-flash for text-only responses with grounding
       const modelName = wantsImage
-        ? 'gemini-2.0-flash-preview-image-generation'
+        ? 'gemini-2.0-flash-exp'
         : 'gemini-2.5-flash';
+
+      console.log('Model selection:', {
+        wantsImage,
+        modelName,
+        promptPreview: prompt.slice(0, 100),
+      });
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
       const modelConfig: Record<string, unknown> = { model: modelName };
       if (!wantsImage) {
         modelConfig['tools'] = [{ google_search: {} }];
       } else {
-        modelConfig['generationConfig'] = { responseModalities: ['TEXT', 'IMAGE'] };
+        // Configure for image generation
+        modelConfig['generationConfig'] = {
+          responseModalities: ['TEXT', 'IMAGE'],
+        };
       }
       const model = genAI.getGenerativeModel(modelConfig as any);
 
@@ -1093,13 +1114,63 @@ export const onChatPrompt = functions
 
       if (wantsImage) {
         // Image model does not support streaming; do one-shot generation.
-        const result = await model.generateContent(history);
-        finalResponse = await result.response;
-        for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
-          if (part.text) {
-            answer += part.text;
-          } else if (part.inlineData?.data) {
-            imgB64 = part.inlineData.data;
+        try {
+          console.log('Attempting image generation with model:', modelName);
+          const result = await model.generateContent(history);
+          finalResponse = await result.response;
+
+          // Check for blocked content or safety issues
+          if (finalResponse.candidates?.[0]?.finishReason === 'SAFETY') {
+            answer =
+              "I apologize, but I couldn't generate that image due to content safety guidelines. Please try a different prompt that doesn't include people or sensitive content.";
+          } else if (
+            finalResponse.candidates?.[0]?.finishReason === 'RECITATION'
+          ) {
+            answer =
+              "I couldn't generate that image due to content restrictions. Please try a different prompt.";
+          } else {
+            for (const part of finalResponse.candidates?.[0]?.content?.parts ||
+              []) {
+              if (part.text) {
+                answer += part.text;
+              } else if (part.inlineData?.data) {
+                imgB64 = part.inlineData.data;
+              }
+            }
+          }
+
+          // If no image was generated but we expected one, provide feedback
+          if (!imgB64 && !answer) {
+            answer =
+              "I tried to generate an image but wasn't able to. This might be due to content restrictions. Try a prompt without people or sensitive content, like 'Generate an image of a futuristic sustainable city' or 'Create an illustration of renewable energy'.";
+          }
+
+          console.log('Image generation result:', {
+            hasImage: !!imgB64,
+            answerLength: answer.length,
+          });
+        } catch (imageError: any) {
+          console.error(
+            'Image generation error:',
+            imageError?.message || imageError
+          );
+          // Provide a helpful fallback message
+          answer = 'I encountered an issue generating that image. ';
+          if (
+            imageError?.message?.includes('SAFETY') ||
+            imageError?.message?.includes('blocked')
+          ) {
+            answer +=
+              'The content may have been blocked due to safety guidelines. Try a different prompt without people or sensitive subjects.';
+          } else if (
+            imageError?.message?.includes('quota') ||
+            imageError?.message?.includes('limit')
+          ) {
+            answer +=
+              'The image generation service may be temporarily unavailable. Please try again later.';
+          } else {
+            answer +=
+              "Please try a different prompt, such as 'Generate an image of a beautiful landscape' or 'Create a picture of a sustainable city'.";
           }
         }
       } else {
@@ -1127,7 +1198,8 @@ export const onChatPrompt = functions
         }
 
         finalResponse = await streamResult.response;
-        for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
+        for (const part of finalResponse.candidates?.[0]?.content?.parts ||
+          []) {
           if (part.text && !answer.includes(part.text)) {
             answer += part.text;
           } else if (part.inlineData?.data) {
@@ -1142,7 +1214,7 @@ export const onChatPrompt = functions
       if (candidate?.groundingMetadata?.groundingChunks) {
         const groundingChunks = candidate.groundingMetadata.groundingChunks;
         const seenUrls = new Set<string>();
-        
+
         for (const chunk of groundingChunks) {
           if (chunk.web && chunk.web.uri) {
             const url = chunk.web.uri;
@@ -1168,14 +1240,32 @@ export const onChatPrompt = functions
 
       // ────────── 5. store image (if any) ───────────────────────
       let imageUrl: string | undefined;
+      let imageDocId: string | undefined;
       if (imgB64) {
-        const filePath = `generated/${randomUUID()}.png`;
+        imageDocId = randomUUID();
+        const filePath = `chatbot-images/${imageDocId}.png`;
         await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
           contentType: 'image/png',
           resumable: false,
           public: true,
         });
         imageUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+
+        // Save image reference to chatbot-images collection
+        const uid = snap.ref.parent?.parent?.id;
+        await admin
+          .firestore()
+          .collection('chatbot-images')
+          .doc(imageDocId)
+          .set({
+            id: imageDocId,
+            url: imageUrl,
+            storagePath: filePath,
+            prompt: prompt.slice(0, 500), // Store the prompt that generated this image
+            userId: uid || null,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            discussionDocId: snap.id,
+          });
       }
 
       // ────────── 6. final update ───────────────────────────────
@@ -1183,16 +1273,35 @@ export const onChatPrompt = functions
         status: { state: 'COMPLETED' },
         response: answer || null,
         imageUrl: imageUrl || null,
+        imageDocId: imageDocId || null,
         sources: sources.length > 0 ? sources : null,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
-    } catch (err) {
-      console.error('onChatPrompt error:', err);
+    } catch (err: any) {
+      console.error('onChatPrompt error:', err?.message || err);
+
+      // Provide a user-friendly error message
+      let userFriendlyError = 'An unexpected error occurred. Please try again.';
+      const errorMsg = err instanceof Error ? err.message : String(err);
+
+      if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
+        userFriendlyError =
+          'Your request was blocked due to content safety guidelines. Please try a different prompt.';
+      } else if (errorMsg.includes('quota') || errorMsg.includes('429')) {
+        userFriendlyError =
+          'The AI service is temporarily busy. Please wait a moment and try again.';
+      } else if (errorMsg.includes('model')) {
+        userFriendlyError =
+          'There was an issue with the AI model. Please try again.';
+      }
+
       await snap.ref.update({
         status: {
           state: 'ERRORED',
-          error: err instanceof Error ? err.message : String(err),
+          error: userFriendlyError,
+          technicalError: errorMsg,
         },
+        response: userFriendlyError,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }

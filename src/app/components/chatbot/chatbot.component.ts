@@ -25,6 +25,7 @@ export interface DisplayMessage {
   streaming?: boolean;
   insertable?: boolean;  // Can this response be inserted into a playground box?
   sources?: Source[];  // Sources/citations for the response
+  imageDocId?: string;  // Reference to the chatbot-images collection document
 }
 
 export interface AiAvatar {
@@ -220,8 +221,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   uiPhase: UiPhase = 'idle';
   thinkingLabel = 'Thinking';
+  isGeneratingImage = false;
   private thinkingTimer?: any;
   private thinkingPhrases = ['Thinking'];
+  private imageThinkingPhrases = ['Creating image', 'Generating visual', 'Rendering'];
   private thinkingIndex = 0;
 
   ngOnDestroy(): void {
@@ -623,11 +626,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       selectedAi: this.selectedAi.name,
     });
 
+    // Detect if this is an image generation request for UI feedback
+    const isImageGen = this.isImageRequest(trimmed);
+    
     await discussionRef.set({
       prompt: fullPrompt,
       attachmentList,
     });
-    this.startThinking();
+    this.startThinking(isImageGen);
     this.cdRef.detectChanges();
 
     this.prompt = '';
@@ -642,8 +648,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
         switch (state) {
           case 'PROCESSING':
-            this.startThinking();
-            this.status = 'preparing your answer...';
+            this.startThinking(isImageGen);
+            this.status = isImageGen ? 'generating your image...' : 'preparing your answer...';
             break;
 
           case 'COMPLETED':
@@ -672,7 +678,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
               });
             }
             if (snap.imageUrl) {
-              this.responses.push({ src: snap.imageUrl, type: 'IMAGE' });
+              this.responses.push({ 
+                src: snap.imageUrl, 
+                type: 'IMAGE',
+                imageDocId: snap.imageDocId || undefined
+              });
             }
             this.cdRef.detectChanges();
             setTimeout(() => this.scrollToBottom(), 0);
@@ -682,7 +692,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
           case 'ERRORED':
             this.stopThinking();
             console.error('Chatbot Error:', snap.status);
-            this.status = 'Oh no! Something went wrong.';
+            // Show the user-friendly error message from the backend
+            const errorMessage = snap.response || snap.status?.error || 'Something went wrong. Please try again.';
+            this.responses.push({
+              type: 'RESPONSE',
+              text: errorMessage,
+            });
+            this.status = '';
+            this.cdRef.detectChanges();
+            setTimeout(() => this.scrollToBottom(), 0);
             unsub.unsubscribe();
             break;
         }
@@ -864,20 +882,57 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     }
   }
 
-  private startThinking(): void {
+  /**
+   * Detects if the prompt is requesting an image generation
+   */
+  private isImageRequest(prompt: string): boolean {
+    const imagePatterns = [
+      /\b(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)/i,
+      /\b(image|picture|photo|illustration|artwork|visual|graphic)\s+(of|for|showing|depicting|illustrating)/i,
+      /\bshow\s+me\s+(an?\s+)?(image|picture|visual)/i,
+      /\bvisualize\b/i,
+      /\billustrate\b/i,
+      /\bcreate\s+(a\s+)?visual/i,
+      /\b(can you|please|could you)\s+(generate|create|make|draw)\s+(an?\s+)?(image|picture)/i,
+    ];
+    return imagePatterns.some(pattern => pattern.test(prompt));
+  }
+
+  /**
+   * Inserts an image generation prompt prefix into the input
+   */
+  insertImagePrompt(): void {
+    const prefix = 'Generate an image of ';
+    if (!this.prompt.toLowerCase().startsWith('generate an image')) {
+      this.prompt = prefix + this.prompt;
+    }
+    // Focus the textarea
+    setTimeout(() => {
+      const textarea = document.querySelector('textarea[placeholder*="Ask"]') as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.focus();
+        // Move cursor to end
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
+    }, 0);
+  }
+
+  private startThinking(forImageGeneration = false): void {
     if (this.thinkingTimer) {
       clearInterval(this.thinkingTimer);
       this.thinkingTimer = undefined;
     }
 
     this.uiPhase = 'thinking';
+    this.isGeneratingImage = forImageGeneration;
     this.thinkingIndex = 0;
-    this.thinkingLabel = this.thinkingPhrases[this.thinkingIndex];
+    
+    const phrases = forImageGeneration ? this.imageThinkingPhrases : this.thinkingPhrases;
+    this.thinkingLabel = phrases[this.thinkingIndex];
 
     this.thinkingTimer = setInterval(() => {
-      this.thinkingIndex =
-        (this.thinkingIndex + 1) % this.thinkingPhrases.length;
-      this.thinkingLabel = this.thinkingPhrases[this.thinkingIndex];
+      this.thinkingIndex = (this.thinkingIndex + 1) % phrases.length;
+      this.thinkingLabel = phrases[this.thinkingIndex];
     }, 900);
   }
 
@@ -887,5 +942,6 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       this.thinkingTimer = undefined;
     }
     this.uiPhase = 'idle';
+    this.isGeneratingImage = false;
   }
 }
