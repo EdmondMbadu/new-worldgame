@@ -12,6 +12,7 @@ export class ManagementDemoComponent implements OnInit {
   filtered: DemoBooking[] = [];
   search = '';
   isLoggedIn = false;
+  expandedNotes: Set<string> = new Set();
 
   constructor(public auth: AuthService) {}
 
@@ -62,6 +63,29 @@ export class ManagementDemoComponent implements OnInit {
         b.demoDate.includes(q) ||
         b.demoTime.toLowerCase().includes(q)
     );
+  }
+
+  getBookingKey(booking: DemoBooking): string {
+    // Use id if available, otherwise use email + createdAt as unique identifier
+    return booking.id || `${booking.email}_${booking.createdAt}`;
+  }
+
+  toggleNotesExpansion(booking: DemoBooking): void {
+    const key = this.getBookingKey(booking);
+    if (this.expandedNotes.has(key)) {
+      this.expandedNotes.delete(key);
+    } else {
+      this.expandedNotes.add(key);
+    }
+  }
+
+  isNotesExpanded(booking: DemoBooking): boolean {
+    return this.expandedNotes.has(this.getBookingKey(booking));
+  }
+
+  shouldShowExpandButton(notes: string | undefined): boolean {
+    // Show expand button for notes longer than 80 characters (likely to be truncated)
+    return notes ? notes.length > 80 : false;
   }
 
   /** Download visible rows to CSV */

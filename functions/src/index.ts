@@ -1106,7 +1106,7 @@ export const onChatPrompt = functions
         };
       }
       const model = genAI.getGenerativeModel(modelConfig as any);
-      
+
       // For image generation, enhance the prompt for better quality
       let imagePrompt = history;
       if (wantsImage) {
