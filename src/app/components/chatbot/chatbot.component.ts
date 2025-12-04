@@ -26,6 +26,7 @@ export interface DisplayMessage {
   insertable?: boolean;  // Can this response be inserted into a playground box?
   sources?: Source[];  // Sources/citations for the response
   imageDocId?: string;  // Reference to the chatbot-images collection document
+  imagePrompt?: string;  // The prompt that generated this image (for download filename)
 }
 
 export interface AiAvatar {
@@ -678,10 +679,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
               });
             }
             if (snap.imageUrl) {
+              // Find the last user prompt to use for the image filename
+              const lastPrompt = [...this.responses].reverse().find(r => r.type === 'PROMPT');
               this.responses.push({ 
                 src: snap.imageUrl, 
                 type: 'IMAGE',
-                imageDocId: snap.imageDocId || undefined
+                imageDocId: snap.imageDocId || undefined,
+                imagePrompt: lastPrompt?.text || undefined
               });
             }
             this.cdRef.detectChanges();
@@ -839,11 +843,25 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     await batch.commit();
   }
 
-  async downloadImage(src: string) {
-    const urlParts = src.split('/');
-    let filename = urlParts[urlParts.length - 1].split('?')[0];
-    if (!filename.match(/\.(png|jpe?g|gif)$/i)) {
-      filename = `image-${Date.now()}.png`;
+  async downloadImage(src: string, promptText?: string) {
+    // Generate a meaningful filename from the prompt
+    let filename: string;
+    
+    if (promptText) {
+      // Clean the prompt to create a filename-safe string
+      const cleanPrompt = promptText
+        .toLowerCase()
+        .replace(/^(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic)\s+(of|for|showing|depicting|illustrating)?\s*/i, '')
+        .replace(/[^a-z0-9\s]/gi, '') // Remove special characters
+        .trim()
+        .split(/\s+/)
+        .slice(0, 6) // Take first 6 words
+        .join('-');
+      
+      const timestamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      filename = `${this.getDisplayName(this.selectedAi)}-${cleanPrompt || 'image'}-${timestamp}.png`;
+    } else {
+      filename = `${this.getDisplayName(this.selectedAi)}-image-${Date.now()}.png`;
     }
 
     try {

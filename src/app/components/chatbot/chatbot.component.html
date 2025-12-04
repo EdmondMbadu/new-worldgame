@@ -483,7 +483,7 @@
                 
                 <!-- Download button -->
                 <button
-                  (click)="downloadImage(resp.src!)"
+                  (click)="downloadImage(resp.src!, resp.imagePrompt)"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-teal-100 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-400 transition-all shadow-sm"
                 >
                   <svg
