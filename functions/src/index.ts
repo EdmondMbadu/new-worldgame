@@ -1083,7 +1083,7 @@ export const onChatPrompt = functions
       ];
       const wantsImage = imagePatterns.some((pattern) => pattern.test(prompt));
 
-      // Use gemini-2.0-flash-exp for image generation (supports TEXT and IMAGE output)
+      // Use gemini-2.0-flash-exp for image generation (best available via Generative AI SDK)
       // Use gemini-2.5-flash for text-only responses with grounding
       const modelName = wantsImage
         ? 'gemini-2.0-flash-exp'
@@ -1100,12 +1100,20 @@ export const onChatPrompt = functions
       if (!wantsImage) {
         modelConfig['tools'] = [{ google_search: {} }];
       } else {
-        // Configure for image generation
+        // Configure for high-quality image generation
         modelConfig['generationConfig'] = {
           responseModalities: ['TEXT', 'IMAGE'],
         };
       }
       const model = genAI.getGenerativeModel(modelConfig as any);
+      
+      // For image generation, enhance the prompt for better quality
+      let imagePrompt = history;
+      if (wantsImage) {
+        // Add quality-enhancing instructions to the prompt
+        const qualityPrefix = `You are an expert AI image generator. Create a high-quality, detailed, professional image based on the following request. Make it visually stunning, well-composed, with good lighting and artistic quality.\n\n`;
+        imagePrompt = qualityPrefix + history;
+      }
 
       // ────────── 3. generate ───────────────────────────────────
       let answer = '';
@@ -1116,7 +1124,7 @@ export const onChatPrompt = functions
         // Image model does not support streaming; do one-shot generation.
         try {
           console.log('Attempting image generation with model:', modelName);
-          const result = await model.generateContent(history);
+          const result = await model.generateContent(imagePrompt);
           finalResponse = await result.response;
 
           // Check for blocked content or safety issues
