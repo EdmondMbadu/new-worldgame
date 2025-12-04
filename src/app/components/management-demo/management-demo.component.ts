@@ -84,8 +84,9 @@ export class ManagementDemoComponent implements OnInit {
   }
 
   shouldShowExpandButton(notes: string | undefined): boolean {
-    // Show expand button for notes longer than 80 characters (likely to be truncated)
-    return notes ? notes.length > 80 : false;
+    // Always show expand button for any non-empty notes since CSS truncation 
+    // can happen based on width, not just character count
+    return !!notes && notes.trim().length > 0;
   }
 
   /** Download visible rows to CSV */
