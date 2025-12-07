@@ -54,6 +54,7 @@ export class DashboardComponent implements OnInit {
   allUsers: User[] = [];
   filteredUsers: User[] = [];
   showUserSuggestions = false;
+  selectedUser: User | null = null;
   private suggestionTimeout: any;
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -320,6 +321,7 @@ export class DashboardComponent implements OnInit {
     if (!this.showInviteTeamMemberModal) {
       this.newTeamMember = '';
       this.showUserSuggestions = false;
+      this.selectedUser = null;
       if (this.suggestionTimeout) {
         clearTimeout(this.suggestionTimeout);
       }
@@ -331,6 +333,9 @@ export class DashboardComponent implements OnInit {
     if (this.suggestionTimeout) {
       clearTimeout(this.suggestionTimeout);
     }
+    
+    // Reset selected user if input changes
+    this.selectedUser = null;
     
     const searchTerm = this.newTeamMember.toLowerCase().trim();
     if (searchTerm.length > 0) {
@@ -347,6 +352,14 @@ export class DashboardComponent implements OnInit {
         );
       }).slice(0, 10); // Limit to 10 results
       this.showUserSuggestions = this.filteredUsers.length > 0;
+      
+      // Check if the current input matches an existing user
+      const exactMatch = this.allUsers.find(
+        (user) => user.email?.toLowerCase() === searchTerm
+      );
+      if (exactMatch) {
+        this.selectedUser = exactMatch;
+      }
     } else {
       this.filteredUsers = [];
       this.showUserSuggestions = false;
@@ -355,6 +368,7 @@ export class DashboardComponent implements OnInit {
 
   selectUser(user: User) {
     this.newTeamMember = user.email || '';
+    this.selectedUser = user;
     this.showUserSuggestions = false;
   }
 
