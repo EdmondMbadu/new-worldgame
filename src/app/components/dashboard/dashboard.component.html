@@ -115,6 +115,31 @@
       </p>
     </div>
 
+    <!-- ▼ INVITE TEAM MEMBERS BUTTON (Plus sign) ▼ -->
+    <div class="my-4 w-full max-w-xl mx-auto flex items-center justify-center">
+      <button
+        (click)="toggleInviteTeamMemberModal()"
+        class="group flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+        title="Invite Team Members"
+      >
+        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-white/30 transition">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </div>
+        <span>Invite Team Members</span>
+      </button>
+    </div>
+    <!-- ▲ END INVITE TEAM MEMBERS BUTTON ▲ -->
+
     <!-- ▼ INVITE CTA (compact, below the image) ▼ -->
     <div
       (click)="toggleInviteModal()"
@@ -1402,3 +1427,132 @@
   </div>
 </div>
 <!-- ▸ END INVITE MODAL --------------------------------------------------------- -->
+
+<!-- ▸ INVITE TEAM MEMBER MODAL ------------------------------------------------ -->
+<div *ngIf="showInviteTeamMemberModal" class="fixed inset-0 z-[9999]">
+  <!-- Overlay -->
+  <div
+    class="absolute inset-0 bg-black/55 backdrop-blur-sm"
+    (click)="toggleInviteTeamMemberModal()"
+  ></div>
+
+  <!-- Modal content wrapper -->
+  <div
+    class="relative mx-auto mt-20 w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden"
+  >
+    <!-- Close button -->
+    <button
+      (click)="toggleInviteTeamMemberModal()"
+      class="absolute top-4 right-4 p-2 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition z-10"
+      aria-label="Close"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+      >
+        <path d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Modal body -->
+    <div class="p-6">
+      <h2
+        class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2"
+      >
+        Invite Team Members
+      </h2>
+      <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">
+        Add a new participant to your solution. Start typing an email or name to see suggestions.
+      </p>
+
+      <!-- Input field with autocomplete -->
+      <div class="relative">
+        <label
+          for="teamMemberInput"
+          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+        >
+          Email or Name
+        </label>
+        <input
+          id="teamMemberInput"
+          type="text"
+          [(ngModel)]="newTeamMember"
+          (input)="onTeamMemberInputChange()"
+          (focus)="onTeamMemberInputChange()"
+          (blur)="hideUserSuggestions()"
+          class="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder="email@gmail.com or name"
+        />
+
+        <!-- User suggestions dropdown -->
+        <div
+          *ngIf="showUserSuggestions && filteredUsers.length > 0"
+          class="absolute z-20 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+        >
+          <div
+            *ngFor="let user of filteredUsers"
+            (mousedown)="selectUser(user); $event.preventDefault()"
+            class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0 transition"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                *ngIf="user.profilePicture?.downloadURL"
+                class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+              >
+                <img
+                  [src]="user.profilePicture?.downloadURL"
+                  [alt]="user.firstName + ' ' + user.lastName"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div
+                *ngIf="!user.profilePicture?.downloadURL"
+                class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0"
+              >
+                <svg
+                  class="w-6 h-6 text-gray-400"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  />
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  {{ user.firstName }} {{ user.lastName }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  {{ user.email }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="mt-6 flex items-center justify-end gap-3">
+        <button
+          (click)="toggleInviteTeamMemberModal()"
+          class="px-5 py-2.5 text-sm font-medium text-white rounded-lg bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="addParticipantToSolution()"
+          class="px-5 py-2.5 text-sm font-medium text-white rounded-lg bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800"
+        >
+          Add Participant
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ▸ END INVITE TEAM MEMBER MODAL ------------------------------------------- -->

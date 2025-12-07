@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Solution, SolutionRecruitmentProfile } from 'src/app/models/solution';
+import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -45,6 +47,14 @@ export class DashboardComponent implements OnInit {
   savingProfile = false;
   profileSaved = false;
   profileMessage = '';
+  
+  // Invite team member modal
+  showInviteTeamMemberModal = false;
+  newTeamMember: string = '';
+  allUsers: User[] = [];
+  filteredUsers: User[] = [];
+  showUserSuggestions = false;
+  private suggestionTimeout: any;
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -53,6 +63,11 @@ export class DashboardComponent implements OnInit {
       this.ensureRecruitmentProfile();
       this.profileSaved = false;
       this.profileMessage = '';
+    });
+    
+    // Load all users for autocomplete
+    this.auth.getALlUsers().subscribe((users) => {
+      this.allUsers = users;
     });
   }
   toggleHover(event: boolean) {
@@ -298,5 +313,131 @@ export class DashboardComponent implements OnInit {
     this.sendingBroadcast = false;
   }
 }
+
+  // Invite team member methods
+  toggleInviteTeamMemberModal() {
+    this.showInviteTeamMemberModal = !this.showInviteTeamMemberModal;
+    if (!this.showInviteTeamMemberModal) {
+      this.newTeamMember = '';
+      this.showUserSuggestions = false;
+      if (this.suggestionTimeout) {
+        clearTimeout(this.suggestionTimeout);
+      }
+    }
+  }
+
+  onTeamMemberInputChange() {
+    // Clear any pending timeout
+    if (this.suggestionTimeout) {
+      clearTimeout(this.suggestionTimeout);
+    }
+    
+    const searchTerm = this.newTeamMember.toLowerCase().trim();
+    if (searchTerm.length > 0) {
+      this.filteredUsers = this.allUsers.filter((user) => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        return (
+          firstName.includes(searchTerm) ||
+          lastName.includes(searchTerm) ||
+          fullName.includes(searchTerm) ||
+          email.includes(searchTerm)
+        );
+      }).slice(0, 10); // Limit to 10 results
+      this.showUserSuggestions = this.filteredUsers.length > 0;
+    } else {
+      this.filteredUsers = [];
+      this.showUserSuggestions = false;
+    }
+  }
+
+  selectUser(user: User) {
+    this.newTeamMember = user.email || '';
+    this.showUserSuggestions = false;
+  }
+
+  hideUserSuggestions() {
+    // Delay hiding to allow click events on suggestions to fire
+    this.suggestionTimeout = setTimeout(() => {
+      this.showUserSuggestions = false;
+    }, 200);
+  }
+
+  async addParticipantToSolution() {
+    let participants: any = [];
+    if (this.data.isValidEmail(this.newTeamMember)) {
+      participants = this.currentSolution.participants || [];
+      participants.push({ name: this.newTeamMember });
+
+      this.solution
+        .addParticipantsToSolution(
+          participants,
+          this.currentSolution.solutionId!
+        )
+        .then(() => {
+          alert(`Successfully added ${this.newTeamMember} to the solution.`);
+          this.toggleInviteTeamMemberModal();
+        })
+        .catch((error) => {
+          alert('Error occurred while adding a team member. Try Again!');
+        });
+      await this.sendEmailToParticipant();
+      this.newTeamMember = '';
+    } else {
+      alert('Enter a valid email!');
+    }
+  }
+
+  async sendEmailToParticipant() {
+    const genericEmail = this.fns.httpsCallable('genericEmail');
+    const nonUserEmail = this.fns.httpsCallable('nonUserEmail');
+
+    try {
+      // Fetch the user data
+      const users = await firstValueFrom(
+        this.auth.getUserFromEmail(this.newTeamMember)
+      );
+      console.log('extracted user from email', users);
+      console.log('the new solution data', this.currentSolution);
+
+      if (users && users.length > 0) {
+        // Participant is a registered user
+        const emailData = {
+          email: this.newTeamMember,
+          subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+          title: `${this.currentSolution.title}`,
+          description: `${this.currentSolution.description}`,
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          image: `${this.currentSolution.image}`,
+          path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+          user: `${users[0].firstName} ${users[0].lastName}`,
+        };
+
+        const result = await firstValueFrom(genericEmail(emailData));
+        console.log(`Email sent to ${this.newTeamMember}:`, result);
+      } else {
+        // Participant is NOT a registered user
+        const emailData = {
+          email: this.newTeamMember,
+          subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+          title: this.currentSolution.title,
+          description: this.currentSolution.description,
+          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+          image: this.currentSolution.image,
+          path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+        };
+
+        const result = await firstValueFrom(nonUserEmail(emailData));
+        console.log(`Email sent to ${this.newTeamMember}:`, result);
+      }
+    } catch (error) {
+      console.error(
+        `Error processing participant ${this.newTeamMember}:`,
+        error
+      );
+    }
+  }
 
 }
