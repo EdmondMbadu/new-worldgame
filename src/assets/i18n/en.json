@@ -513,6 +513,106 @@
       "subtitle": "Download a Guide for Exploring NWG, sign up your class, or reach out so we can walk through the platform together."
     }
   },
+  "landingCommunity": {
+    "cta": {
+      "scheduleDemo": "Schedule a Demo",
+      "contact": "Contact Us",
+      "startFree": "Start Free",
+      "signUp": "Sign Up",
+      "downloadGuide": "Download a Guide for Exploring NWG",
+      "exploreAi": "Explore All AI Colleagues"
+    },
+    "hero": {
+      "title": "NewWorld Game for Your Community",
+      "subtitle": "Add a new dimension to your community— a state-of-the-art Community Innovation Lab fully staffed with expert AI researchers who work super-fast, answer your questions with surprising depth and breath, and lead to innovative solutions to the critical problems on which you're working."
+    },
+    "whatYouGet": {
+      "title": "What Your Get With NewWorld Game's AI for Communities",
+      "cards": {
+        "strategicPlanning": {
+          "title": "State-of-the-art Strategic Planning",
+          "description": "State-of-the-art strategic planning/problem solving process"
+        },
+        "aiAssistants": {
+          "title": "AI Assistants",
+          "description": "AI assistants that quickly answer your questions (with footnotes), provide fresh perspectives and add depth and breadth to your work"
+        },
+        "spectrumAi": {
+          "title": "Spectrum of AI Assistants",
+          "description": "Choose from a spectrum of AI assistants (from a notable collection of \"Elders\" to a gang of contemporary researchers from around their world, each with a special skill set) to help in your work"
+        },
+        "fullAccess": {
+          "title": "Full NWG Feature Access",
+          "description": "Full NWG Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+        },
+        "collaboration": {
+          "title": "Team Collaboration Tools",
+          "description": "Invite colleagues, from your community, even around the world if you want, to be on your team. Use Team Collaboration Tools, including Messaging boards, shared files, and peer feedback flows built directly into each project."
+        },
+        "dashboard": {
+          "title": "Private Dashboard for Each Community",
+          "description": "Keep every project you use NWG for organized with a dedicated workspace."
+        }
+      }
+    },
+    "steps": {
+      "badge": "SAMPLE STEP-BY-STEP PATHWAY",
+      "title": "First three moves to launch your AI assisted Community Innovation Lab",
+      "cards": {
+        "one": {
+          "label": "STEP 1",
+          "title": "What is the problem?",
+          "description": "What is the problem we want to work on/why is it important/ How big is it/ Where it it/How do we measure it/What are the underlying causes",
+          "aiPrompt": "Ask your AI Colleague Bucky for help, answers, feedback, advice, causes",
+          "imageAlt": "Step 1 illustration"
+        },
+        "two": {
+          "label": "STEP 2",
+          "title": "Define the future you want",
+          "description": "What's our goal/What do we want our world to be/How do we envision the future/How do we measure it",
+          "aiPrompt": "Ask AI Colleague Bucky for help, feedback, answers, advice, what's missing.",
+          "imageAlt": "Step 2 illustration"
+        },
+        "three": {
+          "label": "STEP 3",
+          "title": "Map the way forward",
+          "description": "How do we reach our goal/solve the problem/what do we do/where/how/when/What technology, policy, programs, partners, funding are needed to test, to scale",
+          "aiPrompt": "Ask AI Colleagues Bucky or Amina, Li, Sofia, Arjun, Elana, Tane or Zane for help, feedback, answers, advice, what's missing.",
+          "imageAlt": "Step 3 illustration"
+        }
+      }
+    },
+    "simple": {
+      "title": "AS SIMPLE AS . . .",
+      "items": {
+        "first": "You: Explore, test and use NewWorld Game— for free. See how it can be used in your work.",
+        "second": "Sign up— FOR FREE. (link to sign up page)",
+        "third": "Choose a challenge, form teams, begin at Step 1 end at Step 5—and transform learning into impact. Yes, for free. Have fun."
+      }
+    },
+    "intro": {
+      "title": "NEWWORLD GAME IS . . .",
+      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work-space and innovation lab for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
+      "paragraph2": "Its goal is to help you and your work have real impact— to change the world— by providing you and your organization with space and tools for developing solutions to the problems and issues you are charged with dealing with.",
+      "paragraph3": "The NewWorld Game is where you develop solutions to global and/or local real-world problems— and determine the best paths for achieving them.",
+      "paragraph4": "All made possible by the creative combination of AI and human intelligence.",
+      "learnMore": "Learn more."
+    },
+    "ai": {
+      "title": "Hear It from Our AI Colleagues",
+      "subtitle": "Powered by the latest AI models and trained specifically for community leaders, activists, and concerned citizens."
+    },
+    "pricing": {
+      "title": "COSTS",
+      "free": "For now, for your community— free.",
+      "later": "For later, if NewWorld Game works for you and your community, pay us/ invest in our work what you think it is worth.",
+      "customized": "If you want a customized, community-branded and focused version for use by everyone from high school students to community organizations, elected leaders and their staffs and everyone in between: contact us."
+    },
+    "finalCta": {
+      "title": "Ready to explore?",
+      "subtitle": "Download a Guide for Exploring NWG, sign up and begin your work, or reach out so we can walk through the platform together."
+    }
+  },
   "landingHome": {
     "hero": {
       "tagline": "solutions to world problems with people around the world.",

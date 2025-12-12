@@ -9,6 +9,7 @@ import { LandingPageComponent } from '../components/landing-page/landing-page.co
 import { LandingTestComponent } from '../components/landing-test/landing-test.component';
 import { LandingCollegeComponent } from '../components/landing-college/landing-college.component';
 import { LandingUnComponent } from '../components/landing-un/landing-un.component';
+import { LandingCommunityComponent } from '../components/landing-community/landing-community.component';
 import { CareersComponent } from '../blogs/careers/careers.component';
 import { PrivacyComponent } from '../blogs/privacy/privacy.component';
 import { FeaturesComponent } from '../blogs/features/features.component';
@@ -59,6 +60,7 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
     LandingTestComponent,
     LandingCollegeComponent,
     LandingUnComponent,
+    LandingCommunityComponent,
     CareersComponent,
     PrivacyComponent,
     FeaturesComponent,

@@ -6,6 +6,7 @@ import { LandingPageComponent } from '../components/landing-page/landing-page.co
 import { LandingTestComponent } from '../components/landing-test/landing-test.component';
 import { LandingCollegeComponent } from '../components/landing-college/landing-college.component';
 import { LandingUnComponent } from '../components/landing-un/landing-un.component';
+import { LandingCommunityComponent } from '../components/landing-community/landing-community.component';
 import { CareersComponent } from '../blogs/careers/careers.component';
 import { PrivacyComponent } from '../blogs/privacy/privacy.component';
 import { FeaturesComponent } from '../blogs/features/features.component';
@@ -54,6 +55,7 @@ const routes: Routes = [
   { path: 'landing', component: LandingTestComponent },
   { path: 'landing-college', component: LandingCollegeComponent },
   { path: 'landing-un', component: LandingUnComponent },
+  { path: 'landing-community', component: LandingCommunityComponent },
   { path: 'careers', component: CareersComponent },
   { path: 'privacy', component: PrivacyComponent },
   { path: 'blogs/features', component: FeaturesComponent },
