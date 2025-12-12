@@ -374,6 +374,145 @@
       "subtitle": "Download a Guide for Exploring NWG, sign up your class, or reach out so we can walk through the platform together."
     }
   },
+  "landingUn": {
+    "cta": {
+      "scheduleDemo": "Schedule a Demo",
+      "contact": "Contact Us",
+      "startFree": "Start Free",
+      "signUp": "Sign Up",
+      "downloadGuide": "Download a Guide for Exploring NWG",
+      "exploreAi": "Explore All AI Colleagues"
+    },
+    "hero": {
+      "title": "NewWorld Game for the United Nations",
+      "subtitle": "Add a new dimension to your work— an Innovation Lab along with Assistants who are expert researchers who work super fast, answer your questions with depth and breath, and can lead to innovative solutions to the critical problems on which you work."
+    },
+    "steps": {
+      "badge": "Step-by-step pathway",
+      "title": "First three moves to launch your Lab",
+      "cards": {
+        "one": {
+          "label": "Step 1",
+          "title": "What is the problem?",
+          "description": "What is the problem we want to work on/why is it important/ How big is it/ Where it it/How do we measure it/What are the underlying causes",
+          "aiPrompt": "Ask AI Colleague Bucky for help, answers, feedback, advice, causes",
+          "imageAlt": "Step 1 illustration"
+        },
+        "two": {
+          "label": "Step 2",
+          "title": "Define the future you want",
+          "description": "What's our goal/What do we want our world to be/How do we envision the future/How do we measure it",
+          "aiPrompt": "Ask AI Colleague Bucky for help, feedback, answers, advice, what's missing.",
+          "imageAlt": "Step 2 illustration"
+        },
+        "three": {
+          "label": "Step 3",
+          "title": "Map the way forward",
+          "description": "How do we reach our goal/solve the problem/what do we do/where/how/when/What technology, policy, programs, partners, funding are needed to test, to scale",
+          "aiPrompt": "Ask AI Colleagues Bucky or Amina, Li, Sofia, Arjun, Elana, Tane or Zane for help, feedback, answers, advice, what's missing.",
+          "imageAlt": "Step 3 illustration"
+        }
+      }
+    },
+    "simple": {
+      "title": "As simple as . . .",
+      "items": {
+        "first": "You: Explore, test and use the NewWorld Game— for free. See if it is appropriate for your needs.",
+        "second": "SIGN UP YOUR CLASS— FOR FREE. See how easy it is.",
+        "third": "Choose a challenge, form teams, begin at Step 1 end at Step 5—and transform learning into impact. Yes, for free. Have fun."
+      }
+    },
+    "intro": {
+      "title": "NewWorld Game Overview",
+      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work- and learning-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
+      "paragraph2": "Its goal is to have real impact—to change the world—by providing you and your students with space and tools for developing solutions to the problems and issues you care about.",
+      "paragraph3": "The NewWorld Game is where students learn the subject matter you teach while developing solutions to global and/or local real-world problems and enter them in a NewWorld Tournament where they compete for recognition and real-world impact.",
+      "paragraph4": "This is made possible by the creative combination of AI and human intelligence.",
+      "learnMore": "Learn more."
+    },
+    "included": {
+      "title": "Features include:",
+      "subtitle": "Over 100 global statistical data bases, 400+ state of the world reports, and curated libraries of solutions.",
+      "cards": {
+        "fullAccess": {
+          "title": "Full NWG Feature Access",
+          "description": "Access to all NWG features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+        },
+        "dashboard": {
+          "title": "Guided Strategic Design Process",
+          "description": "Guided strategic design process inside a simple interface."
+        },
+        "ai": {
+          "title": "AI Assistants",
+          "description": "Seven young avatars that assist in the problem-solving process, along with five wise elders to ask for advice."
+        },
+        "collaboration": {
+          "title": "Peer Review",
+          "description": "Peer review that deepens learning while strengthening solutions."
+        },
+        "tournament": {
+          "title": "Access to the NewWorld Tournament",
+          "description": "Move from classroom pilots to national and global recognition with tournament entries."
+        },
+        "support": {
+          "title": "Implementation Support",
+          "description": "Guidance from design process and AI colleagues to push projects toward real-world adoption."
+        }
+      }
+    },
+    "benefits": {
+      "title": "Results:",
+      "cards": {
+        "interdisciplinary": {
+          "title": "Deep Understanding",
+          "description": "Students don't just study problems—they practice solving them. They leave your course with deep understanding of subject matter, global literacy, teamwork skills, strategic plans, and the confidence to become not only the leaders of tomorrow, but the architects of the future."
+        },
+        "data": {
+          "title": "Data & Solutions Access",
+          "description": "Tap into 100+ global data sets, 400+ state-of-the-world reports, and curated solution libraries for real-time insights and references."
+        },
+        "impact": {
+          "title": "Student Impact",
+          "description": "Fosters informed, engaged global citizens ready to take meaningful action with confidence and clarity."
+        }
+      }
+    },
+    "ai": {
+      "title": "Hear It from Our AI Colleagues",
+      "subtitle": "Powered by the latest AI models and trained to support educators and students through each phase of the NewWorld Game.",
+      "teacher": "For Teachers",
+      "teacherText": "Use AI partners for research prompts, lesson planning, formative feedback, and quick exemplars tailored to each discipline.",
+      "student": "For Students",
+      "studentText": "Teams collaborate with their favorite AI colleague to brainstorm, test, and tell the story of their solution with confidence."
+    },
+    "pricing": {
+      "classPlan": {
+        "badge": "COST FOR YOUR CLASS: FREE",
+        "price": "$0",
+        "note": "To June 2026",
+        "features": {
+          "item1": "30 Students and/or up to Five Teams Full Access (If you have more students, contact us)",
+          "item2": "Unlimited use",
+          "item3": "Unlimited NewWorld Tournament Entries"
+        }
+      },
+      "schoolPlan": {
+        "badge": "COST FOR YOUR SCHOOL",
+        "title": "Contact us",
+        "subtitle": "for",
+        "features": {
+          "item1": "Unlimited use",
+          "item2": "Unlimited NewWorld Tournament Entries",
+          "item3": "Customization options"
+        }
+      },
+      "note": "Start free, scale when you are ready."
+    },
+    "finalCta": {
+      "title": "Ready to explore?",
+      "subtitle": "Download a Guide for Exploring NWG, sign up your class, or reach out so we can walk through the platform together."
+    }
+  },
   "landingHome": {
     "hero": {
       "tagline": "solutions to world problems with people around the world.",

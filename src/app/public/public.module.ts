@@ -8,6 +8,7 @@ import { SharedModule } from '../shared/shared.module';
 import { LandingPageComponent } from '../components/landing-page/landing-page.component';
 import { LandingTestComponent } from '../components/landing-test/landing-test.component';
 import { LandingCollegeComponent } from '../components/landing-college/landing-college.component';
+import { LandingUnComponent } from '../components/landing-un/landing-un.component';
 import { CareersComponent } from '../blogs/careers/careers.component';
 import { PrivacyComponent } from '../blogs/privacy/privacy.component';
 import { FeaturesComponent } from '../blogs/features/features.component';
@@ -57,6 +58,7 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
     LandingPageComponent,
     LandingTestComponent,
     LandingCollegeComponent,
+    LandingUnComponent,
     CareersComponent,
     PrivacyComponent,
     FeaturesComponent,
