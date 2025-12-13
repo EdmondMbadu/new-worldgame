@@ -511,24 +511,10 @@
     },
     "pricing": {
       "classPlan": {
-        "badge": "COST FOR YOUR CLASS: FREE",
-        "price": "$0",
-        "note": "To June 2026",
-        "features": {
-          "item1": "30 Students and/or up to Five Teams Full Access (If you have more students, contact us)",
-          "item2": "Unlimited use",
-          "item3": "Unlimited NewWorld Tournament Entries"
-        }
+        "badge": "COST FOR UN: FREE"
       },
       "schoolPlan": {
-        "badge": "COST FOR YOUR SCHOOL",
-        "title": "Contact us",
-        "subtitle": "for",
-        "features": {
-          "item1": "Unlimited use",
-          "item2": "Unlimited NewWorld Tournament Entries",
-          "item3": "Customization options"
-        }
+        "badge": "COST FOR CUSTOMIZED OPTIONS FOR YOUR SPECIFIC UN USE"
       },
       "note": "Start free, scale when you are ready."
     },
