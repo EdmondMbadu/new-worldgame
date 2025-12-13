@@ -387,9 +387,38 @@
       "title": "NewWorld Game for the United Nations",
       "subtitle": "Add a new dimension to your work— an Innovation Lab along with Assistants who are expert researchers who work super fast, answer your questions with depth and breath, and can lead to innovative solutions to the critical problems on which you work."
     },
+    "whatYouGet": {
+      "title": "What You Get With NewWorld Game",
+      "cards": {
+        "strategicPlanning": {
+          "title": "State-of-the-art Strategic Planning",
+          "description": "State-of-the-art strategic planning/problem solving process"
+        },
+        "aiAssistants": {
+          "title": "AI Assistants",
+          "description": "AI assistants that quickly answer your questions (with footnotes), provide fresh perspectives and add depth and breath to your work"
+        },
+        "spectrumAi": {
+          "title": "Spectrum of AI Assistants",
+          "description": "Choose from a spectrum of AI assistants (from a notable collection of \"Elders\" to a gang of contemporary researchers from around their world, each with a special skill-set) to help in your work"
+        },
+        "fullAccess": {
+          "title": "Full NWG Feature Access",
+          "description": "Full NWG Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+        },
+        "collaboration": {
+          "title": "Team Collaboration Tools",
+          "description": "Invite colleagues, from around the world if you want, to be on your team. Use Team Collaboration Tools, including Messaging boards, shared files, and peer feedback flows built directly into each project."
+        },
+        "dashboard": {
+          "title": "Private Dashboard for Each Project",
+          "description": "Keep every project you use NWG for organized with a dedicated workspace."
+        }
+      }
+    },
     "steps": {
-      "badge": "Step-by-step pathway",
-      "title": "First three moves to launch your Lab",
+      "badge": "SAMPLE STEP-BY-STEP PATHWAY",
+      "title": "First three moves to launch your AI assisted Innovation Lab",
       "cards": {
         "one": {
           "label": "Step 1",
@@ -415,24 +444,23 @@
       }
     },
     "simple": {
-      "title": "As simple as . . .",
+      "title": "AS SIMPLE AS . . .",
       "items": {
-        "first": "You: Explore, test and use the NewWorld Game— for free. See if it is appropriate for your needs.",
-        "second": "SIGN UP YOUR CLASS— FOR FREE. See how easy it is.",
-        "third": "Choose a challenge, form teams, begin at Step 1 end at Step 5—and transform learning into impact. Yes, for free. Have fun."
+        "first": "You: Explore, test and use the NewWorld Game— for free. See how it can be used in your work.",
+        "second": "Sign up— FOR FREE.",
+        "third": "Choose a challenge, form a team if you want, begin at Step 1 end at Step 5—and transform research into impact. Yes, for free. Have fun."
       }
     },
     "intro": {
       "title": "NewWorld Game Overview",
-      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work- and learning-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
-      "paragraph2": "Its goal is to have real impact—to change the world—by providing you and your students with space and tools for developing solutions to the problems and issues you care about.",
-      "paragraph3": "The NewWorld Game is where students learn the subject matter you teach while developing solutions to global and/or local real-world problems and enter them in a NewWorld Tournament where they compete for recognition and real-world impact.",
-      "paragraph4": "This is made possible by the creative combination of AI and human intelligence.",
+      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work-space and innovation lab for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
+      "paragraph2": "Its goal is to help you and your work have real impact— to change the world— by providing you and your organization with space and tools for developing solutions to the problems and issues you are charged with dealing with.",
+      "paragraph3": "The NewWorld Game is where you develop solutions to global and/or local real-world problems— and figure out the best paths for achieving the SDGs. All made possible by the creative combination of AI and human intelligence.",
       "learnMore": "Learn more."
     },
     "included": {
-      "title": "Features include:",
-      "subtitle": "Over 100 global statistical data bases, 400+ state of the world reports, and curated libraries of solutions.",
+      "title": "",
+      "subtitle": "",
       "cards": {
         "fullAccess": {
           "title": "Full NWG Feature Access",
@@ -461,7 +489,7 @@
       }
     },
     "benefits": {
-      "title": "Results:",
+      "title": "",
       "cards": {
         "interdisciplinary": {
           "title": "Deep Understanding",
@@ -479,11 +507,7 @@
     },
     "ai": {
       "title": "Hear It from Our AI Colleagues",
-      "subtitle": "Powered by the latest AI models and trained to support educators and students through each phase of the NewWorld Game.",
-      "teacher": "For Teachers",
-      "teacherText": "Use AI partners for research prompts, lesson planning, formative feedback, and quick exemplars tailored to each discipline.",
-      "student": "For Students",
-      "studentText": "Teams collaborate with their favorite AI colleague to brainstorm, test, and tell the story of their solution with confidence."
+      "subtitle": "Powered by the latest AI models and trained specifically for professionals working on the SDGs."
     },
     "pricing": {
       "classPlan": {
@@ -510,7 +534,7 @@
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring NWG, sign up your class, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring NWG, sign up and begin your work, or reach out so we can walk through the platform together."
     }
   },
   "landingCommunity": {

@@ -54,6 +54,111 @@
     </div>
   </section>
 
+  <!-- What You Get With NewWorld Game -->
+  <section id="what-you-get" class="py-16 bg-white dark:bg-slate-900">
+    <div class="container mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2
+          class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-6"
+        >
+          {{ 'landingUn.whatYouGet.title' | translate }}
+        </h2>
+      </div>
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+        >
+          <h3
+            class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+          >
+            {{
+              'landingUn.whatYouGet.cards.strategicPlanning.title' | translate
+            }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{
+              'landingUn.whatYouGet.cards.strategicPlanning.description'
+                | translate
+            }}
+          </p>
+        </div>
+        <div
+          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+        >
+          <h3
+            class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+          >
+            {{ 'landingUn.whatYouGet.cards.aiAssistants.title' | translate }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{
+              'landingUn.whatYouGet.cards.aiAssistants.description' | translate
+            }}
+          </p>
+        </div>
+        <div
+          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+        >
+          <h3
+            class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+          >
+            {{ 'landingUn.whatYouGet.cards.spectrumAi.title' | translate }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{
+              'landingUn.whatYouGet.cards.spectrumAi.description' | translate
+            }}
+          </p>
+        </div>
+        <div
+          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+        >
+          <h3
+            class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+          >
+            {{ 'landingUn.whatYouGet.cards.fullAccess.title' | translate }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{
+              'landingUn.whatYouGet.cards.fullAccess.description' | translate
+            }}
+          </p>
+        </div>
+        <div
+          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+        >
+          <h3
+            class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+          >
+            {{
+              'landingUn.whatYouGet.cards.collaboration.title' | translate
+            }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{
+              'landingUn.whatYouGet.cards.collaboration.description'
+                | translate
+            }}
+          </p>
+        </div>
+        <div
+          class="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm"
+        >
+          <h3
+            class="text-xl font-semibold text-slate-900 dark:text-white mb-3"
+          >
+            {{ 'landingUn.whatYouGet.cards.dashboard.title' | translate }}
+          </h3>
+          <p class="text-slate-600 dark:text-slate-300">
+            {{
+              'landingUn.whatYouGet.cards.dashboard.description' | translate
+            }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Step cards -->
   @defer (on viewport; prefetch on idle) {
     <section id="steps" class="py-16 bg-white dark:bg-slate-950">
@@ -211,7 +316,12 @@
               >2</span
             >
             <p class="text-slate-700 dark:text-slate-300">
-              {{ 'landingUn.simple.items.second' | translate }}
+              Sign up— FOR FREE.
+              <a
+                routerLink="/signup-school-free"
+                class="text-indigo-600 dark:text-indigo-300 underline underline-offset-4"
+                >(link to sign up page)</a
+              >
             </p>
           </div>
           <div class="flex gap-4">
@@ -248,9 +358,8 @@
         <div class="mt-6 space-y-6 text-slate-700 dark:text-slate-200">
           <p>{{ 'landingUn.intro.paragraph1' | translate }}</p>
           <p>{{ 'landingUn.intro.paragraph2' | translate }}</p>
-          <p>{{ 'landingUn.intro.paragraph3' | translate }}</p>
           <p>
-            {{ 'landingUn.intro.paragraph4' | translate }}
+            {{ 'landingUn.intro.paragraph3' | translate }}
             <a
               href="https://newworld-game.org"
               target="_blank"
@@ -266,7 +375,7 @@
 
   <!-- What's included -->
   @defer (on viewport; prefetch on idle) {
-    <section id="overview" class="py-16 bg-white dark:bg-slate-900">
+    <section id="overview" class="py-16 bg-white dark:bg-slate-900" *ngIf="false">
       <div class="container mx-auto px-6">
         <div class="text-center max-w-3xl mx-auto mb-10">
           <h2
@@ -386,7 +495,7 @@
 
   <!-- Other benefits -->
   @defer (on viewport; prefetch on idle) {
-    <section id="benefits" class="py-16 bg-slate-50 dark:bg-slate-950">
+    <section id="benefits" class="py-16 bg-slate-50 dark:bg-slate-950" *ngIf="false">
       <div class="container mx-auto px-6">
         <div class="text-center max-w-2xl mx-auto mb-12">
           <h2 class="text-3xl font-bold text-slate-900 dark:text-white">
@@ -490,28 +599,6 @@
               }}{{ ai.intro.length > 100 ? "…" : "" }}
             </p>
           </article>
-        </div>
-        <div class="mt-12 grid gap-6 md:grid-cols-2">
-          <div
-            class="p-6 rounded-3xl bg-indigo-600/10 border border-indigo-200 dark:border-indigo-800"
-          >
-            <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-              {{ 'landingUn.ai.teacher' | translate }}
-            </h3>
-            <p class="text-slate-700 dark:text-slate-300">
-              {{ 'landingUn.ai.teacherText' | translate }}
-            </p>
-          </div>
-          <div
-            class="p-6 rounded-3xl bg-emerald-600/10 border border-emerald-200 dark:border-emerald-800"
-          >
-            <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-3">
-              {{ 'landingUn.ai.student' | translate }}
-            </h3>
-            <p class="text-slate-700 dark:text-slate-300">
-              {{ 'landingUn.ai.studentText' | translate }}
-            </p>
-          </div>
         </div>
         <div class="mt-8 text-center">
           <a
