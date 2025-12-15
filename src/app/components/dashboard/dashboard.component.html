@@ -1419,21 +1419,21 @@
 <!-- ▸ END INVITE MODAL --------------------------------------------------------- -->
 
 <!-- ▸ INVITE TEAM MEMBER MODAL ------------------------------------------------ -->
-<div *ngIf="showInviteTeamMemberModal" class="fixed inset-0 z-[9999]">
+<div *ngIf="showInviteTeamMemberModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
   <!-- Overlay -->
   <div
-    class="absolute inset-0 bg-black/55 backdrop-blur-sm"
+    class="absolute inset-0 bg-black/60 backdrop-blur-md"
     (click)="toggleInviteTeamMemberModal()"
   ></div>
 
   <!-- Modal content wrapper -->
   <div
-    class="relative mx-auto mt-20 w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden"
+    class="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden transform transition-all"
   >
     <!-- Close button -->
     <button
       (click)="toggleInviteTeamMemberModal()"
-      class="absolute top-4 right-4 p-2 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition z-10"
+      class="absolute top-5 right-5 p-2.5 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all z-10 shadow-sm hover:shadow-md"
       aria-label="Close"
     >
       <svg
@@ -1450,49 +1450,59 @@
     </button>
 
     <!-- Modal body -->
-    <div class="p-6">
-      <h2
-        class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white mb-2"
-      >
-        Invite Team Members
-      </h2>
-      <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">
-        Add a new participant to your solution. Start typing an email or name to see suggestions.
-      </p>
+    <div class="p-8">
+      <!-- Header Section -->
+      <div class="mb-8">
+        <h2
+          class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-3"
+        >
+          Invite Team Members
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+          Add a new participant to your solution. Start typing an email or name to see suggestions.
+        </p>
+      </div>
 
       <!-- Input field with autocomplete -->
-      <div class="relative">
+      <div class="relative mb-6">
         <label
           for="teamMemberInput"
-          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          class="block mb-3 text-sm font-semibold text-gray-900 dark:text-white"
         >
           Email or Name
         </label>
-        <input
-          id="teamMemberInput"
-          type="text"
-          [(ngModel)]="newTeamMember"
-          (input)="onTeamMemberInputChange()"
-          (focus)="onTeamMemberInputChange()"
-          (blur)="hideUserSuggestions()"
-          class="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="email@gmail.com or name"
-        />
+        <div class="relative">
+          <input
+            id="teamMemberInput"
+            type="text"
+            [(ngModel)]="newTeamMember"
+            (input)="onTeamMemberInputChange()"
+            (focus)="onTeamMemberInputChange()"
+            (blur)="hideUserSuggestions()"
+            class="block w-full px-4 py-4 text-base text-gray-900 bg-gray-50 dark:bg-slate-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 transition-all shadow-sm focus:shadow-md"
+            placeholder="Type email@gmail.com or name to search..."
+          />
+          <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
 
         <!-- User suggestions dropdown -->
         <div
           *ngIf="showUserSuggestions && filteredUsers.length > 0"
-          class="absolute z-20 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          class="absolute z-20 w-full mt-2 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-96 overflow-y-auto"
         >
           <div
             *ngFor="let user of filteredUsers"
             (mousedown)="selectUser(user); $event.preventDefault()"
-            class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer border-b border-gray-200 dark:border-gray-700 last:border-b-0 transition"
+            class="px-5 py-4 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-all duration-150 active:bg-blue-100 dark:active:bg-slate-600"
           >
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4">
               <div
                 *ngIf="user.profilePicture?.downloadURL"
-                class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+                class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600"
               >
                 <img
                   [src]="user.profilePicture?.downloadURL"
@@ -1502,10 +1512,10 @@
               </div>
               <div
                 *ngIf="!user.profilePicture?.downloadURL"
-                class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0"
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600"
               >
                 <svg
-                  class="w-6 h-6 text-gray-400"
+                  class="w-7 h-7 text-blue-600 dark:text-blue-300"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -1515,12 +1525,17 @@
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <p class="text-base font-semibold text-gray-900 dark:text-white truncate mb-1">
                   {{ user.firstName }} {{ user.lastName }}
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
                   {{ user.email }}
                 </p>
+              </div>
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
               </div>
             </div>
           </div>
@@ -1530,15 +1545,15 @@
       <!-- Selected person confirmation -->
       <div
         *ngIf="newTeamMember && (selectedUser || data.isValidEmail(newTeamMember))"
-        class="mt-4 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
+        class="mt-6 p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/30 dark:to-blue-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 shadow-md"
       >
-        <div class="flex items-start gap-3">
+        <div class="flex items-start gap-4">
           <!-- Profile picture or avatar -->
           <div class="flex-shrink-0">
             <div *ngIf="selectedUser">
               <div
                 *ngIf="selectedUser.profilePicture?.downloadURL"
-                class="w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-200 dark:border-emerald-700"
+                class="w-14 h-14 rounded-full overflow-hidden border-4 border-emerald-300 dark:border-emerald-600 shadow-md"
               >
                 <img
                   [src]="selectedUser.profilePicture?.downloadURL"
@@ -1548,10 +1563,10 @@
               </div>
               <div
                 *ngIf="!selectedUser.profilePicture?.downloadURL"
-                class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 border-2 border-emerald-200 dark:border-emerald-700 flex items-center justify-center"
+                class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-700 dark:to-blue-700 border-4 border-emerald-300 dark:border-emerald-600 flex items-center justify-center shadow-md"
               >
                 <svg
-                  class="w-7 h-7 text-gray-400 dark:text-gray-300"
+                  class="w-8 h-8 text-emerald-700 dark:text-emerald-200"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -1563,10 +1578,10 @@
             </div>
             <div *ngIf="!selectedUser && data.isValidEmail(newTeamMember)">
               <div
-                class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 border-2 border-emerald-200 dark:border-emerald-700 flex items-center justify-center"
+                class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-700 dark:to-blue-700 border-4 border-emerald-300 dark:border-emerald-600 flex items-center justify-center shadow-md"
               >
                 <svg
-                  class="w-7 h-7 text-gray-400 dark:text-gray-300"
+                  class="w-8 h-8 text-emerald-700 dark:text-emerald-200"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="2"
@@ -1584,22 +1599,27 @@
           
           <!-- User info -->
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-200 mb-1">
-              Selected:
-            </p>
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-sm font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wide">
+                Selected
+              </p>
+            </div>
             <div *ngIf="selectedUser" class="space-y-1">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">
+              <p class="text-base font-semibold text-gray-900 dark:text-white">
                 {{ selectedUser.firstName }} {{ selectedUser.lastName }}
               </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300">
+              <p class="text-sm text-gray-600 dark:text-gray-300">
                 {{ selectedUser.email }}
               </p>
             </div>
             <div *ngIf="!selectedUser && data.isValidEmail(newTeamMember)">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">
+              <p class="text-base font-semibold text-gray-900 dark:text-white">
                 {{ newTeamMember }}
               </p>
-              <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">
+              <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 (Not registered in system)
               </p>
             </div>
@@ -1608,16 +1628,16 @@
       </div>
 
       <!-- Action buttons -->
-      <div class="mt-6 flex items-center justify-end gap-3">
+      <div class="mt-8 flex items-center justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
         <button
           (click)="toggleInviteTeamMemberModal()"
-          class="px-5 py-2.5 text-sm font-medium text-white rounded-lg bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+          class="px-6 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-600 transition-all shadow-sm hover:shadow-md"
         >
           Cancel
         </button>
         <button
           (click)="addParticipantToSolution()"
-          class="px-5 py-2.5 text-sm font-medium text-white rounded-lg bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800"
+          class="px-6 py-3 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
         >
           Add Participant
         </button>
