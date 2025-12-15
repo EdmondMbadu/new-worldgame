@@ -1459,7 +1459,7 @@
           Invite Team Members
         </h2>
         <p class="text-base text-slate-600 dark:text-slate-400 leading-relaxed">
-          Add participants to your solution. You can invite multiple people in one session.
+          Add participants to your solution. Select from the list or type an email, then click "Add to List" to build a group, or "Add Participant" to add immediately.
         </p>
       </div>
 
@@ -1593,9 +1593,58 @@
         </div>
       </div>
 
-      <!-- Selected person confirmation -->
+      <!-- Pending Participants List -->
       <div
-        *ngIf="newTeamMember && (selectedUser || data.isValidEmail(newTeamMember)) && !isAddingParticipant"
+        *ngIf="pendingParticipants.length > 0"
+        class="mt-6 mb-6"
+      >
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          Pending Participants ({{ pendingParticipants.length }})
+        </h3>
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-2">
+          <div
+            *ngFor="let pending of pendingParticipants"
+            class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700/50 shadow-sm hover:shadow-md transition-all"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-blue-200 dark:bg-blue-700 flex items-center justify-center flex-shrink-0">
+                  <svg *ngIf="pending.user?.profilePicture?.downloadURL" class="w-6 h-6 text-blue-700 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                  </svg>
+                  <svg *ngIf="!pending.user?.profilePicture?.downloadURL" class="w-6 h-6 text-blue-700 dark:text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {{ pending.name }}
+                  </p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    {{ pending.email }}
+                  </p>
+                </div>
+              </div>
+              <button
+                (click)="removePendingParticipant(pending.email)"
+                class="ml-3 p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                aria-label="Remove"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected person confirmation (for single add) -->
+      <div
+        *ngIf="newTeamMember && (selectedUser || data.isValidEmail(newTeamMember)) && !isAddingParticipant && pendingParticipants.length === 0"
         class="mt-6 p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/30 dark:to-blue-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 shadow-md"
       >
         <div class="flex items-start gap-4">
@@ -1655,7 +1704,7 @@
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
               <p class="text-sm font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wide">
-                Selected
+                Ready to Add
               </p>
             </div>
             <div *ngIf="selectedUser" class="space-y-1">
@@ -1680,27 +1729,66 @@
     </div>
 
     <!-- Action buttons - fixed at bottom -->
-    <div class="px-8 py-6 flex items-center justify-end gap-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 flex-shrink-0">
-      <button
-        (click)="toggleInviteTeamMemberModal()"
-        class="px-6 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-600 transition-all shadow-sm hover:shadow-md"
-      >
-        {{ invitedParticipants.length > 0 ? 'Done' : 'Cancel' }}
-      </button>
-      <button
-        (click)="addParticipantToSolution()"
-        [disabled]="isAddingParticipant || !newTeamMember || (!selectedUser && !data.isValidEmail(newTeamMember))"
-        class="px-6 py-3 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-md"
-      >
-        <span *ngIf="!isAddingParticipant">Add Participant</span>
-        <span *ngIf="isAddingParticipant" class="flex items-center gap-2">
-          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Adding...
-        </span>
-      </button>
+    <div class="px-8 py-6 flex items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <button
+          (click)="toggleInviteTeamMemberModal()"
+          class="px-6 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-600 transition-all shadow-sm hover:shadow-md"
+        >
+          {{ invitedParticipants.length > 0 || pendingParticipants.length > 0 ? 'Done' : 'Cancel' }}
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- Add to List button (for bulk mode) - shows when you have something typed/selected -->
+        <button
+          *ngIf="newTeamMember && (selectedUser || data.isValidEmail(newTeamMember))"
+          (click)="addEmailToPending()"
+          [disabled]="isAddingParticipant"
+          class="px-5 py-3 text-sm font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-2 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Add to List
+        </button>
+
+        <!-- Add All Participants button (bulk add) - shows when you have pending participants -->
+        <button
+          *ngIf="pendingParticipants.length > 0"
+          (click)="addAllPendingParticipants()"
+          [disabled]="isAddingParticipant"
+          class="px-6 py-3 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 dark:focus:ring-purple-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-md"
+        >
+          <span *ngIf="!isAddingParticipant" class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add All ({{ pendingParticipants.length }})
+          </span>
+          <span *ngIf="isAddingParticipant" class="flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Adding...
+          </span>
+        </button>
+
+        <!-- Add Participant button (single add) - shows when no pending participants and you have something to add -->
+        <button
+          *ngIf="pendingParticipants.length === 0 && newTeamMember && (selectedUser || data.isValidEmail(newTeamMember))"
+          (click)="addParticipantToSolution()"
+          [disabled]="isAddingParticipant"
+          class="px-6 py-3 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-md"
+        >
+          <span *ngIf="!isAddingParticipant">Add Participant</span>
+          <span *ngIf="isAddingParticipant" class="flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Adding...
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

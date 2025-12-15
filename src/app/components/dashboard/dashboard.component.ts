@@ -62,6 +62,11 @@ export class DashboardComponent implements OnInit {
     status: 'success' | 'error';
   }> = [];
   isAddingParticipant = false;
+  pendingParticipants: Array<{
+    email: string;
+    name: string;
+    user?: User;
+  }> = [];
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -330,6 +335,7 @@ export class DashboardComponent implements OnInit {
       this.showUserSuggestions = false;
       this.selectedUser = null;
       this.invitedParticipants = [];
+      this.pendingParticipants = [];
       this.isAddingParticipant = false;
       if (this.suggestionTimeout) {
         clearTimeout(this.suggestionTimeout);
@@ -378,9 +384,58 @@ export class DashboardComponent implements OnInit {
   }
 
   selectUser(user: User) {
+    // Just select the user, don't add to pending automatically
+    // User can then choose to "Add to List" or "Add Participant"
     this.newTeamMember = user.email || '';
     this.selectedUser = user;
     this.showUserSuggestions = false;
+  }
+
+  addEmailToPending() {
+    let email = '';
+    let name = '';
+    let user: User | undefined = undefined;
+
+    // Handle selected user from dropdown
+    if (this.selectedUser) {
+      email = this.selectedUser.email || '';
+      name =
+        `${this.selectedUser.firstName} ${this.selectedUser.lastName}`.trim();
+      user = this.selectedUser;
+    }
+    // Handle typed email
+    else if (this.data.isValidEmail(this.newTeamMember)) {
+      email = this.newTeamMember;
+      name = email;
+    }
+    // Invalid input
+    else {
+      return;
+    }
+
+    // Check if already in pending list
+    const alreadyPending = this.pendingParticipants.some(
+      (p) => p.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!alreadyPending) {
+      this.pendingParticipants.push({
+        email: email,
+        name: name,
+        user: user,
+      });
+    }
+
+    // Clear input
+    this.newTeamMember = '';
+    this.selectedUser = null;
+    this.showUserSuggestions = false;
+  }
+
+  removePendingParticipant(email: string) {
+    this.pendingParticipants = this.pendingParticipants.filter(
+      (p) => p.email.toLowerCase() !== email.toLowerCase()
+    );
   }
 
   hideUserSuggestions() {
@@ -388,6 +443,88 @@ export class DashboardComponent implements OnInit {
     this.suggestionTimeout = setTimeout(() => {
       this.showUserSuggestions = false;
     }, 200);
+  }
+
+  async addAllPendingParticipants() {
+    if (this.pendingParticipants.length === 0 || this.isAddingParticipant) {
+      return;
+    }
+
+    this.isAddingParticipant = true;
+    const participantsToAdd = [...this.pendingParticipants];
+
+    // Clear pending list immediately for better UX
+    this.pendingParticipants = [];
+
+    let participants: any = [];
+    participants = this.currentSolution.participants || [];
+
+    // Add all pending participants to the participants array
+    participantsToAdd.forEach((pending) => {
+      participants.push({ name: pending.email });
+    });
+
+    try {
+      await this.solution.addParticipantsToSolution(
+        participants,
+        this.currentSolution.solutionId!
+      );
+
+      // Send emails for all participants
+      for (const pending of participantsToAdd) {
+        const previousNewTeamMember = this.newTeamMember;
+        this.newTeamMember = pending.email;
+        try {
+          await this.sendEmailToParticipant();
+        } catch (emailError) {
+          console.error(`Error sending email to ${pending.email}:`, emailError);
+          // Continue even if email fails
+        } finally {
+          this.newTeamMember = previousNewTeamMember;
+        }
+      }
+
+      // Add all to invited list with success status
+      participantsToAdd.forEach((pending) => {
+        this.invitedParticipants.push({
+          email: pending.email,
+          name: pending.name,
+          status: 'success',
+        });
+
+        // Auto-remove success message after 5 seconds
+        setTimeout(() => {
+          const index = this.invitedParticipants.findIndex(
+            (p) => p.email === pending.email && p.status === 'success'
+          );
+          if (index > -1) {
+            this.invitedParticipants.splice(index, 1);
+          }
+        }, 5000);
+      });
+    } catch (error) {
+      console.error('Error adding participants:', error);
+      // Add all to invited list with error status
+      participantsToAdd.forEach((pending) => {
+        this.invitedParticipants.push({
+          email: pending.email,
+          name: pending.name,
+          status: 'error',
+        });
+
+        // Auto-remove error message after 5 seconds
+        setTimeout(() => {
+          const index = this.invitedParticipants.findIndex(
+            (p) => p.email === pending.email && p.status === 'error'
+          );
+          if (index > -1) {
+            this.invitedParticipants.splice(index, 1);
+          }
+        }, 5000);
+      });
+    } finally {
+      this.isAddingParticipant = false;
+    }
   }
 
   async addParticipantToSolution() {
