@@ -47,7 +47,7 @@ export class DashboardComponent implements OnInit {
   savingProfile = false;
   profileSaved = false;
   profileMessage = '';
-  
+
   // Invite team member modal
   showInviteTeamMemberModal = false;
   newTeamMember: string = '';
@@ -56,6 +56,12 @@ export class DashboardComponent implements OnInit {
   showUserSuggestions = false;
   selectedUser: User | null = null;
   private suggestionTimeout: any;
+  invitedParticipants: Array<{
+    email: string;
+    name?: string;
+    status: 'success' | 'error';
+  }> = [];
+  isAddingParticipant = false;
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -65,7 +71,7 @@ export class DashboardComponent implements OnInit {
       this.profileSaved = false;
       this.profileMessage = '';
     });
-    
+
     // Load all users for autocomplete
     this.auth.getALlUsers().subscribe((users) => {
       this.allUsers = users;
@@ -173,8 +179,7 @@ export class DashboardComponent implements OnInit {
 
     const updates = {
       recruitmentProfile: payload,
-      broadCastInviteMessage:
-        this.currentSolution.broadCastInviteMessage ?? '',
+      broadCastInviteMessage: this.currentSolution.broadCastInviteMessage ?? '',
       description: this.currentSolution.description ?? '',
     };
 
@@ -294,26 +299,28 @@ export class DashboardComponent implements OnInit {
   }
 
   async cancelReview() {
-  if (!this.currentSolution?.solutionId) return;
+    if (!this.currentSolution?.solutionId) return;
 
-  try {
-    this.sendingBroadcast = true;
-    await this.solution.cancelPendingBySolutionId(this.currentSolution.solutionId);
+    try {
+      this.sendingBroadcast = true;
+      await this.solution.cancelPendingBySolutionId(
+        this.currentSolution.solutionId
+      );
 
-    // Reset to pre-publish state
-    (this.currentSolution as any).isBroadcasting = false;
-    (this.currentSolution as any).broadcastStatus = 'stopped';
-    (this.currentSolution as any).broadcastId = null;
+      // Reset to pre-publish state
+      (this.currentSolution as any).isBroadcasting = false;
+      (this.currentSolution as any).broadcastStatus = 'stopped';
+      (this.currentSolution as any).broadcastId = null;
 
-    this.profileMessage = 'Review canceled. Not submitted.';
-    this.profileSaved = true;
-  } catch (e) {
-    console.error(e);
-    alert('Could not cancel review.');
-  } finally {
-    this.sendingBroadcast = false;
+      this.profileMessage = 'Review canceled. Not submitted.';
+      this.profileSaved = true;
+    } catch (e) {
+      console.error(e);
+      alert('Could not cancel review.');
+    } finally {
+      this.sendingBroadcast = false;
+    }
   }
-}
 
   // Invite team member methods
   toggleInviteTeamMemberModal() {
@@ -322,6 +329,8 @@ export class DashboardComponent implements OnInit {
       this.newTeamMember = '';
       this.showUserSuggestions = false;
       this.selectedUser = null;
+      this.invitedParticipants = [];
+      this.isAddingParticipant = false;
       if (this.suggestionTimeout) {
         clearTimeout(this.suggestionTimeout);
       }
@@ -333,26 +342,28 @@ export class DashboardComponent implements OnInit {
     if (this.suggestionTimeout) {
       clearTimeout(this.suggestionTimeout);
     }
-    
+
     // Reset selected user if input changes
     this.selectedUser = null;
-    
+
     const searchTerm = this.newTeamMember.toLowerCase().trim();
     if (searchTerm.length > 0) {
-      this.filteredUsers = this.allUsers.filter((user) => {
-        const firstName = user.firstName?.toLowerCase() || '';
-        const lastName = user.lastName?.toLowerCase() || '';
-        const email = user.email?.toLowerCase() || '';
-        const fullName = `${firstName} ${lastName}`.trim();
-        return (
-          firstName.includes(searchTerm) ||
-          lastName.includes(searchTerm) ||
-          fullName.includes(searchTerm) ||
-          email.includes(searchTerm)
-        );
-      }).slice(0, 10); // Limit to 10 results
+      this.filteredUsers = this.allUsers
+        .filter((user) => {
+          const firstName = user.firstName?.toLowerCase() || '';
+          const lastName = user.lastName?.toLowerCase() || '';
+          const email = user.email?.toLowerCase() || '';
+          const fullName = `${firstName} ${lastName}`.trim();
+          return (
+            firstName.includes(searchTerm) ||
+            lastName.includes(searchTerm) ||
+            fullName.includes(searchTerm) ||
+            email.includes(searchTerm)
+          );
+        })
+        .slice(0, 10); // Limit to 10 results
       this.showUserSuggestions = this.filteredUsers.length > 0;
-      
+
       // Check if the current input matches an existing user
       const exactMatch = this.allUsers.find(
         (user) => user.email?.toLowerCase() === searchTerm
@@ -380,27 +391,97 @@ export class DashboardComponent implements OnInit {
   }
 
   async addParticipantToSolution() {
-    let participants: any = [];
-    if (this.data.isValidEmail(this.newTeamMember)) {
-      participants = this.currentSolution.participants || [];
-      participants.push({ name: this.newTeamMember });
+    if (!this.data.isValidEmail(this.newTeamMember)) {
+      // Show error for invalid email
+      this.invitedParticipants.push({
+        email: this.newTeamMember,
+        status: 'error',
+      });
+      setTimeout(() => {
+        const index = this.invitedParticipants.findIndex(
+          (p) => p.email === this.newTeamMember && p.status === 'error'
+        );
+        if (index > -1) {
+          this.invitedParticipants.splice(index, 1);
+        }
+      }, 3000);
+      return;
+    }
 
-      this.solution
-        .addParticipantsToSolution(
-          participants,
-          this.currentSolution.solutionId!
-        )
-        .then(() => {
-          alert(`Successfully added ${this.newTeamMember} to the solution.`);
-          this.toggleInviteTeamMemberModal();
-        })
-        .catch((error) => {
-          alert('Error occurred while adding a team member. Try Again!');
-        });
-      await this.sendEmailToParticipant();
-      this.newTeamMember = '';
-    } else {
-      alert('Enter a valid email!');
+    if (this.isAddingParticipant) {
+      return; // Prevent multiple simultaneous adds
+    }
+
+    this.isAddingParticipant = true;
+    const emailToAdd = this.newTeamMember;
+    const userToAdd = this.selectedUser;
+    const displayName = userToAdd
+      ? `${userToAdd.firstName} ${userToAdd.lastName}`
+      : emailToAdd;
+
+    // Store the email before clearing
+    this.newTeamMember = '';
+    this.selectedUser = null;
+    this.showUserSuggestions = false;
+
+    let participants: any = [];
+    participants = this.currentSolution.participants || [];
+    participants.push({ name: emailToAdd });
+
+    try {
+      await this.solution.addParticipantsToSolution(
+        participants,
+        this.currentSolution.solutionId!
+      );
+
+      // Send email - temporarily set newTeamMember for email function
+      const previousNewTeamMember = this.newTeamMember;
+      this.newTeamMember = emailToAdd;
+      try {
+        await this.sendEmailToParticipant();
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        // Continue even if email fails - participant is still added
+      } finally {
+        this.newTeamMember = previousNewTeamMember; // Always restore
+      }
+
+      // Add to invited list with success status
+      this.invitedParticipants.push({
+        email: emailToAdd,
+        name: displayName,
+        status: 'success',
+      });
+
+      // Auto-remove success message after 5 seconds
+      setTimeout(() => {
+        const index = this.invitedParticipants.findIndex(
+          (p) => p.email === emailToAdd && p.status === 'success'
+        );
+        if (index > -1) {
+          this.invitedParticipants.splice(index, 1);
+        }
+      }, 5000);
+    } catch (error) {
+      console.error('Error adding participant:', error);
+      // Add to invited list with error status
+      this.invitedParticipants.push({
+        email: emailToAdd,
+        name: displayName,
+        status: 'error',
+      });
+
+      // Auto-remove error message after 5 seconds
+      setTimeout(() => {
+        const index = this.invitedParticipants.findIndex(
+          (p) => p.email === emailToAdd && p.status === 'error'
+        );
+        if (index > -1) {
+          this.invitedParticipants.splice(index, 1);
+        }
+      }, 5000);
+    } finally {
+      this.isAddingParticipant = false;
     }
   }
 
@@ -453,5 +534,4 @@ export class DashboardComponent implements OnInit {
       );
     }
   }
-
 }
