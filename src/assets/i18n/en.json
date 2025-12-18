@@ -389,6 +389,8 @@
     },
     "whatYouGet": {
       "title": "What You Get With NewWorld Game",
+      "titleLine1": "What You Get",
+      "titleLine2": "With NewWorld Game",
       "cards": {
         "strategicPlanning": {
           "title": "State-of-the-art Strategic Planning",
@@ -437,7 +439,7 @@
         "three": {
           "label": "Step 3",
           "title": "Map the way forward",
-          "description": "How do we reach our goal/solve the problem/what do we do/where/how/when/What technology, policy, programs, partners, funding are needed to test, to scale",
+          "description": "How do we reach our goal/solve the problem/what do we do/where/how/when/what technology, policy, programs, partners, funding are needed to test, to scale",
           "aiPrompt": "Ask AI Colleagues Bucky or Amina, Li, Sofia, Arjun, Elana, Tane or Zane for help, feedback, answers, advice, what's missing.",
           "imageAlt": "Step 3 illustration"
         }
