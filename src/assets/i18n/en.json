@@ -1297,7 +1297,7 @@
   },
   "contactPage": {
     "heading": "Contact Us",
-    "description": "Got a technical issue? Want to send feedback about a beta feature? Need details about supporting NewWorld Game? Let us know.",
+    "description": "Have a question about NewWorld Game and how you can use or customize it? Got a technical issue? Want to send feedback about a beta feature? Need details about supporting NewWorld Game? Let us know.",
     "emailPrompt": "Send us an email at",
     "alerts": {
       "completeFields": "Complete all fields",
