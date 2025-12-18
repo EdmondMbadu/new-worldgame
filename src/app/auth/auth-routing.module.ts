@@ -7,6 +7,7 @@ import { ForgotPasswordComponent } from '../components/forgot-password/forgot-pa
 import { VerifyEmailComponent } from '../components/verify-email/verify-email.component';
 import { SchoolSignupComponent } from '../components/school-signup/school-signup.component';
 import { SchoolSignupFreeComponent } from '../components/school-signup-free/school-signup-free.component';
+import { UnSignupFreeComponent } from '../components/un-signup-free/un-signup-free.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -15,6 +16,7 @@ const routes: Routes = [
   { path: 'verify-email', component: VerifyEmailComponent },
   { path: 'signup-school', component: SchoolSignupComponent },
   { path: 'signup-school-free', component: SchoolSignupFreeComponent },
+  { path: 'sign-un-free', component: UnSignupFreeComponent },
 ];
 
 @NgModule({

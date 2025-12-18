@@ -12,6 +12,7 @@ import { ForgotPasswordComponent } from '../components/forgot-password/forgot-pa
 import { VerifyEmailComponent } from '../components/verify-email/verify-email.component';
 import { SchoolSignupComponent } from '../components/school-signup/school-signup.component';
 import { SchoolSignupFreeComponent } from '../components/school-signup-free/school-signup-free.component';
+import { UnSignupFreeComponent } from '../components/un-signup-free/un-signup-free.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { SchoolSignupFreeComponent } from '../components/school-signup-free/scho
     VerifyEmailComponent,
     SchoolSignupComponent,
     SchoolSignupFreeComponent,
+    UnSignupFreeComponent,
   ],
   imports: [
     CommonModule,
