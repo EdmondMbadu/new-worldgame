@@ -352,6 +352,31 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     
     this.chatContext.requestInsert(questionKey, cleanContent, mode);
   }
+
+  insertImageToQuestion(questionKey: string, imageUrl: string, imagePrompt?: string): void {
+    // Create an HTML img tag for CKEditor insertion
+    const altText = imagePrompt ? this.escapeHtml(imagePrompt.slice(0, 100)) : 'AI Generated Image';
+    const imageHtml = `<figure class="image"><img src="${this.escapeHtml(imageUrl)}" alt="${altText}" /></figure>`;
+    
+    console.log('insertImageToQuestion called:', { questionKey, imageUrl, imageHtml });
+    this.insertingTo = questionKey;
+    this.showInsertMenu = null;
+    
+    // Check if the question already has content - if so, append
+    const existingAnswer = this.playgroundContext?.questions.find(q => q.key === questionKey)?.currentAnswer;
+    const mode = existingAnswer ? 'append' : 'replace';
+    
+    this.chatContext.requestInsert(questionKey, imageHtml, mode);
+  }
+
+  /**
+   * Escape HTML to prevent XSS
+   */
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
   
   /**
    * Convert markdown to HTML for CKEditor insertion

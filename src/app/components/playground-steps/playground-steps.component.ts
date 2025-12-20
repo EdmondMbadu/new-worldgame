@@ -398,7 +398,10 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     // Determine new content based on mode
     let newContent: string;
     if (mode === 'append' && existingContent) {
-      newContent = existingContent + '\n\n' + content;
+      // Check if content is HTML (like images) - use <br><br> for HTML, \n\n for plain text
+      const isHtml = content.trim().startsWith('<');
+      const separator = isHtml ? '<br><br>' : '\n\n';
+      newContent = existingContent + separator + content;
     } else {
       newContent = content;
     }
