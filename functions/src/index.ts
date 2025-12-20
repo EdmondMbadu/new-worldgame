@@ -1071,8 +1071,9 @@ export const onChatPrompt = functions
       history += `User: ${prompt}\nAssistant:`;
 
       // ────────── 2. pick model ─────────────────────────────────
-      // Enhanced detection for image generation requests
+      // Enhanced detection for image generation requests (English and French)
       const imagePatterns = [
+        // English patterns
         /\b(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)/i,
         /\b(image|picture|photo|illustration|artwork|visual|graphic)\s+(of|for|showing|depicting|illustrating)/i,
         /\bshow\s+me\s+(an?\s+)?(image|picture|visual)/i,
@@ -1080,6 +1081,14 @@ export const onChatPrompt = functions
         /\billustrate\b/i,
         /\bcreate\s+(a\s+)?visual/i,
         /\b(can you|please|could you)\s+(generate|create|make|draw)\s+(an?\s+)?(image|picture)/i,
+        // French patterns
+        /\b(générer|créer|faire|dessiner|peindre|concevoir|produire|rendre)\s+(une\s+)?(image|photo|illustration|visuel|graphique|diagramme|infographie)/i,
+        /\b(image|photo|illustration|visuel|graphique)\s+(de|pour|montrant|dépeignant|illustrant)/i,
+        /\b(montre|montrer)\s+(moi\s+)?(une\s+)?(image|photo|visuel)/i,
+        /\bvisualiser\b/i,
+        /\billustrer\b/i,
+        /\bcréer\s+(un\s+)?visuel/i,
+        /\b(pouvez-vous|peux-tu|s'il te plaît|s'il vous plaît)\s+(générer|créer|faire|dessiner)\s+(une\s+)?(image|photo)/i,
       ];
       const wantsImage = imagePatterns.some((pattern) => pattern.test(prompt));
 

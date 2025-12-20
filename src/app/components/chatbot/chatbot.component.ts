@@ -8,6 +8,7 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatContextService, PlaygroundContext, PlaygroundQuestion } from 'src/app/services/chat-context.service';
@@ -212,7 +213,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     private cdRef: ChangeDetectorRef,
     private storage: AngularFireStorage,
     public router: Router,
-    public chatContext: ChatContextService
+    public chatContext: ChatContextService,
+    private translate: TranslateService
   ) {
     this.user = this.auth.currentUser;
     this.selectedAi = this.aiAvatars[0];
@@ -920,8 +922,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
    * Inserts an image generation prompt prefix into the input
    */
   insertImagePrompt(): void {
-    const prefix = 'Generate an image of ';
-    if (!this.prompt.toLowerCase().startsWith('generate an image')) {
+    const prefix = this.translate.instant('chatbot.imageGeneration.promptPrefix');
+    // Check if prompt already starts with the prefix (case-insensitive)
+    const lowerPrompt = this.prompt.toLowerCase();
+    const lowerPrefix = prefix.toLowerCase();
+    if (!lowerPrompt.startsWith(lowerPrefix)) {
       this.prompt = prefix + this.prompt;
     }
     // Focus the textarea

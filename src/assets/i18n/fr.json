@@ -1081,10 +1081,15 @@
     "eyebrow": "Archives",
     "heading": "Archive photo du GSL",
     "description": "Les participants précédents du Lab venaient de :",
-    "countries": "Espagne, France, Allemagne, Angleterre, Irlande, Pologne, Géorgie, Lituanie, Ukraine, Tanzanie, Nigeria, Ghana, Cameroun, Soudan, Soudan du Sud, Sénégal, Côte d’Ivoire, Kenya, Ouganda, Zimbabwe, Afrique du Sud, RD Congo, Congo, Mozambique, Gabon, Togo, Haïti, Canada, Mexique, Honduras, Venezuela, Chine, Hong Kong, Vietnam, Singapour, Thaïlande, Japon, Nouvelle-Zélande, Australie, Inde, Pakistan, Bangladesh, Palestine, Émirats arabes unis, Arabie saoudite, Népal, Turquie, ainsi que de nombreux États américains.",
+    "countries": "Espagne, France, Allemagne, Angleterre, Irlande, Pologne, Géorgie, Lituanie, Ukraine, Tanzanie, Nigeria, Ghana, Cameroun, Soudan, Soudan du Sud, Sénégal, Côte d'Ivoire, Kenya, Ouganda, Zimbabwe, Afrique du Sud, RD Congo, Congo, Mozambique, Gabon, Togo, Haïti, Canada, Mexique, Honduras, Venezuela, Chine, Hong Kong, Vietnam, Singapour, Thaïlande, Japon, Nouvelle-Zélande, Australie, Inde, Pakistan, Bangladesh, Palestine, Émirats arabes unis, Arabie saoudite, Népal, Turquie, ainsi que de nombreux États américains.",
     "viewLabel": "Voir",
     "galleryAlt": "Participant des archives",
-    "modalCloseLabel": "Fermer l’image plein écran",
+    "modalCloseLabel": "Fermer l'image plein écran",
     "modalAlt": "Affichage plein écran des archives"
+  },
+  "chatbot": {
+    "imageGeneration": {
+      "promptPrefix": "Générer une image de "
+    }
   }
 }

@@ -1337,5 +1337,10 @@
     "galleryAlt": "Archive participant",
     "modalCloseLabel": "Close full screen image",
     "modalAlt": "Full screen archive view"
+  },
+  "chatbot": {
+    "imageGeneration": {
+      "promptPrefix": "Generate an image of "
+    }
   }
 }
