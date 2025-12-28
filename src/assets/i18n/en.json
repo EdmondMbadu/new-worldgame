@@ -1342,5 +1342,96 @@
     "imageGeneration": {
       "promptPrefix": "Generate an image of "
     }
+  },
+  "askFeedback": {
+    "title": "NewWorld Game — Feedback",
+    "description": "After completing a full solution on NWG, please answer the questions below. Your input helps us make NWG better.",
+    "yourInformation": "Your information",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "firstNameRequired": "First name is required.",
+    "lastNameRequired": "Last name is required.",
+    "emailRequired": "Valid email is required.",
+    "questionA": {
+      "title": "What do you think of NewWorld Game (NWG)?",
+      "description": "Did you like it? Will it help develop solutions to global/local problems—including developing businesses, products, or services that support the SDGs? What else do you think?",
+      "placeholder": "Share your thoughts…",
+      "minLength": "Please add at least 20 characters.",
+      "chars": "chars"
+    },
+    "questionB": {
+      "title": "What age/expertise level will NWG work for?",
+      "description": "Check all that apply and (optionally) add details.",
+      "selectAtLeastOne": "Please select at least one level.",
+      "highSchool": "High School",
+      "college": "College",
+      "professionals": "Professionals",
+      "business": "Business",
+      "other": "Other",
+      "highSchoolLabel": "High School — what areas/courses?",
+      "collegeLabel": "College — what areas/courses?",
+      "professionalsLabel": "Professionals — what area?",
+      "otherLabel": "Other — please specify"
+    },
+    "questionC": {
+      "title": "What would you add to NWG to make it better, more useful, easier to use?",
+      "placeholder": "Features, UI ideas, integrations, anything…",
+      "minLength": "Please add at least 5 characters."
+    },
+    "questionF": {
+      "title": "Was \"Ask Bucky\" useful?",
+      "yes": "Yes",
+      "somewhat": "Somewhat",
+      "no": "No",
+      "notSure": "Not sure",
+      "selectOne": "Please select one option."
+    },
+    "questionG": {
+      "title": "Are there problems or issues you could use NWG for developing solutions?",
+      "placeholder": "Briefly describe the problems/issues…",
+      "required": "This field is required."
+    },
+    "questionH": {
+      "title": "Did you use any other AI agents? What for? Was it useful?",
+      "placeholder": "Which agent(s), how you used them, and whether it helped…"
+    },
+    "questionI": {
+      "title": "Prompts you used or created",
+      "description": "Did you use prompts suggested by Jim Walker or <em>Ask Bucky Prompts</em> (Operating Manual)? Did you create new, useful prompts? Please share so we can help other users.",
+      "placeholder": "Paste or write the prompts that worked for you…"
+    },
+    "questionJ": {
+      "title": "What would make NWG more useful in your course?",
+      "placeholder": "Think of what would help your peers (HS, college, researchers, orgs, etc.)…",
+      "minLength": "Please add at least 10 characters."
+    },
+    "questionK": {
+      "title": "What could improve team building and overall functioning of Teams?",
+      "placeholder": "Onboarding, roles, comms, facilitation, tooling, etc."
+    },
+    "questionL": {
+      "title": "What else would you like to add?",
+      "placeholder": "Anything we missed…",
+      "required": "This field is required."
+    },
+    "submit": {
+      "button": "Submit feedback",
+      "submitting": "Submitting…",
+      "requiredFields": "Fields marked with * are required.",
+      "fixFollowing": "Please fix the following:"
+    },
+    "success": {
+      "title": "Thank you! Your feedback was submitted successfully.",
+      "modalTitle": "Feedback sent",
+      "modalDescription": "Thank you! Your feedback has been submitted successfully.",
+      "modalFollowUp": "We'll follow up at",
+      "modalFollowUpSuffix": "if needed.",
+      "close": "Close",
+      "submitAnother": "Submit another"
+    },
+    "error": {
+      "message": "An error occurred. Please try again."
+    }
   }
 }

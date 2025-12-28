@@ -24,11 +24,11 @@
       <header class="text-center">
         <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600">
-            NewWorld Game — Feedback
+            {{ "askFeedback.title" | translate }}
           </span>
         </h1>
         <p class="mt-4 text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-          After completing a full solution on NWG, please answer the questions below. Your input helps us make NWG better.
+          {{ "askFeedback.description" | translate }}
         </p>
       </header>
 
@@ -40,14 +40,14 @@
           <div *ngIf="success" aria-live="polite"
                class="mb-6 rounded-xl border border-emerald-200/60 bg-emerald-50 text-emerald-900
                       dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-200 p-4 text-sm md:text-base">
-            ✅ Thank you! Your feedback was submitted successfully.
+            ✅ {{ "askFeedback.success.title" | translate }}
           </div>
 
           <!-- Error -->
           <div *ngIf="submitError"
                class="mb-6 rounded-xl border border-rose-200/60 bg-rose-50 text-rose-900
                       dark:border-rose-700/50 dark:bg-rose-900/20 dark:text-rose-200 p-4 text-sm md:text-base">
-            ⚠️ An error occurred. Please try again.
+            ⚠️ {{ "askFeedback.error.message" | translate }}
           </div>
 
           <!-- Form -->
@@ -55,31 +55,31 @@
 
             <!-- Identity -->
             <section class="space-y-4">
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Your information</h2>
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{{ "askFeedback.yourInformation" | translate }}</h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div *ngIf="!isLoggedIn">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">First name <span class="text-rose-600">*</span></label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{{ "askFeedback.firstName" | translate }} <span class="text-rose-600">*</span></label>
                   <input type="text" formControlName="firstName"
                          class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
                                 bg-white dark:bg-slate-800/80 px-3 py-3 text-base
                                 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"/>
-                  <p *ngIf="submitted && form.controls.firstName.invalid" class="mt-1 text-xs text-rose-600">First name is required.</p>
+                  <p *ngIf="submitted && form.controls.firstName.invalid" class="mt-1 text-xs text-rose-600">{{ "askFeedback.firstNameRequired" | translate }}</p>
                 </div>
 
                 <div *ngIf="!isLoggedIn">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Last name<span class="text-rose-600">*</span></label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{{ "askFeedback.lastName" | translate }}<span class="text-rose-600">*</span></label>
                   <input type="text" formControlName="lastName"
                          class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
                                 bg-white dark:bg-slate-800/80 px-3 py-3 text-base
                                 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"/>
-                  <p *ngIf="submitted && form.controls.lastName.invalid" class="mt-1 text-xs text-rose-600">Last name is required.</p>
+                  <p *ngIf="submitted && form.controls.lastName.invalid" class="mt-1 text-xs text-rose-600">{{ "askFeedback.lastNameRequired" | translate }}</p>
                 </div>
 
                 <!-- Email (always required) -->
                 <div class="sm:col-span-2">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Email <span class="text-rose-600">*</span></label>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{{ "askFeedback.email" | translate }} <span class="text-rose-600">*</span></label>
                   <input type="email" formControlName="email" [readOnly]="isLoggedIn"
                          class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
                                 bg-white dark:bg-slate-800/80 px-3 py-3 text-base
@@ -87,7 +87,7 @@
                                 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
                          placeholder="you@school.edu"/>
                   <p *ngIf="(submitted || form.controls.email.touched) && form.controls.email.invalid"
-                     class="mt-1 text-xs text-rose-600">Valid email is required.</p>
+                     class="mt-1 text-xs text-rose-600">{{ "askFeedback.emailRequired" | translate }}</p>
                 </div>
               </div>
             </section>
@@ -97,23 +97,21 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">A</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What do you think of NewWorld Game (NWG)? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionA.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">
-                Did you like it? Will it help develop solutions to global/local problems—including developing
-                businesses, products, or services that support the SDGs? What else do you think?
+              <p class="text-sm text-slate-600 dark:text-slate-400" [innerHTML]="'askFeedback.questionA.description' | translate">
               </p>
               <textarea formControlName="opinion" rows="6"
                         class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Share your thoughts…"></textarea>
+                        [placeholder]="'askFeedback.questionA.placeholder' | translate"></textarea>
               <div class="flex items-center justify-between">
                 <p *ngIf="(form.controls.opinion.touched || submitted) && form.controls.opinion.invalid"
-                   class="text-xs text-rose-600">Please add at least 20 characters.</p>
-                <span class="text-xs text-slate-500 dark:text-slate-400">{{ (form.controls.opinion.value?.length || 0) }} chars</span>
+                   class="text-xs text-rose-600">{{ "askFeedback.questionA.minLength" | translate }}</p>
+                <span class="text-xs text-slate-500 dark:text-slate-400">{{ (form.controls.opinion.value?.length || 0) }} {{ "askFeedback.questionA.chars" | translate }}</span>
               </div>
             </section>
 
@@ -122,10 +120,10 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">B</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What age/expertise level will NWG work for? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionB.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">Check all that apply and (optionally) add details.</p>
+              <p class="text-sm text-slate-600 dark:text-slate-400">{{ "askFeedback.questionB.description" | translate }}</p>
 
               <div formArrayName="levels" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label *ngFor="let opt of levelOptions; let i = index"
@@ -133,16 +131,16 @@
                               border-slate-200 bg-white text-slate-800 shadow-sm
                               dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer select-none">
                   <input type="checkbox" [formControlName]="i" class="accent-sky-500 h-5 w-5">
-                  <span>{{ opt }}</span>
+                  <span>{{ getLevelLabel(opt) }}</span>
                 </label>
               </div>
-              <p *ngIf="(levelsFA.touched || submitted) && levelsFA.invalid" class="text-xs text-rose-600">Please select at least one level.</p>
+              <p *ngIf="(levelsFA.touched || submitted) && levelsFA.invalid" class="text-xs text-rose-600">{{ "askFeedback.questionB.selectAtLeastOne" | translate }}</p>
 
               <!-- Details (conditional) -->
               <div formGroupName="levelsDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div *ngIf="isLevelSelected('High School')">
                   <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-                    High School — what areas/courses?
+                    {{ "askFeedback.questionB.highSchoolLabel" | translate }}
                   </label>
                   <input type="text" formControlName="hsCourses"
                          class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
@@ -150,7 +148,7 @@
 
                 <div *ngIf="isLevelSelected('College')">
                   <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-                    College — what areas/courses?
+                    {{ "askFeedback.questionB.collegeLabel" | translate }}
                   </label>
                   <input type="text" formControlName="collegeCourses"
                          class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
@@ -158,7 +156,7 @@
 
                 <div *ngIf="isLevelSelected('Professionals')">
                   <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-                    Professionals — what area?
+                    {{ "askFeedback.questionB.professionalsLabel" | translate }}
                   </label>
                   <input type="text" formControlName="professionalAreas"
                          class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
@@ -166,7 +164,7 @@
 
                 <div *ngIf="isLevelSelected('Other')">
                   <label class="block text-sm font-medium text-slate-800 dark:text-white mb-1">
-                    Other — please specify
+                    {{ "askFeedback.questionB.otherLabel" | translate }}
                   </label>
                   <input type="text" formControlName="otherText"
                          class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 "/>
@@ -179,7 +177,7 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">C</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What would you add to NWG to make it better, more useful, easier to use? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionC.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
               <textarea formControlName="improvements" rows="5"
@@ -187,9 +185,9 @@
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Features, UI ideas, integrations, anything…"></textarea>
+                        [placeholder]="'askFeedback.questionC.placeholder' | translate"></textarea>
               <p *ngIf="(form.controls.improvements.touched || submitted) && form.controls.improvements.invalid"
-                 class="text-xs text-rose-600">Please add at least 5 characters.</p>
+                 class="text-xs text-rose-600">{{ "askFeedback.questionC.minLength" | translate }}</p>
             </section>
 
             <!-- NEW: F) Ask Bucky useful? -->
@@ -197,33 +195,33 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">F</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  Was “Ask Bucky” useful? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionF.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 dark:text-white">
                 <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
                                border-slate-200 dark:border-slate-700 cursor-pointer">
                   <input type="radio" value="yes" formControlName="askBuckyUseful" class="accent-sky-500">
-                  <span>Yes</span>
+                  <span>{{ "askFeedback.questionF.yes" | translate }}</span>
                 </label>
                 <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
                                border-slate-200 dark:border-slate-700 cursor-pointer">
                   <input type="radio" value="somewhat" formControlName="askBuckyUseful" class="accent-sky-500">
-                  <span>Somewhat</span>
+                  <span>{{ "askFeedback.questionF.somewhat" | translate }}</span>
                 </label>
                 <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
                                border-slate-200 dark:border-slate-700 cursor-pointer">
                   <input type="radio" value="no" formControlName="askBuckyUseful" class="accent-sky-500">
-                  <span>No</span>
+                  <span>{{ "askFeedback.questionF.no" | translate }}</span>
                 </label>
                 <label class="inline-flex items-center gap-2 rounded-xl border px-3 py-2
                                border-slate-200 dark:border-slate-700 cursor-pointer">
                   <input type="radio" value="not_sure" formControlName="askBuckyUseful" class="accent-sky-500">
-                  <span>Not sure</span>
+                  <span>{{ "askFeedback.questionF.notSure" | translate }}</span>
                 </label>
               </div>
               <p *ngIf="(form.controls.askBuckyUseful.touched || submitted) && form.controls.askBuckyUseful.invalid"
-                 class="text-xs text-rose-600">Please select one option.</p>
+                 class="text-xs text-rose-600">{{ "askFeedback.questionF.selectOne" | translate }}</p>
             </section>
 
             <!-- NEW: G) Problems you could use NWG for -->
@@ -231,7 +229,7 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">G</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  Are there problems or issues you could use NWG for developing solutions? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionG.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
               <textarea formControlName="concerns" rows="5"
@@ -239,9 +237,9 @@
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Briefly describe the problems/issues…"></textarea>
+                        [placeholder]="'askFeedback.questionG.placeholder' | translate"></textarea>
               <p *ngIf="(form.controls.concerns.touched || submitted) && form.controls.concerns.invalid"
-                 class="text-xs text-rose-600">This field is required.</p>
+                 class="text-xs text-rose-600">{{ "askFeedback.questionG.required" | translate }}</p>
             </section>
 
             <!-- NEW: H) Other AI agents -->
@@ -249,7 +247,7 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">H</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  Did you use any other AI agents? What for? Was it useful?
+                  {{ "askFeedback.questionH.title" | translate }}
                 </h2>
               </div>
               <textarea formControlName="otherAgents" rows="4"
@@ -257,7 +255,7 @@
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Which agent(s), how you used them, and whether it helped…"></textarea>
+                        [placeholder]="'askFeedback.questionH.placeholder' | translate"></textarea>
             </section>
 
             <!-- D) Prompts (kept) -->
@@ -265,19 +263,17 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">I</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  Prompts you used or created
+                  {{ "askFeedback.questionI.title" | translate }}
                 </h2>
               </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">
-                Did you use prompts suggested by Jim Walker or <em>Ask Bucky Prompts</em> (Operating Manual)?
-                Did you create new, useful prompts? Please share so we can help other users.
+              <p class="text-sm text-slate-600 dark:text-slate-400" [innerHTML]="'askFeedback.questionI.description' | translate">
               </p>
               <textarea formControlName="prompts" rows="5"
                         class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Paste or write the prompts that worked for you…"></textarea>
+                        [placeholder]="'askFeedback.questionI.placeholder' | translate"></textarea>
             </section>
 
             <!-- E) Course usefulness (kept, required) -->
@@ -285,7 +281,7 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">J</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What would make NWG more useful in your course? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionJ.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
               <textarea formControlName="courseUse" rows="5"
@@ -293,9 +289,9 @@
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Think of what would help your peers (HS, college, researchers, orgs, etc.)…"></textarea>
+                        [placeholder]="'askFeedback.questionJ.placeholder' | translate"></textarea>
               <p *ngIf="(form.controls.courseUse.touched || submitted) && form.controls.courseUse.invalid"
-                 class="text-xs text-rose-600">Please add at least 10 characters.</p>
+                 class="text-xs text-rose-600">{{ "askFeedback.questionJ.minLength" | translate }}</p>
             </section>
 
             <!-- NEW: K) Team building -->
@@ -303,7 +299,7 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">K</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What could improve team building and overall functioning of Teams?
+                  {{ "askFeedback.questionK.title" | translate }}
                 </h2>
               </div>
               <textarea formControlName="teamBuilding" rows="4"
@@ -311,7 +307,7 @@
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Onboarding, roles, comms, facilitation, tooling, etc."></textarea>
+                        [placeholder]="'askFeedback.questionK.placeholder' | translate"></textarea>
             </section>
 
             <!-- NEW: L) Anything else (required) -->
@@ -319,7 +315,7 @@
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">L</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  What else would you like to add? <span class="text-rose-600">*</span>
+                  {{ "askFeedback.questionL.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
               <textarea formControlName="more" rows="4"
@@ -327,9 +323,9 @@
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
                                focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        placeholder="Anything we missed…"></textarea>
+                        [placeholder]="'askFeedback.questionL.placeholder' | translate"></textarea>
               <p *ngIf="(form.controls.more.touched || submitted) && form.controls.more.invalid"
-                 class="text-xs text-rose-600">This field is required.</p>
+                 class="text-xs text-rose-600">{{ "askFeedback.questionL.required" | translate }}</p>
             </section>
 
             <!-- Submit -->
@@ -345,17 +341,17 @@
                     <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
                     <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
                     </svg>
-                    <span>{{ loading ? 'Submitting…' : 'Submit feedback' }}</span>
+                    <span>{{ loading ? ('askFeedback.submit.submitting' | translate) : ('askFeedback.submit.button' | translate) }}</span>
                 </button>
                 <p class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">
-                    Fields marked with <span class="text-rose-600">*</span> are required.
+                    {{ "askFeedback.submit.requiredFields" | translate }}
                 </p>
 
                 <!-- ✅ Error summary -->
                 <div *ngIf="submitted && form.invalid"
                     class="mt-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-800
                             dark:border-rose-700/50 dark:bg-rose-900/20 dark:text-rose-200 p-3">
-                    <p class="font-medium">Please fix the following:</p>
+                    <p class="font-medium">{{ "askFeedback.submit.fixFollowing" | translate }}</p>
                     <ul class="mt-2 list-disc list-inside text-sm">
                     <li *ngFor="let msg of globalErrorList">{{ msg }}</li>
                     </ul>
@@ -414,11 +410,11 @@
             </div>
 
             <h3 id="success-title" class="text-xl md:text-2xl font-semibold text-slate-900 dark:text-white">
-              Feedback sent
+              {{ "askFeedback.success.modalTitle" | translate }}
             </h3>
             <p id="success-desc" class="mt-2 text-slate-600 dark:text-slate-300">
-              Thank you! Your feedback has been submitted successfully.
-              <span *ngIf="form.controls.email.value">We’ll follow up at <strong>{{ form.controls.email.value }}</strong> if needed.</span>
+              {{ "askFeedback.success.modalDescription" | translate }}
+              <span *ngIf="form.controls.email.value">{{ "askFeedback.success.modalFollowUp" | translate }} <strong>{{ form.controls.email.value }}</strong> {{ "askFeedback.success.modalFollowUpSuffix" | translate }}</span>
             </p>
 
             <!-- Buttons -->
@@ -427,13 +423,13 @@
                       (click)="closeSuccessModal()"
                       class="rounded-full px-5 py-2.5 text-sm font-medium text-white
                              bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                Close
+                {{ "askFeedback.success.close" | translate }}
               </button>
               <a href="#" (click)="$event.preventDefault(); closeSuccessModal();"
                  class="rounded-full px-5 py-2.5 text-sm font-medium
                         text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700
                         hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 text-center">
-                Submit another
+                {{ "askFeedback.success.submitAnother" | translate }}
               </a>
             </div>
           </div>

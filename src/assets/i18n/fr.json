@@ -1091,5 +1091,96 @@
     "imageGeneration": {
       "promptPrefix": "Générer une image de "
     }
+  },
+  "askFeedback": {
+    "title": "NewWorld Game — Retour",
+    "description": "Après avoir complété une solution complète sur NWG, veuillez répondre aux questions ci-dessous. Vos commentaires nous aident à améliorer NWG.",
+    "yourInformation": "Vos informations",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Courriel",
+    "firstNameRequired": "Le prénom est requis.",
+    "lastNameRequired": "Le nom est requis.",
+    "emailRequired": "Un courriel valide est requis.",
+    "questionA": {
+      "title": "Que pensez-vous de NewWorld Game (NWG) ?",
+      "description": "Avez-vous aimé ? Aidera-t-il à développer des solutions aux problèmes mondiaux/locaux — y compris développer des entreprises, produits ou services qui soutiennent les ODD ? Qu'en pensez-vous d'autre ?",
+      "placeholder": "Partagez vos pensées…",
+      "minLength": "Veuillez ajouter au moins 20 caractères.",
+      "chars": "caractères"
+    },
+    "questionB": {
+      "title": "Pour quel niveau d'âge/expertise NWG fonctionnera-t-il ?",
+      "description": "Cochez toutes les cases qui s'appliquent et (optionnellement) ajoutez des détails.",
+      "selectAtLeastOne": "Veuillez sélectionner au moins un niveau.",
+      "highSchool": "École secondaire",
+      "college": "Université",
+      "professionals": "Professionnels",
+      "business": "Entreprise",
+      "other": "Autre",
+      "highSchoolLabel": "École secondaire — quels domaines/cours ?",
+      "collegeLabel": "Université — quels domaines/cours ?",
+      "professionalsLabel": "Professionnels — quel domaine ?",
+      "otherLabel": "Autre — veuillez préciser"
+    },
+    "questionC": {
+      "title": "Que souhaiteriez-vous ajouter à NWG pour le rendre meilleur, plus utile, plus facile à utiliser ?",
+      "placeholder": "Fonctionnalités, idées d'interface, intégrations, tout…",
+      "minLength": "Veuillez ajouter au moins 5 caractères."
+    },
+    "questionF": {
+      "title": "« Demander à Bucky » était-il utile ?",
+      "yes": "Oui",
+      "somewhat": "Un peu",
+      "no": "Non",
+      "notSure": "Je ne suis pas sûr",
+      "selectOne": "Veuillez sélectionner une option."
+    },
+    "questionG": {
+      "title": "Y a-t-il des problèmes ou des enjeux pour lesquels vous pourriez utiliser NWG pour développer des solutions ?",
+      "placeholder": "Décrivez brièvement les problèmes/enjeux…",
+      "required": "Ce champ est requis."
+    },
+    "questionH": {
+      "title": "Avez-vous utilisé d'autres agents IA ? Pour quoi ? C'était utile ?",
+      "placeholder": "Quel(s) agent(s), comment vous les avez utilisés, et si cela a aidé…"
+    },
+    "questionI": {
+      "title": "Invites que vous avez utilisées ou créées",
+      "description": "Avez-vous utilisé des invites suggérées par Jim Walker ou <em>Ask Bucky Prompts</em> (Manuel d'utilisation) ? Avez-vous créé de nouvelles invites utiles ? Veuillez les partager pour que nous puissions aider d'autres utilisateurs.",
+      "placeholder": "Collez ou écrivez les invites qui ont fonctionné pour vous…"
+    },
+    "questionJ": {
+      "title": "Que rendrait NWG plus utile dans votre cours ?",
+      "placeholder": "Pensez à ce qui aiderait vos pairs (école secondaire, université, chercheurs, organisations, etc.)…",
+      "minLength": "Veuillez ajouter au moins 10 caractères."
+    },
+    "questionK": {
+      "title": "Qu'est-ce qui pourrait améliorer la constitution d'équipes et le fonctionnement global des équipes ?",
+      "placeholder": "Intégration, rôles, communication, facilitation, outils, etc."
+    },
+    "questionL": {
+      "title": "Qu'y a-t-il d'autre que vous aimeriez ajouter ?",
+      "placeholder": "Tout ce que nous avons manqué…",
+      "required": "Ce champ est requis."
+    },
+    "submit": {
+      "button": "Envoyer les commentaires",
+      "submitting": "Envoi en cours…",
+      "requiredFields": "Les champs marqués d'un * sont requis.",
+      "fixFollowing": "Veuillez corriger ce qui suit :"
+    },
+    "success": {
+      "title": "Merci ! Vos commentaires ont été envoyés avec succès.",
+      "modalTitle": "Commentaires envoyés",
+      "modalDescription": "Merci ! Vos commentaires ont été envoyés avec succès.",
+      "modalFollowUp": "Nous ferons un suivi à",
+      "modalFollowUpSuffix": "si nécessaire.",
+      "close": "Fermer",
+      "submitAnother": "Envoyer un autre"
+    },
+    "error": {
+      "message": "Une erreur s'est produite. Veuillez réessayer."
+    }
   }
 }

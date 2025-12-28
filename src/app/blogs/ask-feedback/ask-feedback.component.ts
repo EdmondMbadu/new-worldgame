@@ -17,6 +17,7 @@ import {
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
+import { TranslateService } from '@ngx-translate/core';
 
 function atLeastOneChecked(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -98,11 +99,24 @@ export class AskFeedbackComponent implements OnInit {
     public auth: AuthService,
     private data: DataService,
     private time: TimeService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private translate: TranslateService
   ) {
     window.scroll(0, 0);
     // init levels FormArray
     // this.levelOptions.forEach(() => this.levelsFA.push(this.fb.control(false)));
+  }
+
+  getLevelLabel(option: string): string {
+    const keyMap: { [key: string]: string } = {
+      'High School': 'askFeedback.questionB.highSchool',
+      'College': 'askFeedback.questionB.college',
+      'Professionals': 'askFeedback.questionB.professionals',
+      'Business': 'askFeedback.questionB.business',
+      'Other': 'askFeedback.questionB.other'
+    };
+    const key = keyMap[option];
+    return key ? this.translate.instant(key) : option;
   }
 
   get levelsFA(): FormArray<FormControl<boolean>> {
