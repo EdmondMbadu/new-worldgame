@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { AvatarRegistryService } from 'src/app/services/avatar-registry.service';
 import { AIOption, DataService } from 'src/app/services/data.service';
+import { SeoService } from 'src/app/services/seo.service';
 
 declare var am4core: any;
 declare var am4maps: any;
@@ -28,11 +29,21 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private router: Router,
     private data: DataService,
+    private seoService: SeoService,
     @Optional() private avatars?: AvatarRegistryService,
     @Optional() private auth?: AuthService
   ) {}
   colorTheme: string = 'rgb(15, 23, 42)';
   ngOnInit(): void {
+    // Update SEO meta tags for landing page
+    this.seoService.updateMetaTags({
+      title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
+      description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students collaborate to solve real-world global challenges. Join tournaments, discover solutions, and make a difference.',
+      keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational game, collaborative learning, sustainability, world game, Buckminster Fuller, problem solving',
+      url: 'https://new-worldgame.web.app',
+      type: 'website'
+    });
+
     this.aiOptions = this.data.aiOptions;
     window.scroll(0, 0);
     this.themeSubscription = this.data.currentTheme.subscribe((theme) => {

@@ -1,0 +1,51 @@
+# NewWorld Game - Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow authenticated/protected routes
+Disallow: /home
+Disallow: /game
+Disallow: /mini-game
+Disallow: /discover
+Disallow: /profile
+Disallow: /challenge
+Disallow: /whiteboard
+Disallow: /team-building
+Disallow: /solution/
+Disallow: /tournament/
+Disallow: /dashboard
+Disallow: /video-call
+Disallow: /meeting
+Disallow: /school-admin
+
+# Disallow auth routes
+Disallow: /login
+Disallow: /signup
+Disallow: /signup-school
+Disallow: /signup-school-free
+Disallow: /forgot-password
+Disallow: /verify-email
+
+# Disallow admin routes
+Disallow: /admin
+
+# Allow specific important pages
+Allow: /
+Allow: /landing
+Allow: /landing-college
+Allow: /landing-un
+Allow: /landing-community
+Allow: /plans
+Allow: /workshop
+Allow: /tournament-landing
+Allow: /bucky
+Allow: /ask-bucky
+Allow: /our-team
+Allow: /contact-us
+Allow: /overview
+Allow: /blogs/
+
+# Sitemap location
+Sitemap: https://new-worldgame.web.app/sitemap.xml
