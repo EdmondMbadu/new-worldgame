@@ -5,533 +5,928 @@
   - Feature: Author Tools section is expandable/collapsible.
 -->
 
-<ng-container *ngIf="pageReady && ( !isPrivate || allowAccess); else maybePrivate">
-    <!-- Page Container: Subtle background for a premium feel -->
-    <div class="min-h-screen bg-slate-50 dark:bg-gray-950 px-4 pb-24">
-      <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}" class="transition-all duration-300">
-        
-        <app-navbar
-          [sideBarSmall]="!isSidebarOpen"
-          [sideBarBig]="isSidebarOpen"
-          [email]="auth.currentUser.email"
-          [firstName]="auth.currentUser.firstName"
-          [lastName]="auth.currentUser.lastName"
-          [path]="'home'"
-          current=""
-          (toggleAsideEvent)="toggleAside()"
-        ></app-navbar>
-
-        <!-- Sticky Navigation: 'Glassmorphism' effect for a modern feel -->
-        <div class="hidden md:block sticky top-20 z-40 w-full transition-all duration-300 ease-in-out ">
-          <div class="container mx-auto flex justify-center py-2">
-            <div class="flex items-center justify-center space-x-1 rounded-full bg-white/70 dark:bg-slate-800/70 p-1.5 shadow-lg backdrop-blur-md ring-1 ring-slate-900/10 dark:ring-white/10">
-              <a (click)="data.scrollTo($event, 'discussion')" href="#discussion" class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200">Discussion</a>
-              <a (click)="data.scrollTo($event, 'video')" href="#video" class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200">Meeting Room</a>
-              <a (click)="data.scrollTo($event, 'solutions')" href="#solutions" class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200">Teams</a>
-            </div>
-          </div>
-        </div>
-
-<!-- Header / Hero — "profile" inspired -->
-<header class="relative w-full">
-  <!-- Banner -->
-  <div class="relative h-40 sm:h-52 md:h-64 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 group">
-    <!-- If you have a banner image, show it -->
-    <img *ngIf="image"
-         [src]="image"
-         alt="Banner"
-         class="absolute inset-0 h-full w-full object-cover" />
-    <!-- Soft gradient fallback overlay (keeps a subtle glow on top of image too) -->
-    <div class="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/10 dark:to-black/30"></div>
-    <!-- Edit button for hero image (admin only) -->
-    <button
-      *ngIf="isAuthorPage"
-      (click)="openEditPageContent()"
-      class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-             p-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm
-             shadow-lg hover:bg-white dark:hover:bg-slate-700
-             text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-      </svg>
-    </button>
-  </div>
-
-  <!-- Avatar + content bar -->
-  <div class="mx-auto max-w-screen-xl px-4">
-    <div class="relative">
-      <!-- Avatar overlaps banner -->
-      <div class="absolute -top-10 sm:-top-12 group">
-        <div class="h-20 w-20 sm:h-24 sm:w-24 rounded-full ring-4 ring-white dark:ring-slate-900 overflow-hidden bg-white dark:bg-slate-900 shadow-md relative">
-          <img *ngIf="logoImage"
-               [src]="logoImage"
-               alt="Logo"
-               class="h-full w-full object-cover" />
-          <!-- Edit button for logo (admin only) -->
-          <button
-            *ngIf="isAuthorPage"
-            (click)="openEditPageContent()"
-            class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                   flex items-center justify-center bg-black/50 backdrop-blur-sm
-                   text-white hover:bg-black/60 rounded-full">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Row: title + action -->
-      <div class="pt-14 sm:pt-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div class="pr-2 group relative flex-1">
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            {{ heading }}
-          </h1>
-          <p class="mt-1 max-w-3xl text-sm sm:text-base text-slate-600 dark:text-slate-400">
-            {{ subHeading }}
-          </p>
-          <!-- Edit button for heading/subheading (admin only) -->
-          <button
-            *ngIf="isAuthorPage"
-            (click)="openEditPageContent()"
-            class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                   p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md
-                   text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white
-                   border border-slate-200 dark:border-slate-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </button>
-        </div>
-
-        <button
-          (click)="scrollToSolutions()"
-          class="self-start sm:self-center inline-flex items-center justify-center rounded-full px-5 py-2.5
-                 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800
-                 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200
-                 shadow-sm transition-colors focus:outline-none focus:ring-4
-                 focus:ring-slate-300/60 dark:focus:ring-slate-700/60">
-          Start solving
-        </button>
-      </div>
-
-      <!-- Divider -->
-      <div class="mt-4 h-px w-full bg-slate-200 dark:bg-slate-700"></div>
-    </div>
-  </div>
-</header>
-
-
-<!-- Main Content Area -->
-<div class="mx-auto max-w-screen-xl py-10 px-4">
-  <!-- Discussion Card -->
-  <section id="discussion" class="scroll-mt-24 mb-10">
+<ng-container
+  *ngIf="pageReady && (!isPrivate || allowAccess); else maybePrivate"
+>
+  <!-- Page Container: Subtle background for a premium feel -->
+  <div class="min-h-screen bg-slate-50 dark:bg-gray-950 px-4 pb-24">
     <div
-      (click)="goToChallengeDiscussion()"
-      class="group relative overflow-hidden cursor-pointer rounded-2xl ring-1 ring-slate-200/80 dark:ring-slate-800 bg-white/80 dark:bg-slate-900/60"
+      [ngClass]="{ 'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen }"
+      class="transition-all duration-300"
     >
-      <!-- subtle gradient glow -->
-      <div class="pointer-events-none absolute inset-0 -z-10 opacity-80">
-        <div class="absolute -left-20 -bottom-20 h-72 w-72 rounded-full blur-3xl bg-teal-200/40 dark:bg-teal-400/10"></div>
-      </div>
+      <app-navbar
+        [sideBarSmall]="!isSidebarOpen"
+        [sideBarBig]="isSidebarOpen"
+        [email]="auth.currentUser.email"
+        [firstName]="auth.currentUser.firstName"
+        [lastName]="auth.currentUser.lastName"
+        [path]="'home'"
+        current=""
+        (toggleAsideEvent)="toggleAside()"
+      ></app-navbar>
 
-      <div class="p-6 sm:p-7 md:p-8 flex items-center justify-between gap-6">
-        <div>
-          <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Go to Discussion: {{ heading }}
-          </h3>
-          <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            Join the conversation for this workspace.
-          </p>
-        </div>
-
-        <div
-          class="shrink-0 grid place-items-center rounded-full h-10 w-10 ring-1 ring-teal-300/60 dark:ring-teal-700/50 bg-teal-600 text-white transition-all duration-200 group-hover:translate-x-0.5 group-hover:bg-teal-500"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-          </svg>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Content Grid -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
-    <!-- Left Column -->
-    <div class="lg:col-span-2 space-y-6">
-      <!-- Video / Chat Links -->
-      <section id="video" class="scroll-mt-24 space-y-6">
-        <!-- Google Meet -->
-        <div
-          *ngIf="googleMeetLink"
-          class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
-        >
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-              <div
-                class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 ring-1 ring-green-200/70 dark:ring-green-800/50"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Google Meet Room</h3>
-                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400">Always-on video chat.</p>
-              </div>
-            </div>
-            <a
-              [href]="googleMeetLink"
-              target="_blank"
-              rel="noopener"
-              class="px-4 sm:px-5 py-2.5 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-              >Join</a
-            >
-          </div>
-        </div>
-
-        <!-- Zoom -->
-        <div
-          *ngIf="zoomLink"
-          class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
-        >
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-              <div
-                class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/70 dark:ring-blue-800/50"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"></path>
-                </svg>
-              </div>
-              <div>
-                <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Zoom Room</h3>
-              </div>
-            </div>
-            <a
-              [href]="zoomLink"
-              target="_blank"
-              rel="noopener"
-              class="px-4 sm:px-5 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-              >Join</a
-            >
-          </div>
-        </div>
-
-        <!-- Chat note -->
-        <div
-          *ngIf="chatNote"
-          class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800 text-sm text-slate-700 dark:text-slate-300"
-        >
-          {{ chatNote }}
-        </div>
-      </section>
-
-      <!-- Documents -->
-      <section id="documents" class="scroll-mt-24 space-y-6">
-        <!-- Program PDF -->
-        <div
-          *ngIf="programPDF"
-          class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
-        >
-          <div class="flex items-center gap-4">
-            <div
-              class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 ring-1 ring-indigo-200/70 dark:ring-indigo-800/50"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-            <div>
-              <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">{{ programPDF.title }}</h4>
-              <a
-                [href]="programPDF.url"
-                target="_blank"
-                rel="noopener"
-                class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-                >Open PDF</a
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Handouts -->
-        <div
-          *ngIf="handouts.length"
-          class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
-        >
-          <div class="flex items-center gap-4 mb-3">
-            <div
-              class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-300 ring-1 ring-yellow-200/70 dark:ring-yellow-800/50"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-              </svg>
-            </div>
-            <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Handouts</h4>
-          </div>
-
-          <ul class="space-y-2.5">
-            <li
-              *ngFor="let h of handouts"
-              class="flex items-center justify-between gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
-            >
-              <span class="text-sm text-slate-800 dark:text-slate-200">{{ h.name }}</span>
-              <a
-                (click)="downloadFile($event, h.name, h.url)"
-                href="{{ h.url }}"
-                class="text-sm font-semibold text-yellow-700 dark:text-yellow-400 hover:underline"
-                >Download</a
-              >
-            </li>
-          </ul>
-        </div>
-      </section>
-    </div>
-
-    <!-- Sidebar -->
-    <aside class="lg:col-span-1 space-y-6 lg:sticky top-36 h-fit">
-      <!-- Participants -->
+      <!-- Sticky Navigation: 'Glassmorphism' effect for a modern feel -->
       <div
-        *ngIf="participants?.length || isAuthorPage"
-        class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+        class="hidden md:block sticky top-20 z-40 w-full transition-all duration-300 ease-in-out"
       >
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 4a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-              Participants ({{ participants.length }})
-            </h3>
-          </div>
-          <button
-            *ngIf="participants.length && isAuthorPage"
-            (click)="toggleParticipantsVisibilityGlobal()
-            "
-            class="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline"
+        <div class="container mx-auto flex justify-center py-2">
+          <div
+            class="flex items-center justify-center space-x-1 rounded-full bg-white/70 dark:bg-slate-800/70 p-1.5 shadow-lg backdrop-blur-md ring-1 ring-slate-900/10 dark:ring-white/10"
           >
-            {{ showParticipantsList ? 'Hide' : 'Show' }}
-          </button>
-        </div>
-
-        <div *ngIf="showParticipantsList" class="space-y-2">
-          <ul *ngIf="participants.length > 0; else noParticipants" class="space-y-2">
-            <li
-              *ngFor="let participant of participantsToRender"
-              class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+            <a
+              (click)="data.scrollTo($event, 'discussion')"
+              href="#discussion"
+              class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
+              >Discussion</a
             >
-              <span
-                class="grid place-content-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold text-slate-600 dark:text-slate-300"
-                >{{ participant.charAt(0) }}</span
-              >
-              <span class="text-slate-800 dark:text-slate-200">{{ participant }}</span>
-            </li>
-          </ul>
-
-          <button
-            *ngIf="participants.length > 5"
-            (click)="showAllParticipants = !showAllParticipants"
-            class="mt-2 text-xs font-medium text-teal-700 dark:text-teal-400 hover:underline"
-          >
-            {{ showAllParticipants ? 'Show fewer' : 'Show all (' + participants.length + ')' }}
-          </button>
-
-          <ng-template #noParticipants>
-            <p class="text-slate-500 dark:text-slate-400 text-sm">No participants have been added yet.</p>
-          </ng-template>
+            <a
+              (click)="data.scrollTo($event, 'video')"
+              href="#video"
+              class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
+              >Meeting Room</a
+            >
+            <a
+              (click)="data.scrollTo($event, 'solutions')"
+              href="#solutions"
+              class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
+              >Teams</a
+            >
+          </div>
         </div>
       </div>
 
-      <!-- Admins -->
-      <div
-        *ngIf="(adminEmails?.length || isAuthorPage)"
-        class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
-      >
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6l8-2v6c0 5.25-3.438 9.75-8 11-4.562-1.25-8-5.75-8-11V4l8 2z" />
-            </svg>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-              Admins ({{ visibleAdminEmails.length }})
-            </h3>
-          </div>
+      <!-- Header / Hero — "profile" inspired -->
+      <header class="relative w-full">
+        <!-- Banner -->
+        <div
+          class="relative h-40 sm:h-52 md:h-64 w-full overflow-hidden bg-slate-100 dark:bg-slate-800 group"
+        >
+          <!-- If you have a banner image, show it -->
+          <img
+            *ngIf="image"
+            [src]="image"
+            alt="Banner"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <!-- Soft gradient fallback overlay (keeps a subtle glow on top of image too) -->
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/10 dark:to-black/30"
+          ></div>
+          <!-- Edit button for hero image (admin only) -->
           <button
             *ngIf="isAuthorPage"
-            (click)="showAdminsList = !showAdminsList"
-            class="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline"
+            (click)="openEditPageContent()"
+            class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 rounded-full bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm shadow-lg hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
           >
-            {{ showAdminsList ? 'Hide' : 'Show' }}
-          </button>
-        </div>
-
-        <div *ngIf="showAdminsList" class="space-y-2">
-          <ul *ngIf="visibleAdminEmails.length > 0; else noAdmins" class="space-y-2">
-            <li
-              *ngFor="let email of adminEmailsToRender"
-              class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <span
-                class="grid place-content-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold text-slate-600 dark:text-slate-300"
-                >{{ (email.charAt(0) || '?') | uppercase }}</span
-              >
-              <span class="text-slate-800 dark:text-slate-200">{{ email }}</span>
-              <span
-                *ngIf="email === (auth.currentUser.email || '').toLowerCase()"
-                class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300"
-                >You</span
-              >
-            </li>
-          </ul>
-
-          <button
-            *ngIf="visibleAdminEmails.length > 5"
-            (click)="showAllAdmins = !showAllAdmins"
-            class="mt-2 text-xs font-medium text-teal-700 dark:text-teal-400 hover:underline"
-          >
-            {{ showAllAdmins ? 'Show fewer' : 'Show all (' + visibleAdminEmails.length + ')' }}
-          </button>
-
-          <ng-template #noAdmins>
-            <p class="text-slate-500 dark:text-slate-400 text-sm">No admins have been added yet.</p>
-          </ng-template>
-        </div>
-      </div>
-
-      <!-- Author Tools -->
-      <div
-        *ngIf="isAuthorPage"
-        class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
-      >
-        <div class="flex items-center justify-between mb-1">
-          <h3 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Author Tools</h3>
-          <button
-            (click)="showAuthorTools = !showAuthorTools"
-            class="text-xs sm:text-sm font-semibold text-teal-700 dark:text-teal-400 hover:underline"
-          >
-            {{ showAuthorTools ? 'Hide' : 'Show' }}
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
           </button>
         </div>
-        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-5">
-          Manage your workspace content and settings.
-        </p>
 
-        <!-- Collapsible content -->
-        <div *ngIf="showAuthorTools" class="space-y-4">
-          <!-- Privacy toggle -->
-          <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800">
-            <span class="font-semibold text-slate-800 dark:text-slate-200">Workspace Privacy</span>
-            <button
-              (click)="toggleVisibility()"
-              role="switch"
-              [attr.aria-checked]="isPrivate"
-              class="relative inline-flex items-center w-24 h-8 rounded-full transition-colors focus:outline-none ring-1 ring-slate-300 dark:ring-slate-700"
-              [ngClass]="isPrivate ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-600'"
+        <!-- Avatar + content bar -->
+        <div class="mx-auto max-w-screen-xl px-4">
+          <div class="relative">
+            <!-- Avatar overlaps banner -->
+            <div class="absolute -top-10 sm:-top-12 group">
+              <div
+                class="h-20 w-20 sm:h-24 sm:w-24 rounded-full ring-4 ring-white dark:ring-slate-900 overflow-hidden bg-white dark:bg-slate-900 shadow-md relative"
+              >
+                <img
+                  *ngIf="logoImage"
+                  [src]="logoImage"
+                  alt="Logo"
+                  class="h-full w-full object-cover"
+                />
+                <!-- Edit button for logo (admin only) -->
+                <button
+                  *ngIf="isAuthorPage"
+                  (click)="openEditPageContent()"
+                  class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center bg-black/50 backdrop-blur-sm text-white hover:bg-black/60 rounded-full"
+                >
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Row: title + action -->
+            <div
+              class="pt-14 sm:pt-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
             >
-              <span
-                class="absolute left-3 text-[11px] font-semibold text-white transition-opacity"
-                [ngClass]="isPrivate ? 'opacity-100' : 'opacity-0'"
-                >Private</span
+              <div class="pr-2 group relative flex-1">
+                <h1
+                  class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight"
+                >
+                  {{ heading }}
+                </h1>
+                <p
+                  class="mt-1 max-w-3xl text-sm sm:text-base text-slate-600 dark:text-slate-400"
+                >
+                  {{ subHeading }}
+                </p>
+                <!-- Edit button for heading/subheading (admin only) -->
+                <button
+                  *ngIf="isAuthorPage"
+                  (click)="openEditPageContent()"
+                  class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1.5 rounded-full bg-white dark:bg-slate-800 shadow-md text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-700"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <button
+                (click)="scrollToSolutions()"
+                class="self-start sm:self-center inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 shadow-sm transition-colors focus:outline-none focus:ring-4 focus:ring-slate-300/60 dark:focus:ring-slate-700/60"
               >
-              <span
-                class="absolute right-3 text-[11px] font-semibold text-slate-800 dark:text-slate-100 transition-opacity"
-                [ngClass]="isPrivate ? 'opacity-0' : 'opacity-100'"
-                >Public</span
-              >
-              <span
-                class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform"
-                [ngStyle]="{ transform: isPrivate ? 'translateX(64px)' : 'translateX(0)' }"
-              ></span>
-            </button>
-          </div>
-
-          <!-- Tools groups -->
-          <div class="space-y-5 pt-1">
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Challenges</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button (click)="toggle('showAddChallenge')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition">Add Challenge</button>
-                <button (click)="openExistingChallenges()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition">Add Existing Challenge</button>
-                <button (click)="toggle('showMergeSolution')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition">Merge Solution by ID</button>
-              </div>
-            </div>
-
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Participants & Admins</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button (click)="toggle('showAddTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition">Add Participant</button>
-                <button (click)="toggle('showRemoveTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition">Remove Participant</button>
-                <button (click)="toggle('showAddAdmin')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition">Add Admin</button>
-                <button (click)="toggle('showRemoveAdmin')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition">Remove Admin</button>
-              </div>
-            </div>
-
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Resources & Links</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button (click)="toggle('showEditProgram')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">{{ programPDF ? 'Edit PDF' : 'Add PDF' }}</button>
-                <button (click)="toggle('showEditHandouts')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition">Edit Handouts</button>
-                <button (click)="toggle('showEditLinks')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">Edit Links</button>
-                <button (click)="copyUrlToClipboard()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition">Copy URL</button>
-              </div>
-            </div>
-
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Danger Zone</p>
-              <div class="grid grid-cols-2 gap-3">
-                <button (click)="deleteChallengePage()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">Delete Page</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </div>
-</div>
-
-        <!-- Solutions & Challenges Section -->
-        <section #solutions id="solutions" class="scroll-mt-24 mt-16 mx-auto max-w-screen-xl px-4 pb-8">
-            <div class="text-center mb-12">
-              <h2 class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">Challenges</h2>
-              <p class="mt-2 text-lg text-slate-600 dark:text-slate-400">Browse, solve, and manage team challenges.</p>
-            </div>
-            <div class="flex flex-wrap justify-center gap-3 mb-10">
-              <button *ngFor="let category of categories" (click)="setActiveCategory(category)" class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200" [ngClass]="{ 'bg-teal-600 text-white shadow-md': category === activeCategory, 'bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700': category !== activeCategory }">
-                {{ category }}
+                Start solving
               </button>
             </div>
-            <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              <div *ngFor="let t of titles; let i = index" class="relative group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div *ngIf="isAuthorPage" class="absolute top-3 right-3 z-10 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button (click)="openEditChallenge(ids[i], i)" class="p-2 rounded-full bg-slate-700/50 text-white hover:bg-slate-600 backdrop-blur-sm transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6.6-6.6a2.121 2.121 0 013 3L12 15"></path></svg></button>
-                    <button (click)="moveChallenge(ids[i], i)" class="p-2 rounded-full bg-yellow-500/80 text-white hover:bg-yellow-500 backdrop-blur-sm transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 9l4 4m0 0l-4 4m4-4H3"></path></svg></button>
-                    <button (click)="deleteChallenge(ids[i], i)" class="p-2 rounded-full bg-red-600/80 text-white hover:bg-red-600 backdrop-blur-sm transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                </div>
-                <app-challenge [ngStyle]="{'animation-delay': i * 100 + 'ms'}" [image]="challengeImages[i]" [fromChallengeSpace]='true' [id]="ids[i]" [description]="descriptions[i]" [restricted]="'true'" [title]="t"></app-challenge>
+
+            <!-- Divider -->
+            <div class="mt-4 h-px w-full bg-slate-200 dark:bg-slate-700"></div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <div class="mx-auto max-w-screen-xl py-10 px-4">
+        <!-- Discussion Card -->
+        <section id="discussion" class="scroll-mt-24 mb-10">
+          <div
+            (click)="goToChallengeDiscussion()"
+            class="group relative overflow-hidden cursor-pointer rounded-2xl ring-1 ring-slate-200/80 dark:ring-slate-800 bg-white/80 dark:bg-slate-900/60"
+          >
+            <!-- subtle gradient glow -->
+            <div class="pointer-events-none absolute inset-0 -z-10 opacity-80">
+              <div
+                class="absolute -left-20 -bottom-20 h-72 w-72 rounded-full blur-3xl bg-teal-200/40 dark:bg-teal-400/10"
+              ></div>
+            </div>
+
+            <div
+              class="p-6 sm:p-7 md:p-8 flex items-center justify-between gap-6"
+            >
+              <div>
+                <h3
+                  class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white"
+                >
+                  Go to Discussion: {{ heading }}
+                </h3>
+                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  Join the conversation for this workspace.
+                </p>
+              </div>
+
+              <div
+                class="shrink-0 grid place-items-center rounded-full h-10 w-10 ring-1 ring-teal-300/60 dark:ring-teal-700/50 bg-teal-600 text-white transition-all duration-200 group-hover:translate-x-0.5 group-hover:bg-teal-500"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  ></path>
+                </svg>
               </div>
             </div>
+          </div>
         </section>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
+          <!-- Left Column -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Video / Chat Links -->
+            <section id="video" class="scroll-mt-24 space-y-6">
+              <!-- Google Meet -->
+              <div
+                *ngIf="googleMeetLink"
+                class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 ring-1 ring-green-200/70 dark:ring-green-800/50"
+                    >
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3
+                        class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white"
+                      >
+                        Google Meet Room
+                      </h3>
+                      <p
+                        class="text-xs sm:text-sm text-slate-600 dark:text-slate-400"
+                      >
+                        Always-on video chat.
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    [href]="googleMeetLink"
+                    target="_blank"
+                    rel="noopener"
+                    class="px-4 sm:px-5 py-2.5 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                    >Join</a
+                  >
+                </div>
+              </div>
+
+              <!-- Zoom -->
+              <div
+                *ngIf="zoomLink"
+                class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 ring-1 ring-blue-200/70 dark:ring-blue-800/50"
+                    >
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div>
+                      <h3
+                        class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white"
+                      >
+                        Zoom Room
+                      </h3>
+                    </div>
+                  </div>
+                  <a
+                    [href]="zoomLink"
+                    target="_blank"
+                    rel="noopener"
+                    class="px-4 sm:px-5 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    >Join</a
+                  >
+                </div>
+              </div>
+
+              <!-- Chat note -->
+              <div
+                *ngIf="chatNote"
+                class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800 text-sm text-slate-700 dark:text-slate-300"
+              >
+                {{ chatNote }}
+              </div>
+            </section>
+
+            <!-- Documents -->
+            <section id="documents" class="scroll-mt-24 space-y-6">
+              <!-- Program PDF -->
+              <div
+                *ngIf="programPDF"
+                class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 ring-1 ring-indigo-200/70 dark:ring-indigo-800/50"
+                  >
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4
+                      class="text-base sm:text-lg font-bold text-slate-900 dark:text-white"
+                    >
+                      {{ programPDF.title }}
+                    </h4>
+                    <a
+                      [href]="programPDF.url"
+                      target="_blank"
+                      rel="noopener"
+                      class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >Open PDF</a
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Handouts -->
+              <div
+                *ngIf="handouts.length"
+                class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+              >
+                <div class="flex items-center gap-4 mb-3">
+                  <div
+                    class="flex-shrink-0 grid place-content-center w-11 h-11 rounded-xl bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-300 ring-1 ring-yellow-200/70 dark:ring-yellow-800/50"
+                  >
+                    <svg
+                      class="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      ></path>
+                    </svg>
+                  </div>
+                  <h4
+                    class="text-base sm:text-lg font-bold text-slate-900 dark:text-white"
+                  >
+                    Handouts
+                  </h4>
+                </div>
+
+                <ul class="space-y-2.5">
+                  <li
+                    *ngFor="let h of handouts"
+                    class="flex items-center justify-between gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+                  >
+                    <span class="text-sm text-slate-800 dark:text-slate-200">{{
+                      h.name
+                    }}</span>
+                    <a
+                      (click)="downloadFile($event, h.name, h.url)"
+                      href="{{ h.url }}"
+                      class="text-sm font-semibold text-yellow-700 dark:text-yellow-400 hover:underline"
+                      >Download</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </section>
+          </div>
+
+          <!-- Sidebar -->
+          <aside class="lg:col-span-1 space-y-6 lg:sticky top-36 h-fit">
+            <!-- Participants -->
+            <div
+              *ngIf="participants?.length || isAuthorPage"
+              class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-5 h-5 text-slate-500 dark:text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 4a2 2 0 11-4 0 2 2 0 014 0z"
+                    ></path>
+                  </svg>
+                  <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                    Participants ({{ participants.length }})
+                  </h3>
+                </div>
+                <button
+                  *ngIf="participants.length && isAuthorPage"
+                  (click)="toggleParticipantsVisibilityGlobal()"
+                  class="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline"
+                >
+                  {{ showParticipantsList ? "Hide" : "Show" }}
+                </button>
+              </div>
+
+              <div *ngIf="showParticipantsList" class="space-y-2">
+                <ul
+                  *ngIf="participants.length > 0; else noParticipants"
+                  class="space-y-2"
+                >
+                  <li
+                    *ngFor="let participant of participantsToRender"
+                    class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+                  >
+                    <span
+                      class="grid place-content-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold text-slate-600 dark:text-slate-300"
+                      >{{ participant.charAt(0) }}</span
+                    >
+                    <span class="text-slate-800 dark:text-slate-200">{{
+                      participant
+                    }}</span>
+                  </li>
+                </ul>
+
+                <button
+                  *ngIf="participants.length > 5"
+                  (click)="showAllParticipants = !showAllParticipants"
+                  class="mt-2 text-xs font-medium text-teal-700 dark:text-teal-400 hover:underline"
+                >
+                  {{
+                    showAllParticipants
+                      ? "Show fewer"
+                      : "Show all (" + participants.length + ")"
+                  }}
+                </button>
+
+                <ng-template #noParticipants>
+                  <p class="text-slate-500 dark:text-slate-400 text-sm">
+                    No participants have been added yet.
+                  </p>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Admins -->
+            <div
+              *ngIf="adminEmails?.length || isAuthorPage"
+              class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <svg
+                    class="w-5 h-5 text-slate-500 dark:text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 6l8-2v6c0 5.25-3.438 9.75-8 11-4.562-1.25-8-5.75-8-11V4l8 2z"
+                    />
+                  </svg>
+                  <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                    Admins ({{ visibleAdminEmails.length }})
+                  </h3>
+                </div>
+                <button
+                  *ngIf="isAuthorPage"
+                  (click)="showAdminsList = !showAdminsList"
+                  class="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline"
+                >
+                  {{ showAdminsList ? "Hide" : "Show" }}
+                </button>
+              </div>
+
+              <div *ngIf="showAdminsList" class="space-y-2">
+                <ul
+                  *ngIf="visibleAdminEmails.length > 0; else noAdmins"
+                  class="space-y-2"
+                >
+                  <li
+                    *ngFor="let email of adminEmailsToRender"
+                    class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+                  >
+                    <span
+                      class="grid place-content-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold text-slate-600 dark:text-slate-300"
+                      >{{ email.charAt(0) || "?" | uppercase }}</span
+                    >
+                    <span class="text-slate-800 dark:text-slate-200">{{
+                      email
+                    }}</span>
+                    <span
+                      *ngIf="
+                        email === (auth.currentUser.email || '').toLowerCase()
+                      "
+                      class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300"
+                      >You</span
+                    >
+                  </li>
+                </ul>
+
+                <button
+                  *ngIf="visibleAdminEmails.length > 5"
+                  (click)="showAllAdmins = !showAllAdmins"
+                  class="mt-2 text-xs font-medium text-teal-700 dark:text-teal-400 hover:underline"
+                >
+                  {{
+                    showAllAdmins
+                      ? "Show fewer"
+                      : "Show all (" + visibleAdminEmails.length + ")"
+                  }}
+                </button>
+
+                <ng-template #noAdmins>
+                  <p class="text-slate-500 dark:text-slate-400 text-sm">
+                    No admins have been added yet.
+                  </p>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Author Tools -->
+            <div
+              *ngIf="isAuthorPage"
+              class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-6"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <h3
+                  class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white"
+                >
+                  Author Tools
+                </h3>
+                <button
+                  (click)="showAuthorTools = !showAuthorTools"
+                  class="text-xs sm:text-sm font-semibold text-teal-700 dark:text-teal-400 hover:underline"
+                >
+                  {{ showAuthorTools ? "Hide" : "Show" }}
+                </button>
+              </div>
+              <p
+                class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-5"
+              >
+                Manage your workspace content and settings.
+              </p>
+
+              <!-- Collapsible content -->
+              <div *ngIf="showAuthorTools" class="space-y-4">
+                <!-- Privacy toggle -->
+                <div
+                  class="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+                >
+                  <span class="font-semibold text-slate-800 dark:text-slate-200"
+                    >Workspace Privacy</span
+                  >
+                  <button
+                    (click)="toggleVisibility()"
+                    role="switch"
+                    [attr.aria-checked]="isPrivate"
+                    class="relative inline-flex items-center w-24 h-8 rounded-full transition-colors focus:outline-none ring-1 ring-slate-300 dark:ring-slate-700"
+                    [ngClass]="
+                      isPrivate
+                        ? 'bg-teal-600'
+                        : 'bg-slate-300 dark:bg-slate-600'
+                    "
+                  >
+                    <span
+                      class="absolute left-3 text-[11px] font-semibold text-white transition-opacity"
+                      [ngClass]="isPrivate ? 'opacity-100' : 'opacity-0'"
+                      >Private</span
+                    >
+                    <span
+                      class="absolute right-3 text-[11px] font-semibold text-slate-800 dark:text-slate-100 transition-opacity"
+                      [ngClass]="isPrivate ? 'opacity-0' : 'opacity-100'"
+                      >Public</span
+                    >
+                    <span
+                      class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform"
+                      [ngStyle]="{
+                        transform: isPrivate
+                          ? 'translateX(64px)'
+                          : 'translateX(0)'
+                      }"
+                    ></span>
+                  </button>
+                </div>
+
+                <!-- Tools groups -->
+                <div class="space-y-5 pt-1">
+                  <div>
+                    <p
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                    >
+                      Challenges
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <button
+                        (click)="toggle('showAddChallenge')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition"
+                      >
+                        Add New Challenge
+                      </button>
+                      <button
+                        (click)="openExistingChallenges()"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition"
+                      >
+                        Add Existing Challenge
+                      </button>
+                      <button
+                        (click)="toggle('showMergeSolution')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition"
+                      >
+                        Merge Solution by ID
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                    >
+                      Participants & Admins
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <button
+                        (click)="toggle('showAddTeamMember')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition"
+                      >
+                        Add Participant
+                      </button>
+                      <button
+                        (click)="toggle('showRemoveTeamMember')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition"
+                      >
+                        Remove Participant
+                      </button>
+                      <button
+                        (click)="toggle('showAddAdmin')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition"
+                      >
+                        Add Admin
+                      </button>
+                      <button
+                        (click)="toggle('showRemoveAdmin')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition"
+                      >
+                        Remove Admin
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                    >
+                      Resources & Links
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <button
+                        (click)="toggle('showEditProgram')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+                      >
+                        {{ programPDF ? "Edit PDF" : "Add PDF" }}
+                      </button>
+                      <button
+                        (click)="toggle('showEditHandouts')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+                      >
+                        Edit Handouts
+                      </button>
+                      <button
+                        (click)="toggle('showEditLinks')"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                      >
+                        Edit Links
+                      </button>
+                      <button
+                        (click)="copyUrlToClipboard()"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition"
+                      >
+                        Copy URL
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                    >
+                      Danger Zone
+                    </p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <button
+                        (click)="deleteChallengePage()"
+                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition"
+                      >
+                        Delete Page
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
+
+      <!-- Solutions & Challenges Section -->
+      <section
+        #solutions
+        id="solutions"
+        class="scroll-mt-24 mt-16 mx-auto max-w-screen-xl px-4 pb-8"
+      >
+        <div class="text-center mb-12">
+          <h2
+            class="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
+          >
+            Challenges
+          </h2>
+          <p class="mt-2 text-lg text-slate-600 dark:text-slate-400">
+            Browse, solve, and manage team challenges.
+          </p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-3 mb-10">
+          <button
+            *ngFor="let category of categories"
+            (click)="setActiveCategory(category)"
+            class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200"
+            [ngClass]="{
+              'bg-teal-600 text-white shadow-md': category === activeCategory,
+              'bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700':
+                category !== activeCategory
+            }"
+          >
+            {{ category }}
+          </button>
+        </div>
+        <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div
+            *ngFor="let t of titles; let i = index"
+            class="relative group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <div
+              *ngIf="isAuthorPage"
+              class="absolute top-3 right-3 z-10 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            >
+              <button
+                (click)="openEditChallenge(ids[i], i)"
+                class="p-2 rounded-full bg-slate-700/50 text-white hover:bg-slate-600 backdrop-blur-sm transition"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15.232 5.232l3.536 3.536M9 11l6.6-6.6a2.121 2.121 0 013 3L12 15"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                (click)="moveChallenge(ids[i], i)"
+                class="p-2 rounded-full bg-yellow-500/80 text-white hover:bg-yellow-500 backdrop-blur-sm transition"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 9l4 4m0 0l-4 4m4-4H3"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                (click)="deleteChallenge(ids[i], i)"
+                class="p-2 rounded-full bg-red-600/80 text-white hover:bg-red-600 backdrop-blur-sm transition"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+            <app-challenge
+              [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }"
+              [image]="challengeImages[i]"
+              [fromChallengeSpace]="true"
+              [id]="ids[i]"
+              [description]="descriptions[i]"
+              [restricted]="'true'"
+              [title]="t"
+            ></app-challenge>
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
 </ng-container>
 
 <!-- Private Page Template -->
 <ng-template #maybePrivate>
   <ng-container *ngIf="pageReady">
-        <div class="relative min-h-screen flex items-center justify-center bg-slate-100 dark:bg-gray-950 p-4">
-          <button routerLink="/home" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 dark:hover:text-white transition">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-          <div class="text-center space-y-6 p-10 bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-2xl backdrop-blur-lg max-w-md">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50">
-                <svg class="h-8 w-8 text-red-600 dark:text-red-400" stroke-width="2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">Private Workspace</h1>
-            <p class="text-slate-600 dark:text-slate-400">You don’t have permission to view this page. Please contact the administrator for access.</p>
-          </div>
+    <div
+      class="relative min-h-screen flex items-center justify-center bg-slate-100 dark:bg-gray-950 p-4"
+    >
+      <button
+        routerLink="/home"
+        class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 dark:hover:text-white transition"
+      >
+        <svg
+          class="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          ></path>
+        </svg>
+      </button>
+      <div
+        class="text-center space-y-6 p-10 bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-2xl backdrop-blur-lg max-w-md"
+      >
+        <div
+          class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/50"
+        >
+          <svg
+            class="h-8 w-8 text-red-600 dark:text-red-400"
+            stroke-width="2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            ></path>
+          </svg>
         </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">
+          Private Workspace
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400">
+          You don’t have permission to view this page. Please contact the
+          administrator for access.
+        </p>
+      </div>
+    </div>
   </ng-container>
 </ng-template>
 
@@ -541,23 +936,32 @@
   class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
 >
   <div class="relative w-full max-w-5xl px-4 py-8">
-    <div class="relative p-6 bg-white rounded-xl shadow dark:bg-gray-800 overflow-y-auto max-h-[90vh]">
-      <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-200 dark:border-gray-600">
+    <div
+      class="relative p-6 bg-white rounded-xl shadow dark:bg-gray-800 overflow-y-auto max-h-[90vh]"
+    >
+      <div
+        class="flex items-center justify-between pb-4 mb-4 border-b border-gray-200 dark:border-gray-600"
+      >
         <div>
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
             Choose Existing Challenges
           </h3>
           <p class="text-sm text-gray-500 dark:text-gray-300">
-            Pick a challenge from the global library and add it to this workspace.
+            Pick a challenge from the global library and add it to this
+            workspace.
           </p>
         </div>
         <button
           (click)="toggle('showExistingChallenges')"
           type="button"
-          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center 
-                dark:hover:bg-gray-600 dark:hover:text-white"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
         >
-          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg
+            aria-hidden="true"
+            class="w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
             <path
               fill-rule="evenodd"
               d="M4.293 4.293a1 1 0 011.414
@@ -580,24 +984,36 @@
           (click)="setExistingCategory(category)"
           class="px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200"
           [ngClass]="{
-            'bg-emerald-600 text-white shadow-md': category === existingActiveCategory,
-            'bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700': category !== existingActiveCategory
+            'bg-emerald-600 text-white shadow-md':
+              category === existingActiveCategory,
+            'bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700':
+              category !== existingActiveCategory
           }"
         >
           {{ category }}
         </button>
       </div>
 
-      <div *ngIf="isLoadingExistingChallenges" class="text-center py-12 text-slate-500">
+      <div
+        *ngIf="isLoadingExistingChallenges"
+        class="text-center py-12 text-slate-500"
+      >
         Loading challenges...
       </div>
 
-      <div *ngIf="existingChallengesError" class="text-center py-10 text-red-600">
+      <div
+        *ngIf="existingChallengesError"
+        class="text-center py-10 text-red-600"
+      >
         {{ existingChallengesError }}
       </div>
 
       <div
-        *ngIf="!isLoadingExistingChallenges && !existingChallengesError && !filteredExistingChallenges.length"
+        *ngIf="
+          !isLoadingExistingChallenges &&
+          !existingChallengesError &&
+          !filteredExistingChallenges.length
+        "
         class="text-center py-12 text-slate-500"
       >
         No challenges found for this category.
@@ -615,7 +1031,9 @@
               class="absolute inset-0 w-full h-full object-cover"
               loading="lazy"
             />
-            <span class="absolute top-3 left-3 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-white/90 text-slate-700">
+            <span
+              class="absolute top-3 left-3 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide rounded-full bg-white/90 text-slate-700"
+            >
               {{ challenge.category }}
             </span>
           </div>
@@ -631,7 +1049,11 @@
               [disabled]="isAddingExistingChallenge(challenge.id)"
               class="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {{ isAddingExistingChallenge(challenge.id) ? 'Adding...' : 'Add to Workspace' }}
+              {{
+                isAddingExistingChallenge(challenge.id)
+                  ? "Adding..."
+                  : "Add to Workspace"
+              }}
             </button>
           </div>
         </div>
@@ -640,7 +1062,6 @@
   </div>
 </div>
 
-
 <!-- ADD CHALLENGE MODAL -->
 <div
   *ngIf="showAddChallenge"
@@ -648,7 +1069,7 @@
 >
   <div class="relative w-full max-w-2xl px-4 py-8">
     <div
-      class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5  overflow-y-auto max-h-[90vh]"
+      class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5 overflow-y-auto max-h-[90vh]"
     >
       <!-- Header -->
       <div
@@ -660,8 +1081,7 @@
         <button
           (click)="toggle('showAddChallenge')"
           type="button"
-          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center 
-                dark:hover:bg-gray-600 dark:hover:text-white"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
         >
           <svg
             aria-hidden="true"
@@ -698,10 +1118,7 @@
             name="name"
             id="name"
             placeholder="Bridging the Wealth Gap..."
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                  focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5
-                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
         </div>
         <div>
@@ -713,10 +1130,7 @@
           <select
             [(ngModel)]="categoryCreateChallenge"
             id="category"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                  focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5
-                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           >
             <option value="" disabled selected>Choose</option>
             <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
@@ -734,10 +1148,7 @@
             name="name"
             id="name"
             placeholder="Human Rights"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-                  focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 
-                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
         </div>
         <div class="sm:col-span-2">
@@ -751,10 +1162,7 @@
             id="description"
             rows="3"
             placeholder="Write a description..."
-            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg 
-                  border border-gray-300 focus:ring-primary-500 focus:border-primary-500 
-                  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 
-                  dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           ></textarea>
         </div>
 
@@ -807,7 +1215,7 @@
           <input
             type="file"
             id="getFile"
-            style="display:none"
+            style="display: none"
             (change)="startUpload($any($event.target).files)"
           />
         </div>
@@ -817,20 +1225,14 @@
         <button
           (click)="addCreateChallenge()"
           type="submit"
-          class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none
-                 focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 
-                 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+          class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
         >
           Add Challenge
         </button>
         <button
           (click)="toggle('showAddChallenge')"
           type="button"
-          class="text-red-600 inline-flex items-center hover:text-white border border-red-600 
-                 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 
-                 font-medium rounded-lg text-sm px-5 py-2.5 text-center 
-                 dark:border-red-500 dark:text-red-500 dark:hover:text-white 
-                 dark:hover:bg-red-600 dark:focus:ring-red-900"
+          class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
         >
           Cancel
         </button>
@@ -847,9 +1249,7 @@
   <div class="relative w-full max-w-md px-4 py-8">
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <div class="p-4 md:p-5 min-w-xl">
-        <h2
-          class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-        >
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Add a new Participant
         </h2>
         <div class="grid gap-4 mb-4 grid-cols-2">
@@ -858,31 +1258,20 @@
               [(ngModel)]="newParticipant"
               rows="1"
               placeholder="email@gmail.com"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg 
-                     border border-gray-300 focus:ring-blue-500 focus:border-blue-500 
-                     dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 
-                     dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             ></textarea>
           </div>
         </div>
         <div>
           <button
             (click)="toggle('showAddTeamMember')"
-            class="mr-4 text-white inline-flex items-center bg-gray-600 
-                   hover:bg-gray-700 focus:ring-4 focus:outline-none
-                   focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 
-                   text-center dark:bg-gray-500 dark:hover:bg-gray-600 
-                   dark:focus:ring-gray-700"
+            class="mr-4 text-white inline-flex items-center bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
           >
             Cancel
           </button>
           <button
             (click)="addParticipant()"
-            class="text-white inline-flex items-center bg-teal-700 
-                   hover:bg-teal-800 focus:ring-4 focus:outline-none 
-                   focus:ring-teal-300 font-medium rounded-lg text-sm 
-                   px-5 py-2.5 text-center dark:bg-teal-600 
-                   dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+            class="text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
           >
             Add Participant
           </button>
@@ -894,20 +1283,35 @@
 
 <!-- EDIT SCHEDULE MODAL -->
 <!-- EDIT PROGRAM PDF MODAL -->
-<div *ngIf="showEditProgram"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+<div
+  *ngIf="showEditProgram"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+>
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative rounded-xl shadow-2xl
-                bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10">
-
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10"
+    >
       <!-- strip -->
-      <div class="h-2 w-full bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-600"></div>
+      <div
+        class="h-2 w-full bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-600"
+      ></div>
 
       <div class="p-6 space-y-6">
-        <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor"
-               stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        <h2
+          class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2"
+        >
+          <svg
+            class="w-5 h-5 text-indigo-500 dark:text-indigo-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 4v16m8-8H4"
+            />
           </svg>
           Program&nbsp;PDF
         </h2>
@@ -916,105 +1320,135 @@
         <div *ngIf="programPDF" class="space-y-2">
           <p class="text-sm text-gray-700 dark:text-gray-300">
             Current file:&nbsp;
-            <a [href]="programPDF.url" target="_blank"
-               class="text-indigo-600 dark:text-indigo-300 underline hover:no-underline">
+            <a
+              [href]="programPDF.url"
+              target="_blank"
+              class="text-indigo-600 dark:text-indigo-300 underline hover:no-underline"
+            >
               {{ programPDF.title }}
             </a>
           </p>
-          <button (click)="deleteProgramPDF()"
-                  class="text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700">
+          <button
+            (click)="deleteProgramPDF()"
+            class="text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700"
+          >
             Delete&nbsp;PDF
           </button>
-          <hr class="border-gray-300 dark:border-slate-600 my-3">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Replace / rename:</p>
+          <hr class="border-gray-300 dark:border-slate-600 my-3" />
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Replace / rename:
+          </p>
         </div>
 
         <!-- title -->
-        <input type="text" [(ngModel)]="programTitleTmp"
-               placeholder="Agenda, Syllabus, Schedule…"
-               class="w-full p-2 rounded-md border
-                      bg-gray-50 dark:bg-slate-700
-                      border-gray-300 dark:border-slate-600
-                      text-sm text-gray-800 dark:text-gray-100
-                      placeholder-gray-400 dark:placeholder-slate-400"/>
+        <input
+          type="text"
+          [(ngModel)]="programTitleTmp"
+          placeholder="Agenda, Syllabus, Schedule…"
+          class="w-full p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400"
+        />
 
         <!-- file picker -->
-        <input type="file"
-               (change)="programFileTmp = $any($event.target).files[0]"
-               accept=".pdf"
-               class="block w-full text-sm text-gray-700 dark:text-gray-200
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-md file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-indigo-50 file:text-indigo-700
-                      hover:file:bg-indigo-100
-                      dark:file:bg-indigo-600/20 dark:file:text-indigo-300
-                      cursor-pointer"/>
+        <input
+          type="file"
+          (change)="programFileTmp = $any($event.target).files[0]"
+          accept=".pdf"
+          class="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-600/20 dark:file:text-indigo-300 cursor-pointer"
+        />
 
         <!-- buttons -->
         <div class="flex justify-end gap-3 pt-2">
-          <button (click)="toggle('showEditProgram')"
-                  class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600
-                         text-white text-sm">Cancel</button>
+          <button
+            (click)="toggle('showEditProgram')"
+            class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600 text-white text-sm"
+          >
+            Cancel
+          </button>
 
-          <button (click)="saveProgramPDF()"
-                  class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700
-                         text-white text-sm font-semibold active:scale-95">
+          <button
+            (click)="saveProgramPDF()"
+            class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold active:scale-95"
+          >
             Upload&nbsp;&amp;&nbsp;Save
           </button>
         </div>
       </div>
 
       <!-- close icon -->
-      <button (click)="toggle('showEditProgram')"
-              class="absolute top-3 right-3 p-1 rounded-full
-                     text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
-                     bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M6 18L18 6M6 6l12 12"/>
+      <button
+        (click)="toggle('showEditProgram')"
+        class="absolute top-3 right-3 p-1 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
-
     </div>
   </div>
 </div>
 
-
 <!-- EDIT HANDOUTS MODAL -->
-<div *ngIf="showEditHandouts"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+<div
+  *ngIf="showEditHandouts"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+>
   <div class="relative w-full max-w-lg px-4 py-8">
-    <div class="relative rounded-xl shadow-2xl
-                bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10
-                overflow-hidden">
-
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+    >
       <!-- Decorative top strip -->
-      <div class="h-2 w-full bg-gradient-to-r from-indigo-500 via-teal-500 to-emerald-500"></div>
+      <div
+        class="h-2 w-full bg-gradient-to-r from-indigo-500 via-teal-500 to-emerald-500"
+      ></div>
 
       <!-- Modal body -->
       <div class="p-6 space-y-6">
-
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2"
-               viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        <h2
+          class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2"
+        >
+          <svg
+            class="w-6 h-6 text-indigo-500 dark:text-indigo-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 4v16m8-8H4"
+            />
           </svg>
           Handouts
         </h2>
 
         <!-- Existing handouts list -->
         <ul *ngIf="handouts.length; else noFiles" class="space-y-2">
-          <li *ngFor="let h of handouts; let i = index"
-              class="flex justify-between items-center px-3 py-2 rounded-lg
-                     bg-gray-100 dark:bg-slate-700/70">
-            <a [href]="h.url" target="_blank"
-               class="text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:underline">
+          <li
+            *ngFor="let h of handouts; let i = index"
+            class="flex justify-between items-center px-3 py-2 rounded-lg bg-gray-100 dark:bg-slate-700/70"
+          >
+            <a
+              [href]="h.url"
+              target="_blank"
+              class="text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:underline"
+            >
               {{ h.name }}
             </a>
-            <button (click)="removeHandout(i)"
-                    class="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">
+            <button
+              (click)="removeHandout(i)"
+              class="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            >
               Delete
             </button>
           </li>
@@ -1028,53 +1462,48 @@
 
         <!-- Add new handout -->
         <div class="space-y-3">
-          <input type="text" [(ngModel)]="handoutName"
-                 placeholder="Document title"
-                 class="w-full p-2 rounded-md border
-                        bg-gray-50 dark:bg-slate-700
-                        border-gray-300 dark:border-slate-600
-                        text-sm text-gray-800 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-slate-400" />
+          <input
+            type="text"
+            [(ngModel)]="handoutName"
+            placeholder="Document title"
+            class="w-full p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400"
+          />
 
-          <input type="file"
-                 (change)="handoutFile = $any($event.target).files[0]"
-                 accept=".pdf,.doc,.docx,.ppt,.pptx"
-                 class="block w-full text-sm text-gray-700 dark:text-gray-200
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-indigo-50 file:text-indigo-700
-                        hover:file:bg-indigo-100
-                        dark:file:bg-indigo-600/20 dark:file:text-indigo-300
-                        cursor-pointer"/>
+          <input
+            type="file"
+            (change)="handoutFile = $any($event.target).files[0]"
+            accept=".pdf,.doc,.docx,.ppt,.pptx"
+            class="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-600/20 dark:file:text-indigo-300 cursor-pointer"
+          />
 
-          <button (click)="addHandout()"
-                  class="w-full py-2 rounded-md text-sm font-semibold
-                         bg-gradient-to-r from-indigo-600 to-teal-600
-                         hover:from-indigo-700 hover:to-teal-700
-                         text-white transition-all duration-150
-                         focus:outline-none focus:ring-4
-                         focus:ring-indigo-300 dark:focus:ring-indigo-800
-                         active:scale-95">
+          <button
+            (click)="addHandout()"
+            class="w-full py-2 rounded-md text-sm font-semibold bg-gradient-to-r from-indigo-600 to-teal-600 hover:from-indigo-700 hover:to-teal-700 text-white transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800 active:scale-95"
+          >
             Upload&nbsp;&amp;&nbsp;Add
           </button>
         </div>
-
       </div>
 
       <!-- Close -->
-      <button (click)="toggle('showEditHandouts')"
-              class="absolute top-3 right-3 rounded-full p-1
-                     text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
-                     bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70
-                     transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M6 18L18 6M6 6l12 12"/>
+      <button
+        (click)="toggle('showEditHandouts')"
+        class="absolute top-3 right-3 rounded-full p-1 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70 transition"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
-
     </div>
   </div>
 </div>
@@ -1087,9 +1516,7 @@
   <div class="relative w-full max-w-md px-4 py-8">
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
       <div class="p-4 md:p-5 min-w-xl">
-        <h2
-          class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-        >
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Remove Participant
         </h2>
         <div class="grid gap-4 mb-4 grid-cols-2">
@@ -1098,32 +1525,20 @@
               [(ngModel)]="teamMemberToDelete"
               rows="1"
               placeholder="email@gmail.com"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 
-                     rounded-lg border border-gray-300 focus:ring-blue-500 
-                     focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 
-                     dark:placeholder-gray-400 dark:text-white 
-                     dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             ></textarea>
           </div>
         </div>
         <div>
           <button
             (click)="toggle('showRemoveTeamMember')"
-            class="mr-4 text-white inline-flex items-center bg-gray-600 
-                   hover:bg-gray-700 focus:ring-4 focus:outline-none
-                   focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 
-                   text-center dark:bg-gray-500 dark:hover:bg-gray-600 
-                   dark:focus:ring-gray-700"
+            class="mr-4 text-white inline-flex items-center bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
           >
             Cancel
           </button>
           <button
             (click)="removeParticipant(teamMemberToDelete)"
-            class="text-white inline-flex items-center bg-red-700 
-                   hover:bg-red-800 focus:ring-4 focus:outline-none 
-                   focus:ring-red-300 font-medium rounded-lg text-sm 
-                   px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 
-                   dark:focus:ring-red-800"
+            class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
           >
             Remove Participant
           </button>
@@ -1133,232 +1548,286 @@
   </div>
 </div>
 
-
-    <!-- Spinner -->
-    <div *ngIf="isLoading" class="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-gray-800">
-      <div role="status" class="flex flex-col items-center">
-        <svg aria-hidden="true" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-          <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-        </svg>
-        <span class="sr-only">Loading...</span>
-        <div class="mt-2 text-white">Processing your request...</div>
-      </div>
-    </div>
+<!-- Spinner -->
+<div
+  *ngIf="isLoading"
+  class="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50 bg-gray-800"
+>
+  <div role="status" class="flex flex-col items-center">
+    <svg
+      aria-hidden="true"
+      class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+      viewBox="0 0 100 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+        fill="currentColor"
+      />
+      <path
+        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+        fill="currentFill"
+      />
+    </svg>
+    <span class="sr-only">Loading...</span>
+    <div class="mt-2 text-white">Processing your request...</div>
+  </div>
+</div>
 
 <!-- EDIT LINKS MODAL -->
-<div *ngIf="showEditLinks"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+<div
+  *ngIf="showEditLinks"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+>
   <div class="relative w-full max-w-md px-4 py-8">
     <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-
       <!-- Title -->
       <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
         Update Video / Chat Links
       </h2>
 
       <!-- Google Meet -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Google Meet URL
       </label>
-      <input [(ngModel)]="googleMeetLink" type="url"
-             class="w-full mb-4 p-2 rounded border
-                    bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-teal-500
-                    dark:bg-gray-700 dark:border-gray-600
-                    dark:text-gray-100 dark:placeholder-gray-400">
+      <input
+        [(ngModel)]="googleMeetLink"
+        type="url"
+        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+      />
 
       <!-- Zoom -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Zoom URL
       </label>
-      <input [(ngModel)]="zoomLink" type="url"
-             class="w-full mb-4 p-2 rounded border
-                    bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
-                    focus:outline-none focus:ring-2 focus:ring-teal-500
-                    dark:bg-gray-700 dark:border-gray-600
-                    dark:text-gray-100 dark:placeholder-gray-400">
+      <input
+        [(ngModel)]="zoomLink"
+        type="url"
+        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+      />
 
       <!-- Instructions -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Instructions / Chat Note
       </label>
-      <textarea [(ngModel)]="chatNote" rows="3"
-                class="w-full mb-6 p-2 rounded border resize-none
-                       bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400
-                       focus:outline-none focus:ring-2 focus:ring-teal-500
-                       dark:bg-gray-700 dark:border-gray-600
-                       dark:text-gray-100 dark:placeholder-gray-400"></textarea>
+      <textarea
+        [(ngModel)]="chatNote"
+        rows="3"
+        class="w-full mb-6 p-2 rounded border resize-none bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400"
+      ></textarea>
 
       <!-- Buttons -->
       <div class="flex justify-end space-x-3">
-        <button (click)="toggle('showEditLinks')"
-                class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600
-                       focus:outline-none focus:ring-2 focus:ring-gray-400">
+        <button
+          (click)="toggle('showEditLinks')"
+          class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        >
           Cancel
         </button>
 
-        <button (click)="saveLinks()"
-                class="px-4 py-2 rounded bg-teal-700 text-white hover:bg-teal-800
-                       focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <button
+          (click)="saveLinks()"
+          class="px-4 py-2 rounded bg-teal-700 text-white hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
           Save
         </button>
       </div>
-
     </div>
   </div>
 </div>
 
-
-
 <!-- EDIT CHALLENGE MODAL -->
-<div *ngIf="showEditChallenge"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+<div
+  *ngIf="showEditChallenge"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+>
   <div class="relative w-full max-w-lg px-4 py-8">
     <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-
       <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
         Edit Challenge
       </h2>
 
       <!-- Title -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Title
       </label>
-      <input [(ngModel)]="editTitle" type="text"
-             class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300
-                    text-gray-900 placeholder-gray-400 focus:outline-none
-                    focus:ring-2 focus:ring-teal-500 dark:bg-gray-700
-                    dark:border-gray-600 dark:text-gray-100">
+      <input
+        [(ngModel)]="editTitle"
+        type="text"
+        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+      />
 
       <!-- Category (select OR custom) -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Category
       </label>
-      <select [(ngModel)]="editCategory"
-              class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300
-                     text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500
-                     dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+      <select
+        [(ngModel)]="editCategory"
+        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+      >
         <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
         <option value="__new__">— Add new… —</option>
       </select>
-      <input *ngIf="editCategory==='__new__'"
-             [(ngModel)]="editCategoryCustom"
-             placeholder="New category"
-             class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300
-                    text-gray-900 placeholder-gray-400 focus:outline-none
-                    focus:ring-2 focus:ring-teal-500 dark:bg-gray-700
-                    dark:border-gray-600 dark:text-gray-100">
+      <input
+        *ngIf="editCategory === '__new__'"
+        [(ngModel)]="editCategoryCustom"
+        placeholder="New category"
+        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+      />
 
       <!-- Description -->
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Description
       </label>
-      <textarea [(ngModel)]="editDescription" rows="3"
-                class="w-full mb-6 p-2 rounded border resize-none bg-gray-50
-                       border-gray-300 text-gray-900 placeholder-gray-400
-                       focus:outline-none focus:ring-2 focus:ring-teal-500
-                       dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
+      <textarea
+        [(ngModel)]="editDescription"
+        rows="3"
+        class="w-full mb-6 p-2 rounded border resize-none bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+      >
       </textarea>
 
       <!-- Buttons -->
       <div class="flex justify-end space-x-3">
-        <button (click)="showEditChallenge=false"
-                class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600">
+        <button
+          (click)="showEditChallenge = false"
+          class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-600"
+        >
           Cancel
         </button>
-        <button (click)="saveEditChallenge()"
-                class="px-4 py-2 rounded bg-teal-700 text-white hover:bg-teal-800">
+        <button
+          (click)="saveEditChallenge()"
+          class="px-4 py-2 rounded bg-teal-700 text-white hover:bg-teal-800"
+        >
           Save
         </button>
       </div>
-
     </div>
   </div>
 </div>
 
-
 <!-- MERGE SOLUTION MODAL -->
-<div *ngIf="showMergeSolution"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+<div
+  *ngIf="showMergeSolution"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+>
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative rounded-xl shadow-2xl
-                bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 p-6">
-
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 p-6"
+    >
       <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
         Merge Existing Solution
       </h2>
 
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Solution ID
       </label>
-      <input [(ngModel)]="mergeSolutionId"
-             placeholder="e.g. 3P3V3XsmoQBdJAp633ce"
-             class="w-full mb-4 p-2 rounded-md border
-                    bg-gray-50 dark:bg-slate-700
-                    border-gray-300 dark:border-slate-600
-                    text-sm text-gray-800 dark:text-gray-100
-                    placeholder-gray-400 dark:placeholder-slate-400"/>
+      <input
+        [(ngModel)]="mergeSolutionId"
+        placeholder="e.g. 3P3V3XsmoQBdJAp633ce"
+        class="w-full mb-4 p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400"
+      />
 
-      <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
         Category (optional)
       </label>
       <div class="grid grid-cols-2 gap-2 mb-6">
-        <select [(ngModel)]="mergeCategory"
-                class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700
-                       border-gray-300 dark:border-slate-600 text-sm
-                       text-gray-800 dark:text-gray-100">
+        <select
+          [(ngModel)]="mergeCategory"
+          class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100"
+        >
           <option value="">— choose existing —</option>
           <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
         </select>
-        <input [(ngModel)]="mergeCategoryCustom"
-               placeholder="or type a new one…"
-               class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700
-                      border-gray-300 dark:border-slate-600 text-sm
-                      text-gray-800 dark:text-gray-100" />
+        <input
+          [(ngModel)]="mergeCategoryCustom"
+          placeholder="or type a new one…"
+          class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100"
+        />
       </div>
 
       <div class="flex justify-end gap-3">
-        <button (click)="toggle('showMergeSolution')"
-                class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600
-                       text-white text-sm">Cancel</button>
+        <button
+          (click)="toggle('showMergeSolution')"
+          class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600 text-white text-sm"
+        >
+          Cancel
+        </button>
 
-        <button (click)="mergeExistingSolution()"
-                class="px-4 py-2 rounded-md bg-cyan-600 hover:bg-cyan-700
-                       text-white text-sm font-semibold active:scale-95">
+        <button
+          (click)="mergeExistingSolution()"
+          class="px-4 py-2 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold active:scale-95"
+        >
           Merge
         </button>
       </div>
 
       <!-- close icon -->
-      <button (click)="toggle('showMergeSolution')"
-              class="absolute top-3 right-3 p-1 rounded-full
-                     text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white
-                     bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-             viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M6 18L18 6M6 6l12 12"/>
+      <button
+        (click)="toggle('showMergeSolution')"
+        class="absolute top-3 right-3 p-1 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
-
     </div>
   </div>
 </div>
 
-
 <!-- ADD ADMIN MODAL -->
-<div *ngIf="showAddAdmin" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div
+  *ngIf="showAddAdmin"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+>
   <div class="relative w-full max-w-md px-4 py-8">
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add a Page Admin</h2>
-      <input [(ngModel)]="newAdminEmail" type="email" placeholder="admin@example.com"
-             class="block w-full p-2.5 rounded-lg border text-sm
-                    bg-gray-50 border-gray-300 text-gray-900
-                    dark:bg-gray-600 dark:border-gray-500 dark:text-white mb-6" />
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        Add a Page Admin
+      </h2>
+      <input
+        [(ngModel)]="newAdminEmail"
+        type="email"
+        placeholder="admin@example.com"
+        class="block w-full p-2.5 rounded-lg border text-sm bg-gray-50 border-gray-300 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white mb-6"
+      />
       <div class="flex justify-end gap-3">
-        <button (click)="toggle('showAddAdmin')" class="px-4 py-2 rounded bg-gray-500 text-white">Cancel</button>
-        <button (click)="addAdminByEmail()" class="px-4 py-2 rounded bg-fuchsia-700 text-white hover:bg-fuchsia-800">
+        <button
+          (click)="toggle('showAddAdmin')"
+          class="px-4 py-2 rounded bg-gray-500 text-white"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="addAdminByEmail()"
+          class="px-4 py-2 rounded bg-fuchsia-700 text-white hover:bg-fuchsia-800"
+        >
           Add Admin
         </button>
       </div>
@@ -1366,19 +1835,33 @@
   </div>
 </div>
 
-
 <!-- REMOVE ADMIN MODAL -->
-<div *ngIf="showRemoveAdmin" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+<div
+  *ngIf="showRemoveAdmin"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+>
   <div class="relative w-full max-w-md px-4 py-8">
     <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Remove a Page Admin</h2>
-      <input [(ngModel)]="adminToRemove" type="email" placeholder="admin@example.com"
-             class="block w-full p-2.5 rounded-lg border text-sm
-                    bg-gray-50 border-gray-300 text-gray-900
-                    dark:bg-gray-600 dark:border-gray-500 dark:text-white mb-6" />
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        Remove a Page Admin
+      </h2>
+      <input
+        [(ngModel)]="adminToRemove"
+        type="email"
+        placeholder="admin@example.com"
+        class="block w-full p-2.5 rounded-lg border text-sm bg-gray-50 border-gray-300 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white mb-6"
+      />
       <div class="flex justify-end gap-3">
-        <button (click)="toggle('showRemoveAdmin')" class="px-4 py-2 rounded bg-gray-500 text-white">Cancel</button>
-        <button (click)="removeAdminByEmail(adminToRemove)" class="px-4 py-2 rounded bg-pink-700 text-white hover:bg-pink-800">
+        <button
+          (click)="toggle('showRemoveAdmin')"
+          class="px-4 py-2 rounded bg-gray-500 text-white"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="removeAdminByEmail(adminToRemove)"
+          class="px-4 py-2 rounded bg-pink-700 text-white hover:bg-pink-800"
+        >
           Remove Admin
         </button>
       </div>
@@ -1387,23 +1870,57 @@
 </div>
 
 <!-- EDIT PAGE CONTENT MODAL -->
-<div *ngIf="showEditPageContent" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+<div
+  *ngIf="showEditPageContent"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+>
   <div class="relative w-full max-w-2xl max-h-[90vh] flex flex-col">
-    <div class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex flex-col max-h-full">
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden flex flex-col max-h-full"
+    >
       <!-- Decorative top strip -->
-      <div class="h-2 w-full bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-600 flex-shrink-0"></div>
+      <div
+        class="h-2 w-full bg-gradient-to-r from-teal-500 via-indigo-600 to-purple-600 flex-shrink-0"
+      ></div>
 
       <!-- Header (fixed) -->
-      <div class="flex items-center justify-between p-6 pb-4 flex-shrink-0 border-b border-gray-200 dark:border-slate-700">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <svg class="w-6 h-6 text-teal-500 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      <div
+        class="flex items-center justify-between p-6 pb-4 flex-shrink-0 border-b border-gray-200 dark:border-slate-700"
+      >
+        <h2
+          class="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2"
+        >
+          <svg
+            class="w-6 h-6 text-teal-500 dark:text-teal-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            />
           </svg>
           Edit Page Content
         </h2>
-        <button (click)="showEditPageContent = false" class="p-1.5 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70 transition flex-shrink-0">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        <button
+          (click)="showEditPageContent = false"
+          class="p-1.5 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white bg-gray-100/70 dark:bg-slate-700/60 hover:bg-gray-200/80 dark:hover:bg-slate-600/70 transition flex-shrink-0"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -1412,135 +1929,245 @@
       <div class="overflow-y-auto flex-1 min-h-0">
         <div class="p-6 space-y-6">
           <!-- Heading -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Page Name / Heading</label>
-          <input [(ngModel)]="editHeading" type="text" placeholder="Enter page heading"
-                 class="w-full p-3 rounded-lg border bg-gray-50 dark:bg-slate-700
-                        border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-slate-400
-                        focus:outline-none focus:ring-2 focus:ring-teal-500" />
-        </div>
-
-        <!-- Subheading -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Subheading</label>
-          <textarea [(ngModel)]="editSubHeading" rows="2" placeholder="Enter subheading"
-                     class="w-full p-3 rounded-lg border resize-none bg-gray-50 dark:bg-slate-700
-                            border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-100
-                            placeholder-gray-400 dark:placeholder-slate-400
-                            focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
-        </div>
-
-        <!-- Custom URL -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-            Custom URL
-            <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(optional)</span>
-          </label>
-          <div class="relative">
-            <div class="flex items-center">
-              <span class="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
-                /home-challenge/
-              </span>
-              <input [(ngModel)]="editCustomUrl" 
-                     (input)="onCustomUrlChange()"
-                     type="text" 
-                     placeholder="my-custom-url"
-                     [class.border-red-500]="!customUrlValid && customUrlError"
-                     [class.border-green-500]="customUrlValid && editCustomUrl && !isCheckingUrl"
-                     class="flex-1 p-3 rounded-r-lg border bg-gray-50 dark:bg-slate-700
-                            border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-100
-                            placeholder-gray-400 dark:placeholder-slate-400
-                            focus:outline-none focus:ring-2 focus:ring-teal-500" />
-            </div>
-            <div *ngIf="isCheckingUrl" class="mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-              <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Checking availability...
-            </div>
-            <div *ngIf="customUrlError && !isCheckingUrl" class="mt-1 text-xs text-red-600 dark:text-red-400">
-              {{ customUrlError }}
-            </div>
-            <div *ngIf="customUrlValid && editCustomUrl && !isCheckingUrl && !customUrlError" class="mt-1 text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              Available
-            </div>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Leave empty to use the default URL. Only letters, numbers, and hyphens allowed.
-            </p>
+          <div>
+            <label
+              class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+              >Page Name / Heading</label
+            >
+            <input
+              [(ngModel)]="editHeading"
+              type="text"
+              placeholder="Enter page heading"
+              class="w-full p-3 rounded-lg border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
           </div>
-        </div>
 
-        <!-- Logo Image -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Logo Image</label>
-          <div class="flex items-center gap-4">
-            <div class="flex-shrink-0">
-              <div class="h-20 w-20 rounded-full ring-2 ring-gray-300 dark:ring-slate-600 overflow-hidden bg-gray-100 dark:bg-slate-700">
-                <img *ngIf="editLogoPreview" [src]="editLogoPreview" alt="Logo preview" class="h-full w-full object-cover" />
-                <div *ngIf="!editLogoPreview" class="h-full w-full flex items-center justify-center text-gray-400 dark:text-slate-500">
-                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <!-- Subheading -->
+          <div>
+            <label
+              class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+              >Subheading</label
+            >
+            <textarea
+              [(ngModel)]="editSubHeading"
+              rows="2"
+              placeholder="Enter subheading"
+              class="w-full p-3 rounded-lg border resize-none bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            ></textarea>
+          </div>
+
+          <!-- Custom URL -->
+          <div>
+            <label
+              class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+            >
+              Custom URL
+              <span class="text-xs text-gray-500 dark:text-gray-400 ml-1"
+                >(optional)</span
+              >
+            </label>
+            <div class="relative">
+              <div class="flex items-center">
+                <span
+                  class="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg"
+                >
+                  /home-challenge/
+                </span>
+                <input
+                  [(ngModel)]="editCustomUrl"
+                  (input)="onCustomUrlChange()"
+                  type="text"
+                  placeholder="my-custom-url"
+                  [class.border-red-500]="!customUrlValid && customUrlError"
+                  [class.border-green-500]="
+                    customUrlValid && editCustomUrl && !isCheckingUrl
+                  "
+                  class="flex-1 p-3 rounded-r-lg border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+              <div
+                *ngIf="isCheckingUrl"
+                class="mt-1 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1"
+              >
+                <svg
+                  class="w-3 h-3 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Checking availability...
+              </div>
+              <div
+                *ngIf="customUrlError && !isCheckingUrl"
+                class="mt-1 text-xs text-red-600 dark:text-red-400"
+              >
+                {{ customUrlError }}
+              </div>
+              <div
+                *ngIf="
+                  customUrlValid &&
+                  editCustomUrl &&
+                  !isCheckingUrl &&
+                  !customUrlError
+                "
+                class="mt-1 text-xs text-green-600 dark:text-green-400 flex items-center gap-1"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Available
+              </div>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Leave empty to use the default URL. Only letters, numbers, and
+                hyphens allowed.
+              </p>
+            </div>
+          </div>
+
+          <!-- Logo Image -->
+          <div>
+            <label
+              class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+              >Logo Image</label
+            >
+            <div class="flex items-center gap-4">
+              <div class="flex-shrink-0">
+                <div
+                  class="h-20 w-20 rounded-full ring-2 ring-gray-300 dark:ring-slate-600 overflow-hidden bg-gray-100 dark:bg-slate-700"
+                >
+                  <img
+                    *ngIf="editLogoPreview"
+                    [src]="editLogoPreview"
+                    alt="Logo preview"
+                    class="h-full w-full object-cover"
+                  />
+                  <div
+                    *ngIf="!editLogoPreview"
+                    class="h-full w-full flex items-center justify-center text-gray-400 dark:text-slate-500"
+                  >
+                    <svg
+                      class="w-8 h-8"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="flex-1">
+                <input
+                  type="file"
+                  (change)="onLogoFileSelected($event)"
+                  accept="image/*"
+                  class="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 dark:file:bg-teal-600/20 dark:file:text-teal-300 cursor-pointer"
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Leave empty to keep current logo
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Image -->
+          <div>
+            <label
+              class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
+              >Hero / Banner Image</label
+            >
+            <div class="space-y-2">
+              <div
+                class="h-32 rounded-lg ring-2 ring-gray-300 dark:ring-slate-600 overflow-hidden bg-gray-100 dark:bg-slate-700"
+              >
+                <img
+                  *ngIf="editHeroPreview"
+                  [src]="editHeroPreview"
+                  alt="Hero preview"
+                  class="h-full w-full object-cover"
+                />
+                <div
+                  *ngIf="!editHeroPreview"
+                  class="h-full w-full flex items-center justify-center text-gray-400 dark:text-slate-500"
+                >
+                  <svg
+                    class="w-12 h-12"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
               </div>
-            </div>
-            <div class="flex-1">
-              <input type="file" (change)="onLogoFileSelected($event)" accept="image/*"
-                     class="block w-full text-sm text-gray-700 dark:text-gray-200
-                            file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100
-                            dark:file:bg-teal-600/20 dark:file:text-teal-300
-                            cursor-pointer" />
-              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Leave empty to keep current logo</p>
+              <input
+                type="file"
+                (change)="onHeroFileSelected($event)"
+                accept="image/*"
+                class="block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-600/20 dark:file:text-indigo-300 cursor-pointer"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Leave empty to keep current hero image
+              </p>
             </div>
           </div>
-        </div>
-
-        <!-- Hero Image -->
-        <div>
-          <label class="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Hero / Banner Image</label>
-          <div class="space-y-2">
-            <div class="h-32 rounded-lg ring-2 ring-gray-300 dark:ring-slate-600 overflow-hidden bg-gray-100 dark:bg-slate-700">
-              <img *ngIf="editHeroPreview" [src]="editHeroPreview" alt="Hero preview" class="h-full w-full object-cover" />
-              <div *ngIf="!editHeroPreview" class="h-full w-full flex items-center justify-center text-gray-400 dark:text-slate-500">
-                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-            </div>
-            <input type="file" (change)="onHeroFileSelected($event)" accept="image/*"
-                   class="block w-full text-sm text-gray-700 dark:text-gray-200
-                          file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                          file:text-sm file:font-semibold
-                          file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100
-                          dark:file:bg-indigo-600/20 dark:file:text-indigo-300
-                          cursor-pointer" />
-            <p class="text-xs text-gray-500 dark:text-gray-400">Leave empty to keep current hero image</p>
-          </div>
-        </div>
-
         </div>
       </div>
 
       <!-- Footer (fixed) -->
-      <div class="flex justify-end gap-3 p-6 pt-4 border-t border-gray-200 dark:border-slate-700 flex-shrink-0">
-        <button (click)="showEditPageContent = false"
-                class="px-4 py-2 rounded-lg bg-gray-500/80 hover:bg-gray-600 text-white text-sm font-medium transition">
+      <div
+        class="flex justify-end gap-3 p-6 pt-4 border-t border-gray-200 dark:border-slate-700 flex-shrink-0"
+      >
+        <button
+          (click)="showEditPageContent = false"
+          class="px-4 py-2 rounded-lg bg-gray-500/80 hover:bg-gray-600 text-white text-sm font-medium transition"
+        >
           Cancel
         </button>
-        <button (click)="savePageContent()"
-                [disabled]="!customUrlValid && editCustomUrl && !isCheckingUrl"
-                [class.opacity-50]="!customUrlValid && editCustomUrl && !isCheckingUrl"
-                [class.cursor-not-allowed]="!customUrlValid && editCustomUrl && !isCheckingUrl"
-                class="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700
-                       text-white text-sm font-semibold transition-all duration-150 active:scale-95
-                       disabled:opacity-50 disabled:cursor-not-allowed">
+        <button
+          (click)="savePageContent()"
+          [disabled]="!customUrlValid && editCustomUrl && !isCheckingUrl"
+          [class.opacity-50]="
+            !customUrlValid && editCustomUrl && !isCheckingUrl
+          "
+          [class.cursor-not-allowed]="
+            !customUrlValid && editCustomUrl && !isCheckingUrl
+          "
+          class="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white text-sm font-semibold transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Save Changes
         </button>
       </div>
