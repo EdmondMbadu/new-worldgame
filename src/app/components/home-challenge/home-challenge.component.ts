@@ -138,6 +138,7 @@ export class HomeChallengeComponent {
   showJoinPrompt = false;
   isJoining = false;
   private hasHandledJoinPrompt = false;
+  showLeavePrompt = false;
 
   // Edit page content
   showEditPageContent = false;
@@ -861,6 +862,18 @@ export class HomeChallengeComponent {
     this.router.navigate(['/home']);
   }
 
+  openLeavePrompt(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.showLeavePrompt = true;
+  }
+
+  cancelLeave(): void {
+    this.showLeavePrompt = false;
+  }
+
   async leaveChallengePage(): Promise<void> {
     const email = this.normalizeEmail(this.auth.currentUser?.email || '');
     if (!email) {
@@ -879,6 +892,7 @@ export class HomeChallengeComponent {
       this.participants = nextParticipants;
       this.allowAccess = this.isAuthorPage;
       this.loadParticipantProfiles();
+      this.showLeavePrompt = false;
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error leaving challenge page:', error);
