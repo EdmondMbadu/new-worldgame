@@ -1710,12 +1710,25 @@
         </h2>
         <div class="grid gap-4 mb-4 grid-cols-2">
           <div class="col-span-2">
-            <textarea
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+              Select participant
+            </label>
+            <select
               [(ngModel)]="teamMemberToDelete"
-              rows="1"
-              placeholder="email@gmail.com"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            ></textarea>
+              class="block w-full p-2.5 rounded-lg border text-sm bg-gray-50 border-gray-300 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+            >
+              <option value="">Choose a participant</option>
+              <ng-container *ngIf="participantProfiles.length; else fallbackParticipants">
+                <option *ngFor="let participant of participantProfiles" [value]="participant.email">
+                  {{ participant.displayName }} — {{ participant.email }}
+                </option>
+              </ng-container>
+              <ng-template #fallbackParticipants>
+                <option *ngFor="let participant of participants" [value]="participant">
+                  {{ participant }}
+                </option>
+              </ng-template>
+            </select>
           </div>
         </div>
         <div>
@@ -1727,7 +1740,8 @@
           </button>
           <button
             (click)="removeParticipant(teamMemberToDelete)"
-            class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+            [disabled]="!teamMemberToDelete"
+            class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Remove Participant
           </button>
