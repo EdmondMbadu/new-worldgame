@@ -577,29 +577,71 @@
                 </button>
               </div>
 
-              <div *ngIf="showAdminsList" class="space-y-2">
+              <div *ngIf="showAdminsList" class="space-y-3">
+                <div *ngIf="isLoadingAdminProfiles" class="text-sm text-slate-500 dark:text-slate-400">
+                  Loading admin profiles...
+                </div>
+
                 <ul
-                  *ngIf="visibleAdminEmails.length > 0; else noAdmins"
-                  class="space-y-2"
+                  *ngIf="!isLoadingAdminProfiles && adminProfiles.length > 0; else noAdmins"
+                  class="grid gap-3"
                 >
-                  <li
-                    *ngFor="let email of adminEmailsToRender"
-                    class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
-                  >
-                    <span
-                      class="grid place-content-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold text-slate-600 dark:text-slate-300"
-                      >{{ email.charAt(0) || "?" | uppercase }}</span
+                  <li *ngFor="let admin of adminProfilesToRender">
+                    <a
+                      *ngIf="admin.exists && admin.uid"
+                      [routerLink]="admin.isCurrentUser ? '/profile' : ['/user-profile', admin.uid]"
+                      class="group flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800 hover:bg-white dark:hover:bg-slate-800 transition"
                     >
-                    <span class="text-slate-800 dark:text-slate-200">{{
-                      email
-                    }}</span>
-                    <span
-                      *ngIf="
-                        email === (auth.currentUser.email || '').toLowerCase()
-                      "
-                      class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300"
-                      >You</span
+                      <div class="relative">
+                        <img
+                          *ngIf="admin.photoUrl"
+                          [src]="admin.photoUrl"
+                          [attr.alt]="admin.displayName"
+                          class="w-10 h-10 rounded-full object-cover ring-2 ring-white dark:ring-slate-900"
+                        />
+                        <div
+                          *ngIf="!admin.photoUrl"
+                          class="grid place-content-center w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200"
+                        >
+                          {{ participantInitial(admin) }}
+                        </div>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          {{ admin.displayName }}
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {{ admin.email }}
+                        </p>
+                      </div>
+                      <span
+                        *ngIf="admin.isCurrentUser"
+                        class="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300"
+                        >You</span
+                      >
+                      <span
+                        *ngIf="!admin.isCurrentUser"
+                        class="ml-auto text-[11px] font-semibold text-teal-600 dark:text-teal-400"
+                        >View profile</span
+                      >
+                    </a>
+
+                    <div
+                      *ngIf="!admin.exists || !admin.uid"
+                      class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
                     >
+                      <div class="grid place-content-center w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        {{ participantInitial(admin) }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          {{ admin.email }}
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                          {{ admin.exists ? 'Profile unavailable' : 'Not registered' }}
+                        </p>
+                      </div>
+                    </div>
                   </li>
                 </ul>
 
@@ -616,7 +658,7 @@
                 </button>
 
                 <ng-template #noAdmins>
-                  <p class="text-slate-500 dark:text-slate-400 text-sm">
+                  <p *ngIf="!isLoadingAdminProfiles" class="text-slate-500 dark:text-slate-400 text-sm">
                     No admins have been added yet.
                   </p>
                 </ng-template>

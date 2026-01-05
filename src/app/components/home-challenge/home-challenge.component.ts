@@ -61,6 +61,15 @@ export class HomeChallengeComponent {
     isCurrentUser: boolean;
   }[] = [];
   isLoadingParticipantProfiles = false;
+  adminProfiles: {
+    email: string;
+    displayName: string;
+    uid?: string;
+    photoUrl?: string;
+    exists: boolean;
+    isCurrentUser: boolean;
+  }[] = [];
+  isLoadingAdminProfiles = false;
   googleMeetLink: string = '';
   newParticipant: string = '';
   teamMemberToDelete: string = '';
@@ -264,10 +273,15 @@ export class HomeChallengeComponent {
             .then((u) => {
               this.authorEmail = this.normalizeEmail((u as any)?.email || '');
               this.recomputeAdminsView();
+              this.loadAdminProfiles();
             })
-            .catch(() => this.recomputeAdminsView());
+            .catch(() => {
+              this.recomputeAdminsView();
+              this.loadAdminProfiles();
+            });
         } else {
           this.recomputeAdminsView();
+          this.loadAdminProfiles();
         }
 
         // test first if the logo image is available
@@ -532,6 +546,12 @@ export class HomeChallengeComponent {
       : this.participantProfiles.slice(0, 5);
   }
 
+  get adminProfilesToRender() {
+    return this.showAllAdmins
+      ? this.adminProfiles
+      : this.adminProfiles.slice(0, 5);
+  }
+
   async loadParticipantProfiles(): Promise<void> {
     const rawEmails = (this.participants || [])
       .map((email) => (email || '').toString().trim())
@@ -604,6 +624,81 @@ export class HomeChallengeComponent {
       });
     } finally {
       this.isLoadingParticipantProfiles = false;
+    }
+  }
+
+  async loadAdminProfiles(): Promise<void> {
+    const rawEmails = (this.visibleAdminEmails || [])
+      .map((email) => (email || '').toString().trim())
+      .filter((email) => email);
+
+    if (!rawEmails.length) {
+      this.adminProfiles = [];
+      this.isLoadingAdminProfiles = false;
+      return;
+    }
+
+    this.isLoadingAdminProfiles = true;
+    try {
+      const normalizedEmails = rawEmails.map((email) =>
+        this.normalizeEmail(email)
+      );
+      const uniqueEmails = Array.from(new Set(normalizedEmails));
+
+      const results = await Promise.all(
+        uniqueEmails.map(async (email) => {
+          try {
+            const users = await firstValueFrom(
+              this.auth.getUserFromEmail(email)
+            );
+            const user = users?.[0];
+            if (user) {
+              const name = [user.firstName, user.lastName]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+              return {
+                email,
+                displayName: name || email,
+                uid: user.uid,
+                photoUrl:
+                  user.profilePicture?.downloadURL || user.profilePicPath || '',
+                exists: true,
+                isCurrentUser: user.uid === this.auth.currentUser?.uid,
+              };
+            }
+          } catch {}
+
+          return {
+            email,
+            displayName: email,
+            exists: false,
+            isCurrentUser: false,
+          };
+        })
+      );
+
+      const profileMap = new Map(
+        results.map((profile) => [profile.email, profile])
+      );
+      this.adminProfiles = rawEmails.map((email) => {
+        const key = this.normalizeEmail(email);
+        const profile = profileMap.get(key);
+        if (profile) {
+          return {
+            ...profile,
+            email,
+          };
+        }
+        return {
+          email,
+          displayName: email,
+          exists: false,
+          isCurrentUser: false,
+        };
+      });
+    } finally {
+      this.isLoadingAdminProfiles = false;
     }
   }
 
@@ -1475,6 +1570,8 @@ export class HomeChallengeComponent {
 
       alert('Admin added.');
       this.toggle('showAddAdmin');
+      this.recomputeAdminsView();
+      this.loadAdminProfiles();
     } catch (err) {
       console.error('Failed to add admin', err);
       alert('Could not add admin—try again.');
@@ -1526,6 +1623,8 @@ export class HomeChallengeComponent {
       this.isLoading = false;
       this.adminToRemove = '';
       this.toggle('showRemoveAdmin');
+      this.recomputeAdminsView();
+      this.loadAdminProfiles();
     }
   }
 
@@ -1535,6 +1634,7 @@ export class HomeChallengeComponent {
     const set = new Set<string>(base);
     if (extra) set.add(extra);
     this.visibleAdminEmails = Array.from(set);
+    this.loadAdminProfiles();
   }
 
   openEditPageContent() {
