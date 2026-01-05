@@ -29,6 +29,7 @@ export class HomeChallengeComponent {
   image: string = '';
   logoImage: string = '';
   showAddChallenge: boolean = false;
+  showExistingChallenges: boolean = false;
   showAddTeamMember: boolean = false;
   showRemoveTeamMember: boolean = false;
   challengePage: ChallengePage = new ChallengePage();
@@ -74,6 +75,15 @@ export class HomeChallengeComponent {
   pageReady = false;
   handouts: { name: string; url: string }[] = [];
   showEditHandouts = false;
+
+  // Existing challenges picker (global challenges)
+  existingChallenges: any[] = [];
+  filteredExistingChallenges: any[] = [];
+  existingCategories: string[] = [];
+  existingActiveCategory = '';
+  isLoadingExistingChallenges = false;
+  existingChallengesError = '';
+  addingExistingChallengeIds: string[] = [];
 
   // ✨ temp holders while adding one file
   handoutName = '';
@@ -398,6 +408,114 @@ export class HomeChallengeComponent {
     this.challengeImages = categoryData.images;
     this.ids = categoryData.ids!;
   }
+
+  openExistingChallenges(): void {
+    this.showExistingChallenges = true;
+    this.loadExistingChallenges();
+  }
+
+  async loadExistingChallenges(): Promise<void> {
+    if (this.existingChallenges.length) {
+      this.applyExistingFilter();
+      return;
+    }
+
+    this.isLoadingExistingChallenges = true;
+    this.existingChallengesError = '';
+
+    try {
+      const data = await firstValueFrom(this.challenge.getAllChallenges());
+      const list = Array.isArray(data) ? data : [];
+      this.existingChallenges = list;
+      this.existingCategories = Array.from(
+        new Set(list.map((challenge: any) => challenge.category).filter(Boolean))
+      );
+      this.existingActiveCategory =
+        this.existingActiveCategory || this.existingCategories[0] || '';
+      this.applyExistingFilter();
+    } catch (err) {
+      console.error('Error loading existing challenges:', err);
+      this.existingChallengesError =
+        'Could not load existing challenges. Please try again.';
+    } finally {
+      this.isLoadingExistingChallenges = false;
+    }
+  }
+
+  setExistingCategory(category: string): void {
+    if (this.existingActiveCategory === category) {
+      return;
+    }
+    this.existingActiveCategory = category;
+    this.applyExistingFilter();
+  }
+
+  private applyExistingFilter(): void {
+    if (!this.existingActiveCategory) {
+      this.filteredExistingChallenges = [...this.existingChallenges];
+      return;
+    }
+
+    this.filteredExistingChallenges = this.existingChallenges.filter(
+      (challenge: any) => challenge.category === this.existingActiveCategory
+    );
+  }
+
+  isAddingExistingChallenge(challengeId: string): boolean {
+    return this.addingExistingChallengeIds.includes(challengeId);
+  }
+
+  async addExistingChallengeToPage(challenge: any): Promise<void> {
+    if (!challenge?.title || !challenge?.description || !challenge?.category) {
+      alert('This challenge is missing required details.');
+      return;
+    }
+
+    if (this.isAddingExistingChallenge(challenge.id)) {
+      return;
+    }
+
+    this.addingExistingChallengeIds = [
+      ...this.addingExistingChallengeIds,
+      challenge.id,
+    ];
+
+    const newChallengeId = this.afs.createId();
+    const image = challenge.image || 'No image available';
+    const newChallenge = {
+      id: newChallengeId,
+      title: challenge.title,
+      description: challenge.description,
+      category: challenge.category,
+      image,
+      authorId: this.auth.currentUser.uid,
+      challengePageId: this.challengePageId,
+    };
+
+    try {
+      await this.challenge.addUserChallenge(newChallenge);
+      await this.solution.createdNewSolution(
+        newChallenge.title,
+        '',
+        newChallenge.description,
+        newChallenge.image,
+        this.solution.newSolution.participantsHolder,
+        [],
+        [],
+        newChallengeId
+      );
+
+      alert('Challenge added to this workspace.');
+    } catch (err) {
+      console.error('Error adding existing challenge:', err);
+      alert('There was a problem adding this challenge.');
+    } finally {
+      this.addingExistingChallengeIds =
+        this.addingExistingChallengeIds.filter(
+          (id) => id !== challenge.id
+        );
+    }
+  }
   /* ── helper to decide which slice to render (optional) ── */
   get participantsToRender(): string[] {
     // always show at least the first 5; show all if toggled
@@ -409,6 +527,7 @@ export class HomeChallengeComponent {
     property:
       | 'isSidebarOpen'
       | 'showAddChallenge'
+      | 'showExistingChallenges'
       | 'showAddTeamMember'
       | 'showRemoveTeamMember'
       | 'showEditLinks'
