@@ -447,20 +447,43 @@
             </button>
           </div>
 
-          <!-- Tools grid -->
-          <div class="grid grid-cols-2 gap-3 pt-1">
-            <button (click)="toggle('showAddChallenge')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition">Add Challenge</button>
-            <button (click)="openExistingChallenges()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition">Add Existing Challenge</button>
-            <button (click)="toggle('showEditProgram')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">{{ programPDF ? 'Edit PDF' : 'Add PDF' }}</button>
-            <button (click)="toggle('showEditHandouts')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition">Edit Handouts</button>
-            <button (click)="toggle('showEditLinks')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">Edit Links</button>
-            <button (click)="toggle('showAddTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition">Add Participant</button>
-            <button (click)="toggle('showRemoveTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition">Remove Participant</button>
-            <button (click)="toggle('showAddAdmin')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition">Add Admin</button>
-            <button (click)="toggle('showRemoveAdmin')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition">Remove Admin</button>
-            <button (click)="toggle('showMergeSolution')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition">Merge Solution by ID</button>
-            <button (click)="copyUrlToClipboard()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition">Copy URL</button>
-            <button (click)="deleteChallengePage()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">Delete Page</button>
+          <!-- Tools groups -->
+          <div class="space-y-5 pt-1">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Challenges</p>
+              <div class="grid grid-cols-2 gap-3">
+                <button (click)="toggle('showAddChallenge')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition">Add Challenge</button>
+                <button (click)="openExistingChallenges()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition">Add Existing Challenge</button>
+                <button (click)="toggle('showMergeSolution')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition">Merge Solution by ID</button>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Participants & Admins</p>
+              <div class="grid grid-cols-2 gap-3">
+                <button (click)="toggle('showAddTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition">Add Participant</button>
+                <button (click)="toggle('showRemoveTeamMember')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition">Remove Participant</button>
+                <button (click)="toggle('showAddAdmin')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition">Add Admin</button>
+                <button (click)="toggle('showRemoveAdmin')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition">Remove Admin</button>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Resources & Links</p>
+              <div class="grid grid-cols-2 gap-3">
+                <button (click)="toggle('showEditProgram')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition">{{ programPDF ? 'Edit PDF' : 'Add PDF' }}</button>
+                <button (click)="toggle('showEditHandouts')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition">Edit Handouts</button>
+                <button (click)="toggle('showEditLinks')" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">Edit Links</button>
+                <button (click)="copyUrlToClipboard()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition">Copy URL</button>
+              </div>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Danger Zone</p>
+              <div class="grid grid-cols-2 gap-3">
+                <button (click)="deleteChallengePage()" class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition">Delete Page</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
