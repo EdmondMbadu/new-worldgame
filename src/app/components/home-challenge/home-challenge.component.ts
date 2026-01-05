@@ -135,6 +135,10 @@ export class HomeChallengeComponent {
   authorEmail = '';
   visibleAdminEmails: string[] = [];
 
+  showJoinPrompt = false;
+  isJoining = false;
+  private hasHandledJoinPrompt = false;
+
   // Edit page content
   showEditPageContent = false;
   editHeading = '';
@@ -312,6 +316,7 @@ export class HomeChallengeComponent {
         }
 
         this.checkAccess();
+        this.maybePromptJoin();
 
         this.challenge
           .getThisUserChallenges(
@@ -330,10 +335,35 @@ export class HomeChallengeComponent {
           });
   }
   private checkAccess(): void {
+    const email = this.normalizeEmail(this.auth.currentUser?.email || '');
+    const isParticipant = (this.participants || []).some(
+      (participant) => this.normalizeEmail(participant) === email
+    );
     // author always gets in
-    this.allowAccess =
-      this.isAuthorPage ||
-      this.participants.includes(this.auth.currentUser.email);
+    this.allowAccess = this.isAuthorPage || isParticipant;
+  }
+
+  private maybePromptJoin(): void {
+    if (this.hasHandledJoinPrompt) {
+      return;
+    }
+
+    const email = this.normalizeEmail(this.auth.currentUser?.email || '');
+    if (!email) {
+      return;
+    }
+
+    const isParticipant = (this.participants || []).some(
+      (participant) => this.normalizeEmail(participant) === email
+    );
+
+    if (this.isAuthorPage || isParticipant) {
+      this.hasHandledJoinPrompt = true;
+      return;
+    }
+
+    this.showJoinPrompt = true;
+    this.hasHandledJoinPrompt = true;
   }
 
   get isAuthorPage(): boolean {
@@ -783,6 +813,52 @@ export class HomeChallengeComponent {
     } catch (error) {
       console.error('Error removing participant from challenge:', error);
     }
+  }
+
+  async joinChallengePage(): Promise<void> {
+    const email = this.normalizeEmail(this.auth.currentUser?.email || '');
+    if (!email || !this.data.isValidEmail(email)) {
+      alert('Please sign in to join this workspace.');
+      return;
+    }
+
+    if (this.isJoining) {
+      return;
+    }
+
+    const alreadyParticipant = (this.participants || []).some(
+      (participant) => this.normalizeEmail(participant) === email
+    );
+    if (alreadyParticipant) {
+      this.showJoinPrompt = false;
+      this.allowAccess = true;
+      return;
+    }
+
+    this.isJoining = true;
+    const nextParticipants = [...(this.participants || [])];
+    nextParticipants.push(email);
+
+    try {
+      await this.challenge.addParticipantToChallengePage(
+        this.challengePageId,
+        nextParticipants
+      );
+      this.participants = nextParticipants;
+      this.allowAccess = true;
+      this.showJoinPrompt = false;
+      this.loadParticipantProfiles();
+    } catch (error) {
+      console.error('Error joining challenge page:', error);
+      alert('Could not join this workspace. Please try again.');
+    } finally {
+      this.isJoining = false;
+    }
+  }
+
+  declineJoin(): void {
+    this.showJoinPrompt = false;
+    this.router.navigate(['/home']);
   }
   deleteChallengePage() {
     if (
