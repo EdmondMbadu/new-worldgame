@@ -500,9 +500,16 @@
                           {{ participant.email }}
                         </p>
                       </div>
-                      <span class="ml-auto text-[11px] font-semibold text-teal-600 dark:text-teal-400">
-                        View profile
-                      </span>
+                      <div class="ml-auto flex items-center gap-2 text-[11px]">
+                        <span class="font-semibold text-teal-600 dark:text-teal-400">View profile</span>
+                        <button
+                          *ngIf="participant.isCurrentUser && !isAuthorPage"
+                          (click)="leaveChallengePage()"
+                          class="font-semibold text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
+                        >
+                          Leave
+                        </button>
+                      </div>
                     </a>
 
                     <div

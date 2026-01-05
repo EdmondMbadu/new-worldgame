@@ -860,6 +860,31 @@ export class HomeChallengeComponent {
     this.showJoinPrompt = false;
     this.router.navigate(['/home']);
   }
+
+  async leaveChallengePage(): Promise<void> {
+    const email = this.normalizeEmail(this.auth.currentUser?.email || '');
+    if (!email) {
+      return;
+    }
+
+    const nextParticipants = (this.participants || []).filter(
+      (participant) => this.normalizeEmail(participant) !== email
+    );
+
+    try {
+      await this.challenge.addParticipantToChallengePage(
+        this.challengePageId,
+        nextParticipants
+      );
+      this.participants = nextParticipants;
+      this.allowAccess = this.isAuthorPage;
+      this.loadParticipantProfiles();
+      this.router.navigate(['/home']);
+    } catch (error) {
+      console.error('Error leaving challenge page:', error);
+      alert('Could not leave this workspace. Please try again.');
+    }
+  }
   deleteChallengePage() {
     if (
       !confirm(
