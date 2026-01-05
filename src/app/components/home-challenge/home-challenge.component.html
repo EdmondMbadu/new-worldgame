@@ -463,22 +463,64 @@
                 </button>
               </div>
 
-              <div *ngIf="showParticipantsList" class="space-y-2">
+              <div *ngIf="showParticipantsList" class="space-y-3">
+                <div *ngIf="isLoadingParticipantProfiles" class="text-sm text-slate-500 dark:text-slate-400">
+                  Loading participant profiles...
+                </div>
+
                 <ul
-                  *ngIf="participants.length > 0; else noParticipants"
-                  class="space-y-2"
+                  *ngIf="!isLoadingParticipantProfiles && participantProfiles.length > 0; else noParticipants"
+                  class="grid gap-3"
                 >
-                  <li
-                    *ngFor="let participant of participantsToRender"
-                    class="flex items-center gap-3 p-2 rounded-md bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
-                  >
-                    <span
-                      class="grid place-content-center w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[11px] font-semibold text-slate-600 dark:text-slate-300"
-                      >{{ participant.charAt(0) }}</span
+                  <li *ngFor="let participant of participantsProfilesToRender">
+                    <a
+                      *ngIf="participant.exists && participant.uid"
+                      [routerLink]="participant.isCurrentUser ? '/profile' : ['/user-profile', participant.uid]"
+                      class="group flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800 hover:bg-white dark:hover:bg-slate-800 transition"
                     >
-                    <span class="text-slate-800 dark:text-slate-200">{{
-                      participant
-                    }}</span>
+                      <div class="relative">
+                        <img
+                          *ngIf="participant.photoUrl"
+                          [src]="participant.photoUrl"
+                          [attr.alt]="participant.displayName"
+                          class="w-10 h-10 rounded-full object-cover ring-2 ring-white dark:ring-slate-900"
+                        />
+                        <div
+                          *ngIf="!participant.photoUrl"
+                          class="grid place-content-center w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200"
+                        >
+                          {{ participantInitial(participant) }}
+                        </div>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          {{ participant.displayName }}
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {{ participant.email }}
+                        </p>
+                      </div>
+                      <span class="ml-auto text-[11px] font-semibold text-teal-600 dark:text-teal-400">
+                        View profile
+                      </span>
+                    </a>
+
+                    <div
+                      *ngIf="!participant.exists || !participant.uid"
+                      class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 ring-1 ring-slate-200 dark:ring-slate-800"
+                    >
+                      <div class="grid place-content-center w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                        {{ participantInitial(participant) }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                          {{ participant.email }}
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                          {{ participant.exists ? 'Profile unavailable' : 'Not registered' }}
+                        </p>
+                      </div>
+                    </div>
                   </li>
                 </ul>
 
@@ -495,7 +537,7 @@
                 </button>
 
                 <ng-template #noParticipants>
-                  <p class="text-slate-500 dark:text-slate-400 text-sm">
+                  <p *ngIf="!isLoadingParticipantProfiles" class="text-slate-500 dark:text-slate-400 text-sm">
                     No participants have been added yet.
                   </p>
                 </ng-template>

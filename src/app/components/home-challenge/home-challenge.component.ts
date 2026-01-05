@@ -52,6 +52,15 @@ export class HomeChallengeComponent {
   challengeImages: string[] = [];
   ids: string[] = [];
   participants: string[] = [];
+  participantProfiles: {
+    email: string;
+    displayName: string;
+    uid?: string;
+    photoUrl?: string;
+    exists: boolean;
+    isCurrentUser: boolean;
+  }[] = [];
+  isLoadingParticipantProfiles = false;
   googleMeetLink: string = '';
   newParticipant: string = '';
   teamMemberToDelete: string = '';
@@ -275,6 +284,7 @@ export class HomeChallengeComponent {
         if (this.challengePage.participants) {
           this.participants = this.challengePage.participants;
           console.log('Participants:', this.participants);
+          this.loadParticipantProfiles();
         }
         if (this.challengePage.meetLink) {
           this.googleMeetLink = this.challengePage.meetLink;
@@ -516,12 +526,90 @@ export class HomeChallengeComponent {
         );
     }
   }
-  /* ── helper to decide which slice to render (optional) ── */
-  get participantsToRender(): string[] {
-    // always show at least the first 5; show all if toggled
+  get participantsProfilesToRender() {
     return this.showAllParticipants
-      ? this.participants
-      : this.participants.slice(0, 5);
+      ? this.participantProfiles
+      : this.participantProfiles.slice(0, 5);
+  }
+
+  async loadParticipantProfiles(): Promise<void> {
+    const rawEmails = (this.participants || [])
+      .map((email) => (email || '').toString().trim())
+      .filter((email) => email);
+
+    if (!rawEmails.length) {
+      this.participantProfiles = [];
+      this.isLoadingParticipantProfiles = false;
+      return;
+    }
+
+    this.isLoadingParticipantProfiles = true;
+    try {
+      const normalizedEmails = rawEmails.map((email) =>
+        this.normalizeEmail(email)
+      );
+      const uniqueEmails = Array.from(new Set(normalizedEmails));
+
+      const results = await Promise.all(
+        uniqueEmails.map(async (email) => {
+          try {
+            const users = await firstValueFrom(
+              this.auth.getUserFromEmail(email)
+            );
+            const user = users?.[0];
+            if (user) {
+              const name = [user.firstName, user.lastName]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+              return {
+                email,
+                displayName: name || email,
+                uid: user.uid,
+                photoUrl:
+                  user.profilePicture?.downloadURL || user.profilePicPath || '',
+                exists: true,
+                isCurrentUser: user.uid === this.auth.currentUser?.uid,
+              };
+            }
+          } catch {}
+
+          return {
+            email,
+            displayName: email,
+            exists: false,
+            isCurrentUser: false,
+          };
+        })
+      );
+
+      const profileMap = new Map(
+        results.map((profile) => [profile.email, profile])
+      );
+      this.participantProfiles = rawEmails.map((email) => {
+        const key = this.normalizeEmail(email);
+        const profile = profileMap.get(key);
+        if (profile) {
+          return {
+            ...profile,
+            email,
+          };
+        }
+        return {
+          email,
+          displayName: email,
+          exists: false,
+          isCurrentUser: false,
+        };
+      });
+    } finally {
+      this.isLoadingParticipantProfiles = false;
+    }
+  }
+
+  participantInitial(profile: { displayName: string; email: string }): string {
+    const label = profile.displayName || profile.email || '';
+    return label.trim().charAt(0).toUpperCase() || '?';
   }
   toggle(
     property:
@@ -564,6 +652,7 @@ export class HomeChallengeComponent {
         this.participants
       ); // then send email to participant
       await this.sendEmailToParticipant(this.newParticipant);
+      await this.loadParticipantProfiles();
 
       console.log('Participant added successfully:', this.newParticipant);
       alert('Participant added successfully!');
@@ -591,6 +680,7 @@ export class HomeChallengeComponent {
         this.challengePageId,
         this.participants
       );
+      this.loadParticipantProfiles();
 
       console.log('Participant removed successfully:', email);
       alert('Participant removed successfully!');
@@ -1300,6 +1390,7 @@ export class HomeChallengeComponent {
 
       // 5) Update local UI instantly
       this.participants = unionForPage;
+      this.loadParticipantProfiles();
 
       if (!this.categories.includes(category)) {
         this.categories.push(category);
