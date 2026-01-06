@@ -1182,5 +1182,18 @@
     "error": {
       "message": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "discussion": {
+    "mentionTips": {
+      "title": "Conseils de mention :",
+      "everyoneTip": "Tapez @everyone pour notifier tous les participants de cette discussion",
+      "individualTip": "Tapez @ suivi d'un nom pour mentionner une personne spécifique — elle recevra une notification par e-mail"
+    },
+    "mentionDropdown": {
+      "everyone": "@everyone",
+      "everyoneDesc": "Notifier tous les participants",
+      "noMatches": "Aucun participant correspondant"
+    },
+    "placeholder": "Message #discussion-équipe — utilisez @ pour mentionner"
   }
 }

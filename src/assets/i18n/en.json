@@ -1433,5 +1433,18 @@
     "error": {
       "message": "An error occurred. Please try again."
     }
+  },
+  "discussion": {
+    "mentionTips": {
+      "title": "Mention Tips:",
+      "everyoneTip": "Type @everyone to notify all participants in this discussion",
+      "individualTip": "Type @ followed by a name to mention a specific person — they'll receive an email notification"
+    },
+    "mentionDropdown": {
+      "everyone": "@everyone",
+      "everyoneDesc": "Notify all participants",
+      "noMatches": "No matching participants"
+    },
+    "placeholder": "Message #team-discussion — use @ to mention"
   }
 }

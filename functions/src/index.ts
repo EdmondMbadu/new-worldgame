@@ -1591,6 +1591,120 @@ export const commentNotificationEmail = functions.https.onCall(
   }
 );
 
+/**
+ * Send @mention notification emails for discussion messages
+ * Handles both @everyone (sends to all participants) and @individual mentions
+ */
+export const sendMentionNotification = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    if (!context.auth?.token?.email) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to send mention notifications.'
+      );
+    }
+
+    const mentionType = (data?.mentionType || '').toString().trim(); // 'everyone' or 'individual'
+    const recipients = Array.isArray(data?.recipients) ? data.recipients : [];
+    const senderName = (data?.senderName || '').toString().trim();
+    const messageContent = (data?.messageContent || '').toString().trim();
+    const challengeTitle = (data?.challengeTitle || 'a discussion').toString();
+    const discussionUrl = (data?.discussionUrl || '').toString().trim();
+
+    if (!mentionType || (mentionType !== 'everyone' && mentionType !== 'individual')) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'mentionType must be "everyone" or "individual".'
+      );
+    }
+
+    if (!recipients.length) {
+      return { success: false, reason: 'no_recipients' };
+    }
+
+    if (!senderName) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'senderName is required.'
+      );
+    }
+
+    // Filter and validate emails
+    const validEmails: string[] = [];
+    for (const r of recipients) {
+      const email = (typeof r === 'string' ? r : r?.email || '').toString().trim().toLowerCase();
+      if (emailRegex.test(email)) {
+        validEmails.push(email);
+      }
+    }
+
+    if (!validEmails.length) {
+      return { success: false, reason: 'no_valid_emails' };
+    }
+
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const safeSender = escapeHtml(senderName);
+    const safeTitle = escapeHtml(challengeTitle);
+    const safeMessage = messageContent
+      ? escapeHtml(messageContent).replace(/\r?\n/g, '<br />')
+      : '<em>No message content.</em>';
+
+    const mentionLabel = mentionType === 'everyone' 
+      ? '@everyone in the discussion' 
+      : 'you specifically';
+
+    const subject = mentionType === 'everyone'
+      ? `${senderName} mentioned @everyone in ${challengeTitle}`
+      : `${senderName} mentioned you in ${challengeTitle}`;
+
+    const html = `
+      <div style="font-family: 'Inter', Arial, sans-serif; color:#0f172a; line-height:1.5;">
+        <h2 style="font-size:20px; margin:0 0 16px;">You were mentioned in a discussion</h2>
+        <p style="margin:0 0 16px;">
+          <strong>${safeSender}</strong> mentioned ${mentionLabel} in <strong>${safeTitle}</strong>.
+        </p>
+        <div style="margin:0 0 20px; padding:16px; border-radius:16px; background:#f1f5f9;">
+          <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:#0ea5e9; margin-bottom:8px;">Message</div>
+          <div style="color:#334155;">${safeMessage}</div>
+        </div>
+        ${discussionUrl ? `
+        <a href="${discussionUrl}" style="display:inline-block; padding:12px 24px; background:#047857; color:#ffffff; border-radius:9999px; text-decoration:none; font-weight:600;">View Discussion</a>
+        ` : ''}
+        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">You are receiving this notification because you are part of the ${safeTitle} discussion on NewWorld Game.</p>
+      </div>
+    `;
+
+    const text = `${senderName} mentioned ${mentionLabel} in ${challengeTitle}. Message: ${messageContent || 'No message content.'}\n${discussionUrl ? `View discussion: ${discussionUrl}` : ''}`;
+
+    const mail: sgMail.MailDataRequired = {
+      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      subject,
+      html,
+      text,
+      trackingSettings: {
+        clickTracking: { enable: true, enableText: true },
+        openTracking: { enable: true },
+      },
+      personalizations: validEmails.map((email) => ({ to: [{ email }] })),
+    };
+
+    try {
+      await sgMail.send(mail);
+      return { success: true, recipients: validEmails.length };
+    } catch (err: any) {
+      console.error('SendGrid mention email error', err?.response?.body || err?.message || err);
+      throw new functions.https.HttpsError('internal', 'Failed to send mention notification.');
+    }
+  }
+);
+
 export const workshopRegistrationEmail = functions.https.onCall(
   async (data: any, context: any) => {
     const msg = {

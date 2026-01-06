@@ -75,7 +75,24 @@
         >
           Advanced Search
         </a>
-        
+      </div>
+
+      <!-- Mention Rules Banner -->
+      <div class="mx-4 my-2 p-3 rounded-lg 
+                  dark:bg-indigo-900/40 bg-indigo-50 
+                  border dark:border-indigo-700 border-indigo-200">
+        <div class="flex items-start space-x-2">
+          <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <div class="text-sm dark:text-indigo-200 text-indigo-800">
+            <p class="font-semibold mb-1">Mention Tips:</p>
+            <ul class="list-disc list-inside space-y-0.5 text-xs dark:text-indigo-300 text-indigo-700">
+              <li>Type <span class="font-mono bg-indigo-100 dark:bg-indigo-800 px-1 rounded">&#64;everyone</span> to notify all participants in this discussion</li>
+              <li>Type <span class="font-mono bg-indigo-100 dark:bg-indigo-800 px-1 rounded">&#64;</span> followed by a name to mention a specific person — they'll receive an email notification</li>
+            </ul>
+          </div>
+        </div>
       </div>
   
       <!-- Main chat area. Use flex-1 to occupy remaining space. -->
@@ -162,7 +179,7 @@
               <ng-container *ngIf="editingId !== comment.date; else editor">
                 <p
                   class="mt-1 rounded-md px-3 py-2 break-words dark:text-gray-100 text-slate-800"
-                  [innerHTML]="linkify(comment.content!)"
+                  [innerHTML]="highlightMentions(comment.content!)"
                 ></p>
               </ng-container>
               <ng-template #editor>
@@ -255,16 +272,72 @@
   </ng-container>
 </div>
 
-        <textarea
-          [(ngModel)]="prompt"
-          id="user-input"
-          placeholder="Message #team-discussion"
-          class="flex-1 resize-none 
-                 dark:bg-slate-700 bg-slate-100
-                 dark:text-gray-200 text-slate-800
-                 text-sm rounded-md px-3 py-2 outline-none
-                 focus:ring-2 focus:ring-[#5865F2]"
-        ></textarea>
+        <!-- Textarea with mention dropdown -->
+        <div class="flex-1 relative">
+          <textarea
+            [(ngModel)]="prompt"
+            (input)="onPromptInput($event)"
+            (keydown.escape)="closeMentionDropdown()"
+            id="user-input"
+            placeholder="Message #team-discussion — use @ to mention"
+            class="w-full resize-none 
+                   dark:bg-slate-700 bg-slate-100
+                   dark:text-gray-200 text-slate-800
+                   text-sm rounded-md px-3 py-2 outline-none
+                   focus:ring-2 focus:ring-[#5865F2]"
+          ></textarea>
+
+          <!-- Mention dropdown -->
+          <div
+            *ngIf="showMentionDropdown && (filteredParticipants.length > 0 || shouldShowEveryoneOption())"
+            class="absolute bottom-full left-0 mb-1 w-64 max-h-48 overflow-y-auto
+                   dark:bg-slate-800 bg-white
+                   border dark:border-slate-600 border-slate-300
+                   rounded-lg shadow-lg z-50"
+          >
+            <!-- everyone option -->
+            <button
+              *ngIf="shouldShowEveryoneOption()"
+              (click)="selectMention('everyone')"
+              class="w-full px-3 py-2 text-left text-sm
+                     hover:bg-indigo-100 dark:hover:bg-indigo-900/50
+                     flex items-center space-x-2
+                     border-b dark:border-slate-700 border-slate-200"
+            >
+              <span class="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs font-bold">&#64;</span>
+              <div>
+                <span class="font-semibold text-amber-600 dark:text-amber-400">&#64;everyone</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 block">Notify all participants</span>
+              </div>
+            </button>
+
+            <!-- Individual participants -->
+            <button
+              *ngFor="let p of filteredParticipants"
+              (click)="selectMention(p)"
+              class="w-full px-3 py-2 text-left text-sm
+                     hover:bg-slate-100 dark:hover:bg-slate-700
+                     flex items-center space-x-2"
+            >
+              <span class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                {{ getInitial(p.displayName) }}
+              </span>
+              <div class="overflow-hidden">
+                <span class="font-medium dark:text-gray-200 text-slate-800 block truncate">{{ p.displayName }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 block truncate">{{ p.email }}</span>
+              </div>
+            </button>
+
+            <!-- No matches message -->
+            <div
+              *ngIf="filteredParticipants.length === 0 && !shouldShowEveryoneOption()"
+              class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic"
+            >
+              No matching participants
+            </div>
+          </div>
+        </div>
+
         <button
           (click)="addToDiscussion()"
           id="send-button"

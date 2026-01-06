@@ -13,12 +13,20 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Attachment, Comment, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+
+interface ParticipantInfo {
+  email: string;
+  displayName: string;
+  uid?: string;
+}
 
 interface PendingPreview {
   file: File;
@@ -63,6 +71,13 @@ export class FullDiscussionComponent
     and insights on collaboration.
   `;
 
+  // @mention functionality
+  participants: ParticipantInfo[] = [];
+  showMentionDropdown = false;
+  mentionSearchText = '';
+  filteredParticipants: ParticipantInfo[] = [];
+  mentionStartIndex = -1;
+
   private hasScrolled = false;
 
   constructor(
@@ -73,7 +88,8 @@ export class FullDiscussionComponent
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
     private router: Router,
-    private storage: AngularFireStorage
+    private storage: AngularFireStorage,
+    private fns: AngularFireFunctions
   ) {
     this.user = this.auth.currentUser;
     if (this.user?.profilePicture?.downloadURL) {
@@ -117,8 +133,13 @@ export class FullDiscussionComponent
             // <- title was provided
             this.currentSolution.title = qpTitle; // shown in the template
           }
+
+          // Load participants for @mention functionality
+          if (doc?.participants) {
+            this.loadParticipants(doc.participants);
+          }
         });
-      return; // skip the old “solution-id via route” code
+      return; // skip the old "solution-id via route" code
     }
 
     // scrool to bottom
@@ -274,11 +295,17 @@ Please choose a file under 5 MB.`);
 
     this.comments.push(msg);
 
+    // Process @mentions and send notifications (before clearing prompt)
+    if (content) {
+      this.processMentions(content);
+    }
+
     // Clear the prompt & scroll
     this.previews.forEach((p) => URL.revokeObjectURL(p.url));
     this.previews = [];
     this.pendingFiles = [];
     this.prompt = '';
+    this.showMentionDropdown = false;
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => this.scrollToBottom(), 0);
     });
@@ -357,5 +384,220 @@ Please choose a file under 5 MB.`);
     const path =
       this.docPath || `solutions/${this.currentSolution!.solutionId}`;
     await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
+  }
+
+  // ============ @Mention functionality ============
+
+  /** Load participant emails and fetch their display names */
+  private async loadParticipants(participantEmails: string[]) {
+    if (!participantEmails?.length) return;
+
+    const participants: ParticipantInfo[] = [];
+    
+    for (const email of participantEmails) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!normalizedEmail) continue;
+
+      // Try to find user in database
+      try {
+        const userQuery = await firstValueFrom(
+          this.afs
+            .collection('users', (ref) =>
+              ref.where('email', '==', normalizedEmail).limit(1)
+            )
+            .valueChanges()
+        );
+        
+        if (userQuery && userQuery.length > 0) {
+          const user: any = userQuery[0];
+          participants.push({
+            email: normalizedEmail,
+            displayName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || normalizedEmail,
+            uid: user.uid,
+          });
+        } else {
+          // User not found in DB, use email as display name
+          participants.push({
+            email: normalizedEmail,
+            displayName: normalizedEmail,
+          });
+        }
+      } catch {
+        participants.push({
+          email: normalizedEmail,
+          displayName: normalizedEmail,
+        });
+      }
+    }
+
+    this.participants = participants;
+  }
+
+  /** Handle input changes to detect @ mentions */
+  onPromptInput(event: Event) {
+    const textarea = event.target as HTMLTextAreaElement;
+    const cursorPos = textarea.selectionStart;
+    const textBeforeCursor = this.prompt.substring(0, cursorPos);
+    
+    // Find the last @ symbol before cursor
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+    
+    if (lastAtIndex !== -1) {
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      // Only show dropdown if there's no space after @ (still typing mention)
+      if (!textAfterAt.includes(' ')) {
+        this.mentionStartIndex = lastAtIndex;
+        this.mentionSearchText = textAfterAt.toLowerCase();
+        this.filterParticipants();
+        this.showMentionDropdown = true;
+        return;
+      }
+    }
+    
+    this.showMentionDropdown = false;
+    this.mentionStartIndex = -1;
+  }
+
+  /** Filter participants based on search text */
+  private filterParticipants() {
+    if (!this.mentionSearchText) {
+      // Show @everyone option plus all participants
+      this.filteredParticipants = [...this.participants];
+    } else {
+      this.filteredParticipants = this.participants.filter(
+        (p) =>
+          p.displayName.toLowerCase().includes(this.mentionSearchText) ||
+          p.email.toLowerCase().includes(this.mentionSearchText)
+      );
+    }
+  }
+
+  /** Insert selected mention into the prompt */
+  selectMention(participant: ParticipantInfo | 'everyone') {
+    if (this.mentionStartIndex === -1) return;
+
+    const beforeMention = this.prompt.substring(0, this.mentionStartIndex);
+    const afterMention = this.prompt.substring(
+      this.mentionStartIndex + 1 + this.mentionSearchText.length
+    );
+
+    if (participant === 'everyone') {
+      this.prompt = `${beforeMention}@everyone ${afterMention}`;
+    } else {
+      this.prompt = `${beforeMention}@${participant.displayName} ${afterMention}`;
+    }
+
+    this.showMentionDropdown = false;
+    this.mentionStartIndex = -1;
+    this.mentionSearchText = '';
+  }
+
+  /** Close mention dropdown */
+  closeMentionDropdown() {
+    this.showMentionDropdown = false;
+    this.mentionStartIndex = -1;
+    this.mentionSearchText = '';
+  }
+
+  /** Parse message for @mentions and send notifications */
+  private async processMentions(content: string) {
+    if (!content) return;
+
+    const senderName = `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`.trim();
+    const challengeTitle = this.currentSolution?.title || 'Discussion';
+    const discussionUrl = `${window.location.origin}/challenge-discussion/${this.id}`;
+
+    // Check for @everyone
+    if (content.toLowerCase().includes('@everyone')) {
+      const recipientEmails = this.participants
+        .filter((p) => p.email !== this.auth.currentUser.email?.toLowerCase())
+        .map((p) => p.email);
+
+      if (recipientEmails.length > 0) {
+        try {
+          const callable = this.fns.httpsCallable('sendMentionNotification');
+          await firstValueFrom(
+            callable({
+              mentionType: 'everyone',
+              recipients: recipientEmails,
+              senderName,
+              messageContent: content,
+              challengeTitle,
+              discussionUrl,
+            })
+          );
+        } catch (err) {
+          console.error('Failed to send @everyone notification:', err);
+        }
+      }
+      return; // Don't process individual mentions if @everyone was used
+    }
+
+    // Check for individual @mentions
+    const mentionPattern = /@([^\s@]+(?:\s+[^\s@]+)?)/g;
+    const matches = content.matchAll(mentionPattern);
+    const mentionedEmails: string[] = [];
+
+    for (const match of matches) {
+      const mentionText = match[1].toLowerCase();
+      // Find participant by display name or email
+      const found = this.participants.find(
+        (p) =>
+          p.displayName.toLowerCase() === mentionText ||
+          p.email.toLowerCase() === mentionText ||
+          p.displayName.toLowerCase().startsWith(mentionText)
+      );
+      if (found && found.email !== this.auth.currentUser.email?.toLowerCase()) {
+        if (!mentionedEmails.includes(found.email)) {
+          mentionedEmails.push(found.email);
+        }
+      }
+    }
+
+    if (mentionedEmails.length > 0) {
+      try {
+        const callable = this.fns.httpsCallable('sendMentionNotification');
+        await firstValueFrom(
+          callable({
+            mentionType: 'individual',
+            recipients: mentionedEmails,
+            senderName,
+            messageContent: content,
+            challengeTitle,
+            discussionUrl,
+          })
+        );
+      } catch (err) {
+        console.error('Failed to send mention notifications:', err);
+      }
+    }
+  }
+
+  /** Check if text shows @everyone mention hint */
+  shouldShowEveryoneOption(): boolean {
+    return (
+      !this.mentionSearchText ||
+      'everyone'.startsWith(this.mentionSearchText.toLowerCase())
+    );
+  }
+
+  /** Highlight @mentions in displayed message content */
+  highlightMentions(text: string): string {
+    if (!text) return '';
+
+    // First linkify URLs
+    let result = this.linkify(text);
+
+    // Then highlight @mentions
+    result = result.replace(
+      /@everyone\b/gi,
+      '<span class="mention-everyone font-semibold text-amber-500">@everyone</span>'
+    );
+    result = result.replace(
+      /@([^\s<]+)/g,
+      '<span class="mention font-semibold text-blue-400">@$1</span>'
+    );
+
+    return result;
   }
 }
