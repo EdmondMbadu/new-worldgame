@@ -289,25 +289,34 @@
 
           <!-- Mention dropdown -->
           <div
-            *ngIf="showMentionDropdown && (filteredParticipants.length > 0 || shouldShowEveryoneOption())"
-            class="absolute bottom-full left-0 mb-1 w-64 max-h-48 overflow-y-auto
+            *ngIf="showMentionDropdown"
+            class="absolute bottom-full left-0 mb-1 w-72 max-h-56 overflow-y-auto
                    dark:bg-slate-800 bg-white
                    border dark:border-slate-600 border-slate-300
-                   rounded-lg shadow-lg z-50"
+                   rounded-lg shadow-xl z-50"
           >
-            <!-- everyone option -->
+            <!-- Header -->
+            <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wide 
+                        dark:text-gray-400 text-gray-500 
+                        dark:bg-slate-700/50 bg-gray-50
+                        border-b dark:border-slate-700 border-slate-200">
+              Mention someone
+            </div>
+
+            <!-- everyone option - always show when search is empty or matches -->
             <button
               *ngIf="shouldShowEveryoneOption()"
               (click)="selectMention('everyone')"
               class="w-full px-3 py-2 text-left text-sm
-                     hover:bg-indigo-100 dark:hover:bg-indigo-900/50
-                     flex items-center space-x-2
-                     border-b dark:border-slate-700 border-slate-200"
+                     hover:bg-amber-50 dark:hover:bg-amber-900/30
+                     flex items-center space-x-3
+                     border-b dark:border-slate-700 border-slate-200
+                     transition-colors"
             >
-              <span class="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs font-bold">&#64;</span>
+              <span class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">&#64;</span>
               <div>
                 <span class="font-semibold text-amber-600 dark:text-amber-400">&#64;everyone</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400 block">Notify all participants</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 block">Notify all participants via email</span>
               </div>
             </button>
 
@@ -316,24 +325,33 @@
               *ngFor="let p of filteredParticipants"
               (click)="selectMention(p)"
               class="w-full px-3 py-2 text-left text-sm
-                     hover:bg-slate-100 dark:hover:bg-slate-700
-                     flex items-center space-x-2"
+                     hover:bg-blue-50 dark:hover:bg-blue-900/30
+                     flex items-center space-x-3
+                     transition-colors"
             >
-              <span class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold">
+              <span class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                 {{ getInitial(p.displayName) }}
               </span>
-              <div class="overflow-hidden">
+              <div class="overflow-hidden min-w-0">
                 <span class="font-medium dark:text-gray-200 text-slate-800 block truncate">{{ p.displayName }}</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400 block truncate">{{ p.email }}</span>
+                <span *ngIf="p.email" class="text-xs text-gray-500 dark:text-gray-400 block truncate">{{ p.email }}</span>
               </div>
             </button>
 
             <!-- No matches message -->
             <div
               *ngIf="filteredParticipants.length === 0 && !shouldShowEveryoneOption()"
-              class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic"
+              class="px-3 py-3 text-sm text-gray-500 dark:text-gray-400 italic text-center"
             >
-              No matching participants
+              No matching participants found
+            </div>
+
+            <!-- Empty state - show when no participants loaded yet -->
+            <div
+              *ngIf="filteredParticipants.length === 0 && participants.length === 0 && shouldShowEveryoneOption()"
+              class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400 border-t dark:border-slate-700 border-slate-200"
+            >
+              Participants will appear here as they join the discussion
             </div>
           </div>
         </div>

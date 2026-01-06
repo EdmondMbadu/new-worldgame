@@ -135,9 +135,9 @@ export class FullDiscussionComponent
           }
 
           // Load participants for @mention functionality
-          if (doc?.participants) {
-            this.loadParticipants(doc.participants);
-          }
+          this.loadParticipants(doc?.participants || []).then(() => {
+            this.buildParticipantsFromComments();
+          });
         });
       return; // skip the old "solution-id via route" code
     }
@@ -165,6 +165,20 @@ export class FullDiscussionComponent
         setTimeout(() => this.scrollToBottom(), 0);
       });
       this.hasScrolled = false;
+
+      // Load participants for @mention from solution participants
+      const participantEmails: string[] = [];
+      if (data?.participants) {
+        // participants can be an object or array
+        if (Array.isArray(data.participants)) {
+          participantEmails.push(...data.participants.map((p: any) => p.name || p.email || p).filter(Boolean));
+        } else if (typeof data.participants === 'object') {
+          participantEmails.push(...Object.values(data.participants).filter(Boolean) as string[]);
+        }
+      }
+      this.loadParticipants(participantEmails).then(() => {
+        this.buildParticipantsFromComments();
+      });
     });
   }
 
@@ -390,47 +404,69 @@ Please choose a file under 5 MB.`);
 
   /** Load participant emails and fetch their display names */
   private async loadParticipants(participantEmails: string[]) {
-    if (!participantEmails?.length) return;
-
     const participants: ParticipantInfo[] = [];
+    const seenEmails = new Set<string>();
     
-    for (const email of participantEmails) {
-      const normalizedEmail = email.trim().toLowerCase();
-      if (!normalizedEmail) continue;
+    // First, add participants from the page's participant list
+    if (participantEmails?.length) {
+      for (const email of participantEmails) {
+        const normalizedEmail = email.trim().toLowerCase();
+        if (!normalizedEmail || seenEmails.has(normalizedEmail)) continue;
+        seenEmails.add(normalizedEmail);
 
-      // Try to find user in database
-      try {
-        const userQuery = await firstValueFrom(
-          this.afs
-            .collection('users', (ref) =>
-              ref.where('email', '==', normalizedEmail).limit(1)
-            )
-            .valueChanges()
-        );
-        
-        if (userQuery && userQuery.length > 0) {
-          const user: any = userQuery[0];
-          participants.push({
-            email: normalizedEmail,
-            displayName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || normalizedEmail,
-            uid: user.uid,
-          });
-        } else {
-          // User not found in DB, use email as display name
+        // Try to find user in database
+        try {
+          const userQuery = await firstValueFrom(
+            this.afs
+              .collection('users', (ref) =>
+                ref.where('email', '==', normalizedEmail).limit(1)
+              )
+              .valueChanges()
+          );
+          
+          if (userQuery && userQuery.length > 0) {
+            const user: any = userQuery[0];
+            participants.push({
+              email: normalizedEmail,
+              displayName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || normalizedEmail,
+              uid: user.uid,
+            });
+          } else {
+            participants.push({
+              email: normalizedEmail,
+              displayName: normalizedEmail,
+            });
+          }
+        } catch {
           participants.push({
             email: normalizedEmail,
             displayName: normalizedEmail,
           });
         }
-      } catch {
-        participants.push({
-          email: normalizedEmail,
-          displayName: normalizedEmail,
-        });
       }
     }
 
     this.participants = participants;
+    console.log('Loaded participants for mentions:', this.participants);
+  }
+
+  /** Build participants from discussion comments (people who have posted) */
+  private buildParticipantsFromComments() {
+    if (!this.comments?.length) return;
+
+    const seenIds = new Set(this.participants.map(p => p.uid || p.email));
+    
+    for (const comment of this.comments) {
+      if (!comment.authorId || seenIds.has(comment.authorId)) continue;
+      seenIds.add(comment.authorId);
+
+      // Add participant from comment author
+      this.participants.push({
+        email: '', // We don't have email from comments, will lookup
+        displayName: comment.authorName || 'Unknown',
+        uid: comment.authorId,
+      });
+    }
   }
 
   /** Handle input changes to detect @ mentions */
@@ -450,6 +486,11 @@ Please choose a file under 5 MB.`);
         this.mentionSearchText = textAfterAt.toLowerCase();
         this.filterParticipants();
         this.showMentionDropdown = true;
+        console.log('Showing mention dropdown:', {
+          mentionSearchText: this.mentionSearchText,
+          filteredParticipants: this.filteredParticipants.length,
+          showEveryoneOption: this.shouldShowEveryoneOption()
+        });
         return;
       }
     }
