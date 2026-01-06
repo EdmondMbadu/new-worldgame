@@ -738,114 +738,166 @@
                 </div>
 
                 <!-- Tools groups -->
-                <div class="space-y-5 pt-1">
-                  <div>
+                <div class="space-y-6 pt-2">
+                  <!-- Challenges Group -->
+                  <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 p-4 ring-1 ring-slate-200 dark:ring-slate-700">
                     <p
-                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2"
                     >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
                       Challenges
                     </p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <button
                         (click)="toggle('showAddChallenge')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
                         Add New Challenge
                       </button>
                       <button
                         (click)="openExistingChallenges()"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
                         Add Existing Challenge
                       </button>
                       <button
                         (click)="toggle('showMergeSolution')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-all shadow-sm hover:shadow-md sm:col-span-2"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
                         Merge Solution by ID
                       </button>
                     </div>
                   </div>
 
-                  <div>
+                  <!-- Participants & Admins Group -->
+                  <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 p-4 ring-1 ring-slate-200 dark:ring-slate-700">
                     <p
-                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2"
                     >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                      </svg>
                       Participants & Admins
                     </p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <button
                         (click)="toggle('showAddTeamMember')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
                         Add Participant
                       </button>
                       <button
                         (click)="toggle('showRemoveTeamMember')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
                         Remove Participant
                       </button>
                       <button
                         (click)="toggle('showAddAdmin')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-fuchsia-600 rounded-lg hover:bg-fuchsia-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
                         Add Admin
                       </button>
                       <button
                         (click)="toggle('showRemoveAdmin')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
                         Remove Admin
                       </button>
                     </div>
                   </div>
 
-                  <div>
+                  <!-- Resources & Links Group -->
+                  <div class="rounded-xl bg-slate-50 dark:bg-slate-800/40 p-4 ring-1 ring-slate-200 dark:ring-slate-700">
                     <p
-                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                      class="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2"
                     >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                      </svg>
                       Resources & Links
                     </p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <button
                         (click)="toggle('showEditProgram')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                         {{ programPDF ? "Edit PDF" : "Add PDF" }}
                       </button>
                       <button
                         (click)="toggle('showEditHandouts')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
                         Edit Handouts
                       </button>
                       <button
                         (click)="toggle('showEditLinks')"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
                         Edit Links
                       </button>
                       <button
                         (click)="copyUrlToClipboard()"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
                         Copy URL
                       </button>
                     </div>
                   </div>
 
-                  <div>
+                  <!-- Danger Zone Group -->
+                  <div class="rounded-xl bg-red-50 dark:bg-red-900/20 p-4 ring-1 ring-red-200 dark:ring-red-800">
                     <p
-                      class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2"
+                      class="text-xs font-semibold uppercase tracking-wide text-red-700 dark:text-red-400 mb-3 flex items-center gap-2"
                     >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                      </svg>
                       Danger Zone
                     </p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 gap-2.5">
                       <button
                         (click)="deleteChallengePage()"
-                        class="flex items-center justify-center gap-2 p-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition"
+                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all shadow-sm hover:shadow-md"
                       >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
                         Delete Page
                       </button>
                     </div>
@@ -965,6 +1017,7 @@
       </section>
     </div>
   </div>
+  <app-toast></app-toast>
 </ng-container>
 
 <!-- Private Page Template -->
@@ -1433,36 +1486,148 @@
 <!-- ADD TEAM MEMBER MODAL -->
 <div
   *ngIf="showAddTeamMember"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
 >
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      <div class="p-4 md:p-5 min-w-xl">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Add a new Participant
-        </h2>
-        <div class="grid gap-4 mb-4 grid-cols-2">
-          <div class="col-span-2">
-            <textarea
-              [(ngModel)]="newParticipant"
-              rows="1"
-              placeholder="email@gmail.com"
-              class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            ></textarea>
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+    >
+      <!-- Gradient strip -->
+      <div
+        class="h-2 w-full bg-gradient-to-r from-green-500 via-teal-500 to-emerald-500"
+      ></div>
+
+      <div class="p-6 space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+            Add Participant
+          </h2>
+        </div>
+
+        <!-- Selected User Display -->
+        <div *ngIf="selectedUserToAdd" class="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/30 ring-1 ring-green-200 dark:ring-green-800">
+          <img
+            *ngIf="selectedUserToAdd.photoUrl"
+            [src]="selectedUserToAdd.photoUrl"
+            class="w-10 h-10 rounded-full object-cover ring-2 ring-green-400"
+            alt=""
+          />
+          <div *ngIf="!selectedUserToAdd.photoUrl" class="w-10 h-10 rounded-full bg-green-200 dark:bg-green-700 flex items-center justify-center text-green-700 dark:text-green-200 font-bold">
+            {{ selectedUserToAdd.displayName.charAt(0).toUpperCase() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900 dark:text-white truncate">{{ selectedUserToAdd.displayName }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ selectedUserToAdd.email }}</p>
+          </div>
+          <button 
+            (click)="clearSelectedUser()"
+            class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-800 text-gray-500 hover:text-red-500 transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div *ngIf="!selectedUserToAdd" class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Search by name or email
+          </label>
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="userSearchQuery"
+              (input)="onUserSearchChange()"
+              placeholder="Start typing a name or email..."
+              class="block w-full pl-10 pr-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+            />
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg *ngIf="!isSearchingUsers" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <svg *ngIf="isSearchingUsers" class="w-5 h-5 text-teal-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Search Results Dropdown -->
+          <div
+            *ngIf="userSearchResults.length > 0"
+            class="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 max-h-60 overflow-y-auto"
+          >
+            <button
+              *ngFor="let user of userSearchResults"
+              (click)="selectUserToAdd(user)"
+              class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition text-left border-b border-gray-100 dark:border-slate-700 last:border-0"
+            >
+              <img
+                *ngIf="user.photoUrl"
+                [src]="user.photoUrl"
+                class="w-9 h-9 rounded-full object-cover"
+                alt=""
+              />
+              <div *ngIf="!user.photoUrl" class="w-9 h-9 rounded-full bg-teal-100 dark:bg-teal-800 flex items-center justify-center text-teal-700 dark:text-teal-200 font-semibold text-sm">
+                {{ user.displayName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-900 dark:text-white truncate">{{ user.displayName }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+              </div>
+            </button>
+          </div>
+
+          <!-- No Results Message -->
+          <div
+            *ngIf="userSearchQuery.length >= 2 && userSearchResults.length === 0 && !isSearchingUsers"
+            class="absolute z-10 w-full mt-2 p-4 bg-white dark:bg-slate-800 rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 text-center"
+          >
+            <p class="text-sm text-gray-500 dark:text-gray-400">No users found matching "{{ userSearchQuery }}"</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">You can still invite by email below</p>
           </div>
         </div>
-        <div>
+
+        <!-- Manual Email Input (fallback) -->
+        <div *ngIf="!selectedUserToAdd" class="pt-2 border-t border-gray-200 dark:border-slate-700">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Or enter email directly
+          </label>
+          <input
+            type="email"
+            [(ngModel)]="newParticipant"
+            placeholder="participant@example.com"
+            class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+          />
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 pt-3">
           <button
             (click)="toggle('showAddTeamMember')"
-            class="mr-4 text-white inline-flex items-center bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+            class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition"
           >
             Cancel
           </button>
           <button
             (click)="addParticipant()"
-            class="text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
+            [disabled]="isLoading"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-teal-600 rounded-lg hover:from-green-700 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Add Participant
+            <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Invite Participant
           </button>
         </div>
       </div>
@@ -1700,49 +1865,123 @@
 <!-- REMOVE TEAM MEMBER MODAL -->
 <div
   *ngIf="showRemoveTeamMember"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
 >
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-      <div class="p-4 md:p-5 min-w-xl">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Remove Participant
-        </h2>
-        <div class="grid gap-4 mb-4 grid-cols-2">
-          <div class="col-span-2">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Select participant
-            </label>
-            <select
-              [(ngModel)]="teamMemberToDelete"
-              class="block w-full p-2.5 rounded-lg border text-sm bg-gray-50 border-gray-300 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-            >
-              <option value="">Choose a participant</option>
-              <ng-container *ngIf="participantProfiles.length; else fallbackParticipants">
-                <option *ngFor="let participant of participantProfiles" [value]="participant.email">
-                  {{ participant.displayName }} — {{ participant.email }}
-                </option>
-              </ng-container>
-              <ng-template #fallbackParticipants>
-                <option *ngFor="let participant of participants" [value]="participant">
-                  {{ participant }}
-                </option>
-              </ng-template>
-            </select>
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+    >
+      <!-- Gradient strip -->
+      <div
+        class="h-2 w-full bg-gradient-to-r from-orange-500 via-red-500 to-pink-500"
+      ></div>
+
+      <div class="p-6 space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/40">
+            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+            Remove Participant
+          </h2>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Search participants
+          </label>
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="removeParticipantSearchQuery"
+              placeholder="Filter by name or email..."
+              class="block w-full pl-10 pr-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+            />
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
           </div>
         </div>
-        <div>
+
+        <!-- Participants List -->
+        <div class="max-h-64 overflow-y-auto rounded-lg ring-1 ring-gray-200 dark:ring-slate-700">
+          <div
+            *ngIf="filteredParticipantsForRemoval.length === 0"
+            class="p-4 text-center text-gray-500 dark:text-gray-400"
+          >
+            <p *ngIf="removeParticipantSearchQuery">No participants match "{{ removeParticipantSearchQuery }}"</p>
+            <p *ngIf="!removeParticipantSearchQuery">No participants to display</p>
+          </div>
+
+          <button
+            *ngFor="let participant of filteredParticipantsForRemoval"
+            (click)="teamMemberToDelete = participant.email"
+            class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/70 transition text-left border-b border-gray-100 dark:border-slate-700 last:border-0"
+            [ngClass]="{
+              'bg-orange-50 dark:bg-orange-900/30 ring-1 ring-inset ring-orange-200 dark:ring-orange-800': teamMemberToDelete === participant.email
+            }"
+          >
+            <img
+              *ngIf="participant.photoUrl"
+              [src]="participant.photoUrl"
+              class="w-10 h-10 rounded-full object-cover ring-2"
+              [ngClass]="{
+                'ring-orange-400': teamMemberToDelete === participant.email,
+                'ring-gray-200 dark:ring-slate-600': teamMemberToDelete !== participant.email
+              }"
+              alt=""
+            />
+            <div 
+              *ngIf="!participant.photoUrl" 
+              class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+              [ngClass]="{
+                'bg-orange-200 dark:bg-orange-700 text-orange-700 dark:text-orange-200': teamMemberToDelete === participant.email,
+                'bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-300': teamMemberToDelete !== participant.email
+              }"
+            >
+              {{ participant.displayName.charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-900 dark:text-white truncate">{{ participant.displayName }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ participant.email }}</p>
+            </div>
+            <div *ngIf="teamMemberToDelete === participant.email" class="flex-shrink-0">
+              <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        <!-- Selected participant indicator -->
+        <div *ngIf="teamMemberToDelete" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>Selected: <strong>{{ teamMemberToDelete }}</strong></span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 pt-3">
           <button
             (click)="toggle('showRemoveTeamMember')"
-            class="mr-4 text-white inline-flex items-center bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-gray-700"
+            class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition"
           >
             Cancel
           </button>
           <button
             (click)="removeParticipant(teamMemberToDelete)"
             [disabled]="!teamMemberToDelete"
-            class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800 disabled:opacity-60 disabled:cursor-not-allowed"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-orange-600 to-red-600 rounded-lg hover:from-orange-700 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
             Remove Participant
           </button>
         </div>

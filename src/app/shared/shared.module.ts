@@ -7,10 +7,11 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
 import { ChatbotComponent } from '../components/chatbot/chatbot.component';
+import { ToastComponent } from '../components/toast/toast.component';
 import { MaterialModule } from './material.module';
 
 @NgModule({
-  declarations: [NavbarComponent, FooterComponent, ChatbotComponent],
+  declarations: [NavbarComponent, FooterComponent, ChatbotComponent, ToastComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -23,6 +24,7 @@ import { MaterialModule } from './material.module';
     NavbarComponent,
     FooterComponent,
     ChatbotComponent,
+    ToastComponent,
     MaterialModule,
     TranslateModule,
   ],

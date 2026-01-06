@@ -10,6 +10,7 @@ import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { ToastService } from 'src/app/services/toast.service';
 
 @Component({
   selector: 'app-home-challenge',
@@ -154,6 +155,18 @@ export class HomeChallengeComponent {
   customUrlValid = true;
   private customUrlCheckTimeout: any;
 
+  // User search for adding participants
+  userSearchQuery = '';
+  userSearchResults: { email: string; displayName: string; photoUrl?: string; uid?: string }[] = [];
+  isSearchingUsers = false;
+  selectedUserToAdd: { email: string; displayName: string; photoUrl?: string; uid?: string } | null = null;
+  private userSearchTimeout: any;
+  allUsersCache: any[] = [];
+  isLoadingAllUsers = false;
+
+  // Remove participant search
+  removeParticipantSearchQuery = '';
+
   // home-challenge.component.ts
   goToChallengeDiscussion() {
     this.router.navigate(['/challenge-discussion', this.challengePageId], {
@@ -180,7 +193,8 @@ export class HomeChallengeComponent {
     private time: TimeService,
     private afs: AngularFirestore,
     private challenge: ChallengesService,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private toast: ToastService
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -408,10 +422,10 @@ export class HomeChallengeComponent {
       );
 
       this.toggle('showEditLinks');
-      alert('Links updated!');
+      this.toast.success('Links updated!');
     } catch (err) {
       console.error('Error updating links:', err);
-      alert('Could not save links—try again.');
+      this.toast.error('Could not save links—try again.');
     }
   }
   /** whether the detailed list is visible */
@@ -522,7 +536,7 @@ export class HomeChallengeComponent {
 
   async addExistingChallengeToPage(challenge: any): Promise<void> {
     if (!challenge?.title || !challenge?.description || !challenge?.category) {
-      alert('This challenge is missing required details.');
+      this.toast.error('This challenge is missing required details.');
       return;
     }
 
@@ -560,10 +574,10 @@ export class HomeChallengeComponent {
         newChallengeId
       );
 
-      alert('Challenge added to this workspace.');
+      this.toast.success('Challenge added to this workspace.');
     } catch (err) {
       console.error('Error adding existing challenge:', err);
-      alert('There was a problem adding this challenge.');
+      this.toast.error('There was a problem adding this challenge.');
     } finally {
       this.addingExistingChallengeIds =
         this.addingExistingChallengeIds.filter(
@@ -752,24 +766,126 @@ export class HomeChallengeComponent {
       | 'showAddAdmin'
   ) {
     this[property] = !this[property];
+    
+    // Load users when opening add participant modal
+    if (property === 'showAddTeamMember' && this.showAddTeamMember) {
+      this.loadAllUsersForSearch();
+      this.clearSelectedUser();
+    }
+    
+    // Reset remove participant search when opening modal
+    if (property === 'showRemoveTeamMember' && this.showRemoveTeamMember) {
+      this.removeParticipantSearchQuery = '';
+      this.teamMemberToDelete = '';
+    }
   }
   get adminEmailsToRender(): string[] {
     const list = this.visibleAdminEmails || [];
     return this.showAllAdmins ? list : list.slice(0, 5);
   }
 
+  // Load all users for search (cached)
+  async loadAllUsersForSearch(): Promise<void> {
+    if (this.allUsersCache.length > 0 || this.isLoadingAllUsers) return;
+    this.isLoadingAllUsers = true;
+    try {
+      const users = await firstValueFrom(this.data.getAllUsers());
+      this.allUsersCache = users || [];
+    } catch (err) {
+      console.error('Error loading users:', err);
+    } finally {
+      this.isLoadingAllUsers = false;
+    }
+  }
+
+  // Search users by name or email
+  onUserSearchChange(): void {
+    if (this.userSearchTimeout) {
+      clearTimeout(this.userSearchTimeout);
+    }
+    
+    const query = this.userSearchQuery.trim().toLowerCase();
+    
+    if (!query || query.length < 2) {
+      this.userSearchResults = [];
+      return;
+    }
+
+    this.userSearchTimeout = setTimeout(() => {
+      this.searchUsers(query);
+    }, 300);
+  }
+
+  private searchUsers(query: string): void {
+    this.isSearchingUsers = true;
+    
+    // Filter from cached users
+    const results = this.allUsersCache
+      .filter((user: any) => {
+        const email = (user.email || '').toLowerCase();
+        const firstName = (user.firstName || '').toLowerCase();
+        const lastName = (user.lastName || '').toLowerCase();
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        
+        // Don't show users already in participants
+        if (this.participants.some(p => this.normalizeEmail(p) === this.normalizeEmail(email))) {
+          return false;
+        }
+        
+        return email.includes(query) || firstName.includes(query) || lastName.includes(query) || fullName.includes(query);
+      })
+      .slice(0, 8)
+      .map((user: any) => ({
+        email: user.email || '',
+        displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email || '',
+        photoUrl: user.profilePicture?.downloadURL || user.profilePicPath || '',
+        uid: user.uid
+      }));
+    
+    this.userSearchResults = results;
+    this.isSearchingUsers = false;
+  }
+
+  selectUserToAdd(user: { email: string; displayName: string; photoUrl?: string; uid?: string }): void {
+    this.selectedUserToAdd = user;
+    this.userSearchQuery = user.displayName || user.email;
+    this.userSearchResults = [];
+    this.newParticipant = user.email;
+  }
+
+  clearSelectedUser(): void {
+    this.selectedUserToAdd = null;
+    this.userSearchQuery = '';
+    this.newParticipant = '';
+    this.userSearchResults = [];
+  }
+
+  // Filter participants for remove modal
+  get filteredParticipantsForRemoval(): typeof this.participantProfiles {
+    const query = this.removeParticipantSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return this.participantProfiles;
+    }
+    return this.participantProfiles.filter(p => 
+      p.email.toLowerCase().includes(query) || 
+      p.displayName.toLowerCase().includes(query)
+    );
+  }
+
   async addParticipant() {
-    if (!this.newParticipant || !this.data.isValidEmail(this.newParticipant)) {
-      alert('Please enter a valid email address to add a participant.');
+    const emailToAdd = this.selectedUserToAdd?.email || this.newParticipant;
+    
+    if (!emailToAdd || !this.data.isValidEmail(emailToAdd)) {
+      this.toast.error('Please enter a valid email address to add a participant.');
       return;
     }
 
-    if (this.participants.includes(this.newParticipant)) {
-      alert('This participant has already been added.');
+    if (this.participants.some(p => this.normalizeEmail(p) === this.normalizeEmail(emailToAdd))) {
+      this.toast.warning('This participant has already been added.');
       return;
     }
 
-    this.participants.push(this.newParticipant);
+    this.participants.push(emailToAdd);
     this.isLoading = true;
 
     try {
@@ -777,17 +893,22 @@ export class HomeChallengeComponent {
         this.challengePageId,
         this.participants
       ); // then send email to participant
-      await this.sendEmailToParticipant(this.newParticipant);
+      await this.sendEmailToParticipant(emailToAdd);
       await this.loadParticipantProfiles();
 
-      console.log('Participant added successfully:', this.newParticipant);
-      alert('Participant added successfully!');
+      console.log('Participant added successfully:', emailToAdd);
+      this.toast.success(`${this.selectedUserToAdd?.displayName || emailToAdd} added successfully!`);
       this.toggle('showAddTeamMember');
       this.isLoading = false;
     } catch (error) {
       console.error('Error adding participant:', error);
     }
+    
+    // Reset state
     this.newParticipant = '';
+    this.selectedUserToAdd = null;
+    this.userSearchQuery = '';
+    this.userSearchResults = [];
   }
 
   removeParticipant(email: string) {
@@ -809,7 +930,7 @@ export class HomeChallengeComponent {
       this.loadParticipantProfiles();
 
       console.log('Participant removed successfully:', email);
-      alert('Participant removed successfully!');
+      this.toast.success('Participant removed successfully!');
       this.toggle('showRemoveTeamMember');
     } catch (error) {
       console.error('Error removing participant from challenge:', error);
@@ -819,7 +940,7 @@ export class HomeChallengeComponent {
   async joinChallengePage(): Promise<void> {
     const email = this.normalizeEmail(this.auth.currentUser?.email || '');
     if (!email || !this.data.isValidEmail(email)) {
-      alert('Please sign in to join this workspace.');
+      this.toast.error('Please sign in to join this workspace.');
       return;
     }
 
@@ -851,7 +972,7 @@ export class HomeChallengeComponent {
       this.loadParticipantProfiles();
     } catch (error) {
       console.error('Error joining challenge page:', error);
-      alert('Could not join this workspace. Please try again.');
+      this.toast.error('Could not join this workspace. Please try again.');
     } finally {
       this.isJoining = false;
     }
@@ -896,7 +1017,7 @@ export class HomeChallengeComponent {
       this.router.navigate(['/home']);
     } catch (error) {
       console.error('Error leaving challenge page:', error);
-      alert('Could not leave this workspace. Please try again.');
+      this.toast.error('Could not leave this workspace. Please try again.');
     }
   }
   deleteChallengePage() {
@@ -951,7 +1072,7 @@ export class HomeChallengeComponent {
               'Error deleting challenge page or related challenges:',
               error
             );
-            alert(
+            this.toast.error(
               'There was an error while deleting the challenge page. Try again.'
             );
           });
@@ -977,7 +1098,7 @@ export class HomeChallengeComponent {
       console.log('The ID is', this.challengeId);
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Error occurred while uploading file. Please try again.');
+      this.toast.error('Error occurred while uploading file. Please try again.');
     }
   }
   // addCreateChallenge() {
@@ -1024,7 +1145,7 @@ export class HomeChallengeComponent {
       !this.categoryCreateChallenge ||
       !this.imageCreateChallenge
     ) {
-      alert('Please fill in all required fields before adding the challenge.');
+      this.toast.error('Please fill in all required fields before adding the challenge.');
       return;
     }
 
@@ -1066,7 +1187,7 @@ export class HomeChallengeComponent {
       this.router.navigate(['/dashboard', this.challengeId]);
     } catch (err) {
       console.error('Error creating challenge & solution:', err);
-      alert('There was a problem creating the challenge.');
+      this.toast.error('There was a problem creating the challenge.');
     }
 
     // Automatically select the added challenge and navigate
@@ -1103,11 +1224,11 @@ export class HomeChallengeComponent {
     navigator.clipboard
       .writeText(currentUrl)
       .then(() => {
-        alert('URL copied to clipboard!');
+        this.toast.success('URL copied to clipboard!');
       })
       .catch((err) => {
         console.error('Failed to copy URL: ', err);
-        alert('Failed to copy URL. Please try again.');
+        this.toast.error('Failed to copy URL. Please try again.');
       });
   }
 
@@ -1196,10 +1317,10 @@ export class HomeChallengeComponent {
 
       // If you also track counts per category, update them here.
 
-      alert('Challenge deleted.');
+      this.toast.success('Challenge deleted.');
     } catch (err) {
       console.error('Error deleting challenge:', err);
-      alert('Could not delete challenge—try again.');
+      this.toast.error('Could not delete challenge—try again.');
     } finally {
       this.isLoading = false;
     }
@@ -1241,10 +1362,10 @@ export class HomeChallengeComponent {
       // 3c fetch challenges for the destination category so it shows up
       await this.fetchChallenges(newCat);
       this.activeCategory = newCat; // auto-switch view
-      alert('Challenge moved.');
+      this.toast.success('Challenge moved.');
     } catch (err) {
       console.error('Move failed:', err);
-      alert('Could not move challenge—try again.');
+      this.toast.error('Could not move challenge—try again.');
     } finally {
       this.isLoading = false;
     }
@@ -1274,12 +1395,12 @@ export class HomeChallengeComponent {
         .update({ participantsHidden: this.participantsHidden });
     } catch (err) {
       console.error('Failed to update visibility', err);
-      alert('Could not update participants visibility.');
+      this.toast.error('Could not update participants visibility.');
     }
   }
   async addHandout() {
     if (!this.handoutName.trim() || !this.handoutFile) {
-      alert('Choose a file and give it a name.');
+      this.toast.warning('Choose a file and give it a name.');
       return;
     }
     this.isLoading = true;
@@ -1296,7 +1417,7 @@ export class HomeChallengeComponent {
       this.handoutFile = null;
     } catch (err) {
       console.error(err);
-      alert('Upload failed.');
+      this.toast.error('Upload failed.');
     } finally {
       this.isLoading = false;
     }
@@ -1328,13 +1449,13 @@ export class HomeChallengeComponent {
   }
   async saveProgramPDF() {
     if (!this.programTitleTmp.trim()) {
-      alert('Please enter a title.');
+      this.toast.warning('Please enter a title.');
       return;
     }
 
     // if user is only renaming, no new file is needed
     if (!this.programFileTmp && !this.programPDF) {
-      alert('Please choose a PDF to upload.');
+      this.toast.warning('Please choose a PDF to upload.');
       return;
     }
 
@@ -1357,7 +1478,7 @@ export class HomeChallengeComponent {
       this.toggle('showEditProgram');
     } catch (err) {
       console.error('Program PDF update failed', err);
-      alert('Upload failed — try again.');
+      this.toast.error('Upload failed — try again.');
     } finally {
       this.isLoading = false;
     }
@@ -1439,7 +1560,7 @@ export class HomeChallengeComponent {
         : this.editCategory;
 
     if (!newCat) {
-      alert('Category required');
+      this.toast.warning('Category required');
       return;
     }
 
@@ -1476,10 +1597,10 @@ export class HomeChallengeComponent {
       }
 
       this.showEditChallenge = false;
-      alert('Challenge updated.');
+      this.toast.success('Challenge updated.');
     } catch (err) {
       console.error('Update failed:', err);
-      alert('Could not update challenge—try again.');
+      this.toast.error('Could not update challenge—try again.');
     } finally {
       this.isLoading = false;
     }
@@ -1513,7 +1634,7 @@ export class HomeChallengeComponent {
   async mergeExistingSolution() {
     const id = this.mergeSolutionId.trim();
     if (!id) {
-      alert('Enter a solution ID.');
+      this.toast.warning('Enter a solution ID.');
       return;
     }
 
@@ -1522,7 +1643,7 @@ export class HomeChallengeComponent {
       // 1) Load the solution
       const solSnap = await this.afs.doc(`solutions/${id}`).ref.get();
       if (!solSnap.exists) {
-        alert('No solution found with that ID.');
+        this.toast.error('No solution found with that ID.');
         return;
       }
       const sol: any = solSnap.data();
@@ -1627,10 +1748,10 @@ export class HomeChallengeComponent {
       this.mergeCategoryCustom = '';
       this.showMergeSolution = false;
 
-      alert('Solution merged and challenge card created.');
+      this.toast.success('Solution merged and challenge card created.');
     } catch (err) {
       console.error('Merge failed', err);
-      alert('Could not merge solution — check the ID and try again.');
+      this.toast.error('Could not merge solution — check the ID and try again.');
     } finally {
       this.isLoading = false;
     }
@@ -1644,11 +1765,11 @@ export class HomeChallengeComponent {
     const emailLC = this.normalizeEmail(this.newAdminEmail);
 
     if (!emailLC || !this.data.isValidEmail(emailLC)) {
-      alert('Enter a valid admin email.');
+      this.toast.error('Enter a valid admin email.');
       return;
     }
     if ((this.adminEmails || []).includes(emailLC)) {
-      alert('This admin is already added.');
+      this.toast.warning('This admin is already added.');
       return;
     }
 
@@ -1683,13 +1804,13 @@ export class HomeChallengeComponent {
         await this.sendEmailToParticipant(emailLC); // it accepts custom subject; if not, it still invites
       } catch {}
 
-      alert('Admin added.');
+      this.toast.success('Admin added.');
       this.toggle('showAddAdmin');
       this.recomputeAdminsView();
       this.loadAdminProfiles();
     } catch (err) {
       console.error('Failed to add admin', err);
-      alert('Could not add admin—try again.');
+      this.toast.error('Could not add admin—try again.');
     } finally {
       this.isLoading = false;
       this.newAdminEmail = '';
@@ -1699,7 +1820,7 @@ export class HomeChallengeComponent {
   async removeAdminByEmail(email: string) {
     const emailLC = this.normalizeEmail(email);
     if (emailLC === this.authorEmail) {
-      alert('You can’t remove the page owner from admins.');
+      this.toast.warning("You can't remove the page owner from admins.");
       return;
     }
 
@@ -1730,10 +1851,10 @@ export class HomeChallengeComponent {
         },
         { merge: true }
       );
-      alert('Admin removed.');
+      this.toast.success('Admin removed.');
     } catch (err) {
       console.error('Failed to remove admin', err);
-      alert('Could not remove admin—try again.');
+      this.toast.error('Could not remove admin—try again.');
     } finally {
       this.isLoading = false;
       this.adminToRemove = '';
@@ -1839,7 +1960,7 @@ export class HomeChallengeComponent {
 
   async savePageContent() {
     if (!this.editHeading?.trim()) {
-      alert('Heading is required');
+      this.toast.warning('Heading is required');
       return;
     }
 
@@ -1854,7 +1975,7 @@ export class HomeChallengeComponent {
       if (this.editCustomUrl?.trim()) {
         const normalized = this.challenge.normalizeCustomUrl(this.editCustomUrl.trim());
         if (!normalized) {
-          alert('Custom URL must contain at least one letter or number');
+          this.toast.error('Custom URL must contain at least one letter or number');
           this.isLoading = false;
           return;
         }
@@ -1862,7 +1983,7 @@ export class HomeChallengeComponent {
         // Final duplicate check before saving
         const exists = await this.challenge.checkCustomUrlExists(normalized, this.challengePageId);
         if (exists) {
-          alert('This custom URL is already taken. Please choose another.');
+          this.toast.error('This custom URL is already taken. Please choose another.');
           this.isLoading = false;
           return;
         }
@@ -1914,13 +2035,13 @@ export class HomeChallengeComponent {
 
       this.showEditPageContent = false;
       if (updates.customUrl) {
-        alert('Page content updated successfully! The URL has been updated to use your custom URL.');
+        this.toast.success('Page content updated successfully! The URL has been updated to use your custom URL.');
       } else {
-        alert('Page content updated successfully!');
+        this.toast.success('Page content updated successfully!');
       }
     } catch (err) {
       console.error('Error updating page content:', err);
-      alert('Could not update page content—try again.');
+      this.toast.error('Could not update page content—try again.');
     } finally {
       this.isLoading = false;
     }
