@@ -338,6 +338,81 @@ export class SolutionService {
     return this.afs.collection<Solution>(`solutions`).valueChanges();
   }
 
+  /**
+   * Search solutions by title prefix (efficient server-side query)
+   * Uses Firestore's startAt/endAt for prefix matching
+   * Only returns finished solutions, limited to 20 results
+   */
+  searchSolutionsByTitle(searchTerm: string, limit: number = 20): Observable<Solution[]> {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      return of([]);
+    }
+    
+    const term = searchTerm.trim();
+    // For prefix search, we use startAt and endAt with a high Unicode character
+    const endTerm = term + '\uf8ff';
+    
+    return this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref
+          .where('finished', '==', 'true')
+          .orderBy('title')
+          .startAt(term)
+          .endAt(endTerm)
+          .limit(limit)
+      )
+      .valueChanges();
+  }
+
+  /**
+   * Search finished solutions with a limit (for navbar search)
+   * Fetches recent finished solutions and filters client-side
+   * More flexible than prefix search but still efficient with limit
+   */
+  searchFinishedSolutions(searchTerm: string, limit: number = 50): Observable<Solution[]> {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      return of([]);
+    }
+    
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    
+    // Fetch limited recent finished solutions and filter client-side
+    return this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref
+          .where('finished', '==', 'true')
+          .orderBy('submissionDate', 'desc')
+          .limit(limit * 2) // Fetch more to account for filtering
+      )
+      .valueChanges()
+      .pipe(
+        map((solutions) =>
+          solutions
+            .filter(
+              (solution) =>
+                solution.title?.toLowerCase().includes(lowerSearchTerm) ||
+                solution.authorName?.toLowerCase().includes(lowerSearchTerm)
+            )
+            .slice(0, limit)
+        )
+      );
+  }
+
+  /**
+   * Get limited recent finished solutions (for initial search cache)
+   * Much more efficient than loading all solutions
+   */
+  getRecentFinishedSolutions(limit: number = 100): Observable<Solution[]> {
+    return this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref
+          .where('finished', '==', 'true')
+          .orderBy('submissionDate', 'desc')
+          .limit(limit)
+      )
+      .valueChanges();
+  }
+
   addEvaluation(solution: Solution) {
     const data = {
       evaluationDetails: solution.evaluationDetails,

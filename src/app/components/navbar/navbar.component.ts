@@ -18,7 +18,7 @@ import {
   Subject,
 } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
-import { ChallengePage, User } from 'src/app/models/user';
+import { ChallengePage } from 'src/app/models/user';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
@@ -45,9 +45,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Input() lastName: string = '';
   @Input() email: string = '';
   showDropDown: boolean = false;
-  allSolutions: Solution[] = [];
-  allUsers: User[] = [];
   filteredItems: Solution[] = [];
+  isSearching: boolean = false;
   displayHamburgerMenu: boolean = true;
   displayHamburgerMenuClose: boolean = false;
   displayHamburgerHomeMenu: boolean = true;
@@ -142,12 +141,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.filteredItems = [];
 
     if (this.email) {
-      this.solution.getAllSolutionsFromAllAccounts().subscribe((data) => {
-        this.allSolutions = data.filter((data) => data.finished === 'true');
-      });
-      this.data.getAllUsers().subscribe((data) => {
-        this.allUsers = data;
-      });
+      // Only load profile picture - NOT all solutions and users
       if (
         this.auth.currentUser!.profilePicture &&
         this.auth.currentUser.profilePicture.path
@@ -157,14 +151,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }
     }
 
+    // Efficient on-demand search: only queries when user types
     this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
-        switchMap((value) => this.search(value))
+        switchMap((value) => {
+          if (!value || value.trim().length < 2) {
+            this.isSearching = false;
+            return of([]);
+          }
+          this.isSearching = true;
+          // Use efficient server-side search with limit
+          return this.solution.searchFinishedSolutions(value, 20);
+        }),
+        takeUntil(this.destroy$)
       )
       .subscribe((results) => {
-        this.filteredItems = results!;
+        this.filteredItems = results;
+        this.isSearching = false;
       });
 
     // these are the challengePages that this user has if they have any.
@@ -286,19 +291,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showThemeDropDown = !this.showThemeDropDown;
   }
 
-  search(value: string) {
-    if (value) {
-      const lowerCaseValue = value.toLowerCase();
-      return of(
-        this.allSolutions.filter(
-          (solution) =>
-            solution.title?.toLowerCase().includes(lowerCaseValue) ||
-            solution.authorName?.toLowerCase().includes(lowerCaseValue)
-        )
-      );
-    } else {
-      return of([]);
-    }
+  clearSearch() {
+    this.searchControl.setValue('');
+    this.filteredItems = [];
   }
 
   // lightMode() {
