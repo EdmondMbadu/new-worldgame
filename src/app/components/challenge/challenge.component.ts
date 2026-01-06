@@ -22,10 +22,12 @@ export class ChallengeComponent implements OnInit {
   @Input() restricted: string = '';
   @Input() fromChallengeSpace: boolean = false;
   @Input() fit: 'cover' | 'contain' = 'cover';
+  @Input() challengePageId: string = ''; // The workspace/challenge page ID
 
   currentSolution: Solution = {};
   user?: User = {};
   alreadyParticipant = false;
+  isLoadingParticipantStatus = false;
   challengeText = 'Join Solution';
   constructor(
     private time: TimeService,
@@ -103,6 +105,77 @@ export class ChallengeComponent implements OnInit {
 
   ngOnInit(): void {
     this.user = this.auth.currentUser;
-    // console.log('the current user is', this.user);
+    // Check participant status when component loads (only for challenge space view)
+    if (this.fromChallengeSpace && this.id) {
+      this.checkParticipantStatus();
+    }
+  }
+
+  /**
+   * Check if the current user is already a participant of this solution
+   */
+  async checkParticipantStatus(): Promise<void> {
+    const email = this.auth.currentUser?.email?.trim().toLowerCase();
+    if (!email) {
+      this.alreadyParticipant = false;
+      return;
+    }
+
+    this.isLoadingParticipantStatus = true;
+    try {
+      const solution = await firstValueFrom(
+        this.solutionService.getSolution(this.id)
+      );
+      
+      if (!solution) {
+        this.alreadyParticipant = false;
+        return;
+      }
+
+      this.currentSolution = solution;
+      const raw = solution.participants ?? [];
+      const participants: { name: string }[] = Array.isArray(raw)
+        ? [...raw]
+        : Object.values(raw as Record<string, string>).map((e) => ({
+            name: e,
+          }));
+
+      this.alreadyParticipant = participants.some(
+        (p) => p.name.trim().toLowerCase() === email
+      );
+    } catch (err) {
+      console.error('Error checking participant status:', err);
+      this.alreadyParticipant = false;
+    } finally {
+      this.isLoadingParticipantStatus = false;
+    }
+  }
+
+  /**
+   * View the solution without joining (for workspace participants)
+   * This navigates to the dashboard with a special query param
+   */
+  viewSolution(): void {
+    if (!this.id) {
+      console.error('No solution ID available');
+      return;
+    }
+    // Navigate to dashboard - user is already a participant
+    this.router.navigate(['/dashboard', this.id]);
+  }
+
+  /**
+   * Preview the solution without joining
+   * This allows workspace members to view the dashboard without becoming participants
+   */
+  async previewSolution(): Promise<void> {
+    if (!this.id) {
+      console.error('No solution ID available');
+      return;
+    }
+    // Navigate to dashboard with challengePageId so auth guard allows workspace participants
+    this.router.navigate(['/dashboard', this.id], {
+      queryParams: { challengePageId: this.challengePageId }
+    });
   }
 }

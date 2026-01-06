@@ -32,22 +32,58 @@
         </div>
        
    
-      <div class="flex flex-nowrap items-center text-gray-600 dark:text-gray-400 mt-4" >
+      <div class="flex flex-wrap items-center gap-2 text-gray-600 dark:text-gray-400 mt-4" >
 
-        <button *ngIf="!fromChallengeSpace" (click)="selectChallenge()" type="button" class="p-3 px-6  text-white  bg-teal-700 rounded-full hover:bg-teal-800">Start Solution</button>
-        <button *ngIf="fromChallengeSpace" (click)="selectChallengeSolution()" type="button" class="p-3 px-6  text-white  bg-teal-700 rounded-full hover:bg-teal-800">Join Solution</button>
-
-       
-
-
-
- 
-
-
-    
-
-
+        <button *ngIf="!fromChallengeSpace" (click)="selectChallenge()" type="button" class="p-3 px-6 text-white bg-teal-700 rounded-full hover:bg-teal-800">Start Solution</button>
         
+        <!-- Challenge Space View: Different buttons based on participant status -->
+        <ng-container *ngIf="fromChallengeSpace">
+          <!-- Loading state -->
+          <div *ngIf="isLoadingParticipantStatus" class="flex items-center gap-2 p-3 px-6">
+            <svg class="w-5 h-5 animate-spin text-teal-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          
+          <!-- User is already a participant: Show "Go to Solution" -->
+          <button 
+            *ngIf="!isLoadingParticipantStatus && alreadyParticipant" 
+            (click)="viewSolution()" 
+            type="button" 
+            class="p-3 px-6 text-white bg-emerald-600 rounded-full hover:bg-emerald-700 transition-colors flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+            Go to Solution
+          </button>
+          
+          <!-- User is NOT a participant: Show "Join Solution" and "Preview" buttons -->
+          <ng-container *ngIf="!isLoadingParticipantStatus && !alreadyParticipant">
+            <button 
+              (click)="selectChallengeSolution()" 
+              type="button" 
+              class="p-3 px-6 text-white bg-teal-700 rounded-full hover:bg-teal-800 transition-colors flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              Join Solution
+            </button>
+            <button 
+              (click)="previewSolution()" 
+              type="button" 
+              class="p-3 px-6 text-teal-700 dark:text-teal-300 bg-transparent border border-teal-600 dark:border-teal-500 rounded-full hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors flex items-center gap-2"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+              Preview
+            </button>
+          </ng-container>
+        </ng-container>
 
     </div>
       <div class="mt-4 flex justify-between items-center text-gray-600 dark:text-gray-400">

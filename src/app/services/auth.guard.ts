@@ -214,13 +214,14 @@ export class AuthGuard {
     );
   }
 
-  /** Participant check unchanged */
+  /** Participant check - also allows workspace participants to access solutions in their workspace */
   private checkParticipant(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ) {
     const solutionId = route.paramMap.get('id');
     const allowAdminBypass = route.data['allowAdminBypass'] !== false; // default: admins can bypass
+    const challengePageId = route.queryParamMap.get('challengePageId'); // workspace context
 
     return this.auth.user$.pipe(
       take(1),
@@ -237,18 +238,56 @@ export class AuthGuard {
           return of(true);
         }
 
+        const userEmail = (user.email ?? '').toLowerCase();
+
         // regular participant check
         return this.solutionService.getSolution(solutionId!).pipe(
-          map((solution: any) => {
-            if (!solution?.participants) return false;
-            return Object.values(solution.participants).some(
-              (participant: any) => {
-                const email = (Object.values(participant)?.[0] ?? '')
-                  .toString()
-                  .toLowerCase();
-                return email === (user.email ?? '').toLowerCase();
-              }
-            );
+          switchMap((solution: any) => {
+            // Check if user is a direct participant of the solution
+            if (solution?.participants) {
+              const isParticipant = Object.values(solution.participants).some(
+                (participant: any) => {
+                  const email = (Object.values(participant)?.[0] ?? '')
+                    .toString()
+                    .toLowerCase();
+                  return email === userEmail;
+                }
+              );
+              if (isParticipant) return of(true);
+            }
+
+            // If solution has a challengePageId, check if user is a workspace participant
+            const workspaceId = solution?.challengePageId || challengePageId;
+            if (workspaceId) {
+              return this.afs
+                .doc(`challengePages/${workspaceId}`)
+                .valueChanges()
+                .pipe(
+                  take(1),
+                  map((page: any) => {
+                    if (!page) return false;
+                    // Check if user is workspace owner
+                    if (page.authorId === user.uid) return true;
+                    // Check if user is workspace admin
+                    if (Array.isArray(page.adminEmails) && 
+                        page.adminEmails.some((e: string) => (e || '').toLowerCase() === userEmail)) {
+                      return true;
+                    }
+                    if (Array.isArray(page.adminUids) && page.adminUids.includes(user.uid)) {
+                      return true;
+                    }
+                    // Check if user is workspace participant
+                    if (Array.isArray(page.participants)) {
+                      return page.participants.some(
+                        (p: string) => (p || '').toLowerCase() === userEmail
+                      );
+                    }
+                    return false;
+                  })
+                );
+            }
+
+            return of(false);
           }),
           tap((ok) => {
             if (!ok) this.router.navigate(['/home']);
