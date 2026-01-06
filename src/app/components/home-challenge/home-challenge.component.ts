@@ -155,14 +155,14 @@ export class HomeChallengeComponent {
   customUrlValid = true;
   private customUrlCheckTimeout: any;
 
-  // User search for adding participants
+  // User search for adding participants (hybrid: client-side + server fallback)
   userSearchQuery = '';
   userSearchResults: { email: string; displayName: string; photoUrl?: string; uid?: string }[] = [];
   isSearchingUsers = false;
   selectedUserToAdd: { email: string; displayName: string; photoUrl?: string; uid?: string } | null = null;
-  private userSearchTimeout: any;
-  allUsersCache: any[] = [];
-  isLoadingAllUsers = false;
+  allUsers: any[] = [];  // Cached users for instant client-side filtering
+  showUserSuggestions = false;
+  private userSearchTimeout: any;  // For debouncing server-side search
 
   // Remove participant search
   removeParticipantSearchQuery = '';
@@ -172,7 +172,6 @@ export class HomeChallengeComponent {
   adminSearchResults: { email: string; displayName: string; photoUrl?: string; uid?: string }[] = [];
   isSearchingAdmins = false;
   selectedAdminToAdd: { email: string; displayName: string; photoUrl?: string; uid?: string } | null = null;
-  private adminSearchTimeout: any;
 
   // Remove admin search
   removeAdminSearchQuery = '';
@@ -218,6 +217,12 @@ export class HomeChallengeComponent {
       window.scrollTo(0, 0);
       this.pageReady = false;
       this.loadChallengePage(idOrSlug);
+    });
+    
+    // Load all users on init for autocomplete (same as dashboard)
+    this.auth.getALlUsers().subscribe((users) => {
+      this.allUsers = users || [];
+      console.log(`Loaded ${this.allUsers.length} users for search`);
     });
   }
   private resetPageState(): void {
@@ -777,9 +782,8 @@ export class HomeChallengeComponent {
   ) {
     this[property] = !this[property];
     
-    // Load users when opening add participant modal
+    // Reset search when opening add participant modal (users already loaded on init)
     if (property === 'showAddTeamMember' && this.showAddTeamMember) {
-      this.loadAllUsersForSearch();
       this.clearSelectedUser();
     }
     
@@ -789,9 +793,8 @@ export class HomeChallengeComponent {
       this.teamMemberToDelete = '';
     }
 
-    // Load users when opening add admin modal
+    // Reset search when opening add admin modal (users already loaded on init)
     if (property === 'showAddAdmin' && this.showAddAdmin) {
-      this.loadAllUsersForSearch();
       this.clearSelectedAdmin();
     }
 
@@ -806,72 +809,120 @@ export class HomeChallengeComponent {
     return this.showAllAdmins ? list : list.slice(0, 5);
   }
 
-  // Load all users for search (cached)
-  async loadAllUsersForSearch(): Promise<void> {
-    if (this.allUsersCache.length > 0 || this.isLoadingAllUsers) return;
-    this.isLoadingAllUsers = true;
-    try {
-      const users = await firstValueFrom(this.data.getAllUsers());
-      this.allUsersCache = users || [];
-    } catch (err) {
-      console.error('Error loading users:', err);
-    } finally {
-      this.isLoadingAllUsers = false;
-    }
-  }
-
-  // Search users by name or email
+  /**
+   * Hybrid search: Instant client-side filter + server-side fallback
+   * - Immediately filters from cached users (instant feedback)
+   * - If few/no results, also queries Firestore with debounce (catches users not in cache)
+   * - Scales well: works fast for small datasets, falls back to server for large ones
+   */
   onUserSearchChange(): void {
+    // Reset selected user if input changes
+    this.selectedUserToAdd = null;
+    
+    // Clear any pending server search
     if (this.userSearchTimeout) {
       clearTimeout(this.userSearchTimeout);
     }
     
-    const query = this.userSearchQuery.trim().toLowerCase();
+    const searchTerm = this.userSearchQuery.toLowerCase().trim();
     
-    if (!query || query.length < 2) {
+    if (searchTerm.length === 0) {
       this.userSearchResults = [];
+      this.showUserSuggestions = false;
+      this.isSearchingUsers = false;
       return;
     }
-
-    this.userSearchTimeout = setTimeout(() => {
-      this.searchUsers(query);
-    }, 300);
+    
+    // STEP 1: Instant client-side filter from cached users
+    const clientResults = this.filterUsersLocally(searchTerm);
+    this.userSearchResults = clientResults;
+    this.showUserSuggestions = clientResults.length > 0;
+    
+    // STEP 2: If few results OR searching by email, also query server (debounced)
+    if (clientResults.length < 5 || searchTerm.includes('@')) {
+      this.isSearchingUsers = true;
+      this.userSearchTimeout = setTimeout(() => {
+        this.searchUsersFromServer(searchTerm);
+      }, 300); // 300ms debounce for server query
+    }
   }
 
-  private searchUsers(query: string): void {
-    this.isSearchingUsers = true;
-    
-    // Filter from cached users
-    const results = this.allUsersCache
+  /**
+   * Filter users from local cache (instant)
+   */
+  private filterUsersLocally(searchTerm: string): { email: string; displayName: string; photoUrl?: string; uid?: string }[] {
+    return this.allUsers
       .filter((user: any) => {
-        const email = (user.email || '').toLowerCase();
         const firstName = (user.firstName || '').toLowerCase();
         const lastName = (user.lastName || '').toLowerCase();
-        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const fullName = `${firstName} ${lastName}`.trim();
+        const displayName = (user.displayName || '').toLowerCase();
         
         // Don't show users already in participants
         if (this.participants.some(p => this.normalizeEmail(p) === this.normalizeEmail(email))) {
           return false;
         }
         
-        return email.includes(query) || firstName.includes(query) || lastName.includes(query) || fullName.includes(query);
+        return (
+          firstName.includes(searchTerm) ||
+          lastName.includes(searchTerm) ||
+          fullName.includes(searchTerm) ||
+          email.includes(searchTerm) ||
+          displayName.includes(searchTerm)
+        );
       })
-      .slice(0, 8)
+      .slice(0, 10)
       .map((user: any) => ({
         email: user.email || '',
-        displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email || '',
+        displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.displayName || user.email || '',
         photoUrl: user.profilePicture?.downloadURL || user.profilePicPath || '',
         uid: user.uid
       }));
-    
-    this.userSearchResults = results;
-    this.isSearchingUsers = false;
+  }
+
+  /**
+   * Search users from Firestore (scalable server-side search)
+   */
+  private searchUsersFromServer(searchTerm: string): void {
+    this.auth.searchUsers(searchTerm, 15).subscribe({
+      next: (serverUsers) => {
+        // Merge server results with client results, avoiding duplicates
+        const existingEmails = new Set(this.userSearchResults.map(u => u.email.toLowerCase()));
+        
+        const newResults = serverUsers
+          .filter((user: any) => {
+            const email = (user.email || '').toLowerCase();
+            // Skip duplicates and existing participants
+            if (existingEmails.has(email)) return false;
+            if (this.participants.some(p => this.normalizeEmail(p) === this.normalizeEmail(email))) return false;
+            return true;
+          })
+          .map((user: any) => ({
+            email: user.email || '',
+            displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.displayName || user.email || '',
+            photoUrl: user.profilePicture?.downloadURL || user.profilePicPath || '',
+            uid: user.uid
+          }));
+        
+        // Combine results (client results first, then server additions)
+        this.userSearchResults = [...this.userSearchResults, ...newResults].slice(0, 12);
+        this.showUserSuggestions = this.userSearchResults.length > 0;
+        this.isSearchingUsers = false;
+      },
+      error: (err) => {
+        console.error('Server search failed:', err);
+        this.isSearchingUsers = false;
+        // Keep showing client results even if server fails
+      }
+    });
   }
 
   selectUserToAdd(user: { email: string; displayName: string; photoUrl?: string; uid?: string }): void {
     this.selectedUserToAdd = user;
-    this.userSearchQuery = user.displayName || user.email;
+    this.userSearchQuery = user.email || '';
     this.userSearchResults = [];
+    this.showUserSuggestions = false;
     this.newParticipant = user.email;
   }
 
@@ -880,6 +931,7 @@ export class HomeChallengeComponent {
     this.userSearchQuery = '';
     this.newParticipant = '';
     this.userSearchResults = [];
+    this.showUserSuggestions = false;
   }
 
   // Filter participants for remove modal
@@ -894,52 +946,107 @@ export class HomeChallengeComponent {
     );
   }
 
-  // Admin search methods
+  // Admin search methods (hybrid: client-side + server fallback)
+  showAdminSuggestions = false;
+  private adminSearchTimeout: any;
+  
   onAdminSearchChange(): void {
+    // Reset selected admin if input changes
+    this.selectedAdminToAdd = null;
+    
+    // Clear any pending server search
     if (this.adminSearchTimeout) {
       clearTimeout(this.adminSearchTimeout);
     }
     
-    const query = this.adminSearchQuery.trim().toLowerCase();
+    const searchTerm = this.adminSearchQuery.toLowerCase().trim();
     
-    if (!query || query.length < 2) {
+    if (searchTerm.length === 0) {
       this.adminSearchResults = [];
+      this.showAdminSuggestions = false;
+      this.isSearchingAdmins = false;
       return;
     }
-
-    this.adminSearchTimeout = setTimeout(() => {
-      this.searchAdmins(query);
-    }, 300);
+    
+    // STEP 1: Instant client-side filter from cached users
+    const clientResults = this.filterAdminsLocally(searchTerm);
+    this.adminSearchResults = clientResults;
+    this.showAdminSuggestions = clientResults.length > 0;
+    
+    // STEP 2: If few results OR searching by email, also query server (debounced)
+    if (clientResults.length < 5 || searchTerm.includes('@')) {
+      this.isSearchingAdmins = true;
+      this.adminSearchTimeout = setTimeout(() => {
+        this.searchAdminsFromServer(searchTerm);
+      }, 300);
+    }
   }
 
-  private searchAdmins(query: string): void {
-    this.isSearchingAdmins = true;
-    
-    // Filter from cached users
-    const results = this.allUsersCache
+  /**
+   * Filter admins from local cache (instant)
+   */
+  private filterAdminsLocally(searchTerm: string): { email: string; displayName: string; photoUrl?: string; uid?: string }[] {
+    return this.allUsers
       .filter((user: any) => {
-        const email = (user.email || '').toLowerCase();
         const firstName = (user.firstName || '').toLowerCase();
         const lastName = (user.lastName || '').toLowerCase();
-        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        const email = (user.email || '').toLowerCase();
+        const fullName = `${firstName} ${lastName}`.trim();
+        const displayName = (user.displayName || '').toLowerCase();
         
         // Don't show users already in admins
         if ((this.adminEmails || []).some(e => this.normalizeEmail(e) === this.normalizeEmail(email))) {
           return false;
         }
         
-        return email.includes(query) || firstName.includes(query) || lastName.includes(query) || fullName.includes(query);
+        return (
+          firstName.includes(searchTerm) ||
+          lastName.includes(searchTerm) ||
+          fullName.includes(searchTerm) ||
+          email.includes(searchTerm) ||
+          displayName.includes(searchTerm)
+        );
       })
-      .slice(0, 8)
+      .slice(0, 10)
       .map((user: any) => ({
         email: user.email || '',
-        displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email || '',
+        displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.displayName || user.email || '',
         photoUrl: user.profilePicture?.downloadURL || user.profilePicPath || '',
         uid: user.uid
       }));
-    
-    this.adminSearchResults = results;
-    this.isSearchingAdmins = false;
+  }
+
+  /**
+   * Search admins from Firestore (scalable server-side search)
+   */
+  private searchAdminsFromServer(searchTerm: string): void {
+    this.auth.searchUsers(searchTerm, 15).subscribe({
+      next: (serverUsers) => {
+        const existingEmails = new Set(this.adminSearchResults.map(u => u.email.toLowerCase()));
+        
+        const newResults = serverUsers
+          .filter((user: any) => {
+            const email = (user.email || '').toLowerCase();
+            if (existingEmails.has(email)) return false;
+            if ((this.adminEmails || []).some(e => this.normalizeEmail(e) === this.normalizeEmail(email))) return false;
+            return true;
+          })
+          .map((user: any) => ({
+            email: user.email || '',
+            displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.displayName || user.email || '',
+            photoUrl: user.profilePicture?.downloadURL || user.profilePicPath || '',
+            uid: user.uid
+          }));
+        
+        this.adminSearchResults = [...this.adminSearchResults, ...newResults].slice(0, 12);
+        this.showAdminSuggestions = this.adminSearchResults.length > 0;
+        this.isSearchingAdmins = false;
+      },
+      error: (err) => {
+        console.error('Server search failed:', err);
+        this.isSearchingAdmins = false;
+      }
+    });
   }
 
   selectAdminToAdd(user: { email: string; displayName: string; photoUrl?: string; uid?: string }): void {

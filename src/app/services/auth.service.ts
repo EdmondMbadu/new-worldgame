@@ -170,6 +170,68 @@ export class AuthService {
     return this.afs.collection<User>(`users`).valueChanges();
   }
 
+  /**
+   * Search users by email prefix - scalable Firestore query
+   * Uses Firestore's string ordering for efficient prefix matching
+   */
+  searchUsersByEmail(searchTerm: string, limitCount: number = 10) {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) {
+      return new Observable<User[]>(observer => observer.next([]));
+    }
+    // Firestore prefix search: >= term and < term + high unicode char
+    const endTerm = term + '\uf8ff';
+    return this.afs
+      .collection<User>(`users`, (ref) =>
+        ref
+          .where('email', '>=', term)
+          .where('email', '<=', endTerm)
+          .limit(limitCount)
+      )
+      .valueChanges();
+  }
+
+  /**
+   * Search users by firstName prefix - scalable Firestore query
+   */
+  searchUsersByFirstName(searchTerm: string, limitCount: number = 10) {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) {
+      return new Observable<User[]>(observer => observer.next([]));
+    }
+    const endTerm = term + '\uf8ff';
+    return this.afs
+      .collection<User>(`users`, (ref) =>
+        ref
+          .where('firstNameLower', '>=', term)
+          .where('firstNameLower', '<=', endTerm)
+          .limit(limitCount)
+      )
+      .valueChanges();
+  }
+
+  /**
+   * Combined search - searches email and returns results
+   * For full-text search across multiple fields, consider Algolia/Typesense at scale
+   */
+  searchUsers(searchTerm: string, limitCount: number = 15) {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) {
+      return new Observable<User[]>(observer => observer.next([]));
+    }
+    
+    // Search by email prefix (most reliable for Firestore)
+    const endTerm = term + '\uf8ff';
+    return this.afs
+      .collection<User>(`users`, (ref) =>
+        ref
+          .where('email', '>=', term)
+          .where('email', '<=', endTerm)
+          .limit(limitCount)
+      )
+      .valueChanges();
+  }
+
   getUserFromEmail(email: string) {
     return this.afs
       .collection<User>(`users`, (ref) => ref.where('email', '==', email))
