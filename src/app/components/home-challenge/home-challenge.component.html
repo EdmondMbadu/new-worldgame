@@ -1351,177 +1351,195 @@
 <!-- ADD CHALLENGE MODAL -->
 <div
   *ngIf="showAddChallenge"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+  class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
 >
-  <div class="relative w-full max-w-2xl px-4 py-8">
+  <div class="min-h-full flex items-start justify-center p-4 pt-24 pb-8">
     <div
-      class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5 overflow-y-auto max-h-[90vh]"
+      class="relative w-full max-w-2xl rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
     >
-      <!-- Header -->
+      <!-- Gradient strip -->
       <div
-        class="flex justify-between items-center pb-4 mb-4 rounded-t border-b dark:border-gray-600"
-      >
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          Add Challenge
-        </h3>
-        <button
-          (click)="toggle('showAddChallenge')"
-          type="button"
-          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-        >
-          <svg
-            aria-hidden="true"
-            class="w-5 h-5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
+        class="h-2 w-full bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500"
+      ></div>
+
+      <!-- Header -->
+      <div class="px-6 pt-6 pb-4 border-b border-gray-200 dark:border-slate-700">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 shadow-lg">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                Create New Challenge
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Add a challenge to your workspace
+              </p>
+            </div>
+          </div>
+          <button
+            (click)="toggle('showAddChallenge')"
+            type="button"
+            class="p-2 rounded-lg text-gray-400 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 hover:text-gray-600 dark:hover:text-gray-300 transition"
           >
-            <path
-              fill-rule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414
-            0L10 8.586l4.293-4.293a1 1 0
-            111.414 1.414L11.414 10l4.293
-            4.293a1 1 0 01-1.414 1.414L10
-            11.414l-4.293 4.293a1 1 0
-            01-1.414-1.414L8.586 10
-            4.293 5.707a1 1 0
-            010-1.414z"
-              clip-rule="evenodd"
-            ></path>
-          </svg>
-        </button>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
       </div>
+
       <!-- Body -->
-      <div class="grid gap-4 mb-4 sm:grid-cols-2">
-        <div class="sm:col-span-2">
-          <label
-            for="name"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Title</label
-          >
+      <div class="p-6 space-y-5">
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Challenge Title <span class="text-red-500">*</span>
+          </label>
           <input
             [(ngModel)]="titleCreateChallenge"
             type="text"
-            name="name"
-            id="name"
-            placeholder="Bridging the Wealth Gap..."
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            placeholder="e.g., Bridging the Wealth Gap..."
+            class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
           />
         </div>
-        <div>
-          <label
-            for="category"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Category</label
-          >
-          <select
-            [(ngModel)]="categoryCreateChallenge"
-            id="category"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-          >
-            <option value="" disabled selected>Choose</option>
-            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-          </select>
+
+        <!-- Category Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Category <span class="text-red-500">*</span>
+            </label>
+            <select
+              [(ngModel)]="categoryCreateChallenge"
+              class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition"
+            >
+              <option value="" disabled selected>Select a category</option>
+              <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Or Create New Category
+            </label>
+            <input
+              [(ngModel)]="categoryCreateChallenge"
+              type="text"
+              placeholder="e.g., Human Rights"
+              class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+            />
+          </div>
         </div>
+
+        <!-- Description -->
         <div>
-          <label
-            for="name"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Add Category if not listed</label
-          >
-          <input
-            [(ngModel)]="categoryCreateChallenge"
-            type="text"
-            name="name"
-            id="name"
-            placeholder="Human Rights"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-          />
-        </div>
-        <div class="sm:col-span-2">
-          <label
-            for="description"
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >Description</label
-          >
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Description <span class="text-red-500">*</span>
+          </label>
           <textarea
             [(ngModel)]="descriptionCreateChallenge"
-            id="description"
-            rows="3"
-            placeholder="Write a description..."
-            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            rows="4"
+            placeholder="Describe the challenge and what participants will work on..."
+            class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition resize-none"
           ></textarea>
         </div>
 
-        <!-- Image Upload (Drop Zone) -->
-        <div
-          class="sm:col-span-2 bg-gray-100 dark:bg-gray-700 rounded-md p-4 flex flex-col items-center justify-center relative"
-          appDropZone
-          (hovered)="toggleHover($event)"
-          (dropped)="startUpload($event)"
-          [class.hovering]="isHovering"
-        >
+        <!-- Image Upload -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Cover Image <span class="text-red-500">*</span>
+          </label>
           <div
-            *ngIf="!imageCreateChallenge"
-            onclick="document.getElementById('getFile').click()"
-            class="flex flex-col items-center justify-center cursor-pointer"
+            class="relative rounded-xl border-2 border-dashed transition-all duration-200"
+            [ngClass]="{
+              'border-teal-400 bg-teal-50 dark:bg-teal-900/20': isHovering,
+              'border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50': !isHovering
+            }"
+            appDropZone
+            (hovered)="toggleHover($event)"
+            (dropped)="startUpload($event)"
           >
-            <svg
-              class="w-6 h-6 mb-2 text-gray-500 dark:text-gray-400"
-              fill="none"
-              viewBox="0 0 20 16"
+            <!-- Upload prompt -->
+            <div
+              *ngIf="!imageCreateChallenge"
+              onclick="document.getElementById('getFile').click()"
+              class="flex flex-col items-center justify-center py-10 cursor-pointer"
             >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 13h3a3 3 0 0 0
-                   0-6h-.025A5.56 5.56 0 0 0
-                   16 6.5 5.5 5.5 0 0 0
-                   5.207 5.021C5.137 5.017
-                   5.071 5 5 5a4 4 0 0 0
-                   0 8h2.167M10 15V6m0 0L8
-                   8m2-2 2 2"
+              <div class="w-14 h-14 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center mb-4">
+                <svg class="w-7 h-7 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <span class="text-teal-600 dark:text-teal-400">Click to upload</span> or drag and drop
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                PNG, JPG, GIF or WebP (max. 10MB)
+              </p>
+            </div>
+
+            <!-- Image preview -->
+            <div *ngIf="imageCreateChallenge" class="relative p-4">
+              <img
+                [src]="imageCreateChallenge"
+                alt="Challenge Preview"
+                class="w-full h-48 object-cover rounded-lg shadow-md"
               />
-            </svg>
-            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-              <span class="font-semibold">Click to upload</span> or drag &amp;
-              drop
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              SVG, PNG, JPG or GIF (MAX. 10MB)
-            </p>
+              <button
+                (click)="imageCreateChallenge = ''"
+                class="absolute top-6 right-6 p-2 rounded-full bg-white/90 dark:bg-slate-800/90 shadow-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400 transition"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <input
+              type="file"
+              id="getFile"
+              accept="image/*"
+              style="display: none"
+              (change)="startUpload($any($event.target).files)"
+            />
           </div>
-          <img
-            *ngIf="imageCreateChallenge"
-            [src]="imageCreateChallenge"
-            alt="Challenge Preview"
-            class="w-full h-auto rounded-md shadow mt-2"
-          />
-          <input
-            type="file"
-            id="getFile"
-            style="display: none"
-            (change)="startUpload($any($event.target).files)"
-          />
         </div>
+
+        <!-- Required fields note -->
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          <span class="text-red-500">*</span> Required fields
+        </p>
       </div>
+
       <!-- Footer -->
-      <div class="flex items-center space-x-4">
-        <button
-          (click)="addCreateChallenge()"
-          type="submit"
-          class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-teal-800"
-        >
-          Add Challenge
-        </button>
-        <button
-          (click)="toggle('showAddChallenge')"
-          type="button"
-          class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-        >
-          Cancel
-        </button>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/80 border-t border-gray-200 dark:border-slate-700">
+        <div class="flex items-center justify-end gap-3">
+          <button
+            (click)="toggle('showAddChallenge')"
+            type="button"
+            class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 rounded-lg ring-1 ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="addCreateChallenge()"
+            type="submit"
+            [disabled]="isLoading || !titleCreateChallenge || !descriptionCreateChallenge || !categoryCreateChallenge || !imageCreateChallenge"
+            class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create Challenge
+          </button>
+        </div>
       </div>
     </div>
   </div>
