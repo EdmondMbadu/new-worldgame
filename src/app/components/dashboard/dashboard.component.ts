@@ -48,14 +48,15 @@ export class DashboardComponent implements OnInit {
   profileSaved = false;
   profileMessage = '';
 
-  // Invite team member modal
+  // Invite team member modal (hybrid: client-side + server fallback)
   showInviteTeamMemberModal = false;
   newTeamMember: string = '';
   allUsers: User[] = [];
   filteredUsers: User[] = [];
   showUserSuggestions = false;
   selectedUser: User | null = null;
-  private suggestionTimeout: any;
+  private userSearchTimeout: any;
+  isSearchingUsers = false;
   invitedParticipants: Array<{
     email: string;
     name?: string;
@@ -337,50 +338,101 @@ export class DashboardComponent implements OnInit {
       this.invitedParticipants = [];
       this.pendingParticipants = [];
       this.isAddingParticipant = false;
-      if (this.suggestionTimeout) {
-        clearTimeout(this.suggestionTimeout);
+      this.isSearchingUsers = false;
+      if (this.userSearchTimeout) {
+        clearTimeout(this.userSearchTimeout);
       }
     }
   }
 
+  /**
+   * Hybrid search: Instant client-side filter + server-side fallback
+   * - Immediately filters from cached users (instant feedback)
+   * - If few/no results, also queries Firestore with debounce
+   */
   onTeamMemberInputChange() {
-    // Clear any pending timeout
-    if (this.suggestionTimeout) {
-      clearTimeout(this.suggestionTimeout);
+    // Clear any pending server search
+    if (this.userSearchTimeout) {
+      clearTimeout(this.userSearchTimeout);
     }
 
     // Reset selected user if input changes
     this.selectedUser = null;
 
     const searchTerm = this.newTeamMember.toLowerCase().trim();
-    if (searchTerm.length > 0) {
-      this.filteredUsers = this.allUsers
-        .filter((user) => {
-          const firstName = user.firstName?.toLowerCase() || '';
-          const lastName = user.lastName?.toLowerCase() || '';
-          const email = user.email?.toLowerCase() || '';
-          const fullName = `${firstName} ${lastName}`.trim();
-          return (
-            firstName.includes(searchTerm) ||
-            lastName.includes(searchTerm) ||
-            fullName.includes(searchTerm) ||
-            email.includes(searchTerm)
-          );
-        })
-        .slice(0, 10); // Limit to 10 results
-      this.showUserSuggestions = this.filteredUsers.length > 0;
-
-      // Check if the current input matches an existing user
-      const exactMatch = this.allUsers.find(
-        (user) => user.email?.toLowerCase() === searchTerm
-      );
-      if (exactMatch) {
-        this.selectedUser = exactMatch;
-      }
-    } else {
+    
+    if (searchTerm.length === 0) {
       this.filteredUsers = [];
       this.showUserSuggestions = false;
+      this.isSearchingUsers = false;
+      return;
     }
+
+    // STEP 1: Instant client-side filter from cached users
+    this.filteredUsers = this.filterUsersLocally(searchTerm);
+    this.showUserSuggestions = this.filteredUsers.length > 0;
+
+    // Check if the current input matches an existing user
+    const exactMatch = this.allUsers.find(
+      (user) => user.email?.toLowerCase() === searchTerm
+    );
+    if (exactMatch) {
+      this.selectedUser = exactMatch;
+    }
+
+    // STEP 2: If few results OR searching by email, also query server (debounced)
+    if (this.filteredUsers.length < 5 || searchTerm.includes('@')) {
+      this.isSearchingUsers = true;
+      this.userSearchTimeout = setTimeout(() => {
+        this.searchUsersFromServer(searchTerm);
+      }, 300);
+    }
+  }
+
+  /**
+   * Filter users from local cache (instant)
+   */
+  private filterUsersLocally(searchTerm: string): User[] {
+    return this.allUsers
+      .filter((user) => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        return (
+          firstName.includes(searchTerm) ||
+          lastName.includes(searchTerm) ||
+          fullName.includes(searchTerm) ||
+          email.includes(searchTerm)
+        );
+      })
+      .slice(0, 10);
+  }
+
+  /**
+   * Search users from Firestore (scalable server-side search)
+   */
+  private searchUsersFromServer(searchTerm: string): void {
+    this.auth.searchUsers(searchTerm, 15).subscribe({
+      next: (serverUsers) => {
+        // Merge server results with client results, avoiding duplicates
+        const existingEmails = new Set(this.filteredUsers.map(u => u.email?.toLowerCase()));
+        
+        const newResults = serverUsers.filter((user) => {
+          const email = (user.email || '').toLowerCase();
+          return !existingEmails.has(email);
+        });
+        
+        // Combine results (client results first, then server additions)
+        this.filteredUsers = [...this.filteredUsers, ...newResults].slice(0, 12);
+        this.showUserSuggestions = this.filteredUsers.length > 0;
+        this.isSearchingUsers = false;
+      },
+      error: (err) => {
+        console.error('Server search failed:', err);
+        this.isSearchingUsers = false;
+      }
+    });
   }
 
   selectUser(user: User) {
@@ -440,7 +492,7 @@ export class DashboardComponent implements OnInit {
 
   hideUserSuggestions() {
     // Delay hiding to allow click events on suggestions to fire
-    this.suggestionTimeout = setTimeout(() => {
+    this.userSearchTimeout = setTimeout(() => {
       this.showUserSuggestions = false;
     }, 200);
   }
