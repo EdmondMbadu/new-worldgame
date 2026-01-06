@@ -2246,32 +2246,150 @@
 <!-- ADD ADMIN MODAL -->
 <div
   *ngIf="showAddAdmin"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
 >
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Add a Page Admin
-      </h2>
-      <input
-        [(ngModel)]="newAdminEmail"
-        type="email"
-        placeholder="admin@example.com"
-        class="block w-full p-2.5 rounded-lg border text-sm bg-gray-50 border-gray-300 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white mb-6"
-      />
-      <div class="flex justify-end gap-3">
-        <button
-          (click)="toggle('showAddAdmin')"
-          class="px-4 py-2 rounded bg-gray-500 text-white"
-        >
-          Cancel
-        </button>
-        <button
-          (click)="addAdminByEmail()"
-          class="px-4 py-2 rounded bg-fuchsia-700 text-white hover:bg-fuchsia-800"
-        >
-          Add Admin
-        </button>
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+    >
+      <!-- Gradient strip -->
+      <div
+        class="h-2 w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-pink-500"
+      ></div>
+
+      <div class="p-6 space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/40">
+            <svg class="w-5 h-5 text-fuchsia-600 dark:text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+            Add Page Admin
+          </h2>
+        </div>
+
+        <!-- Selected User Display -->
+        <div *ngIf="selectedAdminToAdd" class="flex items-center gap-3 p-3 rounded-lg bg-fuchsia-50 dark:bg-fuchsia-900/30 ring-1 ring-fuchsia-200 dark:ring-fuchsia-800">
+          <img
+            *ngIf="selectedAdminToAdd.photoUrl"
+            [src]="selectedAdminToAdd.photoUrl"
+            class="w-10 h-10 rounded-full object-cover ring-2 ring-fuchsia-400"
+            alt=""
+          />
+          <div *ngIf="!selectedAdminToAdd.photoUrl" class="w-10 h-10 rounded-full bg-fuchsia-200 dark:bg-fuchsia-700 flex items-center justify-center text-fuchsia-700 dark:text-fuchsia-200 font-bold">
+            {{ selectedAdminToAdd.displayName.charAt(0).toUpperCase() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900 dark:text-white truncate">{{ selectedAdminToAdd.displayName }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ selectedAdminToAdd.email }}</p>
+          </div>
+          <button 
+            (click)="clearSelectedAdmin()"
+            class="p-1.5 rounded-lg hover:bg-fuchsia-100 dark:hover:bg-fuchsia-800 text-gray-500 hover:text-red-500 transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div *ngIf="!selectedAdminToAdd" class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Search by name or email
+          </label>
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="adminSearchQuery"
+              (input)="onAdminSearchChange()"
+              placeholder="Start typing a name or email..."
+              class="block w-full pl-10 pr-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-fuchsia-500 focus:border-fuchsia-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+            />
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg *ngIf="!isSearchingAdmins" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <svg *ngIf="isSearchingAdmins" class="w-5 h-5 text-fuchsia-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Search Results Dropdown -->
+          <div
+            *ngIf="adminSearchResults.length > 0"
+            class="absolute z-10 w-full mt-2 bg-white dark:bg-slate-800 rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 max-h-60 overflow-y-auto"
+          >
+            <button
+              *ngFor="let user of adminSearchResults"
+              (click)="selectAdminToAdd(user)"
+              class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition text-left border-b border-gray-100 dark:border-slate-700 last:border-0"
+            >
+              <img
+                *ngIf="user.photoUrl"
+                [src]="user.photoUrl"
+                class="w-9 h-9 rounded-full object-cover"
+                alt=""
+              />
+              <div *ngIf="!user.photoUrl" class="w-9 h-9 rounded-full bg-fuchsia-100 dark:bg-fuchsia-800 flex items-center justify-center text-fuchsia-700 dark:text-fuchsia-200 font-semibold text-sm">
+                {{ user.displayName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-900 dark:text-white truncate">{{ user.displayName }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+              </div>
+            </button>
+          </div>
+
+          <!-- No Results Message -->
+          <div
+            *ngIf="adminSearchQuery.length >= 2 && adminSearchResults.length === 0 && !isSearchingAdmins"
+            class="absolute z-10 w-full mt-2 p-4 bg-white dark:bg-slate-800 rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 text-center"
+          >
+            <p class="text-sm text-gray-500 dark:text-gray-400">No users found matching "{{ adminSearchQuery }}"</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">You can still add by email below</p>
+          </div>
+        </div>
+
+        <!-- Manual Email Input (fallback) -->
+        <div *ngIf="!selectedAdminToAdd" class="pt-2 border-t border-gray-200 dark:border-slate-700">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Or enter email directly
+          </label>
+          <input
+            type="email"
+            [(ngModel)]="newAdminEmail"
+            placeholder="admin@example.com"
+            class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-fuchsia-500 focus:border-fuchsia-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+          />
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <button
+            (click)="toggle('showAddAdmin')"
+            class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="addAdminByEmail()"
+            [disabled]="isLoading"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-fuchsia-600 to-purple-600 rounded-lg hover:from-fuchsia-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            Add Admin
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2280,32 +2398,146 @@
 <!-- REMOVE ADMIN MODAL -->
 <div
   *ngIf="showRemoveAdmin"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
 >
   <div class="relative w-full max-w-md px-4 py-8">
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 p-6">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Remove a Page Admin
-      </h2>
-      <input
-        [(ngModel)]="adminToRemove"
-        type="email"
-        placeholder="admin@example.com"
-        class="block w-full p-2.5 rounded-lg border text-sm bg-gray-50 border-gray-300 text-gray-900 dark:bg-gray-600 dark:border-gray-500 dark:text-white mb-6"
-      />
-      <div class="flex justify-end gap-3">
-        <button
-          (click)="toggle('showRemoveAdmin')"
-          class="px-4 py-2 rounded bg-gray-500 text-white"
-        >
-          Cancel
-        </button>
-        <button
-          (click)="removeAdminByEmail(adminToRemove)"
-          class="px-4 py-2 rounded bg-pink-700 text-white hover:bg-pink-800"
-        >
-          Remove Admin
-        </button>
+    <div
+      class="relative rounded-xl shadow-2xl bg-white dark:bg-slate-800/95 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+    >
+      <!-- Gradient strip -->
+      <div
+        class="h-2 w-full bg-gradient-to-r from-pink-500 via-rose-500 to-red-500"
+      ></div>
+
+      <div class="p-6 space-y-5">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-pink-100 dark:bg-pink-900/40">
+            <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01"></path>
+            </svg>
+          </div>
+          <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+            Remove Admin
+          </h2>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Search admins
+          </label>
+          <div class="relative">
+            <input
+              type="text"
+              [(ngModel)]="removeAdminSearchQuery"
+              placeholder="Filter by name or email..."
+              class="block w-full pl-10 pr-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
+            />
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admins List -->
+        <div class="max-h-64 overflow-y-auto rounded-lg ring-1 ring-gray-200 dark:ring-slate-700">
+          <div
+            *ngIf="filteredAdminsForRemoval.length === 0"
+            class="p-4 text-center text-gray-500 dark:text-gray-400"
+          >
+            <p *ngIf="removeAdminSearchQuery">No admins match "{{ removeAdminSearchQuery }}"</p>
+            <p *ngIf="!removeAdminSearchQuery">No admins to display</p>
+          </div>
+
+          <button
+            *ngFor="let admin of filteredAdminsForRemoval"
+            (click)="adminToRemove = admin.email"
+            class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700/70 transition text-left border-b border-gray-100 dark:border-slate-700 last:border-0"
+            [ngClass]="{
+              'bg-pink-50 dark:bg-pink-900/30 ring-1 ring-inset ring-pink-200 dark:ring-pink-800': adminToRemove === admin.email
+            }"
+          >
+            <img
+              *ngIf="admin.photoUrl"
+              [src]="admin.photoUrl"
+              class="w-10 h-10 rounded-full object-cover ring-2"
+              [ngClass]="{
+                'ring-pink-400': adminToRemove === admin.email,
+                'ring-gray-200 dark:ring-slate-600': adminToRemove !== admin.email
+              }"
+              alt=""
+            />
+            <div 
+              *ngIf="!admin.photoUrl" 
+              class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+              [ngClass]="{
+                'bg-pink-200 dark:bg-pink-700 text-pink-700 dark:text-pink-200': adminToRemove === admin.email,
+                'bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-300': adminToRemove !== admin.email
+              }"
+            >
+              {{ admin.displayName.charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <p class="font-medium text-gray-900 dark:text-white truncate">{{ admin.displayName }}</p>
+                <span 
+                  *ngIf="admin.email === authorEmail" 
+                  class="px-2 py-0.5 text-xs font-medium bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full"
+                >
+                  Owner
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ admin.email }}</p>
+            </div>
+            <div *ngIf="adminToRemove === admin.email" class="flex-shrink-0">
+              <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        <!-- Selected admin indicator -->
+        <div *ngIf="adminToRemove" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>Selected: <strong>{{ adminToRemove }}</strong></span>
+        </div>
+
+        <!-- Warning for owner -->
+        <div *ngIf="adminToRemove === authorEmail" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+          <span>You cannot remove the page owner</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <button
+            (click)="toggle('showRemoveAdmin')"
+            class="px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition"
+          >
+            Cancel
+          </button>
+          <button
+            (click)="removeAdminByEmail(adminToRemove)"
+            [disabled]="!adminToRemove || adminToRemove === authorEmail || isLoading"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-red-600 rounded-lg hover:from-pink-700 hover:to-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            Remove Admin
+          </button>
+        </div>
       </div>
     </div>
   </div>

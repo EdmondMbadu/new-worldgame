@@ -167,6 +167,16 @@ export class HomeChallengeComponent {
   // Remove participant search
   removeParticipantSearchQuery = '';
 
+  // Admin search for adding admins
+  adminSearchQuery = '';
+  adminSearchResults: { email: string; displayName: string; photoUrl?: string; uid?: string }[] = [];
+  isSearchingAdmins = false;
+  selectedAdminToAdd: { email: string; displayName: string; photoUrl?: string; uid?: string } | null = null;
+  private adminSearchTimeout: any;
+
+  // Remove admin search
+  removeAdminSearchQuery = '';
+
   // home-challenge.component.ts
   goToChallengeDiscussion() {
     this.router.navigate(['/challenge-discussion', this.challengePageId], {
@@ -778,6 +788,18 @@ export class HomeChallengeComponent {
       this.removeParticipantSearchQuery = '';
       this.teamMemberToDelete = '';
     }
+
+    // Load users when opening add admin modal
+    if (property === 'showAddAdmin' && this.showAddAdmin) {
+      this.loadAllUsersForSearch();
+      this.clearSelectedAdmin();
+    }
+
+    // Reset remove admin search when opening modal
+    if (property === 'showRemoveAdmin' && this.showRemoveAdmin) {
+      this.removeAdminSearchQuery = '';
+      this.adminToRemove = '';
+    }
   }
   get adminEmailsToRender(): string[] {
     const list = this.visibleAdminEmails || [];
@@ -867,6 +889,80 @@ export class HomeChallengeComponent {
       return this.participantProfiles;
     }
     return this.participantProfiles.filter(p => 
+      p.email.toLowerCase().includes(query) || 
+      p.displayName.toLowerCase().includes(query)
+    );
+  }
+
+  // Admin search methods
+  onAdminSearchChange(): void {
+    if (this.adminSearchTimeout) {
+      clearTimeout(this.adminSearchTimeout);
+    }
+    
+    const query = this.adminSearchQuery.trim().toLowerCase();
+    
+    if (!query || query.length < 2) {
+      this.adminSearchResults = [];
+      return;
+    }
+
+    this.adminSearchTimeout = setTimeout(() => {
+      this.searchAdmins(query);
+    }, 300);
+  }
+
+  private searchAdmins(query: string): void {
+    this.isSearchingAdmins = true;
+    
+    // Filter from cached users
+    const results = this.allUsersCache
+      .filter((user: any) => {
+        const email = (user.email || '').toLowerCase();
+        const firstName = (user.firstName || '').toLowerCase();
+        const lastName = (user.lastName || '').toLowerCase();
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        
+        // Don't show users already in admins
+        if ((this.adminEmails || []).some(e => this.normalizeEmail(e) === this.normalizeEmail(email))) {
+          return false;
+        }
+        
+        return email.includes(query) || firstName.includes(query) || lastName.includes(query) || fullName.includes(query);
+      })
+      .slice(0, 8)
+      .map((user: any) => ({
+        email: user.email || '',
+        displayName: [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email || '',
+        photoUrl: user.profilePicture?.downloadURL || user.profilePicPath || '',
+        uid: user.uid
+      }));
+    
+    this.adminSearchResults = results;
+    this.isSearchingAdmins = false;
+  }
+
+  selectAdminToAdd(user: { email: string; displayName: string; photoUrl?: string; uid?: string }): void {
+    this.selectedAdminToAdd = user;
+    this.adminSearchQuery = user.displayName || user.email;
+    this.adminSearchResults = [];
+    this.newAdminEmail = user.email;
+  }
+
+  clearSelectedAdmin(): void {
+    this.selectedAdminToAdd = null;
+    this.adminSearchQuery = '';
+    this.newAdminEmail = '';
+    this.adminSearchResults = [];
+  }
+
+  // Filter admins for remove modal
+  get filteredAdminsForRemoval(): typeof this.adminProfiles {
+    const query = this.removeAdminSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return this.adminProfiles;
+    }
+    return this.adminProfiles.filter(p => 
       p.email.toLowerCase().includes(query) || 
       p.displayName.toLowerCase().includes(query)
     );
@@ -1762,7 +1858,8 @@ export class HomeChallengeComponent {
   }
 
   async addAdminByEmail() {
-    const emailLC = this.normalizeEmail(this.newAdminEmail);
+    const emailToAdd = this.selectedAdminToAdd?.email || this.newAdminEmail;
+    const emailLC = this.normalizeEmail(emailToAdd);
 
     if (!emailLC || !this.data.isValidEmail(emailLC)) {
       this.toast.error('Enter a valid admin email.');
@@ -1776,13 +1873,15 @@ export class HomeChallengeComponent {
     this.isLoading = true;
     try {
       // try to resolve a user by email → store uid if exists
-      let uidToAdd: string | null = null;
-      try {
-        const users = await firstValueFrom(this.auth.getUserFromEmail(emailLC));
-        if (users && users.length > 0 && users[0]?.uid) {
-          uidToAdd = users[0].uid;
-        }
-      } catch {}
+      let uidToAdd: string | null = this.selectedAdminToAdd?.uid || null;
+      if (!uidToAdd) {
+        try {
+          const users = await firstValueFrom(this.auth.getUserFromEmail(emailLC));
+          if (users && users.length > 0 && users[0]?.uid) {
+            uidToAdd = users[0].uid;
+          }
+        } catch {}
+      }
 
       // update local arrays
       this.adminEmails = [...(this.adminEmails || []), emailLC];
@@ -1804,7 +1903,8 @@ export class HomeChallengeComponent {
         await this.sendEmailToParticipant(emailLC); // it accepts custom subject; if not, it still invites
       } catch {}
 
-      this.toast.success('Admin added.');
+      const displayName = this.selectedAdminToAdd?.displayName || emailLC;
+      this.toast.success(`${displayName} added as admin.`);
       this.toggle('showAddAdmin');
       this.recomputeAdminsView();
       this.loadAdminProfiles();
@@ -1814,6 +1914,9 @@ export class HomeChallengeComponent {
     } finally {
       this.isLoading = false;
       this.newAdminEmail = '';
+      this.selectedAdminToAdd = null;
+      this.adminSearchQuery = '';
+      this.adminSearchResults = [];
     }
   }
 
