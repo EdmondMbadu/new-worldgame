@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ChatbotComponent } from 'src/app/components/chatbot/chatbot.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatContextService } from 'src/app/services/chat-context.service';
+import { ChatSessionService } from 'src/app/services/chat-session.service';
 
 @Component({
   selector: 'app-chabot-standalone',
@@ -26,10 +27,11 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
     router: Router, // keep for goBack()
     route: ActivatedRoute,
     chatContext: ChatContextService,
-    translate: TranslateService
+    translate: TranslateService,
+    chatSession: ChatSessionService
   ) {
     /* 1 ▪ real user present? */
-    super(afs, ensureUser(auth), cd, storage, router, chatContext, translate); // <— now safe
+    super(afs, ensureUser(auth), cd, storage, router, chatContext, translate, chatSession); // <— now safe
 
     /* 2 ▪ origin */
     this.cameFromWidget = route.snapshot.queryParamMap.get('from') === 'widget';

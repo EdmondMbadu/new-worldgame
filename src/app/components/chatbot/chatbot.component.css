@@ -76,6 +76,16 @@ header > div:last-child {
   animation: dropdown-fade-in 0.2s ease-out;
 }
 
+/* History panel animation */
+header > div[class*="absolute"][class*="top-full"] {
+  animation: dropdown-fade-in 0.2s ease-out;
+}
+
+/* Session item hover effect */
+button[class*="group"]:hover {
+  transform: translateX(2px);
+}
+
 /* Message bubble hover effects */
 .prose a {
   color: #0d9488;

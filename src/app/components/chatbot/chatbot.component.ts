@@ -12,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatContextService, PlaygroundContext, PlaygroundQuestion } from 'src/app/services/chat-context.service';
+import { ChatSessionService, ChatSessionRecord, ChatMessageRecord } from 'src/app/services/chat-session.service';
 
 export interface Source {
   title: string;
@@ -90,6 +91,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   showInsertMenu: number | null = null;  // Index of message showing insert menu
   insertingTo: string | null = null;     // Key of question being inserted to
   insertSuccess: string | null = null;   // Shows success message for question key
+
+  // Session Persistence State
+  currentSessionId: string | null = null;
+  sessions: ChatSessionRecord[] = [];
+  showHistoryPanel = false;
+  private sessionsSub?: Subscription;
+  private messagesSub?: Subscription;
+  isLoadingHistory = false;
+  isLoadingSession = false;
 
   aiAvatars: AiAvatar[] = [
     {
@@ -214,7 +224,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     private storage: AngularFireStorage,
     public router: Router,
     public chatContext: ChatContextService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private chatSession: ChatSessionService
   ) {
     this.user = this.auth.currentUser;
     this.selectedAi = this.aiAvatars[0];
@@ -234,13 +245,17 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.stopThinking();
     this.contextSub?.unsubscribe();
     this.insertCompleteSub?.unsubscribe();
+    this.sessionsSub?.unsubscribe();
+    this.messagesSub?.unsubscribe();
   }
 
   ngOnInit(): void {
     if (this.user?.profilePicture?.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
     }
-    this.deleteAllDocuments();
+    
+    // Load sessions for current avatar and restore the most recent one
+    this.loadSessionsForCurrentAvatar();
     
     // Subscribe to playground context
     this.contextSub = this.chatContext.context$.subscribe(ctx => {
@@ -298,13 +313,178 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.collectionPath = `users/${this.auth.currentUser.uid}/${ai.collectionKey}`;
     this.updateIntroMessage();
     this.responses = [];
+    this.currentSessionId = null;
     this.showAiSelector = false;
-    this.deleteAllDocuments();
+    
+    // Load sessions for the new avatar
+    this.loadSessionsForCurrentAvatar();
     this.cdRef.detectChanges();
   }
 
   toggleAiSelector(): void {
     this.showAiSelector = !this.showAiSelector;
+  }
+
+  // =========== Session Management Methods ===========
+  
+  /**
+   * Load all sessions for the current avatar and restore the most recent one
+   */
+  private loadSessionsForCurrentAvatar(): void {
+    this.sessionsSub?.unsubscribe();
+    this.messagesSub?.unsubscribe();
+    
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    
+    this.isLoadingHistory = true;
+    this.sessionsSub = this.chatSession
+      .listSessionsForAvatar(uid, this.selectedAi.id)
+      .subscribe({
+        next: (sessions) => {
+          this.sessions = sessions;
+          this.isLoadingHistory = false;
+          
+          // Auto-restore the most recent session if we don't have one active
+          if (!this.currentSessionId && sessions.length > 0 && this.responses.length === 0) {
+            this.loadSession(sessions[0].id);
+          }
+          
+          this.cdRef.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading sessions:', err);
+          this.isLoadingHistory = false;
+          this.cdRef.detectChanges();
+        }
+      });
+  }
+
+  /**
+   * Load a specific session's messages
+   */
+  loadSession(sessionId: string): void {
+    this.messagesSub?.unsubscribe();
+    
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    
+    this.isLoadingSession = true;
+    this.currentSessionId = sessionId;
+    this.showHistoryPanel = false;
+    
+    this.messagesSub = this.chatSession
+      .observeMessages(uid, sessionId)
+      .subscribe({
+        next: (messages) => {
+          // Convert ChatMessageRecord to DisplayMessage
+          this.responses = messages.map(msg => ({
+            text: msg.text,
+            type: msg.type as 'PROMPT' | 'RESPONSE',
+          }));
+          this.isLoadingSession = false;
+          this.cdRef.detectChanges();
+          setTimeout(() => this.scrollToBottom('auto'), 0);
+        },
+        error: (err) => {
+          console.error('Error loading messages:', err);
+          this.isLoadingSession = false;
+          this.cdRef.detectChanges();
+        }
+      });
+  }
+
+  /**
+   * Start a new conversation
+   */
+  startNewConversation(): void {
+    this.messagesSub?.unsubscribe();
+    this.currentSessionId = null;
+    this.responses = [];
+    this.showHistoryPanel = false;
+    this.updateIntroMessage();
+    this.cdRef.detectChanges();
+  }
+
+  /**
+   * Toggle the history panel
+   */
+  toggleHistoryPanel(): void {
+    this.showHistoryPanel = !this.showHistoryPanel;
+    this.showAiSelector = false; // Close AI selector if open
+  }
+
+  /**
+   * Delete a session from history
+   */
+  async deleteSessionFromHistory(sessionId: string, event: Event): Promise<void> {
+    event.stopPropagation();
+    
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    
+    try {
+      await this.chatSession.deleteSession(uid, sessionId);
+      
+      // If we deleted the current session, start a new one
+      if (this.currentSessionId === sessionId) {
+        this.startNewConversation();
+      }
+    } catch (err) {
+      console.error('Error deleting session:', err);
+    }
+  }
+
+  /**
+   * Generate a title from the first message
+   */
+  private generateSessionTitle(firstMessage: string): string {
+    if (!firstMessage) return 'New conversation';
+    
+    // Clean up the message
+    const cleaned = firstMessage.replace(/\s+/g, ' ').trim();
+    
+    // Take first sentence or first ~50 chars
+    const firstSentenceMatch = cleaned.match(/^[^.!?]+[.!?]?/);
+    let title = firstSentenceMatch ? firstSentenceMatch[0] : cleaned;
+    
+    // Truncate if too long
+    if (title.length > 50) {
+      title = title.slice(0, 47) + '...';
+    }
+    
+    return title || 'New conversation';
+  }
+
+  /**
+   * Format session date for display
+   */
+  formatSessionDate(timestamp: number | undefined): string {
+    if (!timestamp) return '';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  }
+
+  /**
+   * Get the current session's title
+   */
+  get currentSessionTitle(): string {
+    if (!this.currentSessionId) return 'New conversation';
+    const session = this.sessions.find(s => s.id === this.currentSessionId);
+    return session?.title || 'Conversation';
   }
 
   get colleagueAvatars(): AiAvatar[] {
@@ -607,8 +787,29 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     const trimmed = this.prompt.trim();
     if (!trimmed && !this.previews.length) return;
 
+    const uid = this.auth.currentUser?.uid;
+    
+    // Create a new session if we don't have one
+    if (!this.currentSessionId && uid && trimmed) {
+      const title = this.generateSessionTitle(trimmed);
+      this.currentSessionId = await this.chatSession.createSession(uid, {
+        avatarSlug: this.selectedAi.id,
+        avatarName: this.selectedAi.name,
+        title,
+        firstMessagePreview: trimmed,
+      });
+    }
+
     if (trimmed) {
       this.responses.push({ text: trimmed, type: 'PROMPT' });
+      
+      // Persist the prompt to the session
+      if (uid && this.currentSessionId) {
+        this.chatSession.addMessage(uid, this.currentSessionId, {
+          text: trimmed,
+          type: 'PROMPT',
+        }).catch(err => console.error('Error persisting prompt:', err));
+      }
     }
 
     const attachmentMsgs: DisplayMessage[] = this.previews
@@ -652,6 +853,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       promptLength: fullPrompt.length,
       hasContext: !!this.playgroundContext,
       selectedAi: this.selectedAi.name,
+      sessionId: this.currentSessionId,
     });
 
     // Detect if this is an image generation request for UI feedback
@@ -701,6 +903,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
                 if (snap.sources && !slot.sources) {
                   slot.sources = snap.sources;
                 }
+                
+                // Persist the response to the session after streaming completes
+                if (uid && this.currentSessionId && snap.response) {
+                  this.chatSession.addMessage(uid, this.currentSessionId, {
+                    text: snap.response,
+                    type: 'RESPONSE',
+                  }).catch(err => console.error('Error persisting response:', err));
+                }
+                
                 this.cdRef.detectChanges();
                 setTimeout(() => this.scrollToBottom('smooth'), 0);
               });
@@ -729,6 +940,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
               type: 'RESPONSE',
               text: errorMessage,
             });
+            
+            // Persist error response to the session
+            if (uid && this.currentSessionId) {
+              this.chatSession.addMessage(uid, this.currentSessionId, {
+                text: errorMessage,
+                type: 'RESPONSE',
+              }).catch(err => console.error('Error persisting error response:', err));
+            }
+            
             this.status = '';
             this.cdRef.detectChanges();
             setTimeout(() => this.scrollToBottom(), 0);
@@ -745,7 +965,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   endChat() {
-    this.deleteAllDocuments();
+    // Don't delete documents - they're now persisted in sessions
+    // Just close the chat panel
     this.toggleBot();
   }
 
