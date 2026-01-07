@@ -323,19 +323,21 @@ export class CreatePlaygroundComponent {
     this.createdSolutionError = false;
   }
   sendEmailToParticipants() {
-    const genericEmail = this.fns.httpsCallable('genericEmail');
+    const sendParticipantInvite = this.fns.httpsCallable('sendParticipantInvite');
+    const inviterName = `${this.auth.currentUser?.firstName || ''} ${this.auth.currentUser?.lastName || ''}`.trim() || 'A team member';
 
     this.participantsEmails.forEach((participant) => {
       const emailData = {
         email: participant.name,
-        subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-        title: this.myForm.value.title,
-        description: this.myForm.value.description,
+        inviterName,
+        title: this.myForm.value.title || 'Solution Lab',
+        description: this.myForm.value.description || '',
         path: `https://newworld-game.org/playground-steps/${this.solution.solutionId}`,
-        // Include any other data required by your Cloud Function
+        type: 'solution',
+        isNewUser: false, // Assume existing users for this flow
       };
 
-      genericEmail(emailData).subscribe(
+      sendParticipantInvite(emailData).subscribe(
         (result) => {
           console.log('Email sent:', result);
         },

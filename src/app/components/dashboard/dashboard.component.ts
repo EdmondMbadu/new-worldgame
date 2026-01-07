@@ -675,52 +675,32 @@ export class DashboardComponent implements OnInit {
   }
 
   async sendEmailToParticipant() {
-    const genericEmail = this.fns.httpsCallable('genericEmail');
-    const nonUserEmail = this.fns.httpsCallable('nonUserEmail');
+    const sendParticipantInvite = this.fns.httpsCallable('sendParticipantInvite');
 
     try {
-      // Fetch the user data
+      // Fetch the user data to check if they're registered
       const users = await firstValueFrom(
         this.auth.getUserFromEmail(this.newTeamMember)
       );
-      console.log('extracted user from email', users);
-      console.log('the new solution data', this.currentSolution);
+      const isRegisteredUser = users && users.length > 0;
+      const inviterName = `${this.auth.currentUser.firstName || ''} ${this.auth.currentUser.lastName || ''}`.trim() || 'A team member';
 
-      if (users && users.length > 0) {
-        // Participant is a registered user
-        const emailData = {
-          email: this.newTeamMember,
-          subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-          title: `${this.currentSolution.title}`,
-          description: `${this.currentSolution.description}`,
-          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-          image: `${this.currentSolution.image}`,
-          path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
-          user: `${users[0].firstName} ${users[0].lastName}`,
-        };
+      const emailData = {
+        email: this.newTeamMember,
+        inviterName,
+        title: this.currentSolution.title || 'Solution Lab',
+        description: this.currentSolution.description || '',
+        image: this.currentSolution.image || '',
+        path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+        type: 'solution',
+        recipientName: isRegisteredUser ? `${users[0].firstName || ''} ${users[0].lastName || ''}`.trim() : '',
+        isNewUser: !isRegisteredUser,
+      };
 
-        const result = await firstValueFrom(genericEmail(emailData));
-        console.log(`Email sent to ${this.newTeamMember}:`, result);
-      } else {
-        // Participant is NOT a registered user
-        const emailData = {
-          email: this.newTeamMember,
-          subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-          title: this.currentSolution.title,
-          description: this.currentSolution.description,
-          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-          image: this.currentSolution.image,
-          path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
-        };
-
-        const result = await firstValueFrom(nonUserEmail(emailData));
-        console.log(`Email sent to ${this.newTeamMember}:`, result);
-      }
+      const result = await firstValueFrom(sendParticipantInvite(emailData));
+      console.log(`Email sent to ${this.newTeamMember}:`, result);
     } catch (error) {
-      console.error(
-        `Error processing participant ${this.newTeamMember}:`,
-        error
-      );
+      console.error(`Error sending invite to ${this.newTeamMember}:`, error);
     }
   }
 }

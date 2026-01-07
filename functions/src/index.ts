@@ -1724,6 +1724,227 @@ export const workshopRegistrationEmail = functions.https.onCall(
   }
 );
 
+/**
+ * Beautiful invite email for participants - works for both solutions and challenge pages
+ * Uses inline HTML template (not SendGrid templates) for better deliverability
+ */
+export const sendParticipantInvite = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const recipientEmail = (data?.email || '').toString().trim().toLowerCase();
+    const inviterName = (data?.inviterName || 'Someone').toString().trim();
+    const projectTitle = (data?.title || 'a project').toString().trim();
+    const projectDescription = (data?.description || '').toString().trim();
+    const projectImage = (data?.image || '').toString().trim();
+    const inviteUrl = (data?.path || data?.url || '').toString().trim();
+    const inviteType = (data?.type || 'solution').toString().trim(); // 'solution', 'challenge', 'workspace'
+    const recipientName = (data?.recipientName || '').toString().trim();
+    const isNewUser = data?.isNewUser === true;
+
+    if (!recipientEmail || !emailRegex.test(recipientEmail)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A valid recipient email is required.'
+      );
+    }
+
+    const escapeHtml = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const safeInviter = escapeHtml(inviterName);
+    const safeTitle = escapeHtml(projectTitle);
+    const safeDescription = projectDescription 
+      ? escapeHtml(projectDescription).slice(0, 200) + (projectDescription.length > 200 ? '...' : '')
+      : '';
+    const safeRecipientName = recipientName ? escapeHtml(recipientName) : '';
+    
+    // Determine the invite type label
+    const typeLabels: Record<string, string> = {
+      'solution': 'solution',
+      'challenge': 'challenge workspace',
+      'workspace': 'workspace',
+      'team': 'team',
+    };
+    const typeLabel = typeLabels[inviteType] || 'project';
+
+    // Personalized greeting
+    const greeting = safeRecipientName 
+      ? `Hi ${safeRecipientName},` 
+      : 'Hello,';
+
+    // CTA button text based on user status
+    const ctaText = isNewUser 
+      ? 'Create Account & Join' 
+      : 'View Invitation';
+
+    const subject = `${inviterName} invited you to join "${projectTitle}" on NewWorld Game`;
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0; padding:0; background-color:#f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f8fafc;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px; width:100%;">
+          
+          <!-- Logo Header -->
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <img src="https://firebasestorage.googleapis.com/v0/b/buckminister-backup.appspot.com/o/nwg-logo-green.png?alt=media" alt="NewWorld Game" width="180" style="display:block; max-width:180px; height:auto;" />
+            </td>
+          </tr>
+          
+          <!-- Main Card -->
+          <tr>
+            <td>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff; border-radius:16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); overflow:hidden;">
+                
+                <!-- Project Image (if provided) -->
+                ${projectImage ? `
+                <tr>
+                  <td>
+                    <img src="${escapeHtml(projectImage)}" alt="${safeTitle}" width="600" style="display:block; width:100%; max-height:200px; object-fit:cover;" />
+                  </td>
+                </tr>
+                ` : ''}
+                
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 40px 40px 32px;">
+                    
+                    <!-- Invite Badge -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 16px; border-radius: 9999px;">
+                          <span style="color:#ffffff; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">You're Invited</span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- Greeting -->
+                    <p style="margin:0 0 16px; font-size:16px; color:#334155; line-height:1.5;">
+                      ${greeting}
+                    </p>
+                    
+                    <!-- Main Message -->
+                    <p style="margin:0 0 24px; font-size:16px; color:#334155; line-height:1.6;">
+                      <strong style="color:#0f172a;">${safeInviter}</strong> has invited you to collaborate on a ${typeLabel} on NewWorld Game.
+                    </p>
+                    
+                    <!-- Project Info Box -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f1f5f9; border-radius:12px; margin-bottom:28px;">
+                      <tr>
+                        <td style="padding:24px;">
+                          <p style="margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#64748b; font-weight:600;">
+                            ${typeLabel.toUpperCase()}
+                          </p>
+                          <h2 style="margin:0 0 12px; font-size:20px; color:#0f172a; font-weight:700; line-height:1.3;">
+                            ${safeTitle}
+                          </h2>
+                          ${safeDescription ? `
+                          <p style="margin:0; font-size:14px; color:#475569; line-height:1.5;">
+                            ${safeDescription}
+                          </p>
+                          ` : ''}
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- CTA Button -->
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:28px;">
+                      <tr>
+                        <td align="center" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius:9999px;">
+                          <a href="${inviteUrl}" target="_blank" style="display:inline-block; padding:16px 32px; font-size:16px; font-weight:600; color:#ffffff; text-decoration:none;">
+                            ${ctaText} →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <!-- What is NewWorld Game -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e2e8f0; padding-top:24px;">
+                      <tr>
+                        <td>
+                          <p style="margin:0 0 8px; font-size:13px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
+                            What is NewWorld Game?
+                          </p>
+                          <p style="margin:0; font-size:14px; color:#64748b; line-height:1.6;">
+                            NewWorld Game is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 20px; text-align:center;">
+              <p style="margin:0 0 8px; font-size:13px; color:#94a3b8;">
+                This invitation was sent by ${safeInviter} via NewWorld Game.
+              </p>
+              <p style="margin:0; font-size:12px; color:#94a3b8;">
+                © ${new Date().getFullYear()} NewWorld Game · <a href="https://newworld-game.org" style="color:#64748b; text-decoration:underline;">newworld-game.org</a>
+              </p>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `.trim();
+
+    const text = `${greeting}
+
+${inviterName} has invited you to collaborate on "${projectTitle}" on NewWorld Game.
+
+${safeDescription ? `About this ${typeLabel}: ${projectDescription}\n\n` : ''}To view this invitation and join, visit: ${inviteUrl}
+
+---
+What is NewWorld Game?
+NewWorld Game is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
+
+This invitation was sent by ${inviterName} via NewWorld Game.
+`;
+
+    const mail: sgMail.MailDataRequired = {
+      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      to: recipientEmail,
+      subject,
+      html,
+      text,
+      trackingSettings: {
+        clickTracking: { enable: true, enableText: true },
+        openTracking: { enable: true },
+      },
+    };
+
+    try {
+      await sgMail.send(mail);
+      return { success: true };
+    } catch (err: any) {
+      console.error('SendGrid invite email error:', err?.response?.body || err?.message || err);
+      throw new functions.https.HttpsError('internal', 'Failed to send invitation email.');
+    }
+  }
+);
+
 export const solutionEvaluationInvite = functions.https.onCall(
   async (data: any, context: any) => {
     try {

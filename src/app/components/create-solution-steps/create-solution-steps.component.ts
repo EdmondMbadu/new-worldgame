@@ -437,60 +437,36 @@ export class CreateSolutionStepsComponent implements OnInit {
   //     );
   //   });
   // }
-  // New method to send emails to participants
+  // Send beautiful invite emails to participants
   async sendEmailToParticipants() {
-    const genericEmail = this.fns.httpsCallable('genericEmail');
-    const nonUserEmail = this.fns.httpsCallable('nonUserEmail'); // Ensure you have this Cloud Function set up
-
+    const sendParticipantInvite = this.fns.httpsCallable('sendParticipantInvite');
     const participants = this.solution.newSolution.participantsHolder || [];
+    const inviterName = `${this.auth.currentUser.firstName || ''} ${this.auth.currentUser.lastName || ''}`.trim() || 'A team member';
 
     for (const participant of participants) {
       try {
-        // Fetch the user data
+        // Fetch the user data to check if they're registered
         const users = await firstValueFrom(
           this.auth.getUserFromEmail(participant.name)
         );
-        console.log('extracted user from email', users);
-        console.log('the new solution data', this.solution.newSolution);
+        const isRegisteredUser = users && users.length > 0;
 
-        if (users && users.length > 0) {
-          // Participant is a registered user
-          const emailData = {
-            email: participant.name, // Ensure this is the correct field
-            subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-            title: `${this.solution.newSolution.title}`,
-            description: `${this.solution.newSolution.description}`,
-            author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-            image: `${this.solution.newSolution.image}`,
-            path: `https://newworld-game.org/dashboard/${this.solution.solutionId}`,
-            user: `${users[0].firstName} ${users[0].lastName}`,
-            // Add any other necessary fields
-          };
+        const emailData = {
+          email: participant.name,
+          inviterName,
+          title: this.solution.newSolution.title || 'Solution Lab',
+          description: this.solution.newSolution.description || '',
+          image: this.solution.newSolution.image || '',
+          path: `https://newworld-game.org/dashboard/${this.solution.solutionId}`,
+          type: 'solution',
+          recipientName: isRegisteredUser ? `${users[0].firstName || ''} ${users[0].lastName || ''}`.trim() : '',
+          isNewUser: !isRegisteredUser,
+        };
 
-          const result = await firstValueFrom(genericEmail(emailData));
-          console.log(`Email sent to ${participant.name}:`, result);
-        } else {
-          // Participant is NOT a registered user
-          // Participant is a registered user
-          const emailData = {
-            email: participant.name, // Ensure this is the correct field
-            subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
-            title: this.solution.newSolution.title,
-            description: this.solution.newSolution.description,
-            author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-            image: this.solution.newSolution.image,
-            path: `https://newworld-game.org/dashboard/${this.solution.solutionId}`,
-            // Add any other necessary fields
-          };
-
-          const result = await firstValueFrom(nonUserEmail(emailData));
-          console.log(`Email sent to ${participant.name}:`, result);
-        }
+        const result = await firstValueFrom(sendParticipantInvite(emailData));
+        console.log(`Email sent to ${participant.name}:`, result);
       } catch (error) {
-        console.error(
-          `Error processing participant ${participant.name}:`,
-          error
-        );
+        console.error(`Error sending invite to ${participant.name}:`, error);
       }
     }
   }

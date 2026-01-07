@@ -2,7 +2,6 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import { nonUserchallengePageInvite } from 'functions/src';
 import { firstValueFrom } from 'rxjs';
 import { ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -1435,65 +1434,36 @@ export class HomeChallengeComponent {
       });
   }
 
-  // New method to send emails to participants
+  // Send beautiful invite email to participants
   async sendEmailToParticipant(participant: string) {
     console.log('sending email invite to ', participant);
-    const challengePageInvite = this.fns.httpsCallable('challengePageInvite');
-    const nonUserchallengePageInvite = this.fns.httpsCallable(
-      'nonUserchallengePageInvite'
-    ); // Ensure you have this Cloud Function set up
+    const sendParticipantInvite = this.fns.httpsCallable('sendParticipantInvite');
 
-    // for (const participant of participants) {
     try {
-      // Fetch the user data
+      // Fetch the user data to check if they're registered
       const users = await firstValueFrom(
         this.auth.getUserFromEmail(participant)
       );
-      console.log('extracted user from email', users);
-      console.log('the new solution data', this.solution.newSolution);
+      const isRegisteredUser = users && users.length > 0;
+      const inviterName = `${this.auth.currentUser.firstName || ''} ${this.auth.currentUser.lastName || ''}`.trim() || 'A team member';
+      
+      const emailData = {
+        email: participant,
+        inviterName,
+        title: this.challengePage.name || 'Challenge Workspace',
+        description: this.challengePage.description || '',
+        image: this.challengePage.imageChallenge || '',
+        path: `https://newworld-game.org/home-challenge/${this.challengePageId}`,
+        type: 'challenge',
+        recipientName: isRegisteredUser ? `${users[0].firstName || ''} ${users[0].lastName || ''}`.trim() : '',
+        isNewUser: !isRegisteredUser,
+      };
 
-      if (users && users.length > 0) {
-        // Participant is a registered user
-        console.log('Participant is a registered user');
-
-        const emailData = {
-          email: participant, // Ensure this is the correct field
-          subject: `You Have Been Invited to Join a Challenge Workspace @ NewWorld Game`,
-          title: `${this.challengePage.name}`,
-          description: `${this.challengePage.description}`,
-          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-          image: `${this.challengePage.imageChallenge}`,
-          path: `https://newworld-game.org/home-challenge/${this.challengePageId}`,
-          user: `${users[0].firstName} ${users[0].lastName}`,
-          // Add any other necessary fields
-        };
-
-        const result = await firstValueFrom(challengePageInvite(emailData));
-        console.log(`Email sent to ${participant}:`, result);
-      } else {
-        console.log('Participant is NOT a registered user');
-        // Participant is NOT a registered user
-        // Participant is a registered user
-        const emailData = {
-          email: participant, // Ensure this is the correct field
-          subject: `You Have Been Invited to Join a Challenge Workspace @ NewWorld Game`,
-          title: `${this.challengePage.name}`,
-          description: `${this.challengePage.description}`,
-          author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
-          image: `${this.challengePage.imageChallenge}`,
-          path: `https://newworld-game.org/home-challenge/${this.challengePageId}`,
-          // Add any other necessary fields
-        };
-
-        const result = await firstValueFrom(
-          nonUserchallengePageInvite(emailData)
-        );
-        console.log(`Email sent to ${participant}:`, result);
-      }
+      const result = await firstValueFrom(sendParticipantInvite(emailData));
+      console.log(`Email sent to ${participant}:`, result);
     } catch (error) {
-      console.error(`Error processing participant ${participant}:`, error);
+      console.error(`Error sending invite to ${participant}:`, error);
     }
-    // }
   }
   async deleteChallenge(challengeId: string, index: number) {
     if (!confirm('Delete this challenge? This cannot be undone.')) {
