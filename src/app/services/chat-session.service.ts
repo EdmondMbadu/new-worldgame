@@ -4,7 +4,7 @@ import firebase from 'firebase/compat/app';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export type ChatMessageType = 'PROMPT' | 'RESPONSE';
+export type ChatMessageType = 'PROMPT' | 'RESPONSE' | 'IMAGE';
 
 export interface ChatSessionRecord {
   id: string;
@@ -30,6 +30,10 @@ export interface ChatMessageRecord {
   createdAt?: firebase.firestore.Timestamp | null;
   createdAtMs?: number;
   sources?: ChatMessageSource[];
+  // Image-specific fields
+  imageUrl?: string;
+  imageDocId?: string;
+  imagePrompt?: string;
 }
 
 export interface CreateSessionPayload {
@@ -45,6 +49,10 @@ export interface PersistMessagePayload {
   type: ChatMessageType;
   createdAtMs?: number;
   sources?: ChatMessageSource[];
+  // Image-specific fields
+  imageUrl?: string;
+  imageDocId?: string;
+  imagePrompt?: string;
 }
 
 @Injectable({
@@ -118,7 +126,7 @@ export class ChatSessionService {
     // Build the message document with optional sources
     const messageDoc: Record<string, any> = {
       id: messageId,
-      text: payload.text,
+      text: payload.text || '',
       type: payload.type,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdAtMs,
@@ -128,6 +136,17 @@ export class ChatSessionService {
     if (payload.sources && payload.sources.length > 0) {
       messageDoc['sources'] = payload.sources;
     }
+    
+    // Include image fields if provided (for IMAGE type messages)
+    if (payload.imageUrl) {
+      messageDoc['imageUrl'] = payload.imageUrl;
+    }
+    if (payload.imageDocId) {
+      messageDoc['imageDocId'] = payload.imageDocId;
+    }
+    if (payload.imagePrompt) {
+      messageDoc['imagePrompt'] = payload.imagePrompt;
+    }
 
     await this.afs
       .doc(
@@ -135,11 +154,16 @@ export class ChatSessionService {
       )
       .set(messageDoc);
 
+    // Use image prompt for preview if this is an image message
+    const previewText = payload.type === 'IMAGE' 
+      ? `🖼️ ${payload.imagePrompt || 'Generated image'}`
+      : payload.text;
+
     await this.afs.doc(this.sessionDocPath(uid, sessionId)).set(
       {
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAtMs: createdAtMs,
-        latestPreview: this.truncatePreview(payload.text),
+        latestPreview: this.truncatePreview(previewText),
       },
       { merge: true }
     );

@@ -14,6 +14,7 @@ import { buildICS } from './ics';
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
 import { Buffer } from 'node:buffer';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -1092,38 +1093,38 @@ export const onChatPrompt = functions
       ];
       const wantsImage = imagePatterns.some((pattern) => pattern.test(prompt));
 
-      // Use gemini-2.0-flash-exp for image generation (best available via Generative AI SDK)
+      // Use imagen-3.0-generate-002 for high-quality image generation
       // Use gemini-2.5-flash for text-only responses with grounding
-      const modelName = wantsImage
-        ? 'gemini-2.0-flash-exp'
-        : 'gemini-2.5-flash';
+      const textModelName = 'gemini-2.5-flash';
 
       console.log('Model selection:', {
         wantsImage,
-        modelName,
+        modelName: wantsImage ? 'imagen-3.0-generate-002' : textModelName,
         promptPreview: prompt.slice(0, 100),
       });
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const modelConfig: Record<string, unknown> = { model: modelName };
-      if (!wantsImage) {
-        // Enable Google Search grounding for factual responses with sources
-        // The google_search tool enables grounding with web search
-        modelConfig['tools'] = [{ google_search: {} }];
-      } else {
-        // Configure for high-quality image generation
-        modelConfig['generationConfig'] = {
-          responseModalities: ['TEXT', 'IMAGE'],
-        };
-      }
+      const modelConfig: Record<string, unknown> = { model: textModelName };
+      // Enable Google Search grounding for factual responses with sources
+      modelConfig['tools'] = [{ google_search: {} }];
       const model = genAI.getGenerativeModel(modelConfig as any);
 
-      // For image generation, enhance the prompt for better quality
-      let imagePrompt = history;
+      // For image generation, create a clean, focused prompt
+      let cleanImagePrompt = prompt;
       if (wantsImage) {
-        // Add quality-enhancing instructions to the prompt
-        const qualityPrefix = `You are an expert AI image generator. Create a high-quality, detailed, professional image based on the following request. Make it visually stunning, well-composed, with good lighting and artistic quality.\n\n`;
-        imagePrompt = qualityPrefix + history;
+        // Extract the core image request from the prompt, removing conversational fluff
+        cleanImagePrompt = prompt
+          .replace(/^(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)\s+(of|for|showing|depicting|illustrating)?\s*/i, '')
+          .replace(/^(générer|créer|faire|dessiner|peindre|concevoir|produire|rendre)\s+(une?\s+)?(image|photo|illustration|visuel|graphique|diagramme|infographie)\s+(de|pour|montrant|dépeignant|illustrant)?\s*/i, '')
+          .trim();
+        
+        // If the cleaned prompt is too short, use the original
+        if (cleanImagePrompt.length < 10) {
+          cleanImagePrompt = prompt;
+        }
+        
+        // Add quality-enhancing suffix for Imagen 3
+        cleanImagePrompt = `${cleanImagePrompt}. High quality, detailed, professional photograph or illustration with excellent composition and lighting.`;
       }
 
       // ────────── 3. generate ───────────────────────────────────
@@ -1132,64 +1133,103 @@ export const onChatPrompt = functions
       let finalResponse: any;
 
       if (wantsImage) {
-        // Image model does not support streaming; do one-shot generation.
+        // Use Imagen 3 for high-quality image generation
         try {
-          console.log('Attempting image generation with model:', modelName);
-          const result = await model.generateContent(imagePrompt);
-          finalResponse = await result.response;
-
-          // Check for blocked content or safety issues
-          if (finalResponse.candidates?.[0]?.finishReason === 'SAFETY') {
-            answer =
-              "I apologize, but I couldn't generate that image due to content safety guidelines. Please try a different prompt that doesn't include people or sensitive content.";
-          } else if (
-            finalResponse.candidates?.[0]?.finishReason === 'RECITATION'
-          ) {
-            answer =
-              "I couldn't generate that image due to content restrictions. Please try a different prompt.";
-          } else {
-            for (const part of finalResponse.candidates?.[0]?.content?.parts ||
-              []) {
-              if (part.text) {
-                answer += part.text;
-              } else if (part.inlineData?.data) {
-                imgB64 = part.inlineData.data;
-              }
+          console.log('Attempting image generation with Imagen 3');
+          console.log('Image prompt:', cleanImagePrompt.slice(0, 200));
+          
+          // Initialize the @google/genai client for Imagen 3
+          const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+          
+          const imageResult = await ai.models.generateImages({
+            model: 'imagen-3.0-generate-002',
+            prompt: cleanImagePrompt,
+            config: {
+              numberOfImages: 1,
+              aspectRatio: '16:9', // Wide format for better visual appeal
+            },
+          });
+          
+          // Get the generated image
+          if (imageResult.generatedImages && imageResult.generatedImages.length > 0) {
+            const generatedImage = imageResult.generatedImages[0];
+            if (generatedImage.image?.imageBytes) {
+              // The image is returned as base64-encoded bytes
+              imgB64 = generatedImage.image.imageBytes;
+              answer = "Here's the image I created for you.";
             }
           }
-
-          // If no image was generated but we expected one, provide feedback
-          if (!imgB64 && !answer) {
-            answer =
-              "I tried to generate an image but wasn't able to. This might be due to content restrictions. Try a prompt without people or sensitive content, like 'Generate an image of a futuristic sustainable city' or 'Create an illustration of renewable energy'.";
+          
+          // If no image was generated, provide feedback
+          if (!imgB64) {
+            answer = "I tried to generate an image but wasn't able to. This might be due to content restrictions. Try a prompt without people or sensitive content, like 'Generate an image of a futuristic sustainable city' or 'Create an illustration of renewable energy'.";
           }
-
-          console.log('Image generation result:', {
+          
+          console.log('Imagen 3 generation result:', {
             hasImage: !!imgB64,
             answerLength: answer.length,
           });
         } catch (imageError: any) {
           console.error(
-            'Image generation error:',
+            'Imagen 3 generation error:',
             imageError?.message || imageError
           );
-          // Provide a helpful fallback message
-          answer = 'I encountered an issue generating that image. ';
-          if (
-            imageError?.message?.includes('SAFETY') ||
-            imageError?.message?.includes('blocked')
-          ) {
-            answer +=
-              'The content may have been blocked due to safety guidelines. Try a different prompt without people or sensitive subjects.';
-          } else if (
-            imageError?.message?.includes('quota') ||
-            imageError?.message?.includes('limit')
-          ) {
-            answer +=
-              'The image generation service may be temporarily unavailable. Please try again later.';
-          } else {
-            answer +=
-              "Please try a different prompt, such as 'Generate an image of a beautiful landscape' or 'Create a picture of a sustainable city'.";
+          
+          // Try fallback to Gemini 2.0 Flash for image generation
+          try {
+            console.log('Falling back to Gemini 2.0 Flash for image generation');
+            const fallbackConfig: Record<string, unknown> = { 
+              model: 'gemini-2.0-flash-exp',
+              generationConfig: {
+                responseModalities: ['TEXT', 'IMAGE'],
+              },
+            };
+            const fallbackModel = genAI.getGenerativeModel(fallbackConfig as any);
+            const qualityPrefix = `You are an expert AI image generator. Create a high-quality, detailed, professional image based on the following request. Make it visually stunning, well-composed, with good lighting and artistic quality.\n\n`;
+            const fallbackPrompt = qualityPrefix + prompt;
+            
+            const result = await fallbackModel.generateContent(fallbackPrompt);
+            finalResponse = await result.response;
+            
+            // Check for blocked content or safety issues
+            if (finalResponse.candidates?.[0]?.finishReason === 'SAFETY') {
+              answer = "I apologize, but I couldn't generate that image due to content safety guidelines. Please try a different prompt that doesn't include people or sensitive content.";
+            } else if (finalResponse.candidates?.[0]?.finishReason === 'RECITATION') {
+              answer = "I couldn't generate that image due to content restrictions. Please try a different prompt.";
+            } else {
+              for (const part of finalResponse.candidates?.[0]?.content?.parts || []) {
+                if (part.text) {
+                  answer += part.text;
+                } else if (part.inlineData?.data) {
+                  imgB64 = part.inlineData.data;
+                }
+              }
+            }
+            
+            console.log('Gemini fallback result:', {
+              hasImage: !!imgB64,
+              answerLength: answer.length,
+            });
+          } catch (fallbackError: any) {
+            console.error('Gemini fallback error:', fallbackError?.message || fallbackError);
+            answer = 'I encountered an issue generating that image. ';
+            if (
+              imageError?.message?.includes('SAFETY') ||
+              imageError?.message?.includes('blocked') ||
+              fallbackError?.message?.includes('SAFETY') ||
+              fallbackError?.message?.includes('blocked')
+            ) {
+              answer += 'The content may have been blocked due to safety guidelines. Try a different prompt without people or sensitive subjects.';
+            } else if (
+              imageError?.message?.includes('quota') ||
+              imageError?.message?.includes('limit') ||
+              fallbackError?.message?.includes('quota') ||
+              fallbackError?.message?.includes('limit')
+            ) {
+              answer += 'The image generation service may be temporarily unavailable. Please try again later.';
+            } else {
+              answer += "Please try a different prompt, such as 'Generate an image of a beautiful landscape' or 'Create a picture of a sustainable city'.";
+            }
           }
         }
       } else {

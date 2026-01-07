@@ -377,13 +377,25 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       .observeMessages(uid, sessionId)
       .subscribe({
         next: (messages) => {
-          // Convert ChatMessageRecord to DisplayMessage (including sources)
-          this.responses = messages.map(msg => ({
-            text: msg.text,
-            type: msg.type as 'PROMPT' | 'RESPONSE',
-            sources: msg.sources || undefined,
-            insertable: this.hasContext && msg.type === 'RESPONSE',
-          }));
+          // Convert ChatMessageRecord to DisplayMessage (including sources and images)
+          this.responses = messages.map(msg => {
+            if (msg.type === 'IMAGE') {
+              // Restore image message
+              return {
+                src: msg.imageUrl,
+                type: 'IMAGE' as const,
+                imageDocId: msg.imageDocId || undefined,
+                imagePrompt: msg.imagePrompt || undefined,
+              };
+            }
+            // Text message (PROMPT or RESPONSE)
+            return {
+              text: msg.text,
+              type: msg.type as 'PROMPT' | 'RESPONSE',
+              sources: msg.sources || undefined,
+              insertable: this.hasContext && msg.type === 'RESPONSE',
+            };
+          });
           this.isLoadingSession = false;
           this.cdRef.detectChanges();
           setTimeout(() => this.scrollToBottom('auto'), 0);
@@ -922,12 +934,25 @@ export class ChatbotComponent implements OnInit, OnDestroy {
             if (snap.imageUrl) {
               // Find the last user prompt to use for the image filename
               const lastPrompt = [...this.responses].reverse().find(r => r.type === 'PROMPT');
+              const imagePrompt = lastPrompt?.text || undefined;
+              
               this.responses.push({ 
                 src: snap.imageUrl, 
                 type: 'IMAGE',
                 imageDocId: snap.imageDocId || undefined,
-                imagePrompt: lastPrompt?.text || undefined
+                imagePrompt: imagePrompt
               });
+              
+              // Persist the image to the session
+              if (uid && this.currentSessionId) {
+                this.chatSession.addMessage(uid, this.currentSessionId, {
+                  text: '',
+                  type: 'IMAGE',
+                  imageUrl: snap.imageUrl,
+                  imageDocId: snap.imageDocId || undefined,
+                  imagePrompt: imagePrompt,
+                }).catch(err => console.error('Error persisting image:', err));
+              }
             }
             this.cdRef.detectChanges();
             setTimeout(() => this.scrollToBottom(), 0);
