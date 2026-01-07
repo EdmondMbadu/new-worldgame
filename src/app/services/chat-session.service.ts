@@ -18,12 +18,18 @@ export interface ChatSessionRecord {
   latestPreview?: string;
 }
 
+export interface ChatMessageSource {
+  title: string;
+  url: string;
+}
+
 export interface ChatMessageRecord {
   id: string;
   text: string;
   type: ChatMessageType;
   createdAt?: firebase.firestore.Timestamp | null;
   createdAtMs?: number;
+  sources?: ChatMessageSource[];
 }
 
 export interface CreateSessionPayload {
@@ -38,6 +44,7 @@ export interface PersistMessagePayload {
   text: string;
   type: ChatMessageType;
   createdAtMs?: number;
+  sources?: ChatMessageSource[];
 }
 
 @Injectable({
@@ -108,17 +115,25 @@ export class ChatSessionService {
     const messageId = this.afs.createId();
     const createdAtMs = payload.createdAtMs ?? Date.now();
 
+    // Build the message document with optional sources
+    const messageDoc: Record<string, any> = {
+      id: messageId,
+      text: payload.text,
+      type: payload.type,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdAtMs,
+    };
+    
+    // Include sources if provided (for RESPONSE type messages)
+    if (payload.sources && payload.sources.length > 0) {
+      messageDoc['sources'] = payload.sources;
+    }
+
     await this.afs
       .doc(
         `${this.sessionCollectionPath(uid)}/${sessionId}/messages/${messageId}`
       )
-      .set({
-        id: messageId,
-        text: payload.text,
-        type: payload.type,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        createdAtMs,
-      });
+      .set(messageDoc);
 
     await this.afs.doc(this.sessionDocPath(uid, sessionId)).set(
       {

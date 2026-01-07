@@ -136,9 +136,19 @@ export class ChatContextService {
       prompt += `Answer all questions directly in first person as yourself. `;
       prompt += `NEVER refer to yourself in third person. NEVER ask for perspectives. NEVER end by prompting for other viewpoints. `;
       prompt += `Format responses with clear paragraphs, bullet points when listing items, and **bold** for key concepts. `;
-      prompt += `IMPORTANT: Always use the Google Search tool to find current, accurate information and provide sources for factual claims, statistics, and data. `;
-      prompt += `When citing information, mention the source naturally in your response (e.g., "According to [Source Name], there are approximately 8 billion people in the world"). `;
-      prompt += `The sources will be automatically displayed below your response, so focus on integrating them naturally into your answer.]\n\n`;
+      prompt += `\n\nCRITICAL SOURCE REQUIREMENTS: `;
+      prompt += `ALWAYS use the Google Search tool for EVERY response to find current, accurate information. `;
+      prompt += `PRIORITIZE authoritative and reliable sources such as: `;
+      prompt += `- United Nations (un.org, undp.org, unep.org, unesco.org, who.int) `;
+      prompt += `- World Bank (worldbank.org) `;
+      prompt += `- Official government sources (.gov domains) `;
+      prompt += `- Academic institutions (.edu domains) `;
+      prompt += `- Reputable research organizations (nature.com, science.org, pnas.org) `;
+      prompt += `- Major news organizations (reuters.com, bbc.com, apnews.com) `;
+      prompt += `- Peer-reviewed journals and publications `;
+      prompt += `When citing statistics, data, or facts, explicitly mention the source name in your response (e.g., "According to the World Bank..." or "The UN reports that..."). `;
+      prompt += `Provide specific, current data points whenever possible. `;
+      prompt += `The sources with their URLs will be automatically displayed below your response.]\n\n`;
     }
     
     // Solution context (if available)

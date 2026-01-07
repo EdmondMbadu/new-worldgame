@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -122,7 +123,8 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
     private time: TimeService,
     private storage: AngularFireStorage,
     private dataService: DataService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private cdRef: ChangeDetectorRef
   ) {}
   aiOptions = [
     {
@@ -684,18 +686,35 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       return;
     }
 
-    console.log('Updating content in playground-step for:', questionKey, 'at index:', index);
+    console.log('Updating content in playground-step for:', questionKey, 'at index:', index, 'content length:', content?.length);
     
+    // Calculate the new content
+    let newContent: string;
     if (append && this.contentsArray[index]) {
-      this.contentsArray[index] = this.contentsArray[index] + '\n\n' + content;
+      newContent = this.contentsArray[index] + '\n\n' + content;
     } else {
-      this.contentsArray[index] = content;
+      newContent = content;
     }
+    
+    // Create a new array reference to ensure Angular detects the change
+    const newContentsArray = [...this.contentsArray];
+    newContentsArray[index] = newContent;
+    this.contentsArray = newContentsArray;
+    
+    // Also update staticContentArray to prevent "unsaved changes" warning for this insert
+    const newStaticArray = [...this.staticContentArray];
+    newStaticArray[index] = newContent;
+    this.staticContentArray = newStaticArray;
     
     // Update the solution status as well
     if (this.currentSolution.status) {
-      this.currentSolution.status[questionKey] = this.contentsArray[index];
+      this.currentSolution.status[questionKey] = newContent;
     }
+    
+    // Trigger change detection to ensure CKEditor picks up the change
+    this.cdRef.detectChanges();
+    
+    console.log('Content updated successfully for:', questionKey);
   }
 
   initializeStrategy() {

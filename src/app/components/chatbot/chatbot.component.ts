@@ -377,10 +377,12 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       .observeMessages(uid, sessionId)
       .subscribe({
         next: (messages) => {
-          // Convert ChatMessageRecord to DisplayMessage
+          // Convert ChatMessageRecord to DisplayMessage (including sources)
           this.responses = messages.map(msg => ({
             text: msg.text,
             type: msg.type as 'PROMPT' | 'RESPONSE',
+            sources: msg.sources || undefined,
+            insertable: this.hasContext && msg.type === 'RESPONSE',
           }));
           this.isLoadingSession = false;
           this.cdRef.detectChanges();
@@ -900,15 +902,16 @@ export class ChatbotComponent implements OnInit, OnDestroy {
               this.typewriterEffect(snap.response, slot, () => {
                 slot.streaming = false;
                 // Ensure sources are set after streaming completes
-                if (snap.sources && !slot.sources) {
+                if (snap.sources && snap.sources.length > 0) {
                   slot.sources = snap.sources;
                 }
                 
-                // Persist the response to the session after streaming completes
+                // Persist the response to the session after streaming completes (including sources)
                 if (uid && this.currentSessionId && snap.response) {
                   this.chatSession.addMessage(uid, this.currentSessionId, {
                     text: snap.response,
                     type: 'RESPONSE',
+                    sources: slot.sources || undefined,
                   }).catch(err => console.error('Error persisting response:', err));
                 }
                 

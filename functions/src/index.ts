@@ -1107,6 +1107,8 @@ export const onChatPrompt = functions
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
       const modelConfig: Record<string, unknown> = { model: modelName };
       if (!wantsImage) {
+        // Enable Google Search grounding for factual responses with sources
+        // The google_search tool enables grounding with web search
         modelConfig['tools'] = [{ google_search: {} }];
       } else {
         // Configure for high-quality image generation
@@ -1226,34 +1228,129 @@ export const onChatPrompt = functions
       }
 
       // ────────── 4. extract sources from grounding metadata ───────────────────────
-      const sources: Array<{ title: string; url: string }> = [];
+      const sources: Array<{ title: string; url: string; priority: number }> = [];
       const candidate = finalResponse.candidates?.[0];
+      const seenUrls = new Set<string>();
+      
+      // List of authoritative domains (higher priority)
+      const authoritativeDomains = [
+        'un.org', 'undp.org', 'unep.org', 'unesco.org', 'who.int', 'unicef.org',
+        'worldbank.org', 'imf.org', 'wto.org', 'ilo.org',
+        '.gov', '.edu',
+        'nature.com', 'science.org', 'pnas.org', 'sciencedirect.com',
+        'reuters.com', 'bbc.com', 'bbc.co.uk', 'apnews.com', 'npr.org',
+        'harvard.edu', 'mit.edu', 'stanford.edu', 'oxford.ac.uk', 'cambridge.org',
+        'ncbi.nlm.nih.gov', 'cdc.gov', 'epa.gov', 'nasa.gov',
+        'oecd.org', 'europa.eu', 'weforum.org',
+        'statista.com', 'ourworldindata.org', 'data.worldbank.org',
+      ];
+      
+      // Function to check if URL is from authoritative domain
+      const getAuthorityScore = (hostname: string): number => {
+        const lowerHost = hostname.toLowerCase();
+        for (const domain of authoritativeDomains) {
+          if (lowerHost.includes(domain)) {
+            return 10; // High priority for authoritative sources
+          }
+        }
+        // Medium priority for known reliable domains
+        if (lowerHost.includes('wikipedia.org')) return 5;
+        return 1; // Default priority
+      };
+      
+      // Function to clean and validate URL - be permissive to not lose sources
+      const isValidSourceUrl = (url: string): boolean => {
+        try {
+          const parsed = new URL(url);
+          // Must be http or https
+          if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+          // Only filter out Google's internal search/redirect URLs
+          if (parsed.hostname === 'www.google.com' || parsed.hostname === 'google.com') {
+            if (parsed.pathname.startsWith('/search') || parsed.pathname.startsWith('/url')) {
+              return false;
+            }
+          }
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      
+      // Helper to add a source
+      const addSource = (url: string, title?: string) => {
+        if (!url || seenUrls.has(url) || !isValidSourceUrl(url)) return;
+        seenUrls.add(url);
+        
+        try {
+          const parsedUrl = new URL(url);
+          const hostname = parsedUrl.hostname;
+          const priority = getAuthorityScore(hostname);
+          
+          // Clean up title - use provided title, or derive from hostname
+          let finalTitle = title;
+          if (!finalTitle || finalTitle.length < 3) {
+            finalTitle = hostname.replace(/^www\./, '');
+            // Capitalize first letter
+            finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1);
+          }
+          
+          sources.push({ title: finalTitle, url, priority });
+        } catch (e) {
+          console.warn('Failed to parse URL:', url, e);
+        }
+      };
+      
+      console.log('Raw grounding metadata:', JSON.stringify(candidate?.groundingMetadata, null, 2));
+      
+      // Extract from groundingChunks (primary source of URLs)
       if (candidate?.groundingMetadata?.groundingChunks) {
         const groundingChunks = candidate.groundingMetadata.groundingChunks;
-        const seenUrls = new Set<string>();
-
+        console.log('Found', groundingChunks.length, 'grounding chunks');
+        
         for (const chunk of groundingChunks) {
-          if (chunk.web && chunk.web.uri) {
-            const url = chunk.web.uri;
-            if (!seenUrls.has(url)) {
-              seenUrls.add(url);
-              try {
-                const hostname = new URL(url).hostname;
-                sources.push({
-                  title: chunk.web.title || hostname,
-                  url: url,
-                });
-              } catch (e) {
-                // If URL parsing fails, still add it with the URI as title
-                sources.push({
-                  title: chunk.web.title || url,
-                  url: url,
-                });
-              }
-            }
+          if (chunk.web?.uri) {
+            addSource(chunk.web.uri, chunk.web.title);
           }
         }
       }
+      
+      // Also extract from groundingSupports if available (contains segment-level citations)
+      if (candidate?.groundingMetadata?.groundingSupports) {
+        const supports = candidate.groundingMetadata.groundingSupports;
+        console.log('Found', supports.length, 'grounding supports');
+        
+        for (const support of supports) {
+          if (support.groundingChunkIndices && candidate?.groundingMetadata?.groundingChunks) {
+            // These reference the groundingChunks by index, already handled above
+          }
+          // Some responses have direct web references in supports
+          if (support.segment?.text && support.webSearchQueries) {
+            // Log for debugging but don't duplicate
+          }
+        }
+      }
+      
+      // Check for searchEntryPoint (Google Search grounding metadata)
+      if (candidate?.groundingMetadata?.searchEntryPoint?.renderedContent) {
+        console.log('Has search entry point');
+      }
+      
+      // Log search queries used
+      if (candidate?.groundingMetadata?.webSearchQueries) {
+        console.log('Search queries used:', candidate.groundingMetadata.webSearchQueries);
+      }
+      
+      // Sort by priority (authoritative sources first)
+      sources.sort((a, b) => b.priority - a.priority);
+      
+      // Log the final sources
+      console.log('Final sources count:', sources.length);
+      if (sources.length > 0) {
+        console.log('Sources:', sources.map(s => ({ title: s.title, url: s.url.slice(0, 60), priority: s.priority })));
+      }
+      
+      // Remove priority field before saving (keep only title and url), limit to 6
+      const cleanSources = sources.slice(0, 6).map(({ title, url }) => ({ title, url }));
 
       // ────────── 5. store image (if any) ───────────────────────
       let imageUrl: string | undefined;
@@ -1291,7 +1388,7 @@ export const onChatPrompt = functions
         response: answer || null,
         imageUrl: imageUrl || null,
         imageDocId: imageDocId || null,
-        sources: sources.length > 0 ? sources : null,
+        sources: cleanSources.length > 0 ? cleanSources : null,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     } catch (err: any) {
