@@ -142,6 +142,13 @@
                           title="Add Designer">
                     <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
                   </button>
+                  <button (click)="openInviteModal('designer')"
+                          class="p-1.5 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 text-gray-500 hover:text-teal-600 dark:text-gray-400 dark:hover:text-teal-400 transition-colors"
+                          title="Invite Designer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M22 12l-9 3-3 9-3-9-9-3 9-3 3-9 3 9 9 3z" />
+                    </svg>
+                  </button>
                   <button (click)="toggle('showRemoveTeamMember')"
                           class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
                           title="Remove Designer">
@@ -224,6 +231,13 @@
                           title="Add Evaluator">
                     <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
                   </button>
+                  <button (click)="openInviteModal('evaluator')"
+                          class="p-1.5 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 text-gray-500 hover:text-teal-600 dark:text-gray-400 dark:hover:text-teal-400 transition-colors"
+                          title="Invite Evaluator">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M22 12l-9 3-3 9-3-9-9-3 9-3 3-9 3 9 9 3z" />
+                    </svg>
+                  </button>
                   <button (click)="toggle('showRemoveEvaluator')"
                           class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
                           title="Remove Evaluator">
@@ -305,6 +319,13 @@
                           class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
                           title="Add Admin">
                     <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
+                  </button>
+                  <button (click)="openInviteModal('admin')"
+                          class="p-1.5 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/40 text-gray-500 hover:text-teal-600 dark:text-gray-400 dark:hover:text-teal-400 transition-colors"
+                          title="Invite Admin">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M22 12l-9 3-3 9-3-9-9-3 9-3 3-9 3 9 9 3z" />
+                    </svg>
                   </button>
                   <button (click)="toggle('showRemoveAdmin')"
                           class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
@@ -395,6 +416,349 @@
 <ng-template #modalBackdrop>
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 </ng-template>
+
+<!-- Invite People Modal -->
+<div *ngIf="showInviteModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+  <div
+    class="absolute inset-0 bg-black/60 backdrop-blur-md"
+    (click)="closeInviteModal()"
+  ></div>
+
+  <div
+    class="relative w-full max-w-3xl max-h-[95vh] min-h-[70vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden transform transition-all flex flex-col"
+  >
+    <button
+      (click)="closeInviteModal()"
+      class="absolute top-5 right-5 p-2.5 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all z-10 shadow-sm hover:shadow-md"
+      aria-label="Close"
+    >
+      <svg
+        class="w-5 h-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        viewBox="0 0 24 24"
+      >
+        <path d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <div class="p-8 overflow-y-auto flex-1 min-h-0">
+      <div class="mb-8">
+        <h2 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-3">
+          Invite {{ inviteRolePlural }}
+        </h2>
+        <p class="text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+          Add {{ inviteRolePlural }} to your solution. Select from the list or type an email, then click "Add to List" to build a group, or "Add {{ inviteRoleSingular }}" to add immediately.
+        </p>
+        <p *ngIf="inviteRole === 'admin'" class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+          Admins must be registered users.
+        </p>
+      </div>
+
+      <div class="relative mb-6">
+        <label
+          for="inviteInput"
+          class="block mb-3 text-sm font-semibold text-gray-900 dark:text-white"
+        >
+          Email or Name
+        </label>
+        <div class="relative">
+          <input
+            id="inviteInput"
+            type="text"
+            [(ngModel)]="inviteInput"
+            (input)="onInviteInputChange()"
+            (focus)="onInviteInputChange()"
+            (blur)="hideUserSuggestions()"
+            class="block w-full px-4 py-4 text-base text-gray-900 bg-gray-50 dark:bg-slate-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 transition-all shadow-sm focus:shadow-md"
+            placeholder="Type email@gmail.com or name to search..."
+          />
+          <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+            <svg *ngIf="!isSearchingUsers" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <svg *ngIf="isSearchingUsers" class="w-5 h-5 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div
+          *ngIf="showUserSuggestions && filteredUsers.length > 0"
+          class="relative z-20 w-full mt-2 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-[60vh] overflow-y-auto"
+        >
+          <div
+            *ngFor="let user of filteredUsers"
+            (mousedown)="selectUser(user); $event.preventDefault()"
+            class="px-5 py-4 hover:bg-blue-50 dark:hover:bg-slate-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-all duration-150 active:bg-blue-100 dark:active:bg-slate-600"
+          >
+            <div class="flex items-center gap-4">
+              <div
+                *ngIf="user.profilePicture?.downloadURL"
+                class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600"
+              >
+                <img
+                  [src]="user.profilePicture?.downloadURL"
+                  [alt]="user.firstName + ' ' + user.lastName"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div
+                *ngIf="!user.profilePicture?.downloadURL"
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-200 dark:ring-gray-600"
+              >
+                <span class="text-sm font-semibold text-blue-700 dark:text-blue-200">
+                  {{ getInitials(user.firstName, user.lastName, user.email) }}
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-base font-semibold text-gray-900 dark:text-white truncate mb-1">
+                  {{ user.firstName }} {{ user.lastName }}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                  {{ user.email }}
+                </p>
+              </div>
+              <div class="flex-shrink-0">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="invitedParticipants.length > 0" class="mt-6 mb-6">
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          Recently Invited ({{ invitedParticipants.length }})
+        </h3>
+        <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
+          <div
+            *ngFor="let participant of invitedParticipants"
+            [class]="participant.status === 'success' 
+              ? 'p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/50' 
+              : 'p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50'"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div [class]="participant.status === 'success' 
+                  ? 'w-8 h-8 rounded-full bg-emerald-200 dark:bg-emerald-700 flex items-center justify-center flex-shrink-0' 
+                  : 'w-8 h-8 rounded-full bg-red-200 dark:bg-red-700 flex items-center justify-center flex-shrink-0'">
+                  <svg *ngIf="participant.status === 'success'" class="w-5 h-5 text-emerald-700 dark:text-emerald-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  <svg *ngIf="participant.status === 'error'" class="w-5 h-5 text-red-700 dark:text-red-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    {{ participant.name || participant.email }}
+                  </p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    {{ participant.email }}
+                  </p>
+                </div>
+              </div>
+              <div class="ml-2">
+                <span [class]="participant.status === 'success' 
+                  ? 'text-xs font-semibold text-emerald-700 dark:text-emerald-300' 
+                  : 'text-xs font-semibold text-red-700 dark:text-red-300'">
+                  {{ participant.status === 'success' ? 'Added' : 'Failed' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="pendingParticipants.length > 0" class="mt-6 mb-6">
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          Pending Invites ({{ pendingParticipants.length }})
+        </h3>
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-2">
+          <div
+            *ngFor="let pending of pendingParticipants"
+            class="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700/50 shadow-sm hover:shadow-md transition-all"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-blue-200 dark:bg-blue-700 flex items-center justify-center flex-shrink-0">
+                  <span class="text-sm font-semibold text-blue-700 dark:text-blue-200">
+                    {{ getInitials(pending.user?.firstName, pending.user?.lastName, pending.email) }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    {{ pending.name }}
+                  </p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    {{ pending.email }}
+                  </p>
+                </div>
+              </div>
+              <button
+                (click)="removePendingParticipant(pending.email)"
+                class="ml-3 p-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                aria-label="Remove"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        *ngIf="inviteInput && canAddInvitee && !isAddingParticipant && pendingParticipants.length === 0"
+        class="mt-6 p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-emerald-900/30 dark:to-blue-900/20 border-2 border-emerald-200 dark:border-emerald-700/50 shadow-md"
+      >
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0">
+            <div *ngIf="selectedUser">
+              <div
+                *ngIf="selectedUser.profilePicture?.downloadURL"
+                class="w-14 h-14 rounded-full overflow-hidden border-4 border-emerald-300 dark:border-emerald-600 shadow-md"
+              >
+                <img
+                  [src]="selectedUser.profilePicture?.downloadURL"
+                  [alt]="selectedUser.firstName + ' ' + selectedUser.lastName"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div
+                *ngIf="!selectedUser.profilePicture?.downloadURL"
+                class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-700 dark:to-blue-700 border-4 border-emerald-300 dark:border-emerald-600 flex items-center justify-center shadow-md"
+              >
+                <span class="text-lg font-semibold text-emerald-700 dark:text-emerald-200">
+                  {{ getInitials(selectedUser.firstName, selectedUser.lastName, selectedUser.email) }}
+                </span>
+              </div>
+            </div>
+            <div *ngIf="!selectedUser && data.isValidEmail(inviteInput)">
+              <div
+                class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-700 dark:to-blue-700 border-4 border-emerald-300 dark:border-emerald-600 flex items-center justify-center shadow-md"
+              >
+                <svg
+                  class="w-8 h-8 text-emerald-700 dark:text-emerald-200"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-2">
+              <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <p class="text-sm font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wide">
+                Ready to Add
+              </p>
+            </div>
+            <div *ngIf="selectedUser" class="space-y-1">
+              <p class="text-base font-semibold text-gray-900 dark:text-white">
+                {{ selectedUser.firstName }} {{ selectedUser.lastName }}
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-300">
+                {{ selectedUser.email }}
+              </p>
+            </div>
+            <div *ngIf="!selectedUser && data.isValidEmail(inviteInput)">
+              <p class="text-base font-semibold text-gray-900 dark:text-white">
+                {{ inviteInput }}
+              </p>
+              <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                (Not registered in system)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-8 py-6 flex items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900 flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <button
+          (click)="closeInviteModal()"
+          class="px-6 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 rounded-xl border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-slate-700 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-600 transition-all shadow-sm hover:shadow-md"
+        >
+          {{ invitedParticipants.length > 0 || pendingParticipants.length > 0 ? 'Done' : 'Cancel' }}
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          *ngIf="canAddInvitee"
+          (click)="addEmailToPending()"
+          [disabled]="isAddingParticipant"
+          class="px-5 py-3 text-sm font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 rounded-xl border-2 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Add to List
+        </button>
+
+        <button
+          *ngIf="pendingParticipants.length > 0"
+          (click)="addAllPendingInvitees()"
+          [disabled]="isAddingParticipant"
+          class="px-6 py-3 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 focus:ring-4 focus:outline-none focus:ring-emerald-300 dark:focus:ring-emerald-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-md"
+        >
+          <span *ngIf="!isAddingParticipant" class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add All ({{ pendingParticipants.length }})
+          </span>
+          <span *ngIf="isAddingParticipant" class="flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Adding...
+          </span>
+        </button>
+
+        <button
+          *ngIf="pendingParticipants.length === 0 && canAddInvitee"
+          (click)="addInviteeNow()"
+          [disabled]="isAddingParticipant"
+          class="px-6 py-3 text-base font-semibold text-white rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-md"
+        >
+          <span *ngIf="!isAddingParticipant">Add {{ inviteRoleSingular }}</span>
+          <span *ngIf="isAddingParticipant" class="flex items-center gap-2">
+            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Adding...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Update Title Modal -->
 <div *ngIf="updateTitleBox" class="fixed inset-0 z-50 flex items-center justify-center p-4">

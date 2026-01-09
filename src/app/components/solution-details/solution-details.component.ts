@@ -36,6 +36,8 @@ function toSdgKey(n: number): string {
   return `SDG${n}   ${SDG_TITLES[n - 1]}`;
 }
 
+type InviteRole = 'designer' | 'evaluator' | 'admin';
+
 @Component({
   selector: 'app-solution-details',
   templateUrl: './solution-details.component.html',
@@ -107,6 +109,28 @@ export class SolutionDetailsComponent implements OnInit {
   showAddAdmin = false;
   showRemoveAdmin = false;
 
+  // Invite modal state (designers/evaluators/admins)
+  showInviteModal = false;
+  inviteRole: InviteRole = 'designer';
+  inviteInput = '';
+  allUsers: User[] = [];
+  filteredUsers: User[] = [];
+  showUserSuggestions = false;
+  selectedUser: User | null = null;
+  private inviteSearchTimeout: any;
+  isSearchingUsers = false;
+  invitedParticipants: Array<{
+    email: string;
+    name?: string;
+    status: 'success' | 'error';
+  }> = [];
+  pendingParticipants: Array<{
+    email: string;
+    name: string;
+    user?: User;
+  }> = [];
+  isAddingParticipant = false;
+
   /* ---- SDG state ---- */
   /* ---- SDG state ---- */
   showAddSdg = false;
@@ -130,6 +154,10 @@ export class SolutionDetailsComponent implements OnInit {
       this.title = this.currentSolution.title || '';
       this.getMembers();
       this.getEvaluators();
+    });
+
+    this.auth.getALlUsers().subscribe((users) => {
+      this.allUsers = users;
     });
   }
   toggleHover(event: boolean) {
@@ -235,6 +263,420 @@ export class SolutionDetailsComponent implements OnInit {
     this.showPopUpEvaluators[index] = false;
   }
 
+  openInviteModal(role: InviteRole) {
+    this.inviteRole = role;
+    this.showInviteModal = true;
+    this.resetInviteState();
+  }
+
+  closeInviteModal() {
+    this.showInviteModal = false;
+    this.resetInviteState();
+  }
+
+  private resetInviteState() {
+    this.inviteInput = '';
+    this.filteredUsers = [];
+    this.showUserSuggestions = false;
+    this.selectedUser = null;
+    this.invitedParticipants = [];
+    this.pendingParticipants = [];
+    this.isAddingParticipant = false;
+    this.isSearchingUsers = false;
+    if (this.inviteSearchTimeout) {
+      clearTimeout(this.inviteSearchTimeout);
+    }
+  }
+
+  get inviteRoleSingular(): string {
+    switch (this.inviteRole) {
+      case 'evaluator':
+        return 'Evaluator';
+      case 'admin':
+        return 'Admin';
+      default:
+        return 'Designer';
+    }
+  }
+
+  get inviteRolePlural(): string {
+    switch (this.inviteRole) {
+      case 'evaluator':
+        return 'Evaluators';
+      case 'admin':
+        return 'Admins';
+      default:
+        return 'Designers';
+    }
+  }
+
+  get allowTypedEmail(): boolean {
+    return this.inviteRole !== 'admin';
+  }
+
+  get canAddInvitee(): boolean {
+    return (
+      !!this.inviteInput &&
+      (!!this.selectedUser ||
+        (this.allowTypedEmail && this.data.isValidEmail(this.inviteInput)))
+    );
+  }
+
+  onInviteInputChange() {
+    if (this.inviteSearchTimeout) {
+      clearTimeout(this.inviteSearchTimeout);
+    }
+
+    this.selectedUser = null;
+
+    const searchTerm = this.inviteInput.toLowerCase().trim();
+    if (searchTerm.length === 0) {
+      this.filteredUsers = [];
+      this.showUserSuggestions = false;
+      this.isSearchingUsers = false;
+      return;
+    }
+
+    this.filteredUsers = this.filterUsersLocally(searchTerm);
+    this.showUserSuggestions = this.filteredUsers.length > 0;
+
+    const exactMatch = this.allUsers.find(
+      (user) => user.email?.toLowerCase() === searchTerm
+    );
+    if (exactMatch) {
+      this.selectedUser = exactMatch;
+    }
+
+    if (this.filteredUsers.length < 5 || searchTerm.includes('@')) {
+      this.isSearchingUsers = true;
+      this.inviteSearchTimeout = setTimeout(() => {
+        this.searchUsersFromServer(searchTerm);
+      }, 300);
+    }
+  }
+
+  private filterUsersLocally(searchTerm: string): User[] {
+    return this.allUsers
+      .filter((user) => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        return (
+          firstName.includes(searchTerm) ||
+          lastName.includes(searchTerm) ||
+          fullName.includes(searchTerm) ||
+          email.includes(searchTerm)
+        );
+      })
+      .slice(0, 10);
+  }
+
+  private searchUsersFromServer(searchTerm: string): void {
+    this.auth.searchUsers(searchTerm, 15).subscribe({
+      next: (serverUsers) => {
+        const existingEmails = new Set(
+          this.filteredUsers.map((u) => u.email?.toLowerCase())
+        );
+
+        const newResults = serverUsers.filter((user) => {
+          const email = (user.email || '').toLowerCase();
+          return !existingEmails.has(email);
+        });
+
+        this.filteredUsers = [...this.filteredUsers, ...newResults].slice(0, 12);
+        this.showUserSuggestions = this.filteredUsers.length > 0;
+        this.isSearchingUsers = false;
+      },
+      error: (err) => {
+        console.error('Server search failed:', err);
+        this.isSearchingUsers = false;
+      },
+    });
+  }
+
+  selectUser(user: User) {
+    this.inviteInput = user.email || '';
+    this.selectedUser = user;
+    this.showUserSuggestions = false;
+  }
+
+  addEmailToPending() {
+    if (!this.canAddInvitee) return;
+
+    let email = '';
+    let name = '';
+    let user: User | undefined;
+
+    if (this.selectedUser) {
+      email = this.selectedUser.email || '';
+      name =
+        `${this.selectedUser.firstName} ${this.selectedUser.lastName}`.trim();
+      user = this.selectedUser;
+    } else if (this.data.isValidEmail(this.inviteInput)) {
+      email = this.inviteInput;
+      name = email;
+    }
+
+    if (!email) return;
+
+    const alreadyPending = this.pendingParticipants.some(
+      (p) => p.email.toLowerCase() === email.toLowerCase()
+    );
+
+    if (!alreadyPending) {
+      this.pendingParticipants.push({
+        email: email,
+        name: name,
+        user: user,
+      });
+    }
+
+    this.inviteInput = '';
+    this.selectedUser = null;
+    this.showUserSuggestions = false;
+  }
+
+  removePendingParticipant(email: string) {
+    this.pendingParticipants = this.pendingParticipants.filter(
+      (p) => p.email.toLowerCase() !== email.toLowerCase()
+    );
+  }
+
+  hideUserSuggestions() {
+    this.inviteSearchTimeout = setTimeout(() => {
+      this.showUserSuggestions = false;
+    }, 200);
+  }
+
+  async addAllPendingInvitees() {
+    if (this.pendingParticipants.length === 0 || this.isAddingParticipant) {
+      return;
+    }
+
+    this.isAddingParticipant = true;
+    const inviteesToAdd = [...this.pendingParticipants];
+    this.pendingParticipants = [];
+
+    for (const invitee of inviteesToAdd) {
+      await this.addInvitee(invitee);
+    }
+
+    this.isAddingParticipant = false;
+  }
+
+  async addInviteeNow() {
+    if (!this.canAddInvitee || this.isAddingParticipant) return;
+
+    this.isAddingParticipant = true;
+    const invitee: { email: string; name: string; user?: User } = {
+      email: '',
+      name: '',
+    };
+
+    if (this.selectedUser) {
+      invitee.email = this.selectedUser.email || '';
+      invitee.name =
+        `${this.selectedUser.firstName} ${this.selectedUser.lastName}`.trim();
+      invitee.user = this.selectedUser;
+    } else {
+      invitee.email = this.inviteInput;
+      invitee.name = this.inviteInput;
+    }
+
+    this.inviteInput = '';
+    this.selectedUser = null;
+    this.showUserSuggestions = false;
+
+    await this.addInvitee(invitee);
+    this.isAddingParticipant = false;
+  }
+
+  private async addInvitee(invitee: {
+    email: string;
+    name: string;
+    user?: User;
+  }) {
+    try {
+      let ok = false;
+      if (this.inviteRole === 'designer') {
+        ok = await this.addParticipantEmail(invitee.email);
+      } else if (this.inviteRole === 'evaluator') {
+        ok = await this.addEvaluatorEmail(invitee.email);
+      } else {
+        ok = await this.addAdminEmail(invitee.email, invitee.user);
+      }
+
+      this.pushInviteStatus(invitee.email, invitee.name, ok ? 'success' : 'error');
+    } catch (error) {
+      console.error('Invite failed:', error);
+      this.pushInviteStatus(invitee.email, invitee.name, 'error');
+    }
+  }
+
+  private pushInviteStatus(
+    email: string,
+    name: string,
+    status: 'success' | 'error'
+  ) {
+    this.invitedParticipants.push({ email, name, status });
+    setTimeout(() => {
+      const index = this.invitedParticipants.findIndex(
+        (p) => p.email === email && p.status === status
+      );
+      if (index > -1) {
+        this.invitedParticipants.splice(index, 1);
+      }
+    }, 5000);
+  }
+
+  private participantExists(email: string): boolean {
+    return this.getParticipantEmails().some(
+      (existing) => existing.toLowerCase() === email.toLowerCase()
+    );
+  }
+
+  private evaluatorExists(email: string): boolean {
+    const evaluators = this.currentSolution.evaluators ?? [];
+    return evaluators.some((evaluator: any) => {
+      const value = evaluator?.name || '';
+      return String(value).toLowerCase() === email.toLowerCase();
+    });
+  }
+
+  private adminExists(email: string, uid?: string): boolean {
+    const admins = this.currentSolution.chosenAdmins ?? [];
+    return admins.some(
+      (admin) =>
+        admin.authorEmail?.toLowerCase() === email.toLowerCase() ||
+        (!!uid && admin.authorAccountId === uid)
+    );
+  }
+
+  private getParticipantsArray(): Array<{ name: string }> {
+    const participants = this.currentSolution.participants;
+    if (!participants) return [];
+    if (Array.isArray(participants)) {
+      return participants as Array<{ name: string }>;
+    }
+
+    if (typeof participants === 'object') {
+      return Object.values(participants)
+        .map((value) => {
+          if (!value) return null;
+          if (typeof value === 'string') return { name: value };
+          if (typeof value === 'object') {
+            const fallback = (value as any).name ?? Object.values(value)[0];
+            if (typeof fallback === 'string') return { name: fallback };
+          }
+          return null;
+        })
+        .filter((value): value is { name: string } => !!value);
+    }
+
+    return [];
+  }
+
+  private getParticipantEmails(): string[] {
+    return this.getParticipantsArray()
+      .map((participant) => participant?.name || '')
+      .filter((value) => value.length > 0);
+  }
+
+  private async addParticipantEmail(email: string): Promise<boolean> {
+    if (!this.data.isValidEmail(email) || this.participantExists(email)) {
+      return false;
+    }
+
+    const participants = this.getParticipantsArray();
+    participants.push({ name: email });
+
+    try {
+      await this.solution.addParticipantsToSolution(
+        participants,
+        this.currentSolution.solutionId!
+      );
+      this.currentSolution.participants = participants as any;
+      this.getMembers();
+      await this.sendEmailToParticipant(email);
+      return true;
+    } catch (error) {
+      console.error('Error adding participant:', error);
+      return false;
+    }
+  }
+
+  private async addEvaluatorEmail(email: string): Promise<boolean> {
+    if (!this.data.isValidEmail(email) || this.evaluatorExists(email)) {
+      return false;
+    }
+
+    const evaluators = [...(this.currentSolution.evaluators ?? [])];
+    evaluators.push({ name: email });
+
+    try {
+      await this.solution.addEvaluatorsToSolution(
+        evaluators,
+        this.currentSolution.solutionId!
+      );
+      this.currentSolution.evaluators = evaluators;
+      this.getEvaluators();
+      await this.sendEmailToParticipant(email);
+      return true;
+    } catch (error) {
+      console.error('Error adding evaluator:', error);
+      return false;
+    }
+  }
+
+  private async addAdminEmail(
+    email: string,
+    user?: User
+  ): Promise<boolean> {
+    if (!this.data.isValidEmail(email)) return false;
+
+    let adminUser = user;
+    if (!adminUser) {
+      const users = await firstValueFrom(this.auth.getUserFromEmail(email));
+      adminUser = users?.[0];
+    }
+
+    if (!adminUser || !adminUser.uid || !adminUser.email) {
+      return false;
+    }
+
+    if (this.adminExists(adminUser.email, adminUser.uid)) {
+      return false;
+    }
+
+    const newAdmin: Admin = {
+      authorAccountId: adminUser.uid,
+      authorName: `${adminUser.firstName || ''} ${adminUser.lastName || ''}`.trim(),
+      authorEmail: adminUser.email,
+      authorProfilePicture: adminUser.profilePicture,
+    };
+
+    const updated: Admin[] = [
+      ...(this.currentSolution.chosenAdmins ?? []),
+      newAdmin,
+    ];
+
+    try {
+      await this.solution.updateSolutionField(
+        this.currentSolution.solutionId!,
+        'chosenAdmins',
+        updated
+      );
+      this.currentSolution.chosenAdmins = updated;
+      this.admins = updated;
+      await this.sendEmailToParticipant(adminUser.email);
+      return true;
+    } catch (error) {
+      console.error('Error adding admin:', error);
+      return false;
+    }
+  }
+
   getInitials(
     firstName?: string,
     lastName?: string,
@@ -266,9 +708,8 @@ export class SolutionDetailsComponent implements OnInit {
     return '?';
   }
   async addParticipantToSolution() {
-    let participants: any = [];
     if (this.data.isValidEmail(this.newTeamMember)) {
-      participants = this.currentSolution.participants;
+      const participants = this.getParticipantsArray();
       participants.push({ name: this.newTeamMember });
 
       this.solution
@@ -280,13 +721,14 @@ export class SolutionDetailsComponent implements OnInit {
         .then(() => {
           alert(`Successfully added ${this.newTeamMember} to the solution.`);
           this.getMembers();
+          this.currentSolution.participants = participants as any;
 
           this.toggle('showAddTeamMember');
         })
         .catch((error) => {
           alert('Error occured while adding a team member. Try Again!');
         });
-      await this.sendEmailToParticipant();
+      await this.sendEmailToParticipant(this.newTeamMember);
       this.newTeamMember = '';
     } else {
       alert('Enter a valid email!');
@@ -366,19 +808,19 @@ export class SolutionDetailsComponent implements OnInit {
     }
   }
 
-  async sendEmailToParticipant() {
+  async sendEmailToParticipant(email: string) {
     const sendParticipantInvite = this.fns.httpsCallable('sendParticipantInvite');
 
     try {
       // Fetch the user data to check if they're registered
       const users = await firstValueFrom(
-        this.auth.getUserFromEmail(this.newTeamMember)
+        this.auth.getUserFromEmail(email)
       );
       const isRegisteredUser = users && users.length > 0;
       const inviterName = `${this.auth.currentUser.firstName || ''} ${this.auth.currentUser.lastName || ''}`.trim() || 'A team member';
 
       const emailData = {
-        email: this.newTeamMember,
+        email,
         inviterName,
         title: this.currentSolution.title || 'Solution Lab',
         description: this.currentSolution.description || '',
@@ -390,25 +832,22 @@ export class SolutionDetailsComponent implements OnInit {
       };
 
       const result = await firstValueFrom(sendParticipantInvite(emailData));
-      console.log(`Email sent to ${this.newTeamMember}:`, result);
+      console.log(`Email sent to ${email}:`, result);
     } catch (error) {
-      console.error(`Error sending invite to ${this.newTeamMember}:`, error);
+      console.error(`Error sending invite to ${email}:`, error);
     }
   }
 
   removeParticipantFromSolution(email: string) {
-    // Ensure participants array exists
-    if (
-      !this.currentSolution.participants ||
-      !Array.isArray(this.currentSolution.participants)
-    ) {
+    const participants = this.getParticipantsArray();
+    if (participants.length === 0) {
       alert('No participants found!');
       return;
     }
 
     // Filter out the participant to be removed
-    const updatedParticipants = this.currentSolution.participants.filter(
-      (participant: any) => participant.name !== email
+    const updatedParticipants = participants.filter(
+      (participant) => participant.name !== email
     );
 
     // Update the solution's participants
@@ -419,6 +858,7 @@ export class SolutionDetailsComponent implements OnInit {
       )
       .then(() => {
         alert(`Successfully removed ${email} from the solution.`);
+        this.currentSolution.participants = updatedParticipants as any;
         this.getMembers(); // Refresh the members list
         this.teamMemberToDelete = '';
         this.toggle('showRemoveTeamMember');
