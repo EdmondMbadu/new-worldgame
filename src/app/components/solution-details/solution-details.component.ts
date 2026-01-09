@@ -234,6 +234,37 @@ export class SolutionDetailsComponent implements OnInit {
   onLeaveEvaluatros(index: number) {
     this.showPopUpEvaluators[index] = false;
   }
+
+  getInitials(
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    fullName?: string
+  ): string {
+    const fn = (firstName || '').trim();
+    const ln = (lastName || '').trim();
+    let primary = fn ? fn[0] : '';
+    let secondary = ln ? ln[0] : '';
+
+    if (!primary && !secondary && fullName) {
+      const parts = fullName.trim().split(/\s+/);
+      primary = parts[0]?.[0] || '';
+      secondary = parts.length > 1 ? parts[parts.length - 1]?.[0] || '' : '';
+    }
+
+    if (primary || secondary) {
+      if (!secondary) {
+        if (fn.length > 1) secondary = fn[1];
+        else if (ln.length > 1) secondary = ln[1];
+      }
+      return (primary + secondary).toUpperCase();
+    }
+
+    const local = (email || '').trim().split('@')[0] || '';
+    if (local.length >= 2) return (local[0] + local[1]).toUpperCase();
+    if (local.length === 1) return local[0].toUpperCase();
+    return '?';
+  }
   async addParticipantToSolution() {
     let participants: any = [];
     if (this.data.isValidEmail(this.newTeamMember)) {
