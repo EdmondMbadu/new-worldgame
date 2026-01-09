@@ -1001,7 +1001,7 @@ export class UserManagementComponent implements OnInit {
         };
       });
 
-      const bulkCallable = this.fns.httpsCallable('sendAIInsightsBulkEmail');
+      const bulkCallable = this.fns.httpsCallable('startAIInsightsBulkJob');
       const response: any = await firstValueFrom(
         bulkCallable({
           recipients: payload,
@@ -1009,12 +1009,10 @@ export class UserManagementComponent implements OnInit {
         })
       );
 
-      if (response?.successCount) {
+      if (response?.jobId) {
         this.aiInsightsBulkSent = true;
-      }
-      if (response?.failureCount) {
-        this.aiInsightsBulkError =
-          'Some emails failed to send. Check the send log for details.';
+      } else if (response?.error) {
+        this.aiInsightsBulkError = response.error;
       }
     } finally {
       this.aiInsightsBulkSending = false;

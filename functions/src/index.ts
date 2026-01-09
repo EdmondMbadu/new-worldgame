@@ -708,36 +708,74 @@ export const sendAIInsightsEmail = functions.https.onCall(
 );
 
 // Bulk AI Insights sender with concurrency
-export const sendAIInsightsBulkEmail = functions
-  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+export const startAIInsightsBulkJob = functions
+  .runWith({ timeoutSeconds: 60, memory: '256MB' })
   .https.onCall(
-  async (
-    data: { recipients: AIInsightsPayload[]; concurrency?: number },
-    context: functions.https.CallableContext
-  ) => {
-    if (!context.auth) {
-      throw new functions.https.HttpsError(
-        'unauthenticated',
-        'Authentication is required to send AI insights emails.'
-      );
-    }
+    async (
+      data: { recipients: AIInsightsPayload[]; concurrency?: number },
+      context: functions.https.CallableContext
+    ) => {
+      if (!context.auth) {
+        throw new functions.https.HttpsError(
+          'unauthenticated',
+          'Authentication is required to send AI insights emails.'
+        );
+      }
 
-    const recipients = Array.isArray(data?.recipients) ? data.recipients : [];
-    if (!recipients.length) {
-      throw new functions.https.HttpsError(
-        'invalid-argument',
-        'Recipients list is required.'
-      );
-    }
+      const recipients = Array.isArray(data?.recipients) ? data.recipients : [];
+      if (!recipients.length) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          'Recipients list is required.'
+        );
+      }
 
+      const createdBy = context.auth?.token?.email || 'unknown';
+      const concurrency = Math.min(
+        Math.max(Number(data.concurrency) || 4, 1),
+        6
+      );
+
+      const jobRef = await admin.firestore().collection('ai_insights_bulk_jobs').add({
+        status: 'queued',
+        createdBy,
+        recipients,
+        concurrency,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      return { success: true, jobId: jobRef.id };
+    }
+  );
+
+export const processAIInsightsBulkJob = functions
+  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+  .firestore.document('ai_insights_bulk_jobs/{jobId}')
+  .onCreate(async (snap) => {
+    const data = snap.data() || {};
+    const recipients = Array.isArray(data.recipients) ? data.recipients : [];
     const concurrency = Math.min(Math.max(Number(data.concurrency) || 4, 1), 6);
+    const createdBy = data.createdBy || 'unknown';
+
+    if (!recipients.length) {
+      await snap.ref.update({
+        status: 'failed',
+        error: 'No recipients provided.',
+        completedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      return;
+    }
+
+    await snap.ref.update({
+      status: 'processing',
+      startedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
     const failures: string[] = [];
     let successCount = 0;
 
-    const createdBy = context.auth?.token?.email || 'unknown';
-
     await runWithConcurrency(recipients, concurrency, async (recipient) => {
-      const { userEmail, solutionId, solutionTitle } = recipient;
+      const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
       if (!userEmail || !solutionId || !solutionTitle) {
         failures.push(
           `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
@@ -746,7 +784,9 @@ export const sendAIInsightsBulkEmail = functions
       }
 
       try {
-        const { html, subject } = await buildAIInsightsEmail(recipient);
+        const { html, subject } = await buildAIInsightsEmail(
+          recipient as AIInsightsPayload
+        );
         await sgMail.send({
           to: userEmail,
           from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
@@ -766,7 +806,7 @@ export const sendAIInsightsBulkEmail = functions
       mode: 'bulk',
       subject,
       createdBy,
-      recipients: recipients.map((r) => ({
+      recipients: recipients.map((r: AIInsightsPayload) => ({
         email: r.userEmail,
         solutionId: r.solutionId,
         solutionTitle: r.solutionTitle,
@@ -777,14 +817,15 @@ export const sendAIInsightsBulkEmail = functions
       failures,
     });
 
-    return {
-      success: failures.length === 0,
+    await snap.ref.update({
+      status: failures.length ? 'completed_with_errors' : 'completed',
+      total: recipients.length,
       successCount,
       failureCount: failures.length,
       failures,
-    };
-  }
-);
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  });
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
