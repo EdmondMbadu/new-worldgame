@@ -193,6 +193,15 @@ export class SolutionDetailsComponent implements OnInit {
       | 'showRemoveSdg'
   ) {
     this[property] = !this[property];
+    if (property === 'showRemoveTeamMember' && this[property]) {
+      this.filteredTeamMembers = [...this.teamMembers];
+    }
+    if (property === 'showRemoveEvaluator' && this[property]) {
+      this.filteredEvaluators = [...this.evaluators];
+    }
+    if (property === 'showRemoveAdmin' && this[property]) {
+      this.filteredAdmins = [...this.admins];
+    }
   }
   async updateReadMe() {
     if (this.newReadMe === this.currentSolution.description) {
@@ -328,9 +337,9 @@ export class SolutionDetailsComponent implements OnInit {
   onRemoveInput(role: InviteRole) {
     const query = this.getRemoveQuery(role);
     if (!query) {
-      this.filteredTeamMembers = [];
-      this.filteredEvaluators = [];
-      this.filteredAdmins = [];
+      this.filteredTeamMembers = [...this.teamMembers];
+      this.filteredEvaluators = [...this.evaluators];
+      this.filteredAdmins = [...this.admins];
       return;
     }
 
