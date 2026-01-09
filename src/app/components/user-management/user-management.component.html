@@ -260,6 +260,122 @@
   </section>
   <!-- ===== END DASHBOARD SECTION ===== -->
 
+  <!-- ===== AI INSIGHTS EMAIL SECTION ===== -->
+  <section class="bg-gray-50 dark:bg-gray-900 py-8 px-4 lg:px-8 ml-16 lg:ml-20">
+    <div class="mx-auto w-full max-w-screen-xl 2xl:max-w-[90%] px-2 lg:px-6">
+      <div class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 shadow-sm ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-6">
+          <div class="p-2.5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg shadow-purple-500/30">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Automated Emails with AI Insights</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Send personalized AI-generated insights to solution authors</p>
+          </div>
+        </div>
+
+        <!-- Selection Form -->
+        <div class="space-y-4">
+          <!-- Step 1: User Selection -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Step 1: Select a User (Authors with in-progress solutions)
+            </label>
+            <select
+              [(ngModel)]="aiInsightsSelectedUserData"
+              (ngModelChange)="onAIInsightsUserChange()"
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
+            >
+              <option [ngValue]="null">Select a user...</option>
+              <option *ngFor="let item of usersWithInProgressSolutions" [ngValue]="item">
+                {{ item.user.firstName }} {{ item.user.lastName }} ({{ item.user.email }}) - {{ item.solutions.length }} solution(s)
+              </option>
+            </select>
+            <p *ngIf="usersWithInProgressSolutions.length === 0" class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              No users with in-progress solutions found.
+            </p>
+          </div>
+
+          <!-- Step 2: Solution Selection (shown after user is selected) -->
+          <div *ngIf="aiInsightsSelectedUserData">
+            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Step 2: Select a Solution
+            </label>
+            <select
+              [(ngModel)]="aiInsightsSelectedSolution"
+              (ngModelChange)="onAIInsightsSolutionChange()"
+              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
+            >
+              <option [ngValue]="null">Select a solution...</option>
+              <option *ngFor="let sol of aiInsightsSelectedUserData.solutions" [ngValue]="sol">
+                {{ sol.title || 'Untitled Solution' }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Solution Preview (shown after solution is selected) -->
+          <div *ngIf="aiInsightsSelectedSolution" class="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-4 border border-slate-200 dark:border-slate-700">
+            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Solution Preview</h4>
+            <div class="space-y-2 text-sm">
+              <p><span class="font-medium text-slate-600 dark:text-slate-400">Title:</span> <span class="text-slate-900 dark:text-white">{{ aiInsightsSelectedSolution.title || 'Untitled' }}</span></p>
+              <p *ngIf="aiInsightsSelectedSolution.description"><span class="font-medium text-slate-600 dark:text-slate-400">Description:</span> <span class="text-slate-700 dark:text-slate-300">{{ (aiInsightsSelectedSolution.description | slice:0:200) }}{{ aiInsightsSelectedSolution.description.length > 200 ? '...' : '' }}</span></p>
+              <p *ngIf="aiInsightsSelectedSolution.solutionArea"><span class="font-medium text-slate-600 dark:text-slate-400">Focus Area:</span> <span class="text-slate-700 dark:text-slate-300">{{ aiInsightsSelectedSolution.solutionArea }}</span></p>
+              <p *ngIf="aiInsightsSelectedSolution.sdgs?.length"><span class="font-medium text-slate-600 dark:text-slate-400">SDGs:</span> <span class="text-slate-700 dark:text-slate-300">{{ aiInsightsSelectedSolution.sdgs?.join(', ') }}</span></p>
+              <p *ngIf="aiInsightsSelectedSolution.meetLink"><span class="font-medium text-slate-600 dark:text-slate-400">Meet Link:</span> <span class="text-emerald-600 dark:text-emerald-400">Available</span></p>
+            </div>
+
+            <div class="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+              <p class="text-xs text-purple-700 dark:text-purple-300">
+                <strong>Email will include:</strong> AI-generated potential funders, 3 relevant news headlines, and links to the video call and dashboard (with invite modal auto-open).
+              </p>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="aiInsightsError" class="rounded-xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+            <p class="text-sm text-red-700 dark:text-red-300">{{ aiInsightsError }}</p>
+          </div>
+
+          <!-- Success Message -->
+          <div *ngIf="aiInsightsSent" class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-200 dark:border-emerald-800">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <p class="text-sm text-emerald-700 dark:text-emerald-300">AI Insights email sent successfully to {{ aiInsightsSelectedUserData?.user?.email }}!</p>
+            </div>
+          </div>
+
+          <!-- Send Button -->
+          <div class="pt-2">
+            <button
+              (click)="sendAIInsightsEmail()"
+              [disabled]="!aiInsightsSelectedUserData || !aiInsightsSelectedSolution || aiInsightsSending"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-200
+                     bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700
+                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-indigo-600
+                     shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30"
+            >
+              <svg *ngIf="!aiInsightsSending" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <svg *ngIf="aiInsightsSending" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              {{ aiInsightsSending ? 'Sending...' : 'Send AI Insights Email' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END AI INSIGHTS EMAIL SECTION ===== -->
+
   <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 ml-16 lg:ml-20">
     <div class="mx-auto w-full max-w-screen-xl 2xl:max-w-[90%] px-2 lg:px-6">
       <!-- Start coding here -->

@@ -196,6 +196,262 @@ export const weeklyReminder = functions.https.onCall(
   }
 );
 
+// ===== AI Insights Email Function =====
+// Sends personalized AI-generated insights (funders, news) to solution authors
+export const sendAIInsightsEmail = functions.https.onCall(
+  async (
+    data: {
+      userEmail: string;
+      userFirstName: string;
+      solutionId: string;
+      solutionTitle: string;
+      solutionDescription?: string;
+      solutionArea?: string;
+      sdgs?: string[];
+      meetLink?: string;
+    },
+    context: functions.https.CallableContext
+  ) => {
+    // Validate authentication
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to send AI insights emails.'
+      );
+    }
+
+    // Validate required fields
+    const { userEmail, userFirstName, solutionId, solutionTitle } = data;
+    if (!userEmail || !solutionId || !solutionTitle) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Missing required fields: userEmail, solutionId, or solutionTitle'
+      );
+    }
+
+    console.log('Sending AI Insights email to:', userEmail, 'for solution:', solutionTitle);
+
+    try {
+      // Build context for AI prompts
+      const solutionContext = [
+        `Solution Title: "${solutionTitle}"`,
+        data.solutionDescription ? `Description: ${data.solutionDescription}` : '',
+        data.solutionArea ? `Focus Area: ${data.solutionArea}` : '',
+        data.sdgs?.length ? `Related SDGs: ${data.sdgs.join(', ')}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      // Initialize Gemini with Google Search grounding
+      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        tools: [{ google_search: {} }],
+      } as any);
+
+      // Generate funders insights
+      const fundersPrompt = `You are a research assistant helping social entrepreneurs find funding.
+
+Based on this project:
+${solutionContext}
+
+Find 3-5 REAL, currently active grant programs, foundations, or funding organizations that would be interested in funding this type of project.
+
+For each funder, provide:
+- **Organization Name**: The actual name
+- **Brief Description**: What they fund (1 sentence)
+- **Website**: Direct URL to their grants page if available
+
+IMPORTANT: Only include real, verifiable organizations that actually exist and have active funding programs. Focus on foundations, grants, and impact investors relevant to this solution's focus area.
+
+Format your response as a clean, email-friendly list with clear headers.`;
+
+      const newsPrompt = `You are a research assistant helping social entrepreneurs stay informed.
+
+Based on this project:
+${solutionContext}
+
+Find 3 recent and relevant news headlines from the past 6 months that would be interesting and useful for someone working on this type of solution.
+
+For each headline, provide:
+- **Headline**: The actual news title
+- **Source**: Publication name
+- **Why it's relevant**: Brief explanation (1 sentence)
+
+IMPORTANT: Only include real, recent news articles that actually exist. Focus on developments, trends, or success stories related to this solution's domain.
+
+Format your response as a clean, email-friendly list.`;
+
+      // Call Gemini for both prompts in parallel
+      const [fundersResult, newsResult] = await Promise.all([
+        model.generateContent(fundersPrompt),
+        model.generateContent(newsPrompt),
+      ]);
+
+      const fundersText =
+        fundersResult.response?.text() ||
+        'Unable to generate funder recommendations at this time.';
+      const newsText =
+        newsResult.response?.text() ||
+        'Unable to generate news insights at this time.';
+
+      console.log('AI Insights generated successfully');
+
+      // Build email links
+      const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
+      const meetLink =
+        data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
+
+      // Convert markdown-style formatting to HTML for email
+      const formatForEmail = (text: string): string => {
+        return text
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
+          .replace(/\n/g, '<br>') // Line breaks
+          .replace(
+            /(https?:\/\/[^\s<]+)/g,
+            '<a href="$1" style="color:#059669;text-decoration:none;">$1</a>'
+          ); // Links
+      };
+
+      // Build the email HTML
+      const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background-color:#f8fafc;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f8fafc;">
+    <tr>
+      <td align="center" style="padding:40px 20px;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background-color:#ffffff;border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:32px 32px 24px;background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border-radius:16px 16px 0 0;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">
+                AI Insights for Your Solution
+              </h1>
+              <p style="margin:8px 0 0;color:rgba(255,255,255,0.9);font-size:14px;">
+                Personalized recommendations powered by AI
+              </p>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:24px 32px 16px;">
+              <p style="margin:0;color:#0f172a;font-size:16px;line-height:1.6;">
+                Hi ${userFirstName || 'there'},
+              </p>
+              <p style="margin:12px 0 0;color:#475569;font-size:14px;line-height:1.6;">
+                We've gathered some AI-powered insights specifically for your solution: <strong style="color:#0f172a;">${solutionTitle}</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Funders Section -->
+          <tr>
+            <td style="padding:16px 32px;">
+              <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;">
+                <h2 style="margin:0 0 12px;color:#166534;font-size:16px;font-weight:600;">
+                  💰 Potential Funders
+                </h2>
+                <div style="color:#15803d;font-size:14px;line-height:1.7;">
+                  ${formatForEmail(fundersText)}
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- News Section -->
+          <tr>
+            <td style="padding:16px 32px;">
+              <div style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;">
+                <h2 style="margin:0 0 12px;color:#1e40af;font-size:16px;font-weight:600;">
+                  📰 Relevant News Headlines
+                </h2>
+                <div style="color:#1d4ed8;font-size:14px;line-height:1.7;">
+                  ${formatForEmail(newsText)}
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Call to Action Section -->
+          <tr>
+            <td style="padding:16px 32px;">
+              <div style="background-color:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:20px;">
+                <h2 style="margin:0 0 12px;color:#7c3aed;font-size:16px;font-weight:600;">
+                  🚀 Take Action!
+                </h2>
+                <p style="margin:0 0 16px;color:#6b21a8;font-size:14px;line-height:1.6;">
+                  Ready to make progress on your solution? Connect with your team and start building!
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td style="padding:8px 0;">
+                      <a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;text-decoration:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;">
+                        Join Video Call
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;">
+                      <a href="${dashboardLink}" style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;">
+                        Invite Team Members
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 32px 32px;">
+              <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 16px;">
+              <p style="margin:0;color:#64748b;font-size:12px;line-height:1.5;">
+                Keep up the great work!<br>
+                <strong>The NewWorld Game Team</strong>
+              </p>
+              <p style="margin:12px 0 0;color:#94a3b8;font-size:11px;">
+                <a href="https://newworld-game.org" style="color:#94a3b8;text-decoration:none;">newworld-game.org</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+      // Send via SendGrid
+      const msg = {
+        to: userEmail,
+        from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
+        subject: `AI Insights for your solution: ${solutionTitle}`,
+        html: emailHtml,
+      };
+
+      await sgMail.send(msg);
+      console.log('AI Insights email sent successfully to:', userEmail);
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error in sendAIInsightsEmail:', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        error?.message || 'Failed to send AI insights email'
+      );
+    }
+  }
+);
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const notifyJoinRequest = functions.https.onCall(

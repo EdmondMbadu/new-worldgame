@@ -82,6 +82,16 @@ export class DashboardComponent implements OnInit {
     this.auth.getALlUsers().subscribe((users) => {
       this.allUsers = users;
     });
+
+    // Check for openInvite query param to auto-open invite modal
+    this.activatedRoute.queryParams.subscribe((params) => {
+      if (params['openInvite'] === 'true') {
+        // Small delay to ensure the page is loaded
+        setTimeout(() => {
+          this.showInviteTeamMemberModal = true;
+        }, 500);
+      }
+    });
   }
   toggleHover(event: boolean) {
     this.isHovering = event;

@@ -41,6 +41,15 @@ export class UserManagementComponent implements OnInit {
   unsubscribedEmails: string[] = [];
   unsubSet = new Set<string>();
 
+  // ===== AI Insights Email Section =====
+  aiInsightsSelectedUserData: { user: User; solutions: Solution[] } | null =
+    null;
+  aiInsightsSelectedSolution: Solution | null = null;
+  aiInsightsSending = false;
+  aiInsightsSent = false;
+  aiInsightsError = '';
+  usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
+
   // UI toggle: default = respect unsubscribes (do NOT send to them)
   disregardUnsubs = false;
 
@@ -152,6 +161,9 @@ export class UserManagementComponent implements OnInit {
           user.tempSolutionstarted = solutionCount.toString();
           user.tempSolutionSubmitted = solutionSubmittedCount.toString();
         }
+
+        // Compute users with in-progress solutions for AI Insights feature
+        this.computeUsersWithInProgressSolutions();
       });
     });
 
@@ -637,5 +649,93 @@ export class UserManagementComponent implements OnInit {
     const base = 'https://newworld-game.org/unsubscribe';
     const norm = this.normalizeEmail(email);
     return `${base}?e=${encodeURIComponent(norm)}`;
+  }
+
+  // ===== AI Insights Email Methods =====
+
+  // Compute users who are authors of in-progress solutions
+  computeUsersWithInProgressSolutions() {
+    const userSolutionsMap = new Map<
+      string,
+      { user: User; solutions: Solution[] }
+    >();
+
+    for (const solution of this.everySolution) {
+      // Only include in-progress solutions where user is the author
+      if (solution.finished !== 'true' && solution.authorEmail) {
+        const normalizedAuthorEmail = solution.authorEmail.trim().toLowerCase();
+        const user = this.allUsers.find(
+          (u) => u.email?.trim().toLowerCase() === normalizedAuthorEmail
+        );
+
+        if (user) {
+          if (!userSolutionsMap.has(normalizedAuthorEmail)) {
+            userSolutionsMap.set(normalizedAuthorEmail, { user, solutions: [] });
+          }
+          userSolutionsMap.get(normalizedAuthorEmail)!.solutions.push(solution);
+        }
+      }
+    }
+
+    this.usersWithInProgressSolutions = Array.from(
+      userSolutionsMap.values()
+    ).sort((a, b) => {
+      const nameA = `${a.user.firstName || ''} ${a.user.lastName || ''}`.trim();
+      const nameB = `${b.user.firstName || ''} ${b.user.lastName || ''}`.trim();
+      return nameA.localeCompare(nameB);
+    });
+  }
+
+  // Called when user selection changes
+  onAIInsightsUserChange() {
+    this.aiInsightsSelectedSolution = null;
+    this.aiInsightsSent = false;
+    this.aiInsightsError = '';
+  }
+
+  // Called when solution selection changes
+  onAIInsightsSolutionChange() {
+    this.aiInsightsSent = false;
+    this.aiInsightsError = '';
+  }
+
+  // Send AI insights email
+  async sendAIInsightsEmail() {
+    if (!this.aiInsightsSelectedUserData || !this.aiInsightsSelectedSolution) {
+      this.aiInsightsError = 'Please select a user and a solution.';
+      return;
+    }
+
+    const user = this.aiInsightsSelectedUserData.user;
+    const solution = this.aiInsightsSelectedSolution;
+
+    this.aiInsightsSending = true;
+    this.aiInsightsError = '';
+    this.aiInsightsSent = false;
+
+    try {
+      const callable = this.fns.httpsCallable('sendAIInsightsEmail');
+      await firstValueFrom(
+        callable({
+          userEmail: user.email,
+          userFirstName: user.firstName || 'there',
+          solutionId: solution.solutionId,
+          solutionTitle: solution.title || 'Untitled Solution',
+          solutionDescription: solution.description || '',
+          solutionArea: solution.solutionArea || '',
+          sdgs: solution.sdgs || [],
+          meetLink: solution.meetLink || '',
+        })
+      );
+
+      this.aiInsightsSent = true;
+      console.log('AI Insights email sent to:', user.email);
+    } catch (error: any) {
+      console.error('Error sending AI insights email:', error);
+      this.aiInsightsError =
+        error?.message || 'Failed to send email. Please try again.';
+    } finally {
+      this.aiInsightsSending = false;
+    }
   }
 }
