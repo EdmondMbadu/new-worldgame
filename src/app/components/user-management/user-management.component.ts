@@ -68,6 +68,18 @@ export class UserManagementComponent implements OnInit {
     unsubscribed: 0,
     finalRecipients: 0,
   };
+  aiInsightsSendLogs: Array<{
+    id: string;
+    mode: 'single' | 'bulk';
+    subject: string;
+    createdBy: string;
+    recipients: Array<{ email: string; solutionId: string; solutionTitle: string }>;
+    total: number;
+    successCount: number;
+    failureCount: number;
+    failures?: string[];
+    sentAt?: any;
+  }> = [];
 
   // Searchable dropdown state
   aiInsightsUserSearch = '';
@@ -195,6 +207,7 @@ export class UserManagementComponent implements OnInit {
     });
 
     this.subscribeUnsubscribes();
+    this.subscribeAIInsightsLogs();
   }
 
   // A simple computed property that filters users by the search term.
@@ -972,46 +985,68 @@ export class UserManagementComponent implements OnInit {
     this.aiInsightsBulkSent = false;
     this.aiInsightsBulkError = '';
 
-    const callable = this.fns.httpsCallable('sendAIInsightsEmail');
-    const failures: string[] = [];
-
     try {
-      for (const item of this.aiInsightsBulkSelections) {
-        const userEmail = this.normalizeEmail(item.email);
-        if (!userEmail) continue;
-
+      const payload = this.aiInsightsBulkSelections.map((item) => {
         const sol = item.solution;
-        try {
-          await firstValueFrom(
-            callable({
-              userEmail,
-              userFirstName: item.name.split(' ')[0] || 'there',
-              solutionId: sol.solutionId,
-              solutionTitle: sol.title || 'Untitled Solution',
-              solutionDescription: sol.description || '',
-              solutionArea: sol.solutionArea || '',
-              sdgs: sol.sdgs || [],
-              meetLink: sol.meetLink || '',
-              solutionImage: sol.image || '',
-            })
-          );
-        } catch (error: any) {
-          failures.push(`${userEmail}: ${error?.message || 'send failed'}`);
-        }
+        return {
+          userEmail: item.email,
+          userFirstName: item.name.split(' ')[0] || 'there',
+          solutionId: sol.solutionId,
+          solutionTitle: sol.title || 'Untitled Solution',
+          solutionDescription: sol.description || '',
+          solutionArea: sol.solutionArea || '',
+          sdgs: sol.sdgs || [],
+          meetLink: sol.meetLink || '',
+          solutionImage: sol.image || '',
+        };
+      });
 
-        await new Promise((res) => setTimeout(res, 120));
-      }
+      const bulkCallable = this.fns.httpsCallable('sendAIInsightsBulkEmail');
+      const response: any = await firstValueFrom(
+        bulkCallable({
+          recipients: payload,
+          concurrency: 4,
+        })
+      );
 
-      if (!failures.length) {
+      if (response?.successCount) {
         this.aiInsightsBulkSent = true;
       }
-    } finally {
-      if (failures.length) {
-        console.error('Bulk AI insights failures:', failures);
+      if (response?.failureCount) {
         this.aiInsightsBulkError =
-          'Some emails failed to send. Check console/logs.';
+          'Some emails failed to send. Check the send log for details.';
       }
+    } finally {
       this.aiInsightsBulkSending = false;
     }
+  }
+
+  private subscribeAIInsightsLogs() {
+    this.afs
+      .collection('ai_insights_send_logs', (ref) =>
+        ref.orderBy('sentAt', 'desc').limit(200)
+      )
+      .valueChanges({ idField: 'id' })
+      .subscribe((rows: any[]) => {
+        this.aiInsightsSendLogs = rows || [];
+      });
+  }
+
+  deleteAIInsightsLog(id: string) {
+    if (!id) return;
+    this.afs.doc(`ai_insights_send_logs/${id}`).delete();
+  }
+
+  formatLogTimestamp(ts: any): string {
+    const d =
+      ts?.toDate?.() || (ts instanceof Date ? ts : new Date(ts || ''));
+    if (!d || isNaN(d.getTime())) return '';
+    return d.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
   }
 }

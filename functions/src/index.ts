@@ -196,62 +196,39 @@ export const weeklyReminder = functions.https.onCall(
   }
 );
 
-// ===== AI Insights Email Function =====
-// Sends personalized AI-generated insights (funders, news) to solution authors
-export const sendAIInsightsEmail = functions.https.onCall(
-  async (
-    data: {
-      userEmail: string;
-      userFirstName: string;
-      solutionId: string;
-      solutionTitle: string;
-      solutionDescription?: string;
-      solutionArea?: string;
-      sdgs?: string[];
-      meetLink?: string;
-      solutionImage?: string;
-    },
-    context: functions.https.CallableContext
-  ) => {
-    // Validate authentication
-    if (!context.auth) {
-      throw new functions.https.HttpsError(
-        'unauthenticated',
-        'Authentication is required to send AI insights emails.'
-      );
-    }
+type AIInsightsPayload = {
+  userEmail: string;
+  userFirstName: string;
+  solutionId: string;
+  solutionTitle: string;
+  solutionDescription?: string;
+  solutionArea?: string;
+  sdgs?: string[];
+  meetLink?: string;
+  solutionImage?: string;
+};
 
-    // Validate required fields
-    const { userEmail, userFirstName, solutionId, solutionTitle } = data;
-    if (!userEmail || !solutionId || !solutionTitle) {
-      throw new functions.https.HttpsError(
-        'invalid-argument',
-        'Missing required fields: userEmail, solutionId, or solutionTitle'
-      );
-    }
+const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
+  const { userEmail, userFirstName, solutionId, solutionTitle } = data;
+  // Build context for AI prompts
+  const solutionContext = [
+    `Solution Title: "${solutionTitle}"`,
+    data.solutionDescription ? `Description: ${data.solutionDescription}` : '',
+    data.solutionArea ? `Focus Area: ${data.solutionArea}` : '',
+    data.sdgs?.length ? `Related SDGs: ${data.sdgs.join(', ')}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 
-    console.log('Sending AI Insights email to:', userEmail, 'for solution:', solutionTitle);
+  // Initialize Gemini with Google Search grounding
+  const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.5-flash',
+    tools: [{ google_search: {} }],
+  } as any);
 
-    try {
-      // Build context for AI prompts
-      const solutionContext = [
-        `Solution Title: "${solutionTitle}"`,
-        data.solutionDescription ? `Description: ${data.solutionDescription}` : '',
-        data.solutionArea ? `Focus Area: ${data.solutionArea}` : '',
-        data.sdgs?.length ? `Related SDGs: ${data.sdgs.join(', ')}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n');
-
-      // Initialize Gemini with Google Search grounding
-      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
-        tools: [{ google_search: {} }],
-      } as any);
-
-      // Generate funders insights
-      const fundersPrompt = `You are a research assistant helping social entrepreneurs find funding.
+  // Generate funders insights
+  const fundersPrompt = `You are a research assistant helping social entrepreneurs find funding.
 
 Based on this project:
 ${solutionContext}
@@ -272,7 +249,7 @@ IMPORTANT:
 - If you cannot find an exact URL, omit the item.
 - No markdown formatting.`;
 
-      const newsPrompt = `You are a research assistant helping social entrepreneurs stay informed.
+  const newsPrompt = `You are a research assistant helping social entrepreneurs stay informed.
 
 Based on this project:
 ${solutionContext}
@@ -294,113 +271,113 @@ IMPORTANT:
 - If you cannot find an exact URL, omit the item.
 - No markdown formatting.`;
 
-      // Call Gemini for both prompts in parallel
-      const [fundersResult, newsResult] = await Promise.all([
-        model.generateContent(fundersPrompt),
-        model.generateContent(newsPrompt),
-      ]);
+  // Call Gemini for both prompts in parallel
+  const [fundersResult, newsResult] = await Promise.all([
+    model.generateContent(fundersPrompt),
+    model.generateContent(newsPrompt),
+  ]);
 
-      const fundersText =
-        fundersResult.response?.text() ||
-        'Unable to generate funder recommendations at this time.';
-      const newsText =
-        newsResult.response?.text() ||
-        'Unable to generate news insights at this time.';
+  const fundersText =
+    fundersResult.response?.text() ||
+    'Unable to generate funder recommendations at this time.';
+  const newsText =
+    newsResult.response?.text() ||
+    'Unable to generate news insights at this time.';
 
-      console.log('AI Insights generated successfully');
+  console.log('AI Insights generated successfully');
 
-      // Build email links
-      const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
-      const meetLink =
-        data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
-      const solutionImage = data.solutionImage || '';
+  // Build email links
+  const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
+  const meetLink =
+    data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
+  const solutionImage = data.solutionImage || '';
 
-      // Format and validate links before rendering
-      const cleanUrlFromLine = (line: string): string => {
-        const match = line.match(/https?:\/\/[^\s<>"')]+/);
-        if (!match) return '';
-        return match[0].replace(/[)\].,]+$/, '');
-      };
+  // Format and validate links before rendering
+  const cleanUrlFromLine = (line: string): string => {
+    const match = line.match(/https?:\/\/[^\s<>"')]+/);
+    if (!match) return '';
+    return match[0].replace(/[)\].,]+$/, '');
+  };
 
-      const parseFunders = (text: string) => {
-        const blocks = text.split(/\n\n+/).filter(b => b.trim());
-        return blocks
-          .map(block => {
-            const lines = block.split('\n').filter(l => l.trim());
-            if (lines.length === 0) return null;
-            const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
-            const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
-            const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
-            const cleanUrl = cleanUrlFromLine(url);
-            if (!name || !cleanUrl) return null;
-            return { name, desc, url: cleanUrl };
-          })
-          .filter(Boolean) as Array<{ name: string; desc: string; url: string }>;
-      };
+  const parseFunders = (text: string) => {
+    const blocks = text.split(/\n\n+/).filter(b => b.trim());
+    return blocks
+      .map(block => {
+        const lines = block.split('\n').filter(l => l.trim());
+        if (lines.length === 0) return null;
+        const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
+        const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
+        const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
+        const cleanUrl = cleanUrlFromLine(url);
+        if (!name || !cleanUrl) return null;
+        return { name, desc, url: cleanUrl };
+      })
+      .filter(Boolean) as Array<{ name: string; desc: string; url: string }>;
+  };
 
-      const parseNews = (text: string) => {
-        const blocks = text.split(/\n\n+/).filter(b => b.trim());
-        return blocks
-          .map(block => {
-            const lines = block.split('\n').filter(l => l.trim());
-            if (lines.length === 0) return null;
-            const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
-            const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
-            const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
-            const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
-            const articleUrl = cleanUrlFromLine(urlLine);
-            if (!headline || !articleUrl) return null;
-            return { headline, source, relevance, url: articleUrl };
-          })
-          .filter(Boolean) as Array<{
-            headline: string;
-            source: string;
-            relevance: string;
-            url: string;
-          }>;
-      };
+  const parseNews = (text: string) => {
+    const blocks = text.split(/\n\n+/).filter(b => b.trim());
+    return blocks
+      .map(block => {
+        const lines = block.split('\n').filter(l => l.trim());
+        if (lines.length === 0) return null;
+        const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
+        const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
+        const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
+        const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
+        const articleUrl = cleanUrlFromLine(urlLine);
+        if (!headline || !articleUrl) return null;
+        return { headline, source, relevance, url: articleUrl };
+      })
+      .filter(Boolean) as Array<{
+        headline: string;
+        source: string;
+        relevance: string;
+        url: string;
+      }>;
+  };
 
-      const isUrlReachable = async (url: string): Promise<boolean> => {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000);
-          const response = await fetch(url, {
-            method: 'GET',
-            redirect: 'follow',
-            signal: controller.signal,
-            headers: {
-              'User-Agent':
-                'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
-              Range: 'bytes=0-2048',
-            },
-          });
-          clearTimeout(timeoutId);
-          return response.status >= 200 && response.status < 400;
-        } catch (error) {
-          console.warn('URL check failed:', url, error);
-          return false;
-        }
-      };
+  const isUrlReachable = async (url: string): Promise<boolean> => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const response = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+          Range: 'bytes=0-2048',
+        },
+      });
+      clearTimeout(timeoutId);
+      return response.status >= 200 && response.status < 400;
+    } catch (error) {
+      console.warn('URL check failed:', url, error);
+      return false;
+    }
+  };
 
-      const validateLinks = async <T extends { url: string }>(items: T[]) => {
-        const valid: T[] = [];
-        for (const item of items) {
-          if (await isUrlReachable(item.url)) {
-            valid.push(item);
-          }
-        }
-        return valid;
-      };
+  const validateLinks = async <T extends { url: string }>(items: T[]) => {
+    const valid: T[] = [];
+    for (const item of items) {
+      if (await isUrlReachable(item.url)) {
+        valid.push(item);
+      }
+    }
+    return valid;
+  };
 
-      const formatFundersForEmail = (
-        items: Array<{ name: string; desc: string; url: string }>
-      ): string => {
-        return items
-          .map(item => {
-            const displayHost = item.url
-              .replace(/^https?:\/\//, '')
-              .split('/')[0];
-            return `
+  const formatFundersForEmail = (
+    items: Array<{ name: string; desc: string; url: string }>
+  ): string => {
+    return items
+      .map(item => {
+        const displayHost = item.url
+          .replace(/^https?:\/\//, '')
+          .split('/')[0];
+        return `
             <tr>
               <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
                 <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${item.name}</p>
@@ -408,21 +385,21 @@ IMPORTANT:
                 <a href="${item.url}" style="font-size:13px;color:#2563eb;text-decoration:none;">${displayHost} →</a>
               </td>
             </tr>`;
-          })
-          .join('');
-      };
+      })
+      .join('');
+  };
 
-      const formatNewsForEmail = (
-        items: Array<{
-          headline: string;
-          source: string;
-          relevance: string;
-          url: string;
-        }>
-      ): string => {
-        return items
-          .map(item => {
-            return `
+  const formatNewsForEmail = (
+    items: Array<{
+      headline: string;
+      source: string;
+      relevance: string;
+      url: string;
+    }>
+  ): string => {
+    return items
+      .map(item => {
+        return `
             <tr>
               <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
                 <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${item.headline}</p>
@@ -431,38 +408,38 @@ IMPORTANT:
                 <a href="${item.url}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>
               </td>
             </tr>`;
-          })
-          .join('');
-      };
+      })
+      .join('');
+  };
 
-      const funderItems = parseFunders(fundersText);
-      const newsItems = parseNews(newsText);
+  const funderItems = parseFunders(fundersText);
+  const newsItems = parseNews(newsText);
 
-      const validFunders = (await validateLinks(funderItems)).slice(0, 5);
-      const validNews = (await validateLinks(newsItems)).slice(0, 5);
+  const validFunders = (await validateLinks(funderItems)).slice(0, 5);
+  const validNews = (await validateLinks(newsItems)).slice(0, 5);
 
-      const fundersHtml = validFunders.length
-        ? formatFundersForEmail(validFunders)
-        : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified funding links available today.</p></td></tr>`;
+  const fundersHtml = validFunders.length
+    ? formatFundersForEmail(validFunders)
+    : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified funding links available today.</p></td></tr>`;
 
-      const newsHtml = validNews.length
-        ? formatNewsForEmail(validNews)
-        : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified news links available today.</p></td></tr>`;
+  const newsHtml = validNews.length
+    ? formatNewsForEmail(validNews)
+    : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified news links available today.</p></td></tr>`;
 
-      // Get current date formatted
-      const currentDate = new Date().toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+  // Get current date formatted
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-      const unsubscribeUrl = `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
-        (userEmail || '').toLowerCase()
-      )}`;
+  const unsubscribeUrl = `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
+    (userEmail || '').toLowerCase()
+  )}`;
 
-      // Build the premium NYT-style email HTML
-      const emailHtml = `
+  // Build the premium NYT-style email HTML
+  const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -613,17 +590,111 @@ IMPORTANT:
   </table>
 </body>
 </html>`;
+  return {
+    html: emailHtml,
+    subject: `Daily NewWorld Game Intelligence Brief: ${solutionTitle}`,
+    verifiedFunders: validFunders.length,
+    verifiedNews: validNews.length,
+  };
+};
 
-      // Send via SendGrid
+const writeAIInsightsLog = async (entry: {
+  mode: 'single' | 'bulk';
+  subject: string;
+  createdBy: string;
+  recipients: Array<{ email: string; solutionId: string; solutionTitle: string }>;
+  total: number;
+  successCount: number;
+  failureCount: number;
+  failures?: string[];
+}) => {
+  await admin.firestore().collection('ai_insights_send_logs').add({
+    mode: entry.mode,
+    subject: entry.subject,
+    createdBy: entry.createdBy,
+    recipients: entry.recipients,
+    total: entry.total,
+    successCount: entry.successCount,
+    failureCount: entry.failureCount,
+    failures: entry.failures || [],
+    sentAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+};
+
+const runWithConcurrency = async <T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<R>
+) => {
+  const results: R[] = [];
+  let idx = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (idx < items.length) {
+      const current = items[idx++];
+      results.push(await worker(current));
+    }
+  });
+  await Promise.all(runners);
+  return results;
+};
+
+// ===== AI Insights Email Function =====
+// Sends personalized AI-generated insights (funders, news) to solution authors
+export const sendAIInsightsEmail = functions.https.onCall(
+  async (data: AIInsightsPayload, context: functions.https.CallableContext) => {
+    // Validate authentication
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to send AI insights emails.'
+      );
+    }
+
+    // Validate required fields
+    const { userEmail, solutionId, solutionTitle } = data;
+    if (!userEmail || !solutionId || !solutionTitle) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Missing required fields: userEmail, solutionId, or solutionTitle'
+      );
+    }
+
+    console.log(
+      'Sending AI Insights email to:',
+      userEmail,
+      'for solution:',
+      solutionTitle
+    );
+
+    try {
+      const { html, subject } = await buildAIInsightsEmail(data);
+
       const msg = {
         to: userEmail,
         from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
-        subject: `Daily NewWorld Game Intelligence Brief: ${solutionTitle}`,
-        html: emailHtml,
+        subject,
+        html,
       };
 
       await sgMail.send(msg);
       console.log('AI Insights email sent successfully to:', userEmail);
+
+      const createdBy = context.auth?.token?.email || 'unknown';
+      await writeAIInsightsLog({
+        mode: 'single',
+        subject,
+        createdBy,
+        recipients: [
+          {
+            email: userEmail,
+            solutionId,
+            solutionTitle,
+          },
+        ],
+        total: 1,
+        successCount: 1,
+        failureCount: 0,
+      });
 
       return { success: true };
     } catch (error: any) {
@@ -633,6 +704,85 @@ IMPORTANT:
         error?.message || 'Failed to send AI insights email'
       );
     }
+  }
+);
+
+// Bulk AI Insights sender with concurrency
+export const sendAIInsightsBulkEmail = functions
+  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+  .https.onCall(
+  async (
+    data: { recipients: AIInsightsPayload[]; concurrency?: number },
+    context: functions.https.CallableContext
+  ) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to send AI insights emails.'
+      );
+    }
+
+    const recipients = Array.isArray(data?.recipients) ? data.recipients : [];
+    if (!recipients.length) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Recipients list is required.'
+      );
+    }
+
+    const concurrency = Math.min(Math.max(Number(data.concurrency) || 4, 1), 6);
+    const failures: string[] = [];
+    let successCount = 0;
+
+    const createdBy = context.auth?.token?.email || 'unknown';
+
+    await runWithConcurrency(recipients, concurrency, async (recipient) => {
+      const { userEmail, solutionId, solutionTitle } = recipient;
+      if (!userEmail || !solutionId || !solutionTitle) {
+        failures.push(
+          `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
+        );
+        return;
+      }
+
+      try {
+        const { html, subject } = await buildAIInsightsEmail(recipient);
+        await sgMail.send({
+          to: userEmail,
+          from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
+          subject,
+          html,
+        });
+        successCount += 1;
+      } catch (error: any) {
+        failures.push(
+          `${userEmail}:${error?.message || 'failed to send'}`
+        );
+      }
+    });
+
+    const subject = `Daily NewWorld Game Intelligence Brief (bulk)`;
+    await writeAIInsightsLog({
+      mode: 'bulk',
+      subject,
+      createdBy,
+      recipients: recipients.map((r) => ({
+        email: r.userEmail,
+        solutionId: r.solutionId,
+        solutionTitle: r.solutionTitle,
+      })),
+      total: recipients.length,
+      successCount,
+      failureCount: failures.length,
+      failures,
+    });
+
+    return {
+      success: failures.length === 0,
+      successCount,
+      failureCount: failures.length,
+      failures,
+    };
   }
 );
 

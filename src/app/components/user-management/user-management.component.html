@@ -255,6 +255,69 @@
             </div>
           </div>
         </div>
+
+        <!-- Send Log -->
+        <div class="mt-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 p-5">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h4 class="text-sm font-semibold text-slate-900 dark:text-white">Brief Send Log</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Records of daily intelligence briefs sent</p>
+            </div>
+            <span class="text-xs text-slate-500 dark:text-slate-400">{{ aiInsightsSendLogs.length }} records</span>
+          </div>
+
+          <div *ngIf="aiInsightsSendLogs.length; else noSendLogs" class="space-y-3">
+            <div
+              *ngFor="let log of aiInsightsSendLogs"
+              class="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-4"
+            >
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">
+                    {{ log.subject }}
+                  </p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ formatLogTimestamp(log.sentAt) }} • {{ log.mode }} • {{ log.successCount }}/{{ log.total }} sent
+                  </p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Sent by {{ log.createdBy || 'unknown' }}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  (click)="deleteAIInsightsLog(log.id)"
+                  class="text-xs font-semibold text-rose-600 hover:text-rose-700"
+                >
+                  Delete
+                </button>
+              </div>
+
+              <div class="mt-3 text-xs text-slate-600 dark:text-slate-300">
+                <span class="font-semibold">Recipients:</span>
+                <span class="ml-1">
+                  {{ log.recipients?.length || 0 }}
+                </span>
+              </div>
+
+              <div *ngIf="log.recipients?.length" class="mt-2 max-h-32 overflow-y-auto text-xs text-slate-500 dark:text-slate-400">
+                <div *ngFor="let rec of log.recipients" class="flex items-center justify-between gap-2 py-0.5">
+                  <span class="truncate">{{ rec.email }}</span>
+                  <span class="truncate text-slate-400">{{ rec.solutionTitle }}</span>
+                </div>
+              </div>
+
+              <div *ngIf="log.failureCount" class="mt-2 text-xs text-rose-600">
+                {{ log.failureCount }} failed
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noSendLogs>
+            <div class="rounded-lg border border-dashed border-slate-300 dark:border-slate-600 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+              No brief sends recorded yet.
+            </div>
+          </ng-template>
+        </div>
       </div>
     </div>
   </section>
