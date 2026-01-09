@@ -256,33 +256,43 @@ export const sendAIInsightsEmail = functions.https.onCall(
 Based on this project:
 ${solutionContext}
 
-Find 3-5 REAL, currently active grant programs, foundations, or funding organizations that would be interested in funding this type of project.
+Find 6 REAL, currently active grant programs, foundations, or funding organizations that would be interested in funding this type of project.
 
 For each funder, provide ONLY this format (no markdown, no asterisks):
 Organization Name
 Brief description of what they fund (1 sentence)
-Website URL
+Website URL (full https:// link to the official organization page)
 
 Separate each funder with a blank line.
 
-IMPORTANT: Only include real, verifiable organizations. No markdown formatting.`;
+IMPORTANT:
+- Only include real, verifiable organizations.
+- Use a precise, direct link to the official site (no homepages without context, no short links, no tracking, no aggregators).
+- Include the full URL with https:// and the complete path.
+- If you cannot find an exact URL, omit the item.
+- No markdown formatting.`;
 
       const newsPrompt = `You are a research assistant helping social entrepreneurs stay informed.
 
 Based on this project:
 ${solutionContext}
 
-Find 3 recent and relevant news headlines from the past 6 months that would be interesting and useful for someone working on this type of solution.
+Find 6 recent and relevant news headlines from the past 6 months that would be interesting and useful for someone working on this type of solution.
 
 For each headline, provide ONLY this format (no markdown, no asterisks):
 Headline text
 Source publication name
-Article URL (direct link to the news article)
+Article URL (full https:// link to the exact article page)
 Why it's relevant (1 sentence)
 
 Separate each news item with a blank line.
 
-IMPORTANT: Only include real, recent news articles with actual working URLs. No markdown formatting.`;
+IMPORTANT:
+- Only include real, recent news articles with working URLs.
+- Use a precise, direct article link from the publisher (no homepages, no short links, no tracking, no aggregators).
+- Include the full URL with https:// and the complete path.
+- If you cannot find an exact URL, omit the item.
+- No markdown formatting.`;
 
       // Call Gemini for both prompts in parallel
       const [fundersResult, newsResult] = await Promise.all([
@@ -305,54 +315,139 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
         data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
       const solutionImage = data.solutionImage || '';
 
-      // Format funders into structured HTML blocks
-      const formatFundersForEmail = (text: string): string => {
-        const blocks = text.split(/\n\n+/).filter(b => b.trim());
-        return blocks.map(block => {
-          const lines = block.split('\n').filter(l => l.trim());
-          if (lines.length === 0) return '';
-          const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
-          const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
-          const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
-          const urlMatch = url.match(/(https?:\/\/[^\s]+)/);
-          const cleanUrl = urlMatch ? urlMatch[1] : '';
-          return `
-            <tr>
-              <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-                <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${name}</p>
-                <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5;">${desc}</p>
-                ${cleanUrl ? `<a href="${cleanUrl}" style="font-size:13px;color:#2563eb;text-decoration:none;">${cleanUrl.replace(/^https?:\/\//, '').split('/')[0]} →</a>` : ''}
-              </td>
-            </tr>`;
-        }).join('');
+      // Format and validate links before rendering
+      const cleanUrlFromLine = (line: string): string => {
+        const match = line.match(/https?:\/\/[^\s<>"')]+/);
+        if (!match) return '';
+        return match[0].replace(/[)\].,]+$/, '');
       };
 
-      // Format news into structured HTML blocks
-      const formatNewsForEmail = (text: string): string => {
+      const parseFunders = (text: string) => {
         const blocks = text.split(/\n\n+/).filter(b => b.trim());
-        return blocks.map(block => {
-          const lines = block.split('\n').filter(l => l.trim());
-          if (lines.length === 0) return '';
-          const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
-          const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
-          const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
-          const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
+        return blocks
+          .map(block => {
+            const lines = block.split('\n').filter(l => l.trim());
+            if (lines.length === 0) return null;
+            const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
+            const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
+            const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
+            const cleanUrl = cleanUrlFromLine(url);
+            if (!name || !cleanUrl) return null;
+            return { name, desc, url: cleanUrl };
+          })
+          .filter(Boolean) as Array<{ name: string; desc: string; url: string }>;
+      };
 
-          // Extract URL from the line
-          const urlMatch = urlLine.match(/(https?:\/\/[^\s]+)/);
-          const articleUrl = urlMatch ? urlMatch[1] : '';
+      const parseNews = (text: string) => {
+        const blocks = text.split(/\n\n+/).filter(b => b.trim());
+        return blocks
+          .map(block => {
+            const lines = block.split('\n').filter(l => l.trim());
+            if (lines.length === 0) return null;
+            const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
+            const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
+            const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
+            const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
+            const articleUrl = cleanUrlFromLine(urlLine);
+            if (!headline || !articleUrl) return null;
+            return { headline, source, relevance, url: articleUrl };
+          })
+          .filter(Boolean) as Array<{
+            headline: string;
+            source: string;
+            relevance: string;
+            url: string;
+          }>;
+      };
 
-          return `
+      const isUrlReachable = async (url: string): Promise<boolean> => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const response = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow',
+            signal: controller.signal,
+            headers: {
+              'User-Agent':
+                'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+              Range: 'bytes=0-2048',
+            },
+          });
+          clearTimeout(timeoutId);
+          return response.status >= 200 && response.status < 400;
+        } catch (error) {
+          console.warn('URL check failed:', url, error);
+          return false;
+        }
+      };
+
+      const validateLinks = async <T extends { url: string }>(items: T[]) => {
+        const valid: T[] = [];
+        for (const item of items) {
+          if (await isUrlReachable(item.url)) {
+            valid.push(item);
+          }
+        }
+        return valid;
+      };
+
+      const formatFundersForEmail = (
+        items: Array<{ name: string; desc: string; url: string }>
+      ): string => {
+        return items
+          .map(item => {
+            const displayHost = item.url
+              .replace(/^https?:\/\//, '')
+              .split('/')[0];
+            return `
             <tr>
               <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-                <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${headline}</p>
-                <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${source}</p>
-                ${relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${relevance}</p>` : ''}
-                ${articleUrl ? `<a href="${articleUrl}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>` : ''}
+                <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${item.name}</p>
+                <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5;">${item.desc}</p>
+                <a href="${item.url}" style="font-size:13px;color:#2563eb;text-decoration:none;">${displayHost} →</a>
               </td>
             </tr>`;
-        }).join('');
+          })
+          .join('');
       };
+
+      const formatNewsForEmail = (
+        items: Array<{
+          headline: string;
+          source: string;
+          relevance: string;
+          url: string;
+        }>
+      ): string => {
+        return items
+          .map(item => {
+            return `
+            <tr>
+              <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
+                <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${item.headline}</p>
+                <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${item.source}</p>
+                ${item.relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${item.relevance}</p>` : ''}
+                <a href="${item.url}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>
+              </td>
+            </tr>`;
+          })
+          .join('');
+      };
+
+      const funderItems = parseFunders(fundersText);
+      const newsItems = parseNews(newsText);
+
+      const validFunders = (await validateLinks(funderItems)).slice(0, 5);
+      const validNews = (await validateLinks(newsItems)).slice(0, 5);
+
+      const fundersHtml = validFunders.length
+        ? formatFundersForEmail(validFunders)
+        : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified funding links available today.</p></td></tr>`;
+
+      const newsHtml = validNews.length
+        ? formatNewsForEmail(validNews)
+        : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified news links available today.</p></td></tr>`;
 
       // Get current date formatted
       const currentDate = new Date().toLocaleDateString('en-US', {
@@ -361,6 +456,10 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
         month: 'long',
         day: 'numeric'
       });
+
+      const unsubscribeUrl = `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
+        (userEmail || '').toLowerCase()
+      )}`;
 
       // Build the premium NYT-style email HTML
       const emailHtml = `
@@ -384,7 +483,7 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
                 <tr>
                   <td>
                     <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;">NewWorld Game</p>
-                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Weekly Intelligence Brief</h1>
+                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Daily NewWorld Game Intelligence Brief</h1>
                     <p style="margin:8px 0 0;font-size:13px;color:#9ca3af;">${currentDate}</p>
                   </td>
                 </tr>
@@ -422,7 +521,7 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
               <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Funding Opportunities</h3>
               <p style="margin:0 0 24px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Organizations aligned with your mission</p>
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                ${formatFundersForEmail(fundersText)}
+                ${fundersHtml}
               </table>
             </td>
           </tr>
@@ -440,7 +539,7 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
               <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">In the News</h3>
               <p style="margin:0 0 24px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Headlines relevant to your work</p>
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                ${formatNewsForEmail(newsText)}
+                ${newsHtml}
               </table>
             </td>
           </tr>
@@ -489,6 +588,8 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
                     </p>
                     <p style="margin:0;font-size:12px;color:#9ca3af;">
                       <a href="https://newworld-game.org" style="color:#6b7280;text-decoration:none;">newworld-game.org</a>
+                      <span style="color:#d1d5db;"> • </span>
+                      <a href="${unsubscribeUrl}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a>
                     </p>
                   </td>
                 </tr>
@@ -517,7 +618,7 @@ IMPORTANT: Only include real, recent news articles with actual working URLs. No 
       const msg = {
         to: userEmail,
         from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
-        subject: `Weekly Intelligence Brief: ${solutionTitle}`,
+        subject: `Daily NewWorld Game Intelligence Brief: ${solutionTitle}`,
         html: emailHtml,
       };
 

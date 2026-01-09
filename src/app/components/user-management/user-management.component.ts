@@ -49,6 +49,25 @@ export class UserManagementComponent implements OnInit {
   aiInsightsSent = false;
   aiInsightsError = '';
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
+  aiInsightsMode: 'single' | 'bulk' = 'single';
+  aiInsightsBulkCriteria: 'most_recent' | 'second_recent' | 'random' =
+    'most_recent';
+  aiInsightsBulkSelections: Array<{
+    email: string;
+    name: string;
+    solution: Solution;
+    solutionTitle: string;
+  }> = [];
+  aiInsightsBulkSending = false;
+  aiInsightsBulkSent = false;
+  aiInsightsBulkError = '';
+  aiInsightsBulkIncludeUnsubscribed = false;
+  aiInsightsBulkStats = {
+    totalParticipants: 0,
+    noSolutions: 0,
+    unsubscribed: 0,
+    finalRecipients: 0,
+  };
 
   // Searchable dropdown state
   aiInsightsUserSearch = '';
@@ -835,6 +854,164 @@ export class UserManagementComponent implements OnInit {
         error?.message || 'Failed to send email. Please try again.';
     } finally {
       this.aiInsightsSending = false;
+    }
+  }
+
+  private solutionDateMs(sol: Solution): number {
+    const raw =
+      (sol as any).createdAt ??
+      (sol as any).creationDate ??
+      (sol as any).updatedAt ??
+      (sol as any).submissionDate ??
+      '';
+    if (!raw) return 0;
+    if (raw instanceof Date) return raw.getTime();
+    if (typeof raw.toDate === 'function') return raw.toDate().getTime();
+    const parsed = Date.parse(String(raw));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private solutionsByParticipant(): Map<string, Solution[]> {
+    const map = new Map<string, Solution[]>();
+    for (const sol of this.everySolution) {
+      const emails = new Set<string>([
+        ...this.normalizeParticipantEmails((sol as any).participants),
+      ]);
+      const author = this.normalizeEmail((sol as any).authorEmail);
+      if (author) emails.add(author);
+      emails.forEach((email) => {
+        if (!email) return;
+        if (!map.has(email)) map.set(email, []);
+        map.get(email)!.push(sol);
+      });
+    }
+    return map;
+  }
+
+  private pickSolutionForEmail(
+    solutions: Solution[],
+    criteria: 'most_recent' | 'second_recent' | 'random'
+  ): Solution | null {
+    if (!solutions.length) return null;
+    const ordered = [...solutions].sort(
+      (a, b) => this.solutionDateMs(b) - this.solutionDateMs(a)
+    );
+    if (criteria === 'random') {
+      const idx = Math.floor(Math.random() * ordered.length);
+      return ordered[idx] || ordered[0];
+    }
+    if (criteria === 'second_recent') {
+      return ordered[1] || ordered[0];
+    }
+    return ordered[0];
+  }
+
+  buildBulkAIInsightsList() {
+    const map = this.solutionsByParticipant();
+    const selections: Array<{
+      email: string;
+      name: string;
+      solution: Solution;
+      solutionTitle: string;
+    }> = [];
+    let noSolutions = 0;
+    let unsubscribedSkipped = 0;
+
+    for (const [email, solutions] of map.entries()) {
+      const picked = this.pickSolutionForEmail(
+        solutions,
+        this.aiInsightsBulkCriteria
+      );
+      if (!picked || !picked.solutionId) {
+        noSolutions += 1;
+        continue;
+      }
+      if (this.isUnsubscribed(email) && !this.aiInsightsBulkIncludeUnsubscribed) {
+        unsubscribedSkipped += 1;
+        continue;
+      }
+      const fromDir = this.userDirectory.get(email);
+      selections.push({
+        email,
+        name: fromDir?.name || email,
+        solution: picked,
+        solutionTitle: picked.title || 'Untitled Solution',
+      });
+    }
+
+    selections.sort((a, b) => a.name.localeCompare(b.name));
+    this.aiInsightsBulkSelections = selections;
+    this.aiInsightsBulkSent = false;
+    this.aiInsightsBulkError = '';
+
+      this.aiInsightsBulkStats = {
+        totalParticipants: map.size,
+        noSolutions,
+        unsubscribed: unsubscribedSkipped,
+        finalRecipients: selections.length,
+      };
+  }
+
+  removeBulkRecipient(email: string) {
+    const norm = this.normalizeEmail(email);
+    this.aiInsightsBulkSelections = this.aiInsightsBulkSelections.filter(
+      (item) => item.email !== norm
+    );
+    this.aiInsightsBulkSent = false;
+    this.aiInsightsBulkError = '';
+    this.aiInsightsBulkStats = {
+      ...this.aiInsightsBulkStats,
+      finalRecipients: this.aiInsightsBulkSelections.length,
+    };
+  }
+
+  async sendBulkAIInsightsEmails() {
+    if (this.aiInsightsBulkSending || !this.aiInsightsBulkSelections.length)
+      return;
+    this.aiInsightsBulkSending = true;
+    this.aiInsightsBulkSent = false;
+    this.aiInsightsBulkError = '';
+
+    const callable = this.fns.httpsCallable('sendAIInsightsEmail');
+    const failures: string[] = [];
+
+    try {
+      for (const item of this.aiInsightsBulkSelections) {
+        const userEmail = this.normalizeEmail(item.email);
+        if (!userEmail) continue;
+
+        const sol = item.solution;
+        try {
+          await firstValueFrom(
+            callable({
+              userEmail,
+              userFirstName: item.name.split(' ')[0] || 'there',
+              solutionId: sol.solutionId,
+              solutionTitle: sol.title || 'Untitled Solution',
+              solutionDescription: sol.description || '',
+              solutionArea: sol.solutionArea || '',
+              sdgs: sol.sdgs || [],
+              meetLink: sol.meetLink || '',
+              solutionImage: sol.image || '',
+            })
+          );
+        } catch (error: any) {
+          failures.push(`${userEmail}: ${error?.message || 'send failed'}`);
+        }
+
+        await new Promise((res) => setTimeout(res, 120));
+      }
+
+      if (!failures.length) {
+        this.aiInsightsBulkSent = true;
+      }
+    } finally {
+      if (failures.length) {
+        console.error('Bulk AI insights failures:', failures);
+        this.aiInsightsBulkError =
+          'Some emails failed to send. Check console/logs.';
+      }
+      this.aiInsightsBulkSending = false;
     }
   }
 }
