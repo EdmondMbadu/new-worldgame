@@ -277,11 +277,12 @@ Find 3 recent and relevant news headlines from the past 6 months that would be i
 For each headline, provide ONLY this format (no markdown, no asterisks):
 Headline text
 Source publication name
+Article URL (direct link to the news article)
 Why it's relevant (1 sentence)
 
 Separate each news item with a blank line.
 
-IMPORTANT: Only include real, recent news. No markdown formatting.`;
+IMPORTANT: Only include real, recent news articles with actual working URLs. No markdown formatting.`;
 
       // Call Gemini for both prompts in parallel
       const [fundersResult, newsResult] = await Promise.all([
@@ -334,13 +335,20 @@ IMPORTANT: Only include real, recent news. No markdown formatting.`;
           if (lines.length === 0) return '';
           const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
           const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
-          const relevance = lines[2]?.replace(/\*\*/g, '').trim() || '';
+          const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
+          const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
+
+          // Extract URL from the line
+          const urlMatch = urlLine.match(/(https?:\/\/[^\s]+)/);
+          const articleUrl = urlMatch ? urlMatch[1] : '';
+
           return `
             <tr>
               <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
                 <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${headline}</p>
                 <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${source}</p>
                 ${relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${relevance}</p>` : ''}
+                ${articleUrl ? `<a href="${articleUrl}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>` : ''}
               </td>
             </tr>`;
         }).join('');
