@@ -50,6 +50,14 @@ export class UserManagementComponent implements OnInit {
   aiInsightsError = '';
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
 
+  // Searchable dropdown state
+  aiInsightsUserSearch = '';
+  aiInsightsSolutionSearch = '';
+  showAIInsightsUserDropdown = false;
+  showAIInsightsSolutionDropdown = false;
+  filteredAIInsightsUsers: { user: User; solutions: Solution[] }[] = [];
+  filteredAIInsightsSolutions: Solution[] = [];
+
   // UI toggle: default = respect unsubscribes (do NOT send to them)
   disregardUnsubs = false;
 
@@ -684,16 +692,106 @@ export class UserManagementComponent implements OnInit {
       const nameB = `${b.user.firstName || ''} ${b.user.lastName || ''}`.trim();
       return nameA.localeCompare(nameB);
     });
+
+    // Initialize filtered list
+    this.filteredAIInsightsUsers = [...this.usersWithInProgressSolutions];
   }
 
-  // Called when user selection changes
+  // Filter users based on search input
+  filterAIInsightsUsers() {
+    const search = this.aiInsightsUserSearch.toLowerCase().trim();
+    if (!search) {
+      this.filteredAIInsightsUsers = [...this.usersWithInProgressSolutions];
+    } else {
+      this.filteredAIInsightsUsers = this.usersWithInProgressSolutions.filter(
+        (item) => {
+          const firstName = (item.user.firstName || '').toLowerCase();
+          const lastName = (item.user.lastName || '').toLowerCase();
+          const email = (item.user.email || '').toLowerCase();
+          return (
+            firstName.includes(search) ||
+            lastName.includes(search) ||
+            email.includes(search) ||
+            `${firstName} ${lastName}`.includes(search)
+          );
+        }
+      );
+    }
+  }
+
+  // Select a user from the dropdown
+  selectAIInsightsUser(item: { user: User; solutions: Solution[] }) {
+    this.aiInsightsSelectedUserData = item;
+    this.aiInsightsUserSearch = `${item.user.firstName || ''} ${item.user.lastName || ''}`.trim();
+    this.showAIInsightsUserDropdown = false;
+    this.aiInsightsSelectedSolution = null;
+    this.aiInsightsSolutionSearch = '';
+    this.filteredAIInsightsSolutions = [...item.solutions];
+    this.aiInsightsSent = false;
+    this.aiInsightsError = '';
+  }
+
+  // Clear user selection
+  clearAIInsightsUserSelection() {
+    this.aiInsightsSelectedUserData = null;
+    this.aiInsightsUserSearch = '';
+    this.aiInsightsSelectedSolution = null;
+    this.aiInsightsSolutionSearch = '';
+    this.filteredAIInsightsUsers = [...this.usersWithInProgressSolutions];
+    this.filteredAIInsightsSolutions = [];
+    this.aiInsightsSent = false;
+    this.aiInsightsError = '';
+  }
+
+  // Filter solutions based on search input
+  filterAIInsightsSolutions() {
+    if (!this.aiInsightsSelectedUserData) return;
+
+    const search = this.aiInsightsSolutionSearch.toLowerCase().trim();
+    if (!search) {
+      this.filteredAIInsightsSolutions = [
+        ...this.aiInsightsSelectedUserData.solutions,
+      ];
+    } else {
+      this.filteredAIInsightsSolutions =
+        this.aiInsightsSelectedUserData.solutions.filter((sol) => {
+          const title = (sol.title || '').toLowerCase();
+          const desc = (sol.description || '').toLowerCase();
+          return title.includes(search) || desc.includes(search);
+        });
+    }
+  }
+
+  // Select a solution from the dropdown
+  selectAIInsightsSolution(sol: Solution) {
+    this.aiInsightsSelectedSolution = sol;
+    this.aiInsightsSolutionSearch = sol.title || 'Untitled Solution';
+    this.showAIInsightsSolutionDropdown = false;
+    this.aiInsightsSent = false;
+    this.aiInsightsError = '';
+  }
+
+  // Clear solution selection
+  clearAIInsightsSolutionSelection() {
+    this.aiInsightsSelectedSolution = null;
+    this.aiInsightsSolutionSearch = '';
+    if (this.aiInsightsSelectedUserData) {
+      this.filteredAIInsightsSolutions = [
+        ...this.aiInsightsSelectedUserData.solutions,
+      ];
+    }
+    this.aiInsightsSent = false;
+    this.aiInsightsError = '';
+  }
+
+  // Called when user selection changes (legacy - keeping for compatibility)
   onAIInsightsUserChange() {
     this.aiInsightsSelectedSolution = null;
     this.aiInsightsSent = false;
     this.aiInsightsError = '';
   }
 
-  // Called when solution selection changes
+  // Called when solution selection changes (legacy - keeping for compatibility)
   onAIInsightsSolutionChange() {
     this.aiInsightsSent = false;
     this.aiInsightsError = '';
@@ -725,6 +823,7 @@ export class UserManagementComponent implements OnInit {
           solutionArea: solution.solutionArea || '',
           sdgs: solution.sdgs || [],
           meetLink: solution.meetLink || '',
+          solutionImage: solution.image || '',
         })
       );
 

@@ -267,108 +267,282 @@
 
         <!-- Header -->
         <div class="flex items-center gap-3 mb-6">
-          <div class="p-2.5 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg shadow-purple-500/30">
+          <div class="p-2.5 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl shadow-lg">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
             </svg>
           </div>
           <div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Automated Emails with AI Insights</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Send personalized AI-generated insights to solution authors</p>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white">Weekly Intelligence Brief</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Send AI-curated funding opportunities and relevant news to solution authors</p>
           </div>
         </div>
 
         <!-- Selection Form -->
-        <div class="space-y-4">
-          <!-- Step 1: User Selection -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Step 1: Select a User (Authors with in-progress solutions)
-            </label>
-            <select
-              [(ngModel)]="aiInsightsSelectedUserData"
-              (ngModelChange)="onAIInsightsUserChange()"
-              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
-            >
-              <option [ngValue]="null">Select a user...</option>
-              <option *ngFor="let item of usersWithInProgressSolutions" [ngValue]="item">
-                {{ item.user.firstName }} {{ item.user.lastName }} ({{ item.user.email }}) - {{ item.solutions.length }} solution(s)
-              </option>
-            </select>
-            <p *ngIf="usersWithInProgressSolutions.length === 0" class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              No users with in-progress solutions found.
-            </p>
-          </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          <!-- Step 2: Solution Selection (shown after user is selected) -->
-          <div *ngIf="aiInsightsSelectedUserData">
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Step 2: Select a Solution
-            </label>
-            <select
-              [(ngModel)]="aiInsightsSelectedSolution"
-              (ngModelChange)="onAIInsightsSolutionChange()"
-              class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-purple-500/60"
-            >
-              <option [ngValue]="null">Select a solution...</option>
-              <option *ngFor="let sol of aiInsightsSelectedUserData.solutions" [ngValue]="sol">
-                {{ sol.title || 'Untitled Solution' }}
-              </option>
-            </select>
-          </div>
+          <!-- Left Column: Selection -->
+          <div class="space-y-5">
+            <!-- Step 1: User Selection with Search -->
+            <div class="relative">
+              <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                Step 1 — Select Recipient
+              </label>
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="aiInsightsUserSearch"
+                  (input)="filterAIInsightsUsers()"
+                  (focus)="showAIInsightsUserDropdown = true"
+                  placeholder="Search by name or email..."
+                  class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 focus:border-transparent transition-all"
+                />
+                <svg class="absolute left-3 top-3.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <!-- Clear button -->
+                <button
+                  *ngIf="aiInsightsSelectedUserData"
+                  (click)="clearAIInsightsUserSelection(); $event.stopPropagation()"
+                  class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
 
-          <!-- Solution Preview (shown after solution is selected) -->
-          <div *ngIf="aiInsightsSelectedSolution" class="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-4 border border-slate-200 dark:border-slate-700">
-            <h4 class="text-sm font-semibold text-slate-900 dark:text-white mb-2">Solution Preview</h4>
-            <div class="space-y-2 text-sm">
-              <p><span class="font-medium text-slate-600 dark:text-slate-400">Title:</span> <span class="text-slate-900 dark:text-white">{{ aiInsightsSelectedSolution.title || 'Untitled' }}</span></p>
-              <p *ngIf="aiInsightsSelectedSolution.description"><span class="font-medium text-slate-600 dark:text-slate-400">Description:</span> <span class="text-slate-700 dark:text-slate-300">{{ (aiInsightsSelectedSolution.description | slice:0:200) }}{{ aiInsightsSelectedSolution.description.length > 200 ? '...' : '' }}</span></p>
-              <p *ngIf="aiInsightsSelectedSolution.solutionArea"><span class="font-medium text-slate-600 dark:text-slate-400">Focus Area:</span> <span class="text-slate-700 dark:text-slate-300">{{ aiInsightsSelectedSolution.solutionArea }}</span></p>
-              <p *ngIf="aiInsightsSelectedSolution.sdgs?.length"><span class="font-medium text-slate-600 dark:text-slate-400">SDGs:</span> <span class="text-slate-700 dark:text-slate-300">{{ aiInsightsSelectedSolution.sdgs?.join(', ') }}</span></p>
-              <p *ngIf="aiInsightsSelectedSolution.meetLink"><span class="font-medium text-slate-600 dark:text-slate-400">Meet Link:</span> <span class="text-emerald-600 dark:text-emerald-400">Available</span></p>
-            </div>
+              <!-- User Dropdown Results -->
+              <div
+                *ngIf="showAIInsightsUserDropdown && filteredAIInsightsUsers.length > 0"
+                class="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-h-64 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let item of filteredAIInsightsUsers"
+                  (click)="selectAIInsightsUser(item)"
+                  class="px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 last:border-b-0 transition-colors"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0">
+                      <span class="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                        {{ item.user.firstName?.charAt(0) || '' }}{{ item.user.lastName?.charAt(0) || '' }}
+                      </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-slate-900 dark:text-white truncate">
+                        {{ item.user.firstName }} {{ item.user.lastName }}
+                      </p>
+                      <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ item.user.email }}</p>
+                    </div>
+                    <span class="flex-shrink-0 text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
+                      {{ item.solutions.length }} solution{{ item.solutions.length > 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-            <div class="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-              <p class="text-xs text-purple-700 dark:text-purple-300">
-                <strong>Email will include:</strong> AI-generated potential funders, 3 relevant news headlines, and links to the video call and dashboard (with invite modal auto-open).
+              <!-- No results message -->
+              <div
+                *ngIf="showAIInsightsUserDropdown && aiInsightsUserSearch && filteredAIInsightsUsers.length === 0"
+                class="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-4"
+              >
+                <p class="text-sm text-slate-500 dark:text-slate-400 text-center">No users found matching "{{ aiInsightsUserSearch }}"</p>
+              </div>
+
+              <!-- Selected User Display -->
+              <div *ngIf="aiInsightsSelectedUserData && !showAIInsightsUserDropdown" class="mt-2 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-slate-800 dark:bg-slate-600 flex items-center justify-center">
+                    <span class="text-sm font-semibold text-white">
+                      {{ aiInsightsSelectedUserData.user.firstName?.charAt(0) || '' }}{{ aiInsightsSelectedUserData.user.lastName?.charAt(0) || '' }}
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                      {{ aiInsightsSelectedUserData.user.firstName }} {{ aiInsightsSelectedUserData.user.lastName }}
+                    </p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ aiInsightsSelectedUserData.user.email }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <p *ngIf="usersWithInProgressSolutions.length === 0" class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                No users with in-progress solutions found.
               </p>
             </div>
-          </div>
 
-          <!-- Error Message -->
-          <div *ngIf="aiInsightsError" class="rounded-xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
-            <p class="text-sm text-red-700 dark:text-red-300">{{ aiInsightsError }}</p>
-          </div>
+            <!-- Step 2: Solution Selection with Search (shown after user is selected) -->
+            <div *ngIf="aiInsightsSelectedUserData" class="relative">
+              <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                Step 2 — Select Solution
+              </label>
+              <div class="relative">
+                <input
+                  type="text"
+                  [(ngModel)]="aiInsightsSolutionSearch"
+                  (input)="filterAIInsightsSolutions()"
+                  (focus)="showAIInsightsSolutionDropdown = true"
+                  placeholder="Search solutions..."
+                  class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-4 py-3 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400 focus:border-transparent transition-all"
+                />
+                <svg class="absolute left-3 top-3.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <!-- Clear button -->
+                <button
+                  *ngIf="aiInsightsSelectedSolution"
+                  (click)="clearAIInsightsSolutionSelection(); $event.stopPropagation()"
+                  class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
 
-          <!-- Success Message -->
-          <div *ngIf="aiInsightsSent" class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-200 dark:border-emerald-800">
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <p class="text-sm text-emerald-700 dark:text-emerald-300">AI Insights email sent successfully to {{ aiInsightsSelectedUserData?.user?.email }}!</p>
+              <!-- Solution Dropdown Results -->
+              <div
+                *ngIf="showAIInsightsSolutionDropdown && filteredAIInsightsSolutions.length > 0"
+                class="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-h-64 overflow-y-auto"
+              >
+                <div
+                  *ngFor="let sol of filteredAIInsightsSolutions"
+                  (click)="selectAIInsightsSolution(sol)"
+                  class="px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700 last:border-b-0 transition-colors"
+                >
+                  <div class="flex items-start gap-3">
+                    <div *ngIf="sol.image" class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700">
+                      <img [src]="sol.image" [alt]="sol.title" class="w-full h-full object-cover" />
+                    </div>
+                    <div *ngIf="!sol.image" class="w-12 h-12 rounded-lg flex-shrink-0 bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                      <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-slate-900 dark:text-white line-clamp-1">
+                        {{ sol.title || 'Untitled Solution' }}
+                      </p>
+                      <p *ngIf="sol.description" class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
+                        {{ sol.description }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- No results message -->
+              <div
+                *ngIf="showAIInsightsSolutionDropdown && aiInsightsSolutionSearch && filteredAIInsightsSolutions.length === 0"
+                class="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 p-4"
+              >
+                <p class="text-sm text-slate-500 dark:text-slate-400 text-center">No solutions found</p>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="aiInsightsError" class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+              <p class="text-sm text-red-700 dark:text-red-300">{{ aiInsightsError }}</p>
+            </div>
+
+            <!-- Success Message -->
+            <div *ngIf="aiInsightsSent" class="rounded-lg bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-200 dark:border-emerald-800">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p class="text-sm text-emerald-700 dark:text-emerald-300">Intelligence brief sent to {{ aiInsightsSelectedUserData?.user?.email }}</p>
+              </div>
+            </div>
+
+            <!-- Send Button -->
+            <div class="pt-2">
+              <button
+                (click)="sendAIInsightsEmail()"
+                [disabled]="!aiInsightsSelectedUserData || !aiInsightsSelectedSolution || aiInsightsSending"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200
+                       bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white
+                       disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg *ngIf="!aiInsightsSending" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                </svg>
+                <svg *ngIf="aiInsightsSending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                {{ aiInsightsSending ? 'Sending Brief...' : 'Send Intelligence Brief' }}
+              </button>
             </div>
           </div>
 
-          <!-- Send Button -->
-          <div class="pt-2">
-            <button
-              (click)="sendAIInsightsEmail()"
-              [disabled]="!aiInsightsSelectedUserData || !aiInsightsSelectedSolution || aiInsightsSending"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all duration-200
-                     bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-purple-600 disabled:hover:to-indigo-600
-                     shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30"
-            >
-              <svg *ngIf="!aiInsightsSending" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-              <svg *ngIf="aiInsightsSending" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
-              {{ aiInsightsSending ? 'Sending...' : 'Send AI Insights Email' }}
-            </button>
+          <!-- Right Column: Preview -->
+          <div *ngIf="aiInsightsSelectedSolution" class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
+            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-4">Email Preview</p>
+
+            <!-- Solution Image -->
+            <div *ngIf="aiInsightsSelectedSolution.image" class="mb-4 rounded-lg overflow-hidden">
+              <img [src]="aiInsightsSelectedSolution.image" [alt]="aiInsightsSelectedSolution.title" class="w-full h-40 object-cover" />
+            </div>
+
+            <!-- Solution Title -->
+            <h4 class="text-lg font-serif font-semibold text-slate-900 dark:text-white mb-2 leading-tight">
+              {{ aiInsightsSelectedSolution.title || 'Untitled' }}
+            </h4>
+
+            <!-- Solution Meta -->
+            <div class="space-y-2 text-sm mb-4">
+              <p *ngIf="aiInsightsSelectedSolution.description" class="text-slate-600 dark:text-slate-400 line-clamp-3">
+                {{ aiInsightsSelectedSolution.description }}
+              </p>
+              <div class="flex flex-wrap gap-2 mt-3">
+                <span *ngIf="aiInsightsSelectedSolution.solutionArea" class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  {{ aiInsightsSelectedSolution.solutionArea }}
+                </span>
+                <span *ngFor="let sdg of aiInsightsSelectedSolution.sdgs?.slice(0, 3)" class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  {{ sdg }}
+                </span>
+              </div>
+            </div>
+
+            <!-- What's Included -->
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
+              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">Email Contents</p>
+              <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span>3-5 relevant funding opportunities</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span>3 recent news headlines in their field</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span>Link to join team video call</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span>Direct link to invite team members</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Empty State for Preview -->
+          <div *ngIf="!aiInsightsSelectedSolution" class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-8 border border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center text-center min-h-[300px]">
+            <svg class="w-12 h-12 text-slate-300 dark:text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Select a user and solution to preview the email</p>
           </div>
         </div>
       </div>

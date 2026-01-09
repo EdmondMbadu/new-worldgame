@@ -209,6 +209,7 @@ export const sendAIInsightsEmail = functions.https.onCall(
       solutionArea?: string;
       sdgs?: string[];
       meetLink?: string;
+      solutionImage?: string;
     },
     context: functions.https.CallableContext
   ) => {
@@ -257,14 +258,14 @@ ${solutionContext}
 
 Find 3-5 REAL, currently active grant programs, foundations, or funding organizations that would be interested in funding this type of project.
 
-For each funder, provide:
-- **Organization Name**: The actual name
-- **Brief Description**: What they fund (1 sentence)
-- **Website**: Direct URL to their grants page if available
+For each funder, provide ONLY this format (no markdown, no asterisks):
+Organization Name
+Brief description of what they fund (1 sentence)
+Website URL
 
-IMPORTANT: Only include real, verifiable organizations that actually exist and have active funding programs. Focus on foundations, grants, and impact investors relevant to this solution's focus area.
+Separate each funder with a blank line.
 
-Format your response as a clean, email-friendly list with clear headers.`;
+IMPORTANT: Only include real, verifiable organizations. No markdown formatting.`;
 
       const newsPrompt = `You are a research assistant helping social entrepreneurs stay informed.
 
@@ -273,14 +274,14 @@ ${solutionContext}
 
 Find 3 recent and relevant news headlines from the past 6 months that would be interesting and useful for someone working on this type of solution.
 
-For each headline, provide:
-- **Headline**: The actual news title
-- **Source**: Publication name
-- **Why it's relevant**: Brief explanation (1 sentence)
+For each headline, provide ONLY this format (no markdown, no asterisks):
+Headline text
+Source publication name
+Why it's relevant (1 sentence)
 
-IMPORTANT: Only include real, recent news articles that actually exist. Focus on developments, trends, or success stories related to this solution's domain.
+Separate each news item with a blank line.
 
-Format your response as a clean, email-friendly list.`;
+IMPORTANT: Only include real, recent news. No markdown formatting.`;
 
       // Call Gemini for both prompts in parallel
       const [fundersResult, newsResult] = await Promise.all([
@@ -301,124 +302,198 @@ Format your response as a clean, email-friendly list.`;
       const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
       const meetLink =
         data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
+      const solutionImage = data.solutionImage || '';
 
-      // Convert markdown-style formatting to HTML for email
-      const formatForEmail = (text: string): string => {
-        return text
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
-          .replace(/\n/g, '<br>') // Line breaks
-          .replace(
-            /(https?:\/\/[^\s<]+)/g,
-            '<a href="$1" style="color:#059669;text-decoration:none;">$1</a>'
-          ); // Links
+      // Format funders into structured HTML blocks
+      const formatFundersForEmail = (text: string): string => {
+        const blocks = text.split(/\n\n+/).filter(b => b.trim());
+        return blocks.map(block => {
+          const lines = block.split('\n').filter(l => l.trim());
+          if (lines.length === 0) return '';
+          const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
+          const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
+          const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
+          const urlMatch = url.match(/(https?:\/\/[^\s]+)/);
+          const cleanUrl = urlMatch ? urlMatch[1] : '';
+          return `
+            <tr>
+              <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
+                <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${name}</p>
+                <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5;">${desc}</p>
+                ${cleanUrl ? `<a href="${cleanUrl}" style="font-size:13px;color:#2563eb;text-decoration:none;">${cleanUrl.replace(/^https?:\/\//, '').split('/')[0]} →</a>` : ''}
+              </td>
+            </tr>`;
+        }).join('');
       };
 
-      // Build the email HTML
+      // Format news into structured HTML blocks
+      const formatNewsForEmail = (text: string): string => {
+        const blocks = text.split(/\n\n+/).filter(b => b.trim());
+        return blocks.map(block => {
+          const lines = block.split('\n').filter(l => l.trim());
+          if (lines.length === 0) return '';
+          const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
+          const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
+          const relevance = lines[2]?.replace(/\*\*/g, '').trim() || '';
+          return `
+            <tr>
+              <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
+                <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${headline}</p>
+                <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${source}</p>
+                ${relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${relevance}</p>` : ''}
+              </td>
+            </tr>`;
+        }).join('');
+      };
+
+      // Get current date formatted
+      const currentDate = new Date().toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+
+      // Build the premium NYT-style email HTML
       const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Insights for ${solutionTitle}</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f8fafc;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f8fafc;">
+<body style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#ffffff;">
     <tr>
-      <td align="center" style="padding:40px 20px;">
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background-color:#ffffff;border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;">
 
-          <!-- Header -->
+          <!-- Masthead -->
           <tr>
-            <td style="padding:32px 32px 24px;background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 100%);border-radius:16px 16px 0 0;">
-              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;">
-                AI Insights for Your Solution
-              </h1>
-              <p style="margin:8px 0 0;color:rgba(255,255,255,0.9);font-size:14px;">
-                Personalized recommendations powered by AI
+            <td style="padding:32px 24px 24px;border-bottom:1px solid #e5e7eb;">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td>
+                    <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;">NewWorld Game</p>
+                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Weekly Intelligence Brief</h1>
+                    <p style="margin:8px 0 0;font-size:13px;color:#9ca3af;">${currentDate}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Hero Section with Solution -->
+          <tr>
+            <td style="padding:32px 24px;">
+              ${solutionImage ? `
+              <img src="${solutionImage}" alt="${solutionTitle}" width="100%" style="display:block;max-width:592px;height:auto;border-radius:4px;margin-bottom:24px;" />
+              ` : ''}
+              <p style="margin:0 0 8px;font-size:12px;color:#dc2626;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Your Solution</p>
+              <h2 style="margin:0 0 16px;font-size:32px;font-weight:400;color:#111827;line-height:1.2;font-family:Georgia,'Times New Roman',serif;">${solutionTitle}</h2>
+              <p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;">
+                Dear ${userFirstName || 'Changemaker'},
+              </p>
+              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
+                We've curated personalized insights to help advance your work. Below you'll find funding opportunities aligned with your mission and recent developments in your field.
               </p>
             </td>
           </tr>
 
-          <!-- Greeting -->
+          <!-- Divider -->
           <tr>
-            <td style="padding:24px 32px 16px;">
-              <p style="margin:0;color:#0f172a;font-size:16px;line-height:1.6;">
-                Hi ${userFirstName || 'there'},
-              </p>
-              <p style="margin:12px 0 0;color:#475569;font-size:14px;line-height:1.6;">
-                We've gathered some AI-powered insights specifically for your solution: <strong style="color:#0f172a;">${solutionTitle}</strong>
-              </p>
+            <td style="padding:0 24px;">
+              <hr style="border:none;border-top:2px solid #111827;margin:0;width:48px;" />
             </td>
           </tr>
 
-          <!-- Funders Section -->
+          <!-- Funding Opportunities Section -->
           <tr>
-            <td style="padding:16px 32px;">
-              <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:20px;">
-                <h2 style="margin:0 0 12px;color:#166534;font-size:16px;font-weight:600;">
-                  💰 Potential Funders
-                </h2>
-                <div style="color:#15803d;font-size:14px;line-height:1.7;">
-                  ${formatForEmail(fundersText)}
-                </div>
-              </div>
+            <td style="padding:32px 24px;">
+              <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Funding Opportunities</h3>
+              <p style="margin:0 0 24px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Organizations aligned with your mission</p>
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                ${formatFundersForEmail(fundersText)}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 24px;">
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
             </td>
           </tr>
 
           <!-- News Section -->
           <tr>
-            <td style="padding:16px 32px;">
-              <div style="background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;">
-                <h2 style="margin:0 0 12px;color:#1e40af;font-size:16px;font-weight:600;">
-                  📰 Relevant News Headlines
-                </h2>
-                <div style="color:#1d4ed8;font-size:14px;line-height:1.7;">
-                  ${formatForEmail(newsText)}
-                </div>
-              </div>
+            <td style="padding:32px 24px;">
+              <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">In the News</h3>
+              <p style="margin:0 0 24px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Headlines relevant to your work</p>
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                ${formatNewsForEmail(newsText)}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Divider -->
+          <tr>
+            <td style="padding:0 24px;">
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
             </td>
           </tr>
 
           <!-- Call to Action Section -->
           <tr>
-            <td style="padding:16px 32px;">
-              <div style="background-color:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:20px;">
-                <h2 style="margin:0 0 12px;color:#7c3aed;font-size:16px;font-weight:600;">
-                  🚀 Take Action!
-                </h2>
-                <p style="margin:0 0 16px;color:#6b21a8;font-size:14px;line-height:1.6;">
-                  Ready to make progress on your solution? Connect with your team and start building!
-                </p>
-                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                  <tr>
-                    <td style="padding:8px 0;">
-                      <a href="${meetLink}" style="display:inline-block;background:#059669;color:#ffffff;text-decoration:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;">
-                        Join Video Call
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style="padding:8px 0;">
-                      <a href="${dashboardLink}" style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;">
-                        Invite Team Members
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              </div>
+            <td style="padding:32px 24px;">
+              <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Take Action</h3>
+              <p style="margin:0 0 24px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Move your solution forward</p>
+              <p style="margin:0 0 24px;font-size:16px;color:#4b5563;line-height:1.6;">
+                Great solutions are built by great teams. Schedule time with your collaborators or expand your network.
+              </p>
+              <table cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td style="padding-right:12px;">
+                    <a href="${meetLink}" style="display:inline-block;background-color:#111827;color:#ffffff;text-decoration:none;padding:14px 28px;font-size:14px;font-weight:500;letter-spacing:0.3px;">
+                      Join Video Call
+                    </a>
+                  </td>
+                  <td>
+                    <a href="${dashboardLink}" style="display:inline-block;background-color:#ffffff;color:#111827;text-decoration:none;padding:13px 27px;font-size:14px;font-weight:500;letter-spacing:0.3px;border:1px solid #111827;">
+                      Invite Team Members
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding:24px 32px 32px;">
-              <hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 16px;">
-              <p style="margin:0;color:#64748b;font-size:12px;line-height:1.5;">
-                Keep up the great work!<br>
-                <strong>The NewWorld Game Team</strong>
-              </p>
-              <p style="margin:12px 0 0;color:#94a3b8;font-size:11px;">
-                <a href="https://newworld-game.org" style="color:#94a3b8;text-decoration:none;">newworld-game.org</a>
+            <td style="padding:32px 24px;background-color:#f9fafb;border-top:1px solid #e5e7eb;">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td>
+                    <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#111827;">NewWorld Game</p>
+                    <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.5;">
+                      Empowering changemakers to solve the world's most pressing challenges.
+                    </p>
+                    <p style="margin:0;font-size:12px;color:#9ca3af;">
+                      <a href="https://newworld-game.org" style="color:#6b7280;text-decoration:none;">newworld-game.org</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Legal Footer -->
+          <tr>
+            <td style="padding:24px;text-align:center;">
+              <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.6;">
+                This email was sent to ${userEmail}<br>
+                © ${new Date().getFullYear()} NewWorld Game. All rights reserved.
               </p>
             </td>
           </tr>
@@ -434,7 +509,7 @@ Format your response as a clean, email-friendly list.`;
       const msg = {
         to: userEmail,
         from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
-        subject: `AI Insights for your solution: ${solutionTitle}`,
+        subject: `Weekly Intelligence Brief: ${solutionTitle}`,
         html: emailHtml,
       };
 
