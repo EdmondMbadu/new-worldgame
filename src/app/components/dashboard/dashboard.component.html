@@ -17,435 +17,218 @@
     current=""
   ></app-navbar>
 
-  <div class="flex-1 flex flex-col items-center mt-20 px-4">
-    <h1
-      class="text-3xl text-gray-900 dark:text-white mb-4 text-center max-w-2xl"
-    >
-      {{ currentSolution.title }}
-    </h1>
-    <div
-      class="relative mb-4 group max-w-xs"
-      appDropZone
-      (hovered)="toggleHover($event)"
-      (dropped)="startUpload($event)"
-      [class.hovering]="isHovering"
-    >
-      <!-- hidden file input (unchanged) -->
-      <input
-        type="file"
-        id="getFile"
-        style="display: none"
-        accept="image/*"
-        (change)="startUpload($any($event.target).files)"
-      />
-
-      <!-- image / placeholder -->
-      <ng-container
-        *ngIf="
-          currentSolution.image && currentSolution.image !== '';
-          else placeholder
-        "
+  <div class="flex-1 flex flex-col items-center mt-20 px-4 pb-12">
+    <!-- Header with Title and Image -->
+    <div class="flex flex-col sm:flex-row items-center gap-6 mb-8 w-full max-w-4xl">
+      <!-- Solution Image -->
+      <div
+        class="relative group shrink-0"
+        appDropZone
+        (hovered)="toggleHover($event)"
+        (dropped)="startUpload($event)"
+        [class.hovering]="isHovering"
       >
-        <img
-          [src]="currentSolution.image"
-          alt="Solution image"
-          class="rounded-xl w-48 h-48 object-cover mx-auto shadow"
+        <input
+          type="file"
+          id="getFile"
+          style="display: none"
+          accept="image/*"
+          (change)="startUpload($any($event.target).files)"
         />
-      </ng-container>
-
-      <ng-template #placeholder>
-        <div
-          class="rounded-xl w-48 h-48 mx-auto flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800"
+        <ng-container
+          *ngIf="currentSolution.image && currentSolution.image !== ''; else placeholder"
         >
-          <svg
-            class="w-8 h-8 mb-1"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.6"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M3 5h18M3 19h18M5 7h14v10H5zM9 11l2 2 4-4"
-            />
-          </svg>
-          <span class="text-xs">{{
-            "dashboard.placeholder.noImage" | translate
-          }}</span>
-        </div>
-      </ng-template>
-
-      <!-- hover ring -->
-      <div
-        class="absolute inset-0 rounded-xl ring-2 ring-transparent group-hover:ring-emerald-400 transition"
-      ></div>
-
-      <!-- drag & drop overlay -->
-      <div
-        *ngIf="isHovering"
-        class="absolute inset-0 rounded-xl border-2 border-dashed border-emerald-400 bg-emerald-500/10 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-sm font-medium"
-      >
-        {{ "dashboard.dragDropHint.dropOverlay" | translate }}
-      </div>
-
-      <!-- change image chip (same behavior; opens file picker) -->
-      <button
-        onclick="document.getElementById('getFile').click()"
-        type="button"
-        aria-label="Change solution image"
-        title="{{ 'dashboard.changeImage' | translate }}"
-        class="absolute bottom-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-black/70 text-white hover:bg-black/80 backdrop-blur shadow-sm"
-      >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-          <path
-            d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM21.207 6.207a1 1 0 0 0 0-1.414L19.207 2.793a1 1 0 0 0-1.414 0L16 4.586l3.75 3.75 1.457-1.457z"
+          <img
+            [src]="currentSolution.image"
+            alt="Solution image"
+            class="rounded-2xl w-28 h-28 object-cover shadow-lg"
           />
-        </svg>
-        {{ "dashboard.changeImage" | translate }}
-      </button>
-
-    </div>
-
-    <!-- ▼ INVITE SECTION (Side by side layout) ▼ -->
-    <div class="my-3 w-full max-w-5xl mx-auto flex flex-wrap items-stretch justify-center gap-3">
-      <!-- Invite Team Members Button (Circular) -->
-      <div class="flex flex-col items-center gap-2">
-        <button
-          (click)="toggleInviteTeamMemberModal()"
-          class="group flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200"
-          title="Invite Team Members"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
+        </ng-container>
+        <ng-template #placeholder>
+          <div
+            class="rounded-2xl w-28 h-28 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800"
           >
-            <path d="M12 5v14M5 12h14" />
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+          </div>
+        </ng-template>
+        <div class="absolute inset-0 rounded-2xl ring-2 ring-transparent group-hover:ring-emerald-400 transition"></div>
+        <div *ngIf="isHovering" class="absolute inset-0 rounded-2xl border-2 border-dashed border-emerald-400 bg-emerald-500/10 flex items-center justify-center text-emerald-700 dark:text-emerald-300 text-xs font-medium">
+          {{ "dashboard.dragDropHint.dropOverlay" | translate }}
+        </div>
+        <button
+          onclick="document.getElementById('getFile').click()"
+          type="button"
+          class="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-slate-800 dark:bg-slate-700 text-white shadow-md hover:bg-slate-700 dark:hover:bg-slate-600 transition"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11zM21.207 6.207a1 1 0 0 0 0-1.414L19.207 2.793a1 1 0 0 0-1.414 0L16 4.586l3.75 3.75 1.457-1.457z" />
           </svg>
         </button>
-        <span class="text-sm font-bold text-slate-800 dark:text-slate-200 text-center">
-          Invite Team Members
-        </span>
       </div>
+      <!-- Title -->
+      <div class="text-center sm:text-left">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+          {{ currentSolution.title }}
+        </h1>
+        <p class="mt-1 text-slate-500 dark:text-slate-400 text-sm">Your solution workspace</p>
+      </div>
+    </div>
 
-      <!-- Define Team Card -->
-      <div
-        (click)="toggleInviteModal()"
-        class="group flex-1 min-w-[300px] max-w-md cursor-pointer rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white/75 dark:bg-slate-800/70 backdrop-blur-sm shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 px-6 py-5 flex items-start gap-4"
-      >
+    <!-- ========== PRIMARY ACTIONS: Define Problem & Develop Solution ========== -->
+    <div class="w-full max-w-4xl mb-8">
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 px-1">Start Here</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Define Problem & Develop Solution Card -->
         <div
-          class="rounded-xl p-3 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex-shrink-0 group-hover:scale-110 transition-transform duration-200"
+          routerLink="/playground-steps/{{ currentSolution.solutionId }}"
+          class="group relative cursor-pointer rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500 p-1 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
         >
-          <svg
-            class="w-7 h-7"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M18 8a6 6 0 01-12 0m12 0a6 6 0 00-12 0M21 17.25V21h-3.75l-2.25-2.25M3 17.25V21h3.75L9 18.75"
-            />
-          </svg>
+          <div class="h-full rounded-xl bg-white dark:bg-slate-900 p-6 flex flex-col">
+            <div class="flex items-start gap-4">
+              <div class="rounded-xl p-3 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40">
+                <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Define Problem & Develop Solution</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Use the Design Science methodology to analyze your challenge and build a comprehensive solution strategy.</p>
+              </div>
+            </div>
+            <div class="mt-auto pt-4 flex items-center justify-between">
+              <span class="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wider">Core Workflow</span>
+              <div class="flex items-center gap-1 text-orange-600 dark:text-orange-400 group-hover:translate-x-1 transition-transform">
+                <span class="text-sm font-semibold">Get Started</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="flex-1">
-          <h3
-            class="text-lg font-semibold text-slate-900 dark:text-white leading-tight"
-          >
-            Define your team and Publish your invite
-          </h3>
-          <div
-            class="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-300"
-          >
-            <span>{{ "dashboard.invite.openWorkspace" | translate }}</span>
-            <svg
-              class="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+        <!-- Invite Team Members Card -->
+        <div
+          (click)="toggleInviteTeamMemberModal()"
+          class="group relative cursor-pointer rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-green-500 p-1 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+        >
+          <div class="h-full rounded-xl bg-white dark:bg-slate-900 p-6 flex flex-col">
+            <div class="flex items-start gap-4">
+              <div class="rounded-xl p-3 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40">
+                <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                </svg>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Invite Team Members</h3>
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Build your team by inviting collaborators via email to join your solution workspace.</p>
+              </div>
+            </div>
+            <div class="mt-auto pt-4 flex items-center justify-between">
+              <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Build Your Team</span>
+              <div class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">
+                <span class="text-sm font-semibold">Invite Now</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- ▲ END INVITE SECTION ▲ -->
 
-    <div
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-8 place-items-center"
-    >
-      <div
-        routerLink="/playground-steps/{{ currentSolution.solutionId }}"
-        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
-      >
-        <svg
-          class="w-12 h-12 mb-2 text-yellow-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M11.049 2.927c.3-1.14 1.952-1.14
-             2.252 0a1.724 1.724 0 002.591.99c1-.654
-             2.29.366 1.937 1.463a1.724 1.724
-             0 001.26 2.256c1.122.264 1.122 1.888
-             0 2.152a1.724 1.724 0 00-1.26
-             2.256c.353 1.097-.936 2.117-1.937
-             1.463a1.724 1.724 0 00-2.59.99c-.301
-             1.14-1.953 1.14-2.254 0a1.724 1.724
-             0 00-2.59-.99c-1 .654-2.29-.366-1.937-1.463a1.724
-             1.724 0 00-1.26-2.256c-1.122-.264-1.122-1.888
-             0-2.152a1.724 1.724 0 001.26-2.256c-.353-1.097.936-2.117
-             1.937-1.463.95.623 2.218.04 2.59-.99z"
-          />
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
-        <span class="text-center">{{ "dashboard.tiles.develop.title" | translate }}</span>
-        <span
-          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >{{ "dashboard.tiles.develop.desc" | translate }}</span
-        >
-      </div>
-
-      <div
-        routerLink="/meeting/{{ currentSolution.solutionId }}"
-        target="_blank"
-        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
-      >
-        <svg
-          class="w-12 h-12 mb-2 text-red-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15.75 10.5l4.098-2.357a.75.75 0
-               011.152.653v6.408a.75.75 0 01-1.152.653l-4.098-2.357v-3z
-               M3 6.75A2.25 2.25 0 015.25 4.5h6a2.25 2.25 0
-               012.25 2.25v10.5a2.25 2.25 0
-               01-2.25 2.25h-6A2.25 2.25 0
-               013 17.25V6.75z"
-          />
-        </svg>
-        <span>{{ "dashboard.tiles.video.title" | translate }}</span>
-        <span
-          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >{{ "dashboard.tiles.video.desc" | translate }}</span
-        >
-      </div>
-
-      <div
-        routerLink="/full-discussion/{{ currentSolution.solutionId }}"
-        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
-      >
-        <svg
-          class="w-12 h-12 mb-2 text-pink-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M20.25 8.511c.884.74.75 1.972.75
-               3.239v4.5A2.25 2.25 0 0118.75 18h-2.772l-3.348
-               2.506c-.872.652-2.13.038-2.13-1.044V18c-1.5
-               0-3.25-.75-3.25-3.75v-4.5c0-2.214 1.292-3.234
-               2.25-3.489"
-          />
-        </svg>
-        <span>{{ "dashboard.tiles.discussion.title" | translate }}</span>
-        <span
-          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >{{ "dashboard.tiles.discussion.desc" | translate }}</span
-        >
-      </div>
-
-      <div
-        routerLink="/solution-details/{{ currentSolution.solutionId }}"
-        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
-      >
-        <svg
-          class="w-12 h-12 mb-2 text-green-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M11.25 9.75h1.5m-.75 3v3m9-3a9 9 0
-               11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <span>{{ "dashboard.tiles.details.title" | translate }}</span>
-        <span
-          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >{{ "dashboard.tiles.details.desc" | translate }}</span
-        >
-      </div>
-
-      <div
-        routerLink="/document-files/{{ currentSolution.solutionId }}"
-        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer text-center"
-      >
-        <svg
-          class="w-12 h-12 mb-2 text-blue-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M19.5 9.75L14.25 4.5H8.25a1.5 1.5 0
-                  00-1.5 1.5v12.75a1.5 1.5 0 001.5
-                  1.5h10.5a1.5 1.5 0 001.5-1.5V9.75z"
-          />
-        </svg>
-        <span class="text-center">{{
-          "dashboard.tiles.documents.title" | translate
-        }}</span>
-        <span
-          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-        >
-          {{ "dashboard.tiles.documents.desc" | translate }}
-        </span>
-      </div>
-      <!-- Grid Tile: Invite -->
-      <!-- <div
-        (click)="toggleInviteModal()"
-        class="group relative h-44 w-72 cursor-pointer select-none rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 text-white shadow-md hover:shadow-2xl hover:-translate-y-1 transition-transform duration-300"
-      >
+    <!-- ========== WORKSPACE TOOLS ========== -->
+    <div class="w-full max-w-4xl mb-8">
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 px-1">Workspace Tools</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <!-- Video Meeting -->
         <div
-          class="flex flex-col items-center justify-center h-full px-4 text-center"
+          routerLink="/meeting/{{ currentSolution.solutionId }}"
+          class="group cursor-pointer rounded-xl bg-slate-100 dark:bg-slate-800 p-4 hover:bg-slate-200 dark:hover:bg-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
         >
-      
-          <div
-            class="flex items-center justify-center w-14 h-14 rounded-full bg-white/20 backdrop-blur group-hover:bg-white/30 transition duration-300 mb-3"
-          >
-            <svg
-              class="w-7 h-7"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M18 20a6 6 0 00-12 0M12 12a4 4 0 100-8 4 4 0 000 8zM16 3.5a9 9 0 11-8 0"
-              />
+          <div class="rounded-lg p-2.5 bg-red-100 dark:bg-red-900/30 mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.098-2.357a.75.75 0 011.152.653v6.408a.75.75 0 01-1.152.653l-4.098-2.357m0-4.714v4.714m0-4.714L9.75 6.25A2.25 2.25 0 007.5 8.5v7a2.25 2.25 0 002.25 2.25h6" />
             </svg>
           </div>
-
-      
-          <h3 class="text-lg font-bold tracking-tight">Define your team and Publish your invite</h3>
-
-      
-          <p
-            class="mt-1 text-sm text-white/90 opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            Share your idea and rally teammates across NewWorld Game
-          </p>
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ "dashboard.tiles.video.title" | translate }}</span>
         </div>
 
-        
+        <!-- Discussion -->
         <div
-          class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        ></div>
-      </div> -->
-
-      <!-- ──────────────── Team Building tile ──────────────── -->
-      <!-- <div
-          routerLink="/team-building/{{ currentSolution.solutionId }}"
-          class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white
-                text-xl font-semibold h-44 w-72 flex flex-col items-center
-                justify-center rounded p-4 hover-effect cursor-pointer"
+          routerLink="/full-discussion/{{ currentSolution.solutionId }}"
+          class="group cursor-pointer rounded-xl bg-slate-100 dark:bg-slate-800 p-4 hover:bg-slate-200 dark:hover:bg-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
         >
-         
-            <svg
-            class="w-12 h-12 mb-2 text-blue-500"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M17 20h5v-2a4 4 0 00-5-3.87M9 20H4v-2a4 4 0 015-3.87M12 12a4 4 0 100-8 4 4 0 000 8zm6 0a3 3 0 100-6 3 3 0 000 6zm-12 0a3 3 0 100-6 3 3 0 000 6z"
-            />
+          <div class="rounded-lg p-2.5 bg-pink-100 dark:bg-pink-900/30 mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-pink-500 dark:text-pink-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ "dashboard.tiles.discussion.title" | translate }}</span>
+        </div>
+
+        <!-- Solution Details -->
+        <div
+          routerLink="/solution-details/{{ currentSolution.solutionId }}"
+          class="group cursor-pointer rounded-xl bg-slate-100 dark:bg-slate-800 p-4 hover:bg-slate-200 dark:hover:bg-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
+        >
+          <div class="rounded-lg p-2.5 bg-green-100 dark:bg-green-900/30 mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ "dashboard.tiles.details.title" | translate }}</span>
+        </div>
+
+        <!-- Documents -->
+        <div
+          routerLink="/document-files/{{ currentSolution.solutionId }}"
+          class="group cursor-pointer rounded-xl bg-slate-100 dark:bg-slate-800 p-4 hover:bg-slate-200 dark:hover:bg-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
+        >
+          <div class="rounded-lg p-2.5 bg-blue-100 dark:bg-blue-900/30 mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ "dashboard.tiles.documents.title" | translate }}</span>
+        </div>
+
+        <!-- Whiteboard -->
+        <div
+          routerLink="/whiteboard/{{ currentSolution.solutionId }}"
+          class="group cursor-pointer rounded-xl bg-slate-100 dark:bg-slate-800 p-4 hover:bg-slate-200 dark:hover:bg-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
+        >
+          <div class="rounded-lg p-2.5 bg-purple-100 dark:bg-purple-900/30 mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-purple-500 dark:text-purple-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ "dashboard.tiles.whiteboard.title" | translate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PUBLISH INVITE BANNER (Last Item) ========== -->
+    <div
+      (click)="toggleInviteModal()"
+      class="w-full max-w-4xl cursor-pointer group"
+    >
+      <div class="rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-950/30 p-5 flex items-center gap-4 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-all">
+        <div class="rounded-xl p-3 bg-indigo-100 dark:bg-indigo-900/50">
+          <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
           </svg>
-
-
-          <span>Team Building</span>
-          <span
-            class="font-extralight text-sm text-center opacity-0 hover:opacity-100
-                  transition-opacity duration-300"
-          >
-            Play “Two Truths and a Code”
-          </span>
-</div> -->
-
-      <div
-        routerLink="/whiteboard/{{ currentSolution.solutionId }}"
-        class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-white text-xl font-semibold h-44 w-72 flex flex-col items-center justify-center rounded p-4 hover-effect cursor-pointer"
-      >
-        <svg
-          class="w-12 h-12 mb-2 text-purple-400"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-          />
+        </div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-indigo-900 dark:text-indigo-100">Define Your Team & Publish Invite</h3>
+          <p class="text-sm text-indigo-700 dark:text-indigo-300">Set up your team profile and broadcast your invite to attract collaborators from the network.</p>
+        </div>
+        <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
-        <span>{{ "dashboard.tiles.whiteboard.title" | translate }}</span>
-        <span
-          class="font-extralight text-sm text-center opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >{{ "dashboard.tiles.whiteboard.desc" | translate }}</span
-        >
       </div>
     </div>
   </div>
