@@ -1,765 +1,774 @@
-<div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
-    <!-- Navbar -->
-    <app-navbar
-      [sideBarSmall]="true"
-      [sideBarBig]="false"
-      [email]="this.auth.currentUser.email"
-      [firstName]="this.auth.currentUser.firstName"
-      [lastName]="this.auth.currentUser.lastName"
-      path="home"
-      current=""
-    ></app-navbar>
+<div class="dark:bg-slate-900 bg-gray-50 min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="this.auth.currentUser.email"
+    [firstName]="this.auth.currentUser.firstName"
+    [lastName]="this.auth.currentUser.lastName"
+    path="home"
+    current=""
+  ></app-navbar>
 
-    <!-- put once (e.g. right after your <app-navbar>) -->
-<ng-template #iconPlus>
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+  <!-- Icon Templates -->
+  <ng-template #iconPlus>
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-      <path d="M5 12h14M12 5v14" />
+      <path d="M12 5v14M5 12h14" />
     </svg>
   </ng-template>
+
   <ng-template #iconMinus>
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
       <path d="M5 12h14" />
     </svg>
   </ng-template>
-  
-  
-    <!-- Outer container, sets text color based on mode -->
-    <div class="container mt-20 mx-auto px-[8rem] py-8 
-                text-black dark:text-white">
-      
-      <!-- Titles -->
-      <h1 class="text-4xl font-bold text-center mb-2">
-        Solution Details
-      </h1>
-      <!-- Lighter text in light mode, lighter gray in dark mode -->
-       <div class="flex flexf-row justify-center mt-4">
-              <h2 class="text-2xl text-center font-bold 
-              text-slate-600 dark:text-gray-300 mb-8">
-      {{currentSolution.title}}
 
-      </h2>
-      
-      <svg (click)="toggle('updateTitleBox')"  class="mt-2 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black cursor-pointer" width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
-      <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
-      </svg>
-       </div>
+  <ng-template #iconEdit>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+    </svg>
+  </ng-template>
 
-            <!-- Solution ID row -->
-          <ng-container *ngIf="currentSolution?.solutionId as sid">
-            <div class="mt-1 mb-4 flex justify-center">
-              <div
-                class="inline-flex items-center gap-2 rounded-full px-3 py-1.5
-                      bg-slate-100/70 ring-1 ring-slate-200
-                      dark:bg-slate-800/70 dark:ring-slate-700">
-                <span class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  Solution ID
-                </span>
+  <!-- Main Content -->
+  <main class="flex-1 pt-20 pb-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                <code class="text-sm font-mono text-slate-800 dark:text-slate-100 select-all" [title]="sid">
-                  {{ sid }}
-                </code>
+      <!-- Header Section -->
+      <header class="text-center mb-8">
+        <!-- Page Title -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 text-sm font-medium mb-4">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          Solution Details
+        </div>
 
-                <button type="button"
-                        class="ml-1 inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium
-                              bg-indigo-600 text-white hover:bg-indigo-500 active:scale-[.98]
-                              focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1
-                              dark:focus:ring-offset-slate-900"
-                        (click)="copySolutionId(sid)">
-                  <svg *ngIf="!copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-                    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+        <!-- Solution Title -->
+        <div class="flex items-center justify-center gap-3 flex-wrap">
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+            {{ currentSolution.title }}
+          </h1>
+          <button *ngIf="isAdminOfSolution"
+                  (click)="toggle('updateTitleBox')"
+                  class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400"
+                  title="Edit title">
+            <ng-container *ngTemplateOutlet="iconEdit"></ng-container>
+          </button>
+        </div>
+
+        <!-- Solution ID Badge -->
+        <div *ngIf="currentSolution?.solutionId as sid" class="mt-4">
+          <div class="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 rounded-xl bg-white dark:bg-slate-800 shadow-sm border border-gray-200 dark:border-slate-700">
+            <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 hidden sm:inline">
+              ID
+            </span>
+            <code class="text-sm font-mono text-gray-800 dark:text-gray-200 truncate max-w-[150px] sm:max-w-none" [title]="sid">
+              {{ sid }}
+            </code>
+            <button type="button"
+                    (click)="copySolutionId(sid)"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all
+                           bg-teal-600 text-white hover:bg-teal-500 active:scale-95
+                           focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+              <svg *ngIf="!copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+              </svg>
+              <svg *ngIf="copied" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              {{ copied ? 'Copied!' : 'Copy' }}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Grid Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left Column: ReadMe (spans 2 cols on large screens) -->
+        <div class="lg:col-span-2">
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <!-- Card Header -->
+            <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
-                  <svg *ngIf="copied" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
-                      viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
-                  <span class="sr-only">Copy Solution ID</span>
-                  <span>{{ copied ? 'Copied!' : 'Copy' }}</span>
-                </button>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">ReadMe</h2>
+              </div>
+              <button *ngIf="isAdminOfSolution"
+                      (click)="toggle('updateReadMeBox')"
+                      class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                      title="Edit ReadMe">
+                <ng-container *ngTemplateOutlet="iconEdit"></ng-container>
+              </button>
+            </div>
+            <!-- Card Body -->
+            <div class="px-5 sm:px-6 py-5">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {{ currentSolution.description || 'No description provided yet.' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Team Info -->
+        <div class="space-y-6">
+
+          <!-- Designers Card -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Designers</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ teamMembers.length }} member{{ teamMembers.length !== 1 ? 's' : '' }}</span>
+                  </div>
+                </div>
+                <!-- Admin Actions -->
+                <div *ngIf="isAdminOfSolution" class="flex gap-1">
+                  <button (click)="toggle('showAddTeamMember')"
+                          class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
+                          title="Add Designer">
+                    <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
+                  </button>
+                  <button (click)="toggle('showRemoveTeamMember')"
+                          class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                          title="Remove Designer">
+                    <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
+                  </button>
+                </div>
               </div>
             </div>
-          </ng-container>     
-    
-    
-      <!-- Main content: 2-column on md+; 1-column on small screens -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- Left column: ReadMe panel -->
-        <!-- Light mode: bg-slate-100; Dark mode: bg-slate-800 -->
-        <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
-          <!-- Heading (no explicit color => black in light, white in dark) -->
-          <div class="flex flex-row">   
-                <h3 class="text-2xl font-semibold mb-4">
-                ReadMe
-            </h3>
-            <svg (click)="toggle('updateReadMeBox')"  class="mt-2 w-10  hover:fill-blue-500 dark:hover:fill-blue-500 dark:fill-white fill-black cursor-pointer" width="20px" height="20px" viewBox="0 0 24 24"  xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M20.8477 1.87868C19.6761 0.707109 17.7766 0.707105 16.605 1.87868L2.44744 16.0363C2.02864 16.4551 1.74317 16.9885 1.62702 17.5692L1.03995 20.5046C0.760062 21.904 1.9939 23.1379 3.39334 22.858L6.32868 22.2709C6.90945 22.1548 7.44285 21.8693 7.86165 21.4505L22.0192 7.29289C23.1908 6.12132 23.1908 4.22183 22.0192 3.05025L20.8477 1.87868ZM18.0192 3.29289C18.4098 2.90237 19.0429 2.90237 19.4335 3.29289L20.605 4.46447C20.9956 4.85499 20.9956 5.48815 20.605 5.87868L17.9334 8.55027L15.3477 5.96448L18.0192 3.29289ZM13.9334 7.3787L3.86165 17.4505C3.72205 17.5901 3.6269 17.7679 3.58818 17.9615L3.00111 20.8968L5.93645 20.3097C6.13004 20.271 6.30784 20.1759 6.44744 20.0363L16.5192 9.96448L13.9334 7.3787Z" />
-                </svg>
-
+            <div class="px-5 py-4">
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let user of teamMembers; let i = index" class="relative group">
+                  <!-- Avatar -->
+                  <div class="relative cursor-pointer"
+                       (mouseenter)="onHoverImageTeam(i)"
+                       (mouseleave)="onLeaveTeam(i)"
+                       [routerLink]="user.uid === auth.currentUser.uid ? '/profile' : '/user-profile/' + user.uid">
+                    <img *ngIf="user.profilePicture?.downloadURL"
+                         [src]="user.profilePicture!.downloadURL"
+                         class="w-12 h-12 rounded-full border-2 border-white dark:border-slate-700 shadow-sm object-cover hover:ring-2 hover:ring-purple-400 transition-all"
+                         alt="{{ user.firstName }}">
+                    <div *ngIf="!user.profilePicture?.downloadURL"
+                         class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-sm hover:ring-2 hover:ring-purple-400 transition-all">
+                      <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <!-- Hover Popup -->
+                  <div *ngIf="showPopUpTeam[i]"
+                       class="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 p-4 animate-in fade-in duration-200">
+                    <div class="flex items-center gap-3 mb-3">
+                      <img *ngIf="user.profilePicture?.downloadURL"
+                           [src]="user.profilePicture!.downloadURL"
+                           class="w-10 h-10 rounded-full object-cover"
+                           alt="">
+                      <div *ngIf="!user.profilePicture?.downloadURL"
+                           class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-gray-900 dark:text-white truncate">{{ user.firstName }} {{ user.lastName }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+                      </div>
+                    </div>
+                    <p *ngIf="user.profileCredential" class="text-sm text-gray-600 dark:text-gray-300 mb-3">{{ user.profileCredential }}</p>
+                    <div class="flex gap-4 text-sm">
+                      <span><strong class="text-gray-900 dark:text-white">{{ user.following || 0 }}</strong> <span class="text-gray-500 dark:text-gray-400">Following</span></span>
+                      <span><strong class="text-gray-900 dark:text-white">{{ user.followers || 0 }}</strong> <span class="text-gray-500 dark:text-gray-400">Followers</span></span>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-800 border-r border-b border-gray-200 dark:border-slate-700 rotate-45"></div>
+                  </div>
+                </div>
+              </div>
+              <p *ngIf="teamMembers.length === 0" class="text-sm text-gray-500 dark:text-gray-400 italic">No designers yet</p>
+            </div>
           </div>
-         
-      
-          <!-- Body text: darker gray in light mode; lighter gray in dark -->
-          <p class="leading-relaxed text-slate-700 dark:text-gray-300">
-           {{currentSolution.description}}
+
+          <!-- Evaluators Card -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Evaluators</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ evaluators.length }} member{{ evaluators.length !== 1 ? 's' : '' }}</span>
+                  </div>
+                </div>
+                <!-- Admin Actions -->
+                <div *ngIf="isAdminOfSolution" class="flex gap-1">
+                  <button (click)="toggle('showAddEvaluator')"
+                          class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
+                          title="Add Evaluator">
+                    <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
+                  </button>
+                  <button (click)="toggle('showRemoveEvaluator')"
+                          class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                          title="Remove Evaluator">
+                    <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="px-5 py-4">
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let user of evaluators; let i = index" class="relative group">
+                  <!-- Avatar -->
+                  <div class="relative cursor-pointer"
+                       (mouseenter)="onHoverImageEvaluators(i)"
+                       (mouseleave)="onLeaveEvaluatros(i)"
+                       [routerLink]="'/user-profile/' + user.uid">
+                    <img *ngIf="user.profilePicture?.downloadURL"
+                         [src]="user.profilePicture!.downloadURL"
+                         class="w-12 h-12 rounded-full border-2 border-white dark:border-slate-700 shadow-sm object-cover hover:ring-2 hover:ring-amber-400 transition-all"
+                         alt="{{ user.firstName }}">
+                    <div *ngIf="!user.profilePicture?.downloadURL"
+                         class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-sm hover:ring-2 hover:ring-amber-400 transition-all">
+                      <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <!-- Hover Popup -->
+                  <div *ngIf="showPopUpEvaluators[i]"
+                       class="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 p-4 animate-in fade-in duration-200">
+                    <div class="flex items-center gap-3 mb-3">
+                      <img *ngIf="user.profilePicture?.downloadURL"
+                           [src]="user.profilePicture!.downloadURL"
+                           class="w-10 h-10 rounded-full object-cover"
+                           alt="">
+                      <div *ngIf="!user.profilePicture?.downloadURL"
+                           class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-gray-900 dark:text-white truncate">{{ user.firstName }} {{ user.lastName }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+                      </div>
+                    </div>
+                    <p *ngIf="user.profileCredential" class="text-sm text-gray-600 dark:text-gray-300 mb-3">{{ user.profileCredential }}</p>
+                    <div class="flex gap-4 text-sm">
+                      <span><strong class="text-gray-900 dark:text-white">{{ user.following || 0 }}</strong> <span class="text-gray-500 dark:text-gray-400">Following</span></span>
+                      <span><strong class="text-gray-900 dark:text-white">{{ user.followers || 0 }}</strong> <span class="text-gray-500 dark:text-gray-400">Followers</span></span>
+                    </div>
+                    <!-- Arrow -->
+                    <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-slate-800 border-r border-b border-gray-200 dark:border-slate-700 rotate-45"></div>
+                  </div>
+                </div>
+              </div>
+              <p *ngIf="evaluators.length === 0" class="text-sm text-gray-500 dark:text-gray-400 italic">No evaluators yet</p>
+            </div>
+          </div>
+
+          <!-- Admins Card (only visible to admins) -->
+          <div *ngIf="isAdminOfSolution" class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 rounded-lg bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">Admins</h3>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ admins.length }} admin{{ admins.length !== 1 ? 's' : '' }}</span>
+                  </div>
+                </div>
+                <!-- Admin Actions -->
+                <div class="flex gap-1">
+                  <button (click)="toggle('showAddAdmin')"
+                          class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
+                          title="Add Admin">
+                    <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
+                  </button>
+                  <button (click)="toggle('showRemoveAdmin')"
+                          class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                          title="Remove Admin">
+                    <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="px-5 py-4">
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let admin of admins" class="relative">
+                  <img *ngIf="admin.authorProfilePicture?.downloadURL"
+                       [src]="admin.authorProfilePicture?.downloadURL"
+                       [title]="admin.authorName"
+                       class="w-12 h-12 rounded-full border-2 border-white dark:border-slate-700 shadow-sm object-cover">
+                  <div *ngIf="!admin.authorProfilePicture?.downloadURL"
+                       [title]="admin.authorName"
+                       class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center border-2 border-white dark:border-slate-700 shadow-sm">
+                    <svg class="w-6 h-6 text-gray-400 dark:text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <p *ngIf="admins.length === 0" class="text-sm text-gray-500 dark:text-gray-400 italic">No admins configured</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SDGs Section (Full Width) -->
+      <div class="mt-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Sustainable Development Goals</h2>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ currentSolution.sdgs?.length || 0 }} SDG{{ (currentSolution.sdgs?.length || 0) !== 1 ? 's' : '' }} selected</span>
+              </div>
+            </div>
+            <!-- Admin Actions -->
+            <div *ngIf="isAdminOfSolution" class="flex gap-1">
+              <button (click)="toggle('showAddSdg')"
+                      class="p-1.5 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 text-gray-500 hover:text-green-600 dark:text-gray-400 dark:hover:text-green-400 transition-colors"
+                      title="Add SDG">
+                <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
+              </button>
+              <button (click)="toggle('showRemoveSdg')"
+                      class="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                      title="Remove SDG">
+                <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="px-5 sm:px-6 py-5">
+          <div *ngIf="currentSolution.sdgs?.length" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3 sm:gap-4">
+            <a *ngFor="let sd of currentSolution.sdgs"
+               [href]="data.sdgsPaths[sd + '-link']"
+               target="_blank"
+               class="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all hover:scale-105">
+              <img [src]="data.sdgsPaths[sd]"
+                   alt="SDG"
+                   class="w-full h-full object-cover">
+            </a>
+          </div>
+          <p *ngIf="!currentSolution.sdgs?.length" class="text-sm text-gray-500 dark:text-gray-400 italic text-center py-4">
+            No SDGs selected yet
           </p>
         </div>
-    
-        <!-- Right column: Designers/Evaluators + SDGs -->
-        <div class="flex flex-col space-y-6">
-          <!-- Designers & Evaluators Panel -->
-          <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
-            <div class="flex flex-row justify-between space-x-4">
-    
-              <!-- Designers block -->
-              <div>
-                <!-- Lighter text in light mode, lighter gray in dark mode -->
-                <div class="font-semibold mb-2 text-lg
-                            text-slate-700 dark:text-gray-300">
-                            Designers :  {{teamMembers.length}}
-                </div>
-    
-                <div class="flex items-center space-x-2">
-                  <!-- Placeholder icons (plus/minus) -->
-                  <button *ngIf="isAdminOfSolution" class="cursor-pointer"
-                  (click)="toggle('showAddTeamMember')"
-                  title="Add Team Members" >
-               
-                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-                  </svg>
-                  
-                  
-                  <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">+</span> -->
-                </button>
-                <button *ngIf="isAdminOfSolution" class="cursor-pointer"
-                (click)="toggle('showRemoveTeamMember')"
-                title="Remove Team Members" >
-            
-                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/>
-                </svg>
-                
-                
-                <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">-</span> -->
-              </button>
-           
-      
-                  
-                  <!-- User avatars (placeholders) -->
-                  <div class="flex flex-wrap -space-x-1 overflow-x-auto" >
-                    <div *ngFor="let user of teamMembers; let i= index" class="cursor-pointer flex-shrink-0" >
-                        <div *ngIf="user.uid === auth.currentUser.uid" >
-                            <img *ngIf="user.profilePicture!.downloadURL !==undefined "   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/profile" alt="">
-                            <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
-    
-                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                            
-                            </div> 
-                            
-                           
-                        </div>
-                        <div *ngIf="user.uid !== auth.currentUser.uid" >
-                            <img *ngIf="user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)"  class="w-16 h-16 border-2 border-white rounded-full dark:border-gray-700" [src]="user.profilePicture!.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                            <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageTeam(i)" (mouseleave)="onLeaveTeam(i)" routerLink="/profile"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto" routerLink="/user-profile/{{user.uid}}">
-                                
-                                <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                            </div> 
-                            
-                          
-                        </div>
-                        <div>
-                            <div *ngIf="showPopUpTeam[i]"  >
-                                <div class=" shadow-lg border-2 border-gray-200 absolute  z-50 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                    <div class="flex items-center justify-between mb-2" >
-                                        <a >
-                                            <img *ngIf="user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture!.downloadURL"alt="">
-                                            
-                                            <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-       
-                                                <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                            </div>   
-                                           
-                                        </a>
-                                        <div>
-                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                        <a>{{user.firstName}} {{user.lastName}}</a>
-                                    </p>
-                                    <p class="mb-3 text-sm font-normal">
-                                        <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
-                                    </p>
-                                    <p  class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
-                                    <ul class="flex text-sm">
-                                        <li class="mr-2">
-                                            <a  class="hover:underline">
-                                                <span class="font-semibold text-gray-800 dark:text-gray-200">{{user.following}} </span>
-                                                <span class="dark:text-gray-200">Following</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="hover:underline">
-                                                <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
-                                                <span class="dark:text-gray-200">Followers</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                  
-                    </div>
-           
-                        
-                </div>
-                </div>
-              </div>
-    
-              <!-- Evaluators block -->
-              <div>
-                <div class="font-semibold mb-2 text-lg 
-                            text-slate-700 dark:text-gray-300">
-                            Evaluators :  {{evaluators.length}}
-                </div>
-                <div class="flex items-center space-x-2">
-                 
-                     <!-- Placeholder icons (plus/minus) -->
-                  <button *ngIf="isAdminOfSolution" class="cursor-pointer"
-                  (click)="toggle('showAddEvaluator')"
-                  title="Add Evaluators" >
-               
-                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
-                  </svg>
-                  
-                  
-                  <!-- <span class="text-slate-700 dark:text-gray-300 text-2xl">+</span> -->
-                </button>
-                <button *ngIf="isAdminOfSolution" class="cursor-pointer"
-                (click)="toggle('showRemoveEvaluator')"
-                title="Remove Team Members" >
-            
-                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"/>
-                </svg>
-                </button>
-          
-                  
-                  <!-- User avatars (placeholders) -->
-                  <div class="flex flex-wrap -space-x-1 overflow-x-auto space-y-1" >
-                    <div *ngFor="let user of evaluators; let i= index" class = "cursor-pointer flex-shrink-0">
-                        <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"   (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)"  class="w-16 h-16 border-2 border-white rounded-full  dark:border-gray-700" [src]="user.profilePicture.downloadURL" routerLink="/user-profile/{{user.uid}}" alt="">
-                         
-                        <div *ngIf="user.profilePicture?.downloadURL ===undefined" (mouseenter)="onHoverImageEvaluators(i)" (mouseleave)="onLeaveEvaluatros(i)" routerLink="/user-profile/{{user.uid}}"   class=" w-16 h-16 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-           
-                            <svg class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                        </div> 
-                        
-                        <div >
-                            <div *ngIf="showPopUpEvaluators[i]"  >
-                                <div class=" shadow-lg border-2 border-gray-200 absolute z-10 -mt-[15rem] bg-white  rounded-lg p-4 dark:bg-slate-800 dark:border-gray-700"  >
-                                    <div class="flex items-center justify-between mb-2" >
-                                        <a >
-                                            <img *ngIf="user.profilePicture && user.profilePicture!.downloadURL !==undefined"  class="w-10 h-10 rounded-full" [src]="user.profilePicture.downloadURL"alt="">
-                                           
-                                            <div *ngIf="user.profilePicture?.downloadURL===undefined"  class=" w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto">
-           
-                                                <svg class=" w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                            </div>   
-                                        </a>
-                                        <div>
-                                            <button type="button" class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 ">Follow</button>
-                                        </div>
-                                    </div>
-                                    <p class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200">
-                                        <a>{{user.firstName}} {{user.lastName}}</a>
-                                    </p>
-                                    <p class="mb-3 text-sm font-normal">
-                                        <a class="hover:underline dark:text-gray-200">{{user.email}}</a>
-                                    </p>
-                                    <p class="mb-4 text-sm text-gray-800 dark:text-gray-200">{{user.profileCredential}}</p>
-                                    <ul class="flex text-sm">
-                                        <li class="mr-2">
-                                            <a  class="hover:underline">
-                                                <span class="font-semibold text-gray-800  dark:text-gray-200">{{user.following}} </span>
-                                                <span class="dark:text-gray-200">Following</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="hover:underline">
-                                                <span class="font-semibold text-gray-900 dark:text-gray-200">{{user.followers}} </span>
-                                                <span class="dark:text-gray-200">Followers</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                </div>
-              </div>
-
-              <!-- --- Admins block (place in the flex column that already contains Designers/Evaluators) --- -->
-
-    <div *ngIf="isAdminOfSolution" class="flex flex-row justify-between space-x-4">
-      <div>
-        <div class="font-semibold mb-2 text-lg text-slate-700 dark:text-gray-300">
-          Admins : {{ admins.length }}
-        </div>
-  
-        <!-- add/remove buttons – only visible for an admin -->
-        <div class="flex items-center space-x-2" *ngIf="isAdminOfSolution">
-          <button (click)="toggle('showAddAdmin')" title="Add Admin">
-            <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
-          </button>
-          <button (click)="toggle('showRemoveAdmin')" title="Remove Admin">
-            <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
-          </button>
-        </div>
-  
-        <!-- avatar list -->
-        <div class="flex flex-wrap -space-x-1 overflow-x-auto">
-          <ng-container *ngFor="let admin of admins">
-            <img *ngIf="admin.authorProfilePicture?.downloadURL !==undefined"   class="w-16 h-16 border-2 rounded-full"
-                 [src]="admin.authorProfilePicture?.downloadURL"
-                 [title]="admin.authorName" />
-            <svg  *ngIf="admin.authorProfilePicture?.downloadURL ===undefined" class=" w-20 h-20 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 24 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-          </ng-container>
-        </div>
       </div>
     </div>
-
-  
-
-            </div>
-          </div>
-    
-          <!-- SDGs Panel -->
-          <!-- <div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
-            <div *ngIf="currentSolution.sdgs" class="font-semibold mb-4 text-lg text-slate-700 dark:text-gray-300">
-              SDGs ({{currentSolution.sdgs!.length}})
-            </div>
-            
-           
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <a *ngFor="let sd of currentSolution.sdgs" href="{{data.sdgsPaths[sd!+'-link']}}" target="_blank"
-                 class="flex flex-col items-center">
-                
-                <img class="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain rounded-lg shadow-md"
-                     [src]="data.sdgsPaths[sd]" alt="SDG">
-              </a>
-            </div>
-          </div> -->
-
-          <!-- SDGs Panel -->
-<div class="rounded-lg p-6 bg-slate-100 dark:bg-slate-800">
-  <div class="flex items-center justify-between mb-4">
-    <p class="font-semibold text-lg text-slate-700 dark:text-gray-300">
-      SDGs ({{ currentSolution.sdgs?.length || 0 }})
-    </p>
-
-    <!-- actions visibles seulement pour un admin -->
-   <!-- inside the header line of the SDG panel -->
-      <div *ngIf="isAdminOfSolution" class="flex gap-2">
-        <button (click)="toggle('showAddSdg')"
-                class="p-1 rounded hover:bg-teal-100 dark:hover:bg-slate-700
-                      text-gray-800 dark:text-gray-200 focus:outline-none">
-          <ng-container *ngTemplateOutlet="iconPlus"></ng-container>
-        </button>
-
-        <button (click)="toggle('showRemoveSdg')"
-                class="p-1 rounded hover:bg-red-100 dark:hover:bg-slate-700
-                      text-gray-800 dark:text-gray-200 focus:outline-none">
-          <ng-container *ngTemplateOutlet="iconMinus"></ng-container>
-        </button>
-      </div>
-
-  </div>
-
-  <!-- grille des SDG inchangée -->
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-    <a *ngFor="let sd of currentSolution.sdgs"
-       [href]="data.sdgsPaths[sd + '-link']"
-       target="_blank"
-       class="flex flex-col items-center">
-      <img class="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 object-contain rounded-lg shadow-md"
-           [src]="data.sdgsPaths[sd]" alt="SDG">
-    </a>
-  </div>
-</div>
-
-          
-        </div>
-      </div>
-    </div>
-  </div>
-  
-
-
-
-
-                    <!-- Dsiplay update ReadMe-->
-                    <div *ngIf="updateReadMeBox" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
-                        <div class="relative p-2 w-full max-w-md max-h-full">
-                            <!-- Modal content -->
-                            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                            
-                            
-                                <!-- Modal body -->
-                                <div class="p-4 md:p-5 min-w-xl">
-                                
-                                    <div class="grid gap-4 mb-4 grid-cols-2">
-                            
-                                        <div class="col-span-2">
-                                            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Update ReadMe</label>
-                                            <textarea [(ngModel)]="newReadMe" id="description" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your updated title here"></textarea>                    
-                                        </div>
-                                    </div>
-                                    <button (click)="toggle('updateReadMeBox')"  class="mr-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                        
-                                        Cancel
-                                    </button>
-                                    <button (click)="updateReadMe()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                                    
-                                    Update ReadMe
-                                </button>
-                            </div>
-                            </div>
-                        </div>
-                    </div> 
-
-
-
-                      <!-- Main modal -->
-  <div *ngIf="showAddTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex ">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add a new Participant (only one at a time)</label>
-                        <textarea [(ngModel)]="newTeamMember" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggle('showAddTeamMember')"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button  (click)="addParticipantToSolution()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Add Participant
-              </button>
-          </div>
-        </div>
-    </div>
-</div> 
-
-<div *ngIf="showAddEvaluator" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex ">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add a new Evaluator (only one at a time)</label>
-                        <textarea [(ngModel)]="newEvaluator" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggle('showAddEvaluator')"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button  (click)="addEvaluatorToSolution()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Add Evaluator
-              </button>
-          </div>
-        </div>
-    </div>
-</div> 
-
-<div *ngIf="showRemoveTeamMember" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex ">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Remove a current pariticpant(only one at a time)</label>
-                        <textarea [(ngModel)]="teamMemberToDelete" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggle('showRemoveTeamMember')"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button  (click)="removeParticipantFromSolution(teamMemberToDelete)" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Remove Participant
-              </button>
-          </div>
-        </div>
-    </div>
-</div> 
-
-
-<div *ngIf="showRemoveEvaluator" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex ">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Remove a current evaluator(only one at a time)</label>
-                        <textarea [(ngModel)]="evaluatorToDelete" id="description" rows="1" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@gmail.com"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggle('showRemoveEvaluator')"  class="mr-4 text-white inline-flex items-center bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-teal-600 dark:hover:bg-teal-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button  (click)="removeEvaluatorFromSolution(evaluatorToDelete)" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Remove Evaluator
-              </button>
-          </div>
-        </div>
-    </div>
+  </main>
 </div>
 
 
+<!-- ============================================= -->
+<!-- MODALS -->
+<!-- ============================================= -->
 
-  
-  <!-- Main modal -->
-  <div *ngIf="updateTitleBox" id="crud-modal"   class=" w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
-    <div class="relative p-2 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-          
-          
-            <!-- Modal body -->
-            <div class="p-4 md:p-5 min-w-xl">
-              
-                <div class="grid gap-4 mb-4 grid-cols-2">
-         
-                    <div class="col-span-2">
-                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">New Title</label>
-                        <textarea [(ngModel)]="newTitle" id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your updated title here"></textarea>                    
-                    </div>
-                </div>
-                <button (click)="toggle('updateTitleBox')"  class="mr-4 text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    
-                    Cancel
-                </button>
-                <button (click)="updateTitile()" class="text-white inline-flex items-center bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-blue-800">
-                  
-                  Update Title 
-              </button>
-          </div>
-        </div>
+<!-- Modal Backdrop Template -->
+<ng-template #modalBackdrop>
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
+</ng-template>
+
+<!-- Update Title Modal -->
+<div *ngIf="updateTitleBox" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('updateTitleBox')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Update Title</h3>
+      <button (click)="toggle('updateTitleBox')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     </div>
-</div> 
-
-
-<!-- ADD ADMIN MODAL -->
-<div *ngIf="showAddAdmin"
-     id="crud-modal"
-     class="fixed inset-x-0 top-[10rem] z-50 flex w-full max-w-md mx-auto p-4">
-
-  <div class="relative w-full max-w-md">
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-
-      <!-- body -->
-      <div class="p-4 md:p-5 min-w-xl">
-        <div class="grid gap-4 mb-4 grid-cols-2">
-          <div class="col-span-2">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Add a new Admin (one at a time)
-            </label>
-
-            <textarea [(ngModel)]="newAdminEmail"
-                      rows="1"
-                      placeholder="email@gmail.com"
-                      class="block w-full p-2.5 text-sm text-gray-900 bg-gray-50
-                             border border-gray-300 rounded-lg
-                             focus:ring-blue-500 focus:border-blue-500
-                             dark:bg-gray-600 dark:border-gray-500
-                             dark:text-white dark:focus:ring-blue-500"></textarea>
-          </div>
-        </div>
-
-        <button (click)="toggle('showAddAdmin')"
-                class="mr-4 px-5 py-2.5 text-sm font-medium text-white rounded-lg
-                       bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4
-                       focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700">
-          Cancel
-        </button>
-
-        <button (click)="addAdminToSolution()"
-                class="px-5 py-2.5 text-sm font-medium text-white rounded-lg
-                       bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4
-                       focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700">
-          Add Admin
-        </button>
-      </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="newTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Title</label>
+      <textarea [(ngModel)]="newTitle"
+                id="newTitle"
+                rows="3"
+                placeholder="Enter your updated title here"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all resize-none"></textarea>
     </div>
-  </div>
-</div>
-
-
-<!-- REMOVE ADMIN MODAL -->
-<div *ngIf="showRemoveAdmin"
-     id="crud-modal"
-     class="fixed inset-x-0 top-[10rem] z-50 flex w-full max-w-md mx-auto p-4">
-
-  <div class="relative w-full max-w-md">
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-
-      <!-- body -->
-      <div class="p-4 md:p-5 min-w-xl">
-        <div class="grid gap-4 mb-4 grid-cols-2">
-          <div class="col-span-2">
-            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-              Remove an Admin
-            </label>
-
-            <textarea [(ngModel)]="adminToDelete"
-                      rows="1"
-                      placeholder="email@gmail.com"
-                      class="block w-full p-2.5 text-sm text-gray-900 bg-gray-50
-                             border border-gray-300 rounded-lg
-                             focus:ring-blue-500 focus:border-blue-500
-                             dark:bg-gray-600 dark:border-gray-500
-                             dark:text-white dark:focus:ring-blue-500"></textarea>
-          </div>
-        </div>
-
-        <button (click)="toggle('showRemoveAdmin')"
-                class="mr-4 px-5 py-2.5 text-sm font-medium text-white rounded-lg
-                       bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4
-                       focus:ring-teal-300 dark:bg-teal-600 dark:hover:bg-teal-700">
-          Cancel
-        </button>
-
-        <button (click)="removeAdminFromSolution(adminToDelete)"
-                class="px-5 py-2.5 text-sm font-medium text-white rounded-lg
-                       bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4
-                       focus:ring-blue-300 dark:bg-red-600 dark:hover:bg-red-700">
-          Remove Admin
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ADD SDG MODAL -->
-<div *ngIf="showAddSdg" class="fixed inset-0 z-50 flex items-start
-            justify-center bg-black/40 p-4">
-  <div class="bg-white dark:bg-slate-800 rounded-lg shadow w-full max-w-md p-6">
-    <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
-      Add Sustainable Development Goal
-    </h3>
-
-    <!-- dropdown -->
-    <select [(ngModel)]="selectedSdgToAdd"
-            class="w-full mb-6 p-2.5 rounded border
-                   bg-gray-50 dark:bg-slate-700
-                   text-gray-800 dark:text-gray-100">
-      <option value="" disabled selected>Select an SDG…</option>
-      <option *ngFor="let sdg of availableSdgs" [ngValue]="sdg">
-        {{ sdg }}
-      </option>
-    </select>
-
-    <!-- actions -->
-   <!-- actions - ADD modal -->
-      <div class="flex justify-end gap-3">
-        <!-- Cancel -->
-        <button type="button"
-                (click)="toggle('showAddSdg')"
-                class="px-4 py-2 rounded-md text-sm font-medium
-                      text-gray-700 bg-gray-200 hover:bg-gray-300
-                      focus:outline-none focus:ring-2 focus:ring-gray-400
-                      dark:text-gray-200 dark:bg-slate-600 dark:hover:bg-slate-500">
-          Cancel
-        </button>
-
-        <!-- Add -->
-        <button type="button"
-                (click)="addSdgToSolution()"
-                class="px-4 py-2 rounded-md text-sm font-medium
-                      text-white bg-teal-600 hover:bg-teal-700
-                      focus:outline-none focus:ring-2 focus:ring-teal-400
-                      dark:bg-teal-500 dark:hover:bg-teal-400">
-          Add
-        </button>
-      </div>
-  </div>
-</div>
-
-<!-- REMOVE SDG MODAL -->
-<div *ngIf="showRemoveSdg" class="fixed inset-0 z-50 flex items-start
-            justify-center bg-black/40 p-4">
-  <div class="bg-white dark:bg-slate-800 rounded-lg shadow w-full max-w-md p-6">
-    <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
-      Remove Sustainable Development Goal
-    </h3>
-
-    <select [(ngModel)]="selectedSdgToRemove"
-            class="w-full mb-6 p-2.5 rounded border
-                   bg-gray-50 dark:bg-slate-700
-                   text-gray-800 dark:text-gray-100">
-      <option value="" disabled selected>Select an SDG…</option>
-      <option *ngFor="let sdg of currentSdgs" [ngValue]="sdg">
-        {{ sdg }}
-      </option>
-    </select>
-<!-- actions - REMOVE modal -->
-    <div class="flex justify-end gap-3 mt-4">
-      <!-- Cancel -->
-      <button type="button"
-              (click)="toggle('showRemoveSdg')"
-              class="px-4 py-2 rounded-md text-sm font-medium
-                    text-gray-700 bg-gray-200 hover:bg-gray-300
-                    focus:outline-none focus:ring-2 focus:ring-gray-400
-                    dark:text-gray-200 dark:bg-slate-600 dark:hover:bg-slate-500">
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('updateTitleBox')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
         Cancel
       </button>
+      <button (click)="updateTitile()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-teal-600 hover:bg-teal-500 transition-colors">
+        Update Title
+      </button>
+    </div>
+  </div>
+</div>
 
-      <!-- Remove -->
-      <button type="button"
-              (click)="removeSdgFromSolution()"
-              class="px-4 py-2 rounded-md text-sm font-medium
-                    text-white bg-red-600 hover:bg-red-700
-                    focus:outline-none focus:ring-2 focus:ring-red-400
-                    dark:bg-red-500 dark:hover:bg-red-400">
-        Remove
+<!-- Update ReadMe Modal -->
+<div *ngIf="updateReadMeBox" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('updateReadMeBox')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Update ReadMe</h3>
+      <button (click)="toggle('updateReadMeBox')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="readmeContent" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+      <textarea [(ngModel)]="newReadMe"
+                id="readmeContent"
+                rows="8"
+                placeholder="Enter your updated description here"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"></textarea>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('updateReadMeBox')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="updateReadMe()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-blue-600 hover:bg-blue-500 transition-colors">
+        Update ReadMe
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Team Member Modal -->
+<div *ngIf="showAddTeamMember" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showAddTeamMember')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add Designer</h3>
+      <button (click)="toggle('showAddTeamMember')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="newMemberEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+      <input [(ngModel)]="newTeamMember"
+             type="email"
+             id="newMemberEmail"
+             placeholder="designer@example.com"
+             class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Enter the email of the person you want to add as a designer.</p>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showAddTeamMember')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="addParticipantToSolution()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-purple-600 hover:bg-purple-500 transition-colors">
+        Add Designer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Team Member Modal -->
+<div *ngIf="showRemoveTeamMember" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showRemoveTeamMember')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Remove Designer</h3>
+      <button (click)="toggle('showRemoveTeamMember')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="removeMemberEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+      <input [(ngModel)]="teamMemberToDelete"
+             type="email"
+             id="removeMemberEmail"
+             placeholder="designer@example.com"
+             class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Enter the email of the designer you want to remove.</p>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showRemoveTeamMember')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="removeParticipantFromSolution(teamMemberToDelete)"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-red-600 hover:bg-red-500 transition-colors">
+        Remove Designer
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Evaluator Modal -->
+<div *ngIf="showAddEvaluator" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showAddEvaluator')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add Evaluator</h3>
+      <button (click)="toggle('showAddEvaluator')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="newEvaluatorEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+      <input [(ngModel)]="newEvaluator"
+             type="email"
+             id="newEvaluatorEmail"
+             placeholder="evaluator@example.com"
+             class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all">
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Enter the email of the person you want to add as an evaluator.</p>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showAddEvaluator')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="addEvaluatorToSolution()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-amber-600 hover:bg-amber-500 transition-colors">
+        Add Evaluator
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Evaluator Modal -->
+<div *ngIf="showRemoveEvaluator" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showRemoveEvaluator')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Remove Evaluator</h3>
+      <button (click)="toggle('showRemoveEvaluator')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="removeEvaluatorEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+      <input [(ngModel)]="evaluatorToDelete"
+             type="email"
+             id="removeEvaluatorEmail"
+             placeholder="evaluator@example.com"
+             class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Enter the email of the evaluator you want to remove.</p>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showRemoveEvaluator')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="removeEvaluatorFromSolution(evaluatorToDelete)"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-red-600 hover:bg-red-500 transition-colors">
+        Remove Evaluator
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Admin Modal -->
+<div *ngIf="showAddAdmin" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showAddAdmin')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add Admin</h3>
+      <button (click)="toggle('showAddAdmin')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="newAdminEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+      <input [(ngModel)]="newAdminEmail"
+             type="email"
+             id="newAdminEmail"
+             placeholder="admin@example.com"
+             class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all">
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Enter the email of the person you want to add as an admin.</p>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showAddAdmin')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="addAdminToSolution()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-rose-600 hover:bg-rose-500 transition-colors">
+        Add Admin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Admin Modal -->
+<div *ngIf="showRemoveAdmin" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showRemoveAdmin')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Remove Admin</h3>
+      <button (click)="toggle('showRemoveAdmin')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="removeAdminEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
+      <input [(ngModel)]="adminToDelete"
+             type="email"
+             id="removeAdminEmail"
+             placeholder="admin@example.com"
+             class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Enter the email of the admin you want to remove.</p>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showRemoveAdmin')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="removeAdminFromSolution(adminToDelete)"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-red-600 hover:bg-red-500 transition-colors">
+        Remove Admin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add SDG Modal -->
+<div *ngIf="showAddSdg" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showAddSdg')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Add SDG</h3>
+      <button (click)="toggle('showAddSdg')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="sdgSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select SDG</label>
+      <select [(ngModel)]="selectedSdgToAdd"
+              id="sdgSelect"
+              class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+        <option value="" disabled selected>Choose a Sustainable Development Goal...</option>
+        <option *ngFor="let sdg of availableSdgs" [ngValue]="sdg">{{ sdg }}</option>
+      </select>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showAddSdg')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="addSdgToSolution()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-green-600 hover:bg-green-500 transition-colors">
+        Add SDG
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove SDG Modal -->
+<div *ngIf="showRemoveSdg" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" (click)="toggle('showRemoveSdg')"></div>
+  <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+    <!-- Modal Header -->
+    <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Remove SDG</h3>
+      <button (click)="toggle('showRemoveSdg')"
+              class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-gray-400 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Body -->
+    <div class="px-6 py-5">
+      <label for="sdgRemoveSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select SDG to Remove</label>
+      <select [(ngModel)]="selectedSdgToRemove"
+              id="sdgRemoveSelect"
+              class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
+        <option value="" disabled selected>Choose an SDG to remove...</option>
+        <option *ngFor="let sdg of currentSdgs" [ngValue]="sdg">{{ sdg }}</option>
+      </select>
+    </div>
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+      <button (click)="toggle('showRemoveSdg')"
+              class="px-5 py-2.5 rounded-xl font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-600 border border-gray-300 dark:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-500 transition-colors">
+        Cancel
+      </button>
+      <button (click)="removeSdgFromSolution()"
+              class="px-5 py-2.5 rounded-xl font-medium text-white bg-red-600 hover:bg-red-500 transition-colors">
+        Remove SDG
       </button>
     </div>
   </div>
