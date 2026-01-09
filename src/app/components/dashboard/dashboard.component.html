@@ -1428,7 +1428,7 @@
 
   <!-- Modal content wrapper -->
   <div
-    class="relative w-full max-w-2xl max-h-[90vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden transform transition-all flex flex-col"
+    class="relative w-full max-w-3xl max-h-[95vh] min-h-[70vh] rounded-3xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden transform transition-all flex flex-col"
   >
     <!-- Close button -->
     <button
@@ -1498,7 +1498,7 @@
         <!-- User suggestions dropdown -->
         <div
           *ngIf="showUserSuggestions && filteredUsers.length > 0"
-          class="absolute z-20 w-full mt-2 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-[500px] overflow-y-auto"
+          class="relative z-20 w-full mt-2 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-[60vh] overflow-y-auto"
         >
           <div
             *ngFor="let user of filteredUsers"
