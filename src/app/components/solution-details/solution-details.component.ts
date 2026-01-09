@@ -98,12 +98,15 @@ export class SolutionDetailsComponent implements OnInit {
   evaluatorToDelete: string = '';
   isHovering: boolean = false;
   teamMembers: User[] = [];
+  filteredTeamMembers: User[] = [];
   showPopUpTeam: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
   evaluators: User[] = [];
+  filteredEvaluators: User[] = [];
 
   /* ––– NEW STATE ––– */
   admins: Admin[] = [];
+  filteredAdmins: Admin[] = [];
   newAdminEmail = '';
   adminToDelete = '';
   showAddAdmin = false;
@@ -320,6 +323,87 @@ export class SolutionDetailsComponent implements OnInit {
       (!!this.selectedUser ||
         (this.allowTypedEmail && this.data.isValidEmail(this.inviteInput)))
     );
+  }
+
+  onRemoveInput(role: InviteRole) {
+    const query = this.getRemoveQuery(role);
+    if (!query) {
+      this.filteredTeamMembers = [];
+      this.filteredEvaluators = [];
+      this.filteredAdmins = [];
+      return;
+    }
+
+    if (role === 'designer') {
+      this.filteredTeamMembers = this.filterUsersForRemoval(
+        this.teamMembers,
+        query
+      );
+      return;
+    }
+
+    if (role === 'evaluator') {
+      this.filteredEvaluators = this.filterUsersForRemoval(
+        this.evaluators,
+        query
+      );
+      return;
+    }
+
+    this.filteredAdmins = this.filterAdminsForRemoval(this.admins, query);
+  }
+
+  selectRemoveCandidate(role: InviteRole, email: string) {
+    if (!email) return;
+    if (role === 'designer') {
+      this.teamMemberToDelete = email;
+      this.filteredTeamMembers = [];
+      return;
+    }
+    if (role === 'evaluator') {
+      this.evaluatorToDelete = email;
+      this.filteredEvaluators = [];
+      return;
+    }
+    this.adminToDelete = email;
+    this.filteredAdmins = [];
+  }
+
+  private getRemoveQuery(role: InviteRole): string {
+    if (role === 'designer') {
+      return (this.teamMemberToDelete || '').toLowerCase().trim();
+    }
+    if (role === 'evaluator') {
+      return (this.evaluatorToDelete || '').toLowerCase().trim();
+    }
+    return (this.adminToDelete || '').toLowerCase().trim();
+  }
+
+  private filterUsersForRemoval(users: User[], query: string): User[] {
+    return users
+      .filter((user) => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        return (
+          firstName.includes(query) ||
+          lastName.includes(query) ||
+          fullName.includes(query) ||
+          email.includes(query)
+        );
+      })
+      .slice(0, 10);
+  }
+
+  private filterAdminsForRemoval(admins: Admin[], query: string): Admin[] {
+    return admins
+      .filter((admin) => {
+        const name = admin.authorName?.toLowerCase() || '';
+        const email = admin.authorEmail?.toLowerCase() || '';
+        return name.includes(query) || email.includes(query);
+      })
+      .slice(0, 10);
   }
 
   onInviteInputChange() {
