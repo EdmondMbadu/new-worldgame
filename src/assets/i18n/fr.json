@@ -810,6 +810,21 @@
       "part1": "Faites glisser une image ici, ou cliquez",
       "dropOverlay": "Déposez l'image pour mettre à jour"
     },
+    "primaryActions": {
+      "heading": "Commencer ici",
+      "develop": {
+        "title": "Définir le problème et développer la solution",
+        "description": "Utilisez la méthodologie Design Science pour analyser votre défi et construire une stratégie de solution complète.",
+        "label": "Flux de travail principal",
+        "cta": "Commencer"
+      },
+      "invite": {
+        "title": "Inviter des membres de l'équipe",
+        "description": "Constituez votre équipe en invitant des collaborateurs par e-mail à rejoindre votre espace de solution.",
+        "label": "Construire votre équipe",
+        "cta": "Inviter maintenant"
+      }
+    },
     "invite": {
       "ctaTitle": "Invitez des collaborateurs • définissez votre équipe • publiez votre invitation",
       "openWorkspace": "Ouvrir l'espace d'invitation",

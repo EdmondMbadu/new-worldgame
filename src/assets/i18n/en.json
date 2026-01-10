@@ -1061,6 +1061,21 @@
       "part1": "Drag & drop an image here, or click",
       "dropOverlay": "Drop image to update"
     },
+    "primaryActions": {
+      "heading": "Start Here",
+      "develop": {
+        "title": "Define Problem & Develop Solution",
+        "description": "Use the Design Science methodology to analyze your challenge and build a comprehensive solution strategy.",
+        "label": "Core Workflow",
+        "cta": "Get Started"
+      },
+      "invite": {
+        "title": "Invite Team Members",
+        "description": "Build your team by inviting collaborators via email to join your solution workspace.",
+        "label": "Build Your Team",
+        "cta": "Invite Now"
+      }
+    },
     "invite": {
       "ctaTitle": "Invite collaborators • define your team • publish your invite",
       "openWorkspace": "Open invite workspace",
