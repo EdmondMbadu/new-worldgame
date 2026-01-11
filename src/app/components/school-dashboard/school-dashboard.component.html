@@ -280,20 +280,32 @@
             <span>{{ classStudentsById[c.challengePageId]?.length || 0 }}</span>
           </div>
           <div *ngIf="classStudentsById[c.challengePageId]?.length; else noClassStudents" class="mt-2 space-y-2">
-            <div *ngFor="let s of classStudentsById[c.challengePageId]" class="flex items-center justify-between">
+            <div *ngFor="let s of classStudentsById[c.challengePageId]" class="flex items-center justify-between gap-3">
               <div class="min-w-0">
                 <p class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
                   {{ s.name || s.email }}
                 </p>
                 <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ s.email }}</p>
               </div>
-              <span
-                *ngIf="s.verified !== null && s.verified !== undefined"
-                class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
-                [ngClass]="s.verified ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'"
-              >
-                {{ s.verified ? 'Verified' : 'Invited' }}
-              </span>
+              <div class="flex items-center gap-2">
+                <span
+                  *ngIf="s.verified !== null && s.verified !== undefined"
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                  [ngClass]="s.verified ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'"
+                >
+                  {{ s.verified ? 'Verified' : 'Invited' }}
+                </span>
+                <button
+                  type="button"
+                  (click)="removeStudentFromClass(c, s)"
+                  class="p-1.5 rounded-full text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition"
+                  title="Remove from class"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 18 12-12M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
           <ng-template #noClassStudents>

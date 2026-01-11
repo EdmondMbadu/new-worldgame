@@ -72,8 +72,10 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   classes: ClassRow[] = [];
   private classesSub?: Subscription;
   private classParticipantsSub?: Subscription;
+  private classProfilesSub?: Subscription;
   private classParticipantsById: Record<string, string[]> = {};
   classStudentsById: Record<string, Row[]> = {};
+  private classProfileNameByEmail: Record<string, string> = {};
 
   constructor(
     public auth: AuthService,
@@ -204,6 +206,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     this.rosterSub?.unsubscribe();
     this.classesSub?.unsubscribe();
     this.classParticipantsSub?.unsubscribe();
+    this.classProfilesSub?.unsubscribe();
   }
 
   /* ───────── invite modal helpers ───────── */
@@ -456,6 +459,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
     if (!this.isAdmin || this.classes.length === 0) {
       this.classParticipantsById = {};
+      this.subscribeClassProfiles([]);
       this.refreshStudentsWithClasses();
       return;
     }
@@ -486,10 +490,55 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       )
     ).subscribe((entries) => {
       const next: Record<string, string[]> = {};
+      const allParticipants: string[] = [];
       entries.forEach((entry) => {
         next[entry.classId] = entry.participants;
+        allParticipants.push(...entry.participants);
       });
       this.classParticipantsById = next;
+      this.subscribeClassProfiles(allParticipants);
+      this.refreshStudentsWithClasses();
+    });
+  }
+
+  private subscribeClassProfiles(emails: string[]): void {
+    this.classProfilesSub?.unsubscribe();
+
+    const normalized = Array.from(
+      new Set(emails.map((email) => this.normalizeEmail(email)))
+    ).filter((email) => !!email);
+
+    if (!this.isAdmin || normalized.length === 0) {
+      this.classProfileNameByEmail = {};
+      return;
+    }
+
+    const chunks: string[][] = [];
+    for (let i = 0; i < normalized.length; i += 10) {
+      chunks.push(normalized.slice(i, i + 10));
+    }
+
+    this.classProfilesSub = combineLatest(
+      chunks.map((chunk) =>
+        this.afs
+          .collection<User>('users', (ref) =>
+            ref.where('email', 'in', chunk)
+          )
+          .valueChanges()
+      )
+    ).subscribe((rows) => {
+      const next: Record<string, string> = {};
+      rows.flat().forEach((user) => {
+        const email = this.normalizeEmail(user?.email || '');
+        if (!email) return;
+        const first = user?.firstName?.trim() ?? '';
+        const last = user?.lastName?.trim() ?? '';
+        const fullName = `${first} ${last}`.trim();
+        if (fullName) {
+          next[email] = fullName;
+        }
+      });
+      this.classProfileNameByEmail = next;
       this.refreshStudentsWithClasses();
     });
   }
@@ -517,8 +566,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
       classStudentsById[classId] = uniqueEmails.map((email) => {
         const rosterRow = rosterByEmail.get(email);
+        const profileName = this.classProfileNameByEmail[email];
         return {
-          name: rosterRow?.name || '',
+          name: rosterRow?.name || profileName || '',
           email,
           verified: rosterRow?.verified ?? null,
           inRoster: !!rosterRow,
@@ -551,8 +601,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
     Object.keys(classMembershipByEmail).forEach((email) => {
       if (seen.has(email)) return;
+      const profileName = this.classProfileNameByEmail[email];
       combinedRows.push({
-        name: this.fallbackNameFromEmail(email),
+        name: profileName || this.fallbackNameFromEmail(email),
         email,
         verified: null,
         inRoster: false,
@@ -703,6 +754,29 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       alert(`Failed to delete school: ${err?.message || 'Unknown error'}`);
     } finally {
       this.deleting = false;
+    }
+  }
+
+  async removeStudentFromClass(classRow: ClassRow, student: Row): Promise<void> {
+    if (!this.isAdmin) return;
+
+    const email = this.normalizeEmail(student.email);
+    if (!email || !classRow?.challengePageId) return;
+
+    const ok = confirm(
+      `Remove ${email} from "${classRow.name}"?\n\nThey will lose access to this class.`
+    );
+    if (!ok) return;
+
+    try {
+      await this.afs
+        .doc(`challengePages/${classRow.challengePageId}`)
+        .update({
+          participants: firebase.firestore.FieldValue.arrayRemove(email),
+        });
+    } catch (err) {
+      console.error('Failed to remove student from class:', err);
+      alert('Failed to remove student from class. Please try again.');
     }
   }
 }
