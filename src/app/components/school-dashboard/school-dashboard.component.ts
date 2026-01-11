@@ -76,6 +76,8 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   private classParticipantsById: Record<string, string[]> = {};
   classStudentsById: Record<string, Row[]> = {};
   private classProfileNameByEmail: Record<string, string> = {};
+  copiedClassId: string | null = null;
+  copyNotice = '';
 
   constructor(
     public auth: AuthService,
@@ -777,6 +779,42 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     } catch (err) {
       console.error('Failed to remove student from class:', err);
       alert('Failed to remove student from class. Please try again.');
+    }
+  }
+
+  async copyClassInviteLink(classRow: ClassRow): Promise<void> {
+    const schoolId = (this.auth.currentUser as any)?.schoolId || '';
+    if (!classRow?.challengePageId) return;
+
+    const url = `/home-challenge/${classRow.challengePageId}${
+      schoolId ? `?sid=${schoolId}` : ''
+    }`;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+
+      this.copiedClassId = classRow.challengePageId;
+      this.copyNotice = `Copied link for "${classRow.name}".`;
+      setTimeout(() => {
+        if (this.copiedClassId === classRow.challengePageId) {
+          this.copiedClassId = null;
+        }
+        this.copyNotice = '';
+      }, 2500);
+    } catch (err) {
+      console.error('Failed to copy class link:', err);
+      alert('Could not copy the class link. Please copy it manually.');
     }
   }
 }
