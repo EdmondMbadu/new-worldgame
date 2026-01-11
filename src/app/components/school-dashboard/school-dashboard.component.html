@@ -451,12 +451,12 @@
 <!-- ░░ Invite students modal ░░ -->
 <div
   *ngIf="showInvite"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-20 pb-6"
 >
   <div
     class="max-w-lg w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
            rounded-2xl shadow-2xl ring-1 ring-slate-900/10 dark:ring-slate-50/10
-           p-8 space-y-6"
+           p-8 space-y-6 max-h-[90vh] overflow-y-auto overscroll-contain mx-4"
   >
     <header class="flex items-center justify-between">
       <h3 class="text-xl font-semibold">Invite students</h3>
