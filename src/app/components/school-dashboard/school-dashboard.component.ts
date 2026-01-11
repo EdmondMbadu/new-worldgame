@@ -2,7 +2,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { firstValueFrom, map, Subscription, switchMap } from 'rxjs';
+import { combineLatest, firstValueFrom, map, Subscription, switchMap } from 'rxjs';
 import { User, School } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { TimeService } from 'src/app/services/time.service';
@@ -14,7 +14,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 interface Row {
   name: string;
   email: string;
-  verified: boolean;
+  verified?: boolean | null;
+  inRoster?: boolean;
+  classNames?: string[];
 }
 interface ClassRow {
   id: string;
@@ -46,6 +48,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   isAdmin = false;
 
   students: Row[] = [];
+  private rosterStudents: Row[] = [];
   invitedCount = 0;
   verifiedCount = 0;
 
@@ -68,6 +71,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   private ownerSub?: Subscription;
   classes: ClassRow[] = [];
   private classesSub?: Subscription;
+  private classParticipantsSub?: Subscription;
+  private classParticipantsById: Record<string, string[]> = {};
+  classStudentsById: Record<string, Row[]> = {};
 
   constructor(
     public auth: AuthService,
@@ -125,6 +131,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
                   challengePageId: r.challengePageId,
                   createdAt: r.createdAt ?? null,
                 }));
+                this.subscribeClassParticipants();
               });
           }
           // Owner profile (if readable)
@@ -162,13 +169,15 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
                       : '',
                     email: d.email,
                     verified: !!d.verified,
+                    inRoster: true,
                   }))
                 )
               )
               .subscribe((rows) => {
-                this.students = rows;
+                this.rosterStudents = rows;
                 this.invitedCount = rows.length;
                 this.verifiedCount = rows.filter((r) => r.verified).length;
+                this.refreshStudentsWithClasses();
               });
           } else {
             // Student: do NOT read identities; get counts only
@@ -180,6 +189,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
               col.where('verified', '==', true).get(),
             ]);
             this.students = []; // keep empty to avoid accidental rendering
+            this.rosterStudents = [];
             this.invitedCount = allSnap.size;
             this.verifiedCount = verifiedSnap.size;
           }
@@ -193,6 +203,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     this.ownerSub?.unsubscribe();
     this.rosterSub?.unsubscribe();
     this.classesSub?.unsubscribe();
+    this.classParticipantsSub?.unsubscribe();
   }
 
   /* ───────── invite modal helpers ───────── */
@@ -383,6 +394,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   }
 
   async removeStudent(row: Row) {
+    if (!row.inRoster) {
+      return;
+    }
     const ok = confirm(
       `Remove ${row.email} from this school?\n\nThey will no longer appear in the roster.`
     );
@@ -435,6 +449,159 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     } finally {
       this.removingEmail = null;
     }
+  }
+
+  private subscribeClassParticipants(): void {
+    this.classParticipantsSub?.unsubscribe();
+
+    if (!this.isAdmin || this.classes.length === 0) {
+      this.classParticipantsById = {};
+      this.refreshStudentsWithClasses();
+      return;
+    }
+
+    const classDocs = this.classes
+      .map((c) => ({ id: c.challengePageId, name: c.name }))
+      .filter((c) => !!c.id);
+
+    if (classDocs.length === 0) {
+      this.classParticipantsById = {};
+      this.refreshStudentsWithClasses();
+      return;
+    }
+
+    this.classParticipantsSub = combineLatest(
+      classDocs.map((c) =>
+        this.afs
+          .doc(`challengePages/${c.id}`)
+          .valueChanges()
+          .pipe(
+            map((page: any) => ({
+              classId: c.id,
+              participants: Array.isArray(page?.participants)
+                ? page.participants
+                : [],
+            }))
+          )
+      )
+    ).subscribe((entries) => {
+      const next: Record<string, string[]> = {};
+      entries.forEach((entry) => {
+        next[entry.classId] = entry.participants;
+      });
+      this.classParticipantsById = next;
+      this.refreshStudentsWithClasses();
+    });
+  }
+
+  private refreshStudentsWithClasses(): void {
+    const rosterByEmail = new Map<string, Row>();
+    this.rosterStudents.forEach((row) => {
+      const email = this.normalizeEmail(row.email);
+      if (email) {
+        rosterByEmail.set(email, row);
+      }
+    });
+
+    const classMembershipByEmail: Record<string, string[]> = {};
+    const classStudentsById: Record<string, Row[]> = {};
+
+    this.classes.forEach((c) => {
+      const classId = c.challengePageId;
+      if (!classId) return;
+
+      const rawParticipants = this.classParticipantsById[classId] || [];
+      const uniqueEmails = Array.from(
+        new Set(rawParticipants.map((email) => this.normalizeEmail(email)))
+      ).filter((email) => !!email);
+
+      classStudentsById[classId] = uniqueEmails.map((email) => {
+        const rosterRow = rosterByEmail.get(email);
+        return {
+          name: rosterRow?.name || '',
+          email,
+          verified: rosterRow?.verified ?? null,
+          inRoster: !!rosterRow,
+        };
+      });
+
+      uniqueEmails.forEach((email) => {
+        const list = classMembershipByEmail[email] || [];
+        if (!list.includes(c.name)) {
+          list.push(c.name);
+        }
+        classMembershipByEmail[email] = list;
+      });
+    });
+
+    const combinedRows: Row[] = [];
+    const seen = new Set<string>();
+
+    this.rosterStudents.forEach((row) => {
+      const email = this.normalizeEmail(row.email);
+      if (!email || seen.has(email)) return;
+      seen.add(email);
+      combinedRows.push({
+        ...row,
+        email,
+        inRoster: true,
+        classNames: classMembershipByEmail[email] || [],
+      });
+    });
+
+    Object.keys(classMembershipByEmail).forEach((email) => {
+      if (seen.has(email)) return;
+      combinedRows.push({
+        name: this.fallbackNameFromEmail(email),
+        email,
+        verified: null,
+        inRoster: false,
+        classNames: classMembershipByEmail[email],
+      });
+    });
+
+    this.classStudentsById = classStudentsById;
+    this.students = combinedRows;
+  }
+
+  private normalizeEmail(email: string): string {
+    return (email || '').trim().toLowerCase();
+  }
+
+  private fallbackNameFromEmail(email: string): string {
+    const local = (email || '').split('@')[0] || '';
+    if (!local) return '';
+    return local
+      .replace(/[._-]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  getStudentStatus(row: Row): string {
+    if (row.inRoster) {
+      return row.verified ? 'Verified' : 'Invited';
+    }
+    if (row.classNames && row.classNames.length > 0) {
+      return 'In class';
+    }
+    return '—';
+  }
+
+  getStudentStatusClasses(row: Row): string {
+    if (row.inRoster) {
+      return row.verified
+        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
+        : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
+    }
+    if (row.classNames && row.classNames.length > 0) {
+      return 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200';
+    }
+    return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+  }
+
+  formatClassList(row: Row): string {
+    return row.classNames && row.classNames.length > 0
+      ? row.classNames.join(', ')
+      : '—';
   }
 
   // ===== Delete School Functionality =====

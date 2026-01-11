@@ -273,6 +273,33 @@
             </button>
           </div>
         </div>
+
+        <div *ngIf="isAdmin" class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-3">
+          <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span class="font-semibold uppercase tracking-wide">Students</span>
+            <span>{{ classStudentsById[c.challengePageId]?.length || 0 }}</span>
+          </div>
+          <div *ngIf="classStudentsById[c.challengePageId]?.length; else noClassStudents" class="mt-2 space-y-2">
+            <div *ngFor="let s of classStudentsById[c.challengePageId]" class="flex items-center justify-between">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                  {{ s.name || s.email }}
+                </p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">{{ s.email }}</p>
+              </div>
+              <span
+                *ngIf="s.verified !== null && s.verified !== undefined"
+                class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                [ngClass]="s.verified ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'"
+              >
+                {{ s.verified ? 'Verified' : 'Invited' }}
+              </span>
+            </div>
+          </div>
+          <ng-template #noClassStudents>
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">No students in this class yet.</p>
+          </ng-template>
+        </div>
       </div>
     </div>
   </div>
@@ -324,31 +351,31 @@
               <tr>
                 <th class="px-6 py-3 text-left font-medium">Name</th>
                 <th class="px-6 py-3 text-left font-medium">Email</th>
+                <th class="px-6 py-3 text-left font-medium">Classes</th>
                 <th class="px-6 py-3 text-left font-medium">Status</th>
+                <th class="px-6 py-3 text-left font-medium">Actions</th>
               </tr>
             </thead>
             <tbody
               class="divide-y divide-slate-200 dark:divide-slate-700 text-slate-900 dark:text-slate-100"
             >
               <tr *ngFor="let s of students">
-                <td class="px-6 py-3">{{ s.name }}</td>
+                <td class="px-6 py-3">{{ s.name || s.email }}</td>
                 <td class="px-6 py-3">{{ s.email }}</td>
+                <td class="px-6 py-3">{{ formatClassList(s) }}</td>
                 <td class="px-6 py-3">
                   <span
                     class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold"
-                    [ngClass]="
-                      s.verified
-                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
-                        : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
-                    "
+                    [ngClass]="getStudentStatusClasses(s)"
                   >
-                    {{ s.verified ? 'Verified' : 'Invited' }}
+                    {{ getStudentStatus(s) }}
                   </span>
                 </td>
                  <td  *ngIf="isAdmin" class="px-6 py-3">
                     <button
                         (click)="removeStudent(s)"
                         [disabled]="removingEmail === s.email"
+                        *ngIf="s.inRoster"
                         class="inline-flex items-center gap-2 text-sm font-medium
                             text-white bg-rose-600 hover:bg-rose-700 rounded-full px-3 py-1.5
                             disabled:opacity-50"
@@ -363,10 +390,11 @@
                         </svg>
                         Remove
                     </button>
+                    <span *ngIf="!s.inRoster" class="text-xs text-slate-400">—</span>
                 </td>
                             </tr>
               <tr *ngIf="students.length === 0">
-                <td colspan="3" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
+                <td colspan="5" class="px-6 py-8 text-center text-slate-500 dark:text-slate-400">
                   No students yet. Click “Invite” to add the first one.
                 </td>
               </tr>
