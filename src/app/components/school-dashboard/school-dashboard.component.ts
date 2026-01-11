@@ -786,9 +786,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     const schoolId = (this.auth.currentUser as any)?.schoolId || '';
     if (!classRow?.challengePageId) return;
 
-    const url = `/home-challenge/${classRow.challengePageId}${
-      schoolId ? `?sid=${schoolId}` : ''
-    }`;
+    const url = this.getClassInviteLink(classRow);
 
     try {
       if (navigator.clipboard?.writeText) {
@@ -816,5 +814,12 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       console.error('Failed to copy class link:', err);
       alert('Could not copy the class link. Please copy it manually.');
     }
+  }
+
+  getClassInviteLink(classRow: ClassRow): string {
+    const schoolId = (this.auth.currentUser as any)?.schoolId || '';
+    if (!classRow?.challengePageId) return '';
+    const suffix = schoolId ? `?sid=${schoolId}` : '';
+    return `${window.location.origin}/home-challenge/${classRow.challengePageId}${suffix}`;
   }
 }
