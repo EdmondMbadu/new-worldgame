@@ -218,6 +218,26 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     },
   ];
 
+  private readonly logosTrustedSources: Source[] = [
+    { title: 'City of Philadelphia (official)', url: 'https://www.phila.gov/' },
+    {
+      title: 'Philadelphia Housing Authority',
+      url: 'https://www.pha.phila.gov/',
+    },
+    {
+      title: 'Pennsylvania Housing Finance Agency (PHFA)',
+      url: 'https://www.phfa.org/',
+    },
+    {
+      title: 'Philadelphia Housing Development Corporation (PHDC)',
+      url: 'https://www.phdc.phila.gov/',
+    },
+    {
+      title: 'HUD (U.S. Department of Housing and Urban Development)',
+      url: 'https://www.hud.gov/',
+    },
+  ];
+
   introMessage: DisplayMessage = {
     text: '',
     link: { text: 'here.', url: '/blogs/nwg-ai' },
@@ -401,7 +421,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
             return {
               text: msg.text,
               type: msg.type as 'PROMPT' | 'RESPONSE',
-              sources: msg.sources || undefined,
+              sources: this.sanitizeSources(msg.sources || undefined),
               insertable: this.hasContext && msg.type === 'RESPONSE',
             };
           });
@@ -732,6 +752,46 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     return result;
   }
 
+  private sanitizeSources(sources?: Source[]): Source[] | undefined {
+    if (!sources || sources.length === 0) {
+      return this.isDrLogos ? [...this.logosTrustedSources] : undefined;
+    }
+    if (!this.isDrLogos) return sources;
+
+    const allowedHosts = new Set(
+      this.logosTrustedSources.map((s) => {
+        try {
+          return new URL(s.url).host;
+        } catch {
+          return '';
+        }
+      })
+    );
+
+    const filtered = sources
+      .map((source) => {
+        try {
+          const url = new URL(source.url);
+          if (!allowedHosts.has(url.host)) return null;
+          const baseUrl = `${url.protocol}//${url.host}/`;
+          const title =
+            this.logosTrustedSources.find((s) => s.url === baseUrl)?.title ||
+            source.title ||
+            baseUrl;
+          return { title, url: baseUrl } as Source;
+        } catch {
+          return null;
+        }
+      })
+      .filter((source): source is Source => !!source);
+
+    return filtered.length > 0 ? filtered : [...this.logosTrustedSources];
+  }
+
+  private get isDrLogos(): boolean {
+    return this.selectedAi?.id === 'dr-logos';
+  }
+
   getQuestionLabel(key: string): string {
     // Format like "S1-A" to "1A" for compact display
     return key.replace('S', '').replace('-', '');
@@ -914,7 +974,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
                 text: '',
                 streaming: true,
                 insertable: this.hasContext,  // Mark as insertable if in playground context
-                sources: snap.sources || undefined,  // Add sources if available
+                sources: this.sanitizeSources(snap.sources || undefined),  // Add sources if available
               };
               this.responses.push(slot);
               this.cdRef.detectChanges();
@@ -924,7 +984,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
                 slot.streaming = false;
                 // Ensure sources are set after streaming completes
                 if (snap.sources && snap.sources.length > 0) {
-                  slot.sources = snap.sources;
+                  slot.sources = this.sanitizeSources(snap.sources);
                 }
                 
                 // Persist the response to the session after streaming completes (including sources)
