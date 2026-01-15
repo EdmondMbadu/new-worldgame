@@ -124,9 +124,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       questions: [
         [
           `What is the problem you have chosen and why is it important? 
-(Answer these two questions first from your personal knowledge. Then Ask Bucky why it is important.)`,
-          `What are the symptoms of this problem? How do you measure it? (Answer these 2 question first from your personal knowledge. Then Ask Bucky.)
-(After these questions, ask Bucky or answer from your knowledge: What are the causes of these symptoms? This will provide deeper insight into the problem.)`,
+(Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
+          `What are the symptoms of this problem? How do you measure it? (Answer these 2 questions first from your personal knowledge. Then Ask Bucky-- after these questions, ask Bucky or answer from your knowledge: What are the causes of these symptoms? This provides deeper insight into the problem.)`,
           `How many people does this problem impact in the world? Where is it most severe? (If you don't know, ask Bucky, or use the data sources provided when you click on the "?" .)`,
           `What will happen if nothing is done to deal with this problem? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
         ],
@@ -135,7 +134,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
           `How will you measure success? How will you know when you reach the preferred state? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
         ],
         [
-          'What does our solution do to reach the preferred state? How will it do it?',
+          "What does our solution do to reach the preferred state? How will it do it? (If you don't have a solution, check the Solutions Library to get some ideas, and/or Ask Bucky what he thinks is a solution that will get you from the Problem to the Preferred state.)",
           'What technology, programs, policies will it need?',
           'What resources does our solution need?',
           'How is our solution part of a circular, regenerative, more equitable economy?',
@@ -153,7 +152,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
           'What can you/your team do — starting now, with just the resources to which you have access, to move your strategy forward?',
         ],
         [
-          'Review Your Entire Strategy, Preview it, Add what you think might be missing.',
+          'Review Your Entire Strategy, Preview it, Add what you think might be missing, add Title, Names of Team members, Format it for publication.',
         ],
       ],
     },
@@ -175,9 +174,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       questions: [
         [
           `Quel problème avez-vous choisi et pourquoi est-il important ?
-(Répondez d'abord à ces deux questions selon vos propres connaissances. Puis demandez à Bucky pourquoi il est important.)`,
-          `Quels sont les symptômes de ce problème ? Comment le mesurez-vous ? (Répondez d'abord à ces deux questions selon vos connaissances, puis demandez à Bucky.)
-(Après ces questions, demandez à Bucky ou répondez selon vos connaissances : quelles sont les causes de ces symptômes ? Cela permettra de mieux comprendre le problème.)`,
+(Répondez d'abord à ces questions selon vos propres connaissances. Puis demandez à Bucky.)`,
+          `Quels sont les symptômes de ce problème ? Comment le mesurez-vous ? (Répondez d'abord à ces deux questions selon vos connaissances, puis demandez à Bucky — après ces questions, demandez à Bucky ou répondez selon vos connaissances : quelles sont les causes de ces symptômes ? Cela apporte un éclairage plus profond sur le problème.)`,
           `Combien de personnes ce problème touche-t-il dans le monde ? Où est-il le plus grave ? (Si vous ne le savez pas, demandez à Bucky ou utilisez les sources de données proposées lorsque vous cliquez sur le " ? ".)`,
           `Que se passera-t-il si rien n'est fait pour résoudre ce problème ? (Répondez d'abord selon vos propres connaissances. Puis demandez à Bucky.)`,
         ],
@@ -186,7 +184,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
           `Comment mesurerez-vous le succès ? Comment saurez-vous que vous avez atteint l'état souhaité ? (Répondez d'abord selon vos connaissances. Puis demandez à Bucky.)`,
         ],
         [
-          `Que fait notre solution pour atteindre l'état souhaité ? Comment y parvient-elle ?`,
+          `Que fait notre solution pour atteindre l'état souhaité ? Comment y parvient-elle ? (Si vous n'avez pas encore de solution, consultez la bibliothèque des solutions pour trouver des idées et/ou demandez à Bucky ce qu'il pense être une solution qui vous fera passer de l'état du problème à l'état souhaité.)`,
           `De quelles technologies, programmes ou politiques aura-t-elle besoin ?`,
           `De quelles ressources notre solution a-t-elle besoin ?`,
           `En quoi notre solution participe-t-elle à une économie circulaire, régénératrice et plus équitable ?`,
@@ -204,7 +202,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
           `Que pouvez-vous/votre équipe faire — dès maintenant, avec les seules ressources auxquelles vous avez accès — pour faire progresser votre stratégie ?`,
         ],
         [
-          `Relisez l'ensemble de votre stratégie, prévisualisez-la et ajoutez ce qui pourrait manquer.`,
+          `Relisez l'ensemble de votre stratégie, prévisualisez-la, ajoutez ce qui pourrait manquer, ajoutez un titre, les noms des membres de l'équipe, et mettez-la en forme pour la publication.`,
         ],
       ],
     },
@@ -224,6 +222,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   subtitles: string[] = [
     ...this.localizedContent[this.defaultLanguage].subtitles,
   ];
+  preferredStateGraphicUrl = '/blogs/sample-preferred-states';
   display: boolean[] = [];
   buttontexts: string[] = [];
   AllQuestions: Array<Array<string>> = this.localizedContent[

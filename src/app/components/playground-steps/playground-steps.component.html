@@ -133,6 +133,13 @@
               class="block mb-2 text-xl font-normal leading-none text-gray-500 dark:text-gray-400">
               {{ subtitles[i] }}
             </time>
+            <div *ngIf="i === 1" class="mb-2 text-sm font-medium text-teal-700 dark:text-teal-300">
+              <a
+                [routerLink]="preferredStateGraphicUrl"
+                class="underline hover:text-teal-600 dark:hover:text-teal-200">
+                {{ currentLanguage === 'fr' ? "Graphique sur l'état souhaité" : 'Graphic on Preferred State' }}
+              </a>
+            </div>
             <time
               *ngIf="AllQuestions[i].length == 1"
               class="block mb-2 text-xl font-normal leading-none text-gray-500 dark:text-gray-400">

@@ -184,6 +184,11 @@
         see "Ask Bucky: Additional Prompts".
       </a>
     </span>
+    <span *ngIf="i==3 && (step.startsWith('Step 1') || step.startsWith('Étape 1'))">
+      <a target="_blank" class="text-blue-500 hover:underline hover:text-blue-600" routerLink="/blogs/ask-bucky">
+        {{ currentLanguage === 'fr' ? 'Voir des invites utiles ici.' : 'See here for useful prompts.' }}
+      </a>
+    </span>
     <!-- (Optional) "Ask Bucky" or extra links if needed -->
     <span *ngIf="i >= 2  && i <= 4 && step.startsWith('Step IV:')">
       <a target="_blank" class="text-blue-500 hover:underline hover:text-blue-600" routerLink="/blogs/ask-bucky">
@@ -292,6 +297,13 @@
                     
                     >
                     </ckeditor>
+                <p
+                    *ngIf="stepNumber === 2 && i === questions.length - 1"
+                    class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    {{ currentLanguage === 'fr'
+                      ? "Plus de questions pour développer votre solution à l'étape suivante."
+                      : 'More questions for developing your solution in the next Step.' }}
+                </p>
 
                 <!-- another risk business DO Not remove this useless code
                 it allows to compare staticContents with the dynamic. It is purely utilitarian -->
