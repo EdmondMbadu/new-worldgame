@@ -168,6 +168,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       group: 'colleague',
     },
     {
+      id: 'dr-logos',
+      name: 'Dr. Logos',
+      avatarPath: 'assets/img/logos.png',
+      collectionKey: 'business',
+      intro:
+        'Dr. Logos - Impact & Systems Design Coach. Dr. Logos is an AI mentor specialized in impact-driven design, systems thinking, and Theory of Change. She helps students and practitioners transform ideas into credible, context-grounded solutions by clarifying problems, mapping stakeholders, and connecting actions to measurable outcomes. Guided by the Impact Business Model Canvas and logic models, Dr. Logos challenges vague thinking, surfaces assumptions, and supports the design of solutions that are both operationally viable and socially meaningful.',
+      group: 'colleague',
+    },
+    {
       id: 'marie',
       name: 'Marie Curie',
       avatarPath: 'assets/img/marie-curie.jpg',

@@ -119,6 +119,16 @@ export class DataService implements OnInit {
       collectionPathTemplate: 'users/{uid}/tane/',
     },
     {
+      avatarPath: '../../../assets/img/logos.png',
+      name: 'Dr. Logos',
+      group: 'colleague',
+      sdgs: [] as number[],
+      intro:
+        'Dr. Logos - Impact & Systems Design Coach. Dr. Logos is an AI mentor specialized in impact-driven design, systems thinking, and Theory of Change. She helps students and practitioners transform ideas into credible, context-grounded solutions by clarifying problems, mapping stakeholders, and connecting actions to measurable outcomes. Guided by the Impact Business Model Canvas and logic models, Dr. Logos challenges vague thinking, surfaces assumptions, and supports the design of solutions that are both operationally viable and socially meaningful.',
+      slug: 'dr-logos',
+      collectionPathTemplate: 'users/{uid}/business/',
+    },
+    {
       avatarPath: '../../../assets/img/marie-curie.jpg',
       name: 'Marie Curie',
       group: 'elder',

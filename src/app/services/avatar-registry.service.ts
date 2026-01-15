@@ -34,6 +34,7 @@ export class AvatarRegistryService {
       'Amina Al-Sayed': 'amina',
       'Elena Volkov': 'elena',
       'Tane Kahu': 'tane',
+      'Dr. Logos': 'business',
     };
     // Fallback = first token lowercased if not in map
     return map[name] ?? name.toLowerCase().split(' ')[0];
@@ -139,6 +140,13 @@ export class AvatarRegistryService {
         group: 'elder',
         sdgs: [2, 6],
         intro: `Wry storyteller who disarms with humor and insight—perfect for cutting through noise and cliché.`,
+      },
+      {
+        avatarPath: '../../../assets/img/logos.png',
+        name: 'Dr. Logos',
+        group: 'colleague',
+        sdgs: [],
+        intro: `Dr. Logos - Impact & Systems Design Coach. Dr. Logos is an AI mentor specialized in impact-driven design, systems thinking, and Theory of Change. She helps students and practitioners transform ideas into credible, context-grounded solutions by clarifying problems, mapping stakeholders, and connecting actions to measurable outcomes. Guided by the Impact Business Model Canvas and logic models, Dr. Logos challenges vague thinking, surfaces assumptions, and supports the design of solutions that are both operationally viable and socially meaningful.`,
       },
     ];
 

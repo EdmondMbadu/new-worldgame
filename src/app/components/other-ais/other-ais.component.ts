@@ -96,6 +96,14 @@ export class OtherAisComponent implements OnInit, OnDestroy {
       collectionKey: 'tane',
     },
     {
+      avatarPath: '../../../assets/img/logos.png',
+      name: 'Dr. Logos',
+      group: 'colleague',
+      sdgs: [],
+      introKey: 'otherAis.avatars.logos.intro',
+      collectionKey: 'business',
+    },
+    {
       avatarPath: '../../../assets/img/marie-curie.jpg',
       name: 'Marie Curie',
       group: 'elder',
