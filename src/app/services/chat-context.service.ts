@@ -150,6 +150,16 @@ export class ChatContextService {
       prompt += `Provide specific, current data points whenever possible. `;
       prompt += `The sources with their URLs will be automatically displayed below your response.]\n\n`;
     }
+
+    if (avatarName === 'Dr. Logos') {
+      prompt += `[LOCALIZATION: You specialize in Philadelphia, PA. Default to Philadelphia-specific guidance, programs, and agencies for housing and homebuyers. `;
+      prompt += `Prioritize official local and state sources when relevant, such as phila.gov, phfa.org, pha.phila.gov, and housing.finance. `;
+      prompt += `If the question is not Philadelphia-specific, say so and then provide a broader answer. `;
+      prompt += `\n\nLINK ACCURACY RULES: `;
+      prompt += `Do NOT invent URLs or cite pages you are unsure exist. `;
+      prompt += `If you cannot verify a specific page, link only to a well-known official homepage or omit the URL and name the source instead. `;
+      prompt += `Never claim you searched or accessed tools. Be transparent about limits.]\n\n`;
+    }
     
     // Solution context (if available)
     if (ctx) {
@@ -178,4 +188,3 @@ export class ChatContextService {
     return prompt;
   }
 }
-
