@@ -307,7 +307,7 @@
         <div *ngIf="isAdmin" class="mt-4 border-t border-slate-200 dark:border-slate-700 pt-3">
           <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <span class="font-semibold uppercase tracking-wide">Students</span>
-            <span>{{ classStudentsById[c.challengePageId]?.length || 0 }}</span>
+            <span>{{ classStudentsById[c.challengePageId].length || 0 }}</span>
           </div>
           <div *ngIf="classStudentsById[c.challengePageId]?.length; else noClassStudents" class="mt-2 space-y-2">
             <div *ngFor="let s of classStudentsById[c.challengePageId]" class="flex items-center justify-between gap-3">
