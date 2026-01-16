@@ -81,6 +81,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // AI Avatar Selection
   showAiSelector = false;
   selectedAi: AiAvatar;
+  private readonly aiSelectionStorageKey = 'nwg_selected_ai';
   
   // Context Integration
   playgroundContext: PlaygroundContext | null = null;
@@ -257,7 +258,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     private chatSession: ChatSessionService
   ) {
     this.user = this.auth.currentUser;
-    this.selectedAi = this.aiAvatars[0];
+    this.selectedAi = this.getInitialAiSelection();
     this.collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAi.collectionKey}`;
     this.updateIntroMessage();
   }
@@ -339,6 +340,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     }
     
     this.selectedAi = ai;
+    this.persistAiSelection(ai);
     this.collectionPath = `users/${this.auth.currentUser.uid}/${ai.collectionKey}`;
     this.updateIntroMessage();
     this.responses = [];
@@ -540,6 +542,29 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   getDisplayName(ai: AiAvatar): string {
     return ai.shortName || ai.name.split(' ')[0];
+  }
+
+  private getInitialAiSelection(): AiAvatar {
+    const savedId = this.getSavedAiId();
+    return this.aiAvatars.find((ai) => ai.id === savedId) || this.aiAvatars[0];
+  }
+
+  private getSavedAiId(): string | null {
+    try {
+      const uid = this.auth?.currentUser?.uid || 'guest';
+      return localStorage.getItem(`${this.aiSelectionStorageKey}_${uid}`);
+    } catch {
+      return null;
+    }
+  }
+
+  private persistAiSelection(ai: AiAvatar): void {
+    try {
+      const uid = this.auth?.currentUser?.uid || 'guest';
+      localStorage.setItem(`${this.aiSelectionStorageKey}_${uid}`, ai.id);
+    } catch {
+      // Ignore storage failures (e.g., blocked storage)
+    }
   }
 
   openFullPage(): void {
