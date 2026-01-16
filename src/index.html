@@ -94,10 +94,8 @@
 </script>
 </head>
 <body>
-  <app-root></app-root>
-
-  <!-- Static content for search engines and crawlers that don't execute JavaScript -->
-  <noscript>
+  <!-- Static content inside app-root for crawlers - Angular will replace this when it loads -->
+  <app-root>
     <div style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: system-ui, -apple-system, sans-serif;">
       <header style="text-align: center; margin-bottom: 40px;">
         <h1>NewWorld Game - Solve Global Challenges Through Collaborative Gameplay</h1>
@@ -134,7 +132,7 @@
         </section>
 
         <section style="margin-bottom: 40px;">
-          <h2>Programs &amp; Offerings</h2>
+          <h2>Programs and Offerings</h2>
           <ul>
             <li><strong>Workshop:</strong> Interactive sessions introducing the NewWorld Game methodology and design science approach.</li>
             <li><strong>Primer:</strong> A foundational course covering Buckminster Fuller's principles and their application to global challenges.</li>
@@ -146,34 +144,34 @@
         <section style="margin-bottom: 40px;">
           <h2>Challenge Categories</h2>
           <ul>
-            <li>Climate Change &amp; Environmental Sustainability</li>
-            <li>Food Security &amp; Agriculture</li>
-            <li>Clean Water &amp; Sanitation</li>
-            <li>Renewable Energy &amp; Energy Access</li>
-            <li>Healthcare &amp; Public Health</li>
-            <li>Education &amp; Learning</li>
-            <li>Poverty Reduction &amp; Economic Development</li>
-            <li>Peace &amp; Social Justice</li>
-            <li>Infrastructure &amp; Urban Development</li>
-            <li>Technology &amp; Innovation</li>
+            <li>Climate Change and Environmental Sustainability</li>
+            <li>Food Security and Agriculture</li>
+            <li>Clean Water and Sanitation</li>
+            <li>Renewable Energy and Energy Access</li>
+            <li>Healthcare and Public Health</li>
+            <li>Education and Learning</li>
+            <li>Poverty Reduction and Economic Development</li>
+            <li>Peace and Social Justice</li>
+            <li>Infrastructure and Urban Development</li>
+            <li>Technology and Innovation</li>
           </ul>
         </section>
 
         <section style="margin-bottom: 40px;">
           <h2>Who Is Buckminster Fuller?</h2>
           <p>R. Buckminster Fuller (1895-1983) was an American architect, systems theorist, author, designer, inventor, and futurist. He developed numerous inventions, mainly architectural designs, and popularized the widely known geodesic dome. Fuller was also the creator of the original World Game, a simulation meant to solve global problems by optimizing the use of Earth's resources.</p>
-          <p>His philosophy centered on doing more with less (ephemeralization) and his famous question: "How do we make the world work for 100% of humanity in the shortest possible time through spontaneous cooperation without ecological damage or disadvantage to anyone?"</p>
+          <p>His philosophy centered on doing more with less (ephemeralization) and his famous question: How do we make the world work for 100% of humanity in the shortest possible time through spontaneous cooperation without ecological damage or disadvantage to anyone?</p>
         </section>
 
         <section style="margin-bottom: 40px;">
           <h2>Contact Us</h2>
-          <p>Ready to join the movement? Visit our website at <a href="https://newworld-game.org">newworld-game.org</a> or <a href="https://new-worldgame.web.app">new-worldgame.web.app</a> to get started.</p>
+          <p>Ready to join the movement? Visit our website at newworld-game.org or new-worldgame.web.app to get started.</p>
           <p>For inquiries, partnerships, or educational collaborations, please reach out through our contact page.</p>
         </section>
       </main>
 
       <footer style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-        <p>&copy; NewWorld Game. All rights reserved.</p>
+        <p>NewWorld Game. All rights reserved.</p>
         <nav>
           <a href="/overview">Overview</a> |
           <a href="/plans">Plans</a> |
@@ -187,7 +185,7 @@
         </nav>
       </footer>
     </div>
-  </noscript>
+  </app-root>
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     crossorigin=""
