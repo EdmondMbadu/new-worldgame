@@ -16,7 +16,7 @@
             "allowedCommonJsDependencies": [
               "@ckeditor/ckeditor5-build-classic",
               "@ckeditor/ckeditor5-angular"
-           ],
+            ],
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
