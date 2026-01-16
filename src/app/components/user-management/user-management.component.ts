@@ -79,6 +79,7 @@ export class UserManagementComponent implements OnInit {
     failureCount: number;
     failures?: string[];
     sentAt?: any;
+    status?: 'processing' | 'completed' | 'completed_with_errors';
   }> = [];
 
   // Searchable dropdown state

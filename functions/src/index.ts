@@ -775,6 +775,7 @@ export const processAIInsightsBulkJob = functions
     const recipients = Array.isArray(data.recipients) ? data.recipients : [];
     const concurrency = Math.min(Math.max(Number(data.concurrency) || 4, 1), 6);
     const createdBy = data.createdBy || 'unknown';
+    const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
 
     if (!recipients.length) {
       await snap.ref.update({
@@ -785,8 +786,27 @@ export const processAIInsightsBulkJob = functions
       return;
     }
 
+    // Create initial log entry immediately so it appears in the UI
+    const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
+      mode: 'bulk',
+      subject,
+      createdBy,
+      recipients: recipients.map((r: AIInsightsPayload) => ({
+        email: r.userEmail,
+        solutionId: r.solutionId,
+        solutionTitle: r.solutionTitle,
+      })),
+      total: recipients.length,
+      successCount: 0,
+      failureCount: 0,
+      failures: [],
+      status: 'processing',
+      sentAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
     await snap.ref.update({
       status: 'processing',
+      logId: logRef.id,
       startedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -803,13 +823,13 @@ export const processAIInsightsBulkJob = functions
       }
 
       try {
-        const { html, subject } = await buildAIInsightsEmail(
+        const { html, subject: emailSubject } = await buildAIInsightsEmail(
           recipient as AIInsightsPayload
         );
         await sgMail.send({
           to: userEmail,
           from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
-          subject,
+          subject: emailSubject,
           html,
         });
         successCount += 1;
@@ -820,20 +840,12 @@ export const processAIInsightsBulkJob = functions
       }
     });
 
-    const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
-    await writeAIInsightsLog({
-      mode: 'bulk',
-      subject,
-      createdBy,
-      recipients: recipients.map((r: AIInsightsPayload) => ({
-        email: r.userEmail,
-        solutionId: r.solutionId,
-        solutionTitle: r.solutionTitle,
-      })),
-      total: recipients.length,
+    // Update the log entry with final results
+    await logRef.update({
       successCount,
       failureCount: failures.length,
       failures,
+      status: failures.length ? 'completed_with_errors' : 'completed',
     });
 
     await snap.ref.update({

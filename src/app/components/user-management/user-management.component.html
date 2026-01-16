@@ -278,6 +278,13 @@
                   </p>
                   <p class="text-xs text-slate-500 dark:text-slate-400">
                     {{ formatLogTimestamp(log.sentAt) }} • {{ log.mode }} • {{ log.successCount }}/{{ log.total }} sent
+                    <span *ngIf="log.status === 'processing'" class="ml-2 inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                      <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Processing...
+                    </span>
                   </p>
                   <p class="text-xs text-slate-500 dark:text-slate-400">
                     Sent by {{ log.createdBy || 'unknown' }}
