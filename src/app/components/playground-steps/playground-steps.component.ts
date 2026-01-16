@@ -222,7 +222,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   subtitles: string[] = [
     ...this.localizedContent[this.defaultLanguage].subtitles,
   ];
-  preferredStateGraphicUrl = '/blogs/sample-preferred-states';
+  preferredStateGraphicUrl = '/blogs/custom-storyboard';
   display: boolean[] = [];
   buttontexts: string[] = [];
   AllQuestions: Array<Array<string>> = this.localizedContent[
