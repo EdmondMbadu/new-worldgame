@@ -4,331 +4,331 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://new-worldgame.web.app/</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://new-worldgame.web.app/"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://new-worldgame.web.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://newworld-game.org/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://newworld-game.org/"/>
   </url>
 
   <!-- Landing Pages -->
   <url>
-    <loc>https://new-worldgame.web.app/landing</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/landing</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/landing-college</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/landing-college</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/landing-un</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/landing-un</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/landing-community</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/landing-community</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Key Product Pages -->
   <url>
-    <loc>https://new-worldgame.web.app/plans</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/plans</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/workshop</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/workshop</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/workshop-register</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/workshop-register</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/primer</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/primer</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/primer-register</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/primer-register</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/global-lab</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/global-lab</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/global-register</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/global-register</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Tournament Pages -->
   <url>
-    <loc>https://new-worldgame.web.app/tournament-landing</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/tournament-landing</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/tournament-university</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/tournament-university</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/tournament-instructions</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/tournament-instructions</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- AI & Interactive Features -->
   <url>
-    <loc>https://new-worldgame.web.app/bucky</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/bucky</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/ask-bucky</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/ask-bucky</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/ask-anything</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/ask-anything</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/ask-feedback</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/ask-feedback</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/other-ais</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/other-ais</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Information Pages -->
   <url>
-    <loc>https://new-worldgame.web.app/overview</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/overview</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/our-team</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/our-team</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/contact-us</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/contact-us</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/careers</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/careers</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/social-media</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/social-media</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/privacy</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/privacy</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/welcome</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/welcome</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/operating-manual</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/operating-manual</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Blog & Content Pages -->
   <url>
-    <loc>https://new-worldgame.web.app/blogs/features</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/features</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/nwg-steps</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/nwg-steps</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/tournament</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/tournament</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/state-of-world</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/state-of-world</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/solution-libraries</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/solution-libraries</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/ask-bucky</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/ask-bucky</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/facilitators</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/facilitators</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/sample-preferred-states</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/sample-preferred-states</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/instructions</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/instructions</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/nwg-ai</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/nwg-ai</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/global-statistical-tools</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/global-statistical-tools</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/custom-storyboard</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/custom-storyboard</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/nwg-solution-tour</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/nwg-solution-tour</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/new-features</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/new-features</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/blogs/worldgame-packet</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/blogs/worldgame-packet</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/nwg-news</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/nwg-news</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/archive-pictures</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/archive-pictures</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://new-worldgame.web.app/evaluators</loc>
-    <lastmod>2025-12-27</lastmod>
+    <loc>https://newworld-game.org/evaluators</loc>
+    <lastmod>2026-01-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
