@@ -460,7 +460,7 @@ IMPORTANT:
                 <tr>
                   <td>
                     <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;">NewWorld Game</p>
-                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Daily NewWorld Game Intelligence Brief</h1>
+                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Weekly NewWorld Game Intelligence Brief</h1>
                     <p style="margin:8px 0 0;font-size:13px;color:#9ca3af;">${currentDate}</p>
                   </td>
                 </tr>
@@ -480,7 +480,26 @@ IMPORTANT:
                 Dear ${userFirstName || 'Changemaker'},
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                We've curated personalized insights to help advance your work. Below you'll find funding opportunities aligned with your mission and recent developments in your field.
+                Welcome to this week's NewWorld Game Intelligence Brief—and thank you for being part of NewWorld Game.
+              </p>
+              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
+                You joined NWG to work on a global or local challenge you care deeply about. That commitment is exactly why this platform exists: to support people turning concern into informed, collaborative action.
+              </p>
+              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;font-weight:600;">
+                Here's a key update:
+              </p>
+              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
+                You now have a personal AI assistant working on your behalf. It continuously searches for recent developments related to your NewWorld Game work, including new research, emerging ideas, and potential funding opportunities. Each week, this Intelligence Brief will deliver the most relevant insights directly to you.
+              </p>
+              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
+                In future Briefs, you may also learn about what other NWG participants are working on, receive invitations to collaborate, and discover opportunities to expand your team around shared challenges.
+              </p>
+              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
+                We're excited to support your work and look forward to the solutions that emerge.
+              </p>
+              <p style="margin:24px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
+                With appreciation,<br>
+                <strong>The NewWorld Game Team</strong>
               </p>
             </td>
           </tr>
@@ -592,7 +611,7 @@ IMPORTANT:
 </html>`;
   return {
     html: emailHtml,
-    subject: `Daily NewWorld Game Intelligence Brief: ${solutionTitle}`,
+    subject: `Weekly NewWorld Game Intelligence Brief: ${solutionTitle}`,
     verifiedFunders: validFunders.length,
     verifiedNews: validNews.length,
   };
@@ -801,7 +820,7 @@ export const processAIInsightsBulkJob = functions
       }
     });
 
-    const subject = `Daily NewWorld Game Intelligence Brief (bulk)`;
+    const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
     await writeAIInsightsLog({
       mode: 'bulk',
       subject,
