@@ -840,62 +840,88 @@ export const processAIInsightsBulkJob = functions
 
     const failures: string[] = [];
     let successCount = 0;
+    let lastUpdateTime = Date.now();
 
-    // Use try/finally to ensure we always update status even on timeout
-    try {
-      await runWithConcurrency(recipients, concurrency, async (recipient) => {
-        const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
-        if (!userEmail || !solutionId || !solutionTitle) {
-          failures.push(
-            `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
-          );
-          return;
-        }
+    // Helper to update progress (throttled to every 5 seconds to reduce writes)
+    const updateProgress = async (force = false) => {
+      const now = Date.now();
+      if (!force && now - lastUpdateTime < 5000) return; // Throttle updates
+      lastUpdateTime = now;
 
-        try {
-          // URL validation is now parallel and fast
-          const { html, subject: emailSubject } = await buildAIInsightsEmail(
-            recipient as AIInsightsPayload
-          );
-          await sgMail.send({
-            to: userEmail,
-            from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
-            subject: emailSubject,
-            html,
-          });
-          successCount += 1;
-          console.log(`Bulk email sent to ${userEmail} (${successCount}/${recipients.length})`);
-        } catch (error: any) {
-          console.error(`Failed to send to ${userEmail}:`, error?.message);
-          failures.push(
-            `${userEmail}:${error?.message || 'failed to send'}`
-          );
-        }
-      });
-    } finally {
-      // Always update the log and job status, even if we're about to timeout
-      const finalStatus = successCount === recipients.length
-        ? 'completed'
-        : successCount > 0
-          ? 'completed_with_errors'
-          : 'failed';
+      const processed = successCount + failures.length;
+      const unsent = recipients.length - processed;
+      await Promise.all([
+        logRef.update({
+          successCount,
+          failureCount: failures.length,
+          failures: failures.slice(-50), // Keep last 50 failures
+          unsent,
+          status: 'processing',
+        }),
+        snap.ref.update({
+          successCount,
+          failureCount: failures.length,
+          processed,
+        }),
+      ]);
+    };
 
-      await logRef.update({
-        successCount,
-        failureCount: failures.length,
-        failures,
-        status: finalStatus,
-      });
+    await runWithConcurrency(recipients, concurrency, async (recipient) => {
+      const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
+      if (!userEmail || !solutionId || !solutionTitle) {
+        failures.push(
+          `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
+        );
+        await updateProgress();
+        return;
+      }
 
-      await snap.ref.update({
-        status: finalStatus,
-        total: recipients.length,
-        successCount,
-        failureCount: failures.length,
-        failures,
-        completedAt: admin.firestore.FieldValue.serverTimestamp(),
-      });
-    }
+      try {
+        // URL validation is now parallel and fast
+        const { html, subject: emailSubject } = await buildAIInsightsEmail(
+          recipient as AIInsightsPayload
+        );
+        await sgMail.send({
+          to: userEmail,
+          from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
+          subject: emailSubject,
+          html,
+        });
+        successCount += 1;
+        console.log(`Bulk email sent to ${userEmail} (${successCount}/${recipients.length})`);
+        await updateProgress();
+      } catch (error: any) {
+        console.error(`Failed to send to ${userEmail}:`, error?.message);
+        failures.push(
+          `${userEmail}:${error?.message || 'failed to send'}`
+        );
+        await updateProgress();
+      }
+    });
+
+    // Final update
+    const finalStatus = successCount === recipients.length
+      ? 'completed'
+      : successCount > 0
+        ? 'incomplete'
+        : 'failed';
+
+    await logRef.update({
+      successCount,
+      failureCount: failures.length,
+      failures,
+      status: finalStatus,
+      unsent: recipients.length - successCount - failures.length,
+    });
+
+    await snap.ref.update({
+      status: finalStatus,
+      total: recipients.length,
+      successCount,
+      failureCount: failures.length,
+      failures,
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
   });
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

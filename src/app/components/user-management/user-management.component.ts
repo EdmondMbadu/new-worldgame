@@ -62,10 +62,12 @@ export class UserManagementComponent implements OnInit {
   aiInsightsBulkSent = false;
   aiInsightsBulkError = '';
   aiInsightsBulkIncludeUnsubscribed = false;
+  aiInsightsBulkExcludeEmails = ''; // Paste emails to exclude (one per line or comma-separated)
   aiInsightsBulkStats = {
     totalParticipants: 0,
     noSolutions: 0,
     unsubscribed: 0,
+    excluded: 0,
     finalRecipients: 0,
   };
   aiInsightsSendLogs: Array<{
@@ -921,8 +923,19 @@ export class UserManagementComponent implements OnInit {
     return ordered[0];
   }
 
+  // Parse excluded emails from textarea (supports newlines, commas, spaces)
+  parseExcludedEmails(): Set<string> {
+    const raw = this.aiInsightsBulkExcludeEmails || '';
+    const emails = raw
+      .split(/[\n,;\s]+/)
+      .map(e => e.trim().toLowerCase())
+      .filter(e => e.includes('@'));
+    return new Set(emails);
+  }
+
   buildBulkAIInsightsList() {
     const map = this.solutionsByParticipant();
+    const excludeSet = this.parseExcludedEmails();
     const selections: Array<{
       email: string;
       name: string;
@@ -931,6 +944,7 @@ export class UserManagementComponent implements OnInit {
     }> = [];
     let noSolutions = 0;
     let unsubscribedSkipped = 0;
+    let excludedSkipped = 0;
 
     for (const [email, solutions] of map.entries()) {
       const picked = this.pickSolutionForEmail(
@@ -943,6 +957,10 @@ export class UserManagementComponent implements OnInit {
       }
       if (this.isUnsubscribed(email) && !this.aiInsightsBulkIncludeUnsubscribed) {
         unsubscribedSkipped += 1;
+        continue;
+      }
+      if (excludeSet.has(email.toLowerCase())) {
+        excludedSkipped += 1;
         continue;
       }
       const fromDir = this.userDirectory.get(email);
@@ -963,6 +981,7 @@ export class UserManagementComponent implements OnInit {
         totalParticipants: map.size,
         noSolutions,
         unsubscribed: unsubscribedSkipped,
+        excluded: excludedSkipped,
         finalRecipients: selections.length,
       };
   }
@@ -1052,51 +1071,31 @@ export class UserManagementComponent implements OnInit {
     this.fixStatusError = '';
 
     try {
-      // Try to find matching bulk job to get actual results (check all statuses)
-      const jobsSnapshot = await firstValueFrom(
-        this.afs.collection('ai_insights_bulk_jobs', ref =>
-          ref.where('createdBy', '==', log.createdBy)
-            .orderBy('createdAt', 'desc')
-            .limit(10)
-        ).get()
-      );
-
       const logRecipientCount = log.recipients?.length || log.total || 0;
+      const currentSuccess = log.successCount || 0;
+      const currentFailure = log.failureCount || 0;
+      const unsent = logRecipientCount - currentSuccess - currentFailure;
 
-      // Default: mark as incomplete with all emails unsent
-      let updateData: any = {
-        status: 'incomplete',
-        successCount: log.successCount || 0,
-        failureCount: log.failureCount || 0,
-        unsent: logRecipientCount - (log.successCount || 0) - (log.failureCount || 0),
-      };
-
-      // Try to match a job by recipient count and update with actual data
-      for (const doc of jobsSnapshot.docs) {
-        const job = doc.data() as any;
-        const jobRecipientCount = job.recipients?.length || job.total || 0;
-
-        if (jobRecipientCount === logRecipientCount) {
-          // Found matching job - use its data
-          const successCount = job.successCount || 0;
-          const failureCount = job.failureCount || 0;
-          const totalProcessed = successCount + failureCount;
-          const unsent = logRecipientCount - totalProcessed;
-
-          updateData = {
-            status: totalProcessed === 0 ? 'failed' :
-                    unsent > 0 ? 'incomplete' :
-                    failureCount > 0 ? 'completed_with_errors' : 'completed',
-            successCount,
-            failureCount: failureCount + unsent, // Count unsent as failures
-            failures: job.failures || [],
-            unsent: unsent > 0 ? unsent : 0,
-          };
-          break;
-        }
+      // Determine status based on what we know
+      let status = 'incomplete';
+      if (currentSuccess === logRecipientCount) {
+        status = 'completed';
+      } else if (currentSuccess === 0 && currentFailure === 0) {
+        status = 'failed'; // Nothing was processed
+      } else if (unsent === 0 && currentFailure > 0) {
+        status = 'completed_with_errors';
       }
 
+      const updateData: any = {
+        status,
+        successCount: currentSuccess,
+        failureCount: currentFailure,
+        unsent: unsent > 0 ? unsent : 0,
+      };
+
+      console.log('Fixing log status:', log.id, updateData);
       await this.afs.doc(`ai_insights_send_logs/${log.id}`).update(updateData);
+      console.log('Log status fixed successfully');
     } catch (error: any) {
       console.error('Failed to fix status:', error);
       this.fixStatusError = error?.message || 'Failed to update status';
@@ -1135,6 +1134,42 @@ export class UserManagementComponent implements OnInit {
   // Fix Status button states
   fixingStatusLogId: string | null = null;
   fixStatusError = '';
+  manualFixLogId: string | null = null;
+  manualSuccessCount: number = 0;
+
+  openManualFix(log: any) {
+    this.manualFixLogId = log.id;
+    this.manualSuccessCount = log.successCount || 0;
+  }
+
+  closeManualFix() {
+    this.manualFixLogId = null;
+    this.manualSuccessCount = 0;
+  }
+
+  async applyManualFix(log: any) {
+    if (!log?.id) return;
+
+    this.fixingStatusLogId = log.id;
+    try {
+      const logRecipientCount = log.recipients?.length || log.total || 0;
+      const successCount = this.manualSuccessCount;
+      const unsent = logRecipientCount - successCount;
+
+      await this.afs.doc(`ai_insights_send_logs/${log.id}`).update({
+        status: unsent > 0 ? 'incomplete' : 'completed',
+        successCount,
+        failureCount: 0,
+        unsent: unsent > 0 ? unsent : 0,
+      });
+      this.closeManualFix();
+    } catch (error: any) {
+      console.error('Failed to apply manual fix:', error);
+      this.fixStatusError = error?.message || 'Failed to update';
+    } finally {
+      this.fixingStatusLogId = null;
+    }
+  }
 
   async retryFailedEmails(log: any) {
     const unsent = this.getUnsentRecipients(log);
