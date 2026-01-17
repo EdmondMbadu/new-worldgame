@@ -516,9 +516,19 @@ IMPORTANT:
                 We're excited to support your work and look forward to the solutions that emerge.
               </p>
               <p style="margin:24px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                With appreciation,<br>
-                <strong>The NewWorld Game Team</strong>
+                With appreciation,
               </p>
+              <table cellpadding="0" cellspacing="0" role="presentation" style="margin-top:16px;">
+                <tr>
+                  <td style="vertical-align:top;padding-right:12px;">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2FNG73q08IBlW39QiC3CzwTGe6zVo2-medard-jpeg.jpeg?alt=media&token=111999e5-6382-4868-b6df-0db2d06ba419" alt="Medard Gabel" width="56" height="56" style="border-radius:50%;display:block;" />
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <p style="margin:0;font-size:16px;font-weight:600;color:#111827;">Medard Gabel</p>
+                    <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">EarthGame Inc Director, NewWorld Game Designer</p>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
