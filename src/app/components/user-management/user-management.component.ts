@@ -79,7 +79,8 @@ export class UserManagementComponent implements OnInit {
     failureCount: number;
     failures?: string[];
     sentAt?: any;
-    status?: 'processing' | 'completed' | 'completed_with_errors';
+    status?: 'processing' | 'completed' | 'completed_with_errors' | 'incomplete' | 'failed' | 'retried';
+    unsent?: number;
   }> = [];
 
   // Searchable dropdown state
@@ -1046,35 +1047,142 @@ export class UserManagementComponent implements OnInit {
 
   async markLogAsCompleted(log: any) {
     if (!log?.id) return;
-    // Try to find matching bulk job to get actual results
-    const jobsSnapshot = await firstValueFrom(
-      this.afs.collection('ai_insights_bulk_jobs', ref =>
-        ref.where('createdBy', '==', log.createdBy)
-          .where('status', 'in', ['completed', 'completed_with_errors'])
-          .orderBy('completedAt', 'desc')
-          .limit(5)
-      ).get()
+
+    this.fixingStatusLogId = log.id;
+    this.fixStatusError = '';
+
+    try {
+      // Try to find matching bulk job to get actual results (check all statuses)
+      const jobsSnapshot = await firstValueFrom(
+        this.afs.collection('ai_insights_bulk_jobs', ref =>
+          ref.where('createdBy', '==', log.createdBy)
+            .orderBy('createdAt', 'desc')
+            .limit(10)
+        ).get()
+      );
+
+      const logRecipientCount = log.recipients?.length || log.total || 0;
+
+      // Default: mark as incomplete with all emails unsent
+      let updateData: any = {
+        status: 'incomplete',
+        successCount: log.successCount || 0,
+        failureCount: log.failureCount || 0,
+        unsent: logRecipientCount - (log.successCount || 0) - (log.failureCount || 0),
+      };
+
+      // Try to match a job by recipient count and update with actual data
+      for (const doc of jobsSnapshot.docs) {
+        const job = doc.data() as any;
+        const jobRecipientCount = job.recipients?.length || job.total || 0;
+
+        if (jobRecipientCount === logRecipientCount) {
+          // Found matching job - use its data
+          const successCount = job.successCount || 0;
+          const failureCount = job.failureCount || 0;
+          const totalProcessed = successCount + failureCount;
+          const unsent = logRecipientCount - totalProcessed;
+
+          updateData = {
+            status: totalProcessed === 0 ? 'failed' :
+                    unsent > 0 ? 'incomplete' :
+                    failureCount > 0 ? 'completed_with_errors' : 'completed',
+            successCount,
+            failureCount: failureCount + unsent, // Count unsent as failures
+            failures: job.failures || [],
+            unsent: unsent > 0 ? unsent : 0,
+          };
+          break;
+        }
+      }
+
+      await this.afs.doc(`ai_insights_send_logs/${log.id}`).update(updateData);
+    } catch (error: any) {
+      console.error('Failed to fix status:', error);
+      this.fixStatusError = error?.message || 'Failed to update status';
+    } finally {
+      this.fixingStatusLogId = null;
+    }
+  }
+
+  // Get list of emails that need to be resent (failed + unsent)
+  getUnsentRecipients(log: any): any[] {
+    if (!log?.recipients?.length) return [];
+
+    const failedEmails = new Set(
+      (log.failures || []).map((f: string) => f.split(':')[0].toLowerCase())
     );
 
-    let updateData: any = {
-      status: 'completed',
-    };
+    // If we have success count, we can figure out which ones weren't sent
+    const successCount = log.successCount || 0;
+    const recipients = log.recipients || [];
 
-    // Try to match a job by recipient count and update with actual data
-    for (const doc of jobsSnapshot.docs) {
-      const job = doc.data() as any;
-      if (job.total === log.total || job.recipients?.length === log.recipients?.length) {
-        updateData = {
-          status: job.status || 'completed',
-          successCount: job.successCount ?? log.total,
-          failureCount: job.failureCount ?? 0,
-          failures: job.failures || [],
-        };
-        break;
-      }
+    // Return recipients that either failed or were never attempted
+    // Since we don't track which specific ones succeeded, we return all non-success
+    if (successCount === 0) {
+      return recipients; // All need to be resent
     }
 
-    await this.afs.doc(`ai_insights_send_logs/${log.id}`).update(updateData);
+    // If some succeeded, only return the ones that explicitly failed
+    return recipients.filter((r: any) =>
+      failedEmails.has((r.email || '').toLowerCase())
+    );
+  }
+
+  retryingSend = false;
+  retryError = '';
+
+  // Fix Status button states
+  fixingStatusLogId: string | null = null;
+  fixStatusError = '';
+
+  async retryFailedEmails(log: any) {
+    const unsent = this.getUnsentRecipients(log);
+    if (!unsent.length) {
+      this.retryError = 'No failed emails to retry';
+      return;
+    }
+
+    this.retryingSend = true;
+    this.retryError = '';
+
+    try {
+      // Build the payload for bulk send
+      const recipients = unsent.map((r: any) => {
+        // Find the full user data
+        const userData = this.usersWithInProgressSolutions.find(
+          u => u.user.email?.toLowerCase() === r.email?.toLowerCase()
+        );
+        const solution = this.everySolution.find(s => s.solutionId === r.solutionId);
+
+        return {
+          userEmail: r.email,
+          userFirstName: userData?.user?.firstName || r.email?.split('@')[0] || 'Changemaker',
+          solutionId: r.solutionId,
+          solutionTitle: r.solutionTitle,
+          solutionDescription: solution?.description || '',
+          solutionArea: solution?.solutionArea || '',
+          sdgs: solution?.sdgs || [],
+          meetLink: solution?.meetLink || '',
+          solutionImage: solution?.image || '',
+        };
+      });
+
+      const startBulkJob = this.fns.httpsCallable('startAIInsightsBulkJob');
+      await firstValueFrom(startBulkJob({ recipients, concurrency: 4 }));
+
+      // Mark the old log as retried
+      await this.afs.doc(`ai_insights_send_logs/${log.id}`).update({
+        status: 'retried',
+        retriedAt: new Date(),
+      });
+
+    } catch (error: any) {
+      console.error('Retry failed:', error);
+      this.retryError = error?.message || 'Failed to start retry job';
+    } finally {
+      this.retryingSend = false;
+    }
   }
 
   formatLogTimestamp(ts: any): string {
