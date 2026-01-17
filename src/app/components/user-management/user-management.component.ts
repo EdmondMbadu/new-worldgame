@@ -1036,6 +1036,47 @@ export class UserManagementComponent implements OnInit {
     this.afs.doc(`ai_insights_send_logs/${id}`).delete();
   }
 
+  isLogStale(log: any): boolean {
+    if (log.status !== 'processing') return false;
+    const sentAt = log.sentAt?.toDate?.() || (log.sentAt instanceof Date ? log.sentAt : new Date(log.sentAt || ''));
+    if (!sentAt || isNaN(sentAt.getTime())) return false;
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    return sentAt.getTime() < oneHourAgo;
+  }
+
+  async markLogAsCompleted(log: any) {
+    if (!log?.id) return;
+    // Try to find matching bulk job to get actual results
+    const jobsSnapshot = await firstValueFrom(
+      this.afs.collection('ai_insights_bulk_jobs', ref =>
+        ref.where('createdBy', '==', log.createdBy)
+          .where('status', 'in', ['completed', 'completed_with_errors'])
+          .orderBy('completedAt', 'desc')
+          .limit(5)
+      ).get()
+    );
+
+    let updateData: any = {
+      status: 'completed',
+    };
+
+    // Try to match a job by recipient count and update with actual data
+    for (const doc of jobsSnapshot.docs) {
+      const job = doc.data() as any;
+      if (job.total === log.total || job.recipients?.length === log.recipients?.length) {
+        updateData = {
+          status: job.status || 'completed',
+          successCount: job.successCount ?? log.total,
+          failureCount: job.failureCount ?? 0,
+          failures: job.failures || [],
+        };
+        break;
+      }
+    }
+
+    await this.afs.doc(`ai_insights_send_logs/${log.id}`).update(updateData);
+  }
+
   formatLogTimestamp(ts: any): string {
     const d =
       ts?.toDate?.() || (ts instanceof Date ? ts : new Date(ts || ''));

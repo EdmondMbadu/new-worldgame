@@ -337,36 +337,53 @@ IMPORTANT:
       }>;
   };
 
-  const isUrlReachable = async (url: string): Promise<boolean> => {
+  const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> => {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(url, {
-        method: 'GET',
+        method: 'HEAD', // HEAD is faster - only fetches headers
         redirect: 'follow',
         signal: controller.signal,
         headers: {
           'User-Agent':
             'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
-          Range: 'bytes=0-2048',
         },
       });
       clearTimeout(timeoutId);
+      // If HEAD fails with 405 (Method Not Allowed), try GET
+      if (response.status === 405) {
+        const controller2 = new AbortController();
+        const timeoutId2 = setTimeout(() => controller2.abort(), timeoutMs);
+        const getResponse = await fetch(url, {
+          method: 'GET',
+          redirect: 'follow',
+          signal: controller2.signal,
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+            Range: 'bytes=0-1024',
+          },
+        });
+        clearTimeout(timeoutId2);
+        return getResponse.status >= 200 && getResponse.status < 400;
+      }
       return response.status >= 200 && response.status < 400;
     } catch (error) {
-      console.warn('URL check failed:', url, error);
+      // Don't log every failure in bulk mode to reduce noise
       return false;
     }
   };
 
+  // Validate all URLs in parallel for speed
   const validateLinks = async <T extends { url: string }>(items: T[]) => {
-    const valid: T[] = [];
-    for (const item of items) {
-      if (await isUrlReachable(item.url)) {
-        valid.push(item);
-      }
-    }
-    return valid;
+    const results = await Promise.all(
+      items.map(async (item) => ({
+        item,
+        valid: await isUrlReachable(item.url),
+      }))
+    );
+    return results.filter((r) => r.valid).map((r) => r.item);
   };
 
   const formatFundersForEmail = (
@@ -415,6 +432,7 @@ IMPORTANT:
   const funderItems = parseFunders(fundersText);
   const newsItems = parseNews(newsText);
 
+  // Validate URLs in parallel for speed
   const validFunders = (await validateLinks(funderItems)).slice(0, 5);
   const validNews = (await validateLinks(newsItems)).slice(0, 5);
 
@@ -813,49 +831,61 @@ export const processAIInsightsBulkJob = functions
     const failures: string[] = [];
     let successCount = 0;
 
-    await runWithConcurrency(recipients, concurrency, async (recipient) => {
-      const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
-      if (!userEmail || !solutionId || !solutionTitle) {
-        failures.push(
-          `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
-        );
-        return;
-      }
+    // Use try/finally to ensure we always update status even on timeout
+    try {
+      await runWithConcurrency(recipients, concurrency, async (recipient) => {
+        const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
+        if (!userEmail || !solutionId || !solutionTitle) {
+          failures.push(
+            `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
+          );
+          return;
+        }
 
-      try {
-        const { html, subject: emailSubject } = await buildAIInsightsEmail(
-          recipient as AIInsightsPayload
-        );
-        await sgMail.send({
-          to: userEmail,
-          from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
-          subject: emailSubject,
-          html,
-        });
-        successCount += 1;
-      } catch (error: any) {
-        failures.push(
-          `${userEmail}:${error?.message || 'failed to send'}`
-        );
-      }
-    });
+        try {
+          // URL validation is now parallel and fast
+          const { html, subject: emailSubject } = await buildAIInsightsEmail(
+            recipient as AIInsightsPayload
+          );
+          await sgMail.send({
+            to: userEmail,
+            from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
+            subject: emailSubject,
+            html,
+          });
+          successCount += 1;
+          console.log(`Bulk email sent to ${userEmail} (${successCount}/${recipients.length})`);
+        } catch (error: any) {
+          console.error(`Failed to send to ${userEmail}:`, error?.message);
+          failures.push(
+            `${userEmail}:${error?.message || 'failed to send'}`
+          );
+        }
+      });
+    } finally {
+      // Always update the log and job status, even if we're about to timeout
+      const finalStatus = successCount === recipients.length
+        ? 'completed'
+        : successCount > 0
+          ? 'completed_with_errors'
+          : 'failed';
 
-    // Update the log entry with final results
-    await logRef.update({
-      successCount,
-      failureCount: failures.length,
-      failures,
-      status: failures.length ? 'completed_with_errors' : 'completed',
-    });
+      await logRef.update({
+        successCount,
+        failureCount: failures.length,
+        failures,
+        status: finalStatus,
+      });
 
-    await snap.ref.update({
-      status: failures.length ? 'completed_with_errors' : 'completed',
-      total: recipients.length,
-      successCount,
-      failureCount: failures.length,
-      failures,
-      completedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+      await snap.ref.update({
+        status: finalStatus,
+        total: recipients.length,
+        successCount,
+        failureCount: failures.length,
+        failures,
+        completedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
   });
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
