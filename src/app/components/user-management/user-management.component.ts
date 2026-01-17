@@ -1108,23 +1108,23 @@ export class UserManagementComponent implements OnInit {
   getUnsentRecipients(log: any): any[] {
     if (!log?.recipients?.length) return [];
 
-    const failedEmails = new Set(
-      (log.failures || []).map((f: string) => f.split(':')[0].toLowerCase())
-    );
-
-    // If we have success count, we can figure out which ones weren't sent
-    const successCount = log.successCount || 0;
     const recipients = log.recipients || [];
+    const successCount = log.successCount || 0;
 
-    // Return recipients that either failed or were never attempted
-    // Since we don't track which specific ones succeeded, we return all non-success
+    // If no emails succeeded, all need to be resent
     if (successCount === 0) {
-      return recipients; // All need to be resent
+      return recipients;
     }
 
-    // If some succeeded, only return the ones that explicitly failed
-    return recipients.filter((r: any) =>
-      failedEmails.has((r.email || '').toLowerCase())
+    // Use the successfulEmails array to find who still needs to receive the email
+    const successfulEmails = new Set(
+      (log.successfulEmails || []).map((e: string) => e.toLowerCase())
+    );
+
+    // Return recipients that are NOT in the successful list
+    // This includes both failed emails and emails that were never attempted (timeout)
+    return recipients.filter(
+      (r: any) => !successfulEmails.has((r.email || '').toLowerCase())
     );
   }
 

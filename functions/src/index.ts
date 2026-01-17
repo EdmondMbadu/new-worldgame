@@ -839,6 +839,7 @@ export const processAIInsightsBulkJob = functions
     });
 
     const failures: string[] = [];
+    const successfulEmails: string[] = []; // Track which emails succeeded
     let successCount = 0;
     let lastUpdateTime = Date.now();
 
@@ -855,6 +856,7 @@ export const processAIInsightsBulkJob = functions
           successCount,
           failureCount: failures.length,
           failures: failures.slice(-50), // Keep last 50 failures
+          successfulEmails: successfulEmails.slice(), // Track which emails succeeded
           unsent,
           status: 'processing',
         }),
@@ -888,6 +890,7 @@ export const processAIInsightsBulkJob = functions
           html,
         });
         successCount += 1;
+        successfulEmails.push(userEmail.toLowerCase()); // Track this email as sent
         console.log(`Bulk email sent to ${userEmail} (${successCount}/${recipients.length})`);
         await updateProgress();
       } catch (error: any) {
@@ -910,6 +913,7 @@ export const processAIInsightsBulkJob = functions
       successCount,
       failureCount: failures.length,
       failures,
+      successfulEmails, // Save all successful emails for retry logic
       status: finalStatus,
       unsent: recipients.length - successCount - failures.length,
     });
