@@ -208,14 +208,193 @@ type AIInsightsPayload = {
   solutionImage?: string;
 };
 
-const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
-  const { userEmail, userFirstName, solutionId, solutionTitle } = data;
+// Cache structure for AI-generated content per solution
+interface SolutionAIContentCache {
+  solutionId: string;
+  solutionTitle: string;
+  fundersHtml: string;
+  newsHtml: string;
+  validFundersCount: number;
+  validNewsCount: number;
+  generatedAt: admin.firestore.Timestamp;
+  weekKey: string; // e.g., "2024-W03" to invalidate weekly
+}
+
+// Get current week key for cache invalidation (content refreshes weekly)
+const getCurrentWeekKey = (): string => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
+  const weekNum = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+  return `${now.getFullYear()}-W${weekNum.toString().padStart(2, '0')}`;
+};
+
+// Helper functions extracted for reuse
+const cleanUrlFromLine = (line: string): string => {
+  const match = line.match(/https?:\/\/[^\s<>"')]+/);
+  if (!match) return '';
+  return match[0].replace(/[)\].,]+$/, '');
+};
+
+const parseFunders = (text: string) => {
+  const blocks = text.split(/\n\n+/).filter(b => b.trim());
+  return blocks
+    .map(block => {
+      const lines = block.split('\n').filter(l => l.trim());
+      if (lines.length === 0) return null;
+      const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
+      const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
+      const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
+      const cleanUrl = cleanUrlFromLine(url);
+      if (!name || !cleanUrl) return null;
+      return { name, desc, url: cleanUrl };
+    })
+    .filter(Boolean) as Array<{ name: string; desc: string; url: string }>;
+};
+
+const parseNews = (text: string) => {
+  const blocks = text.split(/\n\n+/).filter(b => b.trim());
+  return blocks
+    .map(block => {
+      const lines = block.split('\n').filter(l => l.trim());
+      if (lines.length === 0) return null;
+      const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
+      const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
+      const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
+      const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
+      const articleUrl = cleanUrlFromLine(urlLine);
+      if (!headline || !articleUrl) return null;
+      return { headline, source, relevance, url: articleUrl };
+    })
+    .filter(Boolean) as Array<{
+      headline: string;
+      source: string;
+      relevance: string;
+      url: string;
+    }>;
+};
+
+const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+      },
+    });
+    clearTimeout(timeoutId);
+    if (response.status === 405) {
+      const controller2 = new AbortController();
+      const timeoutId2 = setTimeout(() => controller2.abort(), timeoutMs);
+      const getResponse = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller2.signal,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+          Range: 'bytes=0-1024',
+        },
+      });
+      clearTimeout(timeoutId2);
+      return getResponse.status >= 200 && getResponse.status < 400;
+    }
+    return response.status >= 200 && response.status < 400;
+  } catch (error) {
+    return false;
+  }
+};
+
+const validateLinks = async <T extends { url: string }>(items: T[]) => {
+  const results = await Promise.all(
+    items.map(async (item) => ({
+      item,
+      valid: await isUrlReachable(item.url),
+    }))
+  );
+  return results.filter((r) => r.valid).map((r) => r.item);
+};
+
+const formatFundersForEmail = (
+  items: Array<{ name: string; desc: string; url: string }>
+): string => {
+  return items
+    .map(item => {
+      const displayHost = item.url
+        .replace(/^https?:\/\//, '')
+        .split('/')[0];
+      return `
+          <tr>
+            <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
+              <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${item.name}</p>
+              <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5;">${item.desc}</p>
+              <a href="${item.url}" style="font-size:13px;color:#2563eb;text-decoration:none;">${displayHost} →</a>
+            </td>
+          </tr>`;
+    })
+    .join('');
+};
+
+const formatNewsForEmail = (
+  items: Array<{
+    headline: string;
+    source: string;
+    relevance: string;
+    url: string;
+  }>
+): string => {
+  return items
+    .map(item => {
+      return `
+          <tr>
+            <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
+              <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${item.headline}</p>
+              <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${item.source}</p>
+              ${item.relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${item.relevance}</p>` : ''}
+              <a href="${item.url}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>
+            </td>
+          </tr>`;
+    })
+    .join('');
+};
+
+// Generate AI content for a solution (with caching)
+const generateSolutionAIContent = async (
+  solutionId: string,
+  solutionTitle: string,
+  solutionDescription?: string,
+  solutionArea?: string,
+  sdgs?: string[]
+): Promise<{ fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }> => {
+  const weekKey = getCurrentWeekKey();
+  const cacheRef = admin.firestore().collection('ai_insights_content_cache').doc(`${solutionId}_${weekKey}`);
+
+  // Check cache first
+  const cacheDoc = await cacheRef.get();
+  if (cacheDoc.exists) {
+    const cached = cacheDoc.data() as SolutionAIContentCache;
+    console.log(`Using cached AI content for solution ${solutionId} (week ${weekKey})`);
+    return {
+      fundersHtml: cached.fundersHtml,
+      newsHtml: cached.newsHtml,
+      validFundersCount: cached.validFundersCount,
+      validNewsCount: cached.validNewsCount,
+    };
+  }
+
+  console.log(`Generating new AI content for solution ${solutionId}`);
+
   // Build context for AI prompts
   const solutionContext = [
     `Solution Title: "${solutionTitle}"`,
-    data.solutionDescription ? `Description: ${data.solutionDescription}` : '',
-    data.solutionArea ? `Focus Area: ${data.solutionArea}` : '',
-    data.sdgs?.length ? `Related SDGs: ${data.sdgs.join(', ')}` : '',
+    solutionDescription ? `Description: ${solutionDescription}` : '',
+    solutionArea ? `Focus Area: ${solutionArea}` : '',
+    sdgs?.length ? `Related SDGs: ${sdgs.join(', ')}` : '',
   ]
     .filter(Boolean)
     .join('\n');
@@ -227,7 +406,7 @@ const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
     tools: [{ google_search: {} }],
   } as any);
 
-  // Generate funders insights
+  // Generate funders and news prompts
   const fundersPrompt = `You are a research assistant helping social entrepreneurs find funding.
 
 Based on this project:
@@ -284,155 +463,11 @@ IMPORTANT:
     newsResult.response?.text() ||
     'Unable to generate news insights at this time.';
 
-  console.log('AI Insights generated successfully');
-
-  // Build email links
-  const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
-  const meetLink =
-    data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
-  const solutionImage = data.solutionImage || '';
-
-  // Format and validate links before rendering
-  const cleanUrlFromLine = (line: string): string => {
-    const match = line.match(/https?:\/\/[^\s<>"')]+/);
-    if (!match) return '';
-    return match[0].replace(/[)\].,]+$/, '');
-  };
-
-  const parseFunders = (text: string) => {
-    const blocks = text.split(/\n\n+/).filter(b => b.trim());
-    return blocks
-      .map(block => {
-        const lines = block.split('\n').filter(l => l.trim());
-        if (lines.length === 0) return null;
-        const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
-        const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
-        const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
-        const cleanUrl = cleanUrlFromLine(url);
-        if (!name || !cleanUrl) return null;
-        return { name, desc, url: cleanUrl };
-      })
-      .filter(Boolean) as Array<{ name: string; desc: string; url: string }>;
-  };
-
-  const parseNews = (text: string) => {
-    const blocks = text.split(/\n\n+/).filter(b => b.trim());
-    return blocks
-      .map(block => {
-        const lines = block.split('\n').filter(l => l.trim());
-        if (lines.length === 0) return null;
-        const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
-        const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
-        const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
-        const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
-        const articleUrl = cleanUrlFromLine(urlLine);
-        if (!headline || !articleUrl) return null;
-        return { headline, source, relevance, url: articleUrl };
-      })
-      .filter(Boolean) as Array<{
-        headline: string;
-        source: string;
-        relevance: string;
-        url: string;
-      }>;
-  };
-
-  const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> => {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-      const response = await fetch(url, {
-        method: 'HEAD', // HEAD is faster - only fetches headers
-        redirect: 'follow',
-        signal: controller.signal,
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
-        },
-      });
-      clearTimeout(timeoutId);
-      // If HEAD fails with 405 (Method Not Allowed), try GET
-      if (response.status === 405) {
-        const controller2 = new AbortController();
-        const timeoutId2 = setTimeout(() => controller2.abort(), timeoutMs);
-        const getResponse = await fetch(url, {
-          method: 'GET',
-          redirect: 'follow',
-          signal: controller2.signal,
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
-            Range: 'bytes=0-1024',
-          },
-        });
-        clearTimeout(timeoutId2);
-        return getResponse.status >= 200 && getResponse.status < 400;
-      }
-      return response.status >= 200 && response.status < 400;
-    } catch (error) {
-      // Don't log every failure in bulk mode to reduce noise
-      return false;
-    }
-  };
-
-  // Validate all URLs in parallel for speed
-  const validateLinks = async <T extends { url: string }>(items: T[]) => {
-    const results = await Promise.all(
-      items.map(async (item) => ({
-        item,
-        valid: await isUrlReachable(item.url),
-      }))
-    );
-    return results.filter((r) => r.valid).map((r) => r.item);
-  };
-
-  const formatFundersForEmail = (
-    items: Array<{ name: string; desc: string; url: string }>
-  ): string => {
-    return items
-      .map(item => {
-        const displayHost = item.url
-          .replace(/^https?:\/\//, '')
-          .split('/')[0];
-        return `
-            <tr>
-              <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-                <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${item.name}</p>
-                <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5;">${item.desc}</p>
-                <a href="${item.url}" style="font-size:13px;color:#2563eb;text-decoration:none;">${displayHost} →</a>
-              </td>
-            </tr>`;
-      })
-      .join('');
-  };
-
-  const formatNewsForEmail = (
-    items: Array<{
-      headline: string;
-      source: string;
-      relevance: string;
-      url: string;
-    }>
-  ): string => {
-    return items
-      .map(item => {
-        return `
-            <tr>
-              <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-                <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${item.headline}</p>
-                <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${item.source}</p>
-                ${item.relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${item.relevance}</p>` : ''}
-                <a href="${item.url}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>
-              </td>
-            </tr>`;
-      })
-      .join('');
-  };
-
+  // Parse and validate
   const funderItems = parseFunders(fundersText);
   const newsItems = parseNews(newsText);
 
-  // Validate URLs in parallel for speed
+  // Validate URLs in parallel
   const validFunders = (await validateLinks(funderItems)).slice(0, 5);
   const validNews = (await validateLinks(newsItems)).slice(0, 5);
 
@@ -444,7 +479,40 @@ IMPORTANT:
     ? formatNewsForEmail(validNews)
     : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified news links available today.</p></td></tr>`;
 
-  // Get current date formatted
+  // Cache the result
+  await cacheRef.set({
+    solutionId,
+    solutionTitle,
+    fundersHtml,
+    newsHtml,
+    validFundersCount: validFunders.length,
+    validNewsCount: validNews.length,
+    generatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    weekKey,
+  });
+
+  console.log(`Cached AI content for solution ${solutionId} (${validFunders.length} funders, ${validNews.length} news)`);
+
+  return {
+    fundersHtml,
+    newsHtml,
+    validFundersCount: validFunders.length,
+    validNewsCount: validNews.length,
+  };
+};
+
+// Build email HTML using cached content (fast - no AI calls)
+const buildAIInsightsEmailFromCache = (
+  data: AIInsightsPayload,
+  cachedContent: { fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }
+): { html: string; subject: string; verifiedFunders: number; verifiedNews: number } => {
+  const { userEmail, userFirstName, solutionId, solutionTitle } = data;
+  const { fundersHtml, newsHtml, validFundersCount, validNewsCount } = cachedContent;
+
+  const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
+  const meetLink = data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
+  const solutionImage = data.solutionImage || '';
+
   const currentDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -456,7 +524,6 @@ IMPORTANT:
     (userEmail || '').toLowerCase()
   )}`;
 
-  // Build the premium NYT-style email HTML
   const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -637,12 +704,28 @@ IMPORTANT:
   </table>
 </body>
 </html>`;
+
   return {
     html: emailHtml,
     subject: `Weekly NewWorld Game Intelligence Brief: ${solutionTitle}`,
-    verifiedFunders: validFunders.length,
-    verifiedNews: validNews.length,
+    verifiedFunders: validFundersCount,
+    verifiedNews: validNewsCount,
   };
+};
+
+// Wrapper function that uses caching - maintains same interface for backward compatibility
+const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
+  // Generate or get cached AI content for this solution
+  const cachedContent = await generateSolutionAIContent(
+    data.solutionId,
+    data.solutionTitle,
+    data.solutionDescription,
+    data.solutionArea,
+    data.sdgs
+  );
+
+  // Build the email HTML using cached content
+  return buildAIInsightsEmailFromCache(data, cachedContent);
 };
 
 const writeAIInsightsLog = async (entry: {
@@ -868,6 +951,41 @@ export const processAIInsightsBulkJob = functions
       ]);
     };
 
+    // ===== PHASE 1: Pre-generate AI content for unique solutions =====
+    // This dramatically reduces Gemini API calls (e.g., 100 recipients with 30 unique solutions = 30 calls instead of 100)
+    const uniqueSolutions = new Map<string, AIInsightsPayload>();
+    for (const r of recipients) {
+      const payload = r as AIInsightsPayload;
+      if (payload.solutionId && !uniqueSolutions.has(payload.solutionId)) {
+        uniqueSolutions.set(payload.solutionId, payload);
+      }
+    }
+
+    console.log(`Pre-generating AI content for ${uniqueSolutions.size} unique solutions (${recipients.length} total recipients)`);
+
+    // Pre-generate content for all unique solutions with concurrency
+    // This populates the cache so the email sending phase is fast
+    const contentCache = new Map<string, { fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }>();
+    await runWithConcurrency(Array.from(uniqueSolutions.values()), concurrency, async (solution) => {
+      try {
+        const content = await generateSolutionAIContent(
+          solution.solutionId,
+          solution.solutionTitle,
+          solution.solutionDescription,
+          solution.solutionArea,
+          solution.sdgs
+        );
+        contentCache.set(solution.solutionId, content);
+        console.log(`Generated content for solution: ${solution.solutionTitle}`);
+      } catch (error: any) {
+        console.error(`Failed to generate content for solution ${solution.solutionId}:`, error?.message);
+        // Continue - we'll try again during email sending if needed
+      }
+    });
+
+    console.log(`Content generation complete. Cached ${contentCache.size}/${uniqueSolutions.size} solutions. Now sending emails...`);
+
+    // ===== PHASE 2: Send emails using cached content (fast) =====
     await runWithConcurrency(recipients, concurrency, async (recipient) => {
       const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
       if (!userEmail || !solutionId || !solutionTitle) {
@@ -879,9 +997,22 @@ export const processAIInsightsBulkJob = functions
       }
 
       try {
-        // URL validation is now parallel and fast
-        const { html, subject: emailSubject } = await buildAIInsightsEmail(
-          recipient as AIInsightsPayload
+        // Use pre-generated cached content (fast path)
+        let cachedContent = contentCache.get(solutionId);
+        if (!cachedContent) {
+          // Fallback: generate if not in local cache (will check Firestore cache)
+          cachedContent = await generateSolutionAIContent(
+            solutionId,
+            solutionTitle,
+            (recipient as AIInsightsPayload).solutionDescription,
+            (recipient as AIInsightsPayload).solutionArea,
+            (recipient as AIInsightsPayload).sdgs
+          );
+        }
+
+        const { html, subject: emailSubject } = buildAIInsightsEmailFromCache(
+          recipient as AIInsightsPayload,
+          cachedContent
         );
         await sgMail.send({
           to: userEmail,
