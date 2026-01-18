@@ -217,16 +217,16 @@ interface SolutionAIContentCache {
   validFundersCount: number;
   validNewsCount: number;
   generatedAt: admin.firestore.Timestamp;
-  weekKey: string; // e.g., "2024-W03" to invalidate weekly
+  periodKey: string; // e.g., "P12345" - 5-day period key for cache invalidation
 }
 
-// Get current week key for cache invalidation (content refreshes weekly)
-const getCurrentWeekKey = (): string => {
+// Get cache key based on 5-day periods (ensures weekly sends always get fresh content)
+const getCurrentPeriodKey = (): string => {
   const now = new Date();
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const days = Math.floor((now.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000));
-  const weekNum = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-  return `${now.getFullYear()}-W${weekNum.toString().padStart(2, '0')}`;
+  // Use epoch time divided by 5 days to create 5-day periods
+  const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
+  const periodNum = Math.floor(now.getTime() / fiveDaysMs);
+  return `P${periodNum}`;
 };
 
 // Helper functions extracted for reuse
@@ -371,14 +371,14 @@ const generateSolutionAIContent = async (
   solutionArea?: string,
   sdgs?: string[]
 ): Promise<{ fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }> => {
-  const weekKey = getCurrentWeekKey();
-  const cacheRef = admin.firestore().collection('ai_insights_content_cache').doc(`${solutionId}_${weekKey}`);
+  const periodKey = getCurrentPeriodKey();
+  const cacheRef = admin.firestore().collection('ai_insights_content_cache').doc(`${solutionId}_${periodKey}`);
 
   // Check cache first
   const cacheDoc = await cacheRef.get();
   if (cacheDoc.exists) {
     const cached = cacheDoc.data() as SolutionAIContentCache;
-    console.log(`Using cached AI content for solution ${solutionId} (week ${weekKey})`);
+    console.log(`Using cached AI content for solution ${solutionId} (period ${periodKey})`);
     return {
       fundersHtml: cached.fundersHtml,
       newsHtml: cached.newsHtml,
@@ -488,7 +488,7 @@ IMPORTANT:
     validFundersCount: validFunders.length,
     validNewsCount: validNews.length,
     generatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    weekKey,
+    periodKey,
   });
 
   console.log(`Cached AI content for solution ${solutionId} (${validFunders.length} funders, ${validNews.length} news)`);
