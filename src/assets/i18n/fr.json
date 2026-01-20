@@ -1006,7 +1006,13 @@
     "strategyReview": {
       "referenceSteps": "Référence (Étapes 1–4)",
       "currentDraft": "Brouillon actuel",
-      "refreshFromSteps": "Actualiser depuis les étapes 1–4"
+      "refreshFromSteps": "Actualiser depuis les étapes 1–4",
+      "refreshModal": {
+        "title": "Actualiser depuis les étapes 1–4 ?",
+        "body": "Cela remplacera votre brouillon actuel par un résumé des étapes 1–4. Toutes les modifications du brouillon seront perdues.",
+        "cancel": "Annuler",
+        "proceed": "Continuer"
+      }
     }
   },
   "ourTeamPage": {

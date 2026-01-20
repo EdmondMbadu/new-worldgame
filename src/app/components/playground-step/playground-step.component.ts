@@ -115,6 +115,7 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
 
   defaultBgColor: string = 'bg-teal-100';
   strategyBgColor: string = 'bg-teal-100';
+  showRefreshStrategyReviewModal = false;
   constructor(
     private router: Router,
     private solution: SolutionService,
@@ -772,6 +773,22 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       .catch((error) => {
         console.error('Error refreshing from steps 1-4', error);
       });
+  }
+
+  openRefreshStrategyReviewModal() {
+    if (!this.isStrategyReviewStep) {
+      return;
+    }
+    this.showRefreshStrategyReviewModal = true;
+  }
+
+  cancelRefreshStrategyReview() {
+    this.showRefreshStrategyReviewModal = false;
+  }
+
+  confirmRefreshStrategyReview() {
+    this.showRefreshStrategyReviewModal = false;
+    this.refreshStrategyReviewFromSteps();
   }
 
   private buildStrategySummary(): string {

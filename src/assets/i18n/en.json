@@ -1257,7 +1257,13 @@
     "strategyReview": {
       "referenceSteps": "Reference (Steps 1–4)",
       "currentDraft": "Current Draft",
-      "refreshFromSteps": "Refresh from Steps 1–4"
+      "refreshFromSteps": "Refresh from Steps 1–4",
+      "refreshModal": {
+        "title": "Refresh from Steps 1–4?",
+        "body": "This will replace your current draft with a Step 1–4 summary. Any edits in the draft will be lost.",
+        "cancel": "Cancel",
+        "proceed": "Proceed"
+      }
     }
   },
   "ourTeamPage": {

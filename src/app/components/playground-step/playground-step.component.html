@@ -115,9 +115,36 @@
                     </span>
                 </button>
             </div>
-            <button type="button" (click)="refreshStrategyReviewFromSteps()" class="text-sm font-semibold text-teal-700 dark:text-teal-200 border border-teal-500 rounded-full px-4 py-2 hover:bg-teal-600 hover:text-white transition">
+            <button type="button" (click)="openRefreshStrategyReviewModal()" class="text-sm font-semibold text-teal-700 dark:text-teal-200 border border-teal-500 rounded-full px-4 py-2 hover:bg-teal-600 hover:text-white transition">
                 {{ 'playgroundSteps.strategyReview.refreshFromSteps' | translate }}
             </button>
+            <div *ngIf="showRefreshStrategyReviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4">
+                <div class="w-full max-w-md rounded-2xl border border-red-200 bg-white p-6 shadow-2xl dark:border-red-900/60 dark:bg-slate-900">
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.19 14.18A2 2 0 003.82 21h16.36a2 2 0 001.72-2.96L13.71 3.86a2 2 0 00-3.42 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+                                {{ 'playgroundSteps.strategyReview.refreshModal.title' | translate }}
+                            </h3>
+                            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                                {{ 'playgroundSteps.strategyReview.refreshModal.body' | translate }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                        <button type="button" (click)="cancelRefreshStrategyReview()" class="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800">
+                            {{ 'playgroundSteps.strategyReview.refreshModal.cancel' | translate }}
+                        </button>
+                        <button type="button" (click)="confirmRefreshStrategyReview()" class="inline-flex items-center justify-center rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-red-600/30 transition hover:bg-red-500">
+                            {{ 'playgroundSteps.strategyReview.refreshModal.proceed' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
