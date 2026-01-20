@@ -1004,7 +1004,21 @@
       "downloadSolution": "Télécharger la solution et le retour IA",
       "downloadDraft": "Télécharger le brouillon actuel",
       "downloadDraftPdf": "PDF",
-      "downloadDraftDocx": "Word (.docx)"
+      "downloadDraftDocx": "Word (.docx)",
+      "generateReport": "Générer un rapport",
+      "generateReportHint": "Créez un rapport structuré à partir de votre brouillon en un clic.",
+      "generateReportButton": "Générer",
+      "downloadReportPdf": "PDF",
+      "downloadReportDocx": "Word (.docx)",
+      "reportReady": "Rapport prêt",
+      "reportModal": {
+        "badge": "Générateur de rapports IA",
+        "title": "Générer un rapport",
+        "subtitle": "Choisissez un type de rapport et ajustez l’instruction si besoin. L’IA utilisera votre brouillon et vos réponses.",
+        "instructionLabel": "Instruction IA",
+        "cancel": "Annuler",
+        "generate": "L’IA réfléchit & génère le rapport"
+      }
     },
     "strategyReview": {
       "referenceSteps": "Référence (Étapes 1–4)",

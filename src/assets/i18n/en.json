@@ -1255,7 +1255,21 @@
       "downloadSolution": "Download Solution & AI Feedback",
       "downloadDraft": "Download Current Draft",
       "downloadDraftPdf": "PDF",
-      "downloadDraftDocx": "Word (.docx)"
+      "downloadDraftDocx": "Word (.docx)",
+      "generateReport": "Generate Report",
+      "generateReportHint": "Create a structured report from your draft in one click.",
+      "generateReportButton": "Generate",
+      "downloadReportPdf": "PDF",
+      "downloadReportDocx": "Word (.docx)",
+      "reportReady": "Report Ready",
+      "reportModal": {
+        "badge": "AI Report Builder",
+        "title": "Generate a Report",
+        "subtitle": "Choose a report type and edit the instruction if needed. The AI will use your draft and step answers.",
+        "instructionLabel": "AI Instruction",
+        "cancel": "Cancel",
+        "generate": "AI Thinks & Generate Report"
+      }
     },
     "strategyReview": {
       "referenceSteps": "Reference (Steps 1–4)",

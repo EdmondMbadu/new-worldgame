@@ -50,6 +50,18 @@ interface AiEvaluatorOption {
   collectionKey: string;
 }
 
+interface ReportType {
+  id: string;
+  title: string;
+  instruction: string;
+  group: string;
+}
+
+interface ReportGroup {
+  id: string;
+  label: string;
+}
+
 interface SavedAiFeedback {
   evaluatorName: string;
   evaluatorKey: string;
@@ -240,6 +252,22 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   currentDraftHtml = '';
   currentDraftText = '';
   private aiFeedbackDocSub?: Subscription;
+  reportLoading = false;
+  reportStatus = '';
+  reportError = '';
+  reportText = '';
+  reportFormatted = '';
+  showReportModal = false;
+  reportInstruction = '';
+  selectedReportTypeId = 'solution-overview';
+  private reportDocSub?: Subscription;
+  reportGroupState: Record<string, boolean> = {
+    understanding: true,
+    design: false,
+    execution: false,
+    funding: false,
+    growth: false,
+  };
 
   // AI Evaluator selection
   aiEvaluatorOptions: AiEvaluatorOption[] = [
@@ -323,10 +351,92 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     });
     this.initializeLanguageSupport();
   }
+
+  reportGroups: ReportGroup[] = [
+    { id: 'understanding', label: 'Understanding' },
+    { id: 'design', label: 'Design' },
+    { id: 'execution', label: 'Execution' },
+    { id: 'funding', label: 'Funding' },
+    { id: 'growth', label: 'Growth' },
+  ];
+
+  reportTypes: ReportType[] = [
+    {
+      id: 'solution-overview',
+      title: 'Solution Overview Report',
+      group: 'understanding',
+      instruction:
+        'Generate a clear, concise explanation of the problem, the proposed solution, who it serves, and why it matters, using non-technical language suitable for a general audience.',
+    },
+    {
+      id: 'problem-impact-analysis',
+      title: 'Problem & Impact Analysis Report',
+      group: 'understanding',
+      instruction:
+        'Analyze the root causes of the problem, its scale and severity, the populations affected, and the social, economic, or environmental consequences if the problem remains unsolved.',
+    },
+    {
+      id: 'solution-innovation',
+      title: 'Solution & Innovation Report',
+      group: 'design',
+      instruction:
+        'Describe how the proposed solution works, what makes it different from existing approaches, and highlight the innovative aspects in terms of design, technology, or process.',
+    },
+    {
+      id: 'stakeholders-beneficiaries',
+      title: 'Stakeholders & Beneficiaries Report',
+      group: 'design',
+      instruction:
+        'Identify all key stakeholders and beneficiaries, describe their roles, interests, and interactions, and explain how each group is impacted by or contributes to the solution.',
+    },
+    {
+      id: 'feasibility-implementation',
+      title: 'Feasibility & Implementation Report',
+      group: 'execution',
+      instruction:
+        'Evaluate the practical feasibility of the solution by outlining implementation steps, required resources, technical and operational needs, timelines, and key assumptions.',
+    },
+    {
+      id: 'risks-constraints',
+      title: 'Risks & Constraints Report',
+      group: 'execution',
+      instruction:
+        'Identify potential technical, financial, social, regulatory, or operational risks and constraints, and propose realistic mitigation strategies for each.',
+    },
+    {
+      id: 'funding-readiness',
+      title: 'Funding Readiness Report',
+      group: 'funding',
+      instruction:
+        'Estimate funding needs, break down costs by phase, explain how funds will be used, and link financial inputs to expected outcomes and milestones.',
+    },
+    {
+      id: 'executive-summary',
+      title: 'Executive Summary Report (1-Page)',
+      group: 'funding',
+      instruction:
+        'Produce a concise, high-level summary of the problem, solution, impact, and funding needs, optimized for quick review by decision-makers.',
+    },
+    {
+      id: 'impact-measurement',
+      title: 'Impact Measurement Report',
+      group: 'growth',
+      instruction:
+        'Define measurable impact indicators, explain how outcomes will be tracked and evaluated, and distinguish between short-term outputs and long-term impact.',
+    },
+    {
+      id: 'scaling-replication',
+      title: 'Scaling & Replication Report',
+      group: 'growth',
+      instruction:
+        'Assess the potential for scaling or replicating the solution, including geographic expansion, adaptation to new contexts, and requirements for sustainable growth.',
+    },
+  ];
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.display = new Array(this.steps.length).fill(false);
     this.display[this.currentIndexDisplay] = true;
+    this.reportInstruction = this.getSelectedReportType()?.instruction || '';
     
     // Subscribe to chatbot insert requests
     this.insertRequestSub = this.chatContext.insertRequest$.subscribe({
@@ -1323,9 +1433,135 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.triggerDownload(blob, this.buildDraftFileName('docx'));
   }
 
+  openReportModal() {
+    this.showReportModal = true;
+    const selected = this.getSelectedReportType();
+    if (selected && !this.reportInstruction) {
+      this.reportInstruction = selected.instruction;
+    }
+  }
+
+  closeReportModal() {
+    this.showReportModal = false;
+  }
+
+  selectReportType(report: ReportType) {
+    this.selectedReportTypeId = report.id;
+    this.reportInstruction = report.instruction;
+  }
+
+  getReportsByGroup(groupId: string): ReportType[] {
+    return this.reportTypes.filter((type) => type.group === groupId);
+  }
+
+  toggleReportGroup(groupId: string) {
+    this.reportGroupState[groupId] = !this.reportGroupState[groupId];
+  }
+
+  getSelectedReportType(): ReportType | undefined {
+    return this.reportTypes.find((type) => type.id === this.selectedReportTypeId);
+  }
+
+  async generateReport() {
+    if (!this.auth.currentUser?.uid) {
+      this.reportError = 'Please sign in to generate a report.';
+      return;
+    }
+
+    const prompt = this.buildReportPrompt();
+    if (!prompt) {
+      this.reportError = 'We need more solution details before we can generate a report.';
+      return;
+    }
+
+    this.resetReportState();
+    this.reportLoading = true;
+    const reportType = this.getSelectedReportType();
+    this.reportStatus = reportType
+      ? `Generating ${reportType.title}...`
+      : 'Generating report...';
+
+    const docId = this.afs.createId();
+    const collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAiEvaluator.collectionKey}/${docId}`;
+    const docRef: AngularFirestoreDocument<any> = this.afs.doc(collectionPath);
+
+    this.reportDocSub?.unsubscribe();
+    this.reportDocSub = docRef.valueChanges().subscribe((snapshot) => {
+      if (!snapshot?.status) {
+        return;
+      }
+
+      const state = snapshot.status.state;
+      if (state === 'PROCESSING') {
+        this.reportStatus = 'AI is writing your report...';
+      } else if (state === 'COMPLETED') {
+        this.reportLoading = false;
+        this.reportStatus = '';
+        this.reportText = snapshot.response ?? '';
+        this.reportFormatted = this.formatAiFeedback(this.reportText);
+        this.reportDocSub?.unsubscribe();
+      } else if (state === 'ERRORED') {
+        this.reportLoading = false;
+        this.reportStatus = '';
+        this.reportError =
+          snapshot.status?.message ||
+          'We could not generate the report. Please try again in a moment.';
+        this.reportDocSub?.unsubscribe();
+      }
+    });
+
+    try {
+      await docRef.set({ prompt });
+      this.showReportModal = false;
+    } catch (error) {
+      console.error('Report generation request failed', error);
+      this.reportLoading = false;
+      this.reportStatus = '';
+      this.reportError = 'Unable to reach the AI right now. Please retry.';
+      this.reportDocSub?.unsubscribe();
+    }
+  }
+
+  downloadReportPdf() {
+    if (!this.reportText) {
+      return;
+    }
+    const title = this.getSelectedReportType()?.title || 'Report';
+    this.downloadTextPdf(this.reportText, title, this.buildReportFileName('pdf'));
+  }
+
+  async downloadReportDocx() {
+    if (!this.reportText) {
+      return;
+    }
+
+    const title = this.getSelectedReportType()?.title || 'Report';
+    const paragraphs = this.reportText
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => new Paragraph(line));
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+            ...paragraphs,
+          ],
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    this.triggerDownload(blob, this.buildReportFileName('docx'));
+  }
+
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
+    this.reportDocSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     // Clear chat context when leaving the playground
@@ -1376,6 +1612,12 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     this.aiFeedbackError = '';
     this.aiFeedbackParsed = { scores: [], improvements: [] };
     this.aiFeedbackFormatted = '';
+  }
+
+  private resetReportState() {
+    this.reportError = '';
+    this.reportText = '';
+    this.reportFormatted = '';
   }
 
   private parseAiFeedback(raw: string): AiFeedbackDisplay {
@@ -1639,6 +1881,24 @@ Niveau de préparation: ______`;
     return solutionSummary ? `${instructions}\n\n${solutionSummary}` : '';
   }
 
+  private buildReportPrompt(): string {
+    const reportType = this.getSelectedReportType();
+    const instruction = (this.reportInstruction || reportType?.instruction || '').trim();
+    const solutionSummary = this.buildSolutionSummaryForAi();
+
+    if (!solutionSummary || !instruction) {
+      return '';
+    }
+
+    const intro = `Role: You are a senior report writer.
+Generate a professional, structured report based on the solution details below.
+Use clear headings, concise paragraphs, and bullets when helpful.
+Do not include scores, rubrics, or evaluation language.`;
+
+    const reportTitle = reportType?.title ? `Report Type: ${reportType.title}` : 'Report Type: Custom';
+    return `${intro}\n${reportTitle}\nInstruction: ${instruction}\n\n${solutionSummary}`;
+  }
+
   private buildSolutionSummaryForAi(): string {
     if (!this.currentSolution) {
       return '';
@@ -1801,6 +2061,44 @@ Niveau de préparation: ______`;
     const title = (this.currentSolution?.title || 'current-draft').toLowerCase();
     const safeTitle = title.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     return `${safeTitle || 'current-draft'}.${extension}`;
+  }
+
+  private buildReportFileName(extension: 'pdf' | 'docx'): string {
+    const title = (this.currentSolution?.title || 'report').toLowerCase();
+    const reportType = (this.selectedReportTypeId || 'report').toLowerCase();
+    const safeTitle = title.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const safeType = reportType.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return `${safeTitle || 'report'}-${safeType || 'report'}.${extension}`;
+  }
+
+  private downloadTextPdf(text: string, title: string, filename: string): void {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 22;
+    const marginRight = 22;
+    const contentWidth = pageWidth - marginLeft - marginRight;
+    let yPos = 22;
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(16);
+    pdf.text(title, marginLeft, yPos);
+    yPos += 10;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+
+    const lines = pdf.splitTextToSize(text, contentWidth);
+    for (const line of lines) {
+      if (yPos + 6 > pageHeight - 22) {
+        pdf.addPage();
+        yPos = 22;
+      }
+      pdf.text(line, marginLeft, yPos);
+      yPos += 6;
+    }
+
+    pdf.save(filename);
   }
 
   private triggerDownload(blob: Blob, fileName: string): void {
