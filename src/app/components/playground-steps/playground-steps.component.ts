@@ -20,6 +20,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
+import { Document, HeadingLevel, Packer, Paragraph } from 'docx';
 
 type SupportedLanguage = 'en' | 'fr';
 
@@ -237,6 +238,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   aiFeedbackText = '';
   aiFeedbackFormatted = '';
   aiFeedbackParsed: AiFeedbackDisplay = { scores: [], improvements: [] };
+  currentDraftText = '';
   private aiFeedbackDocSub?: Subscription;
 
   // AI Evaluator selection
@@ -292,6 +294,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       
       // Update solution data
       this.currentSolution = data;
+      this.updateCurrentDraftText();
       
       if (isFirstLoad) {
         // First load - initialize everything
@@ -1285,6 +1288,69 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     pdf.save(filename);
   }
 
+  downloadCurrentDraftPdf() {
+    if (!this.currentDraftText) {
+      return;
+    }
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 22;
+    const marginRight = 22;
+    const contentWidth = pageWidth - marginLeft - marginRight;
+    let yPos = 22;
+
+    const title = this.currentSolution?.title || 'Untitled Solution';
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(16);
+    pdf.text(title, marginLeft, yPos);
+    yPos += 10;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+
+    const lines = pdf.splitTextToSize(this.currentDraftText, contentWidth);
+    for (const line of lines) {
+      if (yPos + 6 > pageHeight - 22) {
+        pdf.addPage();
+        yPos = 22;
+      }
+      pdf.text(line, marginLeft, yPos);
+      yPos += 6;
+    }
+
+    pdf.save(this.buildDraftFileName('pdf'));
+  }
+
+  async downloadCurrentDraftDocx() {
+    if (!this.currentDraftText) {
+      return;
+    }
+
+    const title = this.currentSolution?.title || 'Untitled Solution';
+    const paragraphs = this.currentDraftText
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => new Paragraph(line));
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+            ...paragraphs,
+          ],
+        },
+      ],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    this.triggerDownload(blob, this.buildDraftFileName('docx'));
+  }
+
   ngOnDestroy(): void {
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
@@ -1718,6 +1784,55 @@ Niveau de préparation: ______`;
     }
 
     return this.normalizeWhitespace(value.replace(/<[^>]+>/g, ' '));
+  }
+
+  private toPlainTextWithBreaks(value?: string): string {
+    if (!value) {
+      return '';
+    }
+
+    let html = value;
+    html = html.replace(/<br\s*\/?>/gi, '\n');
+    html = html.replace(/<\/p>|<\/div>|<\/h[1-6]>/gi, '\n');
+    html = html.replace(/<li[^>]*>/gi, '- ');
+    html = html.replace(/<\/li>/gi, '\n');
+    html = html.replace(/<[^>]+>/g, ' ');
+    html = html.replace(/\r\n/g, '\n');
+    html = html.replace(/\n{3,}/g, '\n\n');
+    return html.trim();
+  }
+
+  private buildCurrentDraftText(): string {
+    const draftHtml = this.currentSolution?.strategyReview || '';
+    const draftText = this.toPlainTextWithBreaks(draftHtml);
+    if (draftText) {
+      return draftText;
+    }
+    return this.extractStatusResponses();
+  }
+
+  private updateCurrentDraftText(): void {
+    this.currentDraftText = this.buildCurrentDraftText();
+  }
+
+  private buildDraftFileName(extension: 'pdf' | 'docx'): string {
+    const title = (this.currentSolution?.title || 'current-draft').toLowerCase();
+    const safeTitle = title.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return `${safeTitle || 'current-draft'}.${extension}`;
+  }
+
+  private triggerDownload(blob: Blob, fileName: string): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   private clampText(value: string, limit: number): string {

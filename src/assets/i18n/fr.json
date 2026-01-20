@@ -1001,7 +1001,10 @@
       "scores": "Scores",
       "improvements": "Améliorations",
       "readinessLevel": "Niveau de préparation",
-      "downloadSolution": "Télécharger la solution et le retour IA"
+      "downloadSolution": "Télécharger la solution et le retour IA",
+      "downloadDraft": "Télécharger le brouillon actuel",
+      "downloadDraftPdf": "PDF",
+      "downloadDraftDocx": "Word (.docx)"
     },
     "strategyReview": {
       "referenceSteps": "Référence (Étapes 1–4)",

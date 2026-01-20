@@ -1252,7 +1252,10 @@
       "scores": "Scores",
       "improvements": "Improvements",
       "readinessLevel": "Readiness Level",
-      "downloadSolution": "Download Solution & AI Feedback"
+      "downloadSolution": "Download Solution & AI Feedback",
+      "downloadDraft": "Download Current Draft",
+      "downloadDraftPdf": "PDF",
+      "downloadDraftDocx": "Word (.docx)"
     },
     "strategyReview": {
       "referenceSteps": "Reference (Steps 1–4)",
