@@ -261,6 +261,13 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   reportInstruction = '';
   selectedReportTypeId = 'solution-overview';
   private reportDocSub?: Subscription;
+
+  // Download loading states
+  downloadingDraftPdf = false;
+  downloadingDraftDocx = false;
+  downloadingReportPdf = false;
+  downloadingReportDocx = false;
+  downloadingFeedbackPdf = false;
   reportGroupState: Record<string, boolean> = {
     understanding: true,
     design: false,
@@ -1102,6 +1109,22 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   }
 
   downloadSolutionPdf() {
+    if (this.downloadingFeedbackPdf) {
+      return;
+    }
+    this.downloadingFeedbackPdf = true;
+
+    try {
+      this.downloadSolutionPdfInternal();
+    } finally {
+      // Small delay to show loading state
+      setTimeout(() => {
+        this.downloadingFeedbackPdf = false;
+      }, 500);
+    }
+  }
+
+  private downloadSolutionPdfInternal() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -1398,39 +1421,49 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     pdf.save(filename);
   }
 
-  downloadCurrentDraftPdf() {
-    if (!this.currentDraftText) {
+  async downloadCurrentDraftPdf() {
+    if (!this.currentDraftText || this.downloadingDraftPdf) {
       return;
     }
 
-    this.downloadCurrentDraftPdfWithImages().catch((error) => {
+    this.downloadingDraftPdf = true;
+    try {
+      await this.downloadCurrentDraftPdfWithImages();
+    } catch (error) {
       console.error('Failed to export draft with images, falling back to text-only PDF.', error);
       this.downloadCurrentDraftPdfTextOnly();
-    });
+    } finally {
+      this.downloadingDraftPdf = false;
+    }
   }
 
   async downloadCurrentDraftDocx() {
-    if (!this.currentDraftText) {
+    if (!this.currentDraftText || this.downloadingDraftDocx) {
       return;
     }
 
-    const title = this.currentSolution?.title || 'Untitled Solution';
-    const paragraphs = await this.buildDocxParagraphsFromHtml(this.currentDraftHtml);
+    this.downloadingDraftDocx = true;
+    try {
+      const title = this.currentSolution?.title || 'Untitled Solution';
+      const paragraphs = await this.buildDocxParagraphsFromHtml(this.currentDraftHtml);
 
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
-            ...paragraphs,
-          ],
-        },
-      ],
-    });
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+              ...paragraphs,
+            ],
+          },
+        ],
+      });
 
-    const blob = await Packer.toBlob(doc);
-    this.triggerDownload(blob, this.buildDraftFileName('docx'));
+      const blob = await Packer.toBlob(doc);
+      this.triggerDownload(blob, this.buildDraftFileName('docx'));
+    } finally {
+      this.downloadingDraftDocx = false;
+    }
   }
 
   openReportModal() {
@@ -1522,38 +1555,51 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     }
   }
 
-  downloadReportPdf() {
-    if (!this.reportText) {
+  async downloadReportPdf() {
+    if (!this.reportText || this.downloadingReportPdf) {
       return;
     }
-    const title = this.getSelectedReportType()?.title || 'Report';
-    const cleaned = this.normalizeReportText(this.reportText);
-    this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
+    this.downloadingReportPdf = true;
+    try {
+      const title = this.getSelectedReportType()?.title || 'Report';
+      const cleaned = this.normalizeReportText(this.reportText);
+      this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
+    } finally {
+      // Small delay to show loading state
+      setTimeout(() => {
+        this.downloadingReportPdf = false;
+      }, 500);
+    }
   }
 
   async downloadReportDocx() {
-    if (!this.reportText) {
+    if (!this.reportText || this.downloadingReportDocx) {
       return;
     }
 
-    const title = this.getSelectedReportType()?.title || 'Report';
-    const cleaned = this.normalizeReportText(this.reportText);
-    const paragraphs = this.buildReportDocxParagraphs(cleaned);
+    this.downloadingReportDocx = true;
+    try {
+      const title = this.getSelectedReportType()?.title || 'Report';
+      const cleaned = this.normalizeReportText(this.reportText);
+      const paragraphs = this.buildReportDocxParagraphs(cleaned);
 
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
-            ...paragraphs,
-          ],
-        },
-      ],
-    });
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+              ...paragraphs,
+            ],
+          },
+        ],
+      });
 
-    const blob = await Packer.toBlob(doc);
-    this.triggerDownload(blob, this.buildReportFileName('docx'));
+      const blob = await Packer.toBlob(doc);
+      this.triggerDownload(blob, this.buildReportFileName('docx'));
+    } finally {
+      this.downloadingReportDocx = false;
+    }
   }
 
   ngOnDestroy(): void {
