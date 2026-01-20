@@ -1527,7 +1527,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       return;
     }
     const title = this.getSelectedReportType()?.title || 'Report';
-    this.downloadTextPdf(this.reportText, title, this.buildReportFileName('pdf'));
+    const cleaned = this.normalizeReportText(this.reportText);
+    this.downloadTextPdf(cleaned, title, this.buildReportFileName('pdf'));
   }
 
   async downloadReportDocx() {
@@ -1536,7 +1537,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     }
 
     const title = this.getSelectedReportType()?.title || 'Report';
-    const paragraphs = this.reportText
+    const cleaned = this.normalizeReportText(this.reportText);
+    const paragraphs = cleaned
       .split(/\n+/)
       .map((line) => line.trim())
       .filter(Boolean)
@@ -1892,7 +1894,10 @@ Niveau de préparation: ______`;
 
     const intro = `Role: You are a senior report writer.
 Generate a professional, structured report based on the solution details below.
-Use clear headings, concise paragraphs, and bullets when helpful.
+Write in a polished, journalistic tone suitable for The Economist or The New York Times.
+Include one short reference to NewWorld Game in the opening paragraph for context.
+Use clear headings and concise paragraphs; bullets only when helpful.
+Output plain text only (no markdown, no asterisks, no special formatting).
 Do not include scores, rubrics, or evaluation language.`;
 
     const reportTitle = reportType?.title ? `Report Type: ${reportType.title}` : 'Report Type: Custom';
@@ -2099,6 +2104,18 @@ Do not include scores, rubrics, or evaluation language.`;
     }
 
     pdf.save(filename);
+  }
+
+  private normalizeReportText(value: string): string {
+    if (!value) {
+      return '';
+    }
+    let cleaned = value.replace(/\*\*(.*?)\*\*/g, '$1');
+    cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');
+    cleaned = cleaned.replace(/[_`#>]+/g, '');
+    cleaned = cleaned.replace(/\r\n/g, '\n');
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+    return cleaned.trim();
   }
 
   private triggerDownload(blob: Blob, fileName: string): void {
