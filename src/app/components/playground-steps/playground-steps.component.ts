@@ -4,7 +4,6 @@ import jsPDF from 'jspdf';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
-import { Element } from '@angular/compiler';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { Evaluator, Roles, Solution } from 'src/app/models/solution';
@@ -20,7 +19,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
-import { Document, HeadingLevel, Packer, Paragraph } from 'docx';
+import { Document, HeadingLevel, ImageRun, Packer, Paragraph } from 'docx';
 
 type SupportedLanguage = 'en' | 'fr';
 
@@ -238,6 +237,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   aiFeedbackText = '';
   aiFeedbackFormatted = '';
   aiFeedbackParsed: AiFeedbackDisplay = { scores: [], improvements: [] };
+  currentDraftHtml = '';
   currentDraftText = '';
   private aiFeedbackDocSub?: Subscription;
 
@@ -1293,34 +1293,10 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 22;
-    const marginRight = 22;
-    const contentWidth = pageWidth - marginLeft - marginRight;
-    let yPos = 22;
-
-    const title = this.currentSolution?.title || 'Untitled Solution';
-    pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(16);
-    pdf.text(title, marginLeft, yPos);
-    yPos += 10;
-
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
-
-    const lines = pdf.splitTextToSize(this.currentDraftText, contentWidth);
-    for (const line of lines) {
-      if (yPos + 6 > pageHeight - 22) {
-        pdf.addPage();
-        yPos = 22;
-      }
-      pdf.text(line, marginLeft, yPos);
-      yPos += 6;
-    }
-
-    pdf.save(this.buildDraftFileName('pdf'));
+    this.downloadCurrentDraftPdfWithImages().catch((error) => {
+      console.error('Failed to export draft with images, falling back to text-only PDF.', error);
+      this.downloadCurrentDraftPdfTextOnly();
+    });
   }
 
   async downloadCurrentDraftDocx() {
@@ -1329,11 +1305,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     }
 
     const title = this.currentSolution?.title || 'Untitled Solution';
-    const paragraphs = this.currentDraftText
-      .split(/\n+/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => new Paragraph(line));
+    const paragraphs = await this.buildDocxParagraphsFromHtml(this.currentDraftHtml);
 
     const doc = new Document({
       sections: [
@@ -1813,6 +1785,16 @@ Niveau de préparation: ______`;
 
   private updateCurrentDraftText(): void {
     this.currentDraftText = this.buildCurrentDraftText();
+    this.currentDraftHtml = this.buildCurrentDraftHtml();
+  }
+
+  private buildCurrentDraftHtml(): string {
+    const draftHtml = this.currentSolution?.strategyReview || '';
+    if (draftHtml) {
+      return draftHtml;
+    }
+    const fallbackText = this.extractStatusResponses();
+    return this.textToHtml(fallbackText);
   }
 
   private buildDraftFileName(extension: 'pdf' | 'docx'): string {
@@ -1833,6 +1815,377 @@ Niveau de préparation: ______`;
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  private textToHtml(value: string): string {
+    if (!value) {
+      return '';
+    }
+    const lines = value.split('\n').map((line) => line.trim());
+    return lines
+      .map((line) => (line ? `<p>${this.escapeHtml(line)}</p>` : ''))
+      .join('');
+  }
+
+  private async downloadCurrentDraftPdfWithImages(): Promise<void> {
+    if (typeof document === 'undefined') {
+      this.downloadCurrentDraftPdfTextOnly();
+      return;
+    }
+
+    const { default: html2canvas } = await import('html2canvas');
+    const container = document.createElement('div');
+    const title = this.currentSolution?.title || 'Untitled Solution';
+    container.innerHTML = `
+      <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
+        <h1 style="font-size: 22px; font-weight: 700; margin-bottom: 12px;">${this.escapeHtml(title)}</h1>
+        ${this.currentDraftHtml || this.textToHtml(this.currentDraftText)}
+      </div>
+    `;
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '800px';
+    container.style.background = '#ffffff';
+    container.style.padding = '24px';
+    container.style.boxSizing = 'border-box';
+    container.style.border = '1px solid #e5e7eb';
+    container.querySelectorAll('img').forEach((img) => {
+      img.setAttribute('crossorigin', 'anonymous');
+      (img as HTMLImageElement).style.maxWidth = '100%';
+      (img as HTMLImageElement).style.height = 'auto';
+      (img as HTMLImageElement).style.display = 'block';
+      (img as HTMLImageElement).style.margin = '12px 0';
+    });
+    container.querySelectorAll('p').forEach((p) => {
+      (p as HTMLElement).style.margin = '0 0 10px';
+    });
+
+    document.body.appendChild(container);
+    await this.waitForImages(container);
+
+    const canvas = await html2canvas(container, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+    });
+
+    document.body.removeChild(container);
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 14;
+    const marginTop = 14;
+    const marginRight = 14;
+    const usableWidth = pageWidth - marginLeft - marginRight;
+    const usableHeight = pageHeight - marginTop * 2;
+    const scaleFactor = usableWidth / canvas.width;
+    const scaledCanvasHeight = canvas.height * scaleFactor;
+    const totalPages = Math.ceil(scaledCanvasHeight / usableHeight);
+
+    let yOffset = 0;
+    for (let page = 0; page < totalPages; page += 1) {
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      const pageCanvasHeight = Math.min(
+        canvas.height - yOffset,
+        usableHeight / scaleFactor
+      );
+      pageCanvas.height = pageCanvasHeight;
+      const pageCtx = pageCanvas.getContext('2d');
+      if (!pageCtx) {
+        continue;
+      }
+
+      pageCtx.drawImage(
+        canvas,
+        0,
+        yOffset,
+        canvas.width,
+        pageCanvasHeight,
+        0,
+        0,
+        canvas.width,
+        pageCanvasHeight
+      );
+
+      const pageImgData = pageCanvas.toDataURL('image/png');
+      if (page > 0) {
+        pdf.addPage();
+      }
+      const chunkPdfHeight = pageCanvasHeight * scaleFactor;
+      pdf.addImage(pageImgData, 'PNG', marginLeft, marginTop, usableWidth, chunkPdfHeight);
+      yOffset += pageCanvasHeight;
+    }
+
+    pdf.save(this.buildDraftFileName('pdf'));
+  }
+
+  private downloadCurrentDraftPdfTextOnly(): void {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 22;
+    const marginRight = 22;
+    const contentWidth = pageWidth - marginLeft - marginRight;
+    let yPos = 22;
+
+    const title = this.currentSolution?.title || 'Untitled Solution';
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(16);
+    pdf.text(title, marginLeft, yPos);
+    yPos += 10;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(11);
+
+    const lines = pdf.splitTextToSize(this.currentDraftText, contentWidth);
+    for (const line of lines) {
+      if (yPos + 6 > pageHeight - 22) {
+        pdf.addPage();
+        yPos = 22;
+      }
+      pdf.text(line, marginLeft, yPos);
+      yPos += 6;
+    }
+
+    pdf.save(this.buildDraftFileName('pdf'));
+  }
+
+  private async buildDocxParagraphsFromHtml(html: string): Promise<Paragraph[]> {
+    if (!html || typeof document === 'undefined') {
+      return this.currentDraftText
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => new Paragraph(line));
+    }
+
+    const parser = new DOMParser();
+    const parsed = parser.parseFromString(html, 'text/html');
+    const paragraphs: Paragraph[] = [];
+    const bodyChildren = Array.from(parsed.body.children);
+
+    for (const element of bodyChildren) {
+      await this.appendDocxFromElement(element as HTMLElement, paragraphs);
+    }
+
+    return paragraphs;
+  }
+
+  private async appendDocxFromElement(element: HTMLElement, paragraphs: Paragraph[]): Promise<void> {
+    const tag = element.tagName.toLowerCase();
+
+    if (tag === 'img') {
+      const imageParagraph = await this.buildImageParagraph(element as HTMLImageElement);
+      if (imageParagraph) {
+        paragraphs.push(imageParagraph);
+      }
+      return;
+    }
+
+    if (tag === 'figure') {
+      const img = element.querySelector('img');
+      if (img) {
+        const imageParagraph = await this.buildImageParagraph(img as HTMLImageElement);
+        if (imageParagraph) {
+          paragraphs.push(imageParagraph);
+        }
+      }
+      const caption = element.querySelector('figcaption')?.textContent?.trim();
+      if (caption) {
+        paragraphs.push(new Paragraph(caption));
+      }
+      return;
+    }
+
+    if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
+      const headingText = element.textContent?.trim();
+      if (headingText) {
+        paragraphs.push(new Paragraph({ text: headingText, heading: HeadingLevel.HEADING_2 }));
+      }
+      return;
+    }
+
+    if (tag === 'ul' || tag === 'ol') {
+      const items = Array.from(element.querySelectorAll('li'));
+      for (const item of items) {
+        const itemText = item.textContent?.trim();
+        if (itemText) {
+          paragraphs.push(new Paragraph(`• ${itemText}`));
+        }
+        const img = item.querySelector('img');
+        if (img) {
+          const imageParagraph = await this.buildImageParagraph(img as HTMLImageElement);
+          if (imageParagraph) {
+            paragraphs.push(imageParagraph);
+          }
+        }
+      }
+      return;
+    }
+
+    let buffer = '';
+    const childNodes = Array.from(element.childNodes);
+    if (!childNodes.length) {
+      const textContent = element.textContent?.trim();
+      if (textContent) {
+        paragraphs.push(new Paragraph(textContent));
+      }
+      return;
+    }
+
+    for (const node of childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent?.trim();
+        if (text) {
+          buffer = buffer ? `${buffer} ${text}` : text;
+        }
+        continue;
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        continue;
+      }
+
+      const childElement = node as HTMLElement;
+      const childTag = childElement.tagName.toLowerCase();
+
+      if (childTag === 'br') {
+        if (buffer) {
+          paragraphs.push(new Paragraph(buffer));
+          buffer = '';
+        }
+        continue;
+      }
+
+      if (childTag === 'img') {
+        if (buffer) {
+          paragraphs.push(new Paragraph(buffer));
+          buffer = '';
+        }
+        const imageParagraph = await this.buildImageParagraph(childElement as HTMLImageElement);
+        if (imageParagraph) {
+          paragraphs.push(imageParagraph);
+        }
+        continue;
+      }
+
+      const childText = childElement.textContent?.trim();
+      if (childText) {
+        buffer = buffer ? `${buffer} ${childText}` : childText;
+      }
+    }
+
+    if (buffer) {
+      paragraphs.push(new Paragraph(buffer));
+    }
+  }
+
+  private async buildImageParagraph(image: HTMLImageElement): Promise<Paragraph | null> {
+    const src = image.getAttribute('src');
+    if (!src) {
+      return null;
+    }
+
+    try {
+      const imageData = await this.fetchImageData(src);
+      if (!imageData) {
+        return new Paragraph(`Image: ${src}`);
+      }
+      const { data, width, height, type } = imageData;
+      return new Paragraph({
+        children: [
+          new ImageRun({
+            data,
+            type,
+            transformation: { width, height },
+          }),
+        ],
+      });
+    } catch (error) {
+      console.warn('Failed to embed image in docx:', error);
+      return new Paragraph(`Image: ${src}`);
+    }
+  }
+
+  private async fetchImageData(
+    src: string
+  ): Promise<{ data: ArrayBuffer; width: number; height: number; type: 'png' | 'jpg' | 'gif' | 'bmp' } | null> {
+    const response = await fetch(src);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status}`);
+    }
+    const blob = await response.blob();
+    const type = this.mapImageType(blob.type);
+    if (!type) {
+      return null;
+    }
+    const arrayBuffer = await blob.arrayBuffer();
+    const dimensions = await this.getImageDimensions(blob);
+    const maxWidth = 520;
+    const scale = Math.min(1, maxWidth / dimensions.width);
+    return {
+      data: arrayBuffer,
+      width: Math.round(dimensions.width * scale),
+      height: Math.round(dimensions.height * scale),
+      type,
+    };
+  }
+
+  private getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      if (typeof document === 'undefined') {
+        resolve({ width: 520, height: 300 });
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: img.naturalWidth || 520, height: img.naturalHeight || 300 });
+      };
+      img.onerror = (error) => {
+        URL.revokeObjectURL(url);
+        reject(error);
+      };
+      img.src = url;
+    });
+  }
+
+  private mapImageType(mime: string): 'png' | 'jpg' | 'gif' | 'bmp' | null {
+    const normalized = (mime || '').toLowerCase();
+    if (normalized.includes('png')) {
+      return 'png';
+    }
+    if (normalized.includes('jpeg') || normalized.includes('jpg')) {
+      return 'jpg';
+    }
+    if (normalized.includes('gif')) {
+      return 'gif';
+    }
+    if (normalized.includes('bmp')) {
+      return 'bmp';
+    }
+    return null;
+  }
+
+  private async waitForImages(container: HTMLElement): Promise<void> {
+    const images = Array.from(container.querySelectorAll('img'));
+    await Promise.all(
+      images.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if (img.complete) {
+              resolve();
+            } else {
+              img.onload = () => resolve();
+              img.onerror = () => resolve();
+            }
+          })
+      )
+    );
   }
 
   private clampText(value: string, limit: number): string {
