@@ -1528,7 +1528,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     }
     const title = this.getSelectedReportType()?.title || 'Report';
     const cleaned = this.normalizeReportText(this.reportText);
-    this.downloadTextPdf(cleaned, title, this.buildReportFileName('pdf'));
+    this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
   }
 
   async downloadReportDocx() {
@@ -1538,11 +1538,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
 
     const title = this.getSelectedReportType()?.title || 'Report';
     const cleaned = this.normalizeReportText(this.reportText);
-    const paragraphs = cleaned
-      .split(/\n+/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => new Paragraph(line));
+    const paragraphs = this.buildReportDocxParagraphs(cleaned);
 
     const doc = new Document({
       sections: [
@@ -2104,6 +2100,103 @@ Do not include scores, rubrics, or evaluation language.`;
     }
 
     pdf.save(filename);
+  }
+
+  private downloadReportPdfStyled(text: string, title: string, filename: string): void {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 22;
+    const marginRight = 22;
+    const contentWidth = pageWidth - marginLeft - marginRight;
+    let yPos = 22;
+
+    const setHeading = (size: number) => {
+      pdf.setFont('times', 'bold');
+      pdf.setFontSize(size);
+    };
+    const setBody = () => {
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(11);
+    };
+    const addPageIfNeeded = (heightNeeded: number) => {
+      if (yPos + heightNeeded > pageHeight - 22) {
+        pdf.addPage();
+        yPos = 22;
+      }
+    };
+
+    setHeading(18);
+    pdf.text(title, marginLeft, yPos);
+    yPos += 10;
+
+    setBody();
+    const lines = text.split(/\r?\n/).map((line) => line.trim());
+
+    for (const line of lines) {
+      if (!line) {
+        yPos += 4;
+        continue;
+      }
+
+      if (this.isReportHeading(line)) {
+        addPageIfNeeded(10);
+        setHeading(13);
+        pdf.text(line.replace(/:\s*$/, ''), marginLeft, yPos);
+        yPos += 7;
+        setBody();
+        continue;
+      }
+
+      const wrapped = pdf.splitTextToSize(line, contentWidth);
+      for (const segment of wrapped) {
+        addPageIfNeeded(6);
+        pdf.text(segment, marginLeft, yPos);
+        yPos += 6;
+      }
+      yPos += 2;
+    }
+
+    pdf.save(filename);
+  }
+
+  private buildReportDocxParagraphs(text: string): Paragraph[] {
+    const lines = text.split(/\r?\n/).map((line) => line.trim());
+    const paragraphs: Paragraph[] = [];
+
+    lines.forEach((line) => {
+      if (!line) {
+        return;
+      }
+      if (this.isReportHeading(line)) {
+        paragraphs.push(
+          new Paragraph({
+            text: line.replace(/:\s*$/, ''),
+            heading: HeadingLevel.HEADING_2,
+          })
+        );
+        return;
+      }
+      paragraphs.push(new Paragraph(line));
+    });
+
+    return paragraphs;
+  }
+
+  private isReportHeading(line: string): boolean {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return false;
+    }
+    if (trimmed.length <= 3) {
+      return false;
+    }
+    if (trimmed.endsWith(':')) {
+      return true;
+    }
+    const upper = trimmed.toUpperCase();
+    const hasLetters = /[A-Z]/.test(upper);
+    return hasLetters && trimmed.length <= 60 && trimmed === upper;
   }
 
   private normalizeReportText(value: string): string {
