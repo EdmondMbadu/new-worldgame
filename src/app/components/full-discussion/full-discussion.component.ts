@@ -26,7 +26,35 @@ interface ParticipantInfo {
   email: string;
   displayName: string;
   uid?: string;
+  isAI?: boolean;
+  avatarPath?: string;
+  collectionKey?: string;
 }
+
+interface AIAvatar {
+  name: string;
+  avatarPath: string;
+  collectionKey: string;
+  group: 'colleague' | 'elder';
+}
+
+const AI_AVATARS: AIAvatar[] = [
+  { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara', group: 'colleague' },
+  { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun', group: 'colleague' },
+  { name: 'Sofia Morales', avatarPath: '../../../assets/img/sofia-agent.png', collectionKey: 'sofia', group: 'colleague' },
+  { name: 'Li Wei', avatarPath: '../../../assets/img/li-agent.png', collectionKey: 'li', group: 'colleague' },
+  { name: 'Amina Al-Sayed', avatarPath: '../../../assets/img/amina-agent.png', collectionKey: 'amina', group: 'colleague' },
+  { name: 'Elena Volkov', avatarPath: '../../../assets/img/elena-agent.png', collectionKey: 'elena', group: 'colleague' },
+  { name: 'Tane Kahu', avatarPath: '../../../assets/img/tane-agent.png', collectionKey: 'tane', group: 'colleague' },
+  { name: 'Dr. Logos', avatarPath: '../../../assets/img/logos.png', collectionKey: 'business', group: 'colleague' },
+  { name: 'Marie Curie', avatarPath: '../../../assets/img/marie-curie.jpg', collectionKey: 'marie', group: 'elder' },
+  { name: 'Rachel Carson', avatarPath: '../../../assets/img/rachel-carlson.jpeg', collectionKey: 'rachel', group: 'elder' },
+  { name: 'Buckminster Fuller', avatarPath: '../../../assets/img/fuller.jpg', collectionKey: 'bucky', group: 'elder' },
+  { name: 'Albert Einstein', avatarPath: '../../../assets/img/albert.png', collectionKey: 'albert', group: 'elder' },
+  { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'nelson', group: 'elder' },
+  { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi', group: 'elder' },
+  { name: 'Mark Twain', avatarPath: '../../../assets/img/twain.jpg', collectionKey: 'twain', group: 'elder' },
+];
 
 interface PendingPreview {
   file: File;
@@ -76,6 +104,7 @@ export class FullDiscussionComponent
   showMentionDropdown = false;
   mentionSearchText = '';
   filteredParticipants: ParticipantInfo[] = [];
+  filteredAIAvatars: ParticipantInfo[] = [];
   mentionStartIndex = -1;
 
   private hasScrolled = false;
@@ -312,6 +341,8 @@ Please choose a file under 5 MB.`);
     // Process @mentions and send notifications (before clearing prompt)
     if (content) {
       this.processMentions(content);
+      // Process AI mentions and generate responses
+      this.processAIMentions(content);
     }
 
     // Clear the prompt & scroll
@@ -447,7 +478,24 @@ Please choose a file under 5 MB.`);
     }
 
     this.participants = participants;
+
+    // Add AI avatars to participants
+    this.addAIParticipants();
+
     console.log('Loaded participants for mentions:', this.participants);
+  }
+
+  /** Add AI avatars to the participants list */
+  private addAIParticipants() {
+    for (const ai of AI_AVATARS) {
+      this.participants.push({
+        email: `ai-${ai.collectionKey}@system`,
+        displayName: ai.name,
+        isAI: true,
+        avatarPath: ai.avatarPath,
+        collectionKey: ai.collectionKey,
+      });
+    }
   }
 
   /** Build participants from discussion comments (people who have posted) */
@@ -501,14 +549,25 @@ Please choose a file under 5 MB.`);
 
   /** Filter participants based on search text */
   private filterParticipants() {
-    if (!this.mentionSearchText) {
-      // Show @everyone option plus all participants
-      this.filteredParticipants = [...this.participants];
+    const searchText = this.mentionSearchText.toLowerCase();
+
+    // Filter human participants (non-AI)
+    if (!searchText) {
+      this.filteredParticipants = this.participants.filter((p) => !p.isAI);
+      this.filteredAIAvatars = this.participants.filter((p) => p.isAI);
     } else {
       this.filteredParticipants = this.participants.filter(
         (p) =>
-          p.displayName.toLowerCase().includes(this.mentionSearchText) ||
-          p.email.toLowerCase().includes(this.mentionSearchText)
+          !p.isAI &&
+          (p.displayName.toLowerCase().includes(searchText) ||
+            p.email.toLowerCase().includes(searchText))
+      );
+
+      // Filter AI avatars
+      this.filteredAIAvatars = this.participants.filter(
+        (p) =>
+          p.isAI &&
+          p.displayName.toLowerCase().includes(searchText)
       );
     }
   }
@@ -640,5 +699,136 @@ Please choose a file under 5 MB.`);
     );
 
     return result;
+  }
+
+  // ============ AI Mention functionality ============
+
+  /** Process AI mentions in the message and generate responses */
+  private async processAIMentions(content: string) {
+    if (!content) return;
+
+    // Find AI mentions in content
+    const aiMentionPattern = /@([^\s@]+)/g;
+    const matches = [...content.matchAll(aiMentionPattern)];
+    const processedAIs = new Set<string>();
+
+    for (const match of matches) {
+      const mentionName = match[1].toLowerCase();
+
+      // Find matching AI participant
+      const ai = this.participants.find(
+        (p) =>
+          p.isAI &&
+          (p.displayName.toLowerCase() === mentionName ||
+            p.displayName.toLowerCase().replace(/\s+/g, '').includes(mentionName.replace(/\s+/g, '')) ||
+            p.displayName.split(' ')[0].toLowerCase() === mentionName)
+      );
+
+      // Process ALL mentioned AIs (user preference: all respond)
+      if (ai && ai.collectionKey && !processedAIs.has(ai.collectionKey)) {
+        processedAIs.add(ai.collectionKey);
+        await this.generateAIResponse(ai, content);
+      }
+    }
+  }
+
+  /** Generate an AI response and add it to the discussion */
+  private async generateAIResponse(ai: ParticipantInfo, userMessage: string) {
+    // Build context from full discussion
+    const context = this.buildDiscussionContext();
+
+    // Create prompt document in Firestore (triggers Cloud Function)
+    // NOTE: Must write to 'discussions' collection to trigger the onChatPrompt Cloud Function
+    const uid = this.auth.currentUser.uid;
+    const docId = this.afs.createId();
+    const docRef = this.afs.doc(
+      `users/${uid}/discussions/${docId}`
+    ) as AngularFirestoreDocument<any>;
+
+    // Add placeholder message immediately
+    const nowIso = new Date().toISOString();
+    const placeholderMsg: Comment = {
+      date: nowIso,
+      authorId: `ai-${ai.collectionKey}`,
+      authorName: ai.displayName,
+      profilePic: ai.avatarPath,
+      content: '',
+      displayTime: this.time.formatDateStringComment(nowIso),
+      isAI: true,
+      isLoading: true,
+    };
+    this.comments.push(placeholderMsg);
+    this.scrollToBottom();
+
+    // Write prompt to trigger Cloud Function
+    await docRef.set({
+      prompt: `You are ${ai.displayName}, an AI team member participating in a team discussion.
+Here is the context of the conversation so far:
+
+${context}
+
+A team member has just mentioned you with this message: "${userMessage}"
+
+Please respond helpfully to their question or comment, staying in character as ${ai.displayName}.
+Keep your response concise and relevant to the discussion. Do not use markdown formatting.`,
+    });
+
+    // Subscribe to response
+    const subscription = docRef.valueChanges().subscribe(async (data: any) => {
+      if (!data || !data.status) return;
+
+      if (data.status.state === 'COMPLETED' && data.response) {
+        // Run inside Angular zone to trigger change detection
+        this.ngZone.run(async () => {
+          // Find and update the placeholder message in the array
+          const msgIndex = this.comments.findIndex(
+            (c) => c.date === placeholderMsg.date && c.authorId === placeholderMsg.authorId
+          );
+          if (msgIndex !== -1) {
+            // Create a new object to trigger change detection
+            this.comments[msgIndex] = {
+              ...this.comments[msgIndex],
+              content: data.response,
+              isLoading: false,
+            };
+            // Force array reference change for Angular
+            this.comments = [...this.comments];
+          }
+
+          // Sync to Firestore
+          await this.syncDiscussion();
+          this.scrollToBottom();
+          this.playPing();
+
+          subscription.unsubscribe();
+        });
+      } else if (data.status.state === 'ERRORED') {
+        this.ngZone.run(async () => {
+          const msgIndex = this.comments.findIndex(
+            (c) => c.date === placeholderMsg.date && c.authorId === placeholderMsg.authorId
+          );
+          if (msgIndex !== -1) {
+            this.comments[msgIndex] = {
+              ...this.comments[msgIndex],
+              content: 'Sorry, I encountered an error while generating a response. Please try again.',
+              isLoading: false,
+            };
+            this.comments = [...this.comments];
+          }
+          await this.syncDiscussion();
+          subscription.unsubscribe();
+        });
+      }
+    });
+  }
+
+  /** Build context from the discussion for AI */
+  private buildDiscussionContext(): string {
+    // Get last 20 messages for context
+    const recentMessages = this.comments.slice(-20);
+    return recentMessages
+      .filter((c) => c.content && !c.isLoading)
+      .map((c) => `${c.authorName}: ${c.content}`)
+      .join('\n');
   }
 }

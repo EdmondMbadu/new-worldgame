@@ -129,6 +129,8 @@ export class Comment {
   profilePic?: string;
   attachments?: Attachment[]; // NEW
   linkPreview?: LinkPreview;
+  isAI?: boolean; // For AI-generated messages
+  isLoading?: boolean; // For AI typing indicator
 }
 
 export class Roles {
