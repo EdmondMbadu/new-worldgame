@@ -681,12 +681,26 @@ Please choose a file under 5 MB.`);
     );
   }
 
-  /** Highlight @mentions in displayed message content */
+  /** Highlight @mentions and format markdown in displayed message content */
   highlightMentions(text: string): string {
     if (!text) return '';
 
     // First linkify URLs
     let result = this.linkify(text);
+
+    // Format markdown: bold (**text** or __text__)
+    result = result.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    result = result.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+
+    // Format markdown: italic (*text* or _text_) - but not inside URLs or already processed
+    result = result.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+    result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, '<em>$1</em>');
+
+    // Format markdown: bullet points (lines starting with * or -)
+    result = result.replace(/^[\*\-]\s+(.+)$/gm, '<li class="ml-4">$1</li>');
+
+    // Format markdown: numbered lists (lines starting with 1. 2. etc)
+    result = result.replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 list-decimal">$1</li>');
 
     // Then highlight @mentions
     result = result.replace(
@@ -697,6 +711,9 @@ Please choose a file under 5 MB.`);
       /@([^\s<]+)/g,
       '<span class="mention font-semibold text-blue-400">@$1</span>'
     );
+
+    // Convert newlines to <br> for proper display
+    result = result.replace(/\n/g, '<br>');
 
     return result;
   }
@@ -770,7 +787,9 @@ ${context}
 A team member has just mentioned you with this message: "${userMessage}"
 
 Please respond helpfully to their question or comment, staying in character as ${ai.displayName}.
-Keep your response concise and relevant to the discussion. Do not use markdown formatting.`,
+Keep your response concise and relevant to the discussion.
+You may use basic markdown for emphasis: **bold** for important terms, *italic* for emphasis.
+For lists, use dashes (-) or numbers (1. 2. 3.).`,
     });
 
     // Subscribe to response
