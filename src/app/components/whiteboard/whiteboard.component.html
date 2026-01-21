@@ -16,6 +16,14 @@
 
   <!-- Centered content -->
   <div class="flex flex-col items-center p-4 mt-20">
+    <div class="w-full max-w-5xl flex justify-center sm:justify-end mb-4">
+      <a
+        [routerLink]="['/dashboard', solutionId]"
+        class="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm transition hover:border-blue-300 hover:text-blue-800 dark:border-blue-700 dark:bg-slate-800 dark:text-blue-200 dark:hover:border-blue-500"
+      >
+        Back to Dashboard
+      </a>
+    </div>
 
     <!-- Toolbar -->
     <div class="flex flex-wrap justify-center gap-4 mb-4 text-gray-800 dark:text-gray-200">

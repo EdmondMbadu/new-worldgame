@@ -37,6 +37,14 @@
 
       <!-- Header Section -->
       <header class="text-center mb-8">
+        <div class="flex justify-center sm:justify-end mb-4">
+          <a
+            [routerLink]="['/dashboard', id]"
+            class="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-white px-4 py-1.5 text-sm font-semibold text-teal-700 shadow-sm transition hover:border-teal-300 hover:text-teal-800 dark:border-teal-700 dark:bg-slate-800 dark:text-teal-200 dark:hover:border-teal-500"
+          >
+            Back to Dashboard
+          </a>
+        </div>
         <!-- Page Title -->
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 text-sm font-medium mb-4">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
