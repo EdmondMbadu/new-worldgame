@@ -376,7 +376,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       title: 'Impact BMC Theory of Change/Logic Model Report',
       group: 'strategy',
       instruction:
-        'Generate a complete Business Model Canvas following the Alexander Osterwalder framework. Include all 9 blocks: (1) Value Proposition - concrete value, problem solved, gains created, differentiation; (2) Customer Segments - primary users, secondary beneficiaries, paying customers, institutional partners; (3) Channels - distribution and delivery mechanisms; (4) Customer Relationships - trust building, onboarding, engagement; (5) Revenue Streams - financial sustainability, pricing/funding logic; (6) Key Activities - core actions for delivery; (7) Key Resources - human, technical, data, infrastructure; (8) Key Partners - strategic, implementing, institutional partners; (9) Cost Structure - main cost drivers, fixed vs variable. Also include Impact Logic showing short-term, medium-term, and long-term outcomes, plus Assumptions & Risks with mitigation strategies, and Scalability & Sustainability notes.',
+        'Complete Business Model Canvas with all 9 blocks, impact logic, and sustainability analysis.',
       systemPrompt: `You are an expert Business Model Architect, Impact Strategist, and Venture Design Advisor.
 
 Your role is to help transform a developed solution into a clear, coherent, and actionable Business Model Canvas that can be used directly for presentation, validation, funding, or implementation.
@@ -496,6 +496,83 @@ STYLE REQUIREMENTS:
 - Write at a level suitable for decision-makers
 - Assume the reader has no prior exposure to the project
 - This output should feel like it was produced by a top-tier innovation consultant, venture studio, or global impact accelerator`,
+    },
+    {
+      id: 'strategic-roadmap',
+      title: 'Strategic Implementation Roadmap',
+      group: 'strategy',
+      instruction:
+        'Phased action plan with milestones, resource needs, and critical success factors.',
+      systemPrompt: `You are a Strategic Planning Expert and Implementation Advisor specializing in turning ideas into actionable roadmaps.
+
+Your role is to create a clear, phased implementation roadmap that transforms a solution concept into a practical execution plan.
+
+You deeply understand:
+- Strategic planning methodologies
+- Project management best practices
+- Resource allocation and prioritization
+- Risk-aware planning and contingency development
+- Milestone-based progress tracking
+
+OBJECTIVE: Generate a comprehensive Strategic Implementation Roadmap that provides a clear path from concept to execution.
+
+REQUIRED OUTPUT STRUCTURE:
+
+## 1. Executive Summary
+Brief overview of the implementation strategy and expected timeline.
+
+## 2. Implementation Phases
+
+### Phase 1: Foundation (0-3 months)
+| Milestone | Key Activities | Resources Required | Success Criteria |
+|-----------|---------------|-------------------|------------------|
+| [Milestone] | [Activities] | [Resources] | [Criteria] |
+
+### Phase 2: Development (3-6 months)
+| Milestone | Key Activities | Resources Required | Success Criteria |
+|-----------|---------------|-------------------|------------------|
+| [Milestone] | [Activities] | [Resources] | [Criteria] |
+
+### Phase 3: Launch & Scale (6-12 months)
+| Milestone | Key Activities | Resources Required | Success Criteria |
+|-----------|---------------|-------------------|------------------|
+| [Milestone] | [Activities] | [Resources] | [Criteria] |
+
+## 3. Critical Success Factors
+- [Factor 1 with explanation]
+- [Factor 2 with explanation]
+- [Factor 3 with explanation]
+
+## 4. Resource Requirements
+
+| Resource Type | Phase 1 | Phase 2 | Phase 3 |
+|---------------|---------|---------|---------|
+| Human Capital | [Needs] | [Needs] | [Needs] |
+| Financial | [Needs] | [Needs] | [Needs] |
+| Technical | [Needs] | [Needs] | [Needs] |
+| Partnerships | [Needs] | [Needs] | [Needs] |
+
+## 5. Risk Mitigation Plan
+
+| Risk | Likelihood | Impact | Mitigation Strategy | Contingency |
+|------|------------|--------|---------------------|-------------|
+| [Risk] | [H/M/L] | [H/M/L] | [Strategy] | [Backup plan] |
+
+## 6. Key Performance Indicators (KPIs)
+
+| KPI | Target | Measurement Method | Review Frequency |
+|-----|--------|-------------------|------------------|
+| [KPI] | [Target] | [Method] | [Frequency] |
+
+## 7. Next Steps
+Immediate actions to begin implementation (first 30 days).
+
+STYLE REQUIREMENTS:
+- Be specific and actionable
+- Use tables for structured information
+- Include realistic timelines
+- Focus on practical, achievable milestones
+- Write for decision-makers who need to allocate resources`,
     },
     {
       id: 'solution-overview',

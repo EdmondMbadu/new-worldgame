@@ -525,7 +525,7 @@
   <div class="relative w-full max-w-5xl rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-500">
+        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-500">
           {{ 'playgroundSteps.finalReview.reportModal.badge' | translate }}
         </p>
         <h2 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
@@ -544,16 +544,24 @@
     </div>
 
     <div class="mt-6 max-h-[60vh] space-y-6 overflow-y-auto pr-2">
-      <div *ngFor="let group of reportGroups" class="rounded-2xl border border-slate-200 bg-white/80 p-3 dark:border-slate-700 dark:bg-slate-900/60">
+      <div *ngFor="let group of reportGroups"
+        class="rounded-2xl border p-3"
+        [ngClass]="group.id === 'strategy'
+          ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-700/50 dark:bg-emerald-900/20'
+          : 'border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-900/60'">
         <button
           type="button"
           (click)="toggleReportGroup(group.id)"
           class="flex w-full items-center justify-between gap-2 text-left">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <h3 class="text-sm font-semibold uppercase tracking-wide"
+            [ngClass]="group.id === 'strategy'
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-slate-500 dark:text-slate-400'">
             {{ group.label }}
           </h3>
           <svg
-            class="h-4 w-4 text-slate-400 transition-transform"
+            class="h-4 w-4 transition-transform"
+            [ngClass]="group.id === 'strategy' ? 'text-emerald-500' : 'text-slate-400'"
             [class.rotate-180]="reportGroupState[group.id]"
             fill="none"
             stroke="currentColor"
@@ -569,8 +577,12 @@
             (click)="selectReportType(report)"
             class="w-full rounded-2xl border p-4 text-left transition"
             [ngClass]="selectedReportTypeId === report.id
-              ? 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-100 dark:border-amber-400/70 dark:bg-amber-500/10'
-              : 'border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-400/40'">
+              ? (report.group === 'strategy'
+                  ? 'border-emerald-400 bg-emerald-50 shadow-lg shadow-emerald-100 dark:border-emerald-400/70 dark:bg-emerald-500/10'
+                  : 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-100 dark:border-amber-400/70 dark:bg-amber-500/10')
+              : (report.group === 'strategy'
+                  ? 'border-emerald-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-emerald-700/50 dark:bg-slate-900/60 dark:hover:border-emerald-400/40'
+                  : 'border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-400/40')">
             <p class="text-sm font-semibold text-slate-900 dark:text-white">
               {{ report.title }}
             </p>
@@ -588,7 +600,7 @@
         <textarea
           [(ngModel)]="reportInstruction"
           rows="5"
-          class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
         </textarea>
       </div>
     </div>
@@ -604,7 +616,7 @@
         type="button"
         (click)="generateReport()"
         [disabled]="reportLoading"
-        class="inline-flex items-center justify-center rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/30 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60">
+        class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:from-emerald-400 hover:to-teal-400 disabled:cursor-not-allowed disabled:opacity-60">
         {{ 'playgroundSteps.finalReview.reportModal.generate' | translate }}
       </button>
     </div>
