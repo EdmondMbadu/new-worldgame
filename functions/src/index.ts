@@ -838,6 +838,9 @@ export const sendAIInsightsEmail = functions.https.onCall(
 );
 
 // Bulk AI Insights sender with concurrency
+// Batch size for processing - keeps each function invocation under timeout
+const AI_INSIGHTS_BATCH_SIZE = 25;
+
 export const startAIInsightsBulkJob = functions
   .runWith({ timeoutSeconds: 60, memory: '256MB' })
   .https.onCall(
@@ -865,16 +868,44 @@ export const startAIInsightsBulkJob = functions
         Math.max(Number(data.concurrency) || 4, 1),
         6
       );
+      const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
 
+      // Create the log entry FIRST so we have a single log ID for all batches
+      const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
+        mode: 'bulk',
+        subject,
+        createdBy,
+        recipients: recipients.map((r: AIInsightsPayload) => ({
+          email: r.userEmail,
+          solutionId: r.solutionId,
+          solutionTitle: r.solutionTitle,
+        })),
+        total: recipients.length,
+        successCount: 0,
+        failureCount: 0,
+        failures: [],
+        successfulEmails: [],
+        status: 'processing',
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        batchInfo: {
+          totalBatches: Math.ceil(recipients.length / AI_INSIGHTS_BATCH_SIZE),
+          completedBatches: 0,
+        },
+      });
+
+      // Create the first batch job with the log ID
       const jobRef = await admin.firestore().collection('ai_insights_bulk_jobs').add({
         status: 'queued',
         createdBy,
         recipients,
         concurrency,
+        logId: logRef.id,        // Share log ID across all batches
+        batchIndex: 0,           // Track which batch this is
+        totalRecipients: recipients.length,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      return { success: true, jobId: jobRef.id };
+      return { success: true, jobId: jobRef.id, logId: logRef.id };
     }
   );
 
@@ -883,12 +914,14 @@ export const processAIInsightsBulkJob = functions
   .firestore.document('ai_insights_bulk_jobs/{jobId}')
   .onCreate(async (snap) => {
     const data = snap.data() || {};
-    const recipients = Array.isArray(data.recipients) ? data.recipients : [];
+    const allRecipients = Array.isArray(data.recipients) ? data.recipients : [];
     const concurrency = Math.min(Math.max(Number(data.concurrency) || 4, 1), 6);
     const createdBy = data.createdBy || 'unknown';
-    const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
+    const logId = data.logId as string | undefined;
+    const batchIndex = Number(data.batchIndex) || 0;
+    const totalRecipients = Number(data.totalRecipients) || allRecipients.length;
 
-    if (!recipients.length) {
+    if (!allRecipients.length) {
       await snap.ref.update({
         status: 'failed',
         error: 'No recipients provided.',
@@ -897,74 +930,79 @@ export const processAIInsightsBulkJob = functions
       return;
     }
 
-    // Create initial log entry immediately so it appears in the UI
-    const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
-      mode: 'bulk',
-      subject,
-      createdBy,
-      recipients: recipients.map((r: AIInsightsPayload) => ({
-        email: r.userEmail,
-        solutionId: r.solutionId,
-        solutionTitle: r.solutionTitle,
-      })),
-      total: recipients.length,
-      successCount: 0,
-      failureCount: 0,
-      failures: [],
-      status: 'processing',
-      sentAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    // Get or create log reference
+    let logRef: admin.firestore.DocumentReference;
+    if (logId) {
+      // This is a continuation batch - use existing log
+      logRef = admin.firestore().collection('ai_insights_send_logs').doc(logId);
+    } else {
+      // This is an old-style job without logId (backward compatibility)
+      const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
+      logRef = await admin.firestore().collection('ai_insights_send_logs').add({
+        mode: 'bulk',
+        subject,
+        createdBy,
+        recipients: allRecipients.map((r: AIInsightsPayload) => ({
+          email: r.userEmail,
+          solutionId: r.solutionId,
+          solutionTitle: r.solutionTitle,
+        })),
+        total: allRecipients.length,
+        successCount: 0,
+        failureCount: 0,
+        failures: [],
+        successfulEmails: [],
+        status: 'processing',
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    // Take only the batch we're processing
+    const batchRecipients = allRecipients.slice(0, AI_INSIGHTS_BATCH_SIZE);
+    const remainingRecipients = allRecipients.slice(AI_INSIGHTS_BATCH_SIZE);
+    const hasMoreBatches = remainingRecipients.length > 0;
+
+    console.log(`Processing batch ${batchIndex + 1}: ${batchRecipients.length} recipients (${remainingRecipients.length} remaining)`);
 
     await snap.ref.update({
       status: 'processing',
       logId: logRef.id,
+      batchIndex,
+      batchSize: batchRecipients.length,
       startedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     const failures: string[] = [];
-    const successfulEmails: string[] = []; // Track which emails succeeded
+    const successfulEmails: string[] = [];
     let successCount = 0;
-    let lastUpdateTime = Date.now();
 
-    // Helper to update progress (throttled to every 5 seconds to reduce writes)
-    const updateProgress = async (force = false) => {
-      const now = Date.now();
-      if (!force && now - lastUpdateTime < 5000) return; // Throttle updates
-      lastUpdateTime = now;
-
-      const processed = successCount + failures.length;
-      const unsent = recipients.length - processed;
-      await Promise.all([
-        logRef.update({
-          successCount,
-          failureCount: failures.length,
-          failures: failures.slice(-50), // Keep last 50 failures
-          successfulEmails: successfulEmails.slice(), // Track which emails succeeded
-          unsent,
-          status: 'processing',
-        }),
-        snap.ref.update({
-          successCount,
-          failureCount: failures.length,
-          processed,
-        }),
-      ]);
+    // Helper to update progress in the shared log (uses atomic increment)
+    const updateLogProgress = async () => {
+      const updateData: Record<string, any> = {
+        successCount: admin.firestore.FieldValue.increment(successCount),
+        failureCount: admin.firestore.FieldValue.increment(failures.length),
+      };
+      // arrayUnion requires at least 1 argument, so only add if arrays have items
+      if (failures.length > 0) {
+        updateData.failures = admin.firestore.FieldValue.arrayUnion(...failures.slice(-20));
+      }
+      if (successfulEmails.length > 0) {
+        updateData.successfulEmails = admin.firestore.FieldValue.arrayUnion(...successfulEmails);
+      }
+      await logRef.update(updateData);
     };
 
-    // ===== PHASE 1: Pre-generate AI content for unique solutions =====
-    // This dramatically reduces Gemini API calls (e.g., 100 recipients with 30 unique solutions = 30 calls instead of 100)
+    // ===== PHASE 1: Pre-generate AI content for unique solutions in this batch =====
     const uniqueSolutions = new Map<string, AIInsightsPayload>();
-    for (const r of recipients) {
+    for (const r of batchRecipients) {
       const payload = r as AIInsightsPayload;
       if (payload.solutionId && !uniqueSolutions.has(payload.solutionId)) {
         uniqueSolutions.set(payload.solutionId, payload);
       }
     }
 
-    console.log(`Pre-generating AI content for ${uniqueSolutions.size} unique solutions (${recipients.length} total recipients)`);
+    console.log(`Batch ${batchIndex + 1}: Pre-generating AI content for ${uniqueSolutions.size} unique solutions`);
 
-    // Pre-generate content for all unique solutions with concurrency
-    // This populates the cache so the email sending phase is fast
     const contentCache = new Map<string, { fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }>();
     await runWithConcurrency(Array.from(uniqueSolutions.values()), concurrency, async (solution) => {
       try {
@@ -979,28 +1017,22 @@ export const processAIInsightsBulkJob = functions
         console.log(`Generated content for solution: ${solution.solutionTitle}`);
       } catch (error: any) {
         console.error(`Failed to generate content for solution ${solution.solutionId}:`, error?.message);
-        // Continue - we'll try again during email sending if needed
       }
     });
 
-    console.log(`Content generation complete. Cached ${contentCache.size}/${uniqueSolutions.size} solutions. Now sending emails...`);
+    console.log(`Batch ${batchIndex + 1}: Content generation complete. Now sending ${batchRecipients.length} emails...`);
 
-    // ===== PHASE 2: Send emails using cached content (fast) =====
-    await runWithConcurrency(recipients, concurrency, async (recipient) => {
+    // ===== PHASE 2: Send emails using cached content =====
+    await runWithConcurrency(batchRecipients, concurrency, async (recipient) => {
       const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
       if (!userEmail || !solutionId || !solutionTitle) {
-        failures.push(
-          `missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`
-        );
-        await updateProgress();
+        failures.push(`missing_fields:${userEmail || 'unknown'}:${solutionId || 'none'}`);
         return;
       }
 
       try {
-        // Use pre-generated cached content (fast path)
         let cachedContent = contentCache.get(solutionId);
         if (!cachedContent) {
-          // Fallback: generate if not in local cache (will check Firestore cache)
           cachedContent = await generateSolutionAIContent(
             solutionId,
             solutionTitle,
@@ -1021,42 +1053,67 @@ export const processAIInsightsBulkJob = functions
           html,
         });
         successCount += 1;
-        successfulEmails.push(userEmail.toLowerCase()); // Track this email as sent
-        console.log(`Bulk email sent to ${userEmail} (${successCount}/${recipients.length})`);
-        await updateProgress();
+        successfulEmails.push(userEmail.toLowerCase());
+        console.log(`Batch ${batchIndex + 1}: Email sent to ${userEmail} (${successCount}/${batchRecipients.length})`);
       } catch (error: any) {
         console.error(`Failed to send to ${userEmail}:`, error?.message);
-        failures.push(
-          `${userEmail}:${error?.message || 'failed to send'}`
-        );
-        await updateProgress();
+        failures.push(`${userEmail}:${error?.message || 'failed to send'}`);
       }
     });
 
-    // Final update
-    const finalStatus = successCount === recipients.length
-      ? 'completed'
-      : successCount > 0
-        ? 'incomplete'
-        : 'failed';
+    // Update shared log with this batch's results
+    await updateLogProgress();
 
-    await logRef.update({
-      successCount,
-      failureCount: failures.length,
-      failures,
-      successfulEmails, // Save all successful emails for retry logic
-      status: finalStatus,
-      unsent: recipients.length - successCount - failures.length,
-    });
-
+    // Update this job's status
     await snap.ref.update({
-      status: finalStatus,
-      total: recipients.length,
-      successCount,
-      failureCount: failures.length,
-      failures,
+      status: 'batch_completed',
+      batchSuccessCount: successCount,
+      batchFailureCount: failures.length,
       completedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
+
+    console.log(`Batch ${batchIndex + 1} completed: ${successCount} sent, ${failures.length} failed`);
+
+    // ===== PHASE 3: Create continuation job for remaining recipients =====
+    if (hasMoreBatches) {
+      console.log(`Creating continuation job for ${remainingRecipients.length} remaining recipients...`);
+      await admin.firestore().collection('ai_insights_bulk_jobs').add({
+        status: 'queued',
+        createdBy,
+        recipients: remainingRecipients,
+        concurrency,
+        logId: logRef.id,
+        batchIndex: batchIndex + 1,
+        totalRecipients,
+        continuationOf: snap.id,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } else {
+      // All batches complete - finalize the log
+      console.log(`All batches completed. Finalizing log...`);
+      const logSnap = await logRef.get();
+      const logData = logSnap.data() || {};
+      const finalSuccessCount = logData.successCount || 0;
+      const finalFailureCount = logData.failureCount || 0;
+      const total = logData.total || totalRecipients;
+
+      const finalStatus = finalSuccessCount === total
+        ? 'completed'
+        : finalSuccessCount > 0
+          ? 'completed_with_errors'
+          : 'failed';
+
+      await logRef.update({
+        status: finalStatus,
+        unsent: total - finalSuccessCount - finalFailureCount,
+        completedAt: admin.firestore.FieldValue.serverTimestamp(),
+        batchInfo: {
+          totalBatches: batchIndex + 1,
+          completedBatches: batchIndex + 1,
+        },
+      });
+      console.log(`Bulk job finalized: ${finalSuccessCount}/${total} emails sent successfully`);
+    }
   });
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
