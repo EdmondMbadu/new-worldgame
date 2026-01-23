@@ -55,6 +55,7 @@ interface ReportType {
   title: string;
   instruction: string;
   group: string;
+  systemPrompt?: string; // Optional custom system prompt for specialized reports
 }
 
 interface ReportGroup {
@@ -259,7 +260,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   reportFormatted = '';
   showReportModal = false;
   reportInstruction = '';
-  selectedReportTypeId = 'solution-overview';
+  selectedReportTypeId = 'business-model-canvas';
   private reportDocSub?: Subscription;
 
   // Download loading states
@@ -269,7 +270,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   downloadingReportDocx = false;
   downloadingFeedbackPdf = false;
   reportGroupState: Record<string, boolean> = {
-    understanding: true,
+    strategy: true,
+    understanding: false,
     design: false,
     execution: false,
     funding: false,
@@ -360,6 +362,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   }
 
   reportGroups: ReportGroup[] = [
+    { id: 'strategy', label: 'Strategy' },
     { id: 'understanding', label: 'Understanding' },
     { id: 'design', label: 'Design' },
     { id: 'execution', label: 'Execution' },
@@ -368,6 +371,132 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ];
 
   reportTypes: ReportType[] = [
+    {
+      id: 'business-model-canvas',
+      title: 'Impact BMC Theory of Change/Logic Model Report',
+      group: 'strategy',
+      instruction:
+        'Generate a complete Business Model Canvas following the Alexander Osterwalder framework. Include all 9 blocks: (1) Value Proposition - concrete value, problem solved, gains created, differentiation; (2) Customer Segments - primary users, secondary beneficiaries, paying customers, institutional partners; (3) Channels - distribution and delivery mechanisms; (4) Customer Relationships - trust building, onboarding, engagement; (5) Revenue Streams - financial sustainability, pricing/funding logic; (6) Key Activities - core actions for delivery; (7) Key Resources - human, technical, data, infrastructure; (8) Key Partners - strategic, implementing, institutional partners; (9) Cost Structure - main cost drivers, fixed vs variable. Also include Impact Logic showing short-term, medium-term, and long-term outcomes, plus Assumptions & Risks with mitigation strategies, and Scalability & Sustainability notes.',
+      systemPrompt: `You are an expert Business Model Architect, Impact Strategist, and Venture Design Advisor.
+
+Your role is to help transform a developed solution into a clear, coherent, and actionable Business Model Canvas that can be used directly for presentation, validation, funding, or implementation.
+
+You deeply understand:
+- The Business Model Canvas (Alexander Osterwalder)
+- Impact-driven and mission-oriented ventures
+- The relationship between problem statements, beneficiaries, value creation, and sustainability
+- The difference between activities, outputs, outcomes, and long-term impact
+- Early-stage, real-world constraints (resources, adoption, risks, scalability)
+
+You do not generate generic or academic content. You generate grounded, realistic, and decision-ready models.
+
+CONTEXT: You will receive a problem/challenge, a proposed solution, target population/beneficiaries, and optional context (location, constraints, technology, stakeholders). Assume the solution is conceptually complete and your task is to structure it into a strong business model.
+
+OBJECTIVE: Generate a complete Business Model Canvas that:
+- Is internally consistent (all blocks reinforce each other)
+- Clearly explains how value is created, delivered, and sustained
+- Distinguishes users, beneficiaries, and customers when relevant
+- Explicitly supports impact + viability, not one at the expense of the other
+- Can be used as-is in pitch decks, grant applications, innovation reports, incubators/accelerators, and institutional reviews
+
+REQUIRED OUTPUT STRUCTURE:
+
+## 1. Executive Overview
+One concise paragraph explaining the problem, the solution, who it is for, why it matters, and why it can realistically work.
+
+## 2. Business Model Canvas
+
+### Value Proposition
+- What concrete value the solution provides
+- What problem it solves or pain it reduces
+- What meaningful gain it creates
+- Why it is different or better than existing alternatives
+
+### Customer Segments
+| Segment Type | Description |
+|--------------|-------------|
+| Primary Users | [Who directly uses the solution] |
+| Secondary Beneficiaries | [Who else benefits] |
+| Paying Customers | [Who pays, if different] |
+| Institutional Partners | [Organizations involved] |
+
+### Channels
+- How the solution reaches users
+- Distribution, access, or delivery mechanisms
+- Online, offline, hybrid, institutional, or community-based channels
+
+### Customer Relationships
+- How trust is built
+- How users are onboarded
+- How engagement is maintained
+- Human, automated, community-driven, or hybrid relationships
+
+### Revenue Streams
+| Revenue Source | Description | Who Pays | When |
+|----------------|-------------|----------|------|
+| [Source 1] | [Details] | [Payer] | [Timing] |
+
+Include non-profit/hybrid models if relevant.
+
+### Key Activities
+Core actions required to deliver the value proposition. What must be done exceptionally well.
+
+### Key Resources
+| Resource Type | Description | Critical vs Optional |
+|---------------|-------------|---------------------|
+| Human | [Details] | [Priority] |
+| Technical | [Details] | [Priority] |
+| Data/Infrastructure | [Details] | [Priority] |
+| Partnerships | [Details] | [Priority] |
+
+### Key Partners
+| Partner Type | Who | Why Important |
+|--------------|-----|---------------|
+| Strategic | [Partner] | [Reason] |
+| Implementing | [Partner] | [Reason] |
+| Institutional | [Partner] | [Reason] |
+
+### Cost Structure
+| Cost Category | Type (Fixed/Variable) | Priority |
+|---------------|----------------------|----------|
+| [Category] | [Type] | [High/Medium/Low] |
+
+## 3. Impact Logic Alignment
+
+**Short-term Outcomes (Immediate effects):**
+- [Outcome 1]
+- [Outcome 2]
+
+**Medium-term Outcomes (Behavioral/systemic change):**
+- [Outcome 1]
+- [Outcome 2]
+
+**Long-term Impact (Social, economic, environmental, or institutional):**
+- [Impact 1]
+- [Impact 2]
+
+**Impact Chain:** Solution → Activities → Outputs → Outcomes → Impact
+
+## 4. Assumptions & Risks
+
+| Assumption/Risk | Type | Likelihood | Mitigation Strategy |
+|-----------------|------|------------|---------------------|
+| [Item] | [Assumption/Risk] | [High/Medium/Low] | [Strategy] |
+
+## 5. Scalability & Sustainability Notes
+- How the model could scale (geographically, functionally, or institutionally)
+- What would need to change at scale
+- What makes the model resilient over time
+
+STYLE REQUIREMENTS:
+- Be clear, structured, and professional
+- Use tables where they improve clarity and readability
+- Use bullet points for lists
+- Use **bold** for key terms and section emphasis
+- Write at a level suitable for decision-makers
+- Assume the reader has no prior exposure to the project
+- This output should feel like it was produced by a top-tier innovation consultant, venture studio, or global impact accelerator`,
+    },
     {
       id: 'solution-overview',
       title: 'Solution Overview Report',
@@ -1767,11 +1896,93 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     if (!value) {
       return '';
     }
-    let formatted = this.escapeHtml(value);
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    formatted = formatted.replace(/\n/g, '<br>');
+
+    // Process markdown tables first (before escaping HTML)
+    let formatted = this.formatMarkdownTables(value);
+
+    // Split by preserved table markers, escape non-table parts, then rejoin
+    const tableMarker = '<!--TABLE_PRESERVED-->';
+    const parts = formatted.split(tableMarker);
+    formatted = parts.map((part, index) => {
+      // Even indices are non-table content, odd indices are tables
+      if (index % 2 === 0) {
+        let escaped = this.escapeHtml(part);
+        // Format headings (## and ###)
+        escaped = escaped.replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold text-slate-800 dark:text-slate-200 mt-4 mb-2">$1</h4>');
+        escaped = escaped.replace(/^## (.+)$/gm, '<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100 mt-6 mb-3 border-b border-slate-200 dark:border-slate-700 pb-2">$1</h3>');
+        // Format bold and italic
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Format bullet points
+        escaped = escaped.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-slate-700 dark:text-slate-300">$1</li>');
+        // Wrap consecutive list items in <ul>
+        escaped = escaped.replace(/(<li[^>]*>.*?<\/li>\s*)+/gs, '<ul class="my-2 space-y-1">$&</ul>');
+        // Format newlines
+        escaped = escaped.replace(/\n/g, '<br>');
+        // Clean up extra breaks after headings and lists
+        escaped = escaped.replace(/<\/h[34]><br>/g, '</h3>').replace(/<\/h4><br>/g, '</h4>');
+        escaped = escaped.replace(/<\/ul><br>/g, '</ul>');
+        return escaped;
+      }
+      return part; // Return table HTML as-is
+    }).join('');
+
     return formatted;
+  }
+
+  private formatMarkdownTables(value: string): string {
+    // Match markdown tables and convert to HTML
+    const tableRegex = /(\|.+\|[\r\n]+\|[-:\| ]+\|[\r\n]+(?:\|.+\|[\r\n]*)+)/g;
+
+    return value.replace(tableRegex, (match) => {
+      const lines = match.trim().split('\n').filter(line => line.trim());
+      if (lines.length < 2) return match;
+
+      const headerRow = lines[0];
+      const separatorRow = lines[1];
+      const dataRows = lines.slice(2);
+
+      // Parse header
+      const headers = headerRow.split('|').filter(cell => cell.trim()).map(cell => cell.trim());
+
+      // Parse alignment from separator
+      const alignments = separatorRow.split('|').filter(cell => cell.trim()).map(cell => {
+        const trimmed = cell.trim();
+        if (trimmed.startsWith(':') && trimmed.endsWith(':')) return 'center';
+        if (trimmed.endsWith(':')) return 'right';
+        return 'left';
+      });
+
+      // Build HTML table
+      let html = '<!--TABLE_PRESERVED--><div class="overflow-x-auto my-4"><table class="min-w-full border-collapse border border-slate-300 dark:border-slate-600 text-sm">';
+
+      // Header
+      html += '<thead class="bg-slate-100 dark:bg-slate-800"><tr>';
+      headers.forEach((header, i) => {
+        const align = alignments[i] || 'left';
+        html += `<th class="border border-slate-300 dark:border-slate-600 px-3 py-2 text-${align} font-semibold text-slate-800 dark:text-slate-200">${this.escapeHtml(header)}</th>`;
+      });
+      html += '</tr></thead>';
+
+      // Body
+      html += '<tbody>';
+      dataRows.forEach((row, rowIdx) => {
+        const cells = row.split('|').filter(cell => cell.trim() !== '').map(cell => cell.trim());
+        const bgClass = rowIdx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/50';
+        html += `<tr class="${bgClass}">`;
+        cells.forEach((cell, i) => {
+          const align = alignments[i] || 'left';
+          // Handle bold in table cells
+          let cellContent = this.escapeHtml(cell);
+          cellContent = cellContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+          html += `<td class="border border-slate-300 dark:border-slate-600 px-3 py-2 text-${align} text-slate-700 dark:text-slate-300">${cellContent}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div><!--TABLE_PRESERVED-->';
+
+      return html;
+    });
   }
 
   private escapeHtml(value: string): string {
@@ -1934,16 +2145,26 @@ Niveau de préparation: ______`;
       return '';
     }
 
-    const intro = `Role: You are a senior report writer.
+    // Use custom system prompt if available for this report type, otherwise use default
+    const hasCustomSystemPrompt = reportType?.systemPrompt?.trim();
+
+    let intro: string;
+    if (hasCustomSystemPrompt) {
+      // Use the specialized system prompt for reports like Business Model Canvas
+      intro = reportType!.systemPrompt!;
+    } else {
+      // Default generic report writer prompt
+      intro = `Role: You are a senior report writer.
 Generate a professional, structured report based on the solution details below.
 Write in a polished, journalistic tone suitable for The Economist or The New York Times.
 Include one short reference to NewWorld Game in the opening paragraph for context.
 Use clear headings and concise paragraphs; bullets only when helpful.
 Output plain text only (no markdown, no asterisks, no special formatting).
 Do not include scores, rubrics, or evaluation language.`;
+    }
 
     const reportTitle = reportType?.title ? `Report Type: ${reportType.title}` : 'Report Type: Custom';
-    return `${intro}\n${reportTitle}\nInstruction: ${instruction}\n\n${solutionSummary}`;
+    return `${intro}\n\n${reportTitle}\nInstruction: ${instruction}\n\n${solutionSummary}`;
   }
 
   private buildSolutionSummaryForAi(): string {
@@ -2249,12 +2470,59 @@ Do not include scores, rubrics, or evaluation language.`;
     if (!value) {
       return '';
     }
-    let cleaned = value.replace(/\*\*(.*?)\*\*/g, '$1');
+
+    let cleaned = value;
+
+    // Convert markdown headings to plain text with emphasis
+    cleaned = cleaned.replace(/^### (.+)$/gm, '\n$1\n');
+    cleaned = cleaned.replace(/^## (.+)$/gm, '\n$1:\n');
+
+    // Convert markdown tables to readable text format
+    cleaned = this.convertMarkdownTableToText(cleaned);
+
+    // Convert bullet points to clean format
+    cleaned = cleaned.replace(/^- (.+)$/gm, '  • $1');
+
+    // Remove remaining markdown formatting
+    cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
     cleaned = cleaned.replace(/\*(.*?)\*/g, '$1');
-    cleaned = cleaned.replace(/[_`#>]+/g, '');
+    cleaned = cleaned.replace(/[_`>]+/g, '');
     cleaned = cleaned.replace(/\r\n/g, '\n');
     cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
     return cleaned.trim();
+  }
+
+  private convertMarkdownTableToText(value: string): string {
+    // Match markdown tables
+    const tableRegex = /(\|.+\|[\r\n]+\|[-:\| ]+\|[\r\n]+(?:\|.+\|[\r\n]*)+)/g;
+
+    return value.replace(tableRegex, (match) => {
+      const lines = match.trim().split('\n').filter(line => line.trim());
+      if (lines.length < 2) return match;
+
+      const headerRow = lines[0];
+      const dataRows = lines.slice(2);
+
+      // Parse header
+      const headers = headerRow.split('|').filter(cell => cell.trim()).map(cell => cell.trim());
+
+      // Build text representation
+      let text = '\n';
+
+      // Add data rows
+      dataRows.forEach((row) => {
+        const cells = row.split('|').filter(cell => cell.trim() !== '').map(cell => cell.trim());
+        cells.forEach((cell, i) => {
+          if (headers[i] && cell) {
+            text += `  ${headers[i]}: ${cell}\n`;
+          }
+        });
+        text += '\n';
+      });
+
+      return text;
+    });
   }
 
   private triggerDownload(blob: Blob, fileName: string): void {
