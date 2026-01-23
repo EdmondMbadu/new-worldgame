@@ -266,7 +266,7 @@ export class GlobalRegisterComponent implements OnInit {
             email: this.email,
             firstName: this.firstName,
             lastName: this.lastName,
-            subject: 'Thanks for registering for GSL 2025 (Pay Later)',
+            subject: 'Thanks for registering for GSL 2026 (Pay Later)',
           })
           .subscribe(() => {
             console.log('User email sent');
@@ -285,7 +285,7 @@ export class GlobalRegisterComponent implements OnInit {
           this.fns
             .httpsCallable('gslAdminNotificationEmail')({
               emailAdmin: email, // Dynamically assign the email
-              subject: 'New GSL 2025 Registration (Pay Later)',
+              subject: 'New GSL 2026 Registration (Pay Later)',
               ...registrationData, // Ensure this object contains the needed fields
             })
             .subscribe({
@@ -351,7 +351,7 @@ export class GlobalRegisterComponent implements OnInit {
   }
 
   private initializeCountdown(): void {
-    const eventDate = new Date('June 16, 2025 12:00:00 EST').getTime();
+    const eventDate = new Date('June 15, 2026 12:00:00 EST').getTime();
     const daysElement = document.getElementById('days');
     const hoursElement = document.getElementById('hours');
     const minutesElement = document.getElementById('minutes');
