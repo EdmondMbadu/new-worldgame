@@ -326,6 +326,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ];
   selectedAiEvaluator: AiEvaluatorOption = this.aiEvaluatorOptions[0];
   showAiEvaluatorDropdown = false;
+  studioActivePanel: 'export' | 'feedback' | 'report' | null = null;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
   @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 

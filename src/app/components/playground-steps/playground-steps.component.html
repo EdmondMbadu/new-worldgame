@@ -144,374 +144,408 @@
               class="block mb-2 text-xl font-normal leading-none text-gray-500 dark:text-gray-400">
               {{ 'playgroundSteps.finalReview.title' | translate }}
             </time>
-            <div *ngIf="isFinalStep(i)" class="w-full mt-4 space-y-4">
+            <div *ngIf="isFinalStep(i)" class="w-full mt-4">
 
-              <!-- SECTION 1: Download Current Draft -->
-              <div class="w-full rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/80 p-5 shadow-sm transition-all hover:shadow-md dark:border-slate-700 dark:from-slate-900/80 dark:to-slate-800/60">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-                    <svg class="h-5 w-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                      {{ 'playgroundSteps.finalReview.downloadDraft' | translate }}
-                    </p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Save your current work as PDF or Word</p>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    (click)="downloadCurrentDraftPdf()"
-                    [disabled]="!currentDraftText || downloadingDraftPdf"
-                    class="group relative inline-flex items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700">
-                    <ng-container *ngIf="!downloadingDraftPdf; else draftPdfLoading">
-                      <svg class="mr-2 h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-3 9v4h-1v-4H8l2-2 2 2h-1zm6 0v4h-1v-4h-1l2-2 2 2h-1z"/>
-                      </svg>
-                      PDF
-                    </ng-container>
-                    <ng-template #draftPdfLoading>
-                      <svg class="h-4 w-4 animate-spin text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    </ng-template>
-                  </button>
-                  <button
-                    type="button"
-                    (click)="downloadCurrentDraftDocx()"
-                    [disabled]="!currentDraftText || downloadingDraftDocx"
-                    class="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-slate-900/20 transition-all hover:from-slate-700 hover:to-slate-800 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:from-slate-700 dark:to-slate-800 dark:shadow-slate-900/40 dark:hover:from-slate-600 dark:hover:to-slate-700">
-                    <ng-container *ngIf="!downloadingDraftDocx; else draftDocxLoading">
-                      <svg class="mr-2 h-4 w-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM9.5 13l1.5 6 1.5-6h1l1.5 6 1.5-6h1l-2 8h-1l-1.5-6-1.5 6h-1l-2-8h1z"/>
-                      </svg>
-                      Word
-                    </ng-container>
-                    <ng-template #draftDocxLoading>
-                      <svg class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    </ng-template>
-                  </button>
-                </div>
-              </div>
+              <!-- ═══════════════════════════════════════════════════════════════
+                   STUDIO PANEL - Unified actions hub
+                   ═══════════════════════════════════════════════════════════════ -->
+              <div class="w-full rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700/60 dark:bg-slate-900/80 overflow-hidden">
 
-              <!-- SECTION 2: AI Feedback -->
-              <div class="w-full rounded-2xl border border-teal-200/60 bg-gradient-to-br from-teal-50/50 to-emerald-50/30 p-5 shadow-sm transition-all hover:shadow-md dark:border-teal-700/40 dark:from-slate-900/80 dark:to-teal-900/20">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/50">
-                    <svg class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                      {{ 'playgroundSteps.finalReview.getAiFeedback' | translate }}
-                    </p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Get expert evaluation from AI advisors</p>
-                  </div>
-                </div>
-
-                <!-- AI Evaluator Selector -->
-                <div class="relative mb-3" #aiEvaluatorDropdownRef>
-                  <button
-                    type="button"
-                    (click)="toggleAiEvaluatorDropdown()"
-                    class="w-full flex items-center justify-between gap-2 rounded-xl border border-teal-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-teal-300 hover:bg-teal-50/50 dark:border-teal-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-teal-600 dark:hover:bg-slate-700">
-                    <div class="flex items-center gap-3 min-w-0">
-                      <img
-                        [src]="selectedAiEvaluator.avatarPath"
-                        [alt]="selectedAiEvaluator.name"
-                        class="h-8 w-8 rounded-full object-cover ring-2 ring-teal-200 dark:ring-teal-600" />
-                      <span class="truncate font-semibold">{{ selectedAiEvaluator.name }}</span>
+                <!-- Studio Header -->
+                <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+                  <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 shadow-sm">
+                      <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
+                      </svg>
                     </div>
-                    <svg
-                      class="h-5 w-5 flex-shrink-0 text-teal-500 transition-transform"
-                      [class.rotate-180]="showAiEvaluatorDropdown"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
-                    </svg>
-                  </button>
-
-                  <!-- Dropdown Menu -->
-                  <div
-                    *ngIf="showAiEvaluatorDropdown"
-                    class="absolute z-20 mt-2 w-full max-h-56 overflow-y-auto rounded-xl border border-teal-200 bg-white shadow-xl dark:border-teal-700 dark:bg-slate-800">
-                    <button
-                      *ngFor="let ai of aiEvaluatorOptions"
-                      type="button"
-                      (click)="selectAiEvaluator(ai)"
-                      class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition hover:bg-teal-50 dark:hover:bg-slate-700"
-                      [ngClass]="{'bg-teal-50 dark:bg-teal-900/30': ai.collectionKey === selectedAiEvaluator.collectionKey}">
-                      <img
-                        [src]="ai.avatarPath"
-                        [alt]="ai.name"
-                        class="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-600" />
-                      <span class="truncate font-medium text-slate-700 dark:text-slate-200">{{ ai.name }}</span>
-                      <svg
-                        *ngIf="ai.collectionKey === selectedAiEvaluator.collectionKey"
-                        class="ml-auto h-5 w-5 flex-shrink-0 text-teal-600 dark:text-teal-400"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
-                      </svg>
-                    </button>
+                    <div>
+                      <h3 class="text-base font-semibold text-slate-900 dark:text-white">Studio</h3>
+                      <p class="text-xs text-slate-500 dark:text-slate-400">Export, evaluate, and create</p>
+                    </div>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  (click)="requestAiFeedback()"
-                  [disabled]="aiFeedbackLoading"
-                  class="w-full inline-flex items-center justify-center rounded-xl px-4 py-3.5 text-base font-semibold text-white shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
-                  [ngClass]="aiFeedbackText
-                    ? 'bg-gradient-to-r from-slate-600 to-slate-700 shadow-slate-500/30 hover:from-slate-500 hover:to-slate-600'
-                    : 'bg-gradient-to-r from-teal-500 to-emerald-500 shadow-teal-500/40 hover:from-teal-400 hover:to-emerald-400'">
-                  <ng-container *ngIf="!aiFeedbackLoading; else feedbackLoading">
-                    <ng-container *ngIf="aiFeedbackText; else firstFeedback">
-                      <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      {{ 'playgroundSteps.finalReview.getAnotherAiFeedback' | translate }}
-                    </ng-container>
-                    <ng-template #firstFeedback>
-                      <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                      {{ 'playgroundSteps.finalReview.getAiFeedback' | translate }}
-                    </ng-template>
-                  </ng-container>
-                  <ng-template #feedbackLoading>
-                    <span class="flex items-center gap-3">
-                      <svg class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>{{ 'playgroundSteps.finalReview.reviewing' | translate }}</span>
-                    </span>
-                  </ng-template>
-                </button>
+                <!-- Action Tiles Grid -->
+                <div class="p-4">
+                  <div class="grid grid-cols-3 gap-3">
 
-                <p
-                  *ngIf="aiFeedbackStatus"
-                  class="mt-3 text-sm text-center text-teal-700 dark:text-teal-300 animate-pulse">
-                  {{ aiFeedbackStatus }}
-                </p>
-                <div
-                  *ngIf="aiFeedbackError"
-                  class="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200">
-                  {{ aiFeedbackError }}
-                </div>
-              </div>
-
-              <!-- AI Feedback Results (shown when feedback is available) -->
-              <div
-                *ngIf="aiFeedbackText"
-                class="w-full rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-white to-emerald-50/30 p-6 shadow-xl shadow-emerald-500/10 backdrop-blur transition-all dark:border-teal-500/40 dark:from-slate-900/90 dark:to-teal-900/20">
-                <div class="mb-5 flex items-center gap-4">
-                  <img
-                    [src]="selectedAiEvaluator.avatarPath"
-                    [alt]="selectedAiEvaluator.name"
-                    class="h-12 w-12 rounded-full object-cover ring-3 ring-emerald-200 shadow-lg dark:ring-teal-500/40" />
-                  <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-300">{{ 'playgroundSteps.finalReview.evaluationBy' | translate: { name: selectedAiEvaluator.name } }}</p>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ 'playgroundSteps.finalReview.aiFeedback' | translate }}</h3>
-                  </div>
-                </div>
-
-                <ng-container *ngIf="hasStructuredFeedback; else fallbackFeedback">
-                  <div *ngIf="aiFeedbackParsed.scores.length" class="mb-5 space-y-3">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300">
-                      {{ 'playgroundSteps.finalReview.scores' | translate }}
-                    </p>
-                    <div class="grid gap-3 sm:grid-cols-2">
-                      <div
-                        *ngFor="let score of aiFeedbackParsed.scores"
-                        class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/70">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">
-                          {{ score.label }}
-                        </p>
-                        <div class="mt-1 flex items-baseline gap-1 text-slate-900 dark:text-white">
-                          <span class="text-3xl font-bold">
-                            {{ score.scoreValue || '—' }}
-                          </span>
-                          <span class="text-sm text-slate-500">
-                            /{{ score.scoreMax || '10' }}
-                          </span>
+                    <!-- Tile 1: Export Draft -->
+                    <div class="group relative">
+                      <button
+                        type="button"
+                        (click)="studioActivePanel = studioActivePanel === 'export' ? null : 'export'"
+                        [disabled]="!currentDraftText"
+                        class="w-full flex flex-col items-center gap-2.5 rounded-xl border-2 px-3 py-4 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        [ngClass]="studioActivePanel === 'export'
+                          ? 'border-violet-400 bg-violet-50 dark:border-violet-500/60 dark:bg-violet-500/10'
+                          : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-100/80 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600 dark:hover:bg-slate-800'">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-700 dark:ring-slate-600">
+                          <svg class="h-5 w-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
                         </div>
-                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-200">
-                          {{ score.reason || score.raw }}
-                        </p>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Export Draft</span>
+                      </button>
+                    </div>
+
+                    <!-- Tile 2: AI Feedback -->
+                    <div class="group relative">
+                      <button
+                        type="button"
+                        (click)="studioActivePanel = studioActivePanel === 'feedback' ? null : 'feedback'"
+                        class="w-full flex flex-col items-center gap-2.5 rounded-xl border-2 px-3 py-4 transition-all"
+                        [ngClass]="studioActivePanel === 'feedback'
+                          ? 'border-violet-400 bg-violet-50 dark:border-violet-500/60 dark:bg-violet-500/10'
+                          : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-100/80 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600 dark:hover:bg-slate-800'">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-700 dark:ring-slate-600">
+                          <svg class="h-5 w-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">AI Feedback</span>
+                        <span *ngIf="aiFeedbackText" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow">✓</span>
+                      </button>
+                    </div>
+
+                    <!-- Tile 3: Report -->
+                    <div class="group relative">
+                      <button
+                        type="button"
+                        (click)="studioActivePanel = studioActivePanel === 'report' ? null : 'report'"
+                        class="w-full flex flex-col items-center gap-2.5 rounded-xl border-2 px-3 py-4 transition-all"
+                        [ngClass]="studioActivePanel === 'report'
+                          ? 'border-violet-400 bg-violet-50 dark:border-violet-500/60 dark:bg-violet-500/10'
+                          : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-100/80 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600 dark:hover:bg-slate-800'">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-700 dark:ring-slate-600">
+                          <svg class="h-5 w-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Report</span>
+                        <span *ngIf="reportText" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white shadow">✓</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Expandable Content Panels -->
+                <div *ngIf="studioActivePanel" class="border-t border-slate-100 dark:border-slate-800">
+
+                  <!-- Export Panel -->
+                  <div *ngIf="studioActivePanel === 'export'" class="p-5 space-y-4 animate-fadeIn">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {{ 'playgroundSteps.finalReview.downloadDraft' | translate }}
+                      </p>
+                      <button (click)="studioActivePanel = null" class="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Save your current work in your preferred format</p>
+                    <div class="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        (click)="downloadCurrentDraftPdf()"
+                        [disabled]="!currentDraftText || downloadingDraftPdf"
+                        class="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                        <ng-container *ngIf="!downloadingDraftPdf; else draftPdfLoading">
+                          <svg class="h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-3 9v4h-1v-4H8l2-2 2 2h-1zm6 0v4h-1v-4h-1l2-2 2 2h-1z"/>
+                          </svg>
+                          PDF
+                        </ng-container>
+                        <ng-template #draftPdfLoading>
+                          <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </ng-template>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="downloadCurrentDraftDocx()"
+                        [disabled]="!currentDraftText || downloadingDraftDocx"
+                        class="flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-slate-700 dark:hover:bg-slate-600">
+                        <ng-container *ngIf="!downloadingDraftDocx; else draftDocxLoading">
+                          <svg class="h-4 w-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM9.5 13l1.5 6 1.5-6h1l1.5 6 1.5-6h1l-2 8h-1l-1.5-6-1.5 6h-1l-2-8h1z"/>
+                          </svg>
+                          Word
+                        </ng-container>
+                        <ng-template #draftDocxLoading>
+                          <svg class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </ng-template>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- AI Feedback Panel -->
+                  <div *ngIf="studioActivePanel === 'feedback'" class="p-5 space-y-4 animate-fadeIn">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {{ 'playgroundSteps.finalReview.getAiFeedback' | translate }}
+                      </p>
+                      <button (click)="studioActivePanel = null" class="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- AI Selector -->
+                    <div class="relative" #aiEvaluatorDropdownRef>
+                      <button
+                        type="button"
+                        (click)="toggleAiEvaluatorDropdown()"
+                        class="w-full flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm transition hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-slate-500">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                          <img
+                            [src]="selectedAiEvaluator.avatarPath"
+                            [alt]="selectedAiEvaluator.name"
+                            class="h-7 w-7 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600" />
+                          <span class="truncate font-medium text-slate-700 dark:text-slate-200">{{ selectedAiEvaluator.name }}</span>
+                        </div>
+                        <svg class="h-4 w-4 text-slate-400 transition-transform" [class.rotate-180]="showAiEvaluatorDropdown" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      <div *ngIf="showAiEvaluatorDropdown" class="absolute z-20 mt-1.5 w-full max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-800">
+                        <button
+                          *ngFor="let ai of aiEvaluatorOptions"
+                          type="button"
+                          (click)="selectAiEvaluator(ai)"
+                          class="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:hover:bg-slate-700"
+                          [ngClass]="{'bg-slate-50 dark:bg-slate-700/70': ai.collectionKey === selectedAiEvaluator.collectionKey}">
+                          <img [src]="ai.avatarPath" [alt]="ai.name" class="h-7 w-7 rounded-full object-cover" />
+                          <span class="truncate font-medium text-slate-700 dark:text-slate-200">{{ ai.name }}</span>
+                          <svg *ngIf="ai.collectionKey === selectedAiEvaluator.collectionKey" class="ml-auto h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      (click)="requestAiFeedback()"
+                      [disabled]="aiFeedbackLoading"
+                      class="w-full flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed"
+                      [ngClass]="aiFeedbackText
+                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600'
+                        : 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/25 hover:from-violet-500 hover:to-purple-500'">
+                      <ng-container *ngIf="!aiFeedbackLoading; else feedbackLoading">
+                        <svg *ngIf="aiFeedbackText" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <svg *ngIf="!aiFeedbackText" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        {{ aiFeedbackText ? ('playgroundSteps.finalReview.getAnotherAiFeedback' | translate) : ('playgroundSteps.finalReview.getAiFeedback' | translate) }}
+                      </ng-container>
+                      <ng-template #feedbackLoading>
+                        <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>{{ 'playgroundSteps.finalReview.reviewing' | translate }}</span>
+                      </ng-template>
+                    </button>
+
+                    <p *ngIf="aiFeedbackStatus" class="text-xs text-center text-violet-600 dark:text-violet-400 animate-pulse">
+                      {{ aiFeedbackStatus }}
+                    </p>
+                    <div *ngIf="aiFeedbackError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300">
+                      {{ aiFeedbackError }}
+                    </div>
                   </div>
 
-                  <div *ngIf="aiFeedbackParsed.improvements.length" class="mb-5 space-y-3">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300">
-                      {{ 'playgroundSteps.finalReview.improvements' | translate }}
-                    </p>
-                    <ul class="space-y-2">
-                      <li
-                        *ngFor="let tip of aiFeedbackParsed.improvements; let idx = index"
-                        class="flex items-start gap-3 rounded-2xl border border-emerald-100/70 bg-emerald-50/60 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
-                        <span
-                          class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 font-semibold text-white text-sm shadow-sm dark:bg-teal-600">
-                          {{ idx + 1 }}
-                        </span>
-                        <p class="text-sm text-slate-700 dark:text-slate-100">
-                          {{ tip }}
-                        </p>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div *ngIf="aiFeedbackParsed.readinessLevel" class="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-5 dark:border-teal-500/30 dark:from-slate-800 dark:to-teal-900/30">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300">
-                      {{ 'playgroundSteps.finalReview.readinessLevel' | translate }}
-                    </p>
-                    <p class="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                      {{ aiFeedbackParsed.readinessLevel }}
-                    </p>
-                    <p
-                      *ngIf="aiFeedbackParsed.readinessDetails"
-                      class="mt-2 text-sm text-slate-600 dark:text-slate-200">
-                      {{ aiFeedbackParsed.readinessDetails }}
-                    </p>
-                  </div>
-                </ng-container>
-
-                <ng-template #fallbackFeedback>
-                  <div
-                    class="text-sm leading-relaxed text-gray-800 dark:text-gray-100"
-                    [innerHTML]="aiFeedbackFormatted">
-                  </div>
-                </ng-template>
-
-                <!-- Download Feedback Button -->
-                <div class="mt-5 pt-5 border-t border-emerald-200/60 dark:border-teal-700/40">
-                  <button
-                    type="button"
-                    (click)="downloadSolutionPdf()"
-                    [disabled]="downloadingFeedbackPdf"
-                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all hover:from-slate-600 hover:to-slate-700 disabled:cursor-not-allowed disabled:opacity-60 dark:from-slate-600 dark:to-slate-700 dark:hover:from-slate-500 dark:hover:to-slate-600">
-                    <ng-container *ngIf="!downloadingFeedbackPdf; else feedbackPdfLoading">
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      {{ 'playgroundSteps.finalReview.downloadSolution' | translate }}
-                    </ng-container>
-                    <ng-template #feedbackPdfLoading>
-                      <svg class="h-5 w-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Preparing...</span>
-                    </ng-template>
-                  </button>
-                </div>
-              </div>
-
-              <!-- SECTION 3: Generate Report -->
-              <div class="w-full rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50/50 to-orange-50/30 p-5 shadow-sm transition-all hover:shadow-md dark:border-amber-700/40 dark:from-slate-900/80 dark:to-amber-900/20">
-                <div class="flex items-center gap-3 mb-4">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50">
-                    <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-sm font-semibold text-slate-800 dark:text-white">
-                      {{ 'playgroundSteps.finalReview.generateReport' | translate }}
-                    </p>
+                  <!-- Report Panel -->
+                  <div *ngIf="studioActivePanel === 'report'" class="p-5 space-y-4 animate-fadeIn">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {{ 'playgroundSteps.finalReview.generateReport' | translate }}
+                      </p>
+                      <button (click)="studioActivePanel = null" class="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400">
                       {{ 'playgroundSteps.finalReview.generateReportHint' | translate }}
                     </p>
-                  </div>
-                  <button
-                    type="button"
-                    (click)="openReportModal()"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-amber-500/30 transition-all hover:from-amber-400 hover:to-orange-400 hover:shadow-xl">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ 'playgroundSteps.finalReview.generateReportButton' | translate }}
-                  </button>
-                </div>
 
-                <div *ngIf="reportLoading" class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-700/40 dark:bg-amber-900/30">
-                  <svg class="h-5 w-5 animate-spin text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span class="text-sm font-medium text-amber-700 dark:text-amber-300">Generating your report...</span>
-                </div>
-
-                <div *ngIf="reportStatus && !reportLoading" class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700 dark:border-amber-700/40 dark:bg-amber-900/30 dark:text-amber-200">
-                  {{ reportStatus }}
-                </div>
-                <p *ngIf="reportError" class="mt-3 text-sm font-medium text-red-600 dark:text-red-300">
-                  {{ reportError }}
-                </p>
-
-                <div *ngIf="reportText" class="mt-4 space-y-4">
-                  <div class="flex items-center gap-2">
-                    <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      {{ getSelectedReportType()?.title || ('playgroundSteps.finalReview.reportReady' | translate) }}
-                    </p>
-                  </div>
-                  <div class="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      (click)="downloadReportPdf()"
-                      [disabled]="downloadingReportPdf"
-                      class="group relative inline-flex items-center justify-center rounded-xl border-2 border-amber-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition-all hover:border-amber-300 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-amber-600 dark:hover:bg-slate-700">
-                      <ng-container *ngIf="!downloadingReportPdf; else reportPdfLoading">
-                        <svg class="mr-2 h-4 w-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-3 9v4h-1v-4H8l2-2 2 2h-1zm6 0v4h-1v-4h-1l2-2 2 2h-1z"/>
-                        </svg>
-                        PDF
-                      </ng-container>
-                      <ng-template #reportPdfLoading>
-                        <svg class="h-4 w-4 animate-spin text-amber-600" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      </ng-template>
+                      (click)="openReportModal()"
+                      [disabled]="reportLoading"
+                      class="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:from-violet-500 hover:to-purple-500 disabled:opacity-60 disabled:cursor-not-allowed">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      {{ 'playgroundSteps.finalReview.generateReportButton' | translate }}
                     </button>
-                    <button
-                      type="button"
-                      (click)="downloadReportDocx()"
-                      [disabled]="downloadingReportDocx"
-                      class="group relative inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-amber-600/20 transition-all hover:from-amber-500 hover:to-orange-500 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 dark:from-amber-700 dark:to-orange-700 dark:hover:from-amber-600 dark:hover:to-orange-600">
-                      <ng-container *ngIf="!downloadingReportDocx; else reportDocxLoading">
-                        <svg class="mr-2 h-4 w-4 text-blue-200" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM9.5 13l1.5 6 1.5-6h1l1.5 6 1.5-6h1l-2 8h-1l-1.5-6-1.5 6h-1l-2-8h1z"/>
+
+                    <div *ngIf="reportLoading" class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-800">
+                      <svg class="h-4 w-4 animate-spin text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span class="text-xs font-medium text-slate-600 dark:text-slate-300">Generating...</span>
+                    </div>
+
+                    <div *ngIf="reportStatus && !reportLoading" class="rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {{ reportStatus }}
+                    </div>
+                    <p *ngIf="reportError" class="text-xs font-medium text-red-600 dark:text-red-400">{{ reportError }}</p>
+
+                    <!-- Report ready - download options -->
+                    <div *ngIf="reportText" class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div class="flex items-center gap-2">
+                        <svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Word
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                          {{ getSelectedReportType()?.title || ('playgroundSteps.finalReview.reportReady' | translate) }}
+                        </p>
+                      </div>
+                      <div class="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          (click)="downloadReportPdf()"
+                          [disabled]="downloadingReportPdf"
+                          class="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                          <ng-container *ngIf="!downloadingReportPdf; else reportPdfLoading">
+                            <svg class="h-3.5 w-3.5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-3 9v4h-1v-4H8l2-2 2 2h-1zm6 0v4h-1v-4h-1l2-2 2 2h-1z"/>
+                            </svg>
+                            PDF
+                          </ng-container>
+                          <ng-template #reportPdfLoading>
+                            <svg class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </ng-template>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="downloadReportDocx()"
+                          [disabled]="downloadingReportDocx"
+                          class="flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 py-2.5 text-xs font-medium text-white transition hover:bg-slate-800 disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600">
+                          <ng-container *ngIf="!downloadingReportDocx; else reportDocxLoading">
+                            <svg class="h-3.5 w-3.5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM9.5 13l1.5 6 1.5-6h1l1.5 6 1.5-6h1l-2 8h-1l-1.5-6-1.5 6h-1l-2-8h1z"/>
+                            </svg>
+                            Word
+                          </ng-container>
+                          <ng-template #reportDocxLoading>
+                            <svg class="h-3.5 w-3.5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          </ng-template>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Results Section (AI Feedback shown below tiles when available) -->
+                <div *ngIf="aiFeedbackText && studioActivePanel !== 'feedback'" class="border-t border-slate-100 dark:border-slate-800">
+                  <div class="p-5">
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                      <div class="flex items-center gap-3 mb-4">
+                        <img
+                          [src]="selectedAiEvaluator.avatarPath"
+                          [alt]="selectedAiEvaluator.name"
+                          class="h-9 w-9 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-600" />
+                        <div>
+                          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ 'playgroundSteps.finalReview.evaluationBy' | translate: { name: selectedAiEvaluator.name } }}</p>
+                          <h3 class="text-sm font-bold text-slate-900 dark:text-white">{{ 'playgroundSteps.finalReview.aiFeedback' | translate }}</h3>
+                        </div>
+                        <button
+                          (click)="studioActivePanel = 'feedback'"
+                          class="ml-auto text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300">
+                          View details
+                        </button>
+                      </div>
+
+                      <ng-container *ngIf="hasStructuredFeedback; else fallbackFeedbackCompact">
+                        <div *ngIf="aiFeedbackParsed.scores.length" class="mb-4">
+                          <div class="grid gap-2 sm:grid-cols-2">
+                            <div
+                              *ngFor="let score of aiFeedbackParsed.scores"
+                              class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800">
+                              <p class="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ score.label }}</p>
+                              <div class="flex items-baseline gap-1">
+                                <span class="text-xl font-bold text-slate-900 dark:text-white">{{ score.scoreValue || '—' }}</span>
+                                <span class="text-xs text-slate-500">/{{ score.scoreMax || '10' }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div *ngIf="aiFeedbackParsed.improvements.length" class="space-y-2">
+                          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ 'playgroundSteps.finalReview.improvements' | translate }}
+                          </p>
+                          <ul class="space-y-1.5">
+                            <li
+                              *ngFor="let tip of aiFeedbackParsed.improvements.slice(0, 3); let idx = index"
+                              class="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+                              <span class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-[10px] font-semibold text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">{{ idx + 1 }}</span>
+                              <span>{{ tip }}</span>
+                            </li>
+                          </ul>
+                          <p *ngIf="aiFeedbackParsed.improvements.length > 3" class="text-xs text-slate-500 dark:text-slate-400">
+                            +{{ aiFeedbackParsed.improvements.length - 3 }} more suggestions
+                          </p>
+                        </div>
+
+                        <div *ngIf="aiFeedbackParsed.readinessLevel" class="mt-4 rounded-lg bg-gradient-to-r from-violet-50 to-purple-50 p-3 dark:from-violet-500/10 dark:to-purple-500/10">
+                          <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ 'playgroundSteps.finalReview.readinessLevel' | translate }}</p>
+                          <p class="text-lg font-bold text-violet-700 dark:text-violet-300">{{ aiFeedbackParsed.readinessLevel }}</p>
+                        </div>
                       </ng-container>
-                      <ng-template #reportDocxLoading>
-                        <svg class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+
+                      <ng-template #fallbackFeedbackCompact>
+                        <div class="text-xs leading-relaxed text-slate-700 dark:text-slate-300 line-clamp-4" [innerHTML]="aiFeedbackFormatted"></div>
                       </ng-template>
-                    </button>
+
+                      <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+                        <button
+                          type="button"
+                          (click)="downloadSolutionPdf()"
+                          [disabled]="downloadingFeedbackPdf"
+                          class="w-full flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60 dark:bg-slate-700 dark:hover:bg-slate-600">
+                          <ng-container *ngIf="!downloadingFeedbackPdf; else feedbackPdfLoading">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            {{ 'playgroundSteps.finalReview.downloadSolution' | translate }}
+                          </ng-container>
+                          <ng-template #feedbackPdfLoading>
+                            <svg class="h-4 w-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Preparing...</span>
+                          </ng-template>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+              <!-- End Studio Panel -->
 
             </div>
           </div>
