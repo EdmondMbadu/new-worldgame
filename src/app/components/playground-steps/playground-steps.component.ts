@@ -1741,7 +1741,7 @@ STYLE REQUIREMENTS:
     }
     this.downloadingReportPdf = true;
     try {
-      const title = this.getSelectedReportType()?.title || 'Report';
+      const title = this.buildReportTitle();
       const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
       const cleaned = isImpactBmcReport
         ? this.reportText
@@ -1772,7 +1772,7 @@ STYLE REQUIREMENTS:
           sections: [{ properties: {}, children }],
         });
       } else {
-        const title = this.getSelectedReportType()?.title || 'Report';
+        const title = this.buildReportTitle();
         const cleaned = this.normalizeReportText(this.reportText);
         const paragraphs = this.buildReportDocxParagraphs(cleaned);
         doc = new Document({
@@ -2403,6 +2403,15 @@ Do not include scores, rubrics, or evaluation language.`;
     return `${safeTitle || 'report'}-${safeType || 'report'}.${extension}`;
   }
 
+  private buildReportTitle(): string {
+    const projectTitle = (this.currentSolution?.title || '').trim();
+    const reportTitle = this.getSelectedReportType()?.title?.trim() || 'Report';
+    if (projectTitle && projectTitle.toLowerCase() !== reportTitle.toLowerCase()) {
+      return `${projectTitle} — ${reportTitle}`;
+    }
+    return projectTitle || reportTitle;
+  }
+
   private downloadTextPdf(text: string, title: string, filename: string): void {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -2658,6 +2667,13 @@ Do not include scores, rubrics, or evaluation language.`;
 
     blocks.push(
       new Paragraph({
+        text: this.buildReportTitle(),
+        heading: HeadingLevel.HEADING_1,
+      })
+    );
+
+    blocks.push(
+      new Paragraph({
         text: 'Executive Overview',
         heading: HeadingLevel.HEADING_2,
       })
@@ -2702,6 +2718,12 @@ Do not include scores, rubrics, or evaluation language.`;
         yPos = 22;
       }
     };
+
+    setHeading(18);
+    const title = this.buildReportTitle();
+    const titleWrapped = pdf.splitTextToSize(title, contentWidth);
+    pdf.text(titleWrapped, marginLeft, yPos);
+    yPos += titleWrapped.length * 7 + 3;
 
     setHeading(13);
     pdf.text('Executive Overview', marginLeft, yPos);
