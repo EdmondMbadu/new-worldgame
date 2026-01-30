@@ -1780,7 +1780,7 @@ STYLE REQUIREMENTS:
             {
               properties: {},
               children: [
-                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1, spacing: { after: 220 } }),
                 ...paragraphs,
               ],
             },
@@ -2471,8 +2471,12 @@ Do not include scores, rubrics, or evaluation language.`;
     };
 
     setHeading(18);
-    pdf.text(title, marginLeft, yPos);
-    yPos += 10;
+    const titleWrapped = pdf.splitTextToSize(title, contentWidth);
+    pdf.text(titleWrapped, marginLeft, yPos);
+    yPos += titleWrapped.length * 7 + 4;
+    pdf.setLineWidth(0.3);
+    pdf.line(marginLeft, yPos, marginLeft + contentWidth, yPos);
+    yPos += 6;
 
     setBody();
     const lines = text.split(/\r?\n/).map((line) => line.trim());
@@ -2491,6 +2495,19 @@ Do not include scores, rubrics, or evaluation language.`;
         yPos += 7;
         setBody();
 
+        continue;
+      }
+
+      if (line.startsWith('• ')) {
+        const bulletText = line.replace(/^•\s*/, '');
+        const wrapped = pdf.splitTextToSize(bulletText, contentWidth - 6);
+        for (const segment of wrapped) {
+          addPageIfNeeded(6);
+          pdf.text('•', marginLeft + 2, yPos);
+          pdf.text(segment, marginLeft + 6, yPos);
+          yPos += 6;
+        }
+        yPos += 2;
         continue;
       }
 
@@ -2524,6 +2541,7 @@ Do not include scores, rubrics, or evaluation language.`;
           new Paragraph({
             text: headingText,
             heading: HeadingLevel.HEADING_2,
+            spacing: { after: 140 },
           })
         );
 
@@ -2542,7 +2560,23 @@ Do not include scores, rubrics, or evaluation language.`;
         continue;
       }
 
-      blocks.push(new Paragraph(line));
+      if (line.startsWith('• ')) {
+        blocks.push(
+          new Paragraph({
+            text: line.replace(/^•\s*/, ''),
+            bullet: { level: 0 },
+            spacing: { after: 80 },
+          })
+        );
+        continue;
+      }
+
+      blocks.push(
+        new Paragraph({
+          text: line,
+          spacing: { after: 120 },
+        })
+      );
     }
 
     if (isImpactBmcReport && !bmcTableInserted) {
@@ -2558,6 +2592,10 @@ Do not include scores, rubrics, or evaluation language.`;
     yourVenture: string;
     table: ImpactBmcTableData;
   } {
+    const sanitizedText = text
+      .replace(/<br\s*\/?>\s*-\s*/gi, '\n- ')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\s*br\s*/gi, '\n');
     const normalized = (value: string) =>
       value
         .trim()
@@ -2597,7 +2635,7 @@ Do not include scores, rubrics, or evaluation language.`;
       'intended impact': 'intendedImpact',
     };
 
-    const lines = text.split(/\r?\n/);
+    const lines = sanitizedText.split(/\r?\n/);
     let currentKey: keyof typeof result | null = null;
 
     for (const rawLine of lines) {
@@ -2669,6 +2707,7 @@ Do not include scores, rubrics, or evaluation language.`;
       new Paragraph({
         text: this.buildReportTitle(),
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 220 },
       })
     );
 
@@ -2678,7 +2717,7 @@ Do not include scores, rubrics, or evaluation language.`;
         heading: HeadingLevel.HEADING_2,
       })
     );
-    blocks.push(new Paragraph(parsed.executiveOverview || ''));
+    blocks.push(new Paragraph({ text: parsed.executiveOverview || '', spacing: { after: 160 } }));
 
     const ventureLine = parsed.yourVenture
       ? new TextRun({ text: ` ${parsed.yourVenture}` })
@@ -2723,7 +2762,10 @@ Do not include scores, rubrics, or evaluation language.`;
     const title = this.buildReportTitle();
     const titleWrapped = pdf.splitTextToSize(title, contentWidth);
     pdf.text(titleWrapped, marginLeft, yPos);
-    yPos += titleWrapped.length * 7 + 3;
+    yPos += titleWrapped.length * 7 + 4;
+    pdf.setLineWidth(0.3);
+    pdf.line(marginLeft, yPos, marginLeft + contentWidth, yPos);
+    yPos += 6;
 
     setHeading(13);
     pdf.text('Executive Overview', marginLeft, yPos);
@@ -2986,6 +3028,11 @@ Do not include scores, rubrics, or evaluation language.`;
 
     let cleaned = value;
 
+    // Normalize HTML line breaks that sometimes appear in AI output
+    cleaned = cleaned.replace(/<br\s*\/?>\s*-\s*/gi, '\n- ');
+    cleaned = cleaned.replace(/<br\s*\/?>/gi, '\n');
+    cleaned = cleaned.replace(/<\s*br\s*/gi, '\n');
+
     // Convert markdown headings to plain text with emphasis
     cleaned = cleaned.replace(/^### (.+)$/gm, '\n$1\n');
     cleaned = cleaned.replace(/^## (.+)$/gm, '\n$1:\n');
@@ -2994,7 +3041,7 @@ Do not include scores, rubrics, or evaluation language.`;
     cleaned = this.convertMarkdownTableToText(cleaned);
 
     // Convert bullet points to clean format
-    cleaned = cleaned.replace(/^- (.+)$/gm, '  • $1');
+    cleaned = cleaned.replace(/^\s*[-*]\s+(.+)$/gm, '  • $1');
 
     // Remove remaining markdown formatting
     cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
