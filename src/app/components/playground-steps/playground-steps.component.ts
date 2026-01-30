@@ -21,6 +21,8 @@ import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/a
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
 import {
   Document,
+  ExternalHyperlink,
+  Footer,
   HeadingLevel,
   ImageRun,
   Packer,
@@ -1769,7 +1771,13 @@ STYLE REQUIREMENTS:
         const parsed = this.parseImpactBmcReport(this.reportText);
         const children = this.buildImpactBmcDocxBlocks(parsed);
         doc = new Document({
-          sections: [{ properties: {}, children }],
+          sections: [
+            {
+              properties: {},
+              footers: { default: this.buildReportFooter() },
+              children,
+            },
+          ],
         });
       } else {
         const title = this.buildReportTitle();
@@ -1779,6 +1787,7 @@ STYLE REQUIREMENTS:
           sections: [
             {
               properties: {},
+              footers: { default: this.buildReportFooter() },
               children: [
                 new Paragraph({ text: title, heading: HeadingLevel.HEADING_1, spacing: { after: 220 } }),
                 ...paragraphs,
@@ -2439,6 +2448,7 @@ Do not include scores, rubrics, or evaluation language.`;
       yPos += 6;
     }
 
+    this.addPdfFooter(pdf);
     pdf.save(filename);
   }
 
@@ -2520,6 +2530,7 @@ Do not include scores, rubrics, or evaluation language.`;
       yPos += 2;
     }
 
+    this.addPdfFooter(pdf);
     pdf.save(filename);
   }
 
@@ -2803,7 +2814,61 @@ Do not include scores, rubrics, or evaluation language.`;
     yPos += 2;
     yPos = this.drawImpactBmcTablePdf(pdf, marginLeft, contentWidth, yPos, parsed.table);
 
+    this.addPdfFooter(pdf);
     pdf.save(filename);
+  }
+
+  private buildReportFooter(): Footer {
+    return new Footer({
+      children: [
+        new Paragraph({
+          children: [
+            new TextRun({ text: 'NewWorld Game(TM) ', size: 18, color: '666666' }),
+            new ExternalHyperlink({
+              link: 'https://newworld-game.org/',
+              children: [
+                new TextRun({
+                  text: 'newworld-game.org',
+                  size: 18,
+                  color: '2F5FD0',
+                  underline: {},
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
+  }
+
+  private addPdfFooter(pdf: jsPDF): void {
+    const totalPages = pdf.getNumberOfPages();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 22;
+    const marginRight = 22;
+    const y = pageHeight - 14;
+
+    for (let page = 1; page <= totalPages; page += 1) {
+      pdf.setPage(page);
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setLineWidth(0.2);
+      pdf.line(marginLeft, y - 4, pageWidth - marginRight, y - 4);
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(110, 110, 110);
+      if (typeof (pdf as any).textWithLink === 'function') {
+        const prefix = 'NewWorld Game(TM) • ';
+        pdf.text(prefix, marginLeft, y);
+        const prefixWidth = pdf.getTextWidth(prefix);
+        (pdf as any).textWithLink('newworld-game.org', marginLeft + prefixWidth, y, {
+          url: 'https://newworld-game.org/',
+        });
+      } else {
+        pdf.text('NewWorld Game(TM) • newworld-game.org', marginLeft, y);
+      }
+      pdf.setTextColor(0, 0, 0);
+    }
   }
 
   private drawPdfFillLine(
