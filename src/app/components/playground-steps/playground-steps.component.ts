@@ -327,6 +327,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   selectedAiEvaluator: AiEvaluatorOption = this.aiEvaluatorOptions[0];
   showAiEvaluatorDropdown = false;
   studioActivePanel: 'export' | 'feedback' | 'report' | null = null;
+  showFeedbackResults = false;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
   @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 
@@ -1269,6 +1270,9 @@ STYLE REQUIREMENTS:
         this.aiFeedbackFormatted = this.formatAiFeedback(this.aiFeedbackText);
         this.saveFeedbackToFirestore();
         this.aiFeedbackDocSub?.unsubscribe();
+        // Auto-show feedback results and close the panel
+        this.studioActivePanel = null;
+        this.showFeedbackResults = true;
       } else if (state === 'ERRORED') {
         this.aiFeedbackLoading = false;
         this.aiFeedbackStatus = '';
