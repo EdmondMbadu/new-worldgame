@@ -19,7 +19,20 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
-import { Document, HeadingLevel, ImageRun, Packer, Paragraph } from 'docx';
+import {
+  Document,
+  HeadingLevel,
+  ImageRun,
+  Packer,
+  Paragraph,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType,
+  ShadingType,
+  BorderStyle,
+} from 'docx';
 
 type SupportedLanguage = 'en' | 'fr';
 
@@ -61,6 +74,21 @@ interface ReportType {
 interface ReportGroup {
   id: string;
   label: string;
+}
+
+interface ImpactBmcTableData {
+  problemStatement: string;
+  missionStatement: string;
+  keyPartners: string;
+  keyActivities: string;
+  valueProposition: string;
+  stakeholderRelationships: string;
+  stakeholderSegments: string;
+  keyResources: string;
+  channels: string;
+  costStructure: string;
+  revenueStreams: string;
+  intendedImpact: string;
 }
 
 interface SavedAiFeedback {
@@ -376,7 +404,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       title: 'Impact BMC Theory of Change/Logic Model Report',
       group: 'strategy',
       instruction:
-        'Complete Business Model Canvas with all 9 blocks, impact logic, and sustainability analysis.',
+        'Executive overview + Impact Business Model Canvas table only. No extra sections.',
       systemPrompt: `You are an expert Business Model Architect, Impact Strategist, and Venture Design Advisor.
 
 Your role is to help transform a developed solution into a clear, coherent, and actionable Business Model Canvas that can be used directly for presentation, validation, funding, or implementation.
@@ -392,110 +420,56 @@ You do not generate generic or academic content. You generate grounded, realisti
 
 CONTEXT: You will receive a problem/challenge, a proposed solution, target population/beneficiaries, and optional context (location, constraints, technology, stakeholders). Assume the solution is conceptually complete and your task is to structure it into a strong business model.
 
-OBJECTIVE: Generate a complete Business Model Canvas that:
-- Is internally consistent (all blocks reinforce each other)
-- Clearly explains how value is created, delivered, and sustained
-- Distinguishes users, beneficiaries, and customers when relevant
-- Explicitly supports impact + viability, not one at the expense of the other
-- Can be used as-is in pitch decks, grant applications, innovation reports, incubators/accelerators, and institutional reviews
+OBJECTIVE: Generate a complete Business Model Canvas with a short executive overview and concise content for each canvas block.
 
-REQUIRED OUTPUT STRUCTURE:
+STRICT OUTPUT FORMAT (use exactly these labels, in this order; no extra headings or sections):
 
-## 1. Executive Overview
-One concise paragraph explaining the problem, the solution, who it is for, why it matters, and why it can realistically work.
+Executive Overview:
+[One concise paragraph.]
 
-## 2. Business Model Canvas
+Your Venture:
+[Short venture name or placeholder if unknown.]
 
-### Value Proposition
-- What concrete value the solution provides
-- What problem it solves or pain it reduces
-- What meaningful gain it creates
-- Why it is different or better than existing alternatives
+Problem Statement:
+[Concise content.]
 
-### Customer Segments
-| Segment Type | Description |
-|--------------|-------------|
-| Primary Users | [Who directly uses the solution] |
-| Secondary Beneficiaries | [Who else benefits] |
-| Paying Customers | [Who pays, if different] |
-| Institutional Partners | [Organizations involved] |
+Mission Statement:
+[Concise content.]
 
-### Channels
-- How the solution reaches users
-- Distribution, access, or delivery mechanisms
-- Online, offline, hybrid, institutional, or community-based channels
+Key Partners:
+[Concise content.]
 
-### Customer Relationships
-- How trust is built
-- How users are onboarded
-- How engagement is maintained
-- Human, automated, community-driven, or hybrid relationships
+Key Activities:
+[Concise content.]
 
-### Revenue Streams
-| Revenue Source | Description | Who Pays | When |
-|----------------|-------------|----------|------|
-| [Source 1] | [Details] | [Payer] | [Timing] |
+Value Proposition:
+[Concise content.]
 
-Include non-profit/hybrid models if relevant.
+Stakeholder Relationships:
+[Concise content.]
 
-### Key Activities
-Core actions required to deliver the value proposition. What must be done exceptionally well.
+Stakeholder Segments:
+[Concise content.]
 
-### Key Resources
-| Resource Type | Description | Critical vs Optional |
-|---------------|-------------|---------------------|
-| Human | [Details] | [Priority] |
-| Technical | [Details] | [Priority] |
-| Data/Infrastructure | [Details] | [Priority] |
-| Partnerships | [Details] | [Priority] |
+Key Resources:
+[Concise content.]
 
-### Key Partners
-| Partner Type | Who | Why Important |
-|--------------|-----|---------------|
-| Strategic | [Partner] | [Reason] |
-| Implementing | [Partner] | [Reason] |
-| Institutional | [Partner] | [Reason] |
+Channels:
+[Concise content.]
 
-### Cost Structure
-| Cost Category | Type (Fixed/Variable) | Priority |
-|---------------|----------------------|----------|
-| [Category] | [Type] | [High/Medium/Low] |
+Cost Structure:
+[Concise content.]
 
-## 3. Impact Logic Alignment
+Revenue Streams:
+[Concise content.]
 
-**Short-term Outcomes (Immediate effects):**
-- [Outcome 1]
-- [Outcome 2]
-
-**Medium-term Outcomes (Behavioral/systemic change):**
-- [Outcome 1]
-- [Outcome 2]
-
-**Long-term Impact (Social, economic, environmental, or institutional):**
-- [Impact 1]
-- [Impact 2]
-
-**Impact Chain:** Solution → Activities → Outputs → Outcomes → Impact
-
-## 4. Assumptions & Risks
-
-| Assumption/Risk | Type | Likelihood | Mitigation Strategy |
-|-----------------|------|------------|---------------------|
-| [Item] | [Assumption/Risk] | [High/Medium/Low] | [Strategy] |
-
-## 5. Scalability & Sustainability Notes
-- How the model could scale (geographically, functionally, or institutionally)
-- What would need to change at scale
-- What makes the model resilient over time
+Intended Impact:
+[Concise content.]
 
 STYLE REQUIREMENTS:
-- Be clear, structured, and professional
-- Use tables where they improve clarity and readability
-- Use bullet points for lists
-- Use **bold** for key terms and section emphasis
-- Write at a level suitable for decision-makers
-- Assume the reader has no prior exposure to the project
-- This output should feel like it was produced by a top-tier innovation consultant, venture studio, or global impact accelerator`,
+- Be succinct and decision-ready
+- Use short sentences or compact bullet lists
+- Do not add any other sections or formatting`,
     },
     {
       id: 'strategic-roadmap',
@@ -1768,7 +1742,10 @@ STYLE REQUIREMENTS:
     this.downloadingReportPdf = true;
     try {
       const title = this.getSelectedReportType()?.title || 'Report';
-      const cleaned = this.normalizeReportText(this.reportText);
+      const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
+      const cleaned = isImpactBmcReport
+        ? this.reportText
+        : this.normalizeReportText(this.reportText);
       this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
     } finally {
       // Small delay to show loading state
@@ -1785,21 +1762,31 @@ STYLE REQUIREMENTS:
 
     this.downloadingReportDocx = true;
     try {
-      const title = this.getSelectedReportType()?.title || 'Report';
-      const cleaned = this.normalizeReportText(this.reportText);
-      const paragraphs = this.buildReportDocxParagraphs(cleaned);
+      const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
+      let doc: Document;
 
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: [
-              new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
-              ...paragraphs,
-            ],
-          },
-        ],
-      });
+      if (isImpactBmcReport) {
+        const parsed = this.parseImpactBmcReport(this.reportText);
+        const children = this.buildImpactBmcDocxBlocks(parsed);
+        doc = new Document({
+          sections: [{ properties: {}, children }],
+        });
+      } else {
+        const title = this.getSelectedReportType()?.title || 'Report';
+        const cleaned = this.normalizeReportText(this.reportText);
+        const paragraphs = this.buildReportDocxParagraphs(cleaned);
+        doc = new Document({
+          sections: [
+            {
+              properties: {},
+              children: [
+                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+                ...paragraphs,
+              ],
+            },
+          ],
+        });
+      }
 
       const blob = await Packer.toBlob(doc);
       this.triggerDownload(blob, this.buildReportFileName('docx'));
@@ -2447,6 +2434,11 @@ Do not include scores, rubrics, or evaluation language.`;
   }
 
   private downloadReportPdfStyled(text: string, title: string, filename: string): void {
+    if (this.selectedReportTypeId === 'business-model-canvas') {
+      this.downloadImpactBmcPdf(text, filename);
+      return;
+    }
+
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -2454,7 +2446,6 @@ Do not include scores, rubrics, or evaluation language.`;
     const marginRight = 22;
     const contentWidth = pageWidth - marginLeft - marginRight;
     let yPos = 22;
-
     const setHeading = (size: number) => {
       pdf.setFont('times', 'bold');
       pdf.setFontSize(size);
@@ -2486,9 +2477,11 @@ Do not include scores, rubrics, or evaluation language.`;
       if (this.isReportHeading(line)) {
         addPageIfNeeded(10);
         setHeading(13);
-        pdf.text(line.replace(/:\s*$/, ''), marginLeft, yPos);
+        const headingText = line.replace(/:\s*$/, '');
+        pdf.text(headingText, marginLeft, yPos);
         yPos += 7;
         setBody();
+
         continue;
       }
 
@@ -2504,27 +2497,448 @@ Do not include scores, rubrics, or evaluation language.`;
     pdf.save(filename);
   }
 
-  private buildReportDocxParagraphs(text: string): Paragraph[] {
+  private buildReportDocxParagraphs(text: string): Array<Paragraph | Table> {
     const lines = text.split(/\r?\n/).map((line) => line.trim());
-    const paragraphs: Paragraph[] = [];
+    const blocks: Array<Paragraph | Table> = [];
+    const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
+    let bmcTableInserted = false;
+    let skipBmcBody = false;
 
-    lines.forEach((line) => {
+    for (const line of lines) {
       if (!line) {
-        return;
+        continue;
       }
+
       if (this.isReportHeading(line)) {
-        paragraphs.push(
+        const headingText = line.replace(/:\s*$/, '');
+        blocks.push(
           new Paragraph({
-            text: line.replace(/:\s*$/, ''),
+            text: headingText,
             heading: HeadingLevel.HEADING_2,
           })
         );
-        return;
-      }
-      paragraphs.push(new Paragraph(line));
-    });
 
-    return paragraphs;
+        if (isImpactBmcReport && /business model canvas/i.test(headingText)) {
+          blocks.push(this.buildImpactBmcTable());
+          bmcTableInserted = true;
+          skipBmcBody = true;
+          continue;
+        }
+
+        skipBmcBody = false;
+        continue;
+      }
+
+      if (skipBmcBody) {
+        continue;
+      }
+
+      blocks.push(new Paragraph(line));
+    }
+
+    if (isImpactBmcReport && !bmcTableInserted) {
+      blocks.push(new Paragraph({ text: 'Impact Business Model Canvas' }));
+      blocks.push(this.buildImpactBmcTable());
+    }
+
+    return blocks;
+  }
+
+  private parseImpactBmcReport(text: string): {
+    executiveOverview: string;
+    yourVenture: string;
+    table: ImpactBmcTableData;
+  } {
+    const normalized = (value: string) =>
+      value
+        .trim()
+        .toLowerCase()
+        .replace(/[:\s]+$/g, '');
+
+    const result = {
+      executiveOverview: '',
+      yourVenture: '',
+      problemStatement: '',
+      missionStatement: '',
+      keyPartners: '',
+      keyActivities: '',
+      valueProposition: '',
+      stakeholderRelationships: '',
+      stakeholderSegments: '',
+      keyResources: '',
+      channels: '',
+      costStructure: '',
+      revenueStreams: '',
+      intendedImpact: '',
+    };
+    const labelMap: Record<string, keyof typeof result> = {
+      'executive overview': 'executiveOverview',
+      'your venture': 'yourVenture',
+      'problem statement': 'problemStatement',
+      'mission statement': 'missionStatement',
+      'key partners': 'keyPartners',
+      'key activities': 'keyActivities',
+      'value proposition': 'valueProposition',
+      'stakeholder relationships': 'stakeholderRelationships',
+      'stakeholder segments': 'stakeholderSegments',
+      'key resources': 'keyResources',
+      channels: 'channels',
+      'cost structure': 'costStructure',
+      'revenue streams': 'revenueStreams',
+      'intended impact': 'intendedImpact',
+    };
+
+    const lines = text.split(/\r?\n/);
+    let currentKey: keyof typeof result | null = null;
+
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line) {
+        if (currentKey && result[currentKey]) {
+          result[currentKey] += '\n';
+        }
+        continue;
+      }
+
+      const inlineMatch = line.match(/^([^:]+):\s*(.*)$/);
+      if (inlineMatch) {
+        const label = normalized(inlineMatch[1]);
+        const mappedKey = labelMap[label];
+        if (mappedKey) {
+          currentKey = mappedKey;
+          const remainder = inlineMatch[2]?.trim();
+          if (remainder) {
+            result[currentKey] = remainder;
+          }
+          continue;
+        }
+      }
+
+      const maybeLabel = normalized(line);
+      const mappedKey = labelMap[maybeLabel];
+      if (mappedKey) {
+        currentKey = mappedKey;
+        continue;
+      }
+
+      if (currentKey) {
+        result[currentKey] = result[currentKey]
+          ? `${result[currentKey]}\n${line}`
+          : line;
+      }
+    }
+
+    const cleaned = (value: string) => value.trim();
+    return {
+      executiveOverview: cleaned(result.executiveOverview),
+      yourVenture: cleaned(result.yourVenture),
+      table: {
+        problemStatement: cleaned(result.problemStatement),
+        missionStatement: cleaned(result.missionStatement),
+        keyPartners: cleaned(result.keyPartners),
+        keyActivities: cleaned(result.keyActivities),
+        valueProposition: cleaned(result.valueProposition),
+        stakeholderRelationships: cleaned(result.stakeholderRelationships),
+        stakeholderSegments: cleaned(result.stakeholderSegments),
+        keyResources: cleaned(result.keyResources),
+        channels: cleaned(result.channels),
+        costStructure: cleaned(result.costStructure),
+        revenueStreams: cleaned(result.revenueStreams),
+        intendedImpact: cleaned(result.intendedImpact),
+      },
+    };
+  }
+
+  private buildImpactBmcDocxBlocks(parsed: {
+    executiveOverview: string;
+    yourVenture: string;
+    table: ImpactBmcTableData;
+  }): Array<Paragraph | Table> {
+    const blocks: Array<Paragraph | Table> = [];
+
+    blocks.push(
+      new Paragraph({
+        text: 'Executive Overview',
+        heading: HeadingLevel.HEADING_2,
+      })
+    );
+    blocks.push(new Paragraph(parsed.executiveOverview || ''));
+
+    const ventureLine = parsed.yourVenture
+      ? new TextRun({ text: ` ${parsed.yourVenture}` })
+      : new TextRun(' ________________________________________________');
+    blocks.push(
+      new Paragraph({
+        children: [new TextRun({ text: 'Your Venture:', bold: true }), ventureLine],
+      })
+    );
+
+    blocks.push(this.buildImpactBmcTable(parsed.table));
+    return blocks;
+  }
+
+  private downloadImpactBmcPdf(text: string, filename: string): void {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const marginLeft = 22;
+    const marginRight = 22;
+    const contentWidth = pageWidth - marginLeft - marginRight;
+    let yPos = 22;
+
+    const parsed = this.parseImpactBmcReport(text);
+
+    const setHeading = (size: number) => {
+      pdf.setFont('times', 'bold');
+      pdf.setFontSize(size);
+    };
+    const setBody = (size = 11) => {
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(size);
+    };
+    const addPageIfNeeded = (heightNeeded: number) => {
+      if (yPos + heightNeeded > pageHeight - 22) {
+        pdf.addPage();
+        yPos = 22;
+      }
+    };
+
+    setHeading(13);
+    pdf.text('Executive Overview', marginLeft, yPos);
+    yPos += 7;
+
+    setBody(11);
+    if (parsed.executiveOverview) {
+      const wrapped = pdf.splitTextToSize(parsed.executiveOverview, contentWidth);
+      for (const segment of wrapped) {
+        addPageIfNeeded(6);
+        pdf.text(segment, marginLeft, yPos);
+        yPos += 6;
+      }
+    }
+    yPos += 4;
+
+    if (parsed.yourVenture) {
+      addPageIfNeeded(6);
+      pdf.setFont('times', 'bold');
+      pdf.text('Your Venture:', marginLeft, yPos);
+      pdf.setFont('times', 'normal');
+      const labelWidth = pdf.getTextWidth('Your Venture: ') + 2;
+      const wrapped = pdf.splitTextToSize(parsed.yourVenture, contentWidth - labelWidth);
+      pdf.text(wrapped[0] || '', marginLeft + labelWidth, yPos);
+      yPos += 6;
+      for (let i = 1; i < wrapped.length; i += 1) {
+        addPageIfNeeded(6);
+        pdf.text(wrapped[i], marginLeft, yPos);
+        yPos += 6;
+      }
+    } else {
+      yPos = this.drawPdfFillLine(pdf, marginLeft, marginRight, yPos, 'Your Venture:');
+    }
+
+    yPos += 2;
+    yPos = this.drawImpactBmcTablePdf(pdf, marginLeft, contentWidth, yPos, parsed.table);
+
+    pdf.save(filename);
+  }
+
+  private drawPdfFillLine(
+    pdf: jsPDF,
+    marginLeft: number,
+    marginRight: number,
+    yPos: number,
+    label: string
+  ): number {
+    pdf.setFont('times', 'bold');
+    pdf.setFontSize(11);
+    pdf.text(label, marginLeft, yPos);
+
+    const labelWidth = pdf.getTextWidth(label) + 2;
+    const lineStart = marginLeft + labelWidth;
+    const lineEnd = pdf.internal.pageSize.getWidth() - marginRight;
+    pdf.setLineWidth(0.2);
+    pdf.line(lineStart, yPos + 1, lineEnd, yPos + 1);
+
+    pdf.setFont('times', 'normal');
+    pdf.setFontSize(11);
+    return yPos + 6;
+  }
+
+  private drawImpactBmcTablePdf(
+    pdf: jsPDF,
+    marginLeft: number,
+    contentWidth: number,
+    startY: number,
+    data?: ImpactBmcTableData
+  ): number {
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const colWidth = contentWidth / 5;
+    const rowHeights = {
+      problem: 14,
+      mission: 14,
+      top: 34,
+      middle: 26,
+      cost: 18,
+      impact: 14,
+    };
+    const shadedColor = [217, 217, 217];
+    const borderWidth = 0.3;
+
+    const drawCell = (
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      label: string,
+      content = '',
+      shaded = false
+    ) => {
+      if (shaded) {
+        pdf.setFillColor(shadedColor[0], shadedColor[1], shadedColor[2]);
+        pdf.rect(x, y, width, height, 'F');
+      }
+      pdf.setLineWidth(borderWidth);
+      pdf.rect(x, y, width, height);
+      pdf.setFont('times', 'bold');
+      pdf.setFontSize(10);
+      pdf.text(label, x + 2, y + 4);
+      pdf.setFont('times', 'normal');
+      pdf.setFontSize(9);
+      if (content) {
+        const textX = x + 2;
+        const textY = y + 8;
+        const textWidth = width - 4;
+        const textHeight = height - 10;
+        const wrapped = pdf.splitTextToSize(content, textWidth);
+        let lineY = textY;
+        for (const segment of wrapped) {
+          if (lineY > y + textHeight) {
+            break;
+          }
+          pdf.text(segment, textX, lineY);
+          lineY += 4;
+        }
+      }
+    };
+
+    const totalHeight =
+      rowHeights.problem +
+      rowHeights.mission +
+      rowHeights.top +
+      rowHeights.middle +
+      rowHeights.cost +
+      rowHeights.impact +
+      4;
+
+    let y = startY;
+    if (y + totalHeight > pageHeight - 22) {
+      pdf.addPage();
+      y = 22;
+    }
+
+    drawCell(marginLeft, y, contentWidth, rowHeights.problem, 'Problem Statement', data?.problemStatement || '', true);
+    y += rowHeights.problem;
+
+    drawCell(marginLeft, y, contentWidth, rowHeights.mission, 'Mission Statement', data?.missionStatement || '', true);
+    y += rowHeights.mission;
+
+    const x0 = marginLeft;
+    const x1 = marginLeft + colWidth;
+    const x2 = marginLeft + colWidth * 2;
+    const x3 = marginLeft + colWidth * 3;
+    const x4 = marginLeft + colWidth * 4;
+
+    drawCell(x0, y, colWidth, rowHeights.top + rowHeights.middle, 'Key Partners', data?.keyPartners || '');
+    drawCell(x1, y, colWidth, rowHeights.top, 'Key Activities', data?.keyActivities || '');
+    drawCell(x2, y, colWidth, rowHeights.top + rowHeights.middle, 'Value Proposition', data?.valueProposition || '');
+    drawCell(x3, y, colWidth, rowHeights.top, 'Stakeholder Relationships', data?.stakeholderRelationships || '');
+    drawCell(x4, y, colWidth, rowHeights.top + rowHeights.middle, 'Stakeholder Segments', data?.stakeholderSegments || '');
+
+    drawCell(x1, y + rowHeights.top, colWidth, rowHeights.middle, 'Key Resources', data?.keyResources || '');
+    drawCell(x3, y + rowHeights.top, colWidth, rowHeights.middle, 'Channels', data?.channels || '');
+    y += rowHeights.top + rowHeights.middle;
+
+    drawCell(x0, y, colWidth * 3, rowHeights.cost, 'Cost Structure', data?.costStructure || '');
+    drawCell(x3, y, colWidth * 2, rowHeights.cost, 'Revenue Streams', data?.revenueStreams || '');
+    y += rowHeights.cost;
+
+    drawCell(x0, y, contentWidth, rowHeights.impact, 'Intended Impact', data?.intendedImpact || '', true);
+    y += rowHeights.impact;
+
+    return y + 4;
+  }
+
+  private buildImpactBmcTable(data?: ImpactBmcTableData): Table {
+    const shaded = 'D9D9D9';
+    const border = {
+      style: BorderStyle.SINGLE,
+      size: 6,
+      color: '000000',
+    };
+
+    const makeCell = (
+      label: string,
+      content?: string,
+      options?: { shaded?: boolean; columnSpan?: number; rowSpan?: number; lines?: number }
+    ) =>
+      new TableCell({
+        columnSpan: options?.columnSpan,
+        rowSpan: options?.rowSpan,
+        shading: options?.shaded
+          ? { type: ShadingType.CLEAR, fill: shaded }
+          : undefined,
+        borders: { top: border, bottom: border, left: border, right: border },
+        children: [
+          new Paragraph({ children: [new TextRun({ text: label, bold: true })] }),
+          ...(content
+            ? content
+                .split(/\r?\n/)
+                .map((line) => new Paragraph(line))
+            : Array.from({ length: options?.lines ?? 2 }).map(() => new Paragraph(''))),
+        ],
+      });
+
+    return new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({
+          children: [
+            makeCell('Problem Statement', data?.problemStatement, { shaded: true, columnSpan: 5, lines: 2 }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            makeCell('Mission Statement', data?.missionStatement, { shaded: true, columnSpan: 5, lines: 2 }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            makeCell('Key Partners', data?.keyPartners, { rowSpan: 2, lines: 5 }),
+            makeCell('Key Activities', data?.keyActivities, { lines: 4 }),
+            makeCell('Value Proposition', data?.valueProposition, { rowSpan: 2, lines: 6 }),
+            makeCell('Stakeholder Relationships', data?.stakeholderRelationships, { lines: 4 }),
+            makeCell('Stakeholder Segments', data?.stakeholderSegments, { rowSpan: 2, lines: 6 }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            makeCell('Key Resources', data?.keyResources, { lines: 4 }),
+            makeCell('Channels', data?.channels, { lines: 4 }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            makeCell('Cost Structure', data?.costStructure, { columnSpan: 3, lines: 4 }),
+            makeCell('Revenue Streams', data?.revenueStreams, { columnSpan: 2, lines: 4 }),
+          ],
+        }),
+        new TableRow({
+          children: [
+            makeCell('Intended Impact', data?.intendedImpact, { shaded: true, columnSpan: 5, lines: 3 }),
+          ],
+        }),
+      ],
+    });
   }
 
   private isReportHeading(line: string): boolean {
