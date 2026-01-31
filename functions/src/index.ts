@@ -3944,3 +3944,166 @@ export const createGoogleMeet = functions.https.onCall(
     }
   }
 );
+
+/**
+ * Infographic Generation Function
+ * Triggered when a document is created in users/{uid}/infographics/{docId}
+ * Generates a beautiful visual infographic summarizing the user's strategy
+ */
+export const onInfographicRequest = functions
+  .region('us-central1')
+  .runWith({ timeoutSeconds: 120, memory: '1GB' })
+  .firestore.document('users/{uid}/infographics/{docId}')
+  .onCreate(async (snap) => {
+    try {
+      const data = snap.data();
+      const prompt: string = (data?.prompt || '').trim();
+      const solutionTitle: string = data?.solutionTitle || 'Strategy';
+
+      if (!prompt) {
+        await snap.ref.update({
+          status: { state: 'ERRORED', message: 'No prompt provided' },
+        });
+        return;
+      }
+
+      // Mark as processing
+      await snap.ref.update({
+        status: { state: 'PROCESSING' },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Extract key concepts from the strategy for visual representation
+      const strategyText = prompt.slice(0, 2000);
+
+      // Create a visually-focused prompt for a beautiful infographic image
+      const infographicPrompt = `Create a stunning, visually rich infographic illustration for: "${solutionTitle}"
+
+This is about: ${strategyText}
+
+IMPORTANT - Create a VISUAL image, not just text:
+- Beautiful landscape or environment scene that represents the topic
+- Rich illustrations, icons, and visual metaphors
+- Show the journey from problem to solution through imagery
+- Include relevant visual elements: nature, technology, people (illustrated), buildings, etc.
+- Use a warm, hopeful color palette with teal and emerald green accents
+- Make it look like a professional magazine illustration or NotebookLM-style visual summary
+- Minimal text - let the images tell the story
+- High quality, detailed, artistic composition
+- Inspiring and shareable visual that captures the essence of the strategy`;
+
+      console.log('Generating visual infographic:', {
+        title: solutionTitle,
+        promptPreview: infographicPrompt.slice(0, 300),
+      });
+
+      let imgB64 = '';
+
+      // Try Gemini Nano Banana Pro first (best for visual infographics)
+      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      const nanoBananaModels = [
+        'gemini-2.0-flash-preview-image-generation',
+        'gemini-2.0-flash-exp-image-generation',
+        'gemini-2.0-flash-image',
+      ];
+
+      for (const modelName of nanoBananaModels) {
+        if (imgB64) break;
+        try {
+          console.log(`Trying Nano Banana model: ${modelName}`);
+          const modelConfig: Record<string, unknown> = {
+            model: modelName,
+            generationConfig: {
+              responseModalities: ['IMAGE'],
+            },
+          };
+          const model = genAI.getGenerativeModel(modelConfig as any);
+          const result = await model.generateContent(infographicPrompt);
+          const response = await result.response;
+
+          for (const part of response.candidates?.[0]?.content?.parts || []) {
+            if (part.inlineData?.data) {
+              imgB64 = part.inlineData.data;
+              console.log(`Image generated with ${modelName}`);
+              break;
+            }
+          }
+        } catch (modelError: any) {
+          console.log(`${modelName} failed:`, modelError?.message?.slice(0, 150));
+        }
+      }
+
+      // Fallback to Imagen 4
+      if (!imgB64) {
+        try {
+          console.log('Trying Imagen 4 as fallback');
+          const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+          const imageResult = await ai.models.generateImages({
+            model: 'imagen-4.0-generate-001',
+            prompt: infographicPrompt,
+            config: {
+              numberOfImages: 1,
+              aspectRatio: '16:9',
+            },
+          });
+
+          if (imageResult.generatedImages?.[0]?.image?.imageBytes) {
+            imgB64 = imageResult.generatedImages[0].image.imageBytes;
+            console.log('Image generated with Imagen 4');
+          }
+        } catch (imagenError: any) {
+          console.log('Imagen 4 failed:', imagenError?.message?.slice(0, 150));
+        }
+      }
+
+      if (imgB64) {
+        // Upload to Cloud Storage
+        const imageBuffer = Buffer.from(imgB64, 'base64');
+        const fileName = `infographics/${snap.ref.parent.parent?.id}/${snap.id}.png`;
+        const file = bucket.file(fileName);
+
+        await file.save(imageBuffer, {
+          metadata: {
+            contentType: 'image/png',
+            metadata: {
+              solutionTitle,
+              createdAt: new Date().toISOString(),
+            },
+          },
+        });
+
+        // Make the file publicly accessible
+        await file.makePublic();
+
+        // Get the public URL
+        const imageUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+
+        // Update document with success
+        await snap.ref.update({
+          status: { state: 'COMPLETED' },
+          imageUrl,
+          completedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        console.log('Infographic generated successfully:', imageUrl);
+        return;
+      }
+
+      // No image generated after all attempts
+      await snap.ref.update({
+        status: {
+          state: 'ERRORED',
+          message: 'Image generation is temporarily unavailable. Please try again later.',
+        },
+      });
+    } catch (error: any) {
+      console.error('Infographic generation error:', error?.message || error);
+
+      await snap.ref.update({
+        status: {
+          state: 'ERRORED',
+          message: 'Could not generate the infographic. Please try again later.',
+        },
+      });
+    }
+  });

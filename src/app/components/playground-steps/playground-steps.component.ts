@@ -326,8 +326,17 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ];
   selectedAiEvaluator: AiEvaluatorOption = this.aiEvaluatorOptions[0];
   showAiEvaluatorDropdown = false;
-  studioActivePanel: 'export' | 'feedback' | 'report' | null = null;
+  studioActivePanel: 'export' | 'feedback' | 'report' | 'infographic' | null = null;
   showFeedbackResults = false;
+
+  // Infographic generation state
+  infographicLoading = false;
+  infographicStatus = '';
+  infographicError = '';
+  infographicImageUrl = '';
+  showInfographicResults = false;
+  downloadingInfographic = false;
+  private infographicDocSub?: Subscription;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
   @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 
@@ -1295,6 +1304,117 @@ STYLE REQUIREMENTS:
     }
   }
 
+  async generateInfographic() {
+    if (!this.auth.currentUser?.uid) {
+      this.infographicError = 'Please sign in to generate an infographic.';
+      return;
+    }
+
+    if (!this.currentDraftText) {
+      this.infographicError = 'We need more solution details before generating an infographic.';
+      return;
+    }
+
+    // Reset state
+    this.infographicError = '';
+    this.infographicImageUrl = '';
+    this.infographicLoading = true;
+    this.infographicStatus = 'Preparing your strategy summary...';
+
+    // Build the infographic prompt based on solution data
+    const prompt = this.buildInfographicPrompt();
+
+    const docId = this.afs.createId();
+    const collectionPath = `users/${this.auth.currentUser.uid}/infographics/${docId}`;
+    const docRef: AngularFirestoreDocument<any> = this.afs.doc(collectionPath);
+
+    this.infographicDocSub?.unsubscribe();
+    this.infographicDocSub = docRef.valueChanges().subscribe((snapshot) => {
+      if (!snapshot?.status) {
+        return;
+      }
+
+      const state = snapshot.status.state;
+      if (state === 'PROCESSING') {
+        this.infographicStatus = 'Creating your visual summary...';
+      } else if (state === 'COMPLETED') {
+        this.infographicLoading = false;
+        this.infographicStatus = '';
+        this.infographicImageUrl = snapshot.imageUrl ?? '';
+        this.infographicDocSub?.unsubscribe();
+        // Auto-show results and close the panel
+        this.studioActivePanel = null;
+        this.showInfographicResults = true;
+      } else if (state === 'ERRORED') {
+        this.infographicLoading = false;
+        this.infographicStatus = '';
+        this.infographicError =
+          snapshot.status?.message ||
+          'Could not generate the infographic. Please try again.';
+        this.infographicDocSub?.unsubscribe();
+      }
+    });
+
+    try {
+      await docRef.set({
+        prompt,
+        solutionId: this.id,
+        solutionTitle: this.currentSolution.title || 'Strategy'
+      });
+    } catch (error) {
+      console.error('Infographic generation request failed', error);
+      this.infographicLoading = false;
+      this.infographicStatus = '';
+      this.infographicError = 'Unable to start infographic generation. Please retry.';
+      this.infographicDocSub?.unsubscribe();
+    }
+  }
+
+  private buildInfographicPrompt(): string {
+    const title = this.currentSolution.title || 'Strategy';
+    const description = this.currentSolution.description || '';
+
+    // Use the currentDraftText which contains the full solution content
+    const strategyContent = this.currentDraftText.substring(0, 4000);
+
+    return `Create a beautiful, friendly infographic summarizing this strategy:
+
+TITLE: ${title}
+
+OVERVIEW: ${description}
+
+STRATEGY CONTENT:
+${strategyContent}
+
+Make it visually appealing with bright colors, friendly icons, and a clear flow from problem to solution. Use teal and emerald as accent colors.`;
+  }
+
+  async downloadInfographic() {
+    if (!this.infographicImageUrl || this.downloadingInfographic) {
+      return;
+    }
+
+    this.downloadingInfographic = true;
+
+    try {
+      const response = await fetch(this.infographicImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const title = (this.currentSolution.title || 'strategy').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      a.download = `${title}-infographic.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download infographic', error);
+    } finally {
+      this.downloadingInfographic = false;
+    }
+  }
+
   downloadSolutionPdf() {
     if (this.downloadingFeedbackPdf) {
       return;
@@ -1813,6 +1933,7 @@ STYLE REQUIREMENTS:
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();
+    this.infographicDocSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     // Clear chat context when leaving the playground
