@@ -3976,28 +3976,20 @@ export const onInfographicRequest = functions
       // Extract key concepts from the strategy for visual representation
       const strategyText = prompt.slice(0, 1500);
 
-      // Spell out the title letter by letter for accurate text rendering
-      const titleSpelledOut = solutionTitle.split('').join('-');
+      // Create a visually rich infographic - NO TEXT to avoid gibberish
+      const infographicPrompt = `Create a beautiful illustration representing this concept:
 
-      // Create a visually-focused prompt for a beautiful infographic image
-      // Emphasize MINIMAL text and correct spelling
-      const infographicPrompt = `Create a stunning, visually rich infographic illustration.
+${strategyText}
 
-TITLE (spell EXACTLY as shown, letter by letter: ${titleSpelledOut}): "${solutionTitle}"
-
-About: ${strategyText}
-
-CRITICAL IMAGE REQUIREMENTS:
-1. PRIMARILY VISUAL - use illustrations, icons, and imagery to tell the story
-2. If including any text, the title MUST be spelled exactly: "${solutionTitle}" - no typos, no variations
-3. Beautiful landscape, environment, or conceptual scene representing the topic
-4. Rich visual metaphors and icons instead of words
-5. Professional magazine illustration or NotebookLM-style visual summary
-6. Warm, hopeful color palette with teal and emerald accents
-7. Show the journey from problem to solution through IMAGERY, not text
-8. High quality, detailed, artistic composition
-9. AVOID heavy text - let visuals communicate the message
-10. If you must include text, double-check spelling of "${solutionTitle}"`;
+STRICT REQUIREMENTS:
+- NO TEXT, NO WORDS, NO LETTERS, NO NUMBERS in the image
+- Use ONLY visual elements: illustrations, icons, symbols, pictures
+- Beautiful conceptual scene with people, nature, technology, or abstract shapes
+- Professional artistic quality like a magazine cover illustration
+- Warm, hopeful colors with teal and emerald green accents
+- Tell the story purely through imagery and visual metaphors
+- High quality, detailed, inspiring composition
+- The image should be self-explanatory without any text`;
 
       console.log('Generating visual infographic:', {
         title: solutionTitle,
