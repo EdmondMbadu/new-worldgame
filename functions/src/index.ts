@@ -3974,23 +3974,30 @@ export const onInfographicRequest = functions
       });
 
       // Extract key concepts from the strategy for visual representation
-      const strategyText = prompt.slice(0, 2000);
+      const strategyText = prompt.slice(0, 1500);
+
+      // Spell out the title letter by letter for accurate text rendering
+      const titleSpelledOut = solutionTitle.split('').join('-');
 
       // Create a visually-focused prompt for a beautiful infographic image
-      const infographicPrompt = `Create a stunning, visually rich infographic illustration for: "${solutionTitle}"
+      // Emphasize MINIMAL text and correct spelling
+      const infographicPrompt = `Create a stunning, visually rich infographic illustration.
 
-This is about: ${strategyText}
+TITLE (spell EXACTLY as shown, letter by letter: ${titleSpelledOut}): "${solutionTitle}"
 
-IMPORTANT - Create a VISUAL image, not just text:
-- Beautiful landscape or environment scene that represents the topic
-- Rich illustrations, icons, and visual metaphors
-- Show the journey from problem to solution through imagery
-- Include relevant visual elements: nature, technology, people (illustrated), buildings, etc.
-- Use a warm, hopeful color palette with teal and emerald green accents
-- Make it look like a professional magazine illustration or NotebookLM-style visual summary
-- Minimal text - let the images tell the story
-- High quality, detailed, artistic composition
-- Inspiring and shareable visual that captures the essence of the strategy`;
+About: ${strategyText}
+
+CRITICAL IMAGE REQUIREMENTS:
+1. PRIMARILY VISUAL - use illustrations, icons, and imagery to tell the story
+2. If including any text, the title MUST be spelled exactly: "${solutionTitle}" - no typos, no variations
+3. Beautiful landscape, environment, or conceptual scene representing the topic
+4. Rich visual metaphors and icons instead of words
+5. Professional magazine illustration or NotebookLM-style visual summary
+6. Warm, hopeful color palette with teal and emerald accents
+7. Show the journey from problem to solution through IMAGERY, not text
+8. High quality, detailed, artistic composition
+9. AVOID heavy text - let visuals communicate the message
+10. If you must include text, double-check spelling of "${solutionTitle}"`;
 
       console.log('Generating visual infographic:', {
         title: solutionTitle,
@@ -3999,18 +4006,19 @@ IMPORTANT - Create a VISUAL image, not just text:
 
       let imgB64 = '';
 
-      // Try Gemini Nano Banana Pro first (best for visual infographics)
+      // Try Gemini image generation models (various naming conventions)
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const nanoBananaModels = [
-        'gemini-2.0-flash-preview-image-generation',
-        'gemini-2.0-flash-exp-image-generation',
-        'gemini-2.0-flash-image',
+      const imageGenModels = [
+        'gemini-2.0-flash-exp',                        // Latest experimental
+        'gemini-2.0-flash-preview-image-generation',   // Preview with image gen
+        'gemini-2.0-flash-exp-image-generation',       // Experimental image gen
+        'gemini-2.0-flash-thinking-exp-01-21',         // Thinking model (may have better text)
       ];
 
-      for (const modelName of nanoBananaModels) {
+      for (const modelName of imageGenModels) {
         if (imgB64) break;
         try {
-          console.log(`Trying Nano Banana model: ${modelName}`);
+          console.log(`Trying image generation model: ${modelName}`);
           const modelConfig: Record<string, unknown> = {
             model: modelName,
             generationConfig: {
