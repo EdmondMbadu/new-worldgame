@@ -3973,33 +3973,50 @@ export const onInfographicRequest = functions
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      // Extract key concepts from the strategy for visual representation
-      const strategyText = prompt.slice(0, 1500);
+      // Step 1: Use text model to extract and clean key concepts
+      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      const strategyText = prompt.slice(0, 2000);
 
-      // Create a visually rich infographic - NO TEXT to avoid gibberish
-      const infographicPrompt = `Create a beautiful illustration representing this concept:
+      let cleanedConcepts = '';
+      try {
+        const textModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const cleanupResult = await textModel.generateContent(
+          `Extract the main concept from this text and describe it in 2-3 simple, clear English sentences. Fix any spelling errors and summarize the core idea. Do not include any special characters or formatting:
 
 ${strategyText}
 
-STRICT REQUIREMENTS:
-- NO TEXT, NO WORDS, NO LETTERS, NO NUMBERS in the image
-- Use ONLY visual elements: illustrations, icons, symbols, pictures
+Respond with ONLY the clean summary, nothing else.`
+        );
+        cleanedConcepts = cleanupResult.response.text().trim();
+        console.log('Cleaned concepts:', cleanedConcepts);
+      } catch (cleanupError: any) {
+        console.log('Text cleanup failed, using simplified fallback:', cleanupError?.message?.slice(0, 100));
+        // Fallback: just use the title
+        cleanedConcepts = `A solution about: ${solutionTitle}`;
+      }
+
+      // Step 2: Create image prompt with cleaned concepts - NO TEXT in image
+      const infographicPrompt = `Create a beautiful, professional illustration for this concept:
+
+${cleanedConcepts}
+
+CRITICAL REQUIREMENTS:
+- DO NOT include ANY text, words, letters, or numbers in the image
+- Pure visual storytelling using illustrations, icons, and imagery only
 - Beautiful conceptual scene with people, nature, technology, or abstract shapes
-- Professional artistic quality like a magazine cover illustration
-- Warm, hopeful colors with teal and emerald green accents
-- Tell the story purely through imagery and visual metaphors
-- High quality, detailed, inspiring composition
-- The image should be self-explanatory without any text`;
+- Professional magazine-quality artistic composition
+- Warm, hopeful color palette with teal and emerald green accents
+- High quality, detailed, inspiring visual that captures the essence
+- The image must be completely text-free`;
 
       console.log('Generating visual infographic:', {
         title: solutionTitle,
-        promptPreview: infographicPrompt.slice(0, 300),
+        cleanedConcepts: cleanedConcepts.slice(0, 200),
       });
 
       let imgB64 = '';
 
-      // Try Gemini image generation models (various naming conventions)
-      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      // Step 3: Try image generation models
       const imageGenModels = [
         'gemini-2.0-flash-exp',                        // Latest experimental
         'gemini-2.0-flash-preview-image-generation',   // Preview with image gen
