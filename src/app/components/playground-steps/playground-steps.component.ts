@@ -2338,9 +2338,9 @@ Niveau de préparation: ______`;
   private buildReportPrompt(): string {
     const reportType = this.getSelectedReportType();
     const instruction = (this.reportInstruction || reportType?.instruction || '').trim();
-    const solutionSummary = this.buildSolutionSummaryForAi();
+    const reportSource = this.buildReportSourceForAi();
 
-    if (!solutionSummary || !instruction) {
+    if (!reportSource || !instruction) {
       return '';
     }
 
@@ -2354,16 +2354,33 @@ Niveau de préparation: ______`;
     } else {
       // Default generic report writer prompt
       intro = `Role: You are a senior report writer.
-Generate a professional, structured report based on the solution details below.
+Generate a professional, structured report based strictly on the SOURCE material below.
 Write in a polished, journalistic tone suitable for The Economist or The New York Times.
 Include one short reference to NewWorld Game in the opening paragraph for context.
 Use clear headings and concise paragraphs; bullets only when helpful.
 Output plain text only (no markdown, no asterisks, no special formatting).
-Do not include scores, rubrics, or evaluation language.`;
+Do not include scores, rubrics, or evaluation language.
+Do not invent facts or events; if something is not explicitly stated, say "Not specified in the draft."
+Do not contradict the draft.`;
     }
 
     const reportTitle = reportType?.title ? `Report Type: ${reportType.title}` : 'Report Type: Custom';
-    return `${intro}\n\n${reportTitle}\nInstruction: ${instruction}\n\n${solutionSummary}`;
+    return `${intro}\n\n${reportTitle}\nInstruction: ${instruction}\n\nSOURCE (Current Draft):\n${reportSource}`;
+  }
+
+  private buildReportSourceForAi(): string {
+    if (!this.currentSolution) {
+      return '';
+    }
+
+    // Prefer the user-edited current draft as the single source of truth.
+    const draftText = (this.currentDraftText || '').trim();
+    if (draftText) {
+      return this.clampText(draftText, 12000);
+    }
+
+    // Fallback to compiled summary if no draft is available.
+    return this.buildSolutionSummaryForAi();
   }
 
   private buildSolutionSummaryForAi(): string {
