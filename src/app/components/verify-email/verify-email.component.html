@@ -30,31 +30,53 @@
         <!-- Message -->
         <div class="px-8 pb-6 text-center">
           <p class="text-sm text-slate-700 dark:text-slate-300">
-            We’ve sent a verification link to your email address.
+            We've sent a verification link to your email address.
           </p>
           <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">
-            If you don’t see it in your inbox, please check your
+            If you don't see it in your inbox, please check your
             <span class="font-semibold">Spam/Junk</span> (or <span class="font-semibold">Promotions</span>) folder.
           </p>
+        </div>
+
+        <!-- Error message -->
+        <div *ngIf="errorMessage" class="px-8 pb-4">
+          <div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm text-center">
+            {{ errorMessage }}
+          </div>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="checking" class="px-8 pb-4 text-center">
+          <svg class="animate-spin mx-auto h-6 w-6 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Checking verification status...</p>
         </div>
 
         <!-- Actions -->
         <div class="px-8 pb-8">
           <button
             type="button"
-            (click)="goToLogin()"
+            [disabled]="checking"
+            (click)="onVerifiedClick()"
             class="inline-flex w-full items-center justify-center rounded-full
                    bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md
                    transition-all duration-300 hover:from-teal-700 hover:via-emerald-700 hover:to-cyan-700
                    focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2
-                   dark:focus-visible:ring-offset-slate-900"
+                   dark:focus-visible:ring-offset-slate-900
+                   disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Done
+            <span *ngIf="!checking">I've Verified My Email</span>
+            <span *ngIf="checking">Checking...</span>
           </button>
 
-          <!-- Optional small note -->
+          <!-- Resend email link -->
           <p class="mt-3 text-center text-xs text-slate-600 dark:text-slate-400">
-            Still can’t find it? Wait a couple of minutes and check again, or request a new link from your account page.
+            Didn't receive it?
+            <button type="button" (click)="resendEmail()" class="text-teal-600 hover:text-teal-700 underline">
+              Resend verification email
+            </button>
           </p>
         </div>
       </div>

@@ -57,6 +57,10 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
   createAccountPopUp: boolean = false;
   createAccountError: boolean = false;
 
+  // Email verification state
+  checkingVerification: boolean = false;
+  verificationError: string = '';
+
   focus: Focus[] = [
     {
       textKey: 'welcomeFlow.focus.options.solutions',
@@ -145,8 +149,52 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
       let createAccount = await this.createAccount();
     } else {
       if (this.buttonKey === 'done') {
-        this.router.navigate(['/login']);
+        // Check email verification before allowing to proceed
+        await this.verifyEmailAndProceed();
       }
+    }
+  }
+
+  /**
+   * Check if the user has verified their email before allowing them to proceed.
+   */
+  async verifyEmailAndProceed() {
+    this.checkingVerification = true;
+    this.verificationError = '';
+
+    try {
+      const isVerified = await this.auth.syncEmailVerified();
+
+      if (isVerified) {
+        // Email is verified, proceed directly to home (user is already logged in)
+        this.router.navigate(['/home']);
+      } else {
+        // Email not verified yet
+        this.verificationError = this.translate.instant(
+          'welcomeFlow.verification.notVerified'
+        );
+      }
+    } catch (error) {
+      console.error('Error checking verification:', error);
+      this.verificationError = this.translate.instant(
+        'welcomeFlow.verification.error'
+      );
+    } finally {
+      this.checkingVerification = false;
+      this.cdRef.detectChanges();
+    }
+  }
+
+  /**
+   * Resend the verification email to the user.
+   */
+  async resendVerificationEmail() {
+    try {
+      await this.auth.resendVerificationEmail();
+      alert(this.translate.instant('welcomeFlow.verification.emailResent'));
+    } catch (error) {
+      console.error('Error resending verification email:', error);
+      alert(this.translate.instant('welcomeFlow.verification.resendError'));
     }
   }
   chooseFocus(index: number) {

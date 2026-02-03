@@ -757,7 +757,7 @@
       "emailPrompt": "Enter your email.",
       "passwordPrompt": "Create a password to get started.",
       "termsPrompt": "Please accept the Terms and Conditions.",
-      "verifyPrompt": "Voila! Almost done! Go to your email to verify your account. Once completed, click done below. If you don't see our verification email within 2 minutes, please double check your Spam folder."
+      "verifyPrompt": "Almost done! Please check your email for the verification link."
     },
     "buttons": {
       "continue": "Continue",
@@ -815,6 +815,17 @@
       "name": "Bucky",
       "stepImageAlt": "Step illustration",
       "avatarAlt": "Bucky portrait"
+    },
+    "verification": {
+      "title": "Verify Your Email",
+      "instructions": "We've sent a verification email to your inbox. Please click the link in that email to verify your account, then click the button below.",
+      "confirmButton": "I've Verified My Email",
+      "checking": "Checking...",
+      "notVerified": "Your email has not been verified yet. Please check your inbox and click the verification link, then try again.",
+      "error": "An error occurred while checking your verification status. Please try again.",
+      "emailResent": "Verification email has been resent. Please check your inbox.",
+      "resendError": "Failed to resend verification email. Please try again.",
+      "resendLink": "Resend verification email"
     }
   },
   "overviewPage": {

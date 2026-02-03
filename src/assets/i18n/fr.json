@@ -506,7 +506,7 @@
       "emailPrompt": "Entre ton courriel.",
       "passwordPrompt": "Crée un mot de passe pour démarrer.",
       "termsPrompt": "Accepte les conditions générales.",
-      "verifyPrompt": "Voilà ! Presque terminé ! Consulte ton courriel pour vérifier ton compte. Une fois fait, clique sur Terminer ci-dessous. Si tu ne vois pas notre message dans les 2 minutes, vérifie ton dossier de courrier indésirable."
+      "verifyPrompt": "Presque terminé ! Consulte ton courriel pour le lien de vérification."
     },
     "buttons": {
       "continue": "Continuer",
@@ -564,6 +564,17 @@
       "name": "Bucky",
       "stepImageAlt": "Illustration de l'étape",
       "avatarAlt": "Portrait de Bucky"
+    },
+    "verification": {
+      "title": "Vérifiez votre courriel",
+      "instructions": "Nous avons envoyé un courriel de vérification à votre adresse. Veuillez cliquer sur le lien dans ce courriel pour vérifier votre compte, puis cliquez sur le bouton ci-dessous.",
+      "confirmButton": "J'ai vérifié mon courriel",
+      "checking": "Vérification...",
+      "notVerified": "Votre courriel n'a pas encore été vérifié. Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification, puis réessayez.",
+      "error": "Une erreur s'est produite lors de la vérification. Veuillez réessayer.",
+      "emailResent": "Le courriel de vérification a été renvoyé. Veuillez vérifier votre boîte de réception.",
+      "resendError": "Échec de l'envoi du courriel de vérification. Veuillez réessayer.",
+      "resendLink": "Renvoyer le courriel de vérification"
     }
   },
   "overviewPage": {

@@ -582,6 +582,41 @@ export class AuthService {
     return u?.uid ?? null;
   }
 
+  /**
+   * Check if the current user's email is verified.
+   * Reloads the user to get the latest verification status from Firebase.
+   */
+  async isEmailVerified(): Promise<boolean> {
+    const user = await this.fireauth.currentUser;
+    if (!user) return false;
+    // Reload to get the latest status from Firebase
+    await user.reload();
+    return user.emailVerified;
+  }
+
+  /**
+   * Resend verification email to the current user.
+   */
+  async resendVerificationEmail(): Promise<void> {
+    const user = await this.fireauth.currentUser;
+    if (user && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  /**
+   * Refreshes Firebase user and syncs verified flag to Firestore.
+   * Returns true if the user is verified after refresh.
+   */
+  async syncEmailVerified(): Promise<boolean> {
+    const user = await this.fireauth.currentUser;
+    if (!user) return false;
+    await user.reload();
+    if (!user.emailVerified) return false;
+    await this.markUserVerified(user.uid);
+    return true;
+  }
+
   async fetchSignInMethods(email: string): Promise<string[]> {
     return this.fireauth.fetchSignInMethodsForEmail(email);
   }
