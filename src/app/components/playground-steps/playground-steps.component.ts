@@ -2201,7 +2201,7 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     const useFrench = this.currentLanguage === 'fr';
     
     const instructionsEn = `Role: You are the Evaluator for NewWorld Game.
-Your job is to evaluate the user's solution using the official criteria and provide numerical scores + improvement feedback.
+Your job is to evaluate the user's solution using the official criteria and provide numerical scores + improvement feedback that align with the solution content.
 
 Do the following every time:
 
@@ -2209,23 +2209,24 @@ Do the following every time:
 
 Give a score for each category:
 
-Preferred State
+Achieve Preferred State
 
-Technological Feasibility
+Technologically feasible (uses current tech)
 
-Environmental Impact
+Ecologically positive (regenerative)
 
-Economic Viability
+Economical (funding identified)
 
-Equity & Fairness
+Equitable/Socially just
 
-Clarity & Understandability
+Understandable (strategy clearly presented)
 
 (1 = not viable, 5 = needs major improvement, 10 = ready to implement)
 
 2. Explain Each Score
 
 In 1–2 short sentences, explain why you gave that score.
+Base every score on the solution text provided. Do not invent facts. If evidence is missing, say so and score accordingly.
 
 3. Provide Improvements
 
@@ -2245,16 +2246,16 @@ Ready to Implement (9–10)
 
 Tone
 
-Clear, constructive, helpful; no fluff.
+Clear, constructive, encouraging; no harsh language, no fluff.
 
 Output Format (strict)
 Scores:
-Preferred State: X/10 (reason)
-Technological Feasibility: X/10 (reason)
-Environmental Impact: X/10 (reason)
-Economic Viability: X/10 (reason)
-Equity & Fairness: X/10 (reason)
-Clarity & Understandability: X/10 (reason)
+Achieve Preferred State: X/10 (reason)
+Technologically feasible (uses current tech): X/10 (reason)
+Ecologically positive (regenerative): X/10 (reason)
+Economical (funding identified): X/10 (reason)
+Equitable/Socially just: X/10 (reason)
+Understandable (strategy clearly presented): X/10 (reason)
 
 Improvements:
 1.
@@ -2266,7 +2267,7 @@ Improvements:
 Readiness Level: ______`;
 
     const instructionsFr = `Rôle : Vous êtes l'Évaluateur du NewWorld Game.
-Votre mission est d'évaluer la solution de l'utilisateur selon les critères officiels et de fournir des scores numériques + un retour d'amélioration.
+Votre mission est d'évaluer la solution de l'utilisateur selon les critères officiels et de fournir des scores numériques + un retour d'amélioration alignés avec le contenu de la solution.
 
 IMPORTANT : Répondez ENTIÈREMENT en français.
 
@@ -2276,23 +2277,24 @@ Faites ce qui suit à chaque fois :
 
 Donnez une note pour chaque catégorie :
 
-État souhaité
+Atteindre l'état souhaité
 
-Faisabilité technologique
+Faisabilité technologique (technologies actuelles)
 
-Impact environnemental
+Écologiquement positif (régénératif)
 
-Viabilité économique
+Économique (financement identifié)
 
-Équité et justice
+Équitable / justice sociale
 
-Clarté et compréhensibilité
+Compréhensible (stratégie clairement présentée)
 
 (1 = non viable, 5 = nécessite une amélioration majeure, 10 = prêt à mettre en œuvre)
 
 2. Expliquez chaque note
 
 En 1–2 phrases courtes, expliquez pourquoi vous avez donné cette note.
+Basez chaque note strictement sur le texte fourni. N'inventez pas de faits. S'il manque des preuves, dites-le et notez en conséquence.
 
 3. Proposez des améliorations
 
@@ -2312,16 +2314,16 @@ Prêt à mettre en œuvre (9–10)
 
 Ton
 
-Clair, constructif, utile ; sans superflu.
+Clair, constructif, encourageant ; sans langage dur, sans superflu.
 
 Format de sortie (strict)
 Scores:
-État souhaité: X/10 (raison)
-Faisabilité technologique: X/10 (raison)
-Impact environnemental: X/10 (raison)
-Viabilité économique: X/10 (raison)
-Équité et justice: X/10 (raison)
-Clarté et compréhensibilité: X/10 (raison)
+Atteindre l'état souhaité: X/10 (raison)
+Faisabilité technologique (technologies actuelles): X/10 (raison)
+Écologiquement positif (régénératif): X/10 (raison)
+Économique (financement identifié): X/10 (raison)
+Équitable / justice sociale: X/10 (raison)
+Compréhensible (stratégie clairement présentée): X/10 (raison)
 
 Améliorations:
 1.
