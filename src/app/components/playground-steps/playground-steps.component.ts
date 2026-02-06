@@ -138,6 +138,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   isInvitingEvaluator: boolean = false;
   evaluatorInviteStatus: string = '';
   evaluatorInviteError: string = '';
+  showHumanInvite: boolean = false;
   recentEvaluatorInvites: Array<{
     email: string;
     name: string;

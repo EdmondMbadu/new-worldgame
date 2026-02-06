@@ -386,23 +386,38 @@
 
                     <!-- Human Feedback Invite -->
                     <div class="mt-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-emerald-50 p-4 shadow-sm dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/40">
-                      <div class="flex items-start justify-between gap-3">
-                        <div>
-                          <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                            Invite Human Feedback
-                          </p>
-                          <p class="text-xs text-slate-500 dark:text-slate-400">
-                            Add an evaluator to review your solution. They’ll receive the same evaluation page as in Solution Details.
-                          </p>
+                      <button
+                        type="button"
+                        (click)="showHumanInvite = !showHumanInvite"
+                        class="w-full flex items-center justify-between gap-3 text-left"
+                      >
+                        <div class="flex items-start gap-3">
+                          <div class="h-9 w-9 flex items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-300">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                              Invite Human Feedback
+                            </p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                              Add an evaluator to review your solution. They’ll receive the same evaluation page as in Solution Details.
+                            </p>
+                          </div>
                         </div>
-                        <div class="h-9 w-9 flex items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-300">
-                          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                        <div class="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-300">
+                          <span *ngIf="currentSolution.evaluationDetails?.length" class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-200">
+                            {{ currentSolution.evaluationDetails?.length }} feedback
+                          </span>
+                          <span>{{ showHumanInvite ? 'Show less' : 'Expand' }}</span>
+                          <svg class="h-4 w-4 transition-transform" [class.rotate-180]="showHumanInvite" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
                           </svg>
                         </div>
-                      </div>
+                      </button>
 
-                      <div class="mt-4 relative">
+                      <div *ngIf="showHumanInvite" class="mt-4 relative animate-fadeIn">
                         <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-2">
                           Email or Name
                         </label>
@@ -513,6 +528,48 @@
                           >
                             {{ invite.status === 'success' ? 'Sent' : invite.status === 'exists' ? 'Exists' : 'Failed' }}
                           </span>
+                        </div>
+                      </div>
+
+                      <div *ngIf="currentSolution.evaluationDetails?.length" class="mt-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            Existing Feedback ({{ currentSolution.evaluationDetails?.length }})
+                          </p>
+                          <a
+                            [routerLink]="['/evaluation-summary', currentSolution.solutionId]"
+                            class="text-xs font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-300"
+                          >
+                            Open Summary
+                          </a>
+                        </div>
+                        <div class="space-y-2">
+                          <div
+                            *ngFor="let ev of currentSolution.evaluationDetails; let i = index"
+                            class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                          >
+                            <div class="flex items-start justify-between gap-3">
+                              <div class="min-w-0">
+                                <p class="font-semibold text-slate-700 dark:text-slate-200 truncate">
+                                  {{ ev.evaluator?.firstName || ev.evaluator?.lastName ? (ev.evaluator?.firstName + ' ' + ev.evaluator?.lastName) : (ev.evaluator?.email || ('Evaluator #' + (i + 1))) }}
+                                </p>
+                                <p *ngIf="ev.comment" class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                  {{ ev.comment }}
+                                </p>
+                              </div>
+                              <div class="flex flex-col items-end gap-2">
+                                <span *ngIf="ev.average" class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                                  Avg {{ ev.average }}/10
+                                </span>
+                                <a
+                                  [routerLink]="['/evaluation-summary', currentSolution.solutionId]"
+                                  class="text-[11px] font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-300"
+                                >
+                                  Open
+                                </a>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
