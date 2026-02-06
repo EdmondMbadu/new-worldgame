@@ -194,6 +194,14 @@
     *ngIf="i == 8 && step.startsWith('Step IV:')"
     class="pt-4 font-bold text-gray-900 text-2xl dark:text-gray-200"
   >
+    Summary/Conclusions:
+  </h2>
+
+  <!-- “Moving Forward” heading before question at i == 12 -->
+  <h2
+    *ngIf="i == 12 && step.startsWith('Step IV:')"
+    class="pt-4 font-bold text-gray-900 text-2xl dark:text-gray-200"
+  >
     Moving Forward:
   </h2>
 
