@@ -1538,6 +1538,9 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
 
     try {
       const response = await fetch(this.infographicImageUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1550,6 +1553,14 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to download infographic', error);
+      // Fallback for production CORS-restricted buckets: open the file directly.
+      const a = document.createElement('a');
+      a.href = this.infographicImageUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     } finally {
       this.downloadingInfographic = false;
     }

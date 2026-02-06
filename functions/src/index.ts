@@ -4316,6 +4316,7 @@ CRITICAL REQUIREMENTS:
         const imageBuffer = Buffer.from(imgB64, 'base64');
         const fileName = `infographics/${snap.ref.parent.parent?.id}/${snap.id}.png`;
         const file = bucket.file(fileName);
+        const downloadToken = randomUUID();
 
         await file.save(imageBuffer, {
           metadata: {
@@ -4323,15 +4324,13 @@ CRITICAL REQUIREMENTS:
             metadata: {
               solutionTitle,
               createdAt: new Date().toISOString(),
+              firebaseStorageDownloadTokens: downloadToken,
             },
           },
         });
-
-        // Make the file publicly accessible
-        await file.makePublic();
-
-        // Get the public URL
-        const imageUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+        // Use Firebase download URL format for better browser compatibility.
+        const encodedFileName = encodeURIComponent(fileName);
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedFileName}?alt=media&token=${downloadToken}`;
 
         // Update document with success
         await snap.ref.update({
