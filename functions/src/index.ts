@@ -310,6 +310,50 @@ const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> =
   }
 };
 
+const isUrlUsableForReport = async (url: string, timeoutMs = 3500): Promise<boolean> => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+      },
+    });
+    clearTimeout(timeoutId);
+
+    // Explicitly reject hard-dead links.
+    if (response.status === 404 || response.status === 410) return false;
+    // Treat auth-gated pages as usable links.
+    if (response.status === 401 || response.status === 403) return true;
+
+    if (response.status === 405) {
+      const controller2 = new AbortController();
+      const timeoutId2 = setTimeout(() => controller2.abort(), timeoutMs);
+      const getResponse = await fetch(url, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller2.signal,
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+          Range: 'bytes=0-1024',
+        },
+      });
+      clearTimeout(timeoutId2);
+      if (getResponse.status === 404 || getResponse.status === 410) return false;
+      return getResponse.status < 500;
+    }
+
+    return response.status < 500;
+  } catch (error) {
+    return false;
+  }
+};
+
 const validateLinks = async <T extends { url: string }>(items: T[]) => {
   const results = await Promise.all(
     items.map(async (item) => ({
@@ -2393,6 +2437,7 @@ export const onReportRequest = functions
   .onCreate(async (snap) => {
     const data = snap.data() || {};
     const prompt: string = (data?.prompt || '').trim();
+    const isFundingReport = /Report Type:\s*Funding Sources List/i.test(prompt);
 
     if (!prompt) {
       await snap.ref.update({
@@ -2408,7 +2453,13 @@ export const onReportRequest = functions
       });
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const modelConfig: Record<string, unknown> = { model: 'gemini-2.5-flash' };
+      const modelConfig: Record<string, unknown> = {
+        model: isFundingReport ? 'gemini-2.0-flash' : 'gemini-2.5-flash',
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: isFundingReport ? 3500 : 5000,
+        },
+      };
       modelConfig['tools'] = [{ google_search: {} }];
       const model = genAI.getGenerativeModel(modelConfig as any);
 
@@ -2478,11 +2529,66 @@ export const onReportRequest = functions
         }
       }
       sources.sort((a, b) => b.priority - a.priority);
-      const cleanSources = sources.slice(0, 10).map(({ title, url }) => ({ title, url }));
+      const sourceCandidates = sources.slice(0, isFundingReport ? 25 : 10);
+      const validatedSourceResults = await Promise.all(
+        sourceCandidates.map(async (s) => ({
+          source: s,
+          valid: await isUrlUsableForReport(s.url),
+        }))
+      );
+      const cleanSources = validatedSourceResults
+        .filter((r) => r.valid)
+        .slice(0, isFundingReport ? 15 : 10)
+        .map(({ source }) => ({ title: source.title, url: source.url }));
+
+      let finalText = text || '';
+      if (isFundingReport && finalText) {
+        const extracted = finalText.match(/https?:\/\/[^\s<>"')\]]+/g) || [];
+        const uniqueUrls = Array.from(
+          new Set(
+            extracted
+              .map((u) => u.replace(/[),.;]+$/g, ''))
+              .filter(Boolean)
+          )
+        ).slice(0, 40);
+
+        if (uniqueUrls.length) {
+          const validatedInText = await Promise.all(
+            uniqueUrls.map(async (url) => ({
+              url,
+              valid: await isUrlUsableForReport(url),
+            }))
+          );
+          const invalidUrls = validatedInText.filter((x) => !x.valid).map((x) => x.url);
+          if (invalidUrls.length) {
+            // Remove lines that contain dead links.
+            const lines = finalText.split('\n').filter((line) => {
+              const normalized = line.trim();
+              if (!normalized) return true;
+              return !invalidUrls.some((badUrl) => normalized.includes(badUrl));
+            });
+            finalText = lines.join('\n');
+
+            // Remove funder profile cards without any remaining valid URL.
+            const cardRegex =
+              /(FUNDER PROFILE CARD[\s\S]*?)(?=\nFUNDER PROFILE CARD|\n3\.\s*MASTER TABLE|\n4\.\s*CONTACT DIRECTORY|\n5\.\s*ANNEX|$)/gi;
+            finalText = finalText.replace(cardRegex, (cardBlock) => {
+              const cardUrls = cardBlock.match(/https?:\/\/[^\s<>"')\]]+/g) || [];
+              const hasValidLink = cardUrls.some(
+                (url) => !invalidUrls.includes(url.replace(/[),.;]+$/g, ''))
+              );
+              return hasValidLink ? cardBlock : '';
+            });
+
+            // Clean extra blank lines introduced by removals.
+            finalText = finalText.replace(/\n{3,}/g, '\n\n');
+          }
+        }
+      }
 
       await snap.ref.update({
         status: { state: 'COMPLETED' },
-        response: text || null,
+        response: finalText || null,
         sources: cleanSources.length > 0 ? cleanSources : null,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });

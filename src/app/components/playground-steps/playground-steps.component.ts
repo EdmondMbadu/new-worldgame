@@ -319,6 +319,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   reportInstruction = '';
   selectedReportTypeId = 'funding-sources';
   private reportDocSub?: Subscription;
+  private reportTimeoutHandle?: ReturnType<typeof setTimeout>;
 
   // Download loading states
   downloadingDraftPdf = false;
@@ -446,7 +447,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       title: 'Funding Sources List',
       group: 'funder',
       instruction:
-        'After the draft is done, research the web to find real, active funders that fit this specific solution (region, sector, stage, applicant type). Follow this exact structure: Cover Page, Quick Summary (Funding Landscape Overview + Recommended Priority Targets), Funder Directory (repeat standardized profile card with fields A-H), Master Table (top 20 or top 50), Contact Directory, and Annex (keywords, excluded funders, links dump). For missing data, mark as Unverified. Include source links and last-updated dates for every funder. Use concise, professional language suitable for a PDF.',
+        'After the draft is done, research the web to find real, active funding opportunities that fit this specific solution (region, sector, stage, applicant type). Follow this exact structure: Cover Page, Funding Landscape Overview, Recommended Priority Targets, Funder Directory (repeat standardized profile card with fields A-H), Master Table (top 10 summary table), Contact Directory, and Annex (keywords, excluded funders, links dump). Do NOT output a "Quick Summary" heading. The Funding Landscape Overview and Recommended Priority Targets must be structured data only (no narrative paragraphs). Each funder entry must name a specific, active funding opportunity/program/call with a direct official link; do not list generic orgs without a specific opportunity. Include only opportunities with verified working links. If an opportunity link cannot be verified, exclude that funder from the main list and place it in Annex (Excluded) with reason. Target up to 10 verified funders. Only include opportunities that are open or accept rolling applications; if closed, move to Annex (Excluded) with reason. Include source links and last-updated dates for every included funder. Use concise, premium, human but professional language suitable for a PDF.',
       summary: 'A structured funding directory with prioritized targets and contacts.',
     },
     {
@@ -1398,7 +1399,7 @@ STYLE REQUIREMENTS:
     this.aiFeedbackStatus = `Sending your strategy to ${this.selectedAiEvaluator.name}...`;
 
     const docId = this.afs.createId();
-    const collectionPath = `users/${this.auth.currentUser.uid}/report-requests/${docId}`;
+    const collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAiEvaluator.collectionKey}/${docId}`;
     const docRef: AngularFirestoreDocument<any> = this.afs.doc(collectionPath);
 
     this.aiFeedbackDocSub?.unsubscribe();
@@ -1961,10 +1962,21 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       : 'Generating report...';
 
     const docId = this.afs.createId();
-    const collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAiEvaluator.collectionKey}/${docId}`;
+    const collectionPath = `users/${this.auth.currentUser.uid}/report-requests/${docId}`;
     const docRef: AngularFirestoreDocument<any> = this.afs.doc(collectionPath);
 
     this.reportDocSub?.unsubscribe();
+    if (this.reportTimeoutHandle) {
+      clearTimeout(this.reportTimeoutHandle);
+    }
+    this.reportTimeoutHandle = setTimeout(() => {
+      this.reportLoading = false;
+      this.reportStatus = '';
+      this.reportError =
+        'Report generation took too long. Please retry. For Funding Sources, we now target exactly 10 opportunities to keep generation under 1-2 minutes.';
+      this.reportDocSub?.unsubscribe();
+    }, 125000);
+
     this.reportDocSub = docRef.valueChanges().subscribe((snapshot) => {
       if (!snapshot?.status) {
         return;
@@ -1974,12 +1986,20 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       if (state === 'PROCESSING') {
         this.reportStatus = 'AI is writing your report...';
       } else if (state === 'COMPLETED') {
+        if (this.reportTimeoutHandle) {
+          clearTimeout(this.reportTimeoutHandle);
+          this.reportTimeoutHandle = undefined;
+        }
         this.reportLoading = false;
         this.reportStatus = '';
         this.reportText = snapshot.response ?? '';
         this.reportFormatted = this.formatAiFeedback(this.reportText);
         this.reportDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
+        if (this.reportTimeoutHandle) {
+          clearTimeout(this.reportTimeoutHandle);
+          this.reportTimeoutHandle = undefined;
+        }
         this.reportLoading = false;
         this.reportStatus = '';
         this.reportError =
@@ -1994,6 +2014,10 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       this.showReportModal = false;
     } catch (error) {
       console.error('Report generation request failed', error);
+      if (this.reportTimeoutHandle) {
+        clearTimeout(this.reportTimeoutHandle);
+        this.reportTimeoutHandle = undefined;
+      }
       this.reportLoading = false;
       this.reportStatus = '';
       this.reportError = 'Unable to reach the AI right now. Please retry.';
@@ -2072,6 +2096,10 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();
+    if (this.reportTimeoutHandle) {
+      clearTimeout(this.reportTimeoutHandle);
+      this.reportTimeoutHandle = undefined;
+    }
     this.infographicDocSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
@@ -2126,6 +2154,10 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
   }
 
   private resetReportState() {
+    if (this.reportTimeoutHandle) {
+      clearTimeout(this.reportTimeoutHandle);
+      this.reportTimeoutHandle = undefined;
+    }
     this.reportError = '';
     this.reportText = '';
     this.reportFormatted = '';
@@ -2491,9 +2523,14 @@ Niveau de préparation: ______`;
     let intro: string;
     if (reportType?.id === 'funding-sources') {
       intro = `Role: You are a senior funding research analyst.
-Use web research to identify real, active funders that match the specific solution.
+Use web research to identify real, active funding opportunities that match the specific solution.
+Only include opportunities with a direct official program or call page link that appears in your sources.
+Include only opportunities with verified working links. If fewer than 10 are verifiable, return fewer.
+Do not output a "Quick Summary" heading; use "Funding Landscape Overview" and "Recommended Priority Targets" only.
+Those two sections must be structured data only (no narrative paragraphs).
+Exclude closed opportunities from the main list; move them to Annex with the reason.
+Do not use placeholder text like "Unverified (link unavailable)" in the main list.
 Prioritize official sources and funder program pages, and include source links and last-updated dates when available.
-If a data field cannot be verified, mark it as "Unverified".
 Output plain text only (no markdown, no asterisks, no special formatting).`;
     } else if (hasCustomSystemPrompt) {
       // Use the specialized system prompt for reports like Business Model Canvas
