@@ -69,6 +69,7 @@ interface ReportType {
   id: string;
   title: string;
   instruction: string;
+  summary?: string;
   group: string;
   systemPrompt?: string; // Optional custom system prompt for specialized reports
 }
@@ -326,12 +327,13 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   downloadingReportDocx = false;
   downloadingFeedbackPdf = false;
   reportGroupState: Record<string, boolean> = {
-    strategy: true,
-    understanding: false,
-    design: false,
-    execution: false,
-    funding: false,
-    growth: false,
+    funder: false,
+    summary: true,
+    teacher: false,
+    social: false,
+    article: false,
+    conference: false,
+    youtube: false,
   };
 
   // AI Evaluator selection
@@ -429,21 +431,23 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   }
 
   reportGroups: ReportGroup[] = [
-    { id: 'strategy', label: 'Strategy' },
-    { id: 'understanding', label: 'Understanding' },
-    { id: 'design', label: 'Design' },
-    { id: 'execution', label: 'Execution' },
-    { id: 'funding', label: 'Funding' },
-    { id: 'growth', label: 'Growth' },
+    { id: 'funder', label: 'Funder' },
+    { id: 'summary', label: 'Summary' },
+    { id: 'teacher', label: 'Teacher' },
+    { id: 'social', label: 'Social Media' },
+    { id: 'article', label: 'Article' },
+    { id: 'conference', label: 'Conference' },
+    { id: 'youtube', label: 'YouTube' },
   ];
 
   reportTypes: ReportType[] = [
     {
       id: 'business-model-canvas',
-      title: 'Impact BMC Theory of Change/Logic Model Report',
-      group: 'strategy',
+      title: 'Impact Business Model Canvas',
+      group: 'summary',
       instruction:
         'Executive overview + Impact Business Model Canvas table only. No extra sections.',
+      summary: 'Decision-ready Impact BMC with a concise executive overview.',
       systemPrompt: `You are an expert Business Model Architect, Impact Strategist, and Venture Design Advisor.
 
 Your role is to help transform a developed solution into a clear, coherent, and actionable Business Model Canvas that can be used directly for presentation, validation, funding, or implementation.
@@ -511,151 +515,68 @@ STYLE REQUIREMENTS:
 - Do not add any other sections or formatting`,
     },
     {
-      id: 'strategic-roadmap',
-      title: 'Strategic Implementation Roadmap',
-      group: 'strategy',
-      instruction:
-        'Phased action plan with milestones, resource needs, and critical success factors.',
-      systemPrompt: `You are a Strategic Planning Expert and Implementation Advisor specializing in turning ideas into actionable roadmaps.
-
-Your role is to create a clear, phased implementation roadmap that transforms a solution concept into a practical execution plan.
-
-You deeply understand:
-- Strategic planning methodologies
-- Project management best practices
-- Resource allocation and prioritization
-- Risk-aware planning and contingency development
-- Milestone-based progress tracking
-
-OBJECTIVE: Generate a comprehensive Strategic Implementation Roadmap that provides a clear path from concept to execution.
-
-REQUIRED OUTPUT STRUCTURE:
-
-## 1. Executive Summary
-Brief overview of the implementation strategy and expected timeline.
-
-## 2. Implementation Phases
-
-### Phase 1: Foundation (0-3 months)
-| Milestone | Key Activities | Resources Required | Success Criteria |
-|-----------|---------------|-------------------|------------------|
-| [Milestone] | [Activities] | [Resources] | [Criteria] |
-
-### Phase 2: Development (3-6 months)
-| Milestone | Key Activities | Resources Required | Success Criteria |
-|-----------|---------------|-------------------|------------------|
-| [Milestone] | [Activities] | [Resources] | [Criteria] |
-
-### Phase 3: Launch & Scale (6-12 months)
-| Milestone | Key Activities | Resources Required | Success Criteria |
-|-----------|---------------|-------------------|------------------|
-| [Milestone] | [Activities] | [Resources] | [Criteria] |
-
-## 3. Critical Success Factors
-- [Factor 1 with explanation]
-- [Factor 2 with explanation]
-- [Factor 3 with explanation]
-
-## 4. Resource Requirements
-
-| Resource Type | Phase 1 | Phase 2 | Phase 3 |
-|---------------|---------|---------|---------|
-| Human Capital | [Needs] | [Needs] | [Needs] |
-| Financial | [Needs] | [Needs] | [Needs] |
-| Technical | [Needs] | [Needs] | [Needs] |
-| Partnerships | [Needs] | [Needs] | [Needs] |
-
-## 5. Risk Mitigation Plan
-
-| Risk | Likelihood | Impact | Mitigation Strategy | Contingency |
-|------|------------|--------|---------------------|-------------|
-| [Risk] | [H/M/L] | [H/M/L] | [Strategy] | [Backup plan] |
-
-## 6. Key Performance Indicators (KPIs)
-
-| KPI | Target | Measurement Method | Review Frequency |
-|-----|--------|-------------------|------------------|
-| [KPI] | [Target] | [Method] | [Frequency] |
-
-## 7. Next Steps
-Immediate actions to begin implementation (first 30 days).
-
-STYLE REQUIREMENTS:
-- Be specific and actionable
-- Use tables for structured information
-- Include realistic timelines
-- Focus on practical, achievable milestones
-- Write for decision-makers who need to allocate resources`,
-    },
-    {
-      id: 'solution-overview',
-      title: 'Solution Overview Report',
-      group: 'understanding',
-      instruction:
-        'Generate a clear, concise explanation of the problem, the proposed solution, who it serves, and why it matters, using non-technical language suitable for a general audience.',
-    },
-    {
-      id: 'problem-impact-analysis',
-      title: 'Problem & Impact Analysis Report',
-      group: 'understanding',
-      instruction:
-        'Analyze the root causes of the problem, its scale and severity, the populations affected, and the social, economic, or environmental consequences if the problem remains unsolved.',
-    },
-    {
-      id: 'solution-innovation',
-      title: 'Solution & Innovation Report',
-      group: 'design',
-      instruction:
-        'Describe how the proposed solution works, what makes it different from existing approaches, and highlight the innovative aspects in terms of design, technology, or process.',
-    },
-    {
-      id: 'stakeholders-beneficiaries',
-      title: 'Stakeholders & Beneficiaries Report',
-      group: 'design',
-      instruction:
-        'Identify all key stakeholders and beneficiaries, describe their roles, interests, and interactions, and explain how each group is impacted by or contributes to the solution.',
-    },
-    {
-      id: 'feasibility-implementation',
-      title: 'Feasibility & Implementation Report',
-      group: 'execution',
-      instruction:
-        'Evaluate the practical feasibility of the solution by outlining implementation steps, required resources, technical and operational needs, timelines, and key assumptions.',
-    },
-    {
-      id: 'risks-constraints',
-      title: 'Risks & Constraints Report',
-      group: 'execution',
-      instruction:
-        'Identify potential technical, financial, social, regulatory, or operational risks and constraints, and propose realistic mitigation strategies for each.',
-    },
-    {
-      id: 'funding-readiness',
-      title: 'Funding Readiness Report',
-      group: 'funding',
-      instruction:
-        'Estimate funding needs, break down costs by phase, explain how funds will be used, and link financial inputs to expected outcomes and milestones.',
-    },
-    {
       id: 'executive-summary',
-      title: 'Executive Summary Report (1-Page)',
-      group: 'funding',
+      title: 'Executive Summary',
+      group: 'summary',
       instruction:
-        'Produce a concise, high-level summary of the problem, solution, impact, and funding needs, optimized for quick review by decision-makers.',
+        'One-page executive summary covering the problem, solution, beneficiaries, impact, evidence, and immediate next steps.',
+      summary: 'A crisp, one-page overview for quick decisions.',
     },
     {
-      id: 'impact-measurement',
-      title: 'Impact Measurement Report',
-      group: 'growth',
+      id: 'funder-brief',
+      title: 'Funder Brief',
+      group: 'funder',
       instruction:
-        'Define measurable impact indicators, explain how outcomes will be tracked and evaluated, and distinguish between short-term outputs and long-term impact.',
+        'Write a funding-ready brief: problem, solution, impact thesis, evidence, budget snapshot, use of funds, milestones, risks, and the funding ask.',
+      summary: 'Tailored for foundations, sponsors, and grant reviewers.',
     },
     {
-      id: 'scaling-replication',
-      title: 'Scaling & Replication Report',
-      group: 'growth',
+      id: 'teacher-guide',
+      title: 'Teacher Guide',
+      group: 'teacher',
       instruction:
-        'Assess the potential for scaling or replicating the solution, including geographic expansion, adaptation to new contexts, and requirements for sustainable growth.',
+        'Explain the problem and solution in classroom-friendly language. Include learning objectives, key terms, discussion prompts, and a short activity idea.',
+      summary: 'Lesson-ready explanation with prompts and vocabulary.',
+    },
+    {
+      id: 'social-media-pack',
+      title: 'Social Media Post Pack',
+      group: 'social',
+      instruction:
+        'Create 6-8 platform-ready social posts with hooks, captions, hashtags, and a clear call-to-action. Keep each post under 280 characters.',
+      summary: 'Short-form posts optimized for public engagement.',
+    },
+    {
+      id: 'article-500',
+      title: 'Article (500 words)',
+      group: 'article',
+      instruction:
+        'Write a 500-word article with a strong headline, subhead, and clear narrative arc. Include a concluding call-to-action.',
+      summary: 'Concise, reader-friendly narrative for general audiences.',
+    },
+    {
+      id: 'article-1000',
+      title: 'Article (1000 words)',
+      group: 'article',
+      instruction:
+        'Write a 1000-word article with a compelling lead, structured sections, and a persuasive closing. Include key evidence and human impact.',
+      summary: 'Long-form story with depth, evidence, and impact.',
+    },
+    {
+      id: 'conference-proposal',
+      title: 'Conference Proposal',
+      group: 'conference',
+      instruction:
+        'Prepare a conference proposal: title, 150-200 word abstract, objectives, format, target audience, and speaker bio placeholders.',
+      summary: 'Ready-to-submit proposal format for reviewers.',
+    },
+    {
+      id: 'youtube-script',
+      title: 'YouTube Script',
+      group: 'youtube',
+      instruction:
+        'Write a 6-8 minute YouTube script with a hook, intro, 3-5 beats, transitions, and a closing call-to-action. Use conversational tone.',
+      summary: 'Conversational script designed for video delivery.',
     },
   ];
   ngOnInit(): void {

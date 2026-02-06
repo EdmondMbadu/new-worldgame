@@ -887,8 +887,8 @@
   </div>
 
 <div *ngIf="showReportModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 pb-6 pt-24">
-  <div class="absolute inset-0 bg-slate-900/60" (click)="closeReportModal()"></div>
-  <div class="relative w-full max-w-5xl rounded-3xl bg-white p-6 shadow-2xl dark:bg-slate-900">
+  <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" (click)="closeReportModal()"></div>
+  <div class="relative w-full max-w-5xl rounded-3xl border border-white/60 bg-gradient-to-br from-white via-white to-emerald-50/70 p-6 shadow-[0_30px_90px_-40px_rgba(15,23,42,0.8)] dark:border-slate-800/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-900 dark:to-emerald-900/20">
     <div class="flex items-start justify-between gap-4">
       <div>
         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-500">
@@ -911,23 +911,28 @@
 
     <div class="mt-6 max-h-[60vh] space-y-6 overflow-y-auto pr-2">
       <div *ngFor="let group of reportGroups"
-        class="rounded-2xl border p-3"
-        [ngClass]="group.id === 'strategy'
-          ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-700/50 dark:bg-emerald-900/20'
-          : 'border-slate-200 bg-white/80 dark:border-slate-700 dark:bg-slate-900/60'">
+        class="rounded-2xl border p-4 shadow-sm backdrop-blur"
+        [ngClass]="group.id === 'summary'
+          ? 'border-emerald-200/80 bg-emerald-50/70 dark:border-emerald-700/50 dark:bg-emerald-900/20'
+          : 'border-slate-200/80 bg-white/70 dark:border-slate-700/80 dark:bg-slate-900/60'">
         <button
           type="button"
           (click)="toggleReportGroup(group.id)"
           class="flex w-full items-center justify-between gap-2 text-left">
-          <h3 class="text-sm font-semibold uppercase tracking-wide"
-            [ngClass]="group.id === 'strategy'
-              ? 'text-emerald-600 dark:text-emerald-400'
-              : 'text-slate-500 dark:text-slate-400'">
-            {{ group.label }}
-          </h3>
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-[0.18em]"
+              [ngClass]="group.id === 'summary'
+                ? 'text-emerald-700 dark:text-emerald-300'
+                : 'text-slate-500 dark:text-slate-400'">
+              {{ group.label }}
+            </h3>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Choose a report tailored to this audience.
+            </p>
+          </div>
           <svg
             class="h-4 w-4 transition-transform"
-            [ngClass]="group.id === 'strategy' ? 'text-emerald-500' : 'text-slate-400'"
+            [ngClass]="group.id === 'summary' ? 'text-emerald-500' : 'text-slate-400'"
             [class.rotate-180]="reportGroupState[group.id]"
             fill="none"
             stroke="currentColor"
@@ -941,19 +946,19 @@
             *ngFor="let report of getReportsByGroup(group.id)"
             type="button"
             (click)="selectReportType(report)"
-            class="w-full rounded-2xl border p-4 text-left transition"
+            class="group w-full rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5"
             [ngClass]="selectedReportTypeId === report.id
-              ? (report.group === 'strategy'
+              ? (report.group === 'summary'
                   ? 'border-emerald-400 bg-emerald-50 shadow-lg shadow-emerald-100 dark:border-emerald-400/70 dark:bg-emerald-500/10'
                   : 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-100 dark:border-amber-400/70 dark:bg-amber-500/10')
-              : (report.group === 'strategy'
+              : (report.group === 'summary'
                   ? 'border-emerald-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-emerald-700/50 dark:bg-slate-900/60 dark:hover:border-emerald-400/40'
                   : 'border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-400/40')">
             <p class="text-sm font-semibold text-slate-900 dark:text-white">
               {{ report.title }}
             </p>
             <p class="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              {{ report.instruction }}
+              {{ report.summary || report.instruction }}
             </p>
           </button>
         </div>
