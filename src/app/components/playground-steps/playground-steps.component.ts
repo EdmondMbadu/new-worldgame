@@ -130,6 +130,21 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   etAl: string = '';
   newTeamMember: string = '';
   teamMemberToDelete: string = '';
+  evaluatorInviteInput: string = '';
+  evaluatorInviteSuggestions: User[] = [];
+  selectedEvaluatorUser: User | null = null;
+  showEvaluatorSuggestions: boolean = false;
+  isSearchingEvaluators: boolean = false;
+  isInvitingEvaluator: boolean = false;
+  evaluatorInviteStatus: string = '';
+  evaluatorInviteError: string = '';
+  recentEvaluatorInvites: Array<{
+    email: string;
+    name: string;
+    status: 'success' | 'error' | 'exists';
+    message?: string;
+  }> = [];
+  private evaluatorInviteSearchTimeout: any;
 
   hoverChangeReadMe: boolean = false;
   updateReadMeBox: boolean = false;
@@ -1043,6 +1058,155 @@ STYLE REQUIREMENTS:
     });
   }
 
+  onEvaluatorInviteInputChange() {
+    if (this.evaluatorInviteSearchTimeout) {
+      clearTimeout(this.evaluatorInviteSearchTimeout);
+    }
+
+    this.evaluatorInviteError = '';
+    this.evaluatorInviteStatus = '';
+    this.selectedEvaluatorUser = null;
+
+    const searchTerm = this.evaluatorInviteInput.toLowerCase().trim();
+    if (!searchTerm) {
+      this.evaluatorInviteSuggestions = [];
+      this.showEvaluatorSuggestions = false;
+      this.isSearchingEvaluators = false;
+      return;
+    }
+
+    this.isSearchingEvaluators = true;
+    this.evaluatorInviteSearchTimeout = setTimeout(() => {
+      this.auth.searchUsers(searchTerm, 12).subscribe({
+        next: (users) => {
+          this.evaluatorInviteSuggestions = users || [];
+          this.showEvaluatorSuggestions =
+            this.evaluatorInviteSuggestions.length > 0;
+          const exact = this.evaluatorInviteSuggestions.find(
+            (user) => user.email?.toLowerCase() === searchTerm
+          );
+          if (exact) {
+            this.selectedEvaluatorUser = exact;
+          }
+          this.isSearchingEvaluators = false;
+        },
+        error: (err) => {
+          console.error('Evaluator search failed:', err);
+          this.isSearchingEvaluators = false;
+        },
+      });
+    }, 250);
+  }
+
+  hideEvaluatorSuggestions() {
+    this.evaluatorInviteSearchTimeout = setTimeout(() => {
+      this.showEvaluatorSuggestions = false;
+    }, 200);
+  }
+
+  selectEvaluatorSuggestion(user: User) {
+    this.evaluatorInviteInput = user.email || '';
+    this.selectedEvaluatorUser = user;
+    this.showEvaluatorSuggestions = false;
+  }
+
+  get canInviteEvaluator(): boolean {
+    const email = (this.evaluatorInviteInput || '').trim();
+    return (
+      !this.isInvitingEvaluator &&
+      !!email &&
+      (!!this.selectedEvaluatorUser || this.data.isValidEmail(email))
+    );
+  }
+
+  private evaluatorExists(email: string): boolean {
+    const evaluators = this.currentSolution.evaluators ?? [];
+    return evaluators.some((evaluator: any) => {
+      const value = evaluator?.name || '';
+      return String(value).toLowerCase() === email.toLowerCase();
+    });
+  }
+
+  async inviteEvaluator() {
+    if (!this.canInviteEvaluator) {
+      return;
+    }
+
+    this.isInvitingEvaluator = true;
+    this.evaluatorInviteError = '';
+    this.evaluatorInviteStatus = '';
+
+    const email = this.selectedEvaluatorUser?.email || this.evaluatorInviteInput.trim();
+    const name =
+      this.selectedEvaluatorUser
+        ? `${this.selectedEvaluatorUser.firstName || ''} ${this.selectedEvaluatorUser.lastName || ''}`.trim()
+        : email;
+
+    if (!this.data.isValidEmail(email)) {
+      this.evaluatorInviteError = 'Please enter a valid email address.';
+      this.isInvitingEvaluator = false;
+      return;
+    }
+
+    if (this.evaluatorExists(email)) {
+      this.recentEvaluatorInvites.unshift({
+        email,
+        name,
+        status: 'exists',
+        message: 'Already an evaluator.',
+      });
+      this.evaluatorInviteStatus = 'That evaluator is already on the list.';
+      this.isInvitingEvaluator = false;
+      return;
+    }
+
+    try {
+      const evaluators = [...(this.currentSolution.evaluators ?? [])];
+      evaluators.push({ name: email });
+
+      await this.solution.addEvaluatorsToSolution(
+        evaluators,
+        this.currentSolution.solutionId!
+      );
+      this.currentSolution.evaluators = evaluators;
+      this.getEvaluators();
+
+      const solutionEvaluationInvite = this.fns.httpsCallable(
+        'solutionEvaluationInvite'
+      );
+      const emailData = {
+        email,
+        subject: `You have been invited to evaluate the NewWorld Game solution: ${this.currentSolution.title || 'NewWorld Game Solution'}`,
+        title: this.currentSolution.title,
+        description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
+        path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
+      };
+
+      await firstValueFrom(solutionEvaluationInvite(emailData));
+
+      this.recentEvaluatorInvites.unshift({
+        email,
+        name,
+        status: 'success',
+      });
+      this.evaluatorInviteStatus = 'Invite sent successfully.';
+      this.evaluatorInviteInput = '';
+      this.selectedEvaluatorUser = null;
+    } catch (error) {
+      console.error('Evaluator invite failed:', error);
+      this.recentEvaluatorInvites.unshift({
+        email,
+        name,
+        status: 'error',
+        message: 'Invite failed. Try again.',
+      });
+      this.evaluatorInviteError =
+        'We could not send the invite. Please try again.';
+    } finally {
+      this.isInvitingEvaluator = false;
+    }
+  }
+
   goBackAndForthTimeLine(current: number) {
     this.display[this.currentIndexDisplay] = false;
     this.currentIndexDisplay = current;
@@ -1096,6 +1260,37 @@ STYLE REQUIREMENTS:
     } catch (error) {
       console.error(`Error sending invite to ${this.newTeamMember}:`, error);
     }
+  }
+
+  public getInitials(
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    fullName?: string
+  ): string {
+    const fn = (firstName || '').trim();
+    const ln = (lastName || '').trim();
+    let primary = fn ? fn[0] : '';
+    let secondary = ln ? ln[0] : '';
+
+    if (!primary && !secondary && fullName) {
+      const parts = fullName.trim().split(/\s+/);
+      primary = parts[0]?.[0] || '';
+      secondary = parts.length > 1 ? parts[parts.length - 1]?.[0] || '' : '';
+    }
+
+    if (primary || secondary) {
+      if (!secondary) {
+        if (fn.length > 1) secondary = fn[1];
+        else if (ln.length > 1) secondary = ln[1];
+      }
+      return (primary + secondary).toUpperCase();
+    }
+
+    const local = (email || '').trim().split('@')[0] || '';
+    if (local.length >= 2) return (local[0] + local[1]).toUpperCase();
+    if (local.length === 1) return local[0].toUpperCase();
+    return '?';
   }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
