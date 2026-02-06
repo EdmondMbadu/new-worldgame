@@ -180,12 +180,13 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
           "What does our solution do to reach the preferred state? How will it do it? (If you don't have a solution, check the Solutions Library to get some ideas, and/or Ask Bucky what he thinks is a solution that will get you from the Problem to the Preferred state.)",
           'What technology, programs, policies will it need?',
           'What resources does our solution need?',
+          'Is there a business opportunity in the solution? Is it possible to meet need/solve the problem through a business? If so, what is this business? What will it do or sell? (If this question is not relevant to your solution, ignore it.)',
           'How is our solution part of a circular, regenerative, more equitable economy?',
         ],
         [
           `Cost 1. How much will our strategy cost to test, for a proof-of-concept, in the country where we will test and first implement the solution?  (Answer this as best you can. Then ask Bucky. See `,
           'Cost 2. How much will our strategy cost to implement at scale?',
-          'Where will we get the resources and funding needed to implement our solution, to do the above?',
+          'Where will we get the resources and funding or investment needed to implement our solution, to do the above?',
           'Who will implement our solution? Where will it be tested (and first implemented)? Who will be our in-country/on-the-ground partner?',
           'What actions are needed in the next 6-12 months to get our solution implemented? Who will do what, when, where?',
           'What does our implemented strategy look like, in more detail? (For this task ask one of our AI colleagues to describe what the strategy will look like when implemented).',
@@ -230,12 +231,13 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
           `Que fait notre solution pour atteindre l'état souhaité ? Comment y parvient-elle ? (Si vous n'avez pas encore de solution, consultez la bibliothèque des solutions pour trouver des idées et/ou demandez à Bucky ce qu'il pense être une solution qui vous fera passer de l'état du problème à l'état souhaité.)`,
           `De quelles technologies, programmes ou politiques aura-t-elle besoin ?`,
           `De quelles ressources notre solution a-t-elle besoin ?`,
+          `Existe-t-il une opportunité commerciale dans la solution ? Est-il possible de répondre au besoin/de résoudre le problème par une entreprise ? Si oui, quelle est cette entreprise ? Que fera-t-elle ou que vendra-t-elle ? (Si cette question n'est pas pertinente pour votre solution, ignorez-la.)`,
           `En quoi notre solution participe-t-elle à une économie circulaire, régénératrice et plus équitable ?`,
         ],
         [
           `Coût 1. Combien coûtera notre stratégie pour être testée, en preuve de concept, dans le pays où nous la testerons et la mettrons en œuvre pour la première fois ? (Répondez du mieux possible, puis demandez à Bucky. Voir `,
           `Coût 2. Combien coûtera notre stratégie pour être mise en œuvre à grande échelle ?`,
-          `Où obtiendrons-nous les ressources et le financement nécessaires pour mettre en œuvre notre solution, comme décrit ci-dessus ?`,
+          `Où obtiendrons-nous les ressources et le financement ou l'investissement nécessaires pour mettre en œuvre notre solution, comme décrit ci-dessus ?`,
           `Qui mettra en œuvre notre solution ? Où sera-t-elle testée (et déployée en premier) ? Qui sera notre partenaire sur le terrain/dans le pays ?`,
           `Quelles actions sont nécessaires dans les 6 à 12 prochains mois pour mettre en œuvre notre solution ? Qui fera quoi, quand et où ?`,
           `À quoi ressemble, plus en détail, notre stratégie une fois mise en œuvre ? (Pour cette tâche, demandez à l'un de nos collègues IA de décrire à quoi ressemblera la stratégie une fois en place.)`,
@@ -958,7 +960,7 @@ STYLE REQUIREMENTS:
   questionsTitles: Array<Array<string>> = [
     ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
     ['S2-A', 'S2-B'],
-    ['S3-A', 'S3-B', 'S3-C', 'S3-D'],
+    ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E'],
     [
       'S4-A',
       'S4-B',

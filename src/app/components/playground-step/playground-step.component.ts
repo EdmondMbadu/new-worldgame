@@ -318,16 +318,21 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       this.currentSolution.status !== undefined
     ) {
       this.initializeStrategy();
-    } else if (
-      this.currentSolution.status !== undefined &&
-      this.currentSolution.status[this.questionsTitles[0]]
-    ) {
+    } else if (this.currentSolution.status !== undefined) {
+      const hasAnySavedValue = this.questionsTitles.some(
+        (key) => key in this.currentSolution.status!
+      );
+      if (!hasAnySavedValue) {
+        this.isInitialized = true;
+        return;
+      }
       this.contentsArray = [];
       this.staticContentArray = [];
       for (let i = 0; i < this.questionsTitles.length; i++) {
         const content = this.currentSolution.status![this.questionsTitles[i]];
-        this.contentsArray.push(content);
-        this.staticContentArray.push(content); // Sync both arrays initially
+        const normalizedContent = content ?? '';
+        this.contentsArray.push(normalizedContent);
+        this.staticContentArray.push(normalizedContent); // Sync both arrays initially
       }
     }
 
