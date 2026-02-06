@@ -912,7 +912,7 @@
     <div class="mt-6 max-h-[60vh] space-y-6 overflow-y-auto pr-2">
       <div *ngFor="let group of reportGroups"
         class="rounded-2xl border p-4 shadow-sm backdrop-blur"
-        [ngClass]="group.id === 'summary'
+        [ngClass]="group.id === 'funder'
           ? 'border-emerald-200/80 bg-emerald-50/70 dark:border-emerald-700/50 dark:bg-emerald-900/20'
           : 'border-slate-200/80 bg-white/70 dark:border-slate-700/80 dark:bg-slate-900/60'">
         <button
@@ -921,7 +921,7 @@
           class="flex w-full items-center justify-between gap-2 text-left">
           <div>
             <h3 class="text-sm font-semibold uppercase tracking-[0.18em]"
-              [ngClass]="group.id === 'summary'
+              [ngClass]="group.id === 'funder'
                 ? 'text-emerald-700 dark:text-emerald-300'
                 : 'text-slate-500 dark:text-slate-400'">
               {{ group.label }}
@@ -932,7 +932,7 @@
           </div>
           <svg
             class="h-4 w-4 transition-transform"
-            [ngClass]="group.id === 'summary' ? 'text-emerald-500' : 'text-slate-400'"
+            [ngClass]="group.id === 'funder' ? 'text-emerald-500' : 'text-slate-400'"
             [class.rotate-180]="reportGroupState[group.id]"
             fill="none"
             stroke="currentColor"
@@ -948,10 +948,10 @@
             (click)="selectReportType(report)"
             class="group w-full rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5"
             [ngClass]="selectedReportTypeId === report.id
-              ? (report.group === 'summary'
+              ? (report.group === 'funder'
                   ? 'border-emerald-400 bg-emerald-50 shadow-lg shadow-emerald-100 dark:border-emerald-400/70 dark:bg-emerald-500/10'
                   : 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-100 dark:border-amber-400/70 dark:bg-amber-500/10')
-              : (report.group === 'summary'
+              : (report.group === 'funder'
                   ? 'border-emerald-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-emerald-700/50 dark:bg-slate-900/60 dark:hover:border-emerald-400/40'
                   : 'border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-400/40')">
             <p class="text-sm font-semibold text-slate-900 dark:text-white">

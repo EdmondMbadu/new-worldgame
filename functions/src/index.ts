@@ -2381,6 +2381,138 @@ export const onChatPrompt = functions
     }
   });
 
+/**
+ * Report Generation Function
+ * Triggered when a document is created in users/{uid}/report-requests/{docId}
+ * Uses Google Search grounding to ensure up-to-date, cited reports.
+ */
+export const onReportRequest = functions
+  .region('us-central1')
+  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .firestore.document('users/{uid}/report-requests/{docId}')
+  .onCreate(async (snap) => {
+    const data = snap.data() || {};
+    const prompt: string = (data?.prompt || '').trim();
+
+    if (!prompt) {
+      await snap.ref.update({
+        status: { state: 'ERRORED', message: 'No prompt provided' },
+      });
+      return;
+    }
+
+    try {
+      await snap.ref.update({
+        status: { state: 'PROCESSING' },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      const modelConfig: Record<string, unknown> = { model: 'gemini-2.5-flash' };
+      modelConfig['tools'] = [{ google_search: {} }];
+      const model = genAI.getGenerativeModel(modelConfig as any);
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+
+      // Extract sources from grounding metadata
+      const sources: Array<{ title: string; url: string; priority: number }> = [];
+      const candidate = response.candidates?.[0];
+      const seenUrls = new Set<string>();
+      const authoritativeDomains = [
+        'un.org', 'undp.org', 'unep.org', 'unesco.org', 'who.int', 'unicef.org',
+        'worldbank.org', 'imf.org', 'wto.org', 'ilo.org',
+        '.gov', '.edu',
+        'nature.com', 'science.org', 'pnas.org', 'sciencedirect.com',
+        'reuters.com', 'bbc.com', 'bbc.co.uk', 'apnews.com', 'npr.org',
+        'harvard.edu', 'mit.edu', 'stanford.edu', 'oxford.ac.uk', 'cambridge.org',
+        'ncbi.nlm.nih.gov', 'cdc.gov', 'epa.gov', 'nasa.gov',
+        'oecd.org', 'europa.eu', 'weforum.org',
+        'statista.com', 'ourworldindata.org', 'data.worldbank.org',
+      ];
+      const getAuthorityScore = (hostname: string): number => {
+        const lowerHost = hostname.toLowerCase();
+        for (const domain of authoritativeDomains) {
+          if (lowerHost.includes(domain)) return 10;
+        }
+        if (lowerHost.includes('wikipedia.org')) return 5;
+        return 1;
+      };
+      const isValidSourceUrl = (url: string): boolean => {
+        try {
+          const parsed = new URL(url);
+          if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+          if (parsed.hostname === 'www.google.com' || parsed.hostname === 'google.com') {
+            if (parsed.pathname.startsWith('/search') || parsed.pathname.startsWith('/url')) {
+              return false;
+            }
+          }
+          return true;
+        } catch {
+          return false;
+        }
+      };
+      const addSource = (url: string, title?: string) => {
+        if (!url || seenUrls.has(url) || !isValidSourceUrl(url)) return;
+        seenUrls.add(url);
+        try {
+          const parsedUrl = new URL(url);
+          const hostname = parsedUrl.hostname;
+          const priority = getAuthorityScore(hostname);
+          let finalTitle = title;
+          if (!finalTitle || finalTitle.length < 3) {
+            finalTitle = hostname.replace(/^www\./, '');
+            finalTitle = finalTitle.charAt(0).toUpperCase() + finalTitle.slice(1);
+          }
+          sources.push({ title: finalTitle, url, priority });
+        } catch (e) {
+          console.warn('Failed to parse URL:', url, e);
+        }
+      };
+      if (candidate?.groundingMetadata?.groundingChunks) {
+        for (const chunk of candidate.groundingMetadata.groundingChunks) {
+          if (chunk.web?.uri) {
+            addSource(chunk.web.uri, chunk.web.title);
+          }
+        }
+      }
+      sources.sort((a, b) => b.priority - a.priority);
+      const cleanSources = sources.slice(0, 10).map(({ title, url }) => ({ title, url }));
+
+      await snap.ref.update({
+        status: { state: 'COMPLETED' },
+        response: text || null,
+        sources: cleanSources.length > 0 ? cleanSources : null,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (err: any) {
+      console.error('onReportRequest error:', err?.message || err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      let userFriendlyError = 'An unexpected error occurred. Please try again.';
+      if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
+        userFriendlyError =
+          'Your request was blocked due to content safety guidelines. Please try a different prompt.';
+      } else if (errorMsg.includes('quota') || errorMsg.includes('429')) {
+        userFriendlyError =
+          'The AI service is temporarily busy. Please wait a moment and try again.';
+      } else if (errorMsg.includes('model')) {
+        userFriendlyError =
+          'There was an issue with the AI model. Please try again.';
+      }
+
+      await snap.ref.update({
+        status: {
+          state: 'ERRORED',
+          error: userFriendlyError,
+          technicalError: errorMsg,
+        },
+        response: userFriendlyError,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  });
+
 const inferSpeechEncoding = (
   mimeType?: string
 ): speechProtos.google.cloud.speech.v1.RecognitionConfig.AudioEncoding => {

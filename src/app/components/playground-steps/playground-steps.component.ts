@@ -317,7 +317,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   reportFormatted = '';
   showReportModal = false;
   reportInstruction = '';
-  selectedReportTypeId = 'business-model-canvas';
+  selectedReportTypeId = 'funding-sources';
   private reportDocSub?: Subscription;
 
   // Download loading states
@@ -327,8 +327,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   downloadingReportDocx = false;
   downloadingFeedbackPdf = false;
   reportGroupState: Record<string, boolean> = {
-    funder: false,
-    summary: true,
+    funder: true,
+    summary: false,
     teacher: false,
     social: false,
     article: false,
@@ -441,6 +441,14 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ];
 
   reportTypes: ReportType[] = [
+    {
+      id: 'funding-sources',
+      title: 'Funding Sources List',
+      group: 'funder',
+      instruction:
+        'After the draft is done, research the web to find real, active funders that fit this specific solution (region, sector, stage, applicant type). Follow this exact structure: Cover Page, Quick Summary (Funding Landscape Overview + Recommended Priority Targets), Funder Directory (repeat standardized profile card with fields A-H), Master Table (top 20 or top 50), Contact Directory, and Annex (keywords, excluded funders, links dump). For missing data, mark as Unverified. Include source links and last-updated dates for every funder. Use concise, professional language suitable for a PDF.',
+      summary: 'A structured funding directory with prioritized targets and contacts.',
+    },
     {
       id: 'business-model-canvas',
       title: 'Impact Business Model Canvas',
@@ -1390,7 +1398,7 @@ STYLE REQUIREMENTS:
     this.aiFeedbackStatus = `Sending your strategy to ${this.selectedAiEvaluator.name}...`;
 
     const docId = this.afs.createId();
-    const collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAiEvaluator.collectionKey}/${docId}`;
+    const collectionPath = `users/${this.auth.currentUser.uid}/report-requests/${docId}`;
     const docRef: AngularFirestoreDocument<any> = this.afs.doc(collectionPath);
 
     this.aiFeedbackDocSub?.unsubscribe();
@@ -2481,7 +2489,13 @@ Niveau de préparation: ______`;
     const hasCustomSystemPrompt = reportType?.systemPrompt?.trim();
 
     let intro: string;
-    if (hasCustomSystemPrompt) {
+    if (reportType?.id === 'funding-sources') {
+      intro = `Role: You are a senior funding research analyst.
+Use web research to identify real, active funders that match the specific solution.
+Prioritize official sources and funder program pages, and include source links and last-updated dates when available.
+If a data field cannot be verified, mark it as "Unverified".
+Output plain text only (no markdown, no asterisks, no special formatting).`;
+    } else if (hasCustomSystemPrompt) {
       // Use the specialized system prompt for reports like Business Model Canvas
       intro = reportType!.systemPrompt!;
     } else {
@@ -2498,7 +2512,11 @@ Do not contradict the draft.`;
     }
 
     const reportTitle = reportType?.title ? `Report Type: ${reportType.title}` : 'Report Type: Custom';
-    return `${intro}\n\n${reportTitle}\nInstruction: ${instruction}\n\nSOURCE (Current Draft):\n${reportSource}`;
+    const evaluatorName = this.selectedAiEvaluator?.name
+      ? `Evaluator Persona: ${this.selectedAiEvaluator.name}`
+      : '';
+    const personaLine = evaluatorName ? `${evaluatorName}\n` : '';
+    return `${intro}\n\n${reportTitle}\n${personaLine}Instruction: ${instruction}\n\nSOURCE (Current Draft):\n${reportSource}`;
   }
 
   private buildReportSourceForAi(): string {
