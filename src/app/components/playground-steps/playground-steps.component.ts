@@ -1537,30 +1537,19 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     this.downloadingInfographic = true;
 
     try {
-      const response = await fetch(this.infographicImageUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const title = (this.currentSolution.title || 'strategy').replace(/[^a-z0-9]/gi, '-').toLowerCase();
-      a.download = `${title}-infographic.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to download infographic', error);
-      // Fallback for production CORS-restricted buckets: open the file directly.
+      // Use direct URL download/open to avoid cross-origin fetch failures in production.
       const a = document.createElement('a');
       a.href = this.infographicImageUrl;
+      const title = (this.currentSolution.title || 'strategy').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      a.download = `${title}-infographic.png`;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    } catch (error) {
+      console.error('Failed to download infographic', error);
+      this.infographicError = 'Could not open infographic download. Please try again.';
     } finally {
       this.downloadingInfographic = false;
     }

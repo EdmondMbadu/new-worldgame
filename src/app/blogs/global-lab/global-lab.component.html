@@ -1,505 +1,460 @@
 <div class="dark:bg-slate-900 min-h-screen flex flex-col">
-    <app-navbar [currenPageLabBanner]="false"></app-navbar>
-  
-    <!-- HERO / TOP SECTION -->
-<!-- HERO / TOP SECTION with Background Image -->
-<section 
-class="relative mt-28 pb-16 bg-cover bg-center bg-no-repeat" 
-style="background-image: url('https://designsciencelab.com/wordpress/wp-content/uploads/2016/06/IMG_0431.jpg');"
->
-<!-- Overlay to darken the background image -->
-<div class="absolute inset-0 bg-black/50"></div>
+  <app-navbar [currenPageLabBanner]="false"></app-navbar>
 
-<!-- Text Content -->
-<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-  <blockquote class="mx-auto max-w-xl italic text-white text-lg sm:text-xl mb-6 pt-10">
-    “We are called to be architects of the future, not its victims.”
-  </blockquote>
-  <p class="text-lg text-gray-200 mb-4">—Buckminster Fuller</p>
-  
-  <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-6">
-    Global Solutions Lab 2026
-  </h1>
-  <p class="text-lg md:text-xl font-semibold text-gray-200 mb-4">
-    Research and development for the world <br />
-    June 15–24, 2026
-  </p>
+  <!-- HERO / TOP SECTION -->
+  <section
+    class="relative mt-28 pb-16 bg-cover bg-center bg-no-repeat"
+    style="background-image: url('https://designsciencelab.com/wordpress/wp-content/uploads/2016/06/IMG_0431.jpg');"
+  >
+    <div class="absolute inset-0 bg-black/50"></div>
 
-  <p class="max-w-3xl mx-auto text-gray-200 text-base md:text-lg mb-6">
-    The 2026 Global Solutions Lab will be both in-person and online, advanced, and more accessible to more people.
-    Discover how we combine human ingenuity and custom-trained AIs to develop new, innovative, affordable, and 
-    immediately implementable strategies for achieving the UN SDGs.
-  </p>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <blockquote class="mx-auto max-w-xl italic text-white text-lg sm:text-xl mb-6 pt-10">
+        "We are called to be architects of the future, not its victims."
+      </blockquote>
+      <p class="text-lg text-gray-200 mb-4">-Buckminster Fuller</p>
 
-  <!-- Register Button -->
-  <div class="mt-8">
-    <a
-      routerLink="/global-register"
-      class="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
-    >
-      Register Here
-    </a>
-  </div>
-</div>
-</section>
+      <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-6">
+        Global Solutions Lab 2026
+      </h1>
+      <p class="text-lg md:text-xl font-semibold text-gray-200 mb-4">
+        Research and development for the world and your community <br />
+        June 15-24, 2026
+      </p>
 
-<!-- SECTION: Introduction / NewWorld Game / NewWorld Tournament -->
-<section class="bg-gray-50 dark:bg-gray-900 py-12">
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="grid gap-8 lg:grid-cols-2">
-    
-    <!-- Text Content -->
-    <div>
-      <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">
-        The 2026 Global Solutions Lab
+      <p class="max-w-3xl mx-auto text-gray-200 text-base md:text-lg mb-6">
+        The 2026 Global Solutions Lab will be both in-person and online. Discover how we combine
+        human ingenuity and custom-trained AIs to develop innovative, affordable, and immediately
+        implementable solutions to your community or regional problems and achieving the UN SDGs.
+      </p>
+
+      <div class="mt-8">
+        <a
+          routerLink="/global-register"
+          class="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+        >
+          Register Here
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: Focus Areas + Platform -->
+  <section class="bg-gray-50 dark:bg-gray-900 py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid gap-8 lg:grid-cols-2">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">Focus Areas</h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-3">2026 Lab Main Focus Areas include:</p>
+          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
+            <li>Electrifying Africa</li>
+            <li>Strengthening Democracy</li>
+            <li>Climate Resilience for your local or the global community</li>
+            <li>Sustainable Cities Innovations</li>
+          </ul>
+
+          <p class="text-gray-700 dark:text-gray-300 mb-3">Other options include:</p>
+          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
+            <li>Working with teams in Democratic Republic of Congo and Kenya on solutions to their challenges</li>
+            <li>Meeting the food needs of your community/world through regenerative local food systems</li>
+            <li>Meeting energy needs from clean renewable sources</li>
+            <li>Developing a start-up business to meet any of the above needs</li>
+            <li>Working with your community or organization's members on your critical problem</li>
+          </ul>
+
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">AI For Good . . . For Real</h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-4">
+            The 2026 Global Solutions Lab will use the latest version of the extraordinary AI-empowered research,
+            problem-solving/solution development and implementation platform- the NewWorld Game. This platform
+            combines the Lab's problem-solving methodology with our set of unique custom-trained AIs. There's also
+            over 100 global statistical databases, 400+ state-of-the-world reports from every UN agency and many
+            international research organizations, as well as a dozen+ libraries of global solutions that add additional
+            real-world depth to any problem solving.
+          </p>
+          <p class="text-gray-700 dark:text-gray-300 mb-4">
+            With your perspective, knowledge, values, and experience, the process of researching and developing new,
+            innovative, affordable, regenerative, and immediately implementable strategies for achieving one or more
+            of the UN SDGs will be faster, more thorough, and more creative. Plus, there's the NewWorld Tournament
+            where the Lab's best strategies compete for prizes adds yet another level to the Lab's work.
+          </p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 h-screen flex flex-col">
+          <div class="w-full h-1/2">
+            <iframe
+              class="w-full h-full"
+              src="https://www.youtube.com/embed/en_rMNv6uQw"
+              title="Global Solutions Lab Video"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+            ></iframe>
+          </div>
+
+          <div class="w-full h-1/2 flex flex-col justify-center p-8">
+            <h3 class="text-xl md:text-2xl font-bold mb-4 text-gray-900 dark:text-white">Everyone in the World</h3>
+            <p class="text-gray-700 dark:text-gray-300 mb-4 italic">
+              "Make the world work for 100% of humanity in the shortest possible time through spontaneous cooperation
+              without ecological offense or disadvantage of anyone."
+              <br />
+              - Buckminster Fuller
+            </p>
+            <p class="text-gray-700 dark:text-gray-300">
+              The Global Solutions Lab is for researching and developing the means to achieve this vision. Join us and
+              harness AI-driven research, design and planning to develop solutions for solving the world's problems and
+              achieving the UN SDGs.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: Why Participate -->
+  <section class="bg-gray-50 dark:bg-gray-900 py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-12">
+        Why Participate
       </h2>
-      <p class="text-gray-700 dark:text-gray-300 mb-4">
-        The 2026 Global Solutions Lab will use the research, problem-solving/strategic planning, and implementation platform— 
-        <strong>the NewWorld Game</strong> —which combines the Lab’s methodology with our unique custom-trained AIs, 
-        plus over 100 global statistical databases, a set of 400+ state-of-the-world reports from every UN agency, 
-        and many international research organizations, as well as a dozen+ libraries of global solutions.
-      </p>
-      <p class="text-gray-700 dark:text-gray-300 mb-4">
-        With your perspective, knowledge, values, and experience, the process of researching and developing new, 
-        innovative, affordable, regenerative, and immediately implementable strategies for achieving one or more 
-        of the UN SDGs will be faster, more thorough, and more creative. 
-        <strong>AND— the NewWorld Tournament</strong>, where the best strategy will be awarded a cash prize, 
-        adds yet another exciting level to the Lab.
-      </p>
-      <h3 class="text-xl md:text-2xl font-semibold mt-8 mb-2 text-gray-900 dark:text-white">
-        NewWorld Tournament
-      </h3>
-      <p class="text-gray-700 dark:text-gray-300">
-        Your Lab solution can be entered in the NewWorld Tournament where it will be eligible for the award of a cash prize 
-        used to advance your strategy towards implementation in the real world.
-      </p>
-    </div>
+      <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-2">
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🤖</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Hands-On AI Experience</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              AI for Good for Real: Learn to harness advanced AIs and customize prompts to develop real strategies for
+              solving your global or community's problems while achieving the Sustainable Development Goals. Learn to
+              work with AI Colleagues on developing solutions that are sustainable, resilient, equitable and affordable.
+            </p>
+          </div>
+        </div>
 
-  <!-- Side Info / Quote or Video -->
-  <div class="bg-white dark:bg-gray-800 h-screen flex flex-col">
-    <!-- Video Section (Takes Full Top Half) -->
-    <div class="w-full h-1/2">
-        <iframe class="w-full h-full" 
-            src="https://www.youtube.com/embed/en_rMNv6uQw" 
-            title="GSL 2025" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            referrerpolicy="strict-origin-when-cross-origin" 
-            allowfullscreen>
-        </iframe>
-    </div>
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🕹️</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Free Access to the NewWorld Game Platform, for Life
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Join an interactive platform where you'll take on global and local challenges, get access to the latest AI
+              tools for problem solving, collaborate with change-makers from around the world, unlock new levels of
+              innovation, strategy, and social impact. And, after the Global Solutions Lab, continue to have access to
+              all its current and new features, for free.
+            </p>
+          </div>
+        </div>
 
-    <!-- Text Section (Takes Full Bottom Half) -->
-    <div class="w-full h-1/2 flex flex-col justify-center p-8">
-        <h3 class="text-xl md:text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-            AI & Sustainable Development Goals
-        </h3>
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🔎</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Have Your Own AI Agent Researcher Working for You
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              What you work on at the Lab is of great importance. During and after the Lab, you will have the benefit
+              of an AI Agent - a super-researcher working full time for you and your work focus in the Lab. This Agent
+              will tirelessly search for useful-to your-work technology, resources, partners, and funding.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📖</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Your Work Published</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Your work will be featured in a published book shared with UN agencies, NGOs, universities, and global
+              networks-putting your solution in front of global decision-makers. Additionally, the NewWorld Game
+              platform can customize your work so it is suitable for publication as an article, Op-Ed, research report,
+              social media post(s), funding proposal, etc.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🌍</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Global Network</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Connect with participants from Africa, Asia, Europe, around the world-be part of an international
+              cross-cultural, community of collaboration, diversity, and purpose.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">💡</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mentorship &amp; Expert Feedback</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Work alongside professionals, researchers, and global experts who will provide valuable guidance and
+              review to shape your ideas.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🚀</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">A Transformative Experience</h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Engage in an immersive, high-impact program that will challenge your thinking, expand your skills, and
+              connect your passion to purpose.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📘</div>
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              Free Copy of new edition of Tools for Changing the World -A Design Science Primer
+            </h3>
+            <p class="text-gray-700 dark:text-gray-300">
+              Receive a digital copy of our exclusive handbook filled with insights to drive impactful solutions locally
+              and globally. Plus, get the new addendum to book- Community and Vision: Designing for Solutions-Not
+              Problems.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: More Details / Format / Tuition -->
+  <section class="py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-10">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">More Details</h2>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-            “Make the world work for 100% of humanity 
-            in the shortest possible time 
-            through spontaneous cooperation 
-            without ecological offense 
-            or disadvantage of anyone.”
-            <br />
-            — Buckminster Fuller
+          The Global Solutions Lab is generally focused on making real the above quote by Buckminster Fuller and
+          specifically on solving local and global basic human need and environmental challenges- and achieving the UN's
+          Sustainable Development Goals. It is an intense experience- participants are expected to make a substantial
+          time contribution every day throughout the Lab.
         </p>
-        <p class="text-gray-700 dark:text-gray-300">
-            The Global Solutions Lab is for researching and developing the means to achieve this vision. 
-            Join us and harness AI-driven research, planning, and design to accelerate solutions for the UN SDGs.
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          <strong>Format:</strong> The Lab will be in-person and online. It will use the NewWorld Game global research
+          and problem-solving platform for creative work. Participants can participate in a variety of formats- from as
+          an individual to being a part of an international, cross-cultural, multi-disciplinary, intergenerational,
+          collaborative Design Team. The Lab culminates with presentations of the work to a group of corporate,
+          philanthropic, academic, and NGO leaders.
         </p>
-    </div>
-</div>
 
-  
-  </div>
-</div>
-</section>
-  
-<!-- SECTION: What You Will Get -->
-<section class="bg-gray-50 dark:bg-gray-900 py-16">
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-    <h2 class="text-3xl md:text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-12">
-      What You Will Get
-    </h2>
-    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-2">
-      
-      <!-- Bullet 1 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📖</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Your Work Published in a Global Book
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Be featured in a professionally published book shared with UN agencies, NGOs, universities, and global networks—putting your solution in front of global decision-makers.
-          </p>
-        </div>
-      </div>
+        <div class="text-gray-700 dark:text-gray-300 mb-4">
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">In-person Lab Participation</h2>
 
-      <!-- Bullet 2 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🎓</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Certificate of Achievement
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Receive a formal certificate recognizing you as a <strong>Global Solution Solver</strong>—a credential to showcase your contribution to real-world problem solving.
-          </p>
-        </div>
-      </div>
+          <div class="flex flex-col md:items-start md:gap-10 mb-6">
+            <div class="flex-shrink-0 md:w-1/2 mb-4 md:mb-0">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdrexel.webp?alt=media&token=0f5ceb45-a3e2-4223-8391-84c02867372b"
+                alt="Drexel University"
+                class="w-32 max-w-md mx-auto rounded shadow-md"
+              />
+            </div>
 
-      <!-- Bullet 3 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🌍</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            A Truly Global Network
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Connect with participants from Africa, Asia, Europe, the Americas, and more—forming an international community of collaboration, diversity, and purpose.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 4 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🤖</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Hands-On AI Experience
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Learn to harness advanced AIs and global datasets to develop real, scalable strategies aligned with the UN Sustainable Development Goals.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 5 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">💡</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Mentorship & Expert Feedback
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Work alongside UN professionals, researchers, and global experts who will provide valuable guidance and review to shape your ideas.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 6 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🏆</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Eligibility for a Cash Prize
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Submit your project to the <strong>NewWorld Tournament</strong> and compete for a cash award to help bring your idea to life.
-          </p>
-        </div>
-      </div>
-
-      <!-- Bullet 7 -->
-      <!-- <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🎤</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Present to Global Leaders
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Share your final proposal with a high-level audience of UN officials, philanthropists, corporate innovators, and academic experts.
-          </p>
-        </div>
-      </div> -->
-
-      <!-- Bullet 8 -->
-      <div class="flex items-start">
-        <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🚀</div>
-        <div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            A Transformative Experience
-          </h3>
-          <p class="text-gray-700 dark:text-gray-300">
-            Engage in an immersive, high-impact program that will challenge your thinking, expand your skills, and connect your passion to purpose.
-          </p>
-        </div>
-      </div>
-      <!-- Bullet 9 -->
-      <div class="flex items-start">
-      <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📘</div>
-      <div>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          Free Copy of the <em>Tools for Changing the World</em> -A Design Science Primer
-        </h3>
-        <p class="text-gray-700 dark:text-gray-300">
-          Receive a digital copy of our exclusive handbook filled with insights to drive impactful solutions locally and globally.
-        </p>
-      </div>
-      </div>
-
-      <!-- Bullet 10 -->
-      <div class="flex items-start">
-      <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🕹️</div>
-      <div>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          Access to the NewWorld Game Platform
-        </h3>
-        <p class="text-gray-700 dark:text-gray-300">
-          Join an interactive platform where you’ll take on global missions, collaborate with changemakers, and unlock new levels of innovation, strategy, and social impact.
-        </p>
-      </div>
-      </div>
-
-
-    </div>
-  </div>
-</section>
-
-
-    <!-- SECTION: Details / Format / Tuition / Application / Scholarship -->
-    <section class="py-12">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="mb-10">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">More Details</h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            The Global Solutions Lab is generally focused on making real the quote by Buckminster Fuller 
-            and specifically on achieving the UN’s Sustainable Development Goals. It is an intense experience— 
-            participants will be expected to make a substantial time contribution every day throughout the Lab.
-          </p>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            <strong>Format:</strong> The Lab will be in-person and online. It will use the NewWorld Game global research 
-            and problem-solving platform for creative work. Participants collaborate in an international, cross-cultural, 
-            multi-disciplinary, and intergenerational Research and Design Team. The Lab culminates with presentations of 
-            the work to a group of UN, corporate, philanthropic, academic, and NGO leaders.
-          </p>
-          <div class="text-gray-700 dark:text-gray-300 mb-4">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
-              In-person Lab Participation
-            </h2>
-          
-            <div class="flex flex-col  md:items-start md:gap-10 mb-6">
-              <!-- Image -->
-              <div class="flex-shrink-0 md:w-1/2 mb-4 md:mb-0">
-                <img
-                  src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdrexel.webp?alt=media&token=0f5ceb45-a3e2-4223-8391-84c02867372b"
-                  alt="Drexel University"
-                  class="w-32 max-w-md mx-auto rounded shadow-md"
-                />
-              </div>
-          
-              <!-- Text Content -->
-              <div class="md:w-1/2">
-                <p class="mb-4">
-                  <strong>Host & Location:</strong> Charles D. Close School of Entrepreneurship, Drexel University, Philadelphia, PA, USA.
-                </p>
-                <p class="mb-4">
-                  <strong>Age Range:</strong> 18 and above. There is no upper age limit. We have found that inter-generational, international, cross-cultural, and multi-disciplinary teams work exceptionally well.
-                </p>
-          
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">Tuition (In-person Lab)</h2>
-                <ul class="list-disc pl-5 mb-4">
-                  <li>$850 for professionals</li>
-                  <li>$450 for students</li>
-                </ul>
-          
-                <p class="mb-4">
-                  <strong>Housing:</strong>
-                </p>
-                <ul class="list-disc pl-5 mb-4">
-                  <li>$61 per night for a single room</li>
-                  <li>$48 per night for a shared double room</li>
-                </ul>
-          
-                <p class="mb-4">
-                  <strong>Food:</strong> Food will be available through Drexel University’s food service and other sources in the surrounding community.
-                </p>
-          
-                <p class="mb-4">
-                  <span class="ml-2 text-xl font-bold">Letter of Invitation needed for Visa</span>
-                </p>
-          
-                <div class="text-sm text-gray-700 dark:text-gray-300">
-                  <p class="font-semibold mb-2">
-                    If you need a letter of invitation to obtain a visa to participate in the Lab, please send the following information to
-                    <a href="mailto:info@1earthgame.org" class="text-blue-600 hover:text-blue-500">{{reachOutVisa}}</a>:
-                  </p>
-                  <ul class="list-disc list-inside">
-                    <li>Participant Name</li>
-                    <li>Resident of</li>
-                    <li>Date of Birth</li>
-                    <li>Passport Number</li>
-                    <li>Issued (date and place)</li>
-                    <li>Valid until</li>
-                  </ul>
-                </div>
-              </div>
+            <div class="md:w-1/2">
+              <p class="mb-4">
+                <strong>Host &amp; Location:</strong> Charles D. Close School of Entrepreneurship, Drexel University,
+                Philadelphia, PA, USA.
+              </p>
+              <p class="mb-4">
+                <strong>Age Range:</strong> 18 and above. There is no upper age limit. We have found that
+                inter-generational, international, cross-cultural, and multi-disciplinary teams work exceptionally well.
+              </p>
             </div>
           </div>
-          
-          <div class="text-gray-700 dark:text-gray-300 mb-4">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">Tuition(Online)</h2>
-            <ul class="list-disc pl-5">
-              <li>$299 for professionals</li>
-              <li>$99 for students and seniors</li>
-              <li>Scholarships available for players from developing countries*</li>
-            </ul>
-            <br />
-            <small class="italic">
-              *It is our conviction that no one should be denied access to the Lab for financial reasons. Scholarship funds are limited and 
-              variable according to expenses and donations. You can contribute to the Global Solutions Lab Scholarship Fund 
-              by donating <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" class="text-blue-600 hover:text-blue-500">here</a>.
-            </small>
-          </div>
-          
-      
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            The Global Solutions Lab was developed by and is conducted by <em>EarthGame</em>, 
-            a non-profit research and education NGO officially associated with the United Nations Department of Global Communications.
-          </p>
-          <div class="mt-8">
-            <a target="_blank" href="https://buy.stripe.com/8wM5lR1IK2og8r6000" 
+        </div>
 
-              class="py-4 px-6 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-semibold"
-              
-            >
-             Donate To EarthGame
-            </a>
-          </div>
-        </div>
-  
-        <div class="mb-10">
-          <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">On-line Lab Participation</h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            The Lab has participants from all over the world. Different parts of the world don’t all have the same level 
-            of telecommunications infrastructure, so here is what you will need to participate:
-          </p>
-          <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4">
-            <li>Reliable internet connection (as high speed as possible)</li>
-            <li>A computer or tablet (with video & audio) and a relatively quiet space</li>
-            <li>A time commitment of at least 4 to 6 hours per day, starting around 10:00 am Eastern U.S. time</li>
+        <div class="text-gray-700 dark:text-gray-300 mb-4">
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">Tuition Costs for the Lab</h2>
+
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">In-person:</h3>
+          <ul class="list-disc pl-5 mb-4">
+            <li>$800 for professionals (with lodging for 10 days, $1300)</li>
+            <li>$400 for students (with lodging for 10 days, $900)</li>
+            <li>$0 for UN, Community Organizations and Drexel University students</li>
           </ul>
+
+          <p class="mb-2"><strong>Housing:</strong></p>
+          <ul class="list-disc pl-5 mb-4">
+            <li>$61 per night for a single room</li>
+            <li>$48 per night for a shared double room</li>
+            <li>
+              <strong>Food:</strong> Food will be available through Drexel University's food service and other sources in
+              the surrounding community.
+            </li>
+          </ul>
+
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Online:</h3>
+          <ul class="list-disc pl-5 mb-4">
+            <li>$250 for professionals</li>
+            <li>$99 for students and seniors</li>
+            <li>$0 for Drexel University students</li>
+          </ul>
+
+          <small class="italic">
+            *It is our conviction that no one should be denied access to the Lab for financial reasons. Scholarship funds
+            are limited and variable according to expenses and donations. You can contribute to the Global Solutions Lab
+            Scholarship Fund by becoming a NewWorld Game Sponsor. See Sponsorship Opportunities for details on how you
+            or your organization can participate.
+          </small>
         </div>
-  
-        <div>
-          <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">Application</h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            The number of participants in the Lab will be limited. The sooner we hear from you, the better.
-          </p>
+
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          The Global Solutions Lab was developed by and is conducted by <em>EarthGame</em>, a non-profit research and
+          education NGO officially associated with the United Nations Department of Global Communications.
+        </p>
+        <div class="mt-8">
           <a
-            id="register"
-            routerLink="/global-register"
-            class="inline-block px-5 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+            target="_blank"
+            href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
+            class="py-4 px-6 bg-teal-600 hover:bg-teal-700 text-white rounded-full font-semibold"
           >
-            Apply Here
+            Donate To EarthGame
           </a>
         </div>
       </div>
-    </section>
-  
-    <!-- SECTION: AI & SDGs Invitation and Challenge -->
-    <section class=" py-12">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-8 ">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            AI & Sustainable Development Goals
-          </h2>
-          <blockquote class="mx-auto max-w-xl italic text-gray-900 dark:text-white text-lg sm:text-xl mb-6 pt-10">
-          "Make the world work for 100% of humanity in the shortest possible time through spontaneous cooperation without ecological offense or disadvantage of anyone."
-          </blockquote>
-          <p class="text-lg text-gray-900 dark:text-white mb-4">—Buckminster Fuller</p>
-          <p class="text-gray-700 dark:text-gray-200 mb-4">
-            The powerful quote above from Buckminster Fuller encapsulates the ethos of the Global Solutions Lab. 
-          </p>
-          <p class="text-gray-700 dark:text-gray-200 mb-4">
-            You will gain hands-on experience using AI as a powerful engine for addressing the UN SDGs. 
-            The synergy between human intelligence and artificial intelligence will help us create real, 
-            implementable solutions for climate change, poverty, energy, education, health, and other critical global 
-            and local problems. 
-          </p>
-        </div>
-        <div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            2024 NewWorld Tournament Winner
-          </h3>
-          <p class="text-gray-700 dark:text-gray-200 mb-4">
-            <strong>Electrifying Health Clinics in Democratic Republic of Congo</strong><br />
-            The first NewWorld Tournament award goes to a team in the D.R. Congo who are using the award to electrify a village health clinic 
-            (where 60% of the health clinics don’t have electricity). It will serve as a proof-of-concept to scale their solution 
-            to meet health clinic electricity needs for the rest of the country. 
-            <a target="_blank" href="https://new-worldgame.web.app/solution-view-external/o0eqjssL6yn1qZVqAY60" class="text-blue-600 hover:text-blue-500">Learn more here</a>.
-          </p>
+
+      <div class="mb-10">
+        <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">On-line Lab Participation</h2>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          The Lab has participants from all over the world. Different parts of the world don't all have the same level
+          of telecommunications infrastructure, so here is what you will need to participate:
+        </p>
+        <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4">
+          <li>Reliable internet connection (as high speed as possible)</li>
+          <li>A computer or tablet (with video &amp; audio) and a relatively quiet space</li>
+          <li>A time commitment of at least 4 to 6 hours per day, starting around 10:00 am Eastern U.S. time</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">Application</h2>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          The number of participants in the Lab will be limited. The sooner we hear from you, the better.
+        </p>
+        <a
+          id="register"
+          routerLink="/global-register"
+          class="inline-block px-5 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+        >
+          Apply Here
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: Previous Tournament Winner -->
+  <section class="py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Previous NewWorld Tournament Winner</h3>
+      <p class="text-gray-700 dark:text-gray-200 mb-4">
+        <strong>Electrifying Health Clinics in Democratic Republic of Congo</strong><br />
+        The first NewWorld Tournament award went to a team in the D.R. Congo who used the award to electrify a village
+        health clinic (where 60% of the health clinics don't have electricity). It is serving as a proof-of-concept for
+        their solution. Next steps include scaling their solution to meet health clinic electricity needs for the rest
+        of the country.
+        <a
+          target="_blank"
+          href="https://new-worldgame.web.app/solution-view-external/o0eqjssL6yn1qZVqAY60"
+          class="text-blue-600 hover:text-blue-500"
+          >Learn more here</a
+        >.
+      </p>
+    </div>
+  </section>
+
+  <!-- SECTION: Summary -->
+  <section class="py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">SUMMARY</h2>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          Students and young professionals from around the world will be coming to the 2026 Lab. You are invited.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300 mb-4">
+          <strong>When &amp; Where:</strong> June 15-24, 2026, in-person and online.
+        </p>
+      </div>
+      <div class="mb-8">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Past Participates</h3>
+        <p class="text-gray-700 dark:text-gray-300 mb-2">
+          Previous Lab participants have come from Spain, France, Germany, England, Ireland, Poland, Georgia,
+          Lithuania, Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Ivory Coast, Kenya, Uganda,
+          Zimbabwe, DR Congo, Haiti, Canada, Mexico, Honduras, Venezuela, China, Hong Kong, Vietnam, Singapore,
+          Thailand, Japan, New Zealand, Australia, India, Pakistan, Bangladesh, Palestine, Saudi Arabia, Nepal,
+          Turkey, and all over the U.S.
+        </p>
+        <p class="text-gray-700 dark:text-gray-300">
+          UN presenters include representatives from WHO, UNDP, UNEP, UNESCO, UNICEF, UNFAO, WFP, UN Energy-
+          Sustainable Energy for All, UNSDSN, UN Office of Secretary General, UN Department of Economic and Social
+          Affairs, UN Population Fund, UN-Habitat, UN Academic Impact, UN OHCHR, UN SDG Action Campaign, UN
+          Children's Fund, and others.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION: AI Team -->
+  <section id="ai-team" class="py-10 mt-20">
+    <div class="max-w-sm md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Recent Additions</h2>
+        <p class="mt-4 text-lg leading-6 text-gray-500 dark:text-gray-300">Part of the AI Team from NewWorld Game</p>
+      </div>
+
+      <div class="mt-10 mx-auto justify-center grid grid-cols-1 sm:grid-cols-1 2xl:grid-cols-4 2xl:gap-2 md:grid-cols-3 lg:grid-cols-3 gap-10">
+        <div *ngFor="let t of aiOptions" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-sm">
+          <img class="w-full h-1/2 px-4 py-8 mx-auto object-cover" src="{{t.profilePicPath}}" alt="Person Image" />
+          <div class="p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">{{t.name}}</h3>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-300 font-semibold">{{t.title}}</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-300">{{t.description}}</p>
+          </div>
         </div>
       </div>
-    </section>
-  
-    <!-- SECTION: What it is / More About the Lab / Who, When, Where -->
-    <section class=" py-12">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-8">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            What It Is: More About the Lab
-          </h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            Students and young professionals from around the world will be coming to the 2026 Lab. UN presenters in previous years have included representatives from WHO, UNDP, UNEP, UNESCO, and more.
-            and a committee of experts.
-          </p>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            <strong>When & Where:</strong> June 15–24, 2026, in-person and online.
-          </p>
-        </div>
-        <div class="mb-8">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Who Has Participated</h3>
-          <p class="text-gray-700 dark:text-gray-300 mb-2">
-            Previous Lab participants have come from Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania, 
-            Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Ivory Coast, Kenya, Uganda, Zimbabwe, DR Congo, 
-            Haiti, Canada, Mexico, Honduras, Venezuela, China, Hong Kong, Vietnam, Singapore, Thailand, Japan, 
-            New Zealand, Australia, India, Pakistan, Bangladesh, Palestine, Saudi Arabia, Nepal, Turkey, and all over the U.S.
-          </p>
-          <p class="text-gray-700 dark:text-gray-300">
-            UN presenters include representatives from WHO, UNDP, UNEP, UNESCO, and more.
-          </p>
-        </div>
+      <div class="mt-12 flex justify-center">
+        <a routerLink="/other-ais" class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300">
+          Chat with the AIs
+        </a>
       </div>
-    </section>
-        <section id="ai-team" class="py-10  mt-20">
-        <div class="max-w-sm md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center ">
-                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Latest Additions</h2>
-                <p class="mt-4 text-lg leading-6 text-gray-500 dark:text-gray-300">
-                    The AI Team from NewWorld Game 
-                </p>
-            </div>
+    </div>
+  </section>
 
-            <div class="mt-10 mx-auto justify-center grid grid-cols-1 sm:grid-cols-1 2xl:grid-cols-4 2xl:gap-2 md:grid-cols-3 lg:grid-cols-3 gap-10">
-                <!-- Team Member 1 -->
-                <div *ngFor="let t of aiOptions" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-sm">
-                    <img class="w-full h-1/2   px-4 py-8 mx-auto  object-cover" src={{t.profilePicPath}} alt="Person Image">
-                    <div class="p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">{{t.name}}</h3>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-300 font-semibold">{{t.title}}</p>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-300">{{t.description}}</p>
-                        
-                    </div>
-                </div>
+  <!-- SECTION: Sponsorship Opportunities -->
+  <section id="sponsorship-opportunities" class="py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">Sponsorship Opportunities</h2>
+      <p class="text-gray-700 dark:text-gray-300 mb-6">
+        The below opportunities are available for joining the NewWorld Game development team. We are a non-profit,
+        tax-exempt organization. Any contribution helps us continue to grow and improve NewWorld Game. Thank you for
+        your consideration.
+      </p>
+      <p class="text-gray-700 dark:text-gray-300 mb-6">
+        To request the latest Sponsorship Opportunities document, email
+        <a href="mailto:info@1earthgame.org" class="text-blue-600 hover:text-blue-500">info&#64;1earthgame.org</a>.
+      </p>
+    </div>
+  </section>
 
-                  
+  <!-- SECTION: Bottom Links -->
+  <section class="pb-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap gap-4">
+      <a
+        routerLink="/global-register"
+        class="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+      >
+        Register
+      </a>
+      <a
+        href="#sponsorship-opportunities"
+        class="inline-block px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-medium rounded-md shadow"
+      >
+        Sponsorship Opportunities
+      </a>
+    </div>
+  </section>
 
-          
-               
-            </div>
-            <div class="mt-12 flex justify-center">
-                <a routerLink="/other-ais" class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300">
-                  Chat with the AIs
-                </a>
-              </div>
-        </div>
-    </section>
-
-  
-    <!-- FOOTER -->
-    <app-footer></app-footer>
-  </div>
-  
+  <app-footer></app-footer>
+</div>
