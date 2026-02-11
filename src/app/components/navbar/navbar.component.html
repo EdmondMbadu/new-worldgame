@@ -147,6 +147,7 @@
         </div>
       </a>
       <a
+        *ngIf="showLoginButton"
         routerLink="/login"
         class="flex p-2 px-6 pt-2 text-gray-900 border-2 border-gray-400 bg-white rounded-full hover:border-gray-900"
         >{{ "navbar.login" | translate }}</a
