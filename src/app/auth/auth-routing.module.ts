@@ -8,6 +8,7 @@ import { VerifyEmailComponent } from '../components/verify-email/verify-email.co
 import { SchoolSignupComponent } from '../components/school-signup/school-signup.component';
 import { SchoolSignupFreeComponent } from '../components/school-signup-free/school-signup-free.component';
 import { UnSignupFreeComponent } from '../components/un-signup-free/un-signup-free.component';
+import { CommunitySignupComponent } from '../components/community-signup/community-signup.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -16,7 +17,7 @@ const routes: Routes = [
   { path: 'verify-email', component: VerifyEmailComponent },
   { path: 'signup-school', component: SchoolSignupComponent },
   { path: 'signup-school-free', component: SchoolSignupFreeComponent },
-  { path: 'community-signup', component: SignupComponent },
+  { path: 'community-signup', component: CommunitySignupComponent },
   { path: 'sign-un-free', component: UnSignupFreeComponent },
 ];
 

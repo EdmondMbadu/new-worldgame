@@ -13,6 +13,7 @@ import { VerifyEmailComponent } from '../components/verify-email/verify-email.co
 import { SchoolSignupComponent } from '../components/school-signup/school-signup.component';
 import { SchoolSignupFreeComponent } from '../components/school-signup-free/school-signup-free.component';
 import { UnSignupFreeComponent } from '../components/un-signup-free/un-signup-free.component';
+import { CommunitySignupComponent } from '../components/community-signup/community-signup.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { UnSignupFreeComponent } from '../components/un-signup-free/un-signup-fr
     VerifyEmailComponent,
     SchoolSignupComponent,
     SchoolSignupFreeComponent,
+    CommunitySignupComponent,
     UnSignupFreeComponent,
   ],
   imports: [
