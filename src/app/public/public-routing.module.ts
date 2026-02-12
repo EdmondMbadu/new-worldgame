@@ -49,6 +49,7 @@ import { OperatingManualComponent } from '../components/operating-manual/operati
 import { OverviewComponent } from '../components/overview/overview.component';
 import { OtherAisComponent } from '../components/other-ais/other-ais.component';
 import { TournamentInstructionsComponent } from '../blogs/tournament-instructions/tournament-instructions.component';
+import { ChesterReportComponent } from '../blogs/chester-report/chester-report.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -107,6 +108,7 @@ const routes: Routes = [
   { path: 'overview', component: OverviewComponent },
   { path: 'other-ais', component: OtherAisComponent },
   { path: 'tournament-instructions', component: TournamentInstructionsComponent },
+  { path: 'chester-report', component: ChesterReportComponent },
 ];
 
 @NgModule({
