@@ -16,6 +16,7 @@ const routes: Routes = [
   { path: 'verify-email', component: VerifyEmailComponent },
   { path: 'signup-school', component: SchoolSignupComponent },
   { path: 'signup-school-free', component: SchoolSignupFreeComponent },
+  { path: 'community-signup', component: SignupComponent },
   { path: 'sign-un-free', component: UnSignupFreeComponent },
 ];
 
