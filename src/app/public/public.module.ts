@@ -54,6 +54,7 @@ import { OverviewComponent } from '../components/overview/overview.component';
 import { OtherAisComponent } from '../components/other-ais/other-ais.component';
 import { TournamentInstructionsComponent } from '../blogs/tournament-instructions/tournament-instructions.component';
 import { ChesterReportComponent } from '../blogs/chester-report/chester-report.component';
+import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
 
 @NgModule({
   declarations: [
@@ -106,6 +107,7 @@ import { ChesterReportComponent } from '../blogs/chester-report/chester-report.c
     OtherAisComponent,
     TournamentInstructionsComponent,
     ChesterReportComponent,
+    CommunitySponsorshipComponent,
   ],
   imports: [
     CommonModule,
