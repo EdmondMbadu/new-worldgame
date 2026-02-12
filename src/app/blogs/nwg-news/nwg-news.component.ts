@@ -114,7 +114,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit {
     },
     {
       id: 'mandy',
-      title: 'Mandy Welcome Participants to GSL 2025',
+      title: 'Mandy Welcome Participants to GSL 2026',
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FGlobal%20Solutions%20Lab%20Welcome%20AI_1.mp4?alt=media&token=66be6bb7-8cd6-4ab4-a78e-85ed3c35fa2e',
       speaker: 'Mandy',
       thumbUrl: '../../../assets/img/elena-avatar.png',
