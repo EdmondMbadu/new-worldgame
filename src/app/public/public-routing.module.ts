@@ -51,6 +51,7 @@ import { OtherAisComponent } from '../components/other-ais/other-ais.component';
 import { TournamentInstructionsComponent } from '../blogs/tournament-instructions/tournament-instructions.component';
 import { ChesterReportComponent } from '../blogs/chester-report/chester-report.component';
 import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
+import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -111,6 +112,7 @@ const routes: Routes = [
   { path: 'tournament-instructions', component: TournamentInstructionsComponent },
   { path: 'chester-report', component: ChesterReportComponent },
   { path: 'community-sponsorship', component: CommunitySponsorshipComponent },
+  { path: 'gsl-sponsorship', component: GslSponsorshipComponent },
 ];
 
 @NgModule({
