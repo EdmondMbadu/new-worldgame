@@ -609,25 +609,22 @@ const buildAIInsightsEmailFromCache = (
               <p style="margin:0 0 8px;font-size:12px;color:#dc2626;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Your Solution</p>
               <h2 style="margin:0 0 16px;font-size:32px;font-weight:400;color:#111827;line-height:1.2;font-family:Georgia,'Times New Roman',serif;">${solutionTitle}</h2>
               <p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;">
-                Dear ${userFirstName || 'Changemaker'},
+                Dear ${userFirstName || 'there'},
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                Welcome to this week's NewWorld Game Intelligence Brief—and thank you for being part of NewWorld Game.
+                Welcome to this week's NewWorld Game Intelligence Brief - and thank you for being part of NewWorld Game.
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                You joined NWG to work on a global or local challenge you care deeply about. That commitment is exactly why this platform exists: to support people turning concern into informed, collaborative action.
-              </p>
-              <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;font-weight:600;">
-                Here's a key update:
+                Your work on real-world challenges matters. To support you, you now have a personal AI assistant that continuously scans for relevant research, emerging insights, and funding opportunities connected to your solution.
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                You now have a personal AI assistant working on your behalf. It continuously searches for recent developments related to your NewWorld Game work, including new research, emerging ideas, and potential funding opportunities. Each week, this Intelligence Brief will deliver the most relevant insights directly to you.
+                Each week, this brief will highlight the most useful updates to help you move forward.
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                In future Briefs, you may also learn about what other NWG participants are working on, receive invitations to collaborate, and discover opportunities to expand your team around shared challenges.
+                We encourage you to keep building - and if possible, invite friends or collaborators to join you in strengthening your solution.
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                We're excited to support your work and look forward to the solutions that emerge.
+                <a href="https://newworld-game.org/email-feedback" style="color:#2563eb;text-decoration:underline;">We'd also appreciate your feedback</a> as we improve this experience.
               </p>
               <p style="margin:24px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 With appreciation,
