@@ -244,6 +244,22 @@ export class FeedbackManagementComponent implements OnInit {
     this.applyFilter();
   }
 
+  async deleteEmailFeedback(row: Row) {
+    if (row.feedbackCategory !== 'email_feedback') return;
+    const ok = confirm(
+      `Delete email feedback from ${row.name || row.email}? This cannot be undone.`
+    );
+    if (!ok) return;
+
+    try {
+      await this.data.deleteAskFeedback(row.id);
+      this.expanded.delete(row.id);
+    } catch (error) {
+      console.error('Failed to delete email feedback', error);
+      alert('Could not delete this feedback. Please try again.');
+    }
+  }
+
   // --- Ask Bucky helpers ---
   formatBucky(v?: AskBuckyUseful): string {
     if (!v) return '—';
@@ -381,7 +397,20 @@ export class FeedbackManagementComponent implements OnInit {
 
   // ✅ UPDATED: copy all answers with flash
   copyThread(r: Row) {
-    const txt = `NWG Feedback — ${r.name} <${r.email}>
+    const txt =
+      r.feedbackCategory === 'email_feedback'
+        ? `Email Feedback — ${r.name} <${r.email}>
+Submitted: ${r.createdAtMs ? new Date(r.createdAtMs).toLocaleString() : '—'}
+Status: ${r.status.toUpperCase()}
+Type: ${this.feedbackTypeLabel(r)}
+
+How well are we doing: ${r.howDoing || '—'}
+Solution in brief: ${r.solutionName || '—'}
+What to add: ${r.whatToAdd || '—'}
+Which solution/support: ${r.whichSolution || '—'}
+Additional feedback: ${r.emailFeedback || '—'}
+`
+        : `NWG Feedback — ${r.name} <${r.email}>
 Submitted: ${r.createdAtMs ? new Date(r.createdAtMs).toLocaleString() : '—'}
 Status: ${r.status.toUpperCase()}
 Type: ${this.feedbackTypeLabel(r)}
@@ -419,13 +448,6 @@ ${r.teamBuilding || '—'}
 
 L) Anything else:
 ${r.more || '—'}
-
-Email feedback fields:
-How well are we doing: ${r.howDoing || '—'}
-Solution in brief: ${r.solutionName || '—'}
-What to add: ${r.whatToAdd || '—'}
-Which solution/support: ${r.whichSolution || '—'}
-Additional feedback: ${r.emailFeedback || '—'}
 `;
     this.copyToClipboard(txt);
     this.flash(this.copiedAll, this.allTimers, r.id);

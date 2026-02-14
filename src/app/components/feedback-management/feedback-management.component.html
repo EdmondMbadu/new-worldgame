@@ -196,6 +196,13 @@
                                hover:bg-slate-50 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700/30">
                         Close
                       </button>
+                      <button
+                        *ngIf="r.feedbackCategory === 'email_feedback'"
+                        (click)="deleteEmailFeedback(r)"
+                        class="px-2 py-1 text-xs rounded-lg border border-rose-300 text-rose-700
+                               hover:bg-rose-50 dark:border-rose-700 dark:text-rose-200 dark:hover:bg-rose-900/20">
+                        Delete
+                      </button>
                     </div>
                   </td>
                   <td class="px-4 py-3 text-right">
@@ -229,8 +236,31 @@
                           <p class="md:col-span-2"><span class="font-semibold">Which solution/support next:</span> {{ r.whichSolution || '—' }}</p>
                           <p class="md:col-span-2 whitespace-pre-line"><span class="font-semibold">Additional feedback:</span> {{ r.emailFeedback || '—' }}</p>
                         </div>
+
+                        <div class="mt-4 flex flex-wrap gap-3">
+                          <a [href]="'mailto:' + r.email"
+                             class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium
+                                    bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+                            Email
+                          </a>
+                          <button (click)="copyThread(r)"
+                                  class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium border transition"
+                                  [ngClass]="copiedAll.has(r.id)
+                                  ? 'border-emerald-300 text-emerald-700 bg-emerald-50 dark:border-emerald-700 dark:text-emerald-200 dark:bg-emerald-900/20'
+                                  : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200'">
+                            <span *ngIf="!copiedAll.has(r.id)">Copy email feedback</span>
+                            <span *ngIf="copiedAll.has(r.id)">Copied!</span>
+                          </button>
+                          <button (click)="deleteEmailFeedback(r)"
+                                  class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium border transition
+                                         border-rose-300 text-rose-700 bg-rose-50
+                                         dark:border-rose-700 dark:text-rose-200 dark:bg-rose-900/20">
+                            Delete
+                          </button>
+                        </div>
                       </div>
 
+                      <ng-container *ngIf="r.feedbackCategory !== 'email_feedback'">
                       <!-- A) Opinion -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
@@ -355,6 +385,7 @@
 
                         </div>
                       </div>
+                      </ng-container>
 
                     </div>
                   </td>

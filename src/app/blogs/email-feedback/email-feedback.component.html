@@ -186,6 +186,12 @@
                   </svg>
                   <span>{{ loading ? 'Sending…' : 'Send feedback' }}</span>
                 </button>
+
+                <div *ngIf="success"
+                     class="mt-4 rounded-xl border border-emerald-200/60 bg-emerald-50 text-emerald-900
+                            dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-200 p-3 text-sm">
+                  ✅ Feedback sent successfully.
+                </div>
               </div>
             </form>
           </div>

@@ -590,6 +590,10 @@ export class DataService implements OnInit {
       statusChangedAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
   }
+
+  deleteAskFeedback(docId: string): Promise<void> {
+    return this.afs.collection('ask_feedback').doc(docId).delete();
+  }
   setAskStatus(id: string, status: AskStatus) {
     return this.afs.doc(`ask_anything/${id}`).set({ status }, { merge: true });
   }
