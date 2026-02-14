@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 type AskStatus = 'new' | 'read' | 'closed';
 type SortKey = 'createdAt' | 'status';
 type StatusFilter = 'all' | AskStatus;
+type FeedbackTypeFilter = 'all' | 'email_feedback';
 type AskBuckyUseful = 'yes' | 'somewhat' | 'no' | 'not_sure';
 
 export interface LevelsDetails {
@@ -39,11 +40,20 @@ export interface FeedbackDoc {
   createdAt?: any;
   createdAtMs?: number;
   status: AskStatus;
+
+  feedbackType?: string;
+  sourcePath?: string;
+  howDoing?: string;
+  solutionName?: string;
+  whatToAdd?: string;
+  whichSolution?: string;
+  emailFeedback?: string;
 }
 
 interface Row extends FeedbackDoc {
   createdAtMs: number;
   name: string;
+  feedbackCategory: 'email_feedback' | 'ask_feedback';
 }
 
 @Component({
@@ -60,11 +70,13 @@ export class FeedbackManagementComponent implements OnInit {
   search = '';
   sortBy: SortKey = 'createdAt';
   statusFilter: StatusFilter = 'all';
+  feedbackTypeFilter: FeedbackTypeFilter = 'all';
 
   countAll = 0;
   countNew = 0;
   countRead = 0;
   countClosed = 0;
+  countEmailFeedback = 0;
 
   expanded = new Set<string>();
   expandAll = false;
@@ -109,11 +121,19 @@ export class FeedbackManagementComponent implements OnInit {
   private hydrate(d: FeedbackDoc): Row {
     const createdAtMs =
       (d as any).createdAtMs ?? this.normalizeTimestamp((d as any).createdAt);
+    const isEmailFeedback =
+      (d.feedbackType || '').toLowerCase() === 'weekly_email_feedback' ||
+      (d.sourcePath || '') === '/email-feedback';
 
     const name = `${(d.firstName || '').trim()} ${(
       d.lastName || ''
     ).trim()}`.trim();
-    return { ...d, createdAtMs, name };
+    return {
+      ...d,
+      createdAtMs,
+      name,
+      feedbackCategory: isEmailFeedback ? 'email_feedback' : 'ask_feedback',
+    };
   }
 
   private normalizeTimestamp(v: any): number {
@@ -136,6 +156,9 @@ export class FeedbackManagementComponent implements OnInit {
     this.countNew = this.items.filter((i) => i.status === 'new').length;
     this.countRead = this.items.filter((i) => i.status === 'read').length;
     this.countClosed = this.items.filter((i) => i.status === 'closed').length;
+    this.countEmailFeedback = this.items.filter(
+      (i) => i.feedbackCategory === 'email_feedback'
+    ).length;
   }
 
   onSortChange(): void {
@@ -160,6 +183,10 @@ export class FeedbackManagementComponent implements OnInit {
     this.filtered = this.items.filter((i) => {
       const matchesStatus =
         this.statusFilter === 'all' ? true : i.status === this.statusFilter;
+      const matchesFeedbackType =
+        this.feedbackTypeFilter === 'all'
+          ? true
+          : i.feedbackCategory === 'email_feedback';
 
       const levelDetailsBlob = Object.values(i.levelsDetails || {}).join(' ');
       const big = [
@@ -173,6 +200,12 @@ export class FeedbackManagementComponent implements OnInit {
         i.otherAgents,
         i.teamBuilding,
         i.more,
+        i.howDoing,
+        i.solutionName,
+        i.whatToAdd,
+        i.whichSolution,
+        i.emailFeedback,
+        i.feedbackCategory === 'email_feedback' ? 'email feedback' : '',
         levelDetailsBlob,
         ...(i.levels || []),
         i.askBuckyUseful ? this.formatBucky(i.askBuckyUseful) : '',
@@ -181,7 +214,7 @@ export class FeedbackManagementComponent implements OnInit {
         .toLowerCase();
 
       const matchesQuery = !q || big.includes(q);
-      return matchesStatus && matchesQuery;
+      return matchesStatus && matchesFeedbackType && matchesQuery;
     });
 
     if (this.expandAll) this.filtered.forEach((r) => this.expanded.add(r.id));
@@ -196,6 +229,11 @@ export class FeedbackManagementComponent implements OnInit {
     this.expandAll = !this.expandAll;
     this.expanded.clear();
     if (this.expandAll) this.filtered.forEach((r) => this.expanded.add(r.id));
+  }
+
+  setFeedbackTypeFilter(value: FeedbackTypeFilter) {
+    this.feedbackTypeFilter = value;
+    this.applyFilter();
   }
 
   async markStatus(row: Row, status: AskStatus) {
@@ -231,6 +269,18 @@ export class FeedbackManagementComponent implements OnInit {
     };
   }
 
+  feedbackTypeLabel(row: Row): string {
+    return row.feedbackCategory === 'email_feedback'
+      ? 'Email Feedback'
+      : 'NWG Feedback';
+  }
+
+  feedbackTypeBadgeClass(row: Row) {
+    return row.feedbackCategory === 'email_feedback'
+      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-200'
+      : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200';
+  }
+
   // --- CSV export (A–L) ---
   downloadCsv(): void {
     const esc = (s: any) => `"${String(s ?? '').replace(/"/g, '""')}"`;
@@ -238,6 +288,7 @@ export class FeedbackManagementComponent implements OnInit {
       [
         r.name,
         r.email,
+        this.feedbackTypeLabel(r),
         r.status,
         new Date(r.createdAtMs || 0).toLocaleString(),
         r.opinion,
@@ -254,6 +305,11 @@ export class FeedbackManagementComponent implements OnInit {
         r.courseUse,
         r.teamBuilding,
         r.more,
+        r.howDoing,
+        r.solutionName,
+        r.whatToAdd,
+        r.whichSolution,
+        r.emailFeedback,
       ]
         .map(esc)
         .join(',')
@@ -262,6 +318,7 @@ export class FeedbackManagementComponent implements OnInit {
     const header = [
       'Name',
       'Email',
+      'Feedback_Type',
       'Status',
       'Submitted',
       'A_Opinion',
@@ -278,6 +335,11 @@ export class FeedbackManagementComponent implements OnInit {
       'J_CourseUse',
       'K_TeamBuilding',
       'L_More',
+      'Email_HowDoing',
+      'Email_SolutionName',
+      'Email_WhatToAdd',
+      'Email_WhichSolution',
+      'Email_AdditionalFeedback',
     ].join(',');
 
     const csv = [header, ...rows].join('\r\n');
@@ -322,6 +384,7 @@ export class FeedbackManagementComponent implements OnInit {
     const txt = `NWG Feedback — ${r.name} <${r.email}>
 Submitted: ${r.createdAtMs ? new Date(r.createdAtMs).toLocaleString() : '—'}
 Status: ${r.status.toUpperCase()}
+Type: ${this.feedbackTypeLabel(r)}
 
 A) Opinion:
 ${r.opinion || '—'}
@@ -356,6 +419,13 @@ ${r.teamBuilding || '—'}
 
 L) Anything else:
 ${r.more || '—'}
+
+Email feedback fields:
+How well are we doing: ${r.howDoing || '—'}
+Solution in brief: ${r.solutionName || '—'}
+What to add: ${r.whatToAdd || '—'}
+Which solution/support: ${r.whichSolution || '—'}
+Additional feedback: ${r.emailFeedback || '—'}
 `;
     this.copyToClipboard(txt);
     this.flash(this.copiedAll, this.allTimers, r.id);

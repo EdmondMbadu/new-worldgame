@@ -13,7 +13,29 @@
 
   <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
     <div class="mx-auto max-w-screen-2xl px-4 lg:px-12">
-      <h3 class="text-3xl font-bold dark:text-white text-center mb-6">NWG Feedback – Submissions</h3>
+      <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h3 class="text-3xl font-bold dark:text-white">NWG Feedback – Submissions</h3>
+        <div class="inline-flex rounded-xl border border-slate-300 dark:border-slate-600 overflow-hidden self-start sm:self-auto">
+          <button
+            type="button"
+            (click)="setFeedbackTypeFilter('all')"
+            class="h-11 px-4 text-sm font-medium"
+            [ngClass]="feedbackTypeFilter === 'all'
+              ? 'bg-slate-900 text-white'
+              : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600'">
+            All ({{ countAll }})
+          </button>
+          <button
+            type="button"
+            (click)="setFeedbackTypeFilter('email_feedback')"
+            class="h-11 px-4 text-sm font-medium border-l border-slate-300 dark:border-slate-600"
+            [ngClass]="feedbackTypeFilter === 'email_feedback'
+              ? 'bg-slate-900 text-white'
+              : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600'">
+            Email Feedback ({{ countEmailFeedback }})
+          </button>
+        </div>
+      </div>
 
       <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-2xl overflow-hidden ring-1 ring-black/5">
         <!-- toolbar -->
@@ -34,7 +56,7 @@
                   type="text"
                   [(ngModel)]="search"
                   (input)="applyFilter()"
-                  placeholder="Search name, email, or answers A–L…"
+                  placeholder="Search name, email, A–L, or email-feedback fields…"
                   class="h-11 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-xl
                          focus:ring-sky-500 focus:border-sky-500 block w-full pl-10 pr-10
                          dark:bg-gray-700 dark:border-gray-600 dark:text-white"/>
@@ -99,6 +121,7 @@
                 <th class="px-4 py-3 whitespace-nowrap">Submitted</th>
                 <th class="px-4 py-3">Name</th>
                 <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3">Type</th>
                 <th class="px-4 py-3">Bucky</th> <!-- NEW quick badge -->
                 <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3">Actions</th>
@@ -127,6 +150,13 @@
                     <span *ngIf="copiedEmail.has(r.id)">Copied</span>
                     </button>
 
+                    </span>
+                  </td>
+
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          [ngClass]="feedbackTypeBadgeClass(r)">
+                      {{ feedbackTypeLabel(r) }}
                     </span>
                   </td>
 
@@ -184,8 +214,22 @@
 
                 <!-- expanded details -->
                 <tr *ngIf="expanded.has(r.id)" class="bg-gray-50/60 dark:bg-slate-800/60">
-                  <td colspan="8" class="px-6 py-6">
+                  <td colspan="9" class="px-6 py-6">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                      <div *ngIf="r.feedbackCategory === 'email_feedback'" class="rounded-2xl p-5 border border-indigo-200 dark:border-indigo-800 lg:col-span-2 bg-indigo-50/60 dark:bg-indigo-900/10">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-500/30 text-xs font-bold">E</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Weekly Brief Email Feedback</h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700 dark:text-slate-300">
+                          <p><span class="font-semibold">How well are we doing:</span> {{ r.howDoing || '—' }}</p>
+                          <p><span class="font-semibold">Solution in brief:</span> {{ r.solutionName || '—' }}</p>
+                          <p class="md:col-span-2"><span class="font-semibold">What to add:</span> {{ r.whatToAdd || '—' }}</p>
+                          <p class="md:col-span-2"><span class="font-semibold">Which solution/support next:</span> {{ r.whichSolution || '—' }}</p>
+                          <p class="md:col-span-2 whitespace-pre-line"><span class="font-semibold">Additional feedback:</span> {{ r.emailFeedback || '—' }}</p>
+                        </div>
+                      </div>
 
                       <!-- A) Opinion -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
@@ -318,7 +362,7 @@
               </ng-container>
 
               <tr *ngIf="filtered.length === 0">
-                <td colspan="8" class="px-4 py-10 text-center text-slate-500 dark:text-slate-400">
+                <td colspan="9" class="px-4 py-10 text-center text-slate-500 dark:text-slate-400">
                   No submissions found.
                 </td>
               </tr>
