@@ -49,6 +49,7 @@ import { TournamentLandingComponent } from '../blogs/tournament-landing/tourname
 import { TournamentUniversityComponent } from '../blogs/tournament-university/tournament-university.component';
 import { AskAnythingComponent } from '../blogs/ask-anything/ask-anything.component';
 import { AskFeedbackComponent } from '../blogs/ask-feedback/ask-feedback.component';
+import { EmailFeedbackComponent } from '../blogs/email-feedback/email-feedback.component';
 import { OperatingManualComponent } from '../components/operating-manual/operating-manual.component';
 import { OverviewComponent } from '../components/overview/overview.component';
 import { OtherAisComponent } from '../components/other-ais/other-ais.component';
@@ -103,6 +104,7 @@ import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorshi
     TournamentUniversityComponent,
     AskAnythingComponent,
     AskFeedbackComponent,
+    EmailFeedbackComponent,
     OperatingManualComponent,
     OverviewComponent,
     OtherAisComponent,

@@ -555,6 +555,9 @@ const buildAIInsightsEmailFromCache = (
 
   const dashboardLink = `https://newworld-game.org/dashboard/${solutionId}?openInvite=true`;
   const meetLink = data.meetLink || `https://newworld-game.org/dashboard/${solutionId}`;
+  const feedbackUrl = `https://newworld-game.org/email-feedback?source=weekly-brief&solution=${encodeURIComponent(
+    solutionId
+  )}`;
   const solutionImage = data.solutionImage || '';
 
   const currentDate = new Date().toLocaleDateString('en-US', {
@@ -707,6 +710,13 @@ const buildAIInsightsEmailFromCache = (
                     </a>
                   </td>
                 </tr>
+                <tr>
+                  <td colspan="2" style="padding-top:12px;">
+                    <a href="${feedbackUrl}" style="display:inline-block;background-color:#f8fafc;color:#0f172a;text-decoration:none;padding:12px 18px;font-size:13px;font-weight:600;letter-spacing:0.2px;border:1px solid #cbd5e1;">
+                      Give Feedback on This Brief
+                    </a>
+                  </td>
+                </tr>
               </table>
             </td>
           </tr>
@@ -723,6 +733,8 @@ const buildAIInsightsEmailFromCache = (
                     </p>
                     <p style="margin:0;font-size:12px;color:#9ca3af;">
                       <a href="https://newworld-game.org" style="color:#6b7280;text-decoration:none;">newworld-game.org</a>
+                      <span style="color:#d1d5db;"> • </span>
+                      <a href="${feedbackUrl}" style="color:#6b7280;text-decoration:none;">Share Feedback</a>
                       <span style="color:#d1d5db;"> • </span>
                       <a href="${unsubscribeUrl}" style="color:#6b7280;text-decoration:none;">Unsubscribe</a>
                     </p>

@@ -1,0 +1,198 @@
+<div class="dark:bg-slate-900 min-h-screen selection:bg-sky-500/20 selection:text-sky-900 dark:selection:text-sky-100">
+  <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser?.email"
+      [firstName]="auth.currentUser?.firstName"
+      [lastName]="auth.currentUser?.lastName"
+      [path]="'email-feedback'">
+    </app-navbar>
+  </div>
+
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-sky-400/25 blur-3xl"></div>
+    <div class="absolute -bottom-28 -right-24 h-[28rem] w-[28rem] rounded-full bg-emerald-400/20 blur-3xl"></div>
+  </div>
+
+  <section class="bg-white/0 dark:bg-transparent mt-12">
+    <div class="gap-16 items-start py-10 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6">
+      <div class="font-light text-gray-600 sm:text-lg dark:text-gray-300">
+        <h1 class="mb-4 text-2xl md:text-3xl lg:text-5xl font-extrabold text-gray-900 dark:text-white">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600">
+            Weekly Email Feedback
+          </span>
+        </h1>
+
+        <p class="mb-6 text-gray-700 dark:text-gray-300">
+          Tell us how well the Weekly NewWorld Game Intelligence Brief is working for you, what should be added, and which solution needs more support.
+        </p>
+
+        <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+            Helps us improve the weekly email content
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="h-5 w-5 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+            Takes less than 2 minutes
+          </li>
+        </ul>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 my-6">
+        <div class="rounded-3xl p-[1px] bg-gradient-to-br from-sky-400/30 via-cyan-400/20 to-emerald-400/30">
+          <div class="w-full rounded-3xl bg-white/90 dark:bg-slate-900/80 ring-1 ring-black/5 shadow-lg backdrop-blur-md p-6 md:p-8">
+            <div *ngIf="success"
+                 class="mb-4 rounded-xl border border-emerald-200/60 bg-emerald-50 text-emerald-900
+                        dark:border-emerald-700/50 dark:bg-emerald-900/20 dark:text-emerald-200 p-4">
+              ✅ Thank you. Your feedback has been sent.
+            </div>
+
+            <div *ngIf="submitError"
+                 class="mb-4 rounded-xl border border-rose-200/60 bg-rose-50 text-rose-900
+                        dark:border-rose-700/50 dark:bg-rose-900/20 dark:text-rose-200 p-4">
+              ⚠️ An error occurred. Please try again.
+            </div>
+
+            <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="space-y-4">
+              <div *ngIf="!isLoggedIn" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">First name</label>
+                  <input type="text" formControlName="firstName"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                                bg-white dark:bg-slate-800/80 px-3 py-2
+                                text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                                focus:ring-sky-400/70 dark:focus:ring-sky-400/60"/>
+                  <p *ngIf="submitted && form.controls.firstName.invalid"
+                     class="mt-1 text-xs text-rose-600">First name is required.</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Last name</label>
+                  <input type="text" formControlName="lastName"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                                bg-white dark:bg-slate-800/80 px-3 py-2
+                                text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                                focus:ring-sky-400/70 dark:focus:ring-sky-400/60"/>
+                  <p *ngIf="submitted && form.controls.lastName.invalid"
+                     class="mt-1 text-xs text-rose-600">Last name is required.</p>
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">Email</label>
+                  <input type="email" formControlName="email"
+                         class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                                bg-white dark:bg-slate-800/80 px-3 py-2
+                                text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                                focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                         placeholder="you@school.edu"/>
+                  <p *ngIf="submitted && form.controls.email.invalid"
+                     class="mt-1 text-xs text-rose-600">Valid email is required.</p>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  How well are we doing with these emails? *
+                </label>
+                <select formControlName="howDoing"
+                        class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-3 py-2
+                               text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                               focus:ring-sky-400/70 dark:focus:ring-sky-400/60">
+                  <option value="">Select one</option>
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Okay">Okay</option>
+                  <option value="Needs Improvement">Needs Improvement</option>
+                </select>
+                <p *ngIf="submitted && form.controls.howDoing.invalid"
+                   class="mt-1 text-xs text-rose-600">Please select one option.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  Which solution is this feedback about? *
+                </label>
+                <input type="text" formControlName="solutionName"
+                       class="w-full rounded-xl border border-slate-200/80 dark:border-slate-700/70
+                              bg-white dark:bg-slate-800/80 px-3 py-2
+                              text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                              focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                       placeholder="Solution name"/>
+                <p *ngIf="(form.controls.solutionName.touched || submitted) && form.controls.solutionName.invalid"
+                   class="mt-1 text-xs text-rose-600">Please enter the solution name.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  What should we add to the weekly email? *
+                </label>
+                <textarea formControlName="whatToAdd" rows="4"
+                          class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                                 bg-white dark:bg-slate-800/80 px-3 py-3
+                                 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                                 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                          placeholder="What would make these emails more useful for you?"></textarea>
+                <p *ngIf="(form.controls.whatToAdd.touched || submitted) && form.controls.whatToAdd.invalid"
+                   class="mt-1 text-xs text-rose-600">Please enter at least 10 characters.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  Which solution or support would you like next? *
+                </label>
+                <textarea formControlName="whichSolution" rows="3"
+                          class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                                 bg-white dark:bg-slate-800/80 px-3 py-3
+                                 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                                 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                          placeholder="Tell us which support, topic, or solution you need."></textarea>
+                <p *ngIf="(form.controls.whichSolution.touched || submitted) && form.controls.whichSolution.invalid"
+                   class="mt-1 text-xs text-rose-600">Please enter at least 5 characters.</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  Any additional feedback? *
+                </label>
+                <textarea formControlName="emailFeedback" rows="5"
+                          class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                                 bg-white dark:bg-slate-800/80 px-3 py-3
+                                 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2
+                                 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                          placeholder="Anything else you want us to improve?"></textarea>
+                <p *ngIf="(form.controls.emailFeedback.touched || submitted) && form.controls.emailFeedback.invalid"
+                   class="mt-1 text-xs text-rose-600">Please enter at least 20 characters.</p>
+              </div>
+
+              <div class="pt-2">
+                <button type="submit" [disabled]="loading"
+                        class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3
+                               text-white bg-gradient-to-r from-sky-500 to-emerald-500
+                               hover:from-sky-600 hover:to-emerald-600
+                               disabled:opacity-60 shadow-lg shadow-sky-500/20">
+                  <svg *ngIf="loading" class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" opacity="0.25"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+                  </svg>
+                  <span>{{ loading ? 'Sending…' : 'Send feedback' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <app-footer></app-footer>
+</div>

@@ -143,6 +143,13 @@
   </url>
 
   <url>
+    <loc>https://newworld-game.org/email-feedback</loc>
+    <lastmod>2026-02-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
     <loc>https://newworld-game.org/other-ais</loc>
     <lastmod>2026-01-16</lastmod>
     <changefreq>weekly</changefreq>
