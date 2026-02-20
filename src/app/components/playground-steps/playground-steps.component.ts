@@ -3446,7 +3446,7 @@ INTEGRITY RULES:
             top: { style: BorderStyle.SINGLE, size: 2, color: 'BEBEBE' },
           },
           children: [
-            new TextRun({ text: 'NewWorld Game\u2122  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
+            new TextRun({ text: 'NewWorld Game  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
             new ExternalHyperlink({
               link: 'https://newworld-game.org/',
               children: [
@@ -3485,7 +3485,7 @@ INTEGRITY RULES:
       pdf.setTextColor(150, 150, 150);
 
       if (typeof (pdf as any).textWithLink === 'function') {
-        const prefix = 'NewWorld Game\u2122  \u00B7  ';
+        const prefix = 'NewWorld Game  \u00B7  ';
         pdf.text(prefix, marginLeft, y);
         const prefixWidth = pdf.getTextWidth(prefix);
         pdf.setTextColor(120, 120, 120);
@@ -3493,7 +3493,7 @@ INTEGRITY RULES:
           url: 'https://newworld-game.org/',
         });
       } else {
-        pdf.text('NewWorld Game\u2122  \u00B7  newworld-game.org', marginLeft, y);
+        pdf.text('NewWorld Game  \u00B7  newworld-game.org', marginLeft, y);
       }
 
       pdf.setTextColor(150, 150, 150);
