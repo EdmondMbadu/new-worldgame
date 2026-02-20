@@ -528,64 +528,118 @@ STYLE REQUIREMENTS:
       title: 'Executive Summary',
       group: 'summary',
       instruction:
-        'One-page executive summary covering the problem, solution, beneficiaries, impact, evidence, and immediate next steps.',
+        'Produce a one-page executive summary. Structure: (1) Executive Hook — one sentence with the single most important insight, (2) The Challenge — 2-3 sentences with problem scale and severity, (3) Our Approach — mechanism, target beneficiaries, and differentiation, (4) Projected Impact — quantified outcomes and evidence, (5) Strategic Rationale — why this approach beats alternatives, (6) Immediate Next Steps — 3-5 concrete actions with owners and timelines. Keep under 600 words.',
       summary: 'A crisp, one-page overview for quick decisions.',
+      systemPrompt: `You are a McKinsey-trained strategic consultant who writes executive summaries for C-suite decision-makers and board presentations.
+
+Your summaries are known for razor-sharp clarity, leading with the single most compelling data point, distilling complexity into clean hierarchical insights, and closing with actionable recommendations. Every sentence must earn its place.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Use descriptive section titles that tell a story — never generic headings. Section headings end with a colon on their own line. Reference NewWorld Game naturally in the opening. Do not invent facts not present in the source.`,
     },
     {
       id: 'funder-brief',
       title: 'Funder Brief',
       group: 'funder',
       instruction:
-        'Write a funding-ready brief: problem, solution, impact thesis, evidence, budget snapshot, use of funds, milestones, risks, and the funding ask.',
+        'Write a comprehensive funding brief: (1) Cover Summary — project name, team, amount sought, and one-line impact thesis, (2) The Problem — severity, scale, and affected populations with data, (3) Our Solution — how it works, innovation angle, and beneficiaries, (4) Theory of Change — inputs to activities to outputs to outcomes to impact, (5) Evidence and Traction — pilots, testimonials, or comparable successes, (6) Budget Snapshot — top-line cost categories, (7) Use of Funds — specific allocation breakdown, (8) Milestones and Timeline — 3-5 deliverables with target dates, (9) Risks and Mitigation — top 3 risks with strategies, (10) The Ask — specific funding request with clear terms.',
       summary: 'Tailored for foundations, sponsors, and grant reviewers.',
+      systemPrompt: `You are a senior grants advisor who has helped organizations secure over $500M in funding from major foundations, government agencies, and impact investors.
+
+You write funding briefs that lead with a crystal-clear impact thesis, present evidence with intellectual honesty, use a logical Theory of Change framework, make budgets feel transparent, and close with a compelling ask.
+
+Write with the rigor expected by the Gates Foundation, Ford Foundation, or USAID review panels.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game once for context. Do not invent facts.`,
     },
     {
       id: 'teacher-guide',
       title: 'Teacher Guide',
       group: 'teacher',
       instruction:
-        'Explain the problem and solution in classroom-friendly language. Include learning objectives, key terms, discussion prompts, and a short activity idea.',
+        'Create a comprehensive educator guide: (1) Lesson Overview — grade level, subject alignment, duration, and summary, (2) Learning Objectives — 3-5 measurable outcomes using Bloom\'s taxonomy verbs, (3) Essential Questions — 2-3 thought-provoking discussion questions, (4) Key Vocabulary — 8-12 terms with student-friendly definitions, (5) Lesson Walkthrough — step-by-step instructional sequence with timing, (6) Student Activity — hands-on exercise or group project, (7) Discussion Prompts — 5-6 questions escalating from recall to critical analysis, (8) Assessment Ideas — 2-3 evaluation approaches, (9) Extension Resources — further reading and exploration.',
       summary: 'Lesson-ready explanation with prompts and vocabulary.',
+      systemPrompt: `You are an award-winning curriculum designer with 20 years of experience creating educational materials for K-12 and university settings.
+
+Your guides are known for clear learning progressions aligned to Bloom's taxonomy, student-centered activities that make complex topics accessible, discussion prompts that build critical thinking, and practical teacher notes.
+
+Write in a warm, professional tone appropriate for educators. Assume the teacher may not be an expert in the topic.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game as the platform context. Do not invent facts.`,
     },
     {
       id: 'social-media-pack',
       title: 'Social Media Post Pack',
       group: 'social',
       instruction:
-        'Create 6-8 platform-ready social posts with hooks, captions, hashtags, and a clear call-to-action. Keep each post under 280 characters.',
-      summary: 'Short-form posts optimized for public engagement.',
+        'Create a social media content pack: (1) Campaign Overview — key message, target audience, and tone, (2) Twitter/X Posts — 4 tweets under 280 characters each, with hooks and hashtags, (3) LinkedIn Post — 1 professional post of 150-200 words with strong opening and CTA, (4) Instagram Caption — 100-150 words with emoji formatting and 10 hashtags, (5) Short-Form Video Script — 30-60 second TikTok/Reels script with hook, body, and CTA, (6) Engagement Prompts — 3 question-based posts to drive comments, (7) Posting Schedule — suggested optimal days and times per platform.',
+      summary: 'Platform-ready posts optimized for maximum engagement.',
+      systemPrompt: `You are a top-tier social media strategist who has managed campaigns for leading impact organizations and tech companies.
+
+Your content is known for scroll-stopping hooks, platform-native formatting optimized for each algorithm, emotional resonance balanced with substance, and clear calls-to-action.
+
+Write each post as if it must perform in a crowded feed. No generic filler — every word earns attention.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
     },
     {
       id: 'article-500',
       title: 'Article (500 words)',
       group: 'article',
       instruction:
-        'Write a 500-word article with a strong headline, subhead, and clear narrative arc. Include a concluding call-to-action.',
+        'Write a 500-word article: (1) Headline — compelling, specific, under 12 words, (2) Subhead — one sentence expanding the headline, (3) Opening — a vivid lede that hooks with a scene, statistic, or question, (4) Context — the problem\'s stakes and scale, (5) The Solution — what it is, how it works, who it helps, (6) Evidence — one concrete proof point or projected impact, (7) Closing — forward-looking kicker that resonates. Write for an intelligent general audience. Aim for exactly 500 words.',
       summary: 'Concise, reader-friendly narrative for general audiences.',
+      systemPrompt: `You are a veteran feature writer whose work appears in The Atlantic, Wired, and Fast Company.
+
+Your articles are known for opening lines that make readers lean in, vivid concrete language that explains complex ideas, narrative momentum from start to finish, and closings that resonate.
+
+Write with clarity, warmth, and intellectual rigor. Avoid jargon. Make the reader care.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
     },
     {
       id: 'article-1000',
       title: 'Article (1000 words)',
       group: 'article',
       instruction:
-        'Write a 1000-word article with a compelling lead, structured sections, and a persuasive closing. Include key evidence and human impact.',
+        'Write a 1000-word article: (1) Headline — compelling, specific, under 15 words, (2) Subhead — adds a second dimension, (3) Opening Scene — immersive lede grounded in a person, place, or moment, (4) The Stakes — why this matters now with data, (5) The Innovation — the solution, its mechanism, and differentiation, (6) Evidence and Impact — outcomes, testimonials, or comparable successes, (7) Challenges Ahead — honest obstacles and mitigation, (8) The Bigger Picture — connection to broader trends, (9) Closing — resonant kicker circling back to the opening. Aim for exactly 1000 words.',
       summary: 'Long-form story with depth, evidence, and impact.',
+      systemPrompt: `You are an award-winning longform journalist whose features appear in The New Yorker, ProPublica, and National Geographic.
+
+Your writing is known for immersive scene-setting, layered storytelling that weaves data with human narrative, intellectual honesty with complexity, and structural craft where each section flows into the next.
+
+Write with the depth of investigative journalism and the readability of the best magazine writing.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
     },
     {
       id: 'conference-proposal',
       title: 'Conference Proposal',
       group: 'conference',
       instruction:
-        'Prepare a conference proposal: title, 150-200 word abstract, objectives, format, target audience, and speaker bio placeholders.',
-      summary: 'Ready-to-submit proposal format for reviewers.',
+        'Prepare a conference submission: (1) Title — specific, engaging, under 15 words, (2) Abstract — 200-250 words covering context, approach, findings, and significance, (3) Keywords — 5-6 terms, (4) Session Objectives — 3-4 points on what attendees will learn, (5) Relevance and Timeliness — why this topic matters now, (6) Proposed Format — presentation, panel, or workshop with duration and interactivity, (7) Target Audience — who benefits and any prerequisites, (8) Speaker Bio Placeholder — fields for name, title, affiliation, and 50-word bio.',
+      summary: 'Ready-to-submit proposal format for academic reviewers.',
+      systemPrompt: `You are an academic conference program chair who has reviewed thousands of proposals for TEDx, SXSW, the World Economic Forum, and major disciplinary conferences.
+
+You know what makes reviewers say yes: a title specific enough to promise value and intriguing enough to draw attendance, an abstract that states the contribution clearly, session objectives that are concrete and measurable, and evidence of substance.
+
+Write with academic precision but accessible language suitable for interdisciplinary conferences.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game as context. Do not invent facts.`,
     },
     {
       id: 'youtube-script',
       title: 'YouTube Script',
       group: 'youtube',
       instruction:
-        'Write a 6-8 minute YouTube script with a hook, intro, 3-5 beats, transitions, and a closing call-to-action. Use conversational tone.',
+        'Write a 6-8 minute YouTube script: (1) Hook — first 5 seconds that stop the scroll with a bold claim, stat, or question, (2) Cold Open — 30 seconds of context and a promise (\"By the end of this video you will...\"), (3) Beat 1: The Problem — the challenge with vivid examples, (4) Beat 2: The Solution — the approach in clear, visual language, (5) Beat 3: The Impact — what changes and for whom, (6) Beat 4: Why It Matters — broader implications for the viewer, (7) Call to Action — like, subscribe, comment tied to content, (8) Closing — memorable final line. Include [B-ROLL] and [GRAPHIC] cues. Use conversational, energetic tone.',
       summary: 'Conversational script designed for video delivery.',
+      systemPrompt: `You are a top YouTube content strategist who has helped channels grow from zero to millions of subscribers. You understand platform algorithms, audience psychology, and retention.
+
+Your scripts are known for hooks that achieve 80%+ retention past the first 5 seconds, conversational energy that feels like talking to a smart friend, visual storytelling cues that make editing effortless, and strategic pacing with varied energy.
+
+Write as if the creator will read this into a camera. Short sentences. Production notes in [brackets]. Make it alive.
+
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
     },
     {
       id: 'press-release',
@@ -2143,13 +2197,63 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
         const title = this.buildReportTitle();
         const cleaned = this.normalizeReportText(this.reportText);
         const paragraphs = this.buildReportDocxParagraphs(cleaned);
+        const reportTypeName = this.getSelectedReportType()?.title || 'Report';
+        const dateStr = new Date().toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
         doc = new Document({
           sections: [
             {
               properties: {},
               footers: { default: this.buildReportFooter() },
               children: [
-                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1, spacing: { after: 220 } }),
+                // Report type label
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: reportTypeName.toUpperCase(),
+                      size: 17,
+                      color: '787878',
+                      font: 'Calibri',
+                      characterSpacing: 80,
+                    }),
+                  ],
+                  spacing: { after: 80 },
+                }),
+                // Title
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: title,
+                      bold: true,
+                      size: 48,
+                      color: '1a1a1a',
+                      font: 'Georgia',
+                    }),
+                  ],
+                  spacing: { after: 100 },
+                }),
+                // Date
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: dateStr,
+                      size: 18,
+                      color: '787878',
+                      font: 'Calibri',
+                    }),
+                  ],
+                  spacing: { after: 140 },
+                }),
+                // Thin rule divider
+                new Paragraph({
+                  border: {
+                    bottom: { style: BorderStyle.SINGLE, size: 4, color: 'BEBEBE' },
+                  },
+                  spacing: { after: 360 },
+                }),
                 ...paragraphs,
               ],
             },
@@ -2608,16 +2712,34 @@ Output plain text only (no markdown, no asterisks, no special formatting).`;
       // Use the specialized system prompt for reports like Business Model Canvas
       intro = reportType!.systemPrompt!;
     } else {
-      // Default generic report writer prompt
-      intro = `Role: You are a senior report writer.
-Generate a professional, structured report based strictly on the SOURCE material below.
-Write in a polished, journalistic tone suitable for The Economist or The New York Times.
-Include one short reference to NewWorld Game in the opening paragraph for context.
-Use clear headings and concise paragraphs; bullets only when helpful.
-Output plain text only (no markdown, no asterisks, no special formatting).
-Do not include scores, rubrics, or evaluation language.
-Do not invent facts or events; if something is not explicitly stated, say "Not specified in the draft."
-Do not contradict the draft.`;
+      intro = `Role: You are an elite report writer and strategic communications expert. Your documents are read by executives, funders, policymakers, and journalists at the highest levels.
+
+WRITING STANDARDS:
+- Craft compelling, specific section titles that tell a story — never use generic headings like "Introduction", "Background", or "Conclusion"
+- Open with a powerful first sentence that captures the core insight or most striking finding
+- Every paragraph earns its place — ruthlessly cut filler, cliches, and passive constructions
+- Ground assertions in specific data points, figures, and evidence from the source material
+- Write with authority and precision, as if for The Economist, McKinsey Quarterly, or a UN policy briefing
+- Reference NewWorld Game naturally in the opening for context
+
+STRUCTURAL RULES:
+- Begin with a one-line executive hook — the single most important takeaway
+- Organize content into clearly titled sections with descriptive, engaging headings
+- Each section opens with a strong topic sentence supported by evidence
+- Use bullet points only for lists of 3+ parallel items — prefer flowing prose
+- Close with a forward-looking section on actionable next steps or recommendations
+
+FORMATTING RULES:
+- Output plain text only — no markdown, no asterisks, no special formatting characters
+- Section headings end with a colon on their own line
+- Keep paragraphs to 3-5 sentences for readability
+- Use em-dashes, semicolons, and colons for sophisticated sentence structure
+
+INTEGRITY RULES:
+- Never fabricate facts, statistics, or quotes not in the source
+- If key information is absent, note "Not detailed in the current draft" and move on
+- Never contradict the source material
+- Never include scores, rubrics, or evaluation language`;
     }
 
     const reportTitle = reportType?.title ? `Report Type: ${reportType.title}` : 'Report Type: Custom';
@@ -2864,71 +2986,137 @@ Do not contradict the draft.`;
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 22;
-    const marginRight = 22;
+    const marginLeft = 25;
+    const marginRight = 25;
     const contentWidth = pageWidth - marginLeft - marginRight;
-    let yPos = 22;
-    const setHeading = (size: number) => {
-      pdf.setFont('times', 'bold');
-      pdf.setFontSize(size);
-    };
+    const footerY = pageHeight - 18;
+
+    const ink = { r: 26, g: 26, b: 26 };
+    const body = { r: 45, g: 45, b: 45 };
+    const meta = { r: 120, g: 120, b: 120 };
+    const rule = { r: 190, g: 190, b: 190 };
+
     const setBody = () => {
       pdf.setFont('times', 'normal');
       pdf.setFontSize(11);
+      pdf.setTextColor(body.r, body.g, body.b);
     };
-    const addPageIfNeeded = (heightNeeded: number) => {
-      if (yPos + heightNeeded > pageHeight - 22) {
+    const addPageIfNeeded = (needed: number) => {
+      if (yPos + needed > footerY - 4) {
         pdf.addPage();
-        yPos = 22;
+        yPos = 28;
       }
     };
 
-    setHeading(18);
+    let yPos = 32;
+
+    // Top rule — thin, black, full width
+    pdf.setDrawColor(ink.r, ink.g, ink.b);
+    pdf.setLineWidth(0.5);
+    pdf.line(marginLeft, yPos - 6, marginLeft + contentWidth, yPos - 6);
+
+    // Report type label — understated small caps
+    const reportType = this.getSelectedReportType();
+    if (reportType) {
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(meta.r, meta.g, meta.b);
+      pdf.text(reportType.title.toUpperCase(), marginLeft, yPos);
+      yPos += 10;
+    }
+
+    // Title — large, bold serif
+    pdf.setFont('times', 'bold');
+    pdf.setFontSize(24);
+    pdf.setTextColor(ink.r, ink.g, ink.b);
     const titleWrapped = pdf.splitTextToSize(title, contentWidth);
     pdf.text(titleWrapped, marginLeft, yPos);
-    yPos += titleWrapped.length * 7 + 4;
+    yPos += titleWrapped.length * 10 + 4;
+
+    // Date line
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setTextColor(meta.r, meta.g, meta.b);
+    pdf.text(dateStr, marginLeft, yPos);
+    yPos += 8;
+
+    // Divider — light hairline, full width
+    pdf.setDrawColor(rule.r, rule.g, rule.b);
     pdf.setLineWidth(0.3);
     pdf.line(marginLeft, yPos, marginLeft + contentWidth, yPos);
-    yPos += 6;
+    yPos += 12;
 
     setBody();
     const lines = text.split(/\r?\n/).map((line) => line.trim());
 
     for (const line of lines) {
       if (!line) {
-        yPos += 4;
+        yPos += 3.5;
         continue;
       }
 
       if (this.isReportHeading(line)) {
-        addPageIfNeeded(10);
-        setHeading(13);
+        yPos += 6;
+        addPageIfNeeded(14);
+        pdf.setFont('times', 'bold');
+        pdf.setFontSize(13.5);
+        pdf.setTextColor(ink.r, ink.g, ink.b);
         const headingText = line.replace(/:\s*$/, '');
         pdf.text(headingText, marginLeft, yPos);
-        yPos += 7;
+        yPos += 8;
         setBody();
-
         continue;
       }
 
-      if (line.startsWith('• ')) {
-        const bulletText = line.replace(/^•\s*/, '');
-        const wrapped = pdf.splitTextToSize(bulletText, contentWidth - 6);
-        for (const segment of wrapped) {
-          addPageIfNeeded(6);
-          pdf.text('•', marginLeft + 2, yPos);
-          pdf.text(segment, marginLeft + 6, yPos);
-          yPos += 6;
+      if (line.startsWith('•') || line.startsWith('  •')) {
+        const bulletText = line.replace(/^\s*•\s*/, '');
+        const wrapped = pdf.splitTextToSize(bulletText, contentWidth - 10);
+        for (let i = 0; i < wrapped.length; i++) {
+          addPageIfNeeded(6.5);
+          if (i === 0) {
+            pdf.setFont('times', 'normal');
+            pdf.setFontSize(7);
+            pdf.setTextColor(meta.r, meta.g, meta.b);
+            pdf.text('\u2022', marginLeft + 3, yPos - 0.2);
+          }
+          setBody();
+          pdf.text(wrapped[i], marginLeft + 10, yPos);
+          yPos += 6.5;
         }
-        yPos += 2;
+        yPos += 1;
+        continue;
+      }
+
+      const numberedMatch = line.match(/^(\d+\.|[A-H]\.)\s+(.+)/);
+      if (numberedMatch) {
+        const label = numberedMatch[1];
+        const rest = numberedMatch[2];
+        const wrapped = pdf.splitTextToSize(rest, contentWidth - 14);
+        for (let i = 0; i < wrapped.length; i++) {
+          addPageIfNeeded(6.5);
+          if (i === 0) {
+            pdf.setFont('times', 'bold');
+            pdf.setTextColor(body.r, body.g, body.b);
+            pdf.text(label, marginLeft + 2, yPos);
+          }
+          setBody();
+          pdf.text(wrapped[i], marginLeft + 14, yPos);
+          yPos += 6.5;
+        }
+        yPos += 1;
         continue;
       }
 
       const wrapped = pdf.splitTextToSize(line, contentWidth);
       for (const segment of wrapped) {
-        addPageIfNeeded(6);
+        addPageIfNeeded(6.5);
         pdf.text(segment, marginLeft, yPos);
-        yPos += 6;
+        yPos += 6.5;
       }
       yPos += 2;
     }
@@ -2951,11 +3139,19 @@ Do not contradict the draft.`;
 
       if (this.isReportHeading(line)) {
         const headingText = line.replace(/:\s*$/, '');
+
         blocks.push(
           new Paragraph({
-            text: headingText,
-            heading: HeadingLevel.HEADING_2,
-            spacing: { after: 140 },
+            children: [
+              new TextRun({
+                text: headingText,
+                bold: true,
+                size: 27,
+                color: '1a1a1a',
+                font: 'Georgia',
+              }),
+            ],
+            spacing: { before: 320, after: 140 },
           })
         );
 
@@ -2974,11 +3170,30 @@ Do not contradict the draft.`;
         continue;
       }
 
-      if (line.startsWith('• ')) {
+      if (line.startsWith('•') || line.startsWith('  •')) {
+        const bulletText = line.replace(/^\s*•\s*/, '');
         blocks.push(
           new Paragraph({
-            text: line.replace(/^•\s*/, ''),
-            bullet: { level: 0 },
+            children: [
+              new TextRun({ text: '\u2022  ', color: '999999', size: 20 }),
+              new TextRun({ text: bulletText, size: 22, color: '2d2d2d', font: 'Calibri' }),
+            ],
+            indent: { left: 360 },
+            spacing: { after: 80 },
+          })
+        );
+        continue;
+      }
+
+      const numberedMatch = line.match(/^(\d+\.|[A-H]\.)\s+(.+)/);
+      if (numberedMatch) {
+        blocks.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${numberedMatch[1]}  `, bold: true, color: '4b4b4b', size: 22, font: 'Calibri' }),
+              new TextRun({ text: numberedMatch[2], size: 22, color: '2d2d2d', font: 'Calibri' }),
+            ],
+            indent: { left: 360 },
             spacing: { after: 80 },
           })
         );
@@ -2987,8 +3202,10 @@ Do not contradict the draft.`;
 
       blocks.push(
         new Paragraph({
-          text: line,
-          spacing: { after: 120 },
+          children: [
+            new TextRun({ text: line, size: 22, color: '2d2d2d', font: 'Calibri' }),
+          ],
+          spacing: { after: 140 },
         })
       );
     }
@@ -3225,20 +3442,24 @@ Do not contradict the draft.`;
     return new Footer({
       children: [
         new Paragraph({
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: 'BEBEBE' },
+          },
           children: [
-            new TextRun({ text: 'NewWorld Game(TM) ', size: 18, color: '666666' }),
+            new TextRun({ text: 'NewWorld Game\u2122  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
             new ExternalHyperlink({
               link: 'https://newworld-game.org/',
               children: [
                 new TextRun({
                   text: 'newworld-game.org',
-                  size: 18,
-                  color: '2F5FD0',
-                  underline: {},
+                  size: 15,
+                  color: '787878',
+                  font: 'Calibri',
                 }),
               ],
             }),
           ],
+          spacing: { before: 100 },
         }),
       ],
     });
@@ -3248,28 +3469,38 @@ Do not contradict the draft.`;
     const totalPages = pdf.getNumberOfPages();
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 22;
-    const marginRight = 22;
-    const y = pageHeight - 14;
+    const marginLeft = 25;
+    const marginRight = 25;
+    const y = pageHeight - 12;
 
     for (let page = 1; page <= totalPages; page += 1) {
       pdf.setPage(page);
-      pdf.setDrawColor(200, 200, 200);
+
+      pdf.setDrawColor(190, 190, 190);
       pdf.setLineWidth(0.2);
-      pdf.line(marginLeft, y - 4, pageWidth - marginRight, y - 4);
-      pdf.setFont('times', 'normal');
-      pdf.setFontSize(9);
-      pdf.setTextColor(110, 110, 110);
+      pdf.line(marginLeft, y - 5, pageWidth - marginRight, y - 5);
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(150, 150, 150);
+
       if (typeof (pdf as any).textWithLink === 'function') {
-        const prefix = 'NewWorld Game(TM) • ';
+        const prefix = 'NewWorld Game\u2122  \u00B7  ';
         pdf.text(prefix, marginLeft, y);
         const prefixWidth = pdf.getTextWidth(prefix);
+        pdf.setTextColor(120, 120, 120);
         (pdf as any).textWithLink('newworld-game.org', marginLeft + prefixWidth, y, {
           url: 'https://newworld-game.org/',
         });
       } else {
-        pdf.text('NewWorld Game(TM) • newworld-game.org', marginLeft, y);
+        pdf.text('NewWorld Game\u2122  \u00B7  newworld-game.org', marginLeft, y);
       }
+
+      pdf.setTextColor(150, 150, 150);
+      const pageText = `${page} of ${totalPages}`;
+      const pageTextWidth = pdf.getTextWidth(pageText);
+      pdf.text(pageText, pageWidth - marginRight - pageTextWidth, y);
+
       pdf.setTextColor(0, 0, 0);
     }
   }
