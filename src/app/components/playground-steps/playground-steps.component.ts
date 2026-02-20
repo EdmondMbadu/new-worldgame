@@ -587,6 +587,58 @@ STYLE REQUIREMENTS:
         'Write a 6-8 minute YouTube script with a hook, intro, 3-5 beats, transitions, and a closing call-to-action. Use conversational tone.',
       summary: 'Conversational script designed for video delivery.',
     },
+    {
+      id: 'press-release',
+      title: 'Press Release',
+      group: 'article',
+      instruction:
+        'Write a professional, publication-ready press release for this solution. Use the inverted-pyramid structure: lead with the most newsworthy fact, then supporting detail, then background. Include: a compelling headline, a dateline, a strong opening paragraph (who, what, when, where, why), 2-3 body paragraphs with impact data / quotes / context, a boilerplate "About" section for the team or organization, and a media-contact block at the end. Tone should be authoritative, concise, and free of jargon — suitable for journalists, editors, and wire services. Aim for 400-600 words.',
+      summary: 'Publication-ready announcement for media and press.',
+      systemPrompt: `You are an expert public-relations strategist and press-release writer with decades of experience placing stories in top-tier outlets.
+
+You craft press releases that:
+- Open with a newsworthy, attention-grabbing headline and optional sub-headline
+- Follow the AP-style inverted-pyramid format
+- Lead with the most compelling fact or impact metric in the first sentence
+- Attribute quotes to the solution creators (use placeholders like [Founder Name] if not provided)
+- Include concrete data points, beneficiary counts, and measurable outcomes wherever possible
+- End with a concise boilerplate and media-contact placeholder
+
+STRICT OUTPUT FORMAT (use exactly these sections in order):
+
+HEADLINE:
+[Bold, attention-grabbing headline — max 15 words]
+
+SUB-HEADLINE:
+[One sentence expanding on the headline]
+
+DATELINE & LEAD:
+[City, Date] — [Strong opening paragraph: who is launching/announcing what, the core impact, and why it matters now. 2-3 sentences.]
+
+BODY PARAGRAPH 1 — The Solution:
+[What the solution does, how it works, who it serves. Include a key metric or proof point.]
+
+BODY PARAGRAPH 2 — Impact & Evidence:
+[Quantified impact, testimonials or attributed quotes, comparison to status quo.]
+
+BODY PARAGRAPH 3 — What's Next:
+[Roadmap, call to action, upcoming milestones, partnerships, or expansion plans.]
+
+ABOUT [Organization/Team]:
+[2-3 sentence boilerplate describing the mission and track record.]
+
+MEDIA CONTACT:
+[Name placeholder, email placeholder, phone placeholder]
+
+###
+
+STYLE REQUIREMENTS:
+- Third-person, objective journalist tone
+- No hype words (revolutionary, game-changing) — let the facts speak
+- Short paragraphs, active voice, present tense where possible
+- 400-600 words total
+- Suitable for direct distribution to newsrooms and wire services`,
+    },
   ];
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -1943,6 +1995,7 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     'business-model-canvas',
     'funder-brief',
     'funding-sources',
+    'press-release',
   ];
 
   getPrimaryReports(): ReportType[] {
