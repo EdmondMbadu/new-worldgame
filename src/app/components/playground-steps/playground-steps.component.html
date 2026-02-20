@@ -886,108 +886,114 @@
     </div>
   </div>
 
-<div *ngIf="showReportModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 pb-6 pt-24">
-  <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" (click)="closeReportModal()"></div>
-  <div class="relative w-full max-w-5xl rounded-3xl border border-white/60 bg-gradient-to-br from-white via-white to-emerald-50/70 p-6 shadow-[0_30px_90px_-40px_rgba(15,23,42,0.8)] dark:border-slate-800/60 dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-900 dark:to-emerald-900/20">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-500">
-          {{ 'playgroundSteps.finalReview.reportModal.badge' | translate }}
-        </p>
-        <h2 class="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">
+<!-- Report Modal -->
+<div *ngIf="showReportModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+  <div class="absolute inset-0 bg-black/30 backdrop-blur-[2px]" (click)="closeReportModal()"></div>
+
+  <div class="report-modal relative flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] dark:bg-slate-900 dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)]"
+       style="max-height: min(88vh, 760px)">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-slate-100 px-7 py-5 dark:border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/10">
+          <svg class="h-[18px] w-[18px] text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
           {{ 'playgroundSteps.finalReview.reportModal.title' | translate }}
         </h2>
-        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          {{ 'playgroundSteps.finalReview.reportModal.subtitle' | translate }}
-        </p>
       </div>
       <button
         type="button"
         (click)="closeReportModal()"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
-        ✕
+        class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
       </button>
     </div>
 
-    <div class="mt-6 max-h-[60vh] space-y-6 overflow-y-auto pr-2">
-      <div *ngFor="let group of reportGroups"
-        class="rounded-2xl border p-4 shadow-sm backdrop-blur"
-        [ngClass]="group.id === 'funder'
-          ? 'border-emerald-200/80 bg-emerald-50/70 dark:border-emerald-700/50 dark:bg-emerald-900/20'
-          : 'border-slate-200/80 bg-white/70 dark:border-slate-700/80 dark:bg-slate-900/60'">
+    <!-- Scrollable Body -->
+    <div class="flex-1 overflow-y-auto px-7 py-6">
+
+      <!-- Format Section -->
+      <p class="mb-3 text-[13px] font-medium text-slate-500 dark:text-slate-400">Format</p>
+      <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <button
+          *ngFor="let report of getPrimaryReports()"
           type="button"
-          (click)="toggleReportGroup(group.id)"
-          class="flex w-full items-center justify-between gap-2 text-left">
-          <div>
-            <h3 class="text-sm font-semibold uppercase tracking-[0.18em]"
-              [ngClass]="group.id === 'funder'
-                ? 'text-emerald-700 dark:text-emerald-300'
-                : 'text-slate-500 dark:text-slate-400'">
-              {{ group.label }}
-            </h3>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Choose a report tailored to this audience.
-            </p>
+          (click)="selectReportType(report)"
+          class="report-card group relative rounded-xl border p-4 text-left transition-all"
+          [ngClass]="selectedReportTypeId === report.id
+            ? 'border-emerald-400 bg-emerald-50 ring-1 ring-emerald-400/30 dark:border-emerald-500/60 dark:bg-emerald-500/10 dark:ring-emerald-500/20'
+            : 'border-slate-200 bg-stone-50 hover:border-slate-300 hover:bg-stone-100 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800'">
+          <div class="mb-3 flex items-start justify-between">
+            <p class="text-[13px] font-semibold leading-snug text-slate-800 dark:text-slate-100">{{ report.title }}</p>
+            <svg *ngIf="selectedReportTypeId === report.id" class="ml-1 mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+            </svg>
           </div>
-          <svg
-            class="h-4 w-4 transition-transform"
-            [ngClass]="group.id === 'funder' ? 'text-emerald-500' : 'text-slate-400'"
-            [class.rotate-180]="reportGroupState[group.id]"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7" />
-          </svg>
+          <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{{ report.summary }}</p>
         </button>
-        <div *ngIf="reportGroupState[group.id]" class="mt-3 grid gap-3 sm:grid-cols-2">
-          <button
-            *ngFor="let report of getReportsByGroup(group.id)"
-            type="button"
-            (click)="selectReportType(report)"
-            class="group w-full rounded-2xl border p-4 text-left transition-all hover:-translate-y-0.5"
-            [ngClass]="selectedReportTypeId === report.id
-              ? (report.group === 'funder'
-                  ? 'border-emerald-400 bg-emerald-50 shadow-lg shadow-emerald-100 dark:border-emerald-400/70 dark:bg-emerald-500/10'
-                  : 'border-amber-400 bg-amber-50 shadow-lg shadow-amber-100 dark:border-amber-400/70 dark:bg-amber-500/10')
-              : (report.group === 'funder'
-                  ? 'border-emerald-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-emerald-700/50 dark:bg-slate-900/60 dark:hover:border-emerald-400/40'
-                  : 'border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50/40 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-amber-400/40')">
-            <p class="text-sm font-semibold text-slate-900 dark:text-white">
-              {{ report.title }}
-            </p>
-            <p class="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              {{ report.summary || report.instruction }}
-            </p>
-          </button>
-        </div>
       </div>
 
-      <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/40">
-        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <!-- Suggested Format Section -->
+      <p class="mb-3 text-[13px] font-medium text-slate-500 dark:text-slate-400">Suggested Format</p>
+      <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <button
+          *ngFor="let report of getSuggestedReports()"
+          type="button"
+          (click)="selectReportType(report)"
+          class="report-card group relative rounded-xl border p-4 text-left transition-all"
+          [ngClass]="selectedReportTypeId === report.id
+            ? 'border-emerald-400 bg-emerald-50 ring-1 ring-emerald-400/30 dark:border-emerald-500/60 dark:bg-emerald-500/10 dark:ring-emerald-500/20'
+            : 'border-slate-200 bg-stone-50 hover:border-slate-300 hover:bg-stone-100 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800'">
+          <div class="mb-3 flex items-start justify-between">
+            <p class="text-[13px] font-semibold leading-snug text-slate-800 dark:text-slate-100">{{ report.title }}</p>
+            <svg *ngIf="selectedReportTypeId === report.id" class="ml-1 mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <p class="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{{ report.summary }}</p>
+        </button>
+      </div>
+
+      <!-- Custom Instructions -->
+      <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+        <label class="mb-2 block text-[12px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           {{ 'playgroundSteps.finalReview.reportModal.instructionLabel' | translate }}
         </label>
         <textarea
           [(ngModel)]="reportInstruction"
-          rows="5"
-          class="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+          rows="4"
+          placeholder="Customize the AI instruction for this report..."
+          class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm leading-relaxed text-slate-700 placeholder-slate-400 shadow-sm transition-colors focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:ring-emerald-900/40">
         </textarea>
       </div>
     </div>
 
-    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+    <!-- Footer -->
+    <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-7 py-4 dark:border-slate-800">
       <button
         type="button"
         (click)="closeReportModal()"
-        class="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800">
+        class="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
         {{ 'playgroundSteps.finalReview.reportModal.cancel' | translate }}
       </button>
       <button
         type="button"
         (click)="generateReport()"
         [disabled]="reportLoading"
-        class="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:from-emerald-400 hover:to-teal-400 disabled:cursor-not-allowed disabled:opacity-60">
+        class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-emerald-500 dark:hover:bg-emerald-400">
+        <svg *ngIf="!reportLoading" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456Z" />
+        </svg>
+        <svg *ngIf="reportLoading" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
         {{ 'playgroundSteps.finalReview.reportModal.generate' | translate }}
       </button>
     </div>

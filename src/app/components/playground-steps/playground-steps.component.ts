@@ -1938,6 +1938,25 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     this.reportGroupState[groupId] = !this.reportGroupState[groupId];
   }
 
+  private primaryReportIds = [
+    'executive-summary',
+    'business-model-canvas',
+    'funder-brief',
+    'funding-sources',
+  ];
+
+  getPrimaryReports(): ReportType[] {
+    return this.reportTypes.filter((r) =>
+      this.primaryReportIds.includes(r.id)
+    );
+  }
+
+  getSuggestedReports(): ReportType[] {
+    return this.reportTypes.filter(
+      (r) => !this.primaryReportIds.includes(r.id)
+    );
+  }
+
   getSelectedReportType(): ReportType | undefined {
     return this.reportTypes.find((type) => type.id === this.selectedReportTypeId);
   }

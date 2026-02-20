@@ -45,3 +45,28 @@
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }
+
+/* Report modal */
+.report-modal {
+  animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.report-card {
+  min-height: 100px;
+  transition: all 0.15s ease;
+}
+
+.report-card:hover {
+  transform: translateY(-1px);
+}
