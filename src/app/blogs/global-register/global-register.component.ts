@@ -315,14 +315,14 @@ export class GlobalRegisterComponent implements OnInit {
   getPrice(): number {
     if (this.labMode === 'inPerson') {
       // In-person
-      if (this.targetGroup === 'professional') return 850;
+      if (this.targetGroup === 'professional') return 800;
       if (this.targetGroup === 'student' || this.targetGroup === 'senior')
-        return 450;
+        return 400;
     } else {
       // Online
-      if (this.targetGroup === 'professional') return 249;
+      if (this.targetGroup === 'professional') return 250;
       if (this.targetGroup === 'student' || this.targetGroup === 'senior')
-        return 99;
+        return 200;
     }
     return 0; // fallback
   }

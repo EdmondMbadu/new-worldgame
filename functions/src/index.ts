@@ -3340,16 +3340,16 @@ export const createCheckoutSession = functions.https.onCall(
       if (labMode === 'inPerson') {
         // In-Person Lab
         if (targetGroup === 'professional') {
-          amount = 85000; // $850
+          amount = 80000; // $800
         } else if (targetGroup === 'student' || targetGroup === 'senior') {
-          amount = 45000; // $450
+          amount = 40000; // $400
         }
       } else {
         // Online Lab
         if (targetGroup === 'professional') {
-          amount = 24900; // $249
+          amount = 25000; // $250
         } else if (targetGroup === 'student' || targetGroup === 'senior') {
-          amount = 9900; // $99
+          amount = 20000; // $200
         }
       }
 
