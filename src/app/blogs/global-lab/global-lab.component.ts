@@ -1,16 +1,16 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-global-lab',
   templateUrl: './global-lab.component.html',
   styleUrl: './global-lab.component.css',
 })
-export class GlobalLabComponent implements OnInit, AfterViewInit {
-  ngOnInit(): void {}
-
-  ngAfterViewInit(): void {
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }), 200);
+export class GlobalLabComponent implements OnInit {
+  ngOnInit(): void {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }
+
+  videoPlaying = false;
   reachOutVisa: string = 'info@1earthgame.org';
 
   aiOptions: Team[] = [
