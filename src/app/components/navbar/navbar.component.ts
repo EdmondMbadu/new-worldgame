@@ -101,6 +101,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   beta: boolean = true;
   lab: boolean = true;
+  gsl2026: boolean = true;
   solutionDropDown = false;
   guideDropDown = false;
   @Input() showMoreOrLess!: boolean;
@@ -257,6 +258,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
       | 'guideDropDown'
       | 'showMyPages'
       | 'lab'
+      | 'gsl2026'
   ) {
     this[property] = !this[property];
   }
