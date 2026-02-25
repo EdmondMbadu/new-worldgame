@@ -82,6 +82,7 @@
     class="container mx-auto flex items-center justify-between dark:text-white px-12"
   >
     <div
+      *ngIf="showLogo"
       class="pt-2 flex items-center space-x-4 cursor-pointer hover:scale-105 transition-transform duration-300"
       routerLink="/{{ path }}"
     >

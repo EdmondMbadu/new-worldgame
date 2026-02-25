@@ -1,9 +1,52 @@
 <div class="dark:bg-slate-900 min-h-screen flex flex-col">
   <!-- NAVBAR -->
-  <app-navbar [currenPageLabBanner]="false" [showLoginButton]="false"></app-navbar>
+  <app-navbar [currenPageLabBanner]="false" [showLoginButton]="false" [showLogo]="false"></app-navbar>
 
-<section 
-  class="relative pt-32 pb-16 bg-cover bg-center bg-no-repeat"
+  <!-- ── Co-Branding Logo Bar ── -->
+  <div class="fixed top-[58px] left-0 right-0 z-40
+              bg-white/95 dark:bg-slate-900/95
+              backdrop-blur-md
+              border-b border-gray-100 dark:border-slate-800
+              shadow-sm">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-center gap-8 md:gap-16">
+
+      <!-- NewWorld Game -->
+      <div class="flex items-center gap-3">
+        <img
+          src="assets/img/earth-triangle-test.png"
+          alt="NewWorld Game"
+          class="w-20 rounded-lg shadow-lg"
+        />
+        <span class="hidden sm:block text-lg font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent leading-none">
+          NewWorld Game
+        </span>
+      </div>
+
+      <!-- Separator -->
+      <span class="h-10 w-px bg-gray-200 dark:bg-slate-700 flex-shrink-0"></span>
+
+      <!-- EarthGame -->
+      <img
+        src="assets/img/earthgame.png"
+        alt="EarthGame"
+        class="h-16 w-auto object-contain"
+      />
+
+      <!-- Separator -->
+      <span class="h-10 w-px bg-gray-200 dark:bg-slate-700 flex-shrink-0"></span>
+
+      <!-- Drexel University -->
+      <img
+        src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdrexel.webp?alt=media&token=0f5ceb45-a3e2-4223-8391-84c02867372b"
+        alt="Drexel University"
+        class="h-16 w-auto object-contain"
+      />
+
+    </div>
+  </div>
+
+<section
+  class="relative pt-[200px] pb-16 bg-cover bg-center bg-no-repeat"
   style="background-image: url('https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d');"
 >
   <div class="absolute inset-0 bg-black/40"></div>

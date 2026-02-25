@@ -65,6 +65,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Input() currentPageTournament: boolean = false;
   @Input() currenPageLabBanner: boolean = true;
   @Input() showLoginButton: boolean = true;
+  @Input() showLogo: boolean = true;
   profilePicturePath: string = '';
 
   hasSchoolAccess = false; // show link for admins OR invited students
