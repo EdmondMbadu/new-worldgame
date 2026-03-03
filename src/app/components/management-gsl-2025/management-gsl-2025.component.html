@@ -12,11 +12,14 @@
     <section class="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 mt-20">
        
         <div class="mx-auto max-w-screen-xl px-4 lg:px-12">
-            <h3 class="text-3xl font-bold dark:text-white text-center mb-4">Global Lab 2025 Registrations</h3>
+            <h3 class="text-3xl font-bold dark:text-white text-center mb-2">Global Solutions Lab {{ selectedYear }} Registrations</h3>
+            <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Showing {{ selectedYear }} by default (current year: {{ currentYear }}).
+            </p>
 
             <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
                 <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
-                    <div class="w-full md:w-1/2">
+                    <div class="w-full md:w-2/3 flex flex-col md:flex-row gap-3">
                         <form class="flex items-center">
                             <label for="search" class="sr-only">Search</label>
                             <div class="relative w-full">
@@ -30,6 +33,19 @@
                                     placeholder="Search by name, email, or organization">
                             </div>
                         </form>
+                        <div class="w-full md:w-56">
+                          <label for="yearSelect" class="sr-only">Select year</label>
+                          <select
+                            id="yearSelect"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            [ngModel]="selectedYear"
+                            (ngModelChange)="onYearChange($event)"
+                          >
+                            <option *ngFor="let year of availableYears" [value]="year">
+                              GSL {{ year }}
+                            </option>
+                          </select>
+                        </div>
                     </div>
                     <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
                       <div class="relative" (clickOutside)="dropdownOpen = false">
@@ -67,7 +83,7 @@
                         </div>
                       </div>
                       
-                        <h2 class="font-bold dark:text-white">{{ filteredData.length }} Registrations</h2>
+                        <h2 class="font-bold dark:text-white">{{ filteredData.length }} Registrations ({{ selectedYear }})</h2>
                     </div>
                 </div>
 
@@ -101,7 +117,7 @@
                                 </tr>
 
                                 <tr *ngIf="expandedRows[i]" class="bg-gray-50 dark:bg-gray-800">
-                                    <td colspan="5" class="p-4 text-gray-700 dark:text-gray-300">
+                                    <td colspan="6" class="p-4 text-gray-700 dark:text-gray-300">
                                         <strong>Phone:</strong> {{ user.phone }} <br>
                                         <strong>Address:</strong> {{ user.address }}, {{ user.city }}, {{ user.stateProvince }}, {{ user.country }} <br>
                                         <strong>Age:</strong> {{ user.age }} <br>
@@ -114,6 +130,11 @@
                                     </td>
                                 </tr>
                             </ng-container>
+                            <tr *ngIf="filteredData.length === 0">
+                              <td colspan="6" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                                No registrations found for GSL {{ selectedYear }}.
+                              </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -122,7 +143,25 @@
 
         <!-- ========== SUMMARY SECTION ========== -->
 <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden my-10 p-4 mx-auto max-w-screen-xl px-4 lg:px-12">
-    <h4 class="text-lg font-bold mb-2 text-gray-700 dark:text-gray-300">Summary</h4>
+    <h4 class="text-lg font-bold mb-2 text-gray-700 dark:text-gray-300">Summary (GSL {{ selectedYear }})</h4>
+
+    <div class="mb-6">
+      <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Registrations Grouped By Year</h5>
+      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-4">
+        <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            <th scope="col" class="px-4 py-2">Year</th>
+            <th scope="col" class="px-4 py-2">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let year of getYearKeys()">
+            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">GSL {{ year }}</td>
+            <td class="px-4 py-2">{{ registrationsByYear[year] || 0 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   
     <!--  Grid with 2 columns on medium screens and above -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

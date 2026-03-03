@@ -14,6 +14,10 @@ export class ManagementGsl2025Component implements OnInit {
   globalLabData: any[] = [];
   filteredData: any[] = [];
   searchQuery: string = '';
+  currentYear: number = new Date().getFullYear();
+  selectedYear: number = this.currentYear;
+  availableYears: number[] = [];
+  registrationsByYear: { [year: number]: number } = {};
   expandedRows: { [key: number]: boolean } = {}; // Track expanded rows
   gid: string = '';
   private readonly AGE_GROUP_ORDER = [
@@ -61,24 +65,25 @@ export class ManagementGsl2025Component implements OnInit {
           const dateB = this.data.parseDateMMDDYYYY(b.registerDate);
           return dateB - dateA;
         });
-
-        this.filteredData = [...this.globalLabData];
-
-        this.generateSummary(); // Generate summaries after data load
+        this.availableYears = this.computeAvailableYears(this.globalLabData);
+        this.registrationsByYear = this.computeRegistrationsByYear(
+          this.globalLabData
+        );
+        this.applyFilters();
       }
     });
   }
 
   // Filter results based on search input
   filterData() {
-    this.filteredData = this.globalLabData.filter(
-      (user) =>
-        `${user.firstName} ${user.lastName}`
-          .toLowerCase()
-          .includes(this.searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        user.organization.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
+    this.applyFilters();
+  }
+
+  onYearChange(year: string | number) {
+    const nextYear = parseInt(String(year), 10);
+    this.selectedYear = Number.isNaN(nextYear) ? this.currentYear : nextYear;
+    this.applyFilters();
+    this.expandedRows = {};
   }
 
   // Toggle row expansion
@@ -94,10 +99,11 @@ export class ManagementGsl2025Component implements OnInit {
     this.summaryByAgeGroup = {};
     this.summaryByContinent = {};
     this.summaryByOccupation = {};
+    this.summaryByFocusTopic = {};
 
     let totalPaidInCents = 0;
 
-    for (const user of this.globalLabData) {
+    for (const user of this.filteredData) {
       // 1. Age Group
       const ageGroup = this.getAgeGroup(user.age);
       if (!this.summaryByAgeGroup[ageGroup]) {
@@ -129,7 +135,7 @@ export class ManagementGsl2025Component implements OnInit {
     }
 
     // Calculate Payment Summaries
-    const count = this.globalLabData.length;
+    const count = this.filteredData.length;
     this.paymentSummary.totalPaid = totalPaidInCents;
     this.paymentSummary.averagePaid = count > 0 ? totalPaidInCents / count : 0;
   }
@@ -180,6 +186,67 @@ export class ManagementGsl2025Component implements OnInit {
     return Object.keys(obj);
   }
 
+  getYearKeys(): number[] {
+    return this.availableYears;
+  }
+
+  private applyFilters() {
+    const query = this.searchQuery.toLowerCase().trim();
+    this.filteredData = this.globalLabData.filter((user) => {
+      const year = this.extractYear(user.registerDate);
+      const matchesYear = year === this.selectedYear;
+      const matchesQuery =
+        query === '' ||
+        `${user.firstName ?? ''} ${user.lastName ?? ''}`
+          .toLowerCase()
+          .includes(query) ||
+        `${user.email ?? ''}`.toLowerCase().includes(query) ||
+        `${user.organization ?? ''}`.toLowerCase().includes(query);
+
+      return matchesYear && matchesQuery;
+    });
+    this.generateSummary();
+  }
+
+  private computeAvailableYears(data: any[]): number[] {
+    const years = new Set<number>([this.currentYear]);
+    data.forEach((user) => years.add(this.extractYear(user.registerDate)));
+
+    return [...years]
+      .filter((year) => Number.isFinite(year) && year > 0)
+      .sort((a, b) => b - a);
+  }
+
+  private computeRegistrationsByYear(data: any[]): { [year: number]: number } {
+    const summary: { [year: number]: number } = {};
+    for (const user of data) {
+      const year = this.extractYear(user.registerDate);
+      if (!summary[year]) {
+        summary[year] = 0;
+      }
+      summary[year]++;
+    }
+    return summary;
+  }
+
+  private extractYear(dateStr?: string): number {
+    if (!dateStr) {
+      return this.currentYear;
+    }
+    const parts = dateStr.split('-');
+    if (parts.length >= 3) {
+      const year = parseInt(parts[2], 10);
+      if (!Number.isNaN(year)) {
+        return year;
+      }
+    }
+    const timestamp = this.data.parseDateMMDDYYYY(dateStr);
+    if (!timestamp) {
+      return this.currentYear;
+    }
+    return new Date(timestamp).getFullYear();
+  }
+
   downloadCSV() {
     // 1) Prepare header row
     const headers = [
@@ -215,7 +282,7 @@ export class ManagementGsl2025Component implements OnInit {
     const a = document.createElement('a');
     a.setAttribute('href', url);
     // name it however you like; e.g. include date
-    a.setAttribute('download', `gsl-2025-registrations.csv`);
+    a.setAttribute('download', `gsl-${this.selectedYear}-registrations.csv`);
     a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
