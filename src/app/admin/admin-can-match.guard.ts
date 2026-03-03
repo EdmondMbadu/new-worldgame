@@ -4,6 +4,7 @@ const ADMIN_PATHS = new Set<string>([
   'user-management',
   'schools-management',
   'management-workshop',
+  'management-gsl',
   'management-gsl-2025',
   'tournament-management',
   'management-primer',

@@ -35,10 +35,15 @@ const routes: Routes = [
     data: { requireAdmin: true },
   },
   {
-    path: 'management-gsl-2025',
+    path: 'management-gsl',
     component: ManagementGsl2025Component,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
+  },
+  {
+    path: 'management-gsl-2025',
+    redirectTo: 'management-gsl',
+    pathMatch: 'full',
   },
   {
     path: 'tournament-management',

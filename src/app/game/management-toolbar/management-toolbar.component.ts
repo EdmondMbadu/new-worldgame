@@ -18,7 +18,7 @@ export class ManagementToolbarComponent {
     { path: '/user-management', label: 'Sign-Up' },
     { path: '/solution-publication', label: 'Solutions' },
     { path: '/management-primer', label: 'Primer' },
-    { path: '/management-gsl-2025', label: `GSL-${this.currentYear}` },
+    { path: '/management-gsl', label: `GSL-${this.currentYear}` },
     { path: '/tournament-management', label: 'Tournaments' },
     { path: '/management-demo', label: 'Demo Sign-ups' },
     { path: '/schools-management', label: 'Schools' },
