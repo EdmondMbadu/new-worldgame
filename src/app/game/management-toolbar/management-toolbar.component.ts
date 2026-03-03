@@ -12,11 +12,13 @@ interface SubToolLink {
   styleUrl: './management-toolbar.component.css',
 })
 export class ManagementToolbarComponent {
+  currentYear = new Date().getFullYear();
+
   @Input() items: SubToolLink[] = [
     { path: '/user-management', label: 'Sign-Up' },
     { path: '/solution-publication', label: 'Solutions' },
     { path: '/management-primer', label: 'Primer' },
-    { path: '/management-gsl-2025', label: 'GSL-2025' },
+    { path: '/management-gsl-2025', label: `GSL-${this.currentYear}` },
     { path: '/tournament-management', label: 'Tournaments' },
     { path: '/management-demo', label: 'Demo Sign-ups' },
     { path: '/schools-management', label: 'Schools' },
