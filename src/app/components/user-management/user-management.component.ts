@@ -732,7 +732,16 @@ export class UserManagementComponent implements OnInit {
               <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;">
                 <tr>
                   <td align="center" style="padding:0 20px 16px;">
-                    <img src="${logoUrl}" alt="NewWorld Game" width="176" style="display:block;width:176px;max-width:176px;height:auto;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                      <tr>
+                        <td style="vertical-align:middle;padding-right:8px;">
+                          <img src="${logoUrl}" alt="NewWorld Game" width="40" style="display:block;width:40px;max-width:40px;height:auto;">
+                        </td>
+                        <td style="vertical-align:middle;">
+                          <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">NewWorld Game</span>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
                 <tr>
