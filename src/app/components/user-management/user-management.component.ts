@@ -97,6 +97,7 @@ export class UserManagementComponent implements OnInit {
   showAIInsightsSolutionDropdown = false;
   filteredAIInsightsUsers: { user: User; solutions: Solution[] }[] = [];
   filteredAIInsightsSolutions: Solution[] = [];
+  showBriefSendLog = false;
 
   // UI toggle: default = respect unsubscribes (do NOT send to them)
   disregardUnsubs = false;
