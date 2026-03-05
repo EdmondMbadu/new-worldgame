@@ -34,6 +34,8 @@ export class UserManagementComponent implements OnInit {
   userUnfinishedSolutions: Solution[] = [];
   allUsers: User[] = [];
   everySolution: Solution[] = [];
+  includeBotsInList = false;
+  private readonly goalIntroducedOnMs = new Date(2024, 7, 26).getTime();
 
   // Unsubscribes state
   unsubscribedRows: Array<{ email: string; reason?: string; updatedAt: Date }> =
@@ -216,11 +218,12 @@ export class UserManagementComponent implements OnInit {
 
   // A simple computed property that filters users by the search term.
   get filteredUsers(): User[] {
+    const baseUsers = this.usersByBotMode;
     if (!this.searchTerm.trim()) {
-      return this.allUsers;
+      return baseUsers;
     }
     const lowerTerm = this.searchTerm.toLowerCase();
-    return this.allUsers.filter((user) => {
+    return baseUsers.filter((user) => {
       const first = user.firstName?.toLowerCase() || '';
       const last = user.lastName?.toLowerCase() || '';
       const email = user.email?.toLowerCase() || '';
@@ -230,6 +233,84 @@ export class UserManagementComponent implements OnInit {
         email.includes(lowerTerm)
       );
     });
+  }
+
+  get usersByBotMode(): User[] {
+    if (this.includeBotsInList) return this.allUsers;
+    return this.allUsers.filter((user) => !this.isLikelyBot(user));
+  }
+
+  get botUsersCount(): number {
+    return this.allUsers.filter((user) => this.isLikelyBot(user)).length;
+  }
+
+  onIncludeBotsChange(includeBots: boolean) {
+    this.includeBotsInList = includeBots;
+    this.selected = new Set(
+      Array.from(this.selected).filter((email) =>
+        this.usersByBotMode.some((u) => this.normalizeEmail(u.email) === email)
+      )
+    );
+    this.allSelected =
+      this.filteredUsers.length > 0 &&
+      this.filteredUsers.every(
+        (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
+      );
+  }
+
+  private hasGoal(user: User): boolean {
+    return Boolean((user.goal || '').trim());
+  }
+
+  private isRandomLookingNameToken(token: string): boolean {
+    const clean = (token || '').replace(/[^a-zA-Z]/g, '');
+    if (clean.length < 16) return false;
+
+    const upperCount = (clean.match(/[A-Z]/g) || []).length;
+    const lowerCount = (clean.match(/[a-z]/g) || []).length;
+    if (upperCount < 4 || lowerCount < 4) return false;
+
+    const upperRatio = upperCount / clean.length;
+    return upperRatio > 0.2 && upperRatio < 0.8;
+  }
+
+  private hasSuspiciousNameFormat(user: User): boolean {
+    const first = (user.firstName || '').trim();
+    const last = (user.lastName || '').trim();
+    if (!first || !last) return false;
+    return (
+      this.isRandomLookingNameToken(first) &&
+      this.isRandomLookingNameToken(last)
+    );
+  }
+
+  private hasNoActivity(user: User): boolean {
+    return (
+      this.asNum(user.tempSolutionstarted) === 0 &&
+      this.asNum(user.tempSolutionSubmitted) === 0
+    );
+  }
+
+  private isAdminUser(user: User): boolean {
+    const role = (user.role || '').trim().toLowerCase();
+    const adminFlag = (user.admin || '').trim().toLowerCase();
+    return (
+      adminFlag === 'true' || role === 'admin' || role === 'schooladmin'
+    );
+  }
+
+  isLikelyBot(user: User): boolean {
+    if (this.hasGoal(user)) return false;
+
+    if (this.hasNoActivity(user) && this.hasSuspiciousNameFormat(user)) {
+      return true;
+    }
+
+    if (this.isAdminUser(user)) return false;
+
+    const joinedAt = this.data.parseDateMMDDYYYY(user.dateJoined);
+    if (!joinedAt) return false;
+    return joinedAt >= this.goalIntroducedOnMs;
   }
 
   toggleUserDetails(index: number) {
@@ -274,7 +355,7 @@ export class UserManagementComponent implements OnInit {
     ];
 
     // Map user data to match the headers
-    const rows = this.allUsers.map((user) => [
+    const rows = this.filteredUsers.map((user) => [
       user.firstName,
       user.lastName,
       user.email,
@@ -325,7 +406,8 @@ export class UserManagementComponent implements OnInit {
 
   // ===== Dashboard Stats =====
   get dashboardStats() {
-    const totalUsers = this.allUsers.length;
+    const userPool = this.usersByBotMode;
+    const totalUsers = userPool.length;
     const totalSolutions = this.everySolution.length;
 
     // Count unique finished and in-progress solutions
@@ -340,10 +422,12 @@ export class UserManagementComponent implements OnInit {
       totalSolutions > 0
         ? Math.round((totalFinished / totalSolutions) * 100)
         : 0;
-    const unsubscribedCount = this.unsubscribedEmails.length;
+    const unsubscribedCount = userPool.filter((u) =>
+      this.isUnsubscribed(u.email)
+    ).length;
 
     // Users with at least one solution
-    const activeUsers = this.allUsers.filter(
+    const activeUsers = userPool.filter(
       (u) => this.asNum(u.tempSolutionstarted) > 0
     ).length;
 
@@ -364,7 +448,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   toggleSelectAll(checked: boolean) {
-    this.allSelected = checked;
+    this.allSelected = checked && this.filteredUsers.length > 0;
     this.selected.clear();
     if (checked) {
       this.filteredUsers.forEach((u) => {
@@ -378,9 +462,11 @@ export class UserManagementComponent implements OnInit {
     if (checked) this.selected.add(norm);
     else this.selected.delete(norm);
 
-    this.allSelected = this.filteredUsers.every(
-      (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
-    );
+    this.allSelected =
+      this.filteredUsers.length > 0 &&
+      this.filteredUsers.every(
+        (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
+      );
   }
   getPendingSolutions(email: string) {
     const normalized = (email || '').trim().toLowerCase();
@@ -537,8 +623,8 @@ export class UserManagementComponent implements OnInit {
     try {
       const basePool =
         this.targetMode === 'all'
-          ? this.allUsers
-          : this.allUsers.filter(
+          ? this.usersByBotMode
+          : this.usersByBotMode.filter(
               (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
             );
 
@@ -670,8 +756,8 @@ export class UserManagementComponent implements OnInit {
   get recipientCounts() {
     const basePool =
       this.targetMode === 'all'
-        ? this.allUsers
-        : this.allUsers.filter(
+        ? this.usersByBotMode
+        : this.usersByBotMode.filter(
             (u) => u.email && this.selected.has(this.normalizeEmail(u.email))
           );
 
