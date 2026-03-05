@@ -25,6 +25,7 @@ export class User {
   solutionEnvironment?: SolutionEnvironment;
   admin?: string;
   lastLogin?: string;
+  lastActiveAt?: string;
   tempSolutionstarted?: string;
   tempSolutionSubmitted?: string;
   role?: string;

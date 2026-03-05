@@ -196,6 +196,37 @@ export const weeklyReminder = functions.https.onCall(
   }
 );
 
+export const touchLastActive = functions
+  .runWith({ timeoutSeconds: 30, memory: '256MB' })
+  .https.onCall(async (_data: any, context: functions.https.CallableContext) => {
+    if (!context.auth?.uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required.'
+      );
+    }
+
+    const uid = context.auth.uid;
+    const isoNow = new Date().toISOString();
+    const updates = { lastActiveAt: isoNow };
+
+    await admin.firestore().doc(`users/${uid}`).set(updates, { merge: true });
+
+    const byUidSnap = await admin
+      .firestore()
+      .collection('users')
+      .where('uid', '==', uid)
+      .limit(10)
+      .get();
+    if (!byUidSnap.empty) {
+      const batch = admin.firestore().batch();
+      byUidSnap.docs.forEach((doc) => batch.set(doc.ref, updates, { merge: true }));
+      await batch.commit();
+    }
+
+    return { success: true, lastActiveAt: isoNow };
+  });
+
 export const getAuthLastSignInMap = functions
   .runWith({ timeoutSeconds: 120, memory: '512MB' })
   .https.onCall(async (data: any, context: functions.https.CallableContext) => {
@@ -212,7 +243,8 @@ export const getAuthLastSignInMap = functions
       .get();
     const requester = requesterSnap.data() as any;
     const role = String(requester?.role || '').toLowerCase();
-    const isAdmin = requester?.admin === 'true' || role === 'admin';
+    const isAdmin =
+      requester?.admin === 'true' || role === 'admin' || role === 'schooladmin';
 
     if (!isAdmin) {
       throw new functions.https.HttpsError(
@@ -226,37 +258,52 @@ export const getAuthLastSignInMap = functions
           .map((uid: unknown) => String(uid || '').trim())
           .filter((uid: string) => uid.length > 0)
       : [];
+    const requestedEmails = Array.isArray(data?.emails)
+      ? data.emails
+          .map((email: unknown) => String(email || '').trim().toLowerCase())
+          .filter((email: string) => email.length > 0)
+      : [];
+
     const uidSet = new Set<string>(requestedUids);
+    const emailSet = new Set<string>(requestedEmails);
     const lastSignInByUid: Record<string, string> = {};
+    const lastSignInByEmail: Record<string, string> = {};
 
     let pageToken: string | undefined = undefined;
     do {
       const page = await admin.auth().listUsers(1000, pageToken);
       for (const userRecord of page.users) {
-        if (uidSet.size > 0 && !uidSet.has(userRecord.uid)) continue;
+        const authEmail = (userRecord.email || '').trim().toLowerCase();
+        const needsUser =
+          (uidSet.size === 0 || uidSet.has(userRecord.uid)) ||
+          (emailSet.size > 0 && authEmail && emailSet.has(authEmail));
+        if (!needsUser) continue;
 
         const rawLastSignIn = userRecord.metadata?.lastSignInTime || '';
-        if (!rawLastSignIn) {
-          lastSignInByUid[userRecord.uid] = '';
-          continue;
-        }
-
-        const parsedMs = Date.parse(rawLastSignIn);
-        lastSignInByUid[userRecord.uid] = Number.isFinite(parsedMs)
+        const parsedMs = rawLastSignIn ? Date.parse(rawLastSignIn) : NaN;
+        const normalized = Number.isFinite(parsedMs)
           ? new Date(parsedMs).toISOString()
           : rawLastSignIn;
+
+        if (uidSet.size === 0 || uidSet.has(userRecord.uid)) {
+          lastSignInByUid[userRecord.uid] = normalized || '';
+        }
+        if (authEmail && (emailSet.size === 0 || emailSet.has(authEmail))) {
+          lastSignInByEmail[authEmail] = normalized || '';
+        }
       }
 
       pageToken = page.pageToken;
-      if (
-        uidSet.size > 0 &&
-        Object.keys(lastSignInByUid).length >= uidSet.size
-      ) {
-        break;
-      }
+      const uidDone =
+        uidSet.size === 0 ||
+        Object.keys(lastSignInByUid).length >= uidSet.size;
+      const emailDone =
+        emailSet.size === 0 ||
+        Object.keys(lastSignInByEmail).length >= emailSet.size;
+      if (uidDone && emailDone) break;
     } while (pageToken);
 
-    return { lastSignInByUid };
+    return { lastSignInByUid, lastSignInByEmail };
   });
 
 type AIInsightsPayload = {

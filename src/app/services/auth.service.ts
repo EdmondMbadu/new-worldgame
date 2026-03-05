@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import {
   AngularFirestore,
   AngularFirestoreCollection,
@@ -7,7 +8,7 @@ import {
   DocumentReference,
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
 import { NewUser, PlanKey, PRICE_BOOK, School, User } from '../models/user';
 import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
@@ -37,10 +38,15 @@ export class AuthService {
   newUser: NewUser = {};
   logingError?: Observable<any>;
   private redirectUrl: string = '';
+  private activeUid: string | null = null;
+  private lastActiveWriteAtMs = 0;
+  private activityTrackingBound = false;
+  private readonly minLastActiveWriteIntervalMs = 5 * 60 * 1000;
 
   constructor(
     private fireauth: AngularFireAuth,
     private afs: AngularFirestore,
+    private fns: AngularFireFunctions,
     private router: Router,
     private time: TimeService
   ) {
@@ -61,6 +67,7 @@ export class AuthService {
         }
       })
     );
+    this.initLastActiveTracking();
     this.getCurrentUser();
   }
   setRedirectUrl(url: string) {
@@ -712,6 +719,68 @@ export class AuthService {
       );
     } catch (error) {
       console.warn('Unable to persist lastLogin for user:', user.uid, error);
+    }
+  }
+
+  private initLastActiveTracking() {
+    this.fireauth.authState.subscribe((authUser) => {
+      const nextUid = authUser?.uid ?? null;
+      if (nextUid !== this.activeUid) {
+        this.activeUid = nextUid;
+        this.lastActiveWriteAtMs = 0;
+      }
+      if (nextUid) {
+        void this.writeLastActive(nextUid, true);
+      }
+    });
+
+    if (this.activityTrackingBound || typeof window === 'undefined') return;
+
+    const onActiveSignal = () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return;
+      }
+      if (this.activeUid) {
+        void this.writeLastActive(this.activeUid, false);
+      }
+    };
+
+    window.addEventListener('focus', onActiveSignal);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onActiveSignal);
+    }
+    this.activityTrackingBound = true;
+  }
+
+  private async writeLastActive(uid: string, force: boolean): Promise<void> {
+    const nowMs = Date.now();
+    if (
+      !force &&
+      nowMs - this.lastActiveWriteAtMs < this.minLastActiveWriteIntervalMs
+    ) {
+      return;
+    }
+
+    this.lastActiveWriteAtMs = nowMs;
+    try {
+      const touchLastActive = this.fns.httpsCallable('touchLastActive');
+      await firstValueFrom(touchLastActive({}));
+    } catch (error) {
+      console.warn('touchLastActive callable failed, using client fallback', error);
+      try {
+        await this.afs.doc<User>(`users/${uid}`).set(
+          {
+            lastActiveAt: new Date(nowMs).toISOString(),
+          } as Partial<User>,
+          { merge: true }
+        );
+      } catch (fallbackError) {
+        console.warn(
+          'Unable to persist lastActiveAt for user:',
+          uid,
+          fallbackError
+        );
+      }
     }
   }
 

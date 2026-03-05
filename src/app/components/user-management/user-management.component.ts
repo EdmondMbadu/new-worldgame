@@ -35,6 +35,7 @@ export class UserManagementComponent implements OnInit {
   allUsers: User[] = [];
   everySolution: Solution[] = [];
   private authLastSignInByUid = new Map<string, string>();
+  private authLastSignInByEmail = new Map<string, string>();
   private lastAuthSyncKey = '';
   includeBotsInList = false;
   private readonly goalIntroducedOnMs = new Date(2024, 7, 26).getTime();
@@ -352,7 +353,7 @@ export class UserManagementComponent implements OnInit {
       'Last Name',
       'Email',
       'Date Joined',
-      'Last Sign In',
+      'Last Active',
       'Goal',
       'Location',
       'Solutions Started',
@@ -365,7 +366,7 @@ export class UserManagementComponent implements OnInit {
       user.lastName,
       user.email,
       user.dateJoined,
-      this.lastSignInDisplay(user),
+      this.lastActiveDisplay(user),
       user.goal,
       user.location,
       user.tempSolutionstarted || '0', // Default to '0' if undefined
@@ -420,11 +421,14 @@ export class UserManagementComponent implements OnInit {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
-  lastSignInDisplay(user: User): string {
-    const authLastSignIn = user.uid
-      ? this.authLastSignInByUid.get(user.uid)
-      : '';
-    const ms = this.parseUserDateToMs(authLastSignIn || user.lastLogin);
+  lastActiveDisplay(user: User): string {
+    const authByUid = user.uid ? this.authLastSignInByUid.get(user.uid) : '';
+    const authByEmail = this.authLastSignInByEmail.get(
+      this.normalizeEmail(user.email)
+    );
+    const ms = this.parseUserDateToMs(
+      user.lastActiveAt || authByUid || authByEmail || user.lastLogin
+    );
     if (!ms) return 'Never';
     return new Date(ms).toLocaleDateString('en-US', {
       month: '2-digit',
@@ -437,32 +441,42 @@ export class UserManagementComponent implements OnInit {
     const uids = this.allUsers
       .map((u) => (u.uid || '').trim())
       .filter((uid) => uid.length > 0);
-    if (!uids.length) {
+    const emails = this.allUsers
+      .map((u) => this.normalizeEmail(u.email))
+      .filter((email) => email.length > 0);
+
+    if (!uids.length && !emails.length) {
       this.authLastSignInByUid.clear();
+      this.authLastSignInByEmail.clear();
       this.lastAuthSyncKey = '';
       return;
     }
 
-    const syncKey = [...uids].sort().join('|');
+    const syncKey = [...uids].sort().join('|') + '::' + [...emails].sort().join('|');
     if (syncKey === this.lastAuthSyncKey) return;
     this.lastAuthSyncKey = syncKey;
 
     try {
-      const getAuthLastSignInMap = this.fns.httpsCallable(
-        'getAuthLastSignInMap'
-      );
-      const result: any = await firstValueFrom(getAuthLastSignInMap({ uids }));
-      const lastSignInByUid = result?.lastSignInByUid || {};
+      const callable = this.fns.httpsCallable('getAuthLastSignInMap');
+      const result: any = await firstValueFrom(callable({ uids, emails }));
+      const byUid = result?.lastSignInByUid || {};
+      const byEmail = result?.lastSignInByEmail || {};
 
       this.authLastSignInByUid.clear();
-      for (const [uid, value] of Object.entries(lastSignInByUid)) {
-        const lastSignIn = String(value || '').trim();
-        if (lastSignIn) {
-          this.authLastSignInByUid.set(uid, lastSignIn);
+      for (const [uid, value] of Object.entries(byUid)) {
+        const normalized = String(value || '').trim();
+        if (normalized) this.authLastSignInByUid.set(uid, normalized);
+      }
+
+      this.authLastSignInByEmail.clear();
+      for (const [email, value] of Object.entries(byEmail)) {
+        const normalized = String(value || '').trim();
+        if (normalized) {
+          this.authLastSignInByEmail.set(this.normalizeEmail(email), normalized);
         }
       }
     } catch (error) {
-      console.warn('Unable to load last sign-in times from Firebase Auth', error);
+      console.warn('Unable to load Firebase Auth sign-in metadata', error);
     }
   }
 
