@@ -722,8 +722,7 @@ export class UserManagementComponent implements OnInit {
     const toDate = this.formatDateMDY(m.nowMs);
     const activeDeltaColor = m.weeklyActiveIncreasePct >= 0 ? '#059669' : '#dc2626';
     const signupDeltaColor = m.weeklySignupIncreasePct >= 0 ? '#059669' : '#dc2626';
-    const logoUrl =
-      'https://firebasestorage.googleapis.com/v0/b/buckminister-backup.appspot.com/o/nwg-logo-green.png?alt=media';
+    const logoUrl = 'https://newworld-game.org/assets/img/earth-triangle-test.png';
 
     return `
       <div style="margin:0;padding:0;background:#f1f5f9;font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;">
