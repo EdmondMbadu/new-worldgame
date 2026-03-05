@@ -669,6 +669,23 @@ export class UserManagementComponent implements OnInit {
       const joinedMs = this.data.parseDateMMDDYYYY(u.dateJoined);
       return joinedMs >= previousWeekStartMs && joinedMs < weekStartMs;
     }).length;
+    const realUserEmailSet = new Set(
+      realUsers
+        .map((u) => this.normalizeEmail(u.email))
+        .filter((email) => email.length > 0)
+    );
+    const totalOpenSolutions = this.everySolution.filter((sol) => {
+      if ((sol as any).finished === 'true') return false;
+      const participantEmails = this.normalizeParticipantEmails(
+        (sol as any).participants
+      );
+      const authorEmail = this.normalizeEmail((sol as any).authorEmail || '');
+      const ownerEmail = this.normalizeEmail((sol as any).ownerEmail || '');
+      return [...participantEmails, authorEmail, ownerEmail].some(
+        (email) => email && realUserEmailSet.has(email)
+      );
+    }).length;
+
     const weeklyActiveRate =
       totalRealUsers > 0
         ? Math.round((weeklyActiveUsers / totalRealUsers) * 100)
@@ -686,6 +703,7 @@ export class UserManagementComponent implements OnInit {
       totalRealUsers,
       weeklyActiveUsers,
       weeklyNewSignups,
+      totalOpenSolutions,
       weeklyActiveRate,
       previousWeeklyActiveUsers,
       previousWeeklyNewSignups,
@@ -702,45 +720,104 @@ export class UserManagementComponent implements OnInit {
     const generatedAt = this.formatDateMDY(m.nowMs);
     const fromDate = this.formatDateMDY(m.windowStartMs);
     const toDate = this.formatDateMDY(m.nowMs);
-    const author = `${this.auth.currentUser.firstName || ''} ${
-      this.auth.currentUser.lastName || ''
-    }`.trim();
+    const activeDeltaColor = m.weeklyActiveIncreasePct >= 0 ? '#059669' : '#dc2626';
+    const signupDeltaColor = m.weeklySignupIncreasePct >= 0 ? '#059669' : '#dc2626';
+    const logoUrl =
+      'https://firebasestorage.googleapis.com/v0/b/buckminister-backup.appspot.com/o/nwg-logo-green.png?alt=media';
 
     return `
-      <div style="font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;color:#0f172a;line-height:1.5">
-        <h2 style="margin:0 0 8px;font-size:20px;">Weekly Activity Report</h2>
-        <p style="margin:0 0 14px;color:#475569;font-size:13px;">
-          Reporting window: <strong>${fromDate}</strong> to <strong>${toDate}</strong>
-        </p>
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0 10px;">
+      <div style="margin:0;padding:0;background:#f1f5f9;font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 0;">
           <tr>
-            <td style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
-              <div style="font-size:12px;color:#475569;">Total Real Users</div>
-              <div style="font-size:24px;font-weight:700;">${m.totalRealUsers}</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
-              <div style="font-size:12px;color:#475569;">Weekly Active Users</div>
-              <div style="font-size:24px;font-weight:700;">${m.weeklyActiveUsers}</div>
-              <div style="font-size:12px;color:#0f766e;">${m.weeklyActiveRate}% of real users • ${this.percentLabel(
+            <td align="center">
+              <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;">
+                <tr>
+                  <td align="center" style="padding:0 20px 16px;">
+                    <img src="${logoUrl}" alt="NewWorld Game" width="176" style="display:block;width:176px;max-width:176px;height:auto;">
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background:#ffffff;border:1px solid #dbe3ef;border-radius:16px;overflow:hidden;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:12px 24px;background:linear-gradient(90deg,#0f766e 0%,#0ea5a3 100%);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#ecfeff;font-weight:700;">
+                          Weekly Activity Report
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:22px 24px 8px;">
+                          <h2 style="margin:0;color:#0f172a;font-size:24px;line-height:1.2;font-weight:800;">NewWorld Game Community Snapshot</h2>
+                          <p style="margin:8px 0 0;color:#475569;font-size:13px;">
+                            Reporting window: <strong>${fromDate}</strong> to <strong>${toDate}</strong>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:0 16px 6px;">
+                      <tr>
+                        <td width="50%" style="padding:8px;">
+                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
+                            <div style="font-size:12px;color:#64748b;">Total Real Users</div>
+                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.totalRealUsers}</div>
+                          </div>
+                        </td>
+                        <td width="50%" style="padding:8px;">
+                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
+                            <div style="font-size:12px;color:#64748b;">Total Open Solutions</div>
+                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.totalOpenSolutions}</div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="50%" style="padding:8px;">
+                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
+                            <div style="font-size:12px;color:#64748b;">Weekly Active Users</div>
+                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyActiveUsers}</div>
+                            <div style="font-size:12px;color:${activeDeltaColor};font-weight:700;margin-top:4px;">
+                              ${m.weeklyActiveRate}% active • ${this.percentLabel(
       m.weeklyActiveIncreasePct
-    )} vs previous week</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
-              <div style="font-size:12px;color:#475569;">New Signups (This Week)</div>
-              <div style="font-size:24px;font-weight:700;">${m.weeklyNewSignups}</div>
-              <div style="font-size:12px;color:#0f766e;">${this.percentLabel(
-      m.weeklySignupIncreasePct
-    )} vs previous week</div>
+    )} vs prev week
+                            </div>
+                          </div>
+                        </td>
+                        <td width="50%" style="padding:8px;">
+                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
+                            <div style="font-size:12px;color:#64748b;">New Signups (7 Days)</div>
+                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyNewSignups}</div>
+                            <div style="font-size:12px;color:${signupDeltaColor};font-weight:700;margin-top:4px;">
+                              ${this.percentLabel(m.weeklySignupIncreasePct)} vs prev week
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:12px 24px 20px;">
+                          <a href="https://newworld-game.org/user-management" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;">
+                            Open NewWorld Game Admin
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="border-top:1px solid #e2e8f0;padding:12px 24px;background:#f8fafc;font-size:12px;color:#64748b;">
+                          Sent by <strong style="color:#0f172a;">NewWorld Game</strong> •
+                          <a href="https://newworld-game.org" style="color:#0f766e;text-decoration:none;">newworld-game.org</a><br>
+                          Generated on ${generatedAt}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
         </table>
-        <p style="margin:14px 0 0;color:#64748b;font-size:12px;">
-          Generated on ${generatedAt}${author ? ` by ${author}` : ''}.
-        </p>
       </div>
     `;
   }
@@ -791,6 +868,7 @@ export class UserManagementComponent implements OnInit {
           title: 'Weekly Activity Report',
           subject: this.weeklyActivitySubject,
           preheader: 'NewWorld Game weekly activity summary',
+          from: 'newworld@newworld-game.org',
           recipients,
           html: this.weeklyActivityPreviewHtml,
         })
