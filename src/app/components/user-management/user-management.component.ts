@@ -34,6 +34,8 @@ export class UserManagementComponent implements OnInit {
   userUnfinishedSolutions: Solution[] = [];
   allUsers: User[] = [];
   everySolution: Solution[] = [];
+  private authLastSignInByUid = new Map<string, string>();
+  private lastAuthSyncKey = '';
   includeBotsInList = false;
   private readonly goalIntroducedOnMs = new Date(2024, 7, 26).getTime();
 
@@ -154,6 +156,8 @@ export class UserManagementComponent implements OnInit {
         const dateB = this.data.parseDateMMDDYYYY(b.dateJoined!);
         return dateB - dateA; // descending
       });
+
+      void this.loadAuthLastSignIns();
 
       // Build directory: email -> {name,email}
       this.userDirectory.clear();
@@ -348,6 +352,7 @@ export class UserManagementComponent implements OnInit {
       'Last Name',
       'Email',
       'Date Joined',
+      'Last Sign In',
       'Goal',
       'Location',
       'Solutions Started',
@@ -360,6 +365,7 @@ export class UserManagementComponent implements OnInit {
       user.lastName,
       user.email,
       user.dateJoined,
+      this.lastSignInDisplay(user),
       user.goal,
       user.location,
       user.tempSolutionstarted || '0', // Default to '0' if undefined
@@ -402,6 +408,62 @@ export class UserManagementComponent implements OnInit {
     const started = this.asNum(u?.tempSolutionstarted);
     const submitted = this.asNum(u?.tempSolutionSubmitted);
     return Math.max(0, started - submitted);
+  }
+
+  private parseUserDateToMs(raw: unknown): number {
+    if (!raw) return 0;
+    if (raw instanceof Date) return raw.getTime();
+    if (typeof (raw as any)?.toDate === 'function') {
+      return (raw as any).toDate().getTime();
+    }
+    const parsed = Date.parse(String(raw));
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  lastSignInDisplay(user: User): string {
+    const authLastSignIn = user.uid
+      ? this.authLastSignInByUid.get(user.uid)
+      : '';
+    const ms = this.parseUserDateToMs(authLastSignIn || user.lastLogin);
+    if (!ms) return 'Never';
+    return new Date(ms).toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  private async loadAuthLastSignIns(): Promise<void> {
+    const uids = this.allUsers
+      .map((u) => (u.uid || '').trim())
+      .filter((uid) => uid.length > 0);
+    if (!uids.length) {
+      this.authLastSignInByUid.clear();
+      this.lastAuthSyncKey = '';
+      return;
+    }
+
+    const syncKey = [...uids].sort().join('|');
+    if (syncKey === this.lastAuthSyncKey) return;
+    this.lastAuthSyncKey = syncKey;
+
+    try {
+      const getAuthLastSignInMap = this.fns.httpsCallable(
+        'getAuthLastSignInMap'
+      );
+      const result: any = await firstValueFrom(getAuthLastSignInMap({ uids }));
+      const lastSignInByUid = result?.lastSignInByUid || {};
+
+      this.authLastSignInByUid.clear();
+      for (const [uid, value] of Object.entries(lastSignInByUid)) {
+        const lastSignIn = String(value || '').trim();
+        if (lastSignIn) {
+          this.authLastSignInByUid.set(uid, lastSignIn);
+        }
+      }
+    } catch (error) {
+      console.warn('Unable to load last sign-in times from Firebase Auth', error);
+    }
   }
 
   // ===== Dashboard Stats =====

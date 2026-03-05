@@ -1007,6 +1007,7 @@
                 <th scope="col" class="px-4 py-3">Goal</th>
                 <th scope="col" class="px-4 py-3">Location</th>
                 <th scope="col" class="px-4 py-3">Date Joined</th>
+                <th scope="col" class="px-4 py-3">Last Sign In</th>
 
                 <th scope="col" class="px-4 py-3"># Solution Started</th>
                 <th scope="col" class="px-4 py-3"># Solution Submitted</th>
@@ -1054,6 +1055,7 @@
                   <td class="px-4 py-3">{{ user.goal }}</td>
                   <td class="px-4 py-3">{{ user.location }}</td>
                   <td class="px-4 py-3">{{ user.dateJoined }}</td>
+                  <td class="px-4 py-3">{{ lastSignInDisplay(user) }}</td>
                   <td class="px-4 py-3">{{ user.tempSolutionstarted }}</td>
                   <td class="px-4 py-3">{{ user.tempSolutionSubmitted }}</td>
                   <td class="px-4 py-3">
@@ -1130,7 +1132,7 @@
 
                 <!-- Expanded solutions row -->
                 <tr *ngIf="showSolutions[i]">
-                  <td colspan="8" class="bg-slate-50 dark:bg-slate-900/60 p-4">
+                  <td colspan="10" class="bg-slate-50 dark:bg-slate-900/60 p-4">
                     <div
                       class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
                     >

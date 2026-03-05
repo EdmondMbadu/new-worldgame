@@ -196,6 +196,69 @@ export const weeklyReminder = functions.https.onCall(
   }
 );
 
+export const getAuthLastSignInMap = functions
+  .runWith({ timeoutSeconds: 120, memory: '512MB' })
+  .https.onCall(async (data: any, context: functions.https.CallableContext) => {
+    if (!context.auth?.uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required.'
+      );
+    }
+
+    const requesterSnap = await admin
+      .firestore()
+      .doc(`users/${context.auth.uid}`)
+      .get();
+    const requester = requesterSnap.data() as any;
+    const role = String(requester?.role || '').toLowerCase();
+    const isAdmin = requester?.admin === 'true' || role === 'admin';
+
+    if (!isAdmin) {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Only admins can access auth metadata.'
+      );
+    }
+
+    const requestedUids = Array.isArray(data?.uids)
+      ? data.uids
+          .map((uid: unknown) => String(uid || '').trim())
+          .filter((uid: string) => uid.length > 0)
+      : [];
+    const uidSet = new Set<string>(requestedUids);
+    const lastSignInByUid: Record<string, string> = {};
+
+    let pageToken: string | undefined = undefined;
+    do {
+      const page = await admin.auth().listUsers(1000, pageToken);
+      for (const userRecord of page.users) {
+        if (uidSet.size > 0 && !uidSet.has(userRecord.uid)) continue;
+
+        const rawLastSignIn = userRecord.metadata?.lastSignInTime || '';
+        if (!rawLastSignIn) {
+          lastSignInByUid[userRecord.uid] = '';
+          continue;
+        }
+
+        const parsedMs = Date.parse(rawLastSignIn);
+        lastSignInByUid[userRecord.uid] = Number.isFinite(parsedMs)
+          ? new Date(parsedMs).toISOString()
+          : rawLastSignIn;
+      }
+
+      pageToken = page.pageToken;
+      if (
+        uidSet.size > 0 &&
+        Object.keys(lastSignInByUid).length >= uidSet.size
+      ) {
+        break;
+      }
+    } while (pageToken);
+
+    return { lastSignInByUid };
+  });
+
 type AIInsightsPayload = {
   userEmail: string;
   userFirstName: string;

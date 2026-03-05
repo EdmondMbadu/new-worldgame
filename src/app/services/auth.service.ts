@@ -627,6 +627,7 @@ export class AuthService {
       email,
       password
     );
+    await this.updateLastLogin(cred.user ?? null);
     return cred.user!.uid;
   }
 
@@ -668,6 +669,8 @@ export class AuthService {
       return;
     }
 
+    await this.updateLastLogin(user);
+
     const providerIds = user.providerData
       .map((p) => p?.providerId)
       .filter((id): id is string => !!id);
@@ -690,6 +693,25 @@ export class AuthService {
     const data = snap.data();
     if (!data?.verified) {
       await userRef.set({ verified: true } as Partial<User>, { merge: true });
+    }
+  }
+
+  private async updateLastLogin(user: firebase.User | null): Promise<void> {
+    if (!user?.uid) return;
+    const lastSignInTime = user.metadata?.lastSignInTime;
+    const parsedMs = lastSignInTime ? Date.parse(lastSignInTime) : NaN;
+    const iso = Number.isFinite(parsedMs)
+      ? new Date(parsedMs).toISOString()
+      : new Date().toISOString();
+    try {
+      await this.afs.doc<User>(`users/${user.uid}`).set(
+        {
+          lastLogin: iso,
+        } as Partial<User>,
+        { merge: true }
+      );
+    } catch (error) {
+      console.warn('Unable to persist lastLogin for user:', user.uid, error);
     }
   }
 
