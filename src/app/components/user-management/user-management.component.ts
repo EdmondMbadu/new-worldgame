@@ -98,6 +98,13 @@ export class UserManagementComponent implements OnInit {
   filteredAIInsightsUsers: { user: User; solutions: Solution[] }[] = [];
   filteredAIInsightsSolutions: Solution[] = [];
   showBriefSendLog = false;
+  weeklyActivityOpen = false;
+  weeklyActivitySending = false;
+  weeklyActivitySent = false;
+  weeklyActivityError = '';
+  weeklyActivitySubject = '';
+  weeklyActivityPreviewHtml = '';
+  private readonly weeklyActivityWindowDays = 7;
 
   // UI toggle: default = respect unsubscribes (do NOT send to them)
   disregardUnsubs = false;
@@ -112,6 +119,14 @@ export class UserManagementComponent implements OnInit {
   // Convenience
   isUnsubscribed(email?: string | null): boolean {
     return email ? this.unsubSet.has(this.normalizeEmail(email)) : false;
+  }
+
+  private formatDateMDY(ms: number): string {
+    return new Date(ms).toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    });
   }
 
   private userDirectory = new Map<string, { name: string; email: string }>();
@@ -605,6 +620,192 @@ export class UserManagementComponent implements OnInit {
 
   closeReminderModal() {
     this.reminderOpen = false;
+  }
+
+  get selectedRecipientEmails(): string[] {
+    return this.allUsers
+      .map((u) => this.normalizeEmail(u.email))
+      .filter((email) => email && this.selected.has(email));
+  }
+
+  private userActivityMs(user: User): number {
+    const authByUid = user.uid ? this.authLastSignInByUid.get(user.uid) : '';
+    const authByEmail = this.authLastSignInByEmail.get(
+      this.normalizeEmail(user.email)
+    );
+    return this.parseUserDateToMs(
+      user.lastActiveAt || authByUid || authByEmail || user.lastLogin
+    );
+  }
+
+  private percentChange(current: number, previous: number): number {
+    if (previous <= 0) return current > 0 ? 100 : 0;
+    return Math.round(((current - previous) / previous) * 100);
+  }
+
+  percentLabel(value: number): string {
+    return `${value > 0 ? '+' : ''}${value}%`;
+  }
+
+  get weeklyActivityMetrics() {
+    const nowMs = Date.now();
+    const weekMs = this.weeklyActivityWindowDays * 24 * 60 * 60 * 1000;
+    const weekStartMs =
+      nowMs - weekMs;
+    const previousWeekStartMs = weekStartMs - weekMs;
+    const realUsers = this.allUsers.filter((u) => !this.isLikelyBot(u));
+    const totalRealUsers = realUsers.length;
+    const weeklyActiveUsers = realUsers.filter(
+      (u) => this.userActivityMs(u) >= weekStartMs
+    ).length;
+    const previousWeeklyActiveUsers = realUsers.filter((u) => {
+      const activeMs = this.userActivityMs(u);
+      return activeMs >= previousWeekStartMs && activeMs < weekStartMs;
+    }).length;
+    const weeklyNewSignups = realUsers.filter(
+      (u) => this.data.parseDateMMDDYYYY(u.dateJoined) >= weekStartMs
+    ).length;
+    const previousWeeklyNewSignups = realUsers.filter((u) => {
+      const joinedMs = this.data.parseDateMMDDYYYY(u.dateJoined);
+      return joinedMs >= previousWeekStartMs && joinedMs < weekStartMs;
+    }).length;
+    const weeklyActiveRate =
+      totalRealUsers > 0
+        ? Math.round((weeklyActiveUsers / totalRealUsers) * 100)
+        : 0;
+    const weeklyActiveIncreasePct = this.percentChange(
+      weeklyActiveUsers,
+      previousWeeklyActiveUsers
+    );
+    const weeklySignupIncreasePct = this.percentChange(
+      weeklyNewSignups,
+      previousWeeklyNewSignups
+    );
+
+    return {
+      totalRealUsers,
+      weeklyActiveUsers,
+      weeklyNewSignups,
+      weeklyActiveRate,
+      previousWeeklyActiveUsers,
+      previousWeeklyNewSignups,
+      weeklyActiveIncreasePct,
+      weeklySignupIncreasePct,
+      windowStartMs: weekStartMs,
+      previousWeekStartMs,
+      nowMs,
+    };
+  }
+
+  private buildWeeklyActivityReportHtml(): string {
+    const m = this.weeklyActivityMetrics;
+    const generatedAt = this.formatDateMDY(m.nowMs);
+    const fromDate = this.formatDateMDY(m.windowStartMs);
+    const toDate = this.formatDateMDY(m.nowMs);
+    const author = `${this.auth.currentUser.firstName || ''} ${
+      this.auth.currentUser.lastName || ''
+    }`.trim();
+
+    return `
+      <div style="font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;color:#0f172a;line-height:1.5">
+        <h2 style="margin:0 0 8px;font-size:20px;">Weekly Activity Report</h2>
+        <p style="margin:0 0 14px;color:#475569;font-size:13px;">
+          Reporting window: <strong>${fromDate}</strong> to <strong>${toDate}</strong>
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0 10px;">
+          <tr>
+            <td style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
+              <div style="font-size:12px;color:#475569;">Total Real Users</div>
+              <div style="font-size:24px;font-weight:700;">${m.totalRealUsers}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
+              <div style="font-size:12px;color:#475569;">Weekly Active Users</div>
+              <div style="font-size:24px;font-weight:700;">${m.weeklyActiveUsers}</div>
+              <div style="font-size:12px;color:#0f766e;">${m.weeklyActiveRate}% of real users • ${this.percentLabel(
+      m.weeklyActiveIncreasePct
+    )} vs previous week</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
+              <div style="font-size:12px;color:#475569;">New Signups (This Week)</div>
+              <div style="font-size:24px;font-weight:700;">${m.weeklyNewSignups}</div>
+              <div style="font-size:12px;color:#0f766e;">${this.percentLabel(
+      m.weeklySignupIncreasePct
+    )} vs previous week</div>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:14px 0 0;color:#64748b;font-size:12px;">
+          Generated on ${generatedAt}${author ? ` by ${author}` : ''}.
+        </p>
+      </div>
+    `;
+  }
+
+  openWeeklyActivityModal() {
+    if (!this.selectedRecipientEmails.length) {
+      alert('Select at least one recipient first.');
+      return;
+    }
+    const end = this.formatDateMDY(Date.now());
+    this.weeklyActivitySubject = `Weekly Activity Report • ${end}`;
+    this.weeklyActivityPreviewHtml = this.buildWeeklyActivityReportHtml();
+    this.weeklyActivityError = '';
+    this.weeklyActivitySent = false;
+    this.weeklyActivityOpen = true;
+  }
+
+  closeWeeklyActivityModal() {
+    this.weeklyActivityOpen = false;
+  }
+
+  regenerateWeeklyActivityReport() {
+    this.weeklyActivityPreviewHtml = this.buildWeeklyActivityReportHtml();
+    this.weeklyActivitySent = false;
+    this.weeklyActivityError = '';
+  }
+
+  async sendWeeklyActivityReport() {
+    if (this.weeklyActivitySending) return;
+    const recipients = this.selectedRecipientEmails;
+    if (!recipients.length) {
+      this.weeklyActivityError = 'No selected recipients.';
+      return;
+    }
+
+    this.weeklyActivitySending = true;
+    this.weeklyActivitySent = false;
+    this.weeklyActivityError = '';
+
+    try {
+      if (!this.weeklyActivityPreviewHtml) {
+        this.regenerateWeeklyActivityReport();
+      }
+
+      const sendBulkHtml = this.fns.httpsCallable('sendBulkHtml');
+      await firstValueFrom(
+        sendBulkHtml({
+          title: 'Weekly Activity Report',
+          subject: this.weeklyActivitySubject,
+          preheader: 'NewWorld Game weekly activity summary',
+          recipients,
+          html: this.weeklyActivityPreviewHtml,
+        })
+      );
+
+      this.weeklyActivitySent = true;
+      alert(`Weekly activity report sent to ${recipients.length} recipient(s).`);
+      this.closeWeeklyActivityModal();
+    } catch (error: any) {
+      console.error('weekly activity send error', error);
+      this.weeklyActivityError =
+        error?.message || 'Failed to send weekly activity report.';
+    } finally {
+      this.weeklyActivitySending = false;
+    }
   }
 
   // Small helper: nice first name

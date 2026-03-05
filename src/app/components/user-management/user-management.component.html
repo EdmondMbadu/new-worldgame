@@ -969,7 +969,7 @@
                 </div>
 
                 <!-- Right: Actions -->
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2 justify-end">
                   <button
                     type="button"
                     (click)="openReminderModal('selected')"
@@ -995,6 +995,15 @@
                       />
                     </svg>
                     Send Weekly Reminder
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="openWeeklyActivityModal()"
+                    class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+                    [disabled]="selected.size === 0"
+                  >
+                    Generate Weekly Activity Email
                   </button>
 
                   <button
@@ -1315,6 +1324,122 @@
       </div>
     </div>
   </section>
+</div>
+
+<!-- Weekly Activity Report Modal -->
+<div
+  *ngIf="weeklyActivityOpen"
+  class="fixed inset-0 z-[210] flex items-center justify-center p-4 sm:p-6 dark:text-white"
+>
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="weeklyActivityTitle"
+    class="relative w-full max-w-3xl rounded-2xl shadow-2xl bg-white dark:bg-slate-900 ring-1 ring-black/5 dark:ring-white/10"
+  >
+    <div class="flex items-center justify-between px-5 py-4 border-b dark:border-slate-800">
+      <div>
+        <h3
+          id="weeklyActivityTitle"
+          class="text-lg font-semibold text-slate-900 dark:text-white"
+        >
+          Weekly Activity Report
+        </h3>
+        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+          Generate and send to selected recipients.
+        </p>
+      </div>
+      <button
+        (click)="closeWeeklyActivityModal()"
+        class="rounded-full p-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+        aria-label="Close"
+      >
+        <svg class="h-5 w-5 text-slate-500 dark:text-slate-300" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="px-5 py-5 space-y-4">
+      <div class="text-sm text-slate-600 dark:text-slate-300">
+        Recipients: <strong>{{ selectedRecipientEmails.length }}</strong>
+      </div>
+
+      <label class="block">
+        <span class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+          Email subject
+        </span>
+        <input
+          [(ngModel)]="weeklyActivitySubject"
+          class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/60"
+        />
+      </label>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+          <p class="text-xs text-slate-500">Total Real Users</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ weeklyActivityMetrics.totalRealUsers }}</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+          <p class="text-xs text-slate-500">Weekly Active Users</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ weeklyActivityMetrics.weeklyActiveUsers }}</p>
+          <p class="text-xs text-emerald-600">
+            {{ weeklyActivityMetrics.weeklyActiveRate }}% active •
+            {{ percentLabel(weeklyActivityMetrics.weeklyActiveIncreasePct) }} vs prev week
+          </p>
+        </div>
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+          <p class="text-xs text-slate-500">New Signups (7 days)</p>
+          <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ weeklyActivityMetrics.weeklyNewSignups }}</p>
+          <p class="text-xs text-emerald-600">
+            {{ percentLabel(weeklyActivityMetrics.weeklySignupIncreasePct) }} vs prev week
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Window: {{ formatLogTimestamp(weeklyActivityMetrics.windowStartMs) }} to {{ formatLogTimestamp(weeklyActivityMetrics.nowMs) }}
+        </p>
+        <button
+          type="button"
+          (click)="regenerateWeeklyActivityReport()"
+          class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+        >
+          Generate / Refresh
+        </button>
+      </div>
+
+      <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 p-4 max-h-72 overflow-y-auto">
+        <div [innerHTML]="weeklyActivityPreviewHtml"></div>
+      </div>
+
+      <p *ngIf="weeklyActivityError" class="text-sm text-rose-600">
+        {{ weeklyActivityError }}
+      </p>
+      <p *ngIf="weeklyActivitySent" class="text-sm text-emerald-600">
+        Weekly activity report sent.
+      </p>
+    </div>
+
+    <div class="flex items-center justify-end gap-2 px-5 py-4 border-t dark:border-slate-800">
+      <button
+        (click)="closeWeeklyActivityModal()"
+        class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="sendWeeklyActivityReport()"
+        class="rounded-xl bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+        [disabled]="weeklyActivitySending || selectedRecipientEmails.length === 0"
+      >
+        {{ weeklyActivitySending ? "Sending…" : "Send report" }}
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Compose / Weekly Reminder Modal -->
