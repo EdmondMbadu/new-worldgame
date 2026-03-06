@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-global-lab',
@@ -6,12 +7,41 @@ import { Component, OnInit } from '@angular/core';
   styleUrl: './global-lab.component.css',
 })
 export class GlobalLabComponent implements OnInit {
+  constructor(private sanitizer: DomSanitizer) {}
+
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }
 
   videoPlaying = false;
+  loadedVideoIds: Record<string, boolean> = {};
   reachOutVisa: string = 'info@1earthgame.org';
+  videoCards: VideoCard[] = [
+    {
+      id: 'differentiation',
+      src: 'https://app.heygen.com/embeds/968bdd6e41df46d2b759fef5caabe0d3',
+      title: 'Global Solutions Lab - Differentiation',
+      label: 'Featured Overview',
+      heading: 'What Sets This Lab Apart',
+      description: 'Discover what makes the Global Solutions Lab a uniquely powerful and transformative experience.',
+    },
+    {
+      id: 'promo',
+      src: 'https://app.heygen.com/embeds/625a1fb51b704c7796b455de9cdb2970',
+      title: 'Global Solutions Lab Promo',
+      label: 'Lab Promo',
+      heading: 'An Introduction to 2026',
+      description: 'Get an overview of the Lab\'s vision, community, and what you will take away from the experience.',
+    },
+    {
+      id: 'mission',
+      src: 'https://app.heygen.com/embeds/f6e00c1aab4d4135bf51dfb9e4d314e0',
+      title: 'Global Solutions Lab - Choose Your Mission',
+      label: 'Choose Your Mission',
+      heading: 'Find Your Focus Area',
+      description: 'Explore the global challenges on offer and choose the mission that aligns with your passion.',
+    },
+  ];
 
   aiOptions: Team[] = [
     {
@@ -55,6 +85,14 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       description: `I’m Tane, grounded in Māori knowledge and New Zealand’s deep respect for nature. I take a holistic view of every challenge, helping players design solutions that protect ecosystems—on land (SDG 15) and under water (SDG 14). `,
     },
   ];
+
+  playGalleryVideo(id: string): void {
+    this.loadedVideoIds[id] = true;
+  }
+
+  trustedVideoUrl(src: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(src);
+  }
 }
 
 interface Team {
@@ -64,4 +102,13 @@ interface Team {
   profilePicPath?: string;
   twitter?: string;
   github?: string;
+}
+
+interface VideoCard {
+  id: string;
+  src: string;
+  title: string;
+  label: string;
+  heading: string;
+  description: string;
 }
