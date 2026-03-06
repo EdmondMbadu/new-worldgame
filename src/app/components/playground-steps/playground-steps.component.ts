@@ -185,18 +185,18 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
         [
           `What is the problem you have chosen and why is it important? 
 (Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
-          `What are the symptoms of this problem? How do you measure it? (Answer these 2 questions first from your personal knowledge. Then Ask Bucky-- after these questions, ask Bucky or answer from your knowledge: What are the causes of these symptoms? This provides deeper insight into the problem.)`,
+          `What are the symptoms of this problem? How do you measure it? (Answer these 2 questions first from your personal knowledge. Then Ask Bucky or answer from your knowledge: What are the causes of these symptoms? What underlying systems produce this outcome? What economic, social, technological, environmental, or cultural drivers are involved? Who are the major actors, organizations, agencies, or people involved with the problem? These additional questions can provide deeper insight into the problem.)`,
           `How many people does this problem impact in the world? Where is it most severe? (If you don't know, ask Bucky, or use the data sources provided when you click on the "?" .)`,
-          `What will happen if nothing is done to deal with this problem? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
+          `What will happen if nothing is done to deal with this problem? (Answer this first from your personal knowledge. Then Ask Bucky: "Who will bear the cost if nothing is done?")`,
         ],
         [
-          `What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved? (Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
+          `What is the preferred or ideal state that you want to reach with your solution? What is your goal? What will the world look like if this problem is solved? What will your ideal state look like in terms of equity and sustainability? (Answer these questions first from your personal knowledge. Then Ask Bucky.)`,
           `How will you measure success? How will you know when you reach the preferred state? (Answer this first from your personal knowledge. Then Ask Bucky.)`,
         ],
         [
-          "What does our solution do to reach the preferred state? How will it do it? (If you don't have a solution, check the Solutions Library to get some ideas, and/or Ask Bucky what he thinks is a solution that will get you from the Problem to the Preferred state.)",
+          "What are some possible solutions? Think of 3 or more. Can they be combined? What is our solution to the problem? What does it do to reach the preferred state? How will it do it? What are the leverage points, where could small changes produce large effects? (If you don't have a solution, ask your teammates for their ideas. If you don't have teammates, check the Solutions Library to get some ideas, and/or Ask Bucky what he thinks is a solution that will get you from the Problem to the Preferred State.)",
           'What technology, programs, policies will it need?',
-          'What resources does our solution need?',
+          'What resources does our solution need? Will it need community buy-in? If so, how will you get it?',
           'Is there a business opportunity in the solution? Is it possible to meet need/solve the problem through a business? If so, what is this business? What will it do or sell? (If this question is not relevant to your solution, ignore it.)',
           'How is our solution part of a circular, regenerative, more equitable economy?',
         ],
