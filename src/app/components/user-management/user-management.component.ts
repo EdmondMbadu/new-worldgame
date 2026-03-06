@@ -312,6 +312,10 @@ export class UserManagementComponent implements OnInit {
     );
   }
 
+  private hasSolutionActivity(user: User): boolean {
+    return !this.hasNoActivity(user);
+  }
+
   private isAdminUser(user: User): boolean {
     const role = (user.role || '').trim().toLowerCase();
     const adminFlag = (user.admin || '').trim().toLowerCase();
@@ -322,6 +326,7 @@ export class UserManagementComponent implements OnInit {
 
   isLikelyBot(user: User): boolean {
     if (this.hasGoal(user)) return false;
+    if (this.hasSolutionActivity(user)) return false;
 
     if (this.hasNoActivity(user) && this.hasSuspiciousNameFormat(user)) {
       return true;
