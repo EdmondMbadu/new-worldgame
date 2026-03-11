@@ -119,6 +119,10 @@ const TEMPLATE_ID_EVALUTION =
   functions.config()['sendgrid'].templatesolutionevaluationinvite;
 const TEMPLATE_ID_EVALUATION_COMPLETE =
   functions.config()['sendgrid'].templateevaluationcomplete;
+const GSL_2026_DATE_RANGE = 'June 15-24, 2026';
+const GSL_2026_CONTACT_EMAIL = 'info@newworld-game.org';
+const GSL_2026_CONFIRMATION_SUBJECT =
+  'Thanks for registering for the Global Solutions Lab 2026';
 sgMail.setApiKey(API_KEY);
 const TEMPLATE_DEMO = functions.config()['sendgrid'].templatenwgdemo;
 
@@ -3605,8 +3609,7 @@ export const stripeWebhook2 = functions.https.onRequest(
           firstName,
           lastName,
           email,
-          // any dynamic data the template might require
-          subject: 'Thanks for registering & paying for the GSL 2025!',
+          subject: GSL_2026_CONFIRMATION_SUBJECT,
         });
 
         // B) Email the admins
@@ -3629,6 +3632,7 @@ export const stripeWebhook2 = functions.https.onRequest(
           targetGroup: targetGroup,
           labMode,
           letterOfInvitation,
+          subject: 'New GSL 2026 Registration (Paid)',
         };
         // Admins: you said you want to email 4 addresses. We can just call
         // the function 4 times with a different "to" each time, or you can
@@ -3986,16 +3990,84 @@ export const getCheckoutStatus = functions.https.onCall(
   }
 );
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildGslRegistrationConfirmationEmail(data: any): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+  const displayName = fullName || 'Participant';
+  const subject =
+    (data.subject || '').toString().trim() || GSL_2026_CONFIRMATION_SUBJECT;
+
+  const html = `
+    <div style="background:#f4f7fb;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+      <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #dbe4ee;border-radius:18px;overflow:hidden;">
+        <div style="background:#0f172a;padding:20px 28px;">
+          <div style="font-size:22px;font-weight:700;color:#ffffff;">NewWorld Game</div>
+        </div>
+        <div style="padding:28px;">
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Dear ${escapeHtml(displayName)},</p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">
+            Thank you for registering for the 2026 Global Solutions Lab! We are thrilled to have you join us from ${GSL_2026_DATE_RANGE}.
+            Get ready for an exciting and transformative experience focused on shaping a sustainable future together!
+          </p>
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">
+            Stay tuned. More details will be sent your way soon. In the meantime, if you have any questions, feel free to reach out at
+            <a href="mailto:${GSL_2026_CONTACT_EMAIL}" style="color:#0f766e;text-decoration:none;">${GSL_2026_CONTACT_EMAIL}</a>.
+          </p>
+          <p style="margin:0 0 24px;font-size:16px;line-height:1.7;">
+            We can't wait to see you at GSL 2026.
+          </p>
+          <p style="margin:0;font-size:16px;line-height:1.7;">
+            Best,<br />
+            NewWorld Game Team
+          </p>
+        </div>
+      </div>
+    </div>
+  `.trim();
+
+  const text = [
+    'NewWorld Game',
+    '',
+    `Dear ${displayName},`,
+    '',
+    `Thank you for registering for the 2026 Global Solutions Lab! We are thrilled to have you join us from ${GSL_2026_DATE_RANGE}. Get ready for an exciting and transformative experience focused on shaping a sustainable future together!`,
+    '',
+    `Stay tuned. More details will be sent your way soon. In the meantime, if you have any questions, feel free to reach out at ${GSL_2026_CONTACT_EMAIL}.`,
+    '',
+    "We can't wait to see you at GSL 2026.",
+    '',
+    'Best,',
+    'NewWorld Game Team',
+  ].join('\n');
+
+  return { subject, html, text };
+}
+
 export const gslRegistrationEmail = functions.https.onCall(
   async (data: any, context: any) => {
+    const emailContent = buildGslRegistrationConfirmationEmail(data);
     const msg = {
       to: data.email,
-      from: 'newworld@newworld-game.org',
-      templateId: functions.config()['sendgrid'].template_gsl_registration,
-      dynamic_template_data: {
-        subject: data.subject,
-        username: `${data.firstName} ${data.lastName}`,
+      from: {
+        email: 'newworld@newworld-game.org',
+        name: 'NewWorld Game',
       },
+      replyTo: GSL_2026_CONTACT_EMAIL,
+      subject: emailContent.subject,
+      html: emailContent.html,
+      text: emailContent.text,
     };
 
     try {
@@ -4047,15 +4119,17 @@ export const gslAdminNotificationEmail = functions.https.onCall(
 );
 
 async function runGslRegistrationEmail(data: any) {
-  // same data structure you used in your "gslRegistrationEmail" function
+  const emailContent = buildGslRegistrationConfirmationEmail(data);
   const msg = {
     to: data.email,
-    from: 'newworld@newworld-game.org',
-    templateId: functions.config()['sendgrid'].template_gsl_registration,
-    dynamic_template_data: {
-      subject: data.subject || 'GSL Registration Confirmation',
-      username: `${data.firstName} ${data.lastName}`,
+    from: {
+      email: 'newworld@newworld-game.org',
+      name: 'NewWorld Game',
     },
+    replyTo: GSL_2026_CONTACT_EMAIL,
+    subject: emailContent.subject,
+    html: emailContent.html,
+    text: emailContent.text,
   };
   await sgMail.send(msg);
 }
@@ -4066,7 +4140,7 @@ async function runGslAdminNotificationEmail(data: any) {
     from: 'newworld@newworld-game.org',
     templateId: functions.config()['sendgrid'].template_gsl_admin,
     dynamic_template_data: {
-      subject: 'New GSL 2025 Registration (Paid)',
+      subject: data.subject || 'New GSL 2026 Registration (Paid)',
       username: `${data.firstName} ${data.lastName}`,
       email: data.email, // or data.participantEmail if you want
       organization: data.organization || 'N/A',

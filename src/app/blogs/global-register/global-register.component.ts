@@ -266,7 +266,7 @@ export class GlobalRegisterComponent implements OnInit {
             email: this.email,
             firstName: this.firstName,
             lastName: this.lastName,
-            subject: 'Thanks for registering for GSL 2026 (Pay Later)',
+            subject: 'Thanks for registering for the Global Solutions Lab 2026',
           })
           .subscribe(() => {
             console.log('User email sent');
