@@ -102,6 +102,7 @@ export class UserManagementComponent implements OnInit {
   solutionEditEndDate = '';
   solutionStepSearchTerm = '';
   solutionCurrentStepFilter: SolutionCurrentStepFilter = 'all';
+  solutionStepTrackerOpen = false;
   readonly solutionEditFilterOptions: Array<{
     key: SolutionEditFilterPreset;
     label: string;
@@ -912,6 +913,33 @@ export class UserManagementComponent implements OnInit {
     }));
   }
 
+  get solutionStepTrackerSummaryCards(): Array<{
+    label: string;
+    count: number;
+  }> {
+    const currentCards = this.solutionCurrentStepCards;
+    const coverageCards = this.stepCoverageCards;
+
+    return [
+      {
+        label: 'Empty',
+        count: currentCards.find((card) => card.key === 'empty')?.count ?? 0,
+      },
+      {
+        label: 'Current Step 4',
+        count: currentCards.find((card) => card.key === '4')?.count ?? 0,
+      },
+      {
+        label: 'Step 1 worked on',
+        count: coverageCards.find((card) => card.step === 1)?.count ?? 0,
+      },
+      {
+        label: 'Step 4 worked on',
+        count: coverageCards.find((card) => card.step === 4)?.count ?? 0,
+      },
+    ];
+  }
+
   get solutionStepPatterns(): Array<{
     key: string;
     label: string;
@@ -964,6 +992,10 @@ export class UserManagementComponent implements OnInit {
 
   setSolutionCurrentStepFilter(filter: SolutionCurrentStepFilter): void {
     this.solutionCurrentStepFilter = filter;
+  }
+
+  toggleSolutionStepTracker(): void {
+    this.solutionStepTrackerOpen = !this.solutionStepTrackerOpen;
   }
 
   solutionCurrentStepDisplay(row: SolutionStepProgressRow): string {
