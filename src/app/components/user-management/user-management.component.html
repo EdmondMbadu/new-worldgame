@@ -1425,7 +1425,7 @@
 <!-- Weekly Activity Report Modal -->
 <div
   *ngIf="weeklyActivityOpen"
-  class="fixed inset-0 z-[210] flex items-center justify-center p-4 sm:p-6 dark:text-white"
+  class="fixed inset-0 z-[210] overflow-y-auto p-4 sm:p-6 dark:text-white"
 >
   <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
 
@@ -1433,9 +1433,9 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="weeklyActivityTitle"
-    class="relative w-full max-w-3xl rounded-2xl shadow-2xl bg-white dark:bg-slate-900 ring-1 ring-black/5 dark:ring-white/10"
+    class="relative mx-auto my-4 flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-slate-900 dark:ring-white/10 sm:my-8 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)]"
   >
-    <div class="flex items-center justify-between px-5 py-4 border-b dark:border-slate-800">
+    <div class="flex shrink-0 items-center justify-between border-b px-5 py-4 dark:border-slate-800">
       <div>
         <h3
           id="weeklyActivityTitle"
@@ -1458,7 +1458,8 @@
       </button>
     </div>
 
-    <div class="px-5 py-5 space-y-4">
+    <div class="flex-1 overflow-y-auto overscroll-contain px-5 py-5">
+      <div class="space-y-4">
       <div class="text-sm text-slate-600 dark:text-slate-300">
         Recipients: <strong>{{ selectedRecipientEmails.length }}</strong>
       </div>
@@ -1525,9 +1526,10 @@
       <p *ngIf="weeklyActivitySent" class="text-sm text-emerald-600">
         Weekly activity report sent.
       </p>
+      </div>
     </div>
 
-    <div class="flex items-center justify-end gap-2 px-5 py-4 border-t dark:border-slate-800">
+    <div class="flex shrink-0 items-center justify-end gap-2 border-t px-5 py-4 dark:border-slate-800">
       <button
         (click)="closeWeeklyActivityModal()"
         class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-200"
