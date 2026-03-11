@@ -468,6 +468,7 @@
           <div
             *ngFor="let card of solutionStepTrackerSummaryCards"
             class="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 dark:border-slate-700 dark:bg-slate-900/50"
+            [attr.title]="card.helper"
           >
             <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
               {{ card.label }}
@@ -475,11 +476,21 @@
             <div class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
               {{ card.count }}
             </div>
+            <div class="mt-1 text-xs font-medium text-slate-600 dark:text-slate-300">
+              {{ card.subtitle }}
+            </div>
+            <div class="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              {{ card.helper }}
+            </div>
           </div>
         </div>
         </div>
 
         <div *ngIf="solutionStepTrackerOpen" class="mt-6 border-t border-slate-200 pt-6 dark:border-slate-700">
+          <div class="mb-4 rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-xs leading-relaxed text-sky-900 dark:border-sky-900/40 dark:bg-sky-950/30 dark:text-sky-100">
+            Reference: <strong>Current Step</strong> means the highest step with saved content. <strong>Worked on</strong> means a solution has any saved content in that step, even if it later moved ahead. <strong>Started</strong> means at least one answer was saved somewhere in Steps 1 to 4.
+          </div>
+
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <button
               type="button"

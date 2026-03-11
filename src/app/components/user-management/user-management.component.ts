@@ -916,6 +916,8 @@ export class UserManagementComponent implements OnInit {
   get solutionStepTrackerSummaryCards(): Array<{
     label: string;
     count: number;
+    subtitle: string;
+    helper: string;
   }> {
     const rows = this.solutionStepProgressRows;
     const currentCards = this.solutionCurrentStepCards;
@@ -925,24 +927,34 @@ export class UserManagementComponent implements OnInit {
       {
         label: 'Empty',
         count: currentCards.find((card) => card.key === 'empty')?.count ?? 0,
+        subtitle: 'No saved step content',
+        helper: 'Nothing has been saved in Steps 1 to 4 for these solutions.',
       },
       {
         label: 'Started',
         count:
           rows.length -
           (currentCards.find((card) => card.key === 'empty')?.count ?? 0),
+        subtitle: 'At least some content saved',
+        helper: 'These solutions have at least one saved answer somewhere in Steps 1 to 4.',
       },
       {
         label: 'Current Step 4',
         count: currentCards.find((card) => card.key === '4')?.count ?? 0,
+        subtitle: 'Highest completed step',
+        helper: 'Step 4 is the highest step with saved content for these solutions.',
       },
       {
         label: 'Step 1 worked on',
         count: coverageCards.find((card) => card.step === 1)?.count ?? 0,
+        subtitle: 'Any Step 1 content',
+        helper: 'Includes every solution with any saved content in Step 1, even if it later moved to Steps 2, 3, or 4.',
       },
       {
         label: 'Step 4 worked on',
         count: coverageCards.find((card) => card.step === 4)?.count ?? 0,
+        subtitle: 'Any Step 4 content',
+        helper: 'Includes every solution with any saved content in Step 4.',
       },
     ];
   }
