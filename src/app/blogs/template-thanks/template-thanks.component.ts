@@ -11,7 +11,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class TemplateThanksComponent implements OnInit {
   @Input() paragraph: string =
-    'Thank you for registering for the 2026 Global Solutions Lab! We’re thrilled to have you join us from June 17-21, 2026. Get ready for an inspiring lab dedicated to shaping a sustainable future together!';
+    'Thank you for registering for the 2026 Global Solutions Lab! We’re thrilled to have you join us from June 15-24, 2026. Get ready for an inspiring lab dedicated to shaping a sustainable future together!';
   @Input() title: string = 'Registration Complete!';
   isLoggedIn: boolean = false;
   constructor(
