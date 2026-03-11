@@ -1098,6 +1098,14 @@ export class UserManagementComponent implements OnInit {
                         </td>
                         <td width="50%" style="padding:8px;">
                           <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
+                            <div style="font-size:12px;color:#64748b;">Total Open Solutions</div>
+                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.totalOpenSolutions}</div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="50%" style="padding:8px;">
+                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
                             <div style="font-size:12px;color:#64748b;">Solutions Worked On (7 Days)</div>
                             <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyWorkedSolutions}</div>
                             <div style="font-size:12px;color:${workedDeltaColor};font-weight:700;margin-top:4px;">
@@ -1107,8 +1115,7 @@ export class UserManagementComponent implements OnInit {
                             </div>
                           </div>
                         </td>
-                      </tr>
-                      <tr>
+                        </td>
                         <td width="50%" style="padding:8px;">
                           <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
                             <div style="font-size:12px;color:#64748b;">Weekly Active Users</div>
@@ -1120,6 +1127,8 @@ export class UserManagementComponent implements OnInit {
                             </div>
                           </div>
                         </td>
+                      </tr>
+                      <tr>
                         <td width="50%" style="padding:8px;">
                           <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
                             <div style="font-size:12px;color:#64748b;">New Signups (7 Days)</div>
@@ -1129,6 +1138,7 @@ export class UserManagementComponent implements OnInit {
                             </div>
                           </div>
                         </td>
+                        <td width="50%" style="padding:8px;"></td>
                       </tr>
                     </table>
 
