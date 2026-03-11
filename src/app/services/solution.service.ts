@@ -72,6 +72,29 @@ export class SolutionService {
       evaluatorsHolder: this.evaluatorsEmails,
     };
   }
+
+  private serverTimestamp() {
+    return firebase.firestore.FieldValue.serverTimestamp();
+  }
+
+  private withSolutionUpdatedAt<T extends Record<string, any>>(data: T) {
+    return {
+      ...data,
+      updatedAt: this.serverTimestamp(),
+    };
+  }
+
+  private withSolutionCreatedAndUpdatedAt<T extends Record<string, any>>(
+    data: T
+  ) {
+    const now = this.serverTimestamp();
+    return {
+      ...data,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
+
   async joinSolution(solution: Solution, email: string) {
     /* --- 1. normalise participants --- */
     const raw = solution.participants ?? [];
@@ -108,7 +131,7 @@ export class SolutionService {
     this.solutionId =
       solutionId !== '' ? solutionId : this.afs.createId().toString();
 
-    const data: {
+    let data: {
       solutionId: string;
       title: string;
       solutionArea: string;
@@ -125,6 +148,8 @@ export class SolutionService {
       likes: any[];
       numLike: string;
       image?: string; // Optional image field
+      createdAt?: firebase.firestore.FieldValue;
+      updatedAt?: firebase.firestore.FieldValue;
     } = {
       solutionId: this.solutionId,
       title: title,
@@ -147,6 +172,8 @@ export class SolutionService {
     if (image) {
       data.image = image;
     }
+
+    data = this.withSolutionCreatedAndUpdatedAt(data);
 
     // Reference to the Firestore document
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
@@ -203,7 +230,7 @@ export class SolutionService {
   ) {
     let formatedDate = this.time.formatDateString(endDate);
 
-    const data = {
+    const data = this.withSolutionCreatedAndUpdatedAt({
       solutionId: solutionId,
       title: title,
       initiatorId: initiatorId,
@@ -218,7 +245,7 @@ export class SolutionService {
       numLike: '0',
       numShare: '0',
       likes: [],
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -429,11 +456,11 @@ export class SolutionService {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${id}`
     );
-    
+
     // Handle nested paths like 'status.S1-A' by building nested object
     const parts = key.split('.');
     let data: any;
-    
+
     if (parts.length === 2) {
       // Nested field like 'status.S1-A' -> { status: { 'S1-A': value } }
       data = { [parts[0]]: { [parts[1]]: value } };
@@ -441,15 +468,15 @@ export class SolutionService {
       // Simple field
       data = { [key]: value };
     }
-    
-    return solutionRef.set(data, { merge: true });
+
+    return solutionRef.set(this.withSolutionUpdatedAt(data), { merge: true });
   }
 
   updateSolutionFields(id: string, values: Partial<Solution>) {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${id}`
     );
-    return solutionRef.set(values, { merge: true });
+    return solutionRef.set(this.withSolutionUpdatedAt(values), { merge: true });
   }
 
   updateSolutionForTournament(solution: Solution) {
@@ -497,30 +524,30 @@ export class SolutionService {
 
   saveSolutionStrategyReview(solutionId: string, review: string) {
     // console.log('saving solution strategy review', review);
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       strategyReview: review,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
     return solutionRef.set(data, { merge: true });
   }
   saveSolutionStatus(solutionId: string, status: any) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       status: status,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
     return solutionRef.set(data, { merge: true });
   }
   submitSolution(solutionId: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       // content: content,
       finished: 'true',
       stqtusForPublication: '', // every submition will need to be seen for publication
       submissionDate: this.time.todaysDate(),
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -528,10 +555,10 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
   submitPreviewSolution(solutionId: string, content: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       content: content,
       preview: 'true',
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -543,7 +570,7 @@ export class SolutionService {
     solutionId: string,
     currentSolution: Solution
   ) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       finished: 'false',
       edited: 'true',
       submissionDate: '',
@@ -551,7 +578,7 @@ export class SolutionService {
       evaluationSummary: {},
       evaluators: currentSolution.evaluators,
       numberofTimesEvaluated: '',
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -559,10 +586,10 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
   submitSolutionForPublication(solutionId: string, currentSolution: Solution) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       statusForPublication: currentSolution.statusForPublication,
       evaluators: currentSolution.evaluators,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -573,9 +600,9 @@ export class SolutionService {
     solutionId: string,
     currentSolution: Solution
   ) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       category: currentSolution.category,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -590,9 +617,9 @@ export class SolutionService {
   }
 
   updateSolutionTitle(solutionId: string, title: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       title: title,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -603,13 +630,15 @@ export class SolutionService {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
-    return solutionRef.update({ board: boardDataUrl });
+    return solutionRef.update(
+      this.withSolutionUpdatedAt({ board: boardDataUrl })
+    );
   }
 
   updateSolutionRoles(roles: Roles, solutionId: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       roles: roles,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -618,9 +647,9 @@ export class SolutionService {
   }
 
   updateSolutionReadMe(solutionId: string, readMe: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       description: readMe,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -629,9 +658,9 @@ export class SolutionService {
   }
 
   addParticipantsToSolution(participants: any, solutionId: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       participants: participants,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -639,9 +668,9 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
   addEvaluatorsToSolution(evaluators: any, solutionId: string) {
-    const data = {
+    const data = this.withSolutionUpdatedAt({
       evaluators: evaluators,
-    };
+    });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );

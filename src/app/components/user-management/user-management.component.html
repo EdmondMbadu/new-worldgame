@@ -1023,6 +1023,71 @@
                     </button>
                   </div>
                 </div>
+
+                <div class="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+                  <div class="flex flex-col gap-3">
+                    <div class="flex flex-col gap-1 xl:flex-row xl:items-center xl:justify-between">
+                      <div>
+                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white">
+                          Solution Edit Activity
+                        </h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">
+                          Filters use tracked solution `updatedAt` timestamps. Older solutions without that field are marked as untracked.
+                        </p>
+                      </div>
+                      <p class="text-xs font-medium text-slate-600 dark:text-slate-300">
+                        {{ solutionEditFilterSummaryText }}
+                      </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        *ngFor="let option of solutionEditFilterOptions"
+                        type="button"
+                        (click)="setSolutionEditFilter(option.key)"
+                        class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                        [ngClass]="
+                          solutionEditFilter === option.key
+                            ? 'border-emerald-600 bg-emerald-600 text-white'
+                            : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                        "
+                      >
+                        {{ option.label }}
+                      </button>
+                    </div>
+
+                    <div
+                      *ngIf="solutionEditFilter === 'custom'"
+                      class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900/60 xl:flex-row xl:items-end"
+                    >
+                      <label class="flex-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Start date
+                        <input
+                          type="date"
+                          [(ngModel)]="solutionEditStartDate"
+                          class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        />
+                      </label>
+
+                      <label class="flex-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        End date
+                        <input
+                          type="date"
+                          [(ngModel)]="solutionEditEndDate"
+                          class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/60 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        />
+                      </label>
+
+                      <button
+                        type="button"
+                        (click)="clearSolutionEditRange()"
+                        class="inline-flex items-center justify-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        Clear range
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1043,6 +1108,7 @@
                 <th scope="col" class="px-4 py-3">Location</th>
                 <th scope="col" class="px-4 py-3">Date Joined</th>
                 <th scope="col" class="px-4 py-3">Last Active</th>
+                <th scope="col" class="px-4 py-3">Last Solution Edit</th>
 
                 <th scope="col" class="px-4 py-3"># Solution Started</th>
                 <th scope="col" class="px-4 py-3"># Solution Submitted</th>
@@ -1091,6 +1157,16 @@
                   <td class="px-4 py-3">{{ user.location }}</td>
                   <td class="px-4 py-3">{{ user.dateJoined }}</td>
                   <td class="px-4 py-3">{{ lastActiveDisplay(user) }}</td>
+                  <td class="px-4 py-3">
+                    <div class="min-w-[12rem]">
+                      <div class="font-medium text-slate-700 dark:text-slate-200">
+                        {{ lastSolutionEditDisplay(user) }}
+                      </div>
+                      <div class="text-xs text-slate-500 dark:text-slate-400">
+                        {{ lastSolutionEditSubtext(user) }}
+                      </div>
+                    </div>
+                  </td>
                   <td class="px-4 py-3">{{ user.tempSolutionstarted }}</td>
                   <td class="px-4 py-3">{{ user.tempSolutionSubmitted }}</td>
                   <td class="px-4 py-3">
@@ -1167,7 +1243,7 @@
 
                 <!-- Expanded solutions row -->
                 <tr *ngIf="showSolutions[i]">
-                  <td colspan="10" class="bg-slate-50 dark:bg-slate-900/60 p-4">
+                  <td colspan="11" class="bg-slate-50 dark:bg-slate-900/60 p-4">
                     <div
                       class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
                     >
@@ -1238,15 +1314,24 @@
                               class="group rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50 hover:shadow-sm dark:border-slate-800 dark:hover:bg-slate-800/60"
                             >
                               <div class="flex items-center gap-2">
-                                <span
-                                  class="flex-1 min-w-0 truncate font-medium text-slate-800 dark:text-slate-100"
-                                >
+                                <span class="flex-1 min-w-0 truncate font-medium text-slate-800 dark:text-slate-100">
                                   {{ j + 1 }}. {{ fi.title }}
                                 </span>
-                                <span
-                                  class="shrink-0 inline-flex items-center whitespace-nowrap leading-none rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200"
-                                >
+                                <span class="shrink-0 inline-flex items-center whitespace-nowrap leading-none rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
                                   Finished
+                                </span>
+                              </div>
+                              <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                <span>{{ solutionEditDisplay(fi) }}</span>
+                                <span
+                                  class="inline-flex items-center rounded-full px-2 py-0.5 font-semibold"
+                                  [ngClass]="
+                                    solutionEditTrackingLabel(fi) === 'Tracked'
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+                                      : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                  "
+                                >
+                                  {{ solutionEditTrackingLabel(fi) }}
                                 </span>
                               </div>
                             </a>
@@ -1294,15 +1379,24 @@
                               class="group rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50 hover:shadow-sm dark:border-slate-800 dark:hover:bg-slate-800/60"
                             >
                               <div class="flex items-center gap-2">
-                                <span
-                                  class="flex-1 min-w-0 truncate font-medium text-slate-800 dark:text-slate-100"
-                                >
+                                <span class="flex-1 min-w-0 truncate font-medium text-slate-800 dark:text-slate-100">
                                   {{ k + 1 }}. {{ un.title }}
                                 </span>
-                                <span
-                                  class="shrink-0 inline-flex items-center whitespace-nowrap leading-none rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
-                                >
+                                <span class="shrink-0 inline-flex items-center whitespace-nowrap leading-none rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
                                   In&nbsp;progress
+                                </span>
+                              </div>
+                              <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                <span>{{ solutionEditDisplay(un) }}</span>
+                                <span
+                                  class="inline-flex items-center rounded-full px-2 py-0.5 font-semibold"
+                                  [ngClass]="
+                                    solutionEditTrackingLabel(un) === 'Tracked'
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200'
+                                      : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                  "
+                                >
+                                  {{ solutionEditTrackingLabel(un) }}
                                 </span>
                               </div>
                             </a>

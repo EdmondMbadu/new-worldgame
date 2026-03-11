@@ -70,8 +70,8 @@ export class Solution {
 
   // broadcastStartedAt?: serverTimestamp;
   // broadcastUpdatedAt?: serverTimestam;
-  updatedAt?: string;
-  createdAt?: string;
+  updatedAt?: any;
+  createdAt?: any;
 }
 
 export interface SolutionRecruitmentProfile {

@@ -10,6 +10,22 @@ import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
+type SolutionEditFilterPreset =
+  | 'all'
+  | 'today'
+  | 'yesterday'
+  | 'two_days_ago'
+  | 'three_days_ago'
+  | 'last_7_days'
+  | 'custom'
+  | 'untracked';
+
+type UserSolutionStats = {
+  started: number;
+  submitted: number;
+  lastTrackedEditMs: number;
+};
+
 @Component({
   selector: 'app-user-management',
   templateUrl: './user-management.component.html',
@@ -34,11 +50,58 @@ export class UserManagementComponent implements OnInit {
   userUnfinishedSolutions: Solution[] = [];
   allUsers: User[] = [];
   everySolution: Solution[] = [];
+  private userSolutionsByEmail = new Map<string, Solution[]>();
+  private userSolutionStatsByEmail = new Map<string, UserSolutionStats>();
   private authLastSignInByUid = new Map<string, string>();
   private authLastSignInByEmail = new Map<string, string>();
   private lastAuthSyncKey = '';
   includeBotsInList = false;
   private readonly goalIntroducedOnMs = new Date(2024, 7, 26).getTime();
+  solutionEditFilter: SolutionEditFilterPreset = 'all';
+  solutionEditStartDate = '';
+  solutionEditEndDate = '';
+  readonly solutionEditFilterOptions: Array<{
+    key: SolutionEditFilterPreset;
+    label: string;
+    description: string;
+  }> = [
+    { key: 'all', label: 'All users', description: 'No solution edit filter' },
+    {
+      key: 'today',
+      label: 'Edited today',
+      description: 'Latest tracked edit happened today',
+    },
+    {
+      key: 'yesterday',
+      label: 'Yesterday',
+      description: 'Latest tracked edit happened yesterday',
+    },
+    {
+      key: 'two_days_ago',
+      label: '2 days ago',
+      description: 'Latest tracked edit happened exactly two days ago',
+    },
+    {
+      key: 'three_days_ago',
+      label: '3 days ago',
+      description: 'Latest tracked edit happened exactly three days ago',
+    },
+    {
+      key: 'last_7_days',
+      label: 'Last 7 days',
+      description: 'Latest tracked edit happened in the last week',
+    },
+    {
+      key: 'custom',
+      label: 'Custom range',
+      description: 'Filter by a specific date interval',
+    },
+    {
+      key: 'untracked',
+      label: 'Untracked',
+      description: 'Has solutions, but no tracked edit timestamp',
+    },
+  ];
 
   // Unsubscribes state
   unsubscribedRows: Array<{ email: string; reason?: string; updatedAt: Date }> =
@@ -204,31 +267,7 @@ export class UserManagementComponent implements OnInit {
       // fetch solutions
       this.solution.getAllSolutionsFromAllAccounts().subscribe((solutions) => {
         this.everySolution = solutions;
-        // do your existing logic for counting solutions, etc.
-        for (let user of this.allUsers) {
-          let solutionCount = 0;
-          let solutionSubmittedCount = 0;
-          const normalizedUserEmail = user.email!.trim().toLowerCase();
-
-          for (let sol of this.everySolution) {
-            if (sol.participants && Array.isArray(sol.participants)) {
-              const isParticipant = sol.participants.some(
-                (p: { name: string }) =>
-                  p.name.trim().toLowerCase() === normalizedUserEmail
-              );
-              if (isParticipant) {
-                solutionCount++;
-                if (sol.finished === 'true') {
-                  solutionSubmittedCount++;
-                }
-              }
-            }
-          }
-          user.tempSolutionstarted = solutionCount.toString();
-          user.tempSolutionSubmitted = solutionSubmittedCount.toString();
-        }
-
-        // Compute users with in-progress solutions for AI Insights feature
+        this.rebuildUserSolutionIndexes();
         this.computeUsersWithInProgressSolutions();
       });
     });
@@ -239,7 +278,9 @@ export class UserManagementComponent implements OnInit {
 
   // A simple computed property that filters users by the search term.
   get filteredUsers(): User[] {
-    const baseUsers = this.usersByBotMode;
+    const baseUsers = this.usersByBotMode.filter((user) =>
+      this.matchesSolutionEditFilter(user)
+    );
     if (!this.searchTerm.trim()) {
       return baseUsers;
     }
@@ -344,15 +385,9 @@ export class UserManagementComponent implements OnInit {
   }
   public findSolutionsByEmail(email: string, index: number) {
     const normalizedEmail = email.trim().toLowerCase();
-    this.userSolutions = this.everySolution.filter(
-      (solution) =>
-        solution.participants &&
-        Array.isArray(solution.participants) &&
-        solution.participants.some(
-          (participant: { name: string }) =>
-            participant.name.trim().toLowerCase() === normalizedEmail
-        )
-    );
+    this.userSolutions = [
+      ...(this.userSolutionsByEmail.get(normalizedEmail) ?? []),
+    ];
     this.userFinishedSolutions = this.userSolutions.filter(
       (solution) => solution.finished === 'true'
     );
@@ -375,6 +410,8 @@ export class UserManagementComponent implements OnInit {
       'Email',
       'Date Joined',
       'Last Active',
+      'Last Solution Edit',
+      'Solution Edit Tracking',
       'Goal',
       'Location',
       'Solutions Started',
@@ -388,6 +425,8 @@ export class UserManagementComponent implements OnInit {
       user.email,
       user.dateJoined,
       this.lastActiveDisplay(user),
+      this.lastSolutionEditDisplay(user),
+      this.lastSolutionEditSubtext(user),
       user.goal,
       user.location,
       user.tempSolutionstarted || '0', // Default to '0' if undefined
@@ -440,6 +479,252 @@ export class UserManagementComponent implements OnInit {
     }
     const parsed = Date.parse(String(raw));
     return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private rebuildUserSolutionIndexes(): void {
+    const solutionsByEmail = new Map<string, Solution[]>();
+
+    for (const solution of this.everySolution) {
+      const emails = new Set(
+        this.normalizeParticipantEmails((solution as any).participants)
+      );
+      emails.forEach((email) => {
+        if (!email) return;
+        if (!solutionsByEmail.has(email)) {
+          solutionsByEmail.set(email, []);
+        }
+        solutionsByEmail.get(email)!.push(solution);
+      });
+    }
+
+    const statsByEmail = new Map<string, UserSolutionStats>();
+    for (const [email, solutions] of solutionsByEmail.entries()) {
+      const ordered = [...solutions].sort(
+        (a, b) => this.solutionActivityMs(b) - this.solutionActivityMs(a)
+      );
+      solutionsByEmail.set(email, ordered);
+
+      const submitted = ordered.filter((solution) => solution.finished === 'true')
+        .length;
+      const lastTrackedEditMs = ordered.reduce(
+        (latest, solution) =>
+          Math.max(latest, this.solutionTrackedEditMs(solution)),
+        0
+      );
+
+      statsByEmail.set(email, {
+        started: ordered.length,
+        submitted,
+        lastTrackedEditMs,
+      });
+    }
+
+    this.userSolutionsByEmail = solutionsByEmail;
+    this.userSolutionStatsByEmail = statsByEmail;
+
+    for (const user of this.allUsers) {
+      const stats = this.userSolutionStatsByEmail.get(
+        this.normalizeEmail(user.email)
+      );
+      user.tempSolutionstarted = String(stats?.started ?? 0);
+      user.tempSolutionSubmitted = String(stats?.submitted ?? 0);
+    }
+  }
+
+  private solutionTrackedEditMs(solution: Solution): number {
+    return this.parseUserDateToMs((solution as any).updatedAt);
+  }
+
+  private solutionFallbackMs(solution: Solution): number {
+    return this.parseUserDateToMs(
+      (solution as any).createdAt ??
+        (solution as any).creationDate ??
+        (solution as any).submissionDate
+    );
+  }
+
+  private solutionActivityMs(solution: Solution): number {
+    return (
+      this.solutionTrackedEditMs(solution) || this.solutionFallbackMs(solution)
+    );
+  }
+
+  private getUserSolutionStats(user: User): UserSolutionStats {
+    return (
+      this.userSolutionStatsByEmail.get(this.normalizeEmail(user.email)) ?? {
+        started: 0,
+        submitted: 0,
+        lastTrackedEditMs: 0,
+      }
+    );
+  }
+
+  private formatDateTime(ms: number): string {
+    return new Date(ms).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
+
+  private startOfDayMs(ms: number): number {
+    const d = new Date(ms);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }
+
+  private endOfDayMs(ms: number): number {
+    const d = new Date(ms);
+    d.setHours(23, 59, 59, 999);
+    return d.getTime();
+  }
+
+  private dayRangeForDaysAgo(daysAgo: number): { start: number; end: number } {
+    const now = new Date();
+    now.setHours(12, 0, 0, 0);
+    now.setDate(now.getDate() - daysAgo);
+    return {
+      start: this.startOfDayMs(now.getTime()),
+      end: this.endOfDayMs(now.getTime()),
+    };
+  }
+
+  private getCustomSolutionEditRange():
+    | { start?: number; end?: number }
+    | null {
+    const start = this.solutionEditStartDate
+      ? this.startOfDayMs(new Date(this.solutionEditStartDate).getTime())
+      : undefined;
+    const end = this.solutionEditEndDate
+      ? this.endOfDayMs(new Date(this.solutionEditEndDate).getTime())
+      : undefined;
+
+    if (start === undefined && end === undefined) return null;
+    if (start !== undefined && Number.isNaN(start)) return null;
+    if (end !== undefined && Number.isNaN(end)) return null;
+    return { start, end };
+  }
+
+  private matchesSolutionEditFilter(user: User): boolean {
+    if (this.solutionEditFilter === 'all') return true;
+
+    const stats = this.getUserSolutionStats(user);
+    if (this.solutionEditFilter === 'untracked') {
+      return stats.started > 0 && !stats.lastTrackedEditMs;
+    }
+
+    const lastTrackedEditMs = stats.lastTrackedEditMs;
+    if (!lastTrackedEditMs) return false;
+
+    switch (this.solutionEditFilter) {
+      case 'today': {
+        const range = this.dayRangeForDaysAgo(0);
+        return (
+          lastTrackedEditMs >= range.start && lastTrackedEditMs <= range.end
+        );
+      }
+      case 'yesterday': {
+        const range = this.dayRangeForDaysAgo(1);
+        return (
+          lastTrackedEditMs >= range.start && lastTrackedEditMs <= range.end
+        );
+      }
+      case 'two_days_ago': {
+        const range = this.dayRangeForDaysAgo(2);
+        return (
+          lastTrackedEditMs >= range.start && lastTrackedEditMs <= range.end
+        );
+      }
+      case 'three_days_ago': {
+        const range = this.dayRangeForDaysAgo(3);
+        return (
+          lastTrackedEditMs >= range.start && lastTrackedEditMs <= range.end
+        );
+      }
+      case 'last_7_days': {
+        const start = this.startOfDayMs(Date.now() - 6 * 24 * 60 * 60 * 1000);
+        return lastTrackedEditMs >= start;
+      }
+      case 'custom': {
+        const range = this.getCustomSolutionEditRange();
+        if (!range) return true;
+        if (range.start !== undefined && lastTrackedEditMs < range.start) {
+          return false;
+        }
+        if (range.end !== undefined && lastTrackedEditMs > range.end) {
+          return false;
+        }
+        return true;
+      }
+      default:
+        return true;
+    }
+  }
+
+  setSolutionEditFilter(filter: SolutionEditFilterPreset): void {
+    this.solutionEditFilter = filter;
+  }
+
+  clearSolutionEditRange(): void {
+    this.solutionEditStartDate = '';
+    this.solutionEditEndDate = '';
+    if (this.solutionEditFilter === 'custom') {
+      this.solutionEditFilter = 'all';
+    }
+  }
+
+  get solutionEditFilterSummaryText(): string {
+    const trackedUsers = this.usersByBotMode.filter(
+      (user) => this.getUserSolutionStats(user).lastTrackedEditMs > 0
+    ).length;
+    const untrackedUsers = this.usersByBotMode.filter((user) => {
+      const stats = this.getUserSolutionStats(user);
+      return stats.started > 0 && !stats.lastTrackedEditMs;
+    }).length;
+
+    return `${this.filteredUsers.length} matching users • ${trackedUsers} with tracked edit times • ${untrackedUsers} untracked legacy users`;
+  }
+
+  lastSolutionEditDisplay(user: User): string {
+    const stats = this.getUserSolutionStats(user);
+    if (stats.lastTrackedEditMs) {
+      return this.formatDateTime(stats.lastTrackedEditMs);
+    }
+    if (stats.started > 0) {
+      return 'Untracked legacy';
+    }
+    return 'No solutions';
+  }
+
+  lastSolutionEditSubtext(user: User): string {
+    const stats = this.getUserSolutionStats(user);
+    if (stats.lastTrackedEditMs) {
+      return 'Tracked from solution edits';
+    }
+    if (stats.started > 0) {
+      return 'Existing solutions without edit timestamps';
+    }
+    return 'No solution activity';
+  }
+
+  solutionEditDisplay(solution: Solution): string {
+    const trackedMs = this.solutionTrackedEditMs(solution);
+    if (trackedMs) {
+      return `Last edited ${this.formatDateTime(trackedMs)}`;
+    }
+
+    const fallbackMs = this.solutionFallbackMs(solution);
+    if (fallbackMs) {
+      return `Created ${this.formatDateTime(fallbackMs)} (edit time not tracked)`;
+    }
+
+    return 'Edit time not tracked';
+  }
+
+  solutionEditTrackingLabel(solution: Solution): string {
+    return this.solutionTrackedEditMs(solution) ? 'Tracked' : 'Legacy';
   }
 
   lastActiveDisplay(user: User): string {
