@@ -917,6 +917,7 @@ export class UserManagementComponent implements OnInit {
     label: string;
     count: number;
   }> {
+    const rows = this.solutionStepProgressRows;
     const currentCards = this.solutionCurrentStepCards;
     const coverageCards = this.stepCoverageCards;
 
@@ -924,6 +925,12 @@ export class UserManagementComponent implements OnInit {
       {
         label: 'Empty',
         count: currentCards.find((card) => card.key === 'empty')?.count ?? 0,
+      },
+      {
+        label: 'Started',
+        count:
+          rows.length -
+          (currentCards.find((card) => card.key === 'empty')?.count ?? 0),
       },
       {
         label: 'Current Step 4',
