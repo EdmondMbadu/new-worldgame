@@ -26,6 +26,20 @@ type UserSolutionStats = {
   lastTrackedEditMs: number;
 };
 
+type SolutionCurrentStepFilter = 'all' | 'empty' | '1' | '2' | '3' | '4';
+
+type SolutionStepProgressRow = {
+  solution: Solution;
+  solutionId: string;
+  title: string;
+  touchedSteps: number[];
+  currentStep: number;
+  isEmpty: boolean;
+  lastActivityMs: number;
+  patternKey: string;
+  patternLabel: string;
+};
+
 @Component({
   selector: 'app-user-management',
   templateUrl: './user-management.component.html',
@@ -57,9 +71,37 @@ export class UserManagementComponent implements OnInit {
   private lastAuthSyncKey = '';
   includeBotsInList = false;
   private readonly goalIntroducedOnMs = new Date(2024, 7, 26).getTime();
+  private readonly solutionStepGroups = [
+    { step: 1, label: 'Step 1', subtitle: 'Problem State', keys: ['S1-A', 'S1-B', 'S1-C', 'S1-D'] },
+    { step: 2, label: 'Step 2', subtitle: 'Preferred State', keys: ['S2-A', 'S2-B'] },
+    { step: 3, label: 'Step 3', subtitle: 'Developing Solution', keys: ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E'] },
+    {
+      step: 4,
+      label: 'Step 4',
+      subtitle: 'Implementation',
+      keys: [
+        'S4-A',
+        'S4-B',
+        'S4-C',
+        'S4-D',
+        'S4-E',
+        'S4-F',
+        'S4-G',
+        'S4-H',
+        'S4-I',
+        'S4-J',
+        'S4-K',
+        'S4-L',
+        'S4-M',
+        'S4-N',
+      ],
+    },
+  ] as const;
   solutionEditFilter: SolutionEditFilterPreset = 'all';
   solutionEditStartDate = '';
   solutionEditEndDate = '';
+  solutionStepSearchTerm = '';
+  solutionCurrentStepFilter: SolutionCurrentStepFilter = 'all';
   readonly solutionEditFilterOptions: Array<{
     key: SolutionEditFilterPreset;
     label: string;
@@ -749,6 +791,194 @@ export class UserManagementComponent implements OnInit {
 
   solutionEditTrackingLabel(solution: Solution): string {
     return this.solutionTrackedEditMs(solution) ? 'Tracked' : 'Legacy';
+  }
+
+  private hasMeaningfulSavedContent(raw: unknown): boolean {
+    if (raw === null || raw === undefined) return false;
+    if (typeof raw !== 'string') {
+      return Array.isArray(raw) ? raw.length > 0 : Boolean(raw);
+    }
+
+    const trimmed = raw.trim();
+    if (!trimmed) return false;
+
+    // Count embedded media/structured content as meaningful even if text is minimal.
+    if (/<(img|figure|table|iframe|video|audio|embed)\b/i.test(trimmed)) {
+      return true;
+    }
+
+    const withoutBreaks = trimmed
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return withoutBreaks.length > 0;
+  }
+
+  private getSolutionTouchedSteps(solution: Solution): number[] {
+    const status = (solution as any).status || {};
+    return this.solutionStepGroups
+      .filter((group) =>
+        group.keys.some((key) => this.hasMeaningfulSavedContent(status[key]))
+      )
+      .map((group) => group.step);
+  }
+
+  private getSolutionPatternLabel(steps: number[]): string {
+    if (!steps.length) return 'Empty';
+    return steps.map((step) => `Step ${step}`).join(' + ');
+  }
+
+  get solutionStepProgressRows(): SolutionStepProgressRow[] {
+    return [...this.everySolution]
+      .map((solution) => {
+        const touchedSteps = this.getSolutionTouchedSteps(solution);
+        const currentStep = touchedSteps.length ? Math.max(...touchedSteps) : 0;
+        const patternKey = touchedSteps.length ? touchedSteps.join('-') : 'empty';
+        return {
+          solution,
+          solutionId: (solution.solutionId || '').trim(),
+          title: (solution.title || 'Untitled Solution').trim() || 'Untitled Solution',
+          touchedSteps,
+          currentStep,
+          isEmpty: touchedSteps.length === 0,
+          lastActivityMs: this.solutionActivityMs(solution),
+          patternKey,
+          patternLabel: this.getSolutionPatternLabel(touchedSteps),
+        };
+      })
+      .sort((a, b) => {
+        const byActivity = b.lastActivityMs - a.lastActivityMs;
+        if (byActivity !== 0) return byActivity;
+        return a.title.localeCompare(b.title);
+      });
+  }
+
+  get solutionCurrentStepCards(): Array<{
+    key: SolutionCurrentStepFilter;
+    label: string;
+    subtitle: string;
+    count: number;
+  }> {
+    const rows = this.solutionStepProgressRows;
+    return [
+      {
+        key: 'empty',
+        label: 'Empty',
+        subtitle: 'No saved step content',
+        count: rows.filter((row) => row.isEmpty).length,
+      },
+      {
+        key: '1',
+        label: 'Current: Step 1',
+        subtitle: 'Problem State',
+        count: rows.filter((row) => row.currentStep === 1).length,
+      },
+      {
+        key: '2',
+        label: 'Current: Step 2',
+        subtitle: 'Preferred State',
+        count: rows.filter((row) => row.currentStep === 2).length,
+      },
+      {
+        key: '3',
+        label: 'Current: Step 3',
+        subtitle: 'Developing Solution',
+        count: rows.filter((row) => row.currentStep === 3).length,
+      },
+      {
+        key: '4',
+        label: 'Current: Step 4',
+        subtitle: 'Implementation',
+        count: rows.filter((row) => row.currentStep === 4).length,
+      },
+    ];
+  }
+
+  get stepCoverageCards(): Array<{
+    step: number;
+    label: string;
+    subtitle: string;
+    count: number;
+  }> {
+    const rows = this.solutionStepProgressRows;
+    return this.solutionStepGroups.map((group) => ({
+      step: group.step,
+      label: `${group.label} worked on`,
+      subtitle: group.subtitle,
+      count: rows.filter((row) => row.touchedSteps.includes(group.step)).length,
+    }));
+  }
+
+  get solutionStepPatterns(): Array<{
+    key: string;
+    label: string;
+    count: number;
+  }> {
+    const counts = new Map<string, { label: string; count: number }>();
+    for (const row of this.solutionStepProgressRows) {
+      const existing = counts.get(row.patternKey);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(row.patternKey, {
+          label: row.patternLabel,
+          count: 1,
+        });
+      }
+    }
+
+    return Array.from(counts.entries())
+      .map(([key, value]) => ({ key, ...value }))
+      .sort((a, b) => {
+        const byCount = b.count - a.count;
+        if (byCount !== 0) return byCount;
+        return a.label.localeCompare(b.label);
+      });
+  }
+
+  get filteredSolutionStepRows(): SolutionStepProgressRow[] {
+    const term = this.solutionStepSearchTerm.trim().toLowerCase();
+    return this.solutionStepProgressRows.filter((row) => {
+      if (this.solutionCurrentStepFilter === 'empty' && !row.isEmpty) {
+        return false;
+      }
+      if (
+        this.solutionCurrentStepFilter !== 'all' &&
+        this.solutionCurrentStepFilter !== 'empty' &&
+        row.currentStep !== Number(this.solutionCurrentStepFilter)
+      ) {
+        return false;
+      }
+
+      if (!term) return true;
+      return (
+        row.title.toLowerCase().includes(term) ||
+        row.solutionId.toLowerCase().includes(term) ||
+        row.patternLabel.toLowerCase().includes(term)
+      );
+    });
+  }
+
+  setSolutionCurrentStepFilter(filter: SolutionCurrentStepFilter): void {
+    this.solutionCurrentStepFilter = filter;
+  }
+
+  solutionCurrentStepDisplay(row: SolutionStepProgressRow): string {
+    return row.isEmpty ? 'Empty' : `Step ${row.currentStep}`;
+  }
+
+  solutionTouchedStepsDisplay(row: SolutionStepProgressRow): string {
+    return row.patternLabel;
+  }
+
+  solutionLastActivityDisplay(row: SolutionStepProgressRow): string {
+    if (row.lastActivityMs) {
+      return this.formatDateTime(row.lastActivityMs);
+    }
+    return 'No tracked activity';
   }
 
   lastActiveDisplay(user: User): string {

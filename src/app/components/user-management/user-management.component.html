@@ -415,6 +415,269 @@
   </section>
   <!-- ===== END DASHBOARD SECTION ===== -->
 
+  <!-- ===== SOLUTION STEP TRACKER SECTION ===== -->
+  <section class="bg-gray-50 dark:bg-gray-900 py-8 px-4 lg:px-8 ml-16 lg:ml-20">
+    <div class="mx-auto w-full max-w-screen-xl 2xl:max-w-[90%] px-2 lg:px-6">
+      <div class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 shadow-sm ring-1 ring-slate-200/60 dark:ring-slate-700/50">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div class="max-w-3xl">
+            <div class="inline-flex items-center rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:bg-sky-900/30 dark:text-sky-200">
+              Solution Step Tracker
+            </div>
+            <h3 class="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              See which solutions are still empty and how far active solutions have progressed.
+            </h3>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+              A step counts once a solution has any saved content in that step. Current step is the highest step with saved content.
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900/50">
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Total solutions tracked
+            </div>
+            <div class="mt-1 text-3xl font-bold text-slate-900 dark:text-white">
+              {{ solutionStepProgressRows.length }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          <button
+            type="button"
+            (click)="setSolutionCurrentStepFilter(card.key)"
+            *ngFor="let card of solutionCurrentStepCards"
+            class="rounded-2xl border p-4 text-left transition-colors"
+            [ngClass]="
+              solutionCurrentStepFilter === card.key
+                ? 'border-sky-500 bg-sky-50 dark:border-sky-400 dark:bg-sky-900/20'
+                : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/40 dark:hover:bg-slate-900/70'
+            "
+          >
+            <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {{ card.label }}
+            </div>
+            <div class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
+              {{ card.count }}
+            </div>
+            <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              {{ card.subtitle }}
+            </div>
+          </button>
+        </div>
+
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+          <div class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <h4 class="text-sm font-semibold text-slate-900 dark:text-white">
+                Step coverage
+              </h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                These counts show how many solutions have any saved content in each step, even if they later moved further ahead.
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                (click)="setSolutionCurrentStepFilter('all')"
+                class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                [ngClass]="
+                  solutionCurrentStepFilter === 'all'
+                    ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                "
+              >
+                All solutions
+              </button>
+              <button
+                type="button"
+                (click)="setSolutionCurrentStepFilter('empty')"
+                class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                [ngClass]="
+                  solutionCurrentStepFilter === 'empty'
+                    ? 'border-sky-600 bg-sky-600 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                "
+              >
+                Empty only
+              </button>
+              <button
+                type="button"
+                (click)="setSolutionCurrentStepFilter('1')"
+                class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                [ngClass]="
+                  solutionCurrentStepFilter === '1'
+                    ? 'border-sky-600 bg-sky-600 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                "
+              >
+                Current step 1
+              </button>
+              <button
+                type="button"
+                (click)="setSolutionCurrentStepFilter('2')"
+                class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                [ngClass]="
+                  solutionCurrentStepFilter === '2'
+                    ? 'border-sky-600 bg-sky-600 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                "
+              >
+                Current step 2
+              </button>
+              <button
+                type="button"
+                (click)="setSolutionCurrentStepFilter('3')"
+                class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                [ngClass]="
+                  solutionCurrentStepFilter === '3'
+                    ? 'border-sky-600 bg-sky-600 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                "
+              >
+                Current step 3
+              </button>
+              <button
+                type="button"
+                (click)="setSolutionCurrentStepFilter('4')"
+                class="inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                [ngClass]="
+                  solutionCurrentStepFilter === '4'
+                    ? 'border-sky-600 bg-sky-600 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                "
+              >
+                Current step 4
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div
+              *ngFor="let card of stepCoverageCards"
+              class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/60"
+            >
+              <div class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {{ card.label }}
+              </div>
+              <div class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
+                {{ card.count }}
+              </div>
+              <div class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                {{ card.subtitle }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(340px,0.9fr)]">
+          <div class="rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900/40">
+            <div class="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 dark:border-slate-700 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <h4 class="text-sm font-semibold text-slate-900 dark:text-white">
+                  Solution list
+                </h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Search by title, solution ID, or step combination.
+                </p>
+              </div>
+
+              <div class="w-full xl:w-72">
+                <input
+                  type="text"
+                  [(ngModel)]="solutionStepSearchTerm"
+                  placeholder="Search solutions"
+                  class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/60 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 text-xs font-medium text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              <span>{{ filteredSolutionStepRows.length }} solutions shown</span>
+              <span>Sorted by latest activity</span>
+            </div>
+
+            <div class="max-h-[540px] overflow-y-auto">
+              <table class="w-full min-w-[760px] text-sm text-left text-slate-600 dark:text-slate-300">
+                <thead class="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                  <tr>
+                    <th class="px-4 py-3 font-semibold">Solution</th>
+                    <th class="px-4 py-3 font-semibold">Current Step</th>
+                    <th class="px-4 py-3 font-semibold">Steps Worked</th>
+                    <th class="px-4 py-3 font-semibold">Last Activity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let row of filteredSolutionStepRows"
+                    class="border-t border-slate-200 align-top dark:border-slate-800"
+                  >
+                    <td class="px-4 py-4">
+                      <div class="font-semibold text-slate-900 dark:text-white">
+                        {{ row.title }}
+                      </div>
+                      <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        {{ row.solutionId || 'No solution ID' }}
+                      </div>
+                    </td>
+                    <td class="px-4 py-4">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                        [ngClass]="
+                          row.isEmpty
+                            ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'
+                            : 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-200'
+                        "
+                      >
+                        {{ solutionCurrentStepDisplay(row) }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-4 text-sm text-slate-700 dark:text-slate-200">
+                      {{ solutionTouchedStepsDisplay(row) }}
+                    </td>
+                    <td class="px-4 py-4 text-sm text-slate-700 dark:text-slate-200">
+                      {{ solutionLastActivityDisplay(row) }}
+                    </td>
+                  </tr>
+                  <tr *ngIf="filteredSolutionStepRows.length === 0">
+                    <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                      No solutions match the current step filter.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+            <h4 class="text-sm font-semibold text-slate-900 dark:text-white">
+              Exact step combinations
+            </h4>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Useful for questions like "how many have Step 1 and Step 3" or "how many completed Step 1 to Step 4".
+            </p>
+
+            <div class="mt-4 flex max-h-[540px] flex-wrap content-start gap-3 overflow-y-auto pr-1">
+              <div
+                *ngFor="let pattern of solutionStepPatterns"
+                class="min-w-[150px] rounded-2xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900/60"
+              >
+                <div class="text-2xl font-bold text-slate-900 dark:text-white">
+                  {{ pattern.count }}
+                </div>
+                <div class="mt-1 text-sm font-medium text-slate-700 dark:text-slate-200">
+                  {{ pattern.label }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ===== END SOLUTION STEP TRACKER SECTION ===== -->
+
   <!-- ===== AI INSIGHTS EMAIL SECTION ===== -->
   <section class="bg-gray-50 dark:bg-gray-900 py-8 px-4 lg:px-8 ml-16 lg:ml-20">
     <div class="mx-auto w-full max-w-screen-xl 2xl:max-w-[90%] px-2 lg:px-6">
