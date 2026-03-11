@@ -591,6 +591,30 @@ export class UserManagementComponent implements OnInit {
     };
   }
 
+  private solutionBelongsToRealUsers(
+    solution: Solution,
+    realUserEmailSet: Set<string>
+  ): boolean {
+    const participantEmails = this.normalizeParticipantEmails(
+      (solution as any).participants
+    );
+    const authorEmail = this.normalizeEmail((solution as any).authorEmail || '');
+    const ownerEmail = this.normalizeEmail((solution as any).ownerEmail || '');
+
+    return [...participantEmails, authorEmail, ownerEmail].some(
+      (email) => email && realUserEmailSet.has(email)
+    );
+  }
+
+  private solutionWorkedInRange(
+    solution: Solution,
+    startMs: number,
+    endMs: number
+  ): boolean {
+    const activityMs = this.solutionActivityMs(solution);
+    return activityMs >= startMs && activityMs < endMs;
+  }
+
   private getCustomSolutionEditRange():
     | { start?: number; end?: number }
     | null {
@@ -966,15 +990,18 @@ export class UserManagementComponent implements OnInit {
     );
     const totalOpenSolutions = this.everySolution.filter((sol) => {
       if ((sol as any).finished === 'true') return false;
-      const participantEmails = this.normalizeParticipantEmails(
-        (sol as any).participants
-      );
-      const authorEmail = this.normalizeEmail((sol as any).authorEmail || '');
-      const ownerEmail = this.normalizeEmail((sol as any).ownerEmail || '');
-      return [...participantEmails, authorEmail, ownerEmail].some(
-        (email) => email && realUserEmailSet.has(email)
-      );
+      return this.solutionBelongsToRealUsers(sol, realUserEmailSet);
     }).length;
+    const weeklyWorkedSolutions = this.everySolution.filter(
+      (sol) =>
+        this.solutionBelongsToRealUsers(sol, realUserEmailSet) &&
+        this.solutionWorkedInRange(sol, weekStartMs, nowMs)
+    ).length;
+    const previousWeeklyWorkedSolutions = this.everySolution.filter(
+      (sol) =>
+        this.solutionBelongsToRealUsers(sol, realUserEmailSet) &&
+        this.solutionWorkedInRange(sol, previousWeekStartMs, weekStartMs)
+    ).length;
 
     const weeklyActiveRate =
       totalRealUsers > 0
@@ -988,17 +1015,24 @@ export class UserManagementComponent implements OnInit {
       weeklyNewSignups,
       previousWeeklyNewSignups
     );
+    const weeklyWorkedSolutionsIncreasePct = this.percentChange(
+      weeklyWorkedSolutions,
+      previousWeeklyWorkedSolutions
+    );
 
     return {
       totalRealUsers,
       weeklyActiveUsers,
       weeklyNewSignups,
       totalOpenSolutions,
+      weeklyWorkedSolutions,
+      previousWeeklyWorkedSolutions,
       weeklyActiveRate,
       previousWeeklyActiveUsers,
       previousWeeklyNewSignups,
       weeklyActiveIncreasePct,
       weeklySignupIncreasePct,
+      weeklyWorkedSolutionsIncreasePct,
       windowStartMs: weekStartMs,
       previousWeekStartMs,
       nowMs,
@@ -1012,6 +1046,8 @@ export class UserManagementComponent implements OnInit {
     const toDate = this.formatDateMDY(m.nowMs);
     const activeDeltaColor = m.weeklyActiveIncreasePct >= 0 ? '#059669' : '#dc2626';
     const signupDeltaColor = m.weeklySignupIncreasePct >= 0 ? '#059669' : '#dc2626';
+    const workedDeltaColor =
+      m.weeklyWorkedSolutionsIncreasePct >= 0 ? '#059669' : '#dc2626';
     const logoUrl = 'https://newworld-game.org/assets/img/earth-triangle-test.png';
 
     return `
@@ -1062,8 +1098,13 @@ export class UserManagementComponent implements OnInit {
                         </td>
                         <td width="50%" style="padding:8px;">
                           <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
-                            <div style="font-size:12px;color:#64748b;">Total Open Solutions</div>
-                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.totalOpenSolutions}</div>
+                            <div style="font-size:12px;color:#64748b;">Solutions Worked On (7 Days)</div>
+                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyWorkedSolutions}</div>
+                            <div style="font-size:12px;color:${workedDeltaColor};font-weight:700;margin-top:4px;">
+                              ${this.percentLabel(
+      m.weeklyWorkedSolutionsIncreasePct
+    )} vs prev week
+                            </div>
                           </div>
                         </td>
                       </tr>
