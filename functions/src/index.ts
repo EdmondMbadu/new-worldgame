@@ -310,6 +310,12 @@ export const getAuthLastSignInMap = functions
     return { lastSignInByUid, lastSignInByEmail };
   });
 
+type AIInsightsTeamMember = {
+  name: string;
+  email: string;
+  avatarUrl?: string;
+};
+
 type AIInsightsPayload = {
   userEmail: string;
   userFirstName: string;
@@ -320,11 +326,7 @@ type AIInsightsPayload = {
   sdgs?: string[];
   meetLink?: string;
   solutionImage?: string;
-  teamMembers?: Array<{
-    name: string;
-    email: string;
-    avatarUrl?: string;
-  }>;
+  teamMembers?: AIInsightsTeamMember[];
 };
 
 // Cache structure for AI-generated content per solution
@@ -1009,6 +1011,133 @@ const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
   return buildAIInsightsEmailFromCache(data, cachedContent);
 };
 
+const AI_INSIGHTS_TEAM_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const extractAIInsightsSolutionEmails = (solution: any): string[] => {
+  const emails = new Set<string>();
+  const addEmail = (candidate: any) => {
+    if (!candidate) return;
+    let email = '';
+    if (typeof candidate === 'string') {
+      email = candidate;
+    } else if (typeof candidate === 'object') {
+      email =
+        candidate.email ||
+        candidate.name ||
+        candidate.address ||
+        candidate.mail ||
+        candidate.authorEmail ||
+        '';
+    }
+    email = String(email || '').trim().toLowerCase();
+    if (!AI_INSIGHTS_TEAM_EMAIL_REGEX.test(email)) return;
+    emails.add(email);
+  };
+
+  addEmail(solution?.authorEmail);
+  addEmail(solution?.ownerEmail);
+
+  const participants = solution?.participants;
+  if (Array.isArray(participants)) {
+    participants.forEach(addEmail);
+  } else if (participants && typeof participants === 'object') {
+    Object.values(participants).forEach(addEmail);
+  }
+
+  const participantsHolder = solution?.participantsHolder;
+  if (Array.isArray(participantsHolder)) {
+    participantsHolder.forEach(addEmail);
+  }
+
+  const teamMembers = solution?.teamMembers;
+  if (Array.isArray(teamMembers)) {
+    teamMembers.forEach(addEmail);
+  }
+
+  const chosenAdmins = solution?.chosenAdmins;
+  if (Array.isArray(chosenAdmins)) {
+    chosenAdmins.forEach(addEmail);
+  }
+
+  return Array.from(emails);
+};
+
+const mergeAIInsightsTeamMembers = (
+  serverMembers: AIInsightsTeamMember[],
+  payloadMembers: AIInsightsTeamMember[] = []
+): AIInsightsTeamMember[] => {
+  const merged = new Map<string, AIInsightsTeamMember>();
+
+  [...serverMembers, ...payloadMembers].forEach((member) => {
+    const email = String(member?.email || '').trim().toLowerCase();
+    if (!AI_INSIGHTS_TEAM_EMAIL_REGEX.test(email)) return;
+
+    const existing = merged.get(email);
+    merged.set(email, {
+      email,
+      name: String(member?.name || existing?.name || email).trim() || email,
+      avatarUrl:
+        String(member?.avatarUrl || existing?.avatarUrl || '').trim() || undefined,
+    });
+  });
+
+  return Array.from(merged.values()).sort((a, b) => a.name.localeCompare(b.name));
+};
+
+const hydrateAIInsightsTeamMembers = async (
+  data: AIInsightsPayload
+): Promise<AIInsightsTeamMember[]> => {
+  const db = admin.firestore();
+  const solutionSnap = await db.doc(`solutions/${data.solutionId}`).get();
+
+  const payloadMembers = Array.isArray(data.teamMembers) ? data.teamMembers : [];
+  if (!solutionSnap.exists) {
+    return mergeAIInsightsTeamMembers([], payloadMembers);
+  }
+
+  const solution = solutionSnap.data() || {};
+  const teamEmails = extractAIInsightsSolutionEmails(solution);
+  if (!teamEmails.length) {
+    return mergeAIInsightsTeamMembers([], payloadMembers);
+  }
+
+  const usersByEmail = new Map<string, any>();
+  const queryChunks: string[][] = [];
+  for (let i = 0; i < teamEmails.length; i += 10) {
+    queryChunks.push(teamEmails.slice(i, i + 10));
+  }
+
+  await Promise.all(
+    queryChunks.map(async (chunk) => {
+      const snap = await db
+        .collection('users')
+        .where('email', 'in', chunk)
+        .get();
+      snap.forEach((doc) => {
+        const user = doc.data() || {};
+        const email = String(user.email || '').trim().toLowerCase();
+        if (email) usersByEmail.set(email, user);
+      });
+    })
+  );
+
+  const serverMembers = teamEmails.map((email) => {
+    const user = usersByEmail.get(email);
+    const first = String(user?.firstName || '').trim();
+    const last = String(user?.lastName || '').trim();
+    const name = `${first} ${last}`.trim() || email;
+    const avatarUrl = String(user?.profilePicture?.downloadURL || '').trim();
+
+    return {
+      email,
+      name,
+      ...(avatarUrl ? { avatarUrl } : {}),
+    };
+  });
+
+  return mergeAIInsightsTeamMembers(serverMembers, payloadMembers);
+};
+
 const writeAIInsightsLog = async (entry: {
   mode: 'single' | 'bulk';
   subject: string;
@@ -1078,7 +1207,11 @@ export const sendAIInsightsEmail = functions.https.onCall(
     );
 
     try {
-      const { html, subject } = await buildAIInsightsEmail(data);
+      const enrichedData: AIInsightsPayload = {
+        ...data,
+        teamMembers: await hydrateAIInsightsTeamMembers(data),
+      };
+      const { html, subject } = await buildAIInsightsEmail(enrichedData);
 
       const msg = {
         to: userEmail,
