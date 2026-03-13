@@ -316,6 +316,16 @@ type AIInsightsTeamMember = {
   avatarUrl?: string;
 };
 
+type AIInsightsJoinOpportunity = {
+  solutionId: string;
+  title: string;
+  summary?: string;
+  joinUrl: string;
+  imageUrl?: string;
+  authorName?: string;
+  focusArea?: string;
+};
+
 type AIInsightsPayload = {
   userEmail: string;
   userFirstName: string;
@@ -327,6 +337,7 @@ type AIInsightsPayload = {
   meetLink?: string;
   solutionImage?: string;
   teamMembers?: AIInsightsTeamMember[];
+  joinOpportunities?: AIInsightsJoinOpportunity[];
 };
 
 // Cache structure for AI-generated content per solution
@@ -706,6 +717,15 @@ const buildAIInsightsEmailFromCache = (
     return '';
   };
 
+  const safeUrl = (value: unknown): string => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (raw.startsWith('/')) {
+      return escapeHtml(`${APP_BASE_URL.replace(/\/$/, '')}${raw}`);
+    }
+    return safeHttpUrl(raw);
+  };
+
   const getInitials = (name: string, email: string): string => {
     const parts = String(name || '')
       .trim()
@@ -788,6 +808,100 @@ const buildAIInsightsEmailFromCache = (
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 ${teamMembersHtml}
               </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 24px;">
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
+            </td>
+          </tr>
+      `
+    : '';
+
+  const joinOpportunities = Array.isArray(data.joinOpportunities)
+    ? data.joinOpportunities
+        .map((item) => ({
+          solutionId: String(item?.solutionId || '').trim(),
+          title: String(item?.title || '').trim(),
+          summary: String(item?.summary || '').trim(),
+          joinUrl: safeUrl(item?.joinUrl),
+          imageUrl: safeUrl(item?.imageUrl),
+          authorName: String(item?.authorName || '').trim(),
+          focusArea: String(item?.focusArea || '').trim(),
+        }))
+        .filter((item) => item.title && item.joinUrl)
+    : [];
+
+  const joinOpportunitiesHtml = joinOpportunities
+    .map((item) => {
+      const metaParts = [item.authorName, item.focusArea].filter(Boolean);
+      const summary = item.summary
+        ? escapeHtml(item.summary.length > 180 ? `${item.summary.slice(0, 177)}...` : item.summary)
+        : '';
+
+      return `
+        <tr>
+          <td style="padding:0 0 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border:1px solid #e5e7eb;border-radius:20px;background-color:#ffffff;">
+              ${
+                item.imageUrl
+                  ? `
+                  <tr>
+                    <td style="padding:0;">
+                      <img src="${item.imageUrl}" alt="${escapeHtml(item.title)}" width="100%" style="display:block;width:100%;max-height:200px;object-fit:cover;border-top-left-radius:20px;border-top-right-radius:20px;" />
+                    </td>
+                  </tr>
+                `
+                  : ''
+              }
+              <tr>
+                <td style="padding:18px 18px 16px;">
+                  <p style="margin:0 0 8px;font-size:19px;line-height:1.35;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${escapeHtml(item.title)}</p>
+                  ${
+                    metaParts.length
+                      ? `
+                      <p style="margin:0 0 10px;font-size:12px;line-height:1.5;color:#6b7280;text-transform:uppercase;letter-spacing:1px;">
+                        ${escapeHtml(metaParts.join(' • '))}
+                      </p>
+                    `
+                      : ''
+                  }
+                  ${
+                    summary
+                      ? `
+                      <p style="margin:0 0 16px;font-size:14px;line-height:1.7;color:#4b5563;">${summary}</p>
+                    `
+                      : ''
+                  }
+                  <a href="${item.joinUrl}" style="display:inline-block;background-color:#ecfdf5;color:#047857;text-decoration:none;padding:11px 18px;font-size:13px;font-weight:700;letter-spacing:0.2px;border:1px solid #a7f3d0;border-radius:999px;">
+                    Explore & Join
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  const joinOpportunitiesSection = joinOpportunities.length
+    ? `
+          <tr>
+            <td style="padding:32px 24px;background:linear-gradient(180deg,#f0fdf4 0%,#ffffff 100%);">
+              <h3 style="margin:0 0 8px;font-size:12px;color:#166534;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;">Open Team Opportunities</h3>
+              <p style="margin:0 0 10px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Solutions looking for participants to join</p>
+              <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.7;">
+                Other active teams across NewWorld Game are inviting collaborators right now.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                ${joinOpportunitiesHtml}
+              </table>
+              <p style="margin:8px 0 0;font-size:13px;line-height:1.6;color:#6b7280;">
+                You can browse more opportunities on
+                <a href="${APP_BASE_URL}/broadcasts" style="color:#047857;text-decoration:underline;">the broadcasts page</a>.
+              </p>
             </td>
           </tr>
 
@@ -915,6 +1029,8 @@ const buildAIInsightsEmailFromCache = (
           </tr>
 
           ${teamSection}
+
+          ${joinOpportunitiesSection}
 
           <!-- Call to Action Section -->
           <tr>
@@ -1138,6 +1254,94 @@ const hydrateAIInsightsTeamMembers = async (
   return mergeAIInsightsTeamMembers(serverMembers, payloadMembers);
 };
 
+const hydrateAIInsightsJoinOpportunities = async (
+  data: AIInsightsPayload
+): Promise<AIInsightsJoinOpportunity[]> => {
+  const db = admin.firestore();
+  const broadcastsSnap = await db
+    .collection('broadcasts')
+    .where('active', '==', true)
+    .orderBy('createdAt', 'desc')
+    .limit(12)
+    .get();
+
+  const candidates = new Map<
+    string,
+    {
+      solutionId: string;
+      title: string;
+      message: string;
+      joinLink: string;
+    }
+  >();
+
+  broadcastsSnap.forEach((doc) => {
+    const broadcast = doc.data() || {};
+    const solutionId = String(broadcast.solutionId || '').trim();
+    if (!solutionId || solutionId === data.solutionId) return;
+    if (candidates.has(solutionId)) return;
+
+    const title = String(broadcast.title || '').trim();
+    const message = String(broadcast.message || '').trim();
+    const joinLink = String(broadcast.joinLink || '').trim();
+
+    candidates.set(solutionId, {
+      solutionId,
+      title,
+      message,
+      joinLink,
+    });
+  });
+
+  const selected = Array.from(candidates.values()).slice(0, 4);
+  if (!selected.length) return [];
+
+  const solutionRefs = selected.map((item) => db.doc(`solutions/${item.solutionId}`));
+  const solutionSnaps = await db.getAll(...solutionRefs);
+  const solutionsById = new Map<string, any>();
+  solutionSnaps.forEach((snap) => {
+    if (snap.exists) {
+      solutionsById.set(snap.id, snap.data() || {});
+    }
+  });
+
+  const opportunities: AIInsightsJoinOpportunity[] = [];
+  selected.forEach((item) => {
+    const solution = solutionsById.get(item.solutionId) || {};
+    const title = String(solution.title || item.title || '').trim();
+    const broadCastInviteMessage = String(
+      solution.broadCastInviteMessage || item.message || ''
+    ).trim();
+    const description = String(solution.description || '').trim();
+    const summary = broadCastInviteMessage || description;
+    const joinUrl = String(
+      item.joinLink || `${APP_BASE_URL.replace(/\/$/, '')}/join/${item.solutionId}`
+    ).trim();
+    const imageUrl = String(solution.image || '').trim();
+    const authorName = String(solution.authorName || '').trim();
+    const focusArea = String(
+      solution.recruitmentProfile?.focusArea ||
+        solution.recruitmentProfile?.teamLabel ||
+        solution.solutionArea ||
+        ''
+    ).trim();
+
+    if (!title || !joinUrl) return;
+
+    opportunities.push({
+      solutionId: item.solutionId,
+      title,
+      ...(summary ? { summary } : {}),
+      joinUrl,
+      ...(imageUrl ? { imageUrl } : {}),
+      ...(authorName ? { authorName } : {}),
+      ...(focusArea ? { focusArea } : {}),
+    });
+  });
+
+  return opportunities;
+};
+
 const writeAIInsightsLog = async (entry: {
   mode: 'single' | 'bulk';
   subject: string;
@@ -1207,9 +1411,14 @@ export const sendAIInsightsEmail = functions.https.onCall(
     );
 
     try {
+      const [teamMembers, joinOpportunities] = await Promise.all([
+        hydrateAIInsightsTeamMembers(data),
+        hydrateAIInsightsJoinOpportunities(data),
+      ]);
       const enrichedData: AIInsightsPayload = {
         ...data,
-        teamMembers: await hydrateAIInsightsTeamMembers(data),
+        teamMembers,
+        joinOpportunities,
       };
       const { html, subject } = await buildAIInsightsEmail(enrichedData);
 
