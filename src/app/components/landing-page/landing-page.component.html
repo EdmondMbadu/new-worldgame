@@ -35,7 +35,7 @@
           <!-- Primary CTA -->
           <a
             routerLink="/get-started"
-            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 transition"
+            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 transition"
           >
             {{ 'landingHome.hero.cta' | translate }}
             <svg
@@ -91,11 +91,6 @@
       <!-- !-- ▸ Image / globe column -->
       <div class="order-1 lg:order-2 relative">
         <div
-          aria-hidden="true"
-          class="absolute -inset-10 rounded-[3rem] bg-gradient-to-tr from-teal-300/20 via-cyan-300/10 to-emerald-300/20 blur-2xl"
-        ></div>
-
-        <div
           class="hidden md:block relative mx-auto w-full max-w-sm md:max-w-md lg:max-w-lg"
         >
           <img
@@ -114,13 +109,8 @@
 
   <section
     id="explore"
-    class="relative py-16 bg-slate-50 dark:bg-slate-950/80 overflow-hidden"
+    class="relative py-16 bg-white dark:bg-slate-900 overflow-hidden border-t border-slate-200 dark:border-slate-800"
   >
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-teal-300/70 to-transparent"
-    ></div>
-
     <div class="container mx-auto max-w-7xl px-6">
       <div class="mx-auto max-w-3xl text-center">
         <span
@@ -191,31 +181,15 @@
     id="quote-nwg"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- ambient glow blobs -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-28 -right-28 h-[26rem] w-[26rem] rounded-full bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"
-    ></div>
-
     <div class="container mx-auto max-w-7xl px-6">
       <figure class="relative mx-auto max-w-4xl">
-        <!-- halo behind card -->
-        <div
-          aria-hidden="true"
-          class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
-        ></div>
-
         <!-- card -->
         <div
           class="relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-900/60 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 md:p-12 shadow-2xl"
         >
           <!-- decorative quote mark -->
           <div
-            class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-500 via-emerald-500 to-cyan-500 text-white shadow"
+            class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-700 text-white shadow"
           >
             <svg
               class="h-6 w-6"
@@ -266,12 +240,12 @@
             >
               {{ 'landingHome.quote.taglinePrefix' | translate }}
               <span
-                class="font-semibold bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
+                class="font-semibold text-slate-900 dark:text-white"
                 >NewWorld</span
               >.
               {{ 'landingHome.quote.taglineSuffix' | translate }}
               <span
-                class="font-semibold bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
+                class="font-semibold text-slate-900 dark:text-white"
                 >NewWorld Game</span
               >.
             </p>
@@ -286,16 +260,6 @@
     id="intro-video"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- ambient glow blobs -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-28 -right-28 h-[26rem] w-[26rem] rounded-full bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"
-    ></div>
-
     <div class="container mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <!-- Copy -->
@@ -309,9 +273,7 @@
           <h2
             class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
           >
-            <span
-              class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
-            >
+            <span class="text-slate-900 dark:text-white">
               {{ 'landingHome.introVideo.title' | translate }}
             </span>
           </h2>
@@ -350,12 +312,6 @@
 
         <!-- Video: framed, glowy, perfectly responsive -->
         <div class="relative">
-          <!-- halo behind player -->
-          <div
-            aria-hidden="true"
-            class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
-          ></div>
-
           <div
             class="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl"
           >
@@ -375,10 +331,6 @@
             </div>
 
             <!-- subtle decorative overlay (non-interactive) -->
-            <div
-              class="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/5 via-transparent"
-            ></div>
-
             <!-- corner label -->
             <span
               class="pointer-events-none absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80 ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold text-teal-700 dark:text-teal-300"
@@ -403,26 +355,10 @@
     id="challenge"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- ambient glow blobs -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-28 -right-28 h-[26rem] w-[26rem] rounded-full bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"
-    ></div>
-
     <div class="container mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <!-- Visual: framed with glow and subtle motion -->
         <div class="relative">
-          <!-- halo -->
-          <div
-            aria-hidden="true"
-            class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/25 via-cyan-300/15 to-emerald-300/25 blur-2xl"
-          ></div>
-
           <figure class="relative mx-auto w-full max-w-md">
             <img
               src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fchallenge-landing.webp?alt=media&token=69a081df-466d-4837-b6d7-d274f61a3462"
@@ -449,9 +385,7 @@
           <h2
             class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
           >
-            <span
-              class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
-            >
+            <span class="text-slate-900 dark:text-white">
               {{ 'landingHome.challenge.title' | translate }}
             </span>
           </h2>
@@ -490,10 +424,6 @@
           <div
             class="relative overflow-hidden rounded-2xl p-5 ring-1 ring-slate-200/70 dark:ring-slate-800/70 bg-white/70 dark:bg-slate-900/60"
           >
-            <div
-              aria-hidden="true"
-              class="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/5 to-emerald-500/5"
-            ></div>
             <p class="relative text-slate-700 dark:text-slate-200">
               <span class="font-semibold"
                 >{{ 'landingHome.challenge.calloutTitle' | translate }}</span
@@ -511,7 +441,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
             <a
               routerLink="/get-started"
-              class="group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
+              class="group inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
             >
               {{ 'landingHome.challenge.primaryCta' | translate }}
               <svg
@@ -546,16 +476,6 @@
     id="sdgs"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- soft gradient blobs -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-20 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-32 -right-28 h-[26rem] w-[26rem] rounded-full bg-gradient-to-tr from-fuchsia-400 via-indigo-400 to-teal-400 opacity-20 blur-3xl"
-    ></div>
-
     <div class="container mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <!-- Copy -->
@@ -569,9 +489,7 @@
           <h2
             class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
           >
-            <span
-              class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
-            >
+            <span class="text-slate-900 dark:text-white">
               {{ 'landingHome.sdgs.title' | translate }}
             </span>
           </h2>
@@ -611,7 +529,7 @@
             <a
               target="_blank"
               href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
-              class="group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm md:text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
+              class="group inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm md:text-base font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
             >
               {{ 'landingHome.sdgs.cta' | translate }}
               <svg
@@ -633,12 +551,6 @@
 
         <!-- Visual -->
         <div class="relative">
-          <!-- halo behind image -->
-          <div
-            aria-hidden="true"
-            class="absolute -inset-x-10 -inset-y-8 rounded-[3rem] bg-gradient-to-tr from-teal-300/20 via-cyan-300/10 to-emerald-300/20 blur-2xl"
-          ></div>
-
           <figure class="relative mx-auto w-full max-w-md">
             <img
               src="../../../assets/img/sdgs.png"
@@ -656,11 +568,7 @@
     </div>
   </section>
   <!-- AI COLLEAGUES -->
-  <section id="ai" class="relative overflow-hidden py-20">
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
-    ></div>
+  <section id="ai" class="relative overflow-hidden py-20 bg-white dark:bg-slate-950">
     <div class="mx-auto max-w-7xl px-6">
       <div class="mx-auto max-w-3xl text-center">
         <h2
@@ -679,15 +587,6 @@
           *ngFor="let item of aiOptions"
           class="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
         >
-          <div
-            class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-            aria-hidden="true"
-          >
-            <div
-              class="pointer-events-none absolute -inset-10 bg-gradient-to-br from-teal-500/10 via-emerald-500/10 to-cyan-500/10 blur-2xl"
-            ></div>
-          </div>
-
           <div class="relative z-10 flex items-center gap-4">
             <img
               [src]="item.avatarPath"
@@ -731,7 +630,7 @@
             <button
               type="button"
               (click)="openAvatar(item)"
-              class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+              class="inline-flex items-center gap-2 rounded-full bg-teal-700 hover:bg-teal-800 px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
             >
               {{ 'landingHome.ai.ask' | translate: { name: item.name } }}
               <svg
@@ -760,16 +659,6 @@
     id="testimonials"
     class="relative py-24 bg-white dark:bg-slate-900 overflow-hidden"
   >
-    <!-- soft gradient blobs -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-indigo-400 to-cyan-400 opacity-20 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-gradient-to-tr from-fuchsia-400 to-indigo-400 opacity-20 blur-3xl"
-    ></div>
-
     <div class="container mx-auto px-6 max-w-7xl">
       <header class="text-center mb-16">
         <h2
@@ -807,7 +696,7 @@
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-semibold"
             >
               {{ 'landingHome.testimonials.cards.one.initials' | translate }}
             </div>
@@ -845,7 +734,7 @@
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-semibold"
             >
               {{ 'landingHome.testimonials.cards.two.initials' | translate }}
             </div>
@@ -883,7 +772,7 @@
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-semibold"
             >
               {{ 'landingHome.testimonials.cards.three.initials' | translate }}
             </div>
@@ -921,7 +810,7 @@
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-semibold"
             >
               {{ 'landingHome.testimonials.cards.four.initials' | translate }}
             </div>
@@ -959,7 +848,7 @@
           </blockquote>
           <figcaption class="mt-6 flex items-center gap-3">
             <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-semibold"
+              class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-semibold"
             >
               {{ 'landingHome.testimonials.cards.five.initials' | translate }}
             </div>
@@ -1007,26 +896,10 @@
     id="design-science"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- ambient glow blobs (teal/cyan/emerald) -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-28 -left-20 h-[26rem] w-[26rem] rounded-full bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"
-    ></div>
-
     <div class="container mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 lg:grid-cols-2">
         <!-- Visual w/ halo -->
         <div class="relative order-last lg:order-first">
-          <!-- teal/cyan halo -->
-          <div
-            aria-hidden="true"
-            class="absolute -inset-6 rounded-[2rem] bg-gradient-to-tr from-teal-300/30 via-cyan-300/20 to-emerald-300/30 blur-2xl"
-          ></div>
-
           <figure class="relative mx-auto w-full max-w-md">
             <img
               src="../../../assets/img/design-science.png"
@@ -1052,9 +925,7 @@
           <h2
             class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
           >
-            <span
-              class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
-            >
+            <span class="text-slate-900 dark:text-white">
               {{ 'landingHome.design.title' | translate }}
             </span>
           </h2>
@@ -1078,7 +949,7 @@
             <a
               target="_blank"
               href="https://newworld-game.org/primer"
-              class="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/25 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:focus:ring-teal-800 transition-all"
+              class="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:focus:ring-teal-800 transition-all"
             >
               {{ 'landingHome.design.cta' | translate }}
               <svg
@@ -1106,16 +977,6 @@
     id="cta"
     class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
   >
-    <!-- ambient glow blobs -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -top-28 -left-24 h-72 w-72 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-400 to-emerald-400 opacity-25 blur-3xl"
-    ></div>
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -bottom-32 -right-24 h-[26rem] w-[26rem] rounded-full bg-gradient-to-tr from-teal-300 via-cyan-300 to-emerald-300 opacity-20 blur-3xl"
-    ></div>
-
     <div class="mx-auto max-w-7xl px-6">
       <div class="mx-auto max-w-3xl text-center">
         <span
@@ -1127,9 +988,7 @@
         <h2
           class="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
         >
-          <span
-            class="bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
-          >
+          <span class="text-slate-900 dark:text-white">
             {{ 'landingHome.cta.title' | translate }}
           </span>
         </h2>
@@ -1144,7 +1003,7 @@
         <div class="mt-10">
           <a
             routerLink="/get-started"
-            class="group inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600 shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
+            class="group inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
           >
             {{ 'landingHome.cta.cta' | translate }}
             <svg
