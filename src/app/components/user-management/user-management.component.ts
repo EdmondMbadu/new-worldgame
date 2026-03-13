@@ -1334,8 +1334,48 @@ export class UserManagementComponent implements OnInit {
     };
   }
 
+  private weeklyWorkedSolutionsForReport() {
+    const m = this.weeklyActivityMetrics;
+    const realUsers = this.allUsers.filter((u) => !this.isLikelyBot(u));
+    const realUserEmailSet = new Set(
+      realUsers
+        .map((u) => this.normalizeEmail(u.email))
+        .filter((email) => email.length > 0)
+    );
+
+    return this.everySolution
+      .filter(
+        (sol) =>
+          this.solutionBelongsToRealUsers(sol, realUserEmailSet) &&
+          this.solutionWorkedInRange(sol, m.windowStartMs, m.nowMs)
+      )
+      .sort((a, b) => this.solutionActivityMs(b) - this.solutionActivityMs(a))
+      .slice(0, 12)
+      .map((sol) => {
+        const authorEmail = this.normalizeEmail((sol as any).authorEmail || '');
+        const authorFromDir = this.userDirectory.get(authorEmail);
+        const authorName =
+          String((sol as any).authorName || '').trim() ||
+          authorFromDir?.name ||
+          authorEmail ||
+          'Unknown author';
+
+        return {
+          title: String((sol as any).title || 'Untitled').trim() || 'Untitled',
+          description: String((sol as any).description || '').trim(),
+          solutionArea: String((sol as any).solutionArea || '').trim(),
+          authorName,
+          lastActivityMs: this.solutionActivityMs(sol),
+          dashboardUrl: `https://newworld-game.org/dashboard/${
+            (sol as any).solutionId || ''
+          }`,
+        };
+      });
+  }
+
   private buildWeeklyActivityReportHtml(): string {
     const m = this.weeklyActivityMetrics;
+    const workedSolutions = this.weeklyWorkedSolutionsForReport();
     const generatedAt = this.formatDateMDY(m.nowMs);
     const fromDate = this.formatDateMDY(m.windowStartMs);
     const toDate = this.formatDateMDY(m.nowMs);
@@ -1344,6 +1384,92 @@ export class UserManagementComponent implements OnInit {
     const workedDeltaColor =
       m.weeklyWorkedSolutionsIncreasePct >= 0 ? '#059669' : '#dc2626';
     const logoUrl = 'https://newworld-game.org/assets/img/earth-triangle-test.png';
+    const safe = (value: unknown) =>
+      String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    const metricCard = (
+      label: string,
+      value: string | number,
+      detail?: string,
+      detailColor = '#64748b'
+    ) => `
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#f8fafc;">
+        <tr>
+          <td style="padding:16px 16px 14px;vertical-align:top;">
+            <div style="font-size:12px;line-height:1.4;color:#64748b;text-transform:uppercase;letter-spacing:.04em;font-weight:700;">${safe(label)}</div>
+            <div style="padding-top:6px;font-size:28px;line-height:1.1;font-weight:800;color:#0f172a;">${safe(value)}</div>
+            ${
+              detail
+                ? `<div style="padding-top:8px;font-size:12px;line-height:1.5;color:${detailColor};font-weight:700;">${safe(detail)}</div>`
+                : ''
+            }
+          </td>
+        </tr>
+      </table>
+    `;
+    const workedSolutionsHtml = workedSolutions.length
+      ? workedSolutions
+          .map((solution) => {
+            const meta = [
+              solution.authorName,
+              solution.solutionArea,
+              `Last activity ${this.formatDateMDY(solution.lastActivityMs)}`,
+            ]
+              .filter(Boolean)
+              .join(' • ');
+            const description = solution.description
+              ? safe(
+                  solution.description.length > 180
+                    ? `${solution.description.slice(0, 177)}...`
+                    : solution.description
+                )
+              : '';
+
+            return `
+              <tr>
+                <td style="padding:0 0 14px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#ffffff;">
+                    <tr>
+                      <td style="padding:16px 18px;">
+                        <div style="font-size:18px;line-height:1.35;font-weight:800;color:#0f172a;">
+                          <a href="${safe(solution.dashboardUrl)}" style="color:#0f172a;text-decoration:none;">${safe(solution.title)}</a>
+                        </div>
+                        <div style="padding-top:6px;font-size:12px;line-height:1.5;color:#64748b;">${safe(meta)}</div>
+                        ${
+                          description
+                            ? `<div style="padding-top:10px;font-size:14px;line-height:1.7;color:#475569;">${description}</div>`
+                            : ''
+                        }
+                        <div style="padding-top:14px;">
+                          <a href="${safe(solution.dashboardUrl)}" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;letter-spacing:.02em;">
+                            Open solution
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            `;
+          })
+          .join('')
+      : `
+        <tr>
+          <td>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#ffffff;">
+              <tr>
+                <td style="padding:18px;font-size:14px;line-height:1.7;color:#475569;">
+                  No real-user solutions were worked on during this reporting window.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      `;
 
     return `
       <div style="margin:0;padding:0;background:#f1f5f9;font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;">
@@ -1383,57 +1509,90 @@ export class UserManagementComponent implements OnInit {
                       </tr>
                     </table>
 
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:0 16px 6px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
                       <tr>
-                        <td width="50%" style="padding:8px;">
-                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
-                            <div style="font-size:12px;color:#64748b;">Total Real Users</div>
-                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.totalRealUsers}</div>
-                          </div>
-                        </td>
-                        <td width="50%" style="padding:8px;">
-                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
-                            <div style="font-size:12px;color:#64748b;">Total Open Solutions</div>
-                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.totalOpenSolutions}</div>
-                          </div>
+                        <td style="padding:0 16px 8px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+                            <tr>
+                              <td width="33.33%" style="padding:8px;vertical-align:top;">
+                                ${metricCard('Total Real Users', m.totalRealUsers)}
+                              </td>
+                              <td width="33.33%" style="padding:8px;vertical-align:top;">
+                                ${metricCard('Total Open Solutions', m.totalOpenSolutions)}
+                              </td>
+                              <td width="33.33%" style="padding:8px;vertical-align:top;">
+                                ${metricCard(
+                                  'Solutions Worked On',
+                                  m.weeklyWorkedSolutions,
+                                  `${this.percentLabel(
+                                    m.weeklyWorkedSolutionsIncreasePct
+                                  )} vs prev week`,
+                                  workedDeltaColor
+                                )}
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                       <tr>
-                        <td width="50%" style="padding:8px;">
-                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
-                            <div style="font-size:12px;color:#64748b;">Solutions Worked On (7 Days)</div>
-                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyWorkedSolutions}</div>
-                            <div style="font-size:12px;color:${workedDeltaColor};font-weight:700;margin-top:4px;">
-                              ${this.percentLabel(
-      m.weeklyWorkedSolutionsIncreasePct
-    )} vs prev week
-                            </div>
-                          </div>
-                        </td>
-                        </td>
-                        <td width="50%" style="padding:8px;">
-                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
-                            <div style="font-size:12px;color:#64748b;">Weekly Active Users</div>
-                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyActiveUsers}</div>
-                            <div style="font-size:12px;color:${activeDeltaColor};font-weight:700;margin-top:4px;">
-                              ${m.weeklyActiveRate}% active • ${this.percentLabel(
-      m.weeklyActiveIncreasePct
-    )} vs prev week
-                            </div>
-                          </div>
+                        <td style="padding:0 16px 6px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+                            <tr>
+                              <td width="50%" style="padding:8px;vertical-align:top;">
+                                ${metricCard(
+                                  'Weekly Active Users',
+                                  m.weeklyActiveUsers,
+                                  `${m.weeklyActiveRate}% active • ${this.percentLabel(
+                                    m.weeklyActiveIncreasePct
+                                  )} vs prev week`,
+                                  activeDeltaColor
+                                )}
+                              </td>
+                              <td width="50%" style="padding:8px;vertical-align:top;">
+                                ${metricCard(
+                                  'New Signups',
+                                  m.weeklyNewSignups,
+                                  `${this.percentLabel(
+                                    m.weeklySignupIncreasePct
+                                  )} vs prev week`,
+                                  signupDeltaColor
+                                )}
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                       <tr>
-                        <td width="50%" style="padding:8px;">
-                          <div style="border:1px solid #dbe3ef;border-radius:12px;background:#f8fafc;padding:14px;">
-                            <div style="font-size:12px;color:#64748b;">New Signups (7 Days)</div>
-                            <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;">${m.weeklyNewSignups}</div>
-                            <div style="font-size:12px;color:${signupDeltaColor};font-weight:700;margin-top:4px;">
-                              ${this.percentLabel(m.weeklySignupIncreasePct)} vs prev week
-                            </div>
+                        <td style="padding:10px 24px 4px;">
+                          <div style="font-size:12px;line-height:1.6;color:#64748b;">
+                            Window: ${this.formatLogTimestamp(
+                              m.windowStartMs
+                            )} to ${this.formatLogTimestamp(m.nowMs)}
                           </div>
                         </td>
-                        <td width="50%" style="padding:8px;"></td>
+                      </tr>
+                    </table>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:12px 24px 4px;">
+                          <div style="font-size:12px;line-height:1.4;color:#0f766e;text-transform:uppercase;letter-spacing:.08em;font-weight:800;">
+                            Weekly Solution Activity
+                          </div>
+                          <h3 style="margin:8px 0 0;font-size:22px;line-height:1.25;font-weight:800;color:#0f172a;">
+                            Solutions worked on this week
+                          </h3>
+                          <p style="margin:8px 0 0;font-size:14px;line-height:1.7;color:#475569;">
+                            A live list of recent solution activity from real users during this reporting window.
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:16px 24px 8px;">
+                          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                            ${workedSolutionsHtml}
+                          </table>
+                        </td>
                       </tr>
                     </table>
 
