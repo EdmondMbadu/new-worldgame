@@ -335,9 +335,7 @@ export class UserManagementComponent implements OnInit {
 
   // A simple computed property that filters users by the search term.
   get filteredUsers(): User[] {
-    const baseUsers = this.usersByBotMode.filter((user) =>
-      this.matchesSolutionEditFilter(user)
-    );
+    const baseUsers = this.usersByBotMode;
     if (!this.searchTerm.trim()) {
       return baseUsers;
     }
@@ -757,15 +755,16 @@ export class UserManagementComponent implements OnInit {
   }
 
   get solutionEditFilterSummaryText(): string {
-    const trackedUsers = this.usersByBotMode.filter(
-      (user) => this.getUserSolutionStats(user).lastTrackedEditMs > 0
+    const rows = this.solutionStepProgressRows;
+    const trackedSolutions = rows.filter(
+      (row) => this.solutionTrackedEditMs(row.solution) > 0
     ).length;
-    const untrackedUsers = this.usersByBotMode.filter((user) => {
-      const stats = this.getUserSolutionStats(user);
-      return stats.started > 0 && !stats.lastTrackedEditMs;
+    const untrackedSolutions = rows.filter((row) => {
+      const fallbackMs = this.solutionFallbackMs(row.solution);
+      return !this.solutionTrackedEditMs(row.solution) && fallbackMs > 0;
     }).length;
 
-    return `${this.filteredUsers.length} matching users • ${trackedUsers} with tracked edit times • ${untrackedUsers} untracked legacy users`;
+    return `${this.filteredSolutionStepRows.length} matching solutions • ${trackedSolutions} with tracked edit times • ${untrackedSolutions} untracked legacy solutions`;
   }
 
   lastSolutionEditDisplay(user: User): string {
@@ -806,6 +805,55 @@ export class UserManagementComponent implements OnInit {
 
   solutionEditTrackingLabel(solution: Solution): string {
     return this.solutionTrackedEditMs(solution) ? 'Tracked' : 'Legacy';
+  }
+
+  private matchesSolutionEditFilterForSolution(solution: Solution): boolean {
+    const trackedEditMs = this.solutionTrackedEditMs(solution);
+    if (this.solutionEditFilter === 'all') return true;
+
+    if (this.solutionEditFilter === 'untracked') {
+      return !trackedEditMs && this.solutionFallbackMs(solution) > 0;
+    }
+
+    if (!trackedEditMs) {
+      return false;
+    }
+
+    switch (this.solutionEditFilter) {
+      case 'today': {
+        const range = this.dayRangeForDaysAgo(0);
+        return trackedEditMs >= range.start && trackedEditMs <= range.end;
+      }
+      case 'yesterday': {
+        const range = this.dayRangeForDaysAgo(1);
+        return trackedEditMs >= range.start && trackedEditMs <= range.end;
+      }
+      case 'two_days_ago': {
+        const range = this.dayRangeForDaysAgo(2);
+        return trackedEditMs >= range.start && trackedEditMs <= range.end;
+      }
+      case 'three_days_ago': {
+        const range = this.dayRangeForDaysAgo(3);
+        return trackedEditMs >= range.start && trackedEditMs <= range.end;
+      }
+      case 'last_7_days': {
+        const start = this.startOfDayMs(Date.now() - 6 * 24 * 60 * 60 * 1000);
+        return trackedEditMs >= start;
+      }
+      case 'custom': {
+        const range = this.getCustomSolutionEditRange();
+        if (!range) return true;
+        if (range.start !== undefined && trackedEditMs < range.start) {
+          return false;
+        }
+        if (range.end !== undefined && trackedEditMs > range.end) {
+          return false;
+        }
+        return true;
+      }
+      default:
+        return true;
+    }
   }
 
   private hasMeaningfulSavedContent(raw: unknown): boolean {
@@ -1003,6 +1051,9 @@ export class UserManagementComponent implements OnInit {
   get filteredSolutionStepRows(): SolutionStepProgressRow[] {
     const term = this.solutionStepSearchTerm.trim().toLowerCase();
     return this.solutionStepProgressRows.filter((row) => {
+      if (!this.matchesSolutionEditFilterForSolution(row.solution)) {
+        return false;
+      }
       if (this.solutionCurrentStepFilter === 'empty' && !row.isEmpty) {
         return false;
       }
