@@ -1436,6 +1436,31 @@ export const processAIInsightsBulkJob = functions
 
     console.log(`Batch ${batchIndex + 1}: Content generation complete. Now sending ${batchRecipients.length} emails...`);
 
+    // Preload team members once per solution so bulk sends match single-send rendering.
+    const teamMembersCache = new Map<string, AIInsightsTeamMember[]>();
+    const uniqueBatchSolutions = new Map<string, AIInsightsPayload>();
+    batchRecipients.forEach((recipient) => {
+      const payload = recipient as AIInsightsPayload;
+      if (payload.solutionId && !uniqueBatchSolutions.has(payload.solutionId)) {
+        uniqueBatchSolutions.set(payload.solutionId, payload);
+      }
+    });
+
+    await Promise.all(
+      Array.from(uniqueBatchSolutions.values()).map(async (payload) => {
+        try {
+          const teamMembers = await hydrateAIInsightsTeamMembers(payload);
+          teamMembersCache.set(payload.solutionId, teamMembers);
+        } catch (error: any) {
+          console.error(
+            `Failed to hydrate team members for solution ${payload.solutionId}:`,
+            error?.message
+          );
+          teamMembersCache.set(payload.solutionId, payload.teamMembers || []);
+        }
+      })
+    );
+
     // ===== PHASE 2: Send emails using cached content =====
     await runWithConcurrency(batchRecipients, concurrency, async (recipient) => {
       const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
@@ -1456,8 +1481,13 @@ export const processAIInsightsBulkJob = functions
           );
         }
 
+        const enrichedRecipient: AIInsightsPayload = {
+          ...(recipient as AIInsightsPayload),
+          teamMembers: teamMembersCache.get(solutionId) || [],
+        };
+
         const { html, subject: emailSubject } = buildAIInsightsEmailFromCache(
-          recipient as AIInsightsPayload,
+          enrichedRecipient,
           cachedContent
         );
         await sgMail.send({
