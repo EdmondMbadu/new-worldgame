@@ -320,6 +320,11 @@ type AIInsightsPayload = {
   sdgs?: string[];
   meetLink?: string;
   solutionImage?: string;
+  teamMembers?: Array<{
+    name: string;
+    email: string;
+    avatarUrl?: string;
+  }>;
 };
 
 // Cache structure for AI-generated content per solution
@@ -685,6 +690,113 @@ const buildAIInsightsEmailFromCache = (
     (userEmail || '').toLowerCase()
   )}`;
 
+  const safeHttpUrl = (value: unknown): string => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    try {
+      const parsed = new URL(raw);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return escapeHtml(parsed.toString());
+      }
+    } catch (error) {
+      console.warn('Invalid team member URL skipped', raw, error);
+    }
+    return '';
+  };
+
+  const getInitials = (name: string, email: string): string => {
+    const parts = String(name || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0] || ''}${parts[parts.length - 1][0] || ''}`.toUpperCase();
+    }
+    const fallback = (parts[0] || String(email || '').split('@')[0] || 'NW')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 2);
+    return (fallback || 'NW').toUpperCase();
+  };
+
+  const teamAccentColors = ['#0f766e', '#1d4ed8', '#b45309', '#7c3aed', '#be185d'];
+  const teamMembers = Array.isArray(data.teamMembers)
+    ? data.teamMembers
+        .map((member) => ({
+          name: String(member?.name || '').trim(),
+          email: String(member?.email || '').trim().toLowerCase(),
+          avatarUrl: safeHttpUrl(member?.avatarUrl),
+        }))
+        .filter((member) => member.email)
+        .filter(
+          (member, index, all) =>
+            all.findIndex((candidate) => candidate.email === member.email) === index
+        )
+    : [];
+
+  const teamMembersHtml = teamMembers
+    .map((member, index) => {
+      const displayName = member.name || member.email;
+      const initials = getInitials(displayName, member.email);
+      const accentColor = teamAccentColors[index % teamAccentColors.length];
+      const avatarHtml = member.avatarUrl
+        ? `
+            <img src="${member.avatarUrl}" alt="${escapeHtml(displayName)}" width="56" height="56" style="display:block;width:56px;height:56px;border-radius:50%;object-fit:cover;border:3px solid #ffffff;" />
+          `
+        : `
+            <table cellpadding="0" cellspacing="0" role="presentation" style="width:56px;height:56px;background:${accentColor};border-radius:50%;">
+              <tr>
+                <td align="center" valign="middle" style="width:56px;height:56px;font-size:18px;font-weight:700;color:#ffffff;letter-spacing:0.5px;">
+                  ${escapeHtml(initials)}
+                </td>
+              </tr>
+            </table>
+          `;
+
+      return `
+        <tr>
+          <td style="padding:0 0 14px;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#ffffff;border:1px solid #e5e7eb;border-radius:18px;">
+              <tr>
+                <td width="76" style="padding:14px 0 14px 14px;vertical-align:middle;">
+                  ${avatarHtml}
+                </td>
+                <td style="padding:14px 16px 14px 8px;vertical-align:middle;">
+                  <p style="margin:0;font-size:16px;line-height:1.4;font-weight:600;color:#111827;">${escapeHtml(displayName)}</p>
+                  <p style="margin:6px 0 0;font-size:13px;line-height:1.5;color:#6b7280;">
+                    <a href="mailto:${escapeHtml(member.email)}" style="color:#6b7280;text-decoration:none;">${escapeHtml(member.email)}</a>
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  const teamSection = teamMembers.length
+    ? `
+          <tr>
+            <td style="padding:32px 24px;background:linear-gradient(180deg,#fcfcfd 0%,#f8fafc 100%);">
+              <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Your Team</h3>
+              <p style="margin:0 0 10px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">People building this solution with you</p>
+              <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.7;">
+                Keep everyone close. Here is the current team connected to this solution.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                ${teamMembersHtml}
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 24px;">
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
+            </td>
+          </tr>
+      `
+    : '';
+
   const emailHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -799,6 +911,8 @@ const buildAIInsightsEmailFromCache = (
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
             </td>
           </tr>
+
+          ${teamSection}
 
           <!-- Call to Action Section -->
           <tr>

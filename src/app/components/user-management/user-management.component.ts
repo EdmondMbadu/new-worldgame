@@ -40,6 +40,12 @@ type SolutionStepProgressRow = {
   patternLabel: string;
 };
 
+type AIInsightsTeamMember = {
+  name: string;
+  email: string;
+  avatarUrl?: string;
+};
+
 @Component({
   selector: 'app-user-management',
   templateUrl: './user-management.component.html',
@@ -235,7 +241,11 @@ export class UserManagementComponent implements OnInit {
     });
   }
 
-  private userDirectory = new Map<string, { name: string; email: string }>();
+  private userDirectory = new Map<
+    string,
+    { name: string; email: string; avatarUrl?: string }
+  >();
+  private usersByEmail = new Map<string, User>();
 
   selected = new Set<string>(); // emails
   allSelected = false;
@@ -284,6 +294,7 @@ export class UserManagementComponent implements OnInit {
 
       // Build directory: email -> {name,email}
       this.userDirectory.clear();
+      this.usersByEmail.clear();
       for (const u of this.allUsers) {
         const email = (u.email || '').trim().toLowerCase();
         if (!email) continue;
@@ -293,10 +304,13 @@ export class UserManagementComponent implements OnInit {
           first || last
             ? `${first} ${last}`.trim()
             : (u.firstName || '').trim();
+        const avatarUrl = (u.profilePicture?.downloadURL || '').trim();
         this.userDirectory.set(email, {
           name: fullName || email,
           email,
+          avatarUrl: avatarUrl || undefined,
         });
+        this.usersByEmail.set(email, u);
       }
       this.userDetails = Array.from(
         { length: this.allUsers.length },
@@ -1706,6 +1720,58 @@ export class UserManagementComponent implements OnInit {
     return [];
   }
 
+  private buildAIInsightsTeamMembers(solution: Solution): AIInsightsTeamMember[] {
+    const teamEmails = new Set<string>();
+    const addEmail = (value: unknown) => {
+      const email = this.normalizeEmail(value);
+      if (email) teamEmails.add(email);
+    };
+    const addCollection = (input: unknown) => {
+      if (!input) return;
+      if (Array.isArray(input)) {
+        input.forEach((item: any) => {
+          if (typeof item === 'string') {
+            addEmail(item);
+            return;
+          }
+          if (item && typeof item === 'object') {
+            addEmail(item.email || item.name);
+          }
+        });
+        return;
+      }
+      if (typeof input === 'object') {
+        Object.values(input as Record<string, unknown>).forEach(addEmail);
+      }
+    };
+
+    addEmail(solution.authorEmail);
+    addCollection((solution as any).participants);
+    addCollection((solution as any).participantsHolder);
+    addCollection((solution as any).teamMembers);
+
+    return Array.from(teamEmails)
+      .map((email) => {
+        const fromDirectory = this.userDirectory.get(email);
+        const user = this.usersByEmail.get(email);
+        const first = (user?.firstName || '').trim();
+        const last = (user?.lastName || '').trim();
+        const name =
+          first || last
+            ? `${first} ${last}`.trim()
+            : fromDirectory?.name || email;
+        const avatarUrl =
+          (user?.profilePicture?.downloadURL || fromDirectory?.avatarUrl || '').trim();
+
+        return {
+          name,
+          email,
+          ...(avatarUrl ? { avatarUrl } : {}),
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   private subscribeUnsubscribes() {
     this.afs
       .collection('mailing_unsubscribes', (ref) =>
@@ -1932,6 +1998,7 @@ export class UserManagementComponent implements OnInit {
           sdgs: solution.sdgs || [],
           meetLink: solution.meetLink || '',
           solutionImage: solution.image || '',
+          teamMembers: this.buildAIInsightsTeamMembers(solution),
         })
       );
 
