@@ -11,20 +11,25 @@ export interface SeoConfig {
   url?: string;
   type?: string;
   author?: string;
+  robots?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class SeoService {
+  private readonly primaryDomain = 'https://newworld-game.org';
+  private readonly defaultImage = `${this.primaryDomain}/assets/img/earth-triangle-test.png`;
+
   private defaultConfig: SeoConfig = {
     title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
-    description: 'NewWorld Game is an educational platform where students and teams collaborate to solve real-world global challenges. Join tournaments, discover solutions, and make a difference.',
+    description: 'NewWorld Game is an educational platform where students, educators, and teams collaborate to solve real-world global challenges through design science, AI guidance, and structured programs.',
     keywords: 'NewWorld Game, New World Game, global challenges, educational game, collaborative learning, sustainability, problem-solving, tournaments, world game, Buckminster Fuller',
-    image: 'https://new-worldgame.web.app/assets/img/earth-triangle-test.png',
-    url: 'https://new-worldgame.web.app',
+    image: this.defaultImage,
+    url: `${this.primaryDomain}/`,
     type: 'website',
-    author: 'NewWorld Game Team'
+    author: 'NewWorld Game Team',
+    robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
   };
 
   constructor(
@@ -41,6 +46,8 @@ export class SeoService {
    */
   updateMetaTags(config: SeoConfig): void {
     const seoConfig = { ...this.defaultConfig, ...config };
+    const canonicalUrl = this.toAbsoluteUrl(seoConfig.url || '/');
+    const robots = seoConfig.robots || this.defaultConfig.robots || 'index, follow';
 
     // Update title
     if (seoConfig.title) {
@@ -51,22 +58,27 @@ export class SeoService {
     this.metaService.updateTag({ name: 'description', content: seoConfig.description || '' });
     this.metaService.updateTag({ name: 'keywords', content: seoConfig.keywords || '' });
     this.metaService.updateTag({ name: 'author', content: seoConfig.author || '' });
+    this.metaService.updateTag({ name: 'robots', content: robots });
+    this.metaService.updateTag({ name: 'googlebot', content: robots });
 
     // Open Graph tags
     this.metaService.updateTag({ property: 'og:title', content: seoConfig.title || '' });
     this.metaService.updateTag({ property: 'og:description', content: seoConfig.description || '' });
-    this.metaService.updateTag({ property: 'og:image', content: seoConfig.image || '' });
-    this.metaService.updateTag({ property: 'og:url', content: seoConfig.url || '' });
+    this.metaService.updateTag({ property: 'og:image', content: this.toAbsoluteUrl(seoConfig.image || this.defaultImage) });
+    this.metaService.updateTag({ property: 'og:url', content: canonicalUrl });
     this.metaService.updateTag({ property: 'og:type', content: seoConfig.type || 'website' });
+    this.metaService.updateTag({ property: 'og:site_name', content: 'NewWorld Game' });
+    this.metaService.updateTag({ property: 'og:image:alt', content: 'NewWorld Game - educational platform for solving global challenges' });
 
     // Twitter Card tags
     this.metaService.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
     this.metaService.updateTag({ name: 'twitter:title', content: seoConfig.title || '' });
     this.metaService.updateTag({ name: 'twitter:description', content: seoConfig.description || '' });
-    this.metaService.updateTag({ name: 'twitter:image', content: seoConfig.image || '' });
+    this.metaService.updateTag({ name: 'twitter:image', content: this.toAbsoluteUrl(seoConfig.image || this.defaultImage) });
+    this.metaService.updateTag({ name: 'twitter:url', content: canonicalUrl });
 
     // Canonical URL
-    this.updateCanonicalUrl(seoConfig.url || '');
+    this.updateCanonicalUrl(canonicalUrl);
   }
 
   /**
@@ -112,14 +124,33 @@ export class SeoService {
    * Get route-specific SEO configuration
    */
   getRouteConfig(route: string): SeoConfig {
-    const baseUrl = 'https://new-worldgame.web.app';
+    const normalizedRoute = this.normalizeRoute(route);
+    const baseUrl = this.primaryDomain;
     const configs: { [key: string]: SeoConfig } = {
       '/': {
         title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
-        description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students collaborate to solve real-world global challenges. Join tournaments, discover solutions, and make a difference.',
-        keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational game, collaborative learning, sustainability, world game, Buckminster Fuller, problem solving',
-        url: baseUrl,
+        description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students, educators, and communities collaborate to solve global challenges through AI guidance, design science, tournaments, and solution-building programs.',
+        keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational platform, Buckminster Fuller, design science, sustainability education, collaborative learning, AI problem solving',
+        url: `${baseUrl}/`,
         type: 'website'
+      },
+      '/get-started': {
+        title: 'Get Started with NewWorld Game | Global Challenge Learning Platform',
+        description: 'Start using NewWorld Game. Explore the onboarding path for students, educators, and partners who want to solve global challenges through collaborative gameplay and design science.',
+        keywords: 'get started NewWorld Game, NewWorld Game onboarding, start New World Game, design science learning platform',
+        url: `${baseUrl}/get-started`
+      },
+      '/welcome': {
+        title: 'Get Started with NewWorld Game | Global Challenge Learning Platform',
+        description: 'Start using NewWorld Game. Explore the onboarding path for students, educators, and partners who want to solve global challenges through collaborative gameplay and design science.',
+        keywords: 'get started NewWorld Game, NewWorld Game onboarding, start New World Game, design science learning platform',
+        url: `${baseUrl}/get-started`
+      },
+      '/about': {
+        title: 'About NewWorld Game | Buckminster Fuller Inspired Learning Platform',
+        description: 'Learn what NewWorld Game is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',
+        keywords: 'about NewWorld Game, Buckminster Fuller world game, design science education, global problem solving platform',
+        url: `${baseUrl}/about`
       },
       '/landing': {
         title: 'Welcome to NewWorld Game - Transform Learning Through Global Problem Solving',
@@ -145,11 +176,17 @@ export class SeoService {
         keywords: 'NewWorld Game community, global problem solvers, collaborative learning community, educational network',
         url: `${baseUrl}/landing-community`
       },
+      '/pricing': {
+        title: 'NewWorld Game Pricing Plans | Programs for Schools, Universities, and Teams',
+        description: 'Explore NewWorld Game pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
+        keywords: 'NewWorld Game pricing, NewWorld Game plans, educational platform pricing, school packages, university challenge platform',
+        url: `${baseUrl}/pricing`
+      },
       '/plans': {
-        title: 'NewWorld Game Pricing Plans - Choose Your Package',
-        description: 'Explore NewWorld Game pricing plans for individuals, schools, and organizations. Find the perfect package to start solving global challenges.',
-        keywords: 'NewWorld Game pricing, NWG plans, educational platform pricing, school packages, tournament access',
-        url: `${baseUrl}/plans`
+        title: 'NewWorld Game Pricing Plans | Programs for Schools, Universities, and Teams',
+        description: 'Explore NewWorld Game pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
+        keywords: 'NewWorld Game pricing, NewWorld Game plans, educational platform pricing, school packages, university challenge platform',
+        url: `${baseUrl}/pricing`
       },
       '/workshop': {
         title: 'NewWorld Game Workshop - Interactive Learning Experience',
@@ -169,11 +206,17 @@ export class SeoService {
         keywords: 'NewWorld Game team, about us, educational innovators, game creators',
         url: `${baseUrl}/our-team`
       },
+      '/contact': {
+        title: 'Contact NewWorld Game | Partnerships, Workshops, and Support',
+        description: 'Contact the NewWorld Game team for partnerships, school programs, workshops, tournaments, and platform support.',
+        keywords: 'contact NewWorld Game, support, workshops, partnerships, New World Game contact',
+        url: `${baseUrl}/contact`
+      },
       '/contact-us': {
-        title: 'Contact NewWorld Game - Get in Touch',
-        description: 'Contact the NewWorld Game team. Questions about our platform, workshops, or tournaments? We\'re here to help.',
-        keywords: 'contact NewWorld Game, support, get in touch, NWG contact',
-        url: `${baseUrl}/contact-us`
+        title: 'Contact NewWorld Game | Partnerships, Workshops, and Support',
+        description: 'Contact the NewWorld Game team for partnerships, school programs, workshops, tournaments, and platform support.',
+        keywords: 'contact NewWorld Game, support, workshops, partnerships, New World Game contact',
+        url: `${baseUrl}/contact`
       },
       '/blogs/features': {
         title: 'NewWorld Game Features - Platform Capabilities & Tools',
@@ -200,14 +243,19 @@ export class SeoService {
         url: `${baseUrl}/privacy`
       },
       '/overview': {
-        title: 'NewWorld Game Overview - How It Works',
-        description: 'Learn how NewWorld Game works. Understand the game mechanics, challenge structure, and collaborative problem-solving approach.',
-        keywords: 'NewWorld Game overview, how it works, game mechanics, platform guide',
-        url: `${baseUrl}/overview`
+        title: 'About NewWorld Game | Buckminster Fuller Inspired Learning Platform',
+        description: 'Learn what NewWorld Game is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',
+        keywords: 'about NewWorld Game, Buckminster Fuller world game, design science education, global problem solving platform',
+        url: `${baseUrl}/about`
       }
     };
 
-    return configs[route] || this.defaultConfig;
+    return {
+      ...this.defaultConfig,
+      ...(configs[normalizedRoute] || {}),
+      url: (configs[normalizedRoute]?.url || `${baseUrl}${normalizedRoute === '/' ? '/' : normalizedRoute}`),
+      robots: this.getRobotsForRoute(normalizedRoute),
+    };
   }
 
   /**
@@ -223,5 +271,70 @@ export class SeoService {
         // Scroll to top on route change
         window.scrollTo(0, 0);
       });
+
+    this.updateMetaTags(this.getRouteConfig(this.router.url || '/'));
+  }
+
+  private normalizeRoute(route: string): string {
+    const [path] = route.split(/[?#]/);
+    return path || '/';
+  }
+
+  private toAbsoluteUrl(url: string): string {
+    if (!url) {
+      return `${this.primaryDomain}/`;
+    }
+
+    if (/^https?:\/\//i.test(url)) {
+      return url;
+    }
+
+    return `${this.primaryDomain}${url.startsWith('/') ? url : `/${url}`}`;
+  }
+
+  private getRobotsForRoute(route: string): string {
+    const noIndexPrefixes = [
+      '/home',
+      '/game',
+      '/mini-game',
+      '/discover',
+      '/profile',
+      '/challenge',
+      '/whiteboard',
+      '/team-building',
+      '/solution',
+      '/dashboard',
+      '/video-call',
+      '/meeting',
+      '/school-admin',
+      '/login',
+      '/signup',
+      '/forgot-password',
+      '/verify-email',
+      '/admin',
+      '/join',
+      '/unsubscribe',
+      '/scheduler',
+      '/thank-you',
+      '/start-challenge',
+      '/problem-feedback',
+      '/evaluation-summary',
+      '/solution-view',
+      '/solution-preview',
+      '/solution-details',
+      '/document-files',
+      '/broadcasts',
+      '/create-playground',
+      '/create-solution',
+      '/playground-steps',
+      '/active-tournaments',
+      '/your-tournaments',
+      '/past-tournaments',
+      '/invitations',
+    ];
+
+    return noIndexPrefixes.some((prefix) => route === prefix || route.startsWith(`${prefix}/`))
+      ? 'noindex, nofollow'
+      : this.defaultConfig.robots || 'index, follow';
   }
 }

@@ -19,6 +19,21 @@ Disallow: /dashboard
 Disallow: /video-call
 Disallow: /meeting
 Disallow: /school-admin
+Disallow: /playground-steps
+Disallow: /create-playground
+Disallow: /create-solution
+Disallow: /solution-view
+Disallow: /solution-preview
+Disallow: /solution-details
+Disallow: /problem-feedback
+Disallow: /evaluation-summary
+Disallow: /document-files
+Disallow: /broadcasts
+Disallow: /join
+Disallow: /join-success
+Disallow: /unsubscribe
+Disallow: /scheduler
+Disallow: /thank-you
 
 # Disallow auth routes
 Disallow: /login
@@ -33,18 +48,19 @@ Disallow: /admin
 
 # Allow specific important pages
 Allow: /
+Allow: /get-started
+Allow: /about
 Allow: /landing
 Allow: /landing-college
 Allow: /landing-un
 Allow: /landing-community
-Allow: /plans
+Allow: /pricing
 Allow: /workshop
 Allow: /tournament-landing
 Allow: /bucky
 Allow: /ask-bucky
 Allow: /our-team
-Allow: /contact-us
-Allow: /overview
+Allow: /contact
 Allow: /blogs/
 
 # Sitemap location

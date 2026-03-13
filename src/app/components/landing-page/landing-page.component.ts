@@ -38,9 +38,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     // Update SEO meta tags for landing page
     this.seoService.updateMetaTags({
       title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
-      description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students collaborate to solve real-world global challenges. Join tournaments, discover solutions, and make a difference.',
-      keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational game, collaborative learning, sustainability, world game, Buckminster Fuller, problem solving',
-      url: 'https://new-worldgame.web.app',
+      description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students, educators, and communities collaborate to solve global challenges through AI guidance, design science, tournaments, and solution-building programs.',
+      keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational platform, collaborative learning, sustainability, world game, Buckminster Fuller, design science',
+      url: 'https://newworld-game.org/',
       type: 'website'
     });
 

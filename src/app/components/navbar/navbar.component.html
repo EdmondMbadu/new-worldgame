@@ -79,7 +79,7 @@
   </div>
 
   <div
-    class="container mx-auto flex items-center justify-between dark:text-white px-12"
+    class="container mx-auto flex items-center justify-between gap-6 dark:text-white px-6 lg:px-12"
   >
     <div
       *ngIf="showLogo"
@@ -100,6 +100,17 @@
         {{ "navbar.brand" | translate }}
       </h1>
     </div>
+
+    <div
+      class="hidden lg:flex items-center gap-1 rounded-full border border-slate-200 bg-white/90 px-2 py-2 text-sm font-medium text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200"
+      aria-label="Primary navigation"
+    >
+      <a routerLink="/get-started" class="rounded-full px-3 py-2 hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-700 dark:hover:text-teal-300 transition-colors">Get Started</a>
+      <a routerLink="/about" class="rounded-full px-3 py-2 hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-700 dark:hover:text-teal-300 transition-colors">About</a>
+      <a routerLink="/global-lab" class="rounded-full px-3 py-2 hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-700 dark:hover:text-teal-300 transition-colors">Programs</a>
+      <a routerLink="/pricing" class="rounded-full px-3 py-2 hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-700 dark:hover:text-teal-300 transition-colors">Pricing</a>
+      <a routerLink="/contact" class="rounded-full px-3 py-2 hover:bg-slate-100 hover:text-teal-700 dark:hover:bg-slate-700 dark:hover:text-teal-300 transition-colors">Contact</a>
+    </div>
     <!-- <a *ngIf="currenPageLabBanner" routerLink="/global-lab" class="hidden md:inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-teal-900 bg-teal-100 rounded-full dark:bg-teal-900 dark:text-white hover:bg-teal-200 dark:hover:bg-teal-800" role="alert">
         <span class="text-xs bg-emerald-600 rounded-full text-white px-4 py-1.5 mr-3">Event</span> 
         <span class="text-sm font-medium">🌍 Join the Global Solutions Lab – June 16-20, 2025</span> 
@@ -108,7 +119,7 @@
         </svg>
       </a> -->
 
-    <div class="flex flex-row items-center space-x-4">
+    <div class="flex flex-row items-center space-x-4 shrink-0">
       <!-- Minimal Language Dropdown with Flags -->
       <div *ngIf="canShowLanguageSwitcher" class="relative" (clickOutside)="showLanguageDropdown = false">
         <button
