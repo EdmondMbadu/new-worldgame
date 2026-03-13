@@ -1254,9 +1254,9 @@ const hydrateAIInsightsTeamMembers = async (
   return mergeAIInsightsTeamMembers(serverMembers, payloadMembers);
 };
 
-const hydrateAIInsightsJoinOpportunities = async (
-  data: AIInsightsPayload
-): Promise<AIInsightsJoinOpportunity[]> => {
+const loadAIInsightsJoinOpportunityPool = async (): Promise<
+  AIInsightsJoinOpportunity[]
+> => {
   const db = admin.firestore();
   const broadcastsSnap = await db
     .collection('broadcasts')
@@ -1278,7 +1278,7 @@ const hydrateAIInsightsJoinOpportunities = async (
   broadcastsSnap.forEach((doc) => {
     const broadcast = doc.data() || {};
     const solutionId = String(broadcast.solutionId || '').trim();
-    if (!solutionId || solutionId === data.solutionId) return;
+    if (!solutionId) return;
     if (candidates.has(solutionId)) return;
 
     const title = String(broadcast.title || '').trim();
@@ -1293,7 +1293,7 @@ const hydrateAIInsightsJoinOpportunities = async (
     });
   });
 
-  const selected = Array.from(candidates.values()).slice(0, 4);
+  const selected = Array.from(candidates.values());
   if (!selected.length) return [];
 
   const solutionRefs = selected.map((item) => db.doc(`solutions/${item.solutionId}`));
@@ -1340,6 +1340,22 @@ const hydrateAIInsightsJoinOpportunities = async (
   });
 
   return opportunities;
+};
+
+const selectAIInsightsJoinOpportunities = (
+  pool: AIInsightsJoinOpportunity[],
+  currentSolutionId: string,
+  maxItems = 4
+): AIInsightsJoinOpportunity[] =>
+  pool
+    .filter((item) => item.solutionId !== currentSolutionId)
+    .slice(0, maxItems);
+
+const hydrateAIInsightsJoinOpportunities = async (
+  data: AIInsightsPayload
+): Promise<AIInsightsJoinOpportunity[]> => {
+  const pool = await loadAIInsightsJoinOpportunityPool();
+  return selectAIInsightsJoinOpportunities(pool, data.solutionId);
 };
 
 const writeAIInsightsLog = async (entry: {
@@ -1670,6 +1686,16 @@ export const processAIInsightsBulkJob = functions
       })
     );
 
+    let joinOpportunityPool: AIInsightsJoinOpportunity[] = [];
+    try {
+      joinOpportunityPool = await loadAIInsightsJoinOpportunityPool();
+    } catch (error: any) {
+      console.error(
+        `Failed to load join opportunities for batch ${batchIndex + 1}:`,
+        error?.message
+      );
+    }
+
     // ===== PHASE 2: Send emails using cached content =====
     await runWithConcurrency(batchRecipients, concurrency, async (recipient) => {
       const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
@@ -1693,6 +1719,10 @@ export const processAIInsightsBulkJob = functions
         const enrichedRecipient: AIInsightsPayload = {
           ...(recipient as AIInsightsPayload),
           teamMembers: teamMembersCache.get(solutionId) || [],
+          joinOpportunities: selectAIInsightsJoinOpportunities(
+            joinOpportunityPool,
+            solutionId
+          ),
         };
 
         const { html, subject: emailSubject } = buildAIInsightsEmailFromCache(
