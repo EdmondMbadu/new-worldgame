@@ -52,7 +52,13 @@
   <div class="absolute inset-0 bg-black/40"></div>
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
     <h1 class="text-3xl md:text-5xl font-extrabold mb-4">
-      {{ isDrexelOnly ? '2026 Global Solutions Lab Drexel Student Registration' : '2026 Global Solutions Lab Registration' }}
+      <ng-container *ngIf="isDrexelOnly; else standardHeroTitle">
+        2026 Global Solutions Lab<br />
+        Drexel Student Registration
+      </ng-container>
+      <ng-template #standardHeroTitle>
+        2026 Global Solutions Lab Registration
+      </ng-template>
     </h1>
     <p class="text-lg md:text-xl font-semibold mb-6">
       {{ isDrexelOnly ? 'Register for free today!' : 'Secure your spot today!' }}
@@ -167,7 +173,7 @@
             </h3>
             <ng-container *ngIf="isDrexelOnly; else standardOnlineTuition">
               <p class="text-base md:text-lg font-semibold text-teal-700 dark:text-teal-300">
-                Registration is free for Drexel University students.
+                Participation is free for Drexel University students.
               </p>
             </ng-container>
             <ng-template #standardOnlineTuition>
@@ -521,7 +527,7 @@
           </h3>
           <ng-container *ngIf="isDrexelOnly; else standardInPersonTuition">
             <p class="text-base md:text-lg font-semibold text-teal-700 dark:text-teal-300 mb-6">
-              Registration is free for Drexel University students.
+              Participation is free for Drexel University students.
             </p>
           </ng-container>
           <ng-template #standardInPersonTuition>
@@ -916,7 +922,9 @@
             Hands-On AI Experience
           </h3>
           <p class="text-gray-700 dark:text-gray-300">
-            Learn to harness advanced AIs and global datasets to develop real, scalable strategies aligned with the UN Sustainable Development Goals.
+            {{ isDrexelOnly
+              ? 'Learn to harness AI for good, use advanced AIs and global datasets to develop real, scalable strategies aligned with your values and the UN Sustainable Development Goals.'
+              : 'Learn to harness advanced AIs and global datasets to develop real, scalable strategies aligned with the UN Sustainable Development Goals.' }}
           </p>
         </div>
       </div>
@@ -929,7 +937,9 @@
             Mentorship & Expert Feedback
           </h3>
           <p class="text-gray-700 dark:text-gray-300">
-            Work alongside UN professionals, researchers, and global experts who will provide valuable guidance and review to shape your ideas.
+            {{ isDrexelOnly
+              ? 'Work alongside professionals, researchers, other students, and global experts who will provide valuable guidance and review to shape your ideas.'
+              : 'Work alongside UN professionals, researchers, and global experts who will provide valuable guidance and review to shape your ideas.' }}
           </p>
         </div>
       </div>
@@ -939,10 +949,15 @@
         <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🏆</div>
         <div>
           <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            Eligibility for a Cash Prize
+            {{ isDrexelOnly ? 'Tournament Visibility & Awards' : 'Eligibility for a Cash Prize' }}
           </h3>
           <p class="text-gray-700 dark:text-gray-300">
-            Submit your project to the <strong>NewWorld Tournament</strong> and compete for a cash award to help bring your idea to life.
+            <ng-container *ngIf="isDrexelOnly; else standardCashPrize">
+              Submit your project to the <strong>NewWorld Tournament</strong> where winning solutions gain visibility and possible awards that help bring your idea to life.
+            </ng-container>
+            <ng-template #standardCashPrize>
+              Submit your project to the <strong>NewWorld Tournament</strong> and compete for a cash award to help bring your idea to life.
+            </ng-template>
           </p>
         </div>
       </div>
