@@ -97,6 +97,16 @@ const routes: Routes = [
   { path: 'welcome', component: WelcomeComponent },
   { path: 'global-lab', component: GlobalLabComponent },
   { path: 'global-register', component: GlobalRegisterComponent },
+  {
+    path: 'drexel-register',
+    component: GlobalRegisterComponent,
+    data: { drexelOnly: true },
+  },
+  {
+    path: 'global-register-drexel',
+    component: GlobalRegisterComponent,
+    data: { drexelOnly: true },
+  },
   { path: 'blogs/new-features', component: NewFeaturesComponent },
   { path: 'workshop', component: WorkshopComponent },
   { path: 'workshop-register', component: WorkshopRegisterComponent },

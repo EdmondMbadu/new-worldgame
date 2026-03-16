@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
@@ -12,6 +12,7 @@ import { TimeService } from 'src/app/services/time.service';
   styleUrl: './global-register.component.css',
 })
 export class GlobalRegisterComponent implements OnInit {
+  isDrexelOnly: boolean = false;
   email: string = '';
   firstName: string = '';
   lastName: string = '';
@@ -43,12 +44,17 @@ export class GlobalRegisterComponent implements OnInit {
     public auth: AuthService,
     private data: DataService,
     private router: Router,
+    private route: ActivatedRoute,
     private fns: AngularFireFunctions,
     private time: TimeService
   ) {}
 
   ngOnInit(): void {
     window.scroll(0, 0);
+    this.isDrexelOnly = !!this.route.snapshot.data['drexelOnly'];
+    if (this.isDrexelOnly) {
+      this.targetGroup = 'drexelStudent';
+    }
     if (
       this.auth.currentUser !== null &&
       this.auth.currentUser.email !== undefined
@@ -140,11 +146,12 @@ export class GlobalRegisterComponent implements OnInit {
           occupation: this.occupation,
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
-          targetGroup: this.targetGroup,
+          targetGroup: this.getRegistrationTargetGroup(),
           labMode: this.labMode, // pass the new field
           letterOfInvitation: this.letterOfInvitation, // pass the new field
           registerDate: this.time.todaysDate(),
           pid: this.pid,
+          registrationType: this.isDrexelOnly ? 'drexel' : 'standard',
         };
 
         this.globalLabData.push(registrationData);
@@ -250,11 +257,12 @@ export class GlobalRegisterComponent implements OnInit {
           occupation: this.occupation,
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
-          targetGroup: this.targetGroup,
+          targetGroup: this.getRegistrationTargetGroup(),
           labMode: this.labMode,
           letterOfInvitation: this.letterOfInvitation,
           registerDate: this.time.todaysDate(),
           pid: this.pid,
+          registrationType: this.isDrexelOnly ? 'drexel' : 'standard',
         };
 
         this.globalLabData.push(registrationData);
@@ -285,7 +293,9 @@ export class GlobalRegisterComponent implements OnInit {
           this.fns
             .httpsCallable('gslAdminNotificationEmail')({
               emailAdmin: email, // Dynamically assign the email
-              subject: 'New GSL 2026 Registration (Pay Later)',
+              subject: this.isDrexelOnly
+                ? 'New GSL 2026 Drexel Registration'
+                : 'New GSL 2026 Registration (Pay Later)',
               ...registrationData, // Ensure this object contains the needed fields
             })
             .subscribe({
@@ -313,6 +323,9 @@ export class GlobalRegisterComponent implements OnInit {
   // Method to figure out the cost
   // UPDATED to factor in labMode
   getPrice(): number {
+    if (this.isDrexelOnly) {
+      return 0;
+    }
     if (this.labMode === 'inPerson') {
       // In-person
       if (this.targetGroup === 'professional') return 800;
@@ -346,8 +359,12 @@ export class GlobalRegisterComponent implements OnInit {
     this.labMode = 'inPerson';
     this.letterOfInvitation = false;
 
-    this.targetGroup = 'professional';
+    this.targetGroup = this.isDrexelOnly ? 'drexelStudent' : 'professional';
     this.reachOutEmail = 'newworld@newworld-game.org';
+  }
+
+  getRegistrationTargetGroup(): string {
+    return this.isDrexelOnly ? 'drexelStudent' : this.targetGroup;
   }
 
   private initializeCountdown(): void {

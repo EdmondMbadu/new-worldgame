@@ -52,10 +52,10 @@
   <div class="absolute inset-0 bg-black/40"></div>
   <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
     <h1 class="text-3xl md:text-5xl font-extrabold mb-4">
-      2026 Global Solutions Lab Registration
+      {{ isDrexelOnly ? '2026 Global Solutions Lab Drexel Student Registration' : '2026 Global Solutions Lab Registration' }}
     </h1>
     <p class="text-lg md:text-xl font-semibold mb-6">
-      Secure your spot today!
+      {{ isDrexelOnly ? 'Register for free today!' : 'Secure your spot today!' }}
     </p>
 
     <!-- COUNTDOWN HEADING (no box) -->
@@ -137,7 +137,7 @@
   </div>
   <div class="max-w-2xl mx-auto my-6 px-6 py-4 bg-teal-50 dark:bg-slate-800 border-l-4 border-teal-600 dark:border-teal-400 rounded">
     <p class="text-center text-gray-800 dark:text-gray-100 text-base md:text-lg font-semibold">
-      🕒 <strong>Important:</strong> The deadline for <span class="underline">In-Person</span> registration and payment is <strong>June 1st</strong>. For <span class="underline">Online</span>, it is <strong>June 9th</strong>.
+      🕒 <strong>Important:</strong> The deadline for <span class="underline">In-Person</span> registration{{ isDrexelOnly ? '' : ' and payment' }} is <strong>June 1st</strong>. For <span class="underline">Online</span>, it is <strong>June 9th</strong>.
     </p>
   </div>
   
@@ -156,27 +156,38 @@
           </p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-6">
             <li class="mb-2">Fill out the registration form on this page.</li>
-            <li class="mb-2">We will send you a response. Tuition is due by June 1, 2026.</li>
+            <li class="mb-2">
+              {{ isDrexelOnly ? 'We will send you a confirmation after you register.' : 'We will send you a response. Tuition is due by June 1, 2026.' }}
+            </li>
             <li>You will receive further information about program specifics starting in April 2026.</li>
           </ul>
           <div class="text-gray-700 dark:text-gray-300 mb-4">
-            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">TUITION (Online)</h3>
-            <ul class="list-disc pl-5">
-              <li>$250 for professionals</li>
-              <li>$200 for students and seniors</li>
-              <li>$0 for Drexel University students</li>
-              <li>Scholarships available for players from developing countries*</li>
-            </ul>
-            <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
-              * For players from developing countries, email us at 
-              <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
-              to request partial to full scholarship depending on the case.
-            </h1>
+            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+              {{ isDrexelOnly ? 'DREXEL STUDENT REGISTRATION (Online)' : 'TUITION (Online)' }}
+            </h3>
+            <ng-container *ngIf="isDrexelOnly; else standardOnlineTuition">
+              <p class="text-base md:text-lg font-semibold text-teal-700 dark:text-teal-300">
+                Registration is free for Drexel University students.
+              </p>
+            </ng-container>
+            <ng-template #standardOnlineTuition>
+              <ul class="list-disc pl-5">
+                <li>$250 for professionals</li>
+                <li>$200 for students and seniors</li>
+                <li>$0 for Drexel University students</li>
+                <li>Scholarships available for players from developing countries*</li>
+              </ul>
+              <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
+                * For players from developing countries, email us at 
+                <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a> 
+                to request partial to full scholarship depending on the case.
+              </h1>
+            </ng-template>
             <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
               EarthGame is a 501(c)(3) nonprofit organization. Donations are tax-deductible. ©2025 EarthGame. All rights reserved.
             </h1>
           </div>
-          <div class="mt-8 mx-auto">
+          <div *ngIf="!isDrexelOnly" class="mt-8 mx-auto">
             <a 
               target="_blank" 
               href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
@@ -197,7 +208,7 @@
         <!-- Right Column: Registration Form -->
         <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-md shadow">
           <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-            2026 GSL (Online) Registration Form
+            {{ isDrexelOnly ? '2026 GSL Drexel Student (Online) Registration Form' : '2026 GSL (Online) Registration Form' }}
           </h2>
           <!-- Form Start -->
           <div class="space-y-6">
@@ -408,7 +419,7 @@
             </div> -->
 
             <!-- Select Option for Pricing (ONLINE) -->
-            <div *ngIf="labMode === 'online'">
+            <div *ngIf="labMode === 'online' && !isDrexelOnly">
               <label for="targetGroupOnline" class="block mb-2 font-medium text-gray-900 dark:text-white">
                 You are? (Required)
               </label>
@@ -427,19 +438,19 @@
             </div>
 
             <!-- Payment Notice -->
-            <div class="my-4 text-gray-700 dark:text-gray-300">
+            <div *ngIf="!isDrexelOnly" class="my-4 text-gray-700 dark:text-gray-300">
               <p>If you prefer to register now and pay later, click the button below.</p>
             </div>
 
             <!-- Notice -->
-            <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <h1 *ngIf="!isDrexelOnly" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               * If you need partial tuition assistance email us at 
               <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
                 {{reachOutEmail}}
               </a>
               to request a scholarship.
             </h1>
-            <h1 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+            <h1 *ngIf="!isDrexelOnly" class="text-xl font-medium text-gray-700 dark:text-gray-300">
               * Discount available for teams. Contact us if you have 3 or more people to register
               or to become a sponsor. Email us at 
               <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
@@ -448,12 +459,12 @@
             </h1>
 
             <!-- Price Display (ONLINE) -->
-            <div class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
+            <div *ngIf="!isDrexelOnly" class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
               You will pay: ${{ getPrice() }}
             </div>
 
             <!-- Submit Buttons -->
-            <div class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
+            <div *ngIf="!isDrexelOnly; else drexelOnlineRegister" class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
               <!-- Pay & Register -->
               <button
                 class="w-full md:w-1/2 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
@@ -469,6 +480,14 @@
                 Register Now (Pay Later)
               </button>
             </div>
+            <ng-template #drexelOnlineRegister>
+              <button
+                class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+                (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+                Register
+              </button>
+            </ng-template>
           </div>
           <!-- End Form -->
         </div>
@@ -498,36 +517,43 @@
             international, cross-cultural, multi-disciplinary teams work exceptionally well.
           </p> -->
           <h3 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-            TUITION (In Person)
+            {{ isDrexelOnly ? 'DREXEL STUDENT REGISTRATION (In Person)' : 'TUITION (In Person)' }}
           </h3>
-          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
-            <li>$800 for professionals</li>
-            <li>$400 for students</li>
-            <li>$0 for UN, Community Organizations and Drexel University students</li>
-            <li>Scholarships available for players from developing countries*</li>
-          </ul>
-          <p class="text-gray-700 dark:text-gray-300 mb-2">
-            Optional on-campus housing available in Drexel dorms:
-          </p>
-          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
-            <li>$52 per night for single room</li>
-            <li>$41 per night for double</li>
-            <li>
-              The FIFA World Cup is being held in Philadelphia during the Lab. Drexel needs to know by <strong>April 1</strong>
-              if you need housing, and cannot guarantee space for reservations made after April 1.
-            </li>
-          </ul>
-          <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
-            * For players from developing countries, email us at
-            <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a>
-            to request partial to full scholarship depending on the case.
-          </h1>
+          <ng-container *ngIf="isDrexelOnly; else standardInPersonTuition">
+            <p class="text-base md:text-lg font-semibold text-teal-700 dark:text-teal-300 mb-6">
+              Registration is free for Drexel University students.
+            </p>
+          </ng-container>
+          <ng-template #standardInPersonTuition>
+            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
+              <li>$800 for professionals</li>
+              <li>$400 for students</li>
+              <li>$0 for UN, Community Organizations and Drexel University students</li>
+              <li>Scholarships available for players from developing countries*</li>
+            </ul>
+            <p class="text-gray-700 dark:text-gray-300 mb-2">
+              Optional on-campus housing available in Drexel dorms:
+            </p>
+            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
+              <li>$52 per night for single room</li>
+              <li>$41 per night for double</li>
+              <li>
+                The FIFA World Cup is being held in Philadelphia during the Lab. Drexel needs to know by <strong>April 1</strong>
+                if you need housing, and cannot guarantee space for reservations made after April 1.
+              </li>
+            </ul>
+            <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              * For players from developing countries, email us at
+              <a class="text-blue-600 underline" href="mailto:{{reachOutEmail}}">{{reachOutEmail}}</a>
+              to request partial to full scholarship depending on the case.
+            </h1>
+          </ng-template>
           <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300 mt-2">
             EarthGame is a 501(c)(3) nonprofit organization. Donations are tax-deductible. 
             ©2025 EarthGame. All rights reserved.
           </h1>
 
-          <div class="mt-8 mx-auto">
+          <div *ngIf="!isDrexelOnly" class="mt-8 mx-auto">
             <a 
               target="_blank" 
               href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
@@ -549,7 +575,7 @@
         <!-- Right Column: Registration Form (In-Person) -->
         <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-md shadow">
           <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-            2026 GSL (In-Person) Registration Form
+            {{ isDrexelOnly ? '2026 GSL Drexel Student (In-Person) Registration Form' : '2026 GSL (In-Person) Registration Form' }}
           </h2>
           <!-- Form Start -->
           <div class="space-y-6">
@@ -760,7 +786,7 @@
             </div>
 
             <!-- Select Option for Pricing (IN PERSON) -->
-            <div *ngIf="labMode === 'inPerson'">
+            <div *ngIf="labMode === 'inPerson' && !isDrexelOnly">
               <label for="targetGroupInPerson" class="block mb-2 font-medium text-gray-900 dark:text-white">
                 You are? (Required)
               </label>
@@ -779,18 +805,18 @@
             </div>
 
             <!-- Payment Notice -->
-            <div class="my-4 text-gray-700 dark:text-gray-300">
+            <div *ngIf="!isDrexelOnly" class="my-4 text-gray-700 dark:text-gray-300">
               <p>If you prefer to register now and pay later, click the button below.</p>
             </div>
 
             <!-- Notice -->
-            <h1 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <h1 *ngIf="!isDrexelOnly" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               * If you need partial tuition assistance email us at 
               <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
                 {{reachOutEmail}}
               </a> to request a scholarship.
             </h1>
-            <h1 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+            <h1 *ngIf="!isDrexelOnly" class="text-xl font-medium text-gray-700 dark:text-gray-300">
               * Discount available for teams. Contact us if you have 3 or more people to register
               or to become a sponsor. Email us at
               <a class="text-blue-500 underline" href="mailto:{{reachOutEmail}}">
@@ -799,12 +825,12 @@
             </h1>
 
             <!-- Price Display (IN PERSON) -->
-            <div class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
+            <div *ngIf="!isDrexelOnly" class="mt-2 text-gray-700 dark:text-gray-300 text-xl">
               You will pay: ${{ getPrice() }}
             </div>
 
             <!-- Submit Buttons -->
-            <div class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
+            <div *ngIf="!isDrexelOnly; else drexelInPersonRegister" class="md:space-x-2 md:flex md:justify-center space-y-4 md:space-y-0">
               <!-- Pay & Register -->
               <button
                 class="w-full md:w-1/2 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
@@ -820,6 +846,14 @@
                 Register Now (Pay Later)
               </button>
             </div>
+            <ng-template #drexelInPersonRegister>
+              <button
+                class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
+                (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+                Register
+              </button>
+            </ng-template>
           </div>
           <!-- End Form -->
         </div>
