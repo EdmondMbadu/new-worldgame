@@ -39,6 +39,7 @@ interface SchoolDoc {
   templateUrl: './school-dashboard.component.html',
 })
 export class SchoolDashboardComponent implements OnInit, OnDestroy {
+  currentSchoolId = '';
   schoolName = '';
   schoolWebsite = '';
 
@@ -89,16 +90,38 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.authSub = this.auth.user$.subscribe(async (me) => {
-      if (!me?.schoolId) return;
+    this.authSub = combineLatest([
+      this.auth.user$,
+      this.route.queryParamMap,
+    ]).subscribe(async ([me, queryParams]) => {
+      if (!me) {
+        this.resetSchoolState();
+        return;
+      }
+
+      const requestedSchoolId = (queryParams.get('sid') || '').trim();
+      const schoolId = requestedSchoolId || me.schoolId || '';
+
+      if (!schoolId) {
+        this.resetSchoolState();
+        return;
+      }
+
+      this.currentSchoolId = schoolId;
+      const isPlatformAdmin = this.isPlatformAdmin(me);
 
       // ── Load school meta (name, website, owner/admins) ───────────────────
       this.schoolSub?.unsubscribe();
       this.schoolSub = this.afs
-        .doc<SchoolDoc>(`schools/${me.schoolId}`)
+        .doc<SchoolDoc>(`schools/${schoolId}`)
         .valueChanges()
         .subscribe(async (school) => {
           console.log('current school', school);
+
+          if (!school) {
+            this.resetSchoolState();
+            return;
+          }
 
           this.schoolName = school?.name ?? '';
 
@@ -117,11 +140,15 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
             ? school!.adminUids!
             : [];
           this.isAdmin =
-            !!me.uid && (me.uid === ownerUid || admins.includes(me.uid));
-          if (me?.schoolId) {
+            isPlatformAdmin ||
+            (!!me.uid &&
+              (me.uid === ownerUid ||
+                admins.includes(me.uid) ||
+                (me.role === 'schoolAdmin' && me.schoolId === schoolId)));
+          if (schoolId) {
             this.classesSub?.unsubscribe();
             this.classesSub = this.afs
-              .collection(`schools/${me.schoolId}/classes`, (ref) =>
+              .collection(`schools/${schoolId}/classes`, (ref) =>
                 ref.orderBy('createdAt', 'desc')
               )
               .valueChanges({ idField: 'id' })
@@ -163,7 +190,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
           if (this.isAdmin) {
             // Admin: subscribe to students and show full roster
             this.rosterSub = this.afs
-              .collection(`schools/${me.schoolId}/students`)
+              .collection(`schools/${schoolId}/students`)
               .valueChanges({ idField: 'id' })
               .pipe(
                 map((docs: any[]) =>
@@ -186,7 +213,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
           } else {
             // Student: do NOT read identities; get counts only
             const col = this.afs.firestore.collection(
-              `schools/${me.schoolId}/students`
+              `schools/${schoolId}/students`
             );
             const [allSnap, verifiedSnap] = await Promise.all([
               col.get(),
@@ -257,7 +284,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   createClass() {
     // open the generator and carry the schoolId along with class mode
     this.router.navigate(['/generate-challenges'], {
-      queryParams: { sid: (this.auth.currentUser as any)?.schoolId, mode: 'class' },
+      queryParams: { sid: this.currentSchoolId, mode: 'class' },
     });
   }
 
@@ -267,7 +294,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const schoolId = (this.auth.currentUser as any)?.schoolId;
+      const schoolId = this.currentSchoolId;
       if (!schoolId) throw new Error('No school ID');
 
       const batch = this.afs.firestore.batch();
@@ -304,22 +331,23 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
     try {
       const admin = await firstValueFrom(this.auth.user$); // ← key change
-      if (!admin?.schoolId) throw new Error('schoolId missing');
+      const schoolId = this.currentSchoolId;
+      if (!admin || !schoolId) throw new Error('schoolId missing');
 
       // Get school info for email
       const schoolDoc = await firstValueFrom(
-        this.afs.doc(`schools/${admin.schoolId}`).get()
+        this.afs.doc(`schools/${schoolId}`).get()
       );
       const schoolData = schoolDoc.data() as any;
       const schoolName = schoolData?.name || 'New World Game School';
       const schoolWebsite = schoolData?.website || schoolData?.meta?.website || '';
 
       // Build the school page URL
-      const schoolPageUrl = `${window.location.origin}/school-admin?sid=${admin.schoolId}`;
+      const schoolPageUrl = `${window.location.origin}/school-admin?sid=${schoolId}`;
 
       const batch = this.afs.firestore.batch();
       const colRef = this.afs.collection(
-        `schools/${admin.schoolId}/students`
+        `schools/${schoolId}/students`
       ).ref;
 
       // Prepare email sending
@@ -411,9 +439,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
       this.removingEmail = row.email;
 
       const admin = await firstValueFrom(this.auth.user$);
-      if (!admin?.schoolId) throw new Error('schoolId missing');
+      const schoolId = this.currentSchoolId;
+      if (!admin || !schoolId) throw new Error('schoolId missing');
 
-      const schoolId = admin.schoolId;
       const batch = this.afs.firestore.batch();
 
       // 1) delete from roster (doc-id = email)
@@ -670,7 +698,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     if (this.deleting) return;
 
     const me = await firstValueFrom(this.auth.user$);
-    if (!me?.schoolId) {
+    if (!this.currentSchoolId) {
       alert('No school ID found.');
       return;
     }
@@ -678,7 +706,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
     this.deleting = true;
 
     try {
-      const schoolId = me.schoolId;
+      const schoolId = this.currentSchoolId;
 
       // Get school document to find owner and all admins
       const schoolDoc = await firstValueFrom(
@@ -783,7 +811,6 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   }
 
   async copyClassInviteLink(classRow: ClassRow): Promise<void> {
-    const schoolId = (this.auth.currentUser as any)?.schoolId || '';
     if (!classRow?.challengePageId) return;
 
     const url = this.getClassInviteLink(classRow);
@@ -817,9 +844,42 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
   }
 
   getClassInviteLink(classRow: ClassRow): string {
-    const schoolId = (this.auth.currentUser as any)?.schoolId || '';
+    const schoolId = this.currentSchoolId;
     if (!classRow?.challengePageId) return '';
     const suffix = schoolId ? `?sid=${schoolId}` : '';
     return `${window.location.origin}/home-challenge/${classRow.challengePageId}${suffix}`;
+  }
+
+  private isPlatformAdmin(user: User | null | undefined): boolean {
+    return user?.admin === 'true' || user?.role === 'admin';
+  }
+
+  private resetSchoolState(): void {
+    this.schoolSub?.unsubscribe();
+    this.schoolSub = undefined;
+    this.ownerSub?.unsubscribe();
+    this.ownerSub = undefined;
+    this.rosterSub?.unsubscribe();
+    this.rosterSub = undefined;
+    this.classesSub?.unsubscribe();
+    this.classesSub = undefined;
+    this.classParticipantsSub?.unsubscribe();
+    this.classParticipantsSub = undefined;
+    this.classProfilesSub?.unsubscribe();
+    this.classProfilesSub = undefined;
+    this.currentSchoolId = '';
+    this.schoolName = '';
+    this.schoolWebsite = '';
+    this.ownerName = '';
+    this.ownerEmail = '';
+    this.isAdmin = false;
+    this.students = [];
+    this.rosterStudents = [];
+    this.invitedCount = 0;
+    this.verifiedCount = 0;
+    this.classes = [];
+    this.classParticipantsById = {};
+    this.classStudentsById = {};
+    this.classProfileNameByEmail = {};
   }
 }

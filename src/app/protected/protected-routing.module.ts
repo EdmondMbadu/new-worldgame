@@ -206,6 +206,7 @@ const routes: Routes = [
     path: 'school-admin',
     component: SchoolDashboardComponent,
     canActivate: [AuthGuard],
+    data: { requireAdminOrSchoolAdmin: true },
   },
 ];
 
