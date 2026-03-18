@@ -122,8 +122,10 @@
                            [image]="challengeImages[i]"
                            [id]="ids[i]"
                            [description]="descriptions[i]"
+                           [originalDescription]="getOriginalChallengeDescription(i)"
                            [restricted]="'false'"
                            [title]="t"
+                           [originalTitle]="getOriginalChallengeTitle(i)"
                            [fit]="isSdgCategory(activeCategory) ? 'contain' : 'cover'">
             </app-challenge>
           </div>

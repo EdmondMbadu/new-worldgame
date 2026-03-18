@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { Observable, Subscription, of } from 'rxjs';
 import { User } from 'src/app/models/user';
+import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { Email } from '../create-playground/create-playground.component';
-import { Observable, of } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,8 +14,9 @@ import { Router } from '@angular/router';
   templateUrl: './start-challenge.component.html',
   styleUrl: './start-challenge.component.css',
 })
-export class StartChallengeComponent implements OnInit {
+export class StartChallengeComponent implements OnInit, OnDestroy {
   selectedChallengeItem: any;
+  baseSelectedChallengeItem: any;
   numberOfEvaluators: number = 3;
   evaluatorsEmails: Email[] = [];
   isLoading: boolean = false;
@@ -21,32 +24,36 @@ export class StartChallengeComponent implements OnInit {
   createdSolutionError: boolean = false;
   solutionError: Observable<any> = of(null);
   restricted: string = '';
+  private challengeSub?: Subscription;
+  private languageSub?: Subscription;
 
   constructor(
     private challengeService: ChallengesService,
     public auth: AuthService,
     public solution: SolutionService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
     window.scroll(0, 0);
-    this.challengeService.selectedChallengeItem$.subscribe((challengeItem) => {
-      if (challengeItem) {
-        this.selectedChallengeItem = challengeItem;
-        this.restricted = this.selectedChallengeItem.restricted;
-        console.log('restricted', this.restricted);
-      } else {
-        // Fallback to localStorage if BehaviorSubject is empty (e.g., after a page refresh)
-        this.selectedChallengeItem =
-          this.challengeService.getSelectedChallengeItemFromStorage();
-        this.restricted = this.selectedChallengeItem.restricted;
+    this.challengeSub = this.challengeService.selectedChallengeItem$.subscribe(
+      (challengeItem) => {
+        this.applyChallengeItem(
+          challengeItem ||
+            this.challengeService.getSelectedChallengeItemFromStorage()
+        );
+        console.log('challenge item', challengeItem);
       }
-      console.log('challenge item', challengeItem);
+    );
+    this.languageSub = this.translate.onLangChange.subscribe(() => {
+      this.localizeSelectedChallengeItem();
     });
     this.setUpChallengeInfo();
   }
   ngOnDestroy(): void {
+    this.challengeSub?.unsubscribe();
+    this.languageSub?.unsubscribe();
     // Clean up localStorage when the component is destroyed
     this.challengeService.clearSelectedChallengeItem();
   }
@@ -112,6 +119,48 @@ export class StartChallengeComponent implements OnInit {
   closePopUpError() {
     this.createdSolutionError = false;
   }
+
+  private applyChallengeItem(challengeItem: any): void {
+    this.baseSelectedChallengeItem = challengeItem || null;
+    this.localizeSelectedChallengeItem();
+  }
+
+  private localizeSelectedChallengeItem(): void {
+    if (!this.baseSelectedChallengeItem) {
+      this.selectedChallengeItem = null;
+      this.restricted = '';
+      return;
+    }
+
+    const englishTitle =
+      this.baseSelectedChallengeItem.originalTitle ||
+      this.baseSelectedChallengeItem.title ||
+      '';
+    const englishDescription =
+      this.baseSelectedChallengeItem.originalDescription ||
+      this.baseSelectedChallengeItem.description ||
+      '';
+    const frenchContent =
+      HOME_CHALLENGE_FR[this.baseSelectedChallengeItem.id] || null;
+    const shouldUseFrench = (
+      this.translate.currentLang || this.translate.defaultLang || 'en'
+    )
+      .toLowerCase()
+      .startsWith('fr');
+
+    this.selectedChallengeItem = {
+      ...this.baseSelectedChallengeItem,
+      title: shouldUseFrench
+        ? frenchContent?.title || this.baseSelectedChallengeItem.title
+        : englishTitle,
+      description: shouldUseFrench
+        ? frenchContent?.description || this.baseSelectedChallengeItem.description
+        : englishDescription,
+    };
+    this.restricted = this.selectedChallengeItem.restricted || '';
+    console.log('restricted', this.restricted);
+  }
+
   deleteChallenge() {
     if (!this.selectedChallengeItem || !this.selectedChallengeItem.id) {
       console.error('No challenge selected for deletion.');

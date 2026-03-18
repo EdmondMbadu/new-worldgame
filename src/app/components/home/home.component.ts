@@ -1,12 +1,14 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { TranslateService } from '@ngx-translate/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
+import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
@@ -18,14 +20,16 @@ import { TimeService } from 'src/app/services/time.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   user: User;
   // Centralized data for all challenges
   challenges: {
     [key: string]: {
       ids?: string[];
       titles: string[];
+      frenchTitles?: string[];
       descriptions: string[];
+      frenchDescriptions?: string[];
       images: string[];
     };
   } = {};
@@ -52,6 +56,7 @@ export class HomeComponent implements OnInit {
   // (optional) simple cache hit to prevent flashing loader if we already have data for that category
   private minOverlayMs = 400; // minimum visible time to prevent jarring flicker
   private initialStart = performance.now();
+  private languageSub?: Subscription;
 
   updateChallenges(): void {
     const categoryData = this.challenges[this.activeCategory];
@@ -63,8 +68,13 @@ export class HomeComponent implements OnInit {
       this.ids = [];
       return;
     }
-    this.titles = categoryData.titles;
-    this.descriptions = categoryData.descriptions;
+    const shouldUseFrenchContent = this.shouldUseFrenchTitles();
+    this.titles = shouldUseFrenchContent
+      ? categoryData.frenchTitles ?? categoryData.titles
+      : categoryData.titles;
+    this.descriptions = shouldUseFrenchContent
+      ? categoryData.frenchDescriptions ?? categoryData.descriptions
+      : categoryData.descriptions;
     this.challengeImages = categoryData.images;
     this.ids = categoryData.ids!;
   }
@@ -114,6 +124,9 @@ export class HomeComponent implements OnInit {
     this.user = this.auth.currentUser;
   }
   async ngOnInit() {
+    this.languageSub = this.translate.onLangChange.subscribe(() => {
+      this.updateChallenges();
+    });
     this.filterSolutions();
 
     if (this.user && this.user.location) {
@@ -176,7 +189,11 @@ export class HomeComponent implements OnInit {
           const transformedData = {
             ids: data.map((d) => d.id),
             titles: data.map((d) => d.title),
+            frenchTitles: data.map((d) => this.resolveFrenchChallengeTitle(d)),
             descriptions: data.map((d) => d.description),
+            frenchDescriptions: data.map((d) =>
+              this.resolveFrenchChallengeDescription(d)
+            ),
             images: data.map((d) => d.image || 'No image available'),
           };
           this.challenges[category] = transformedData;
@@ -191,6 +208,10 @@ export class HomeComponent implements OnInit {
           if (opts?.isInitial) this.finishInitialOverlay();
         },
       });
+  }
+
+  ngOnDestroy(): void {
+    this.languageSub?.unsubscribe();
   }
 
   private finishInitialOverlay() {
@@ -440,5 +461,57 @@ export class HomeComponent implements OnInit {
 
   getCategoryLabelKey(category: string): string {
     return this.categoryLabelKeyMap[category] || category;
+  }
+
+  getOriginalChallengeTitle(index: number): string {
+    return this.challenges[this.activeCategory]?.titles?.[index] || this.titles[index];
+  }
+
+  getOriginalChallengeDescription(index: number): string {
+    return (
+      this.challenges[this.activeCategory]?.descriptions?.[index] ||
+      this.descriptions[index]
+    );
+  }
+
+  private shouldUseFrenchTitles(): boolean {
+    return (this.translate.currentLang || this.translate.defaultLang || 'en')
+      .toLowerCase()
+      .startsWith('fr');
+  }
+
+  private resolveFrenchChallengeTitle(challenge: any): string {
+    const explicitFrenchTitle =
+      challenge?.titleFr ||
+      challenge?.frenchTitle ||
+      challenge?.translations?.fr?.title ||
+      challenge?.titleTranslations?.fr;
+
+    if (typeof explicitFrenchTitle === 'string' && explicitFrenchTitle.trim()) {
+      return explicitFrenchTitle.trim();
+    }
+
+    return HOME_CHALLENGE_FR[challenge?.id]?.title || challenge?.title || '';
+  }
+
+  private resolveFrenchChallengeDescription(challenge: any): string {
+    const explicitFrenchDescription =
+      challenge?.descriptionFr ||
+      challenge?.frenchDescription ||
+      challenge?.translations?.fr?.description ||
+      challenge?.descriptionTranslations?.fr;
+
+    if (
+      typeof explicitFrenchDescription === 'string' &&
+      explicitFrenchDescription.trim()
+    ) {
+      return explicitFrenchDescription.trim();
+    }
+
+    return (
+      HOME_CHALLENGE_FR[challenge?.id]?.description ||
+      challenge?.description ||
+      ''
+    );
   }
 }

@@ -18,6 +18,8 @@ export class ChallengeComponent implements OnInit {
   @Input() image: string = '';
   @Input() title: string = '';
   @Input() description: string = '';
+  @Input() originalTitle: string = '';
+  @Input() originalDescription: string = '';
   @Input() id: string = '';
   @Input() restricted: string = '';
   @Input() fromChallengeSpace: boolean = false;
@@ -42,6 +44,8 @@ export class ChallengeComponent implements OnInit {
       id: this.id,
       title: this.title,
       description: this.description,
+      originalTitle: this.originalTitle || this.title,
+      originalDescription: this.originalDescription || this.description,
       image: this.image,
       restricted: this.restricted,
     };
