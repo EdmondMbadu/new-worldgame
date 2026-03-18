@@ -1,8 +1,11 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
@@ -16,7 +19,7 @@ import { ToastService } from 'src/app/services/toast.service';
   templateUrl: './home-challenge.component.html',
   styleUrl: './home-challenge.component.css',
 })
-export class HomeChallengeComponent {
+export class HomeChallengeComponent implements OnDestroy {
   titleCreateChallenge: string = '';
   imageCreateChallenge: string = '';
   descriptionCreateChallenge: string = '';
@@ -41,7 +44,9 @@ export class HomeChallengeComponent {
     [key: string]: {
       ids?: string[];
       titles: string[];
+      frenchTitles?: string[];
       descriptions: string[];
+      frenchDescriptions?: string[];
       images: string[];
     };
   } = {};
@@ -174,6 +179,7 @@ export class HomeChallengeComponent {
 
   // Remove admin search
   removeAdminSearchQuery = '';
+  private languageSub?: Subscription;
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -202,10 +208,14 @@ export class HomeChallengeComponent {
     private afs: AngularFirestore,
     private challenge: ChallengesService,
     private fns: AngularFireFunctions,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
+    this.languageSub = this.translate.onLangChange.subscribe(() => {
+      this.updateChallenges();
+    });
     this.activatedRoute.paramMap.subscribe((params) => {
       const idOrSlug = params.get('id');
       if (!idOrSlug) {
@@ -223,6 +233,9 @@ export class HomeChallengeComponent {
       this.allUsers = users || [];
       console.log(`Loaded ${this.allUsers.length} users for search`);
     });
+  }
+  ngOnDestroy(): void {
+    this.languageSub?.unsubscribe();
   }
   private resetPageState(): void {
     // everything that can legitimately be “missing” on a page
@@ -458,7 +471,13 @@ export class HomeChallengeComponent {
         const transformedData = {
           ids: data.map((challenge) => challenge.id),
           titles: data.map((challenge) => challenge.title),
+          frenchTitles: data.map((challenge) =>
+            this.resolveFrenchChallengeTitle(challenge)
+          ),
           descriptions: data.map((challenge) => challenge.description),
+          frenchDescriptions: data.map((challenge) =>
+            this.resolveFrenchChallengeDescription(challenge)
+          ),
           images: data.map(
             (challenge) => challenge.image || 'No image available'
           ),
@@ -486,10 +505,83 @@ export class HomeChallengeComponent {
       this.ids = [];
       return;
     }
-    this.titles = categoryData.titles;
-    this.descriptions = categoryData.descriptions;
+    const shouldUseFrenchContent = this.shouldUseFrenchContent();
+    this.titles = shouldUseFrenchContent
+      ? categoryData.frenchTitles ?? categoryData.titles
+      : categoryData.titles;
+    this.descriptions = shouldUseFrenchContent
+      ? categoryData.frenchDescriptions ?? categoryData.descriptions
+      : categoryData.descriptions;
     this.challengeImages = categoryData.images;
     this.ids = categoryData.ids!;
+  }
+
+  getOriginalChallengeTitle(index: number): string {
+    return this.challenges[this.activeCategory]?.titles?.[index] || this.titles[index];
+  }
+
+  getOriginalChallengeDescription(index: number): string {
+    return (
+      this.challenges[this.activeCategory]?.descriptions?.[index] ||
+      this.descriptions[index]
+    );
+  }
+
+  getExistingChallengeDisplayTitle(challenge: any): string {
+    if (!this.shouldUseFrenchContent()) {
+      return challenge?.title || '';
+    }
+
+    return this.resolveFrenchChallengeTitle(challenge);
+  }
+
+  getExistingChallengeDisplayDescription(challenge: any): string {
+    if (!this.shouldUseFrenchContent()) {
+      return challenge?.description || '';
+    }
+
+    return this.resolveFrenchChallengeDescription(challenge);
+  }
+
+  private shouldUseFrenchContent(): boolean {
+    return (this.translate.currentLang || this.translate.defaultLang || 'en')
+      .toLowerCase()
+      .startsWith('fr');
+  }
+
+  private resolveFrenchChallengeTitle(challenge: any): string {
+    const explicitFrenchTitle =
+      challenge?.titleFr ||
+      challenge?.frenchTitle ||
+      challenge?.translations?.fr?.title ||
+      challenge?.titleTranslations?.fr;
+
+    if (typeof explicitFrenchTitle === 'string' && explicitFrenchTitle.trim()) {
+      return explicitFrenchTitle.trim();
+    }
+
+    return HOME_CHALLENGE_FR[challenge?.id]?.title || challenge?.title || '';
+  }
+
+  private resolveFrenchChallengeDescription(challenge: any): string {
+    const explicitFrenchDescription =
+      challenge?.descriptionFr ||
+      challenge?.frenchDescription ||
+      challenge?.translations?.fr?.description ||
+      challenge?.descriptionTranslations?.fr;
+
+    if (
+      typeof explicitFrenchDescription === 'string' &&
+      explicitFrenchDescription.trim()
+    ) {
+      return explicitFrenchDescription.trim();
+    }
+
+    return (
+      HOME_CHALLENGE_FR[challenge?.id]?.description ||
+      challenge?.description ||
+      ''
+    );
   }
 
   openExistingChallenges(): void {

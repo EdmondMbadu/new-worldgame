@@ -37,19 +37,19 @@
               (click)="data.scrollTo($event, 'discussion')"
               href="#discussion"
               class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
-              >Discussion</a
+              >{{ 'homeChallengePage.nav.discussion' | translate }}</a
             >
             <a
               (click)="data.scrollTo($event, 'video')"
               href="#video"
               class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
-              >Meeting Room</a
+              >{{ 'homeChallengePage.nav.meetingRoom' | translate }}</a
             >
             <a
               (click)="data.scrollTo($event, 'solutions')"
               href="#solutions"
               class="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-all duration-200"
-              >Teams</a
+              >{{ 'homeChallengePage.nav.teams' | translate }}</a
             >
           </div>
         </div>
@@ -172,7 +172,7 @@
                 (click)="scrollToSolutions()"
                 class="self-start sm:self-center inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 shadow-sm transition-colors focus:outline-none focus:ring-4 focus:ring-slate-300/60 dark:focus:ring-slate-700/60"
               >
-                Start solving
+                {{ 'homeChallengePage.hero.startSolving' | translate }}
               </button>
             </div>
 
@@ -204,10 +204,10 @@
                 <h3
                   class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white"
                 >
-                  Go to Discussion: {{ heading }}
+                  {{ 'homeChallengePage.discussionCard.title' | translate:{ heading: heading } }}
                 </h3>
                 <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                  Join the conversation for this workspace.
+                  {{ 'homeChallengePage.discussionCard.subtitle' | translate }}
                 </p>
               </div>
 
@@ -266,12 +266,12 @@
                       <h3
                         class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white"
                       >
-                        Google Meet Room
+                        {{ 'homeChallengePage.meeting.googleMeetTitle' | translate }}
                       </h3>
                       <p
                         class="text-xs sm:text-sm text-slate-600 dark:text-slate-400"
                       >
-                        Always-on video chat.
+                        {{ 'homeChallengePage.meeting.googleMeetSubtitle' | translate }}
                       </p>
                     </div>
                   </div>
@@ -280,7 +280,7 @@
                     target="_blank"
                     rel="noopener"
                     class="px-4 sm:px-5 py-2.5 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-                    >Join</a
+                    >{{ 'homeChallengePage.common.join' | translate }}</a
                   >
                 </div>
               </div>
@@ -313,7 +313,7 @@
                       <h3
                         class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white"
                       >
-                        Zoom Room
+                        {{ 'homeChallengePage.meeting.zoomTitle' | translate }}
                       </h3>
                     </div>
                   </div>
@@ -322,7 +322,7 @@
                     target="_blank"
                     rel="noopener"
                     class="px-4 sm:px-5 py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                    >Join</a
+                    >{{ 'homeChallengePage.common.join' | translate }}</a
                   >
                 </div>
               </div>
@@ -372,7 +372,7 @@
                       target="_blank"
                       rel="noopener"
                       class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-                      >Open PDF</a
+                      >{{ 'homeChallengePage.documents.openPdf' | translate }}</a
                     >
                   </div>
                 </div>
@@ -404,7 +404,7 @@
                   <h4
                     class="text-base sm:text-lg font-bold text-slate-900 dark:text-white"
                   >
-                    Handouts
+                    {{ 'homeChallengePage.documents.handouts' | translate }}
                   </h4>
                 </div>
 
@@ -420,7 +420,7 @@
                       (click)="downloadFile($event, h.name, h.url)"
                       href="{{ h.url }}"
                       class="text-sm font-semibold text-yellow-700 dark:text-yellow-400 hover:underline"
-                      >Download</a
+                      >{{ 'homeChallengePage.documents.download' | translate }}</a
                     >
                   </li>
                 </ul>
@@ -451,7 +451,7 @@
                     ></path>
                   </svg>
                   <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-                    Participants ({{ participants.length }})
+                    {{ 'homeChallengePage.participants.title' | translate:{ count: participants.length } }}
                   </h3>
                 </div>
                 <button
@@ -459,13 +459,13 @@
                   (click)="toggleParticipantsVisibilityGlobal()"
                   class="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline"
                 >
-                  {{ showParticipantsList ? "Hide" : "Show" }}
+                  {{ (showParticipantsList ? 'homeChallengePage.common.hide' : 'homeChallengePage.common.show') | translate }}
                 </button>
               </div>
 
               <div *ngIf="showParticipantsList" class="space-y-3">
                 <div *ngIf="isLoadingParticipantProfiles" class="text-sm text-slate-500 dark:text-slate-400">
-                  Loading participant profiles...
+                  {{ 'homeChallengePage.participants.loadingProfiles' | translate }}
                 </div>
 
                 <ul
@@ -501,13 +501,13 @@
                         </p>
                       </div>
                       <div class="ml-auto flex items-center gap-2 text-[11px]">
-                        <span class="font-semibold text-teal-600 dark:text-teal-400">View profile</span>
+                        <span class="font-semibold text-teal-600 dark:text-teal-400">{{ 'homeChallengePage.common.viewProfile' | translate }}</span>
                         <button
                           *ngIf="participant.isCurrentUser && !isAuthorPage"
                           (click)="openLeavePrompt($event)"
                           class="font-semibold text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400"
                         >
-                          Leave
+                          {{ 'homeChallengePage.common.leave' | translate }}
                         </button>
                       </div>
                     </a>
@@ -524,7 +524,7 @@
                           {{ participant.email }}
                         </p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
-                          {{ participant.exists ? 'Profile unavailable' : 'Not registered' }}
+                          {{ (participant.exists ? 'homeChallengePage.common.profileUnavailable' : 'homeChallengePage.common.notRegistered') | translate }}
                         </p>
                       </div>
                     </div>
@@ -538,14 +538,14 @@
                 >
                   {{
                     showAllParticipants
-                      ? "Show fewer"
-                      : "Show all (" + participants.length + ")"
+                      ? ('homeChallengePage.common.showFewer' | translate)
+                      : ('homeChallengePage.common.showAll' | translate:{ count: participants.length })
                   }}
                 </button>
 
                 <ng-template #noParticipants>
                   <p *ngIf="!isLoadingParticipantProfiles" class="text-slate-500 dark:text-slate-400 text-sm">
-                    No participants have been added yet.
+                    {{ 'homeChallengePage.participants.none' | translate }}
                   </p>
                 </ng-template>
               </div>
@@ -1009,8 +1009,10 @@
               [fromChallengeSpace]="true"
               [id]="ids[i]"
               [description]="descriptions[i]"
+              [originalDescription]="getOriginalChallengeDescription(i)"
               [restricted]="'true'"
               [title]="t"
+              [originalTitle]="getOriginalChallengeTitle(i)"
               [challengePageId]="challengePageId"
             ></app-challenge>
           </div>
@@ -1064,11 +1066,10 @@
           </svg>
         </div>
         <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white">
-          Private Workspace
+          {{ 'homeChallengePage.privateWorkspace.title' | translate }}
         </h1>
         <p class="text-slate-600 dark:text-slate-400">
-          You don’t have permission to view this page. Please contact the
-          administrator for access.
+          {{ 'homeChallengePage.privateWorkspace.description' | translate }}
         </p>
       </div>
     </div>
@@ -1085,10 +1086,10 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">
-            Leave Workspace
+            {{ 'homeChallengePage.leaveWorkspace.badge' | translate }}
           </p>
           <h3 class="mt-2 text-xl font-bold text-slate-900 dark:text-white">
-            Are you sure you want to leave?
+            {{ 'homeChallengePage.leaveWorkspace.title' | translate }}
           </h3>
         </div>
         <button
@@ -1102,7 +1103,7 @@
       </div>
 
       <p class="mt-4 text-sm text-slate-600 dark:text-slate-300">
-        You will be removed from this workspace’s participants list. You can rejoin anytime with the link.
+        {{ 'homeChallengePage.leaveWorkspace.description' | translate }}
       </p>
 
       <div class="mt-6 flex flex-col sm:flex-row gap-3">
@@ -1110,13 +1111,13 @@
           (click)="leaveChallengePage()"
           class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm px-4 py-2.5 transition"
         >
-          Yes, leave
+          {{ 'homeChallengePage.leaveWorkspace.confirm' | translate }}
         </button>
         <button
           (click)="cancelLeave()"
           class="flex-1 inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
         >
-          Stay
+          {{ 'homeChallengePage.leaveWorkspace.stay' | translate }}
         </button>
       </div>
     </div>
@@ -1133,10 +1134,10 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-teal-600 dark:text-teal-400">
-            Invitation
+            {{ 'homeChallengePage.joinWorkspace.badge' | translate }}
           </p>
           <h3 class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
-            Join this workspace?
+            {{ 'homeChallengePage.joinWorkspace.title' | translate }}
           </h3>
         </div>
         <button
@@ -1150,8 +1151,9 @@
       </div>
 
       <p class="mt-4 text-sm text-slate-600 dark:text-slate-300">
-        You are viewing <span class="font-semibold text-slate-900 dark:text-white">{{ heading }}</span>.
-        Join to collaborate, view team challenges, and participate in discussions.
+        {{ 'homeChallengePage.joinWorkspace.descriptionPrefix' | translate }}
+        <span class="font-semibold text-slate-900 dark:text-white">{{ heading }}</span>.
+        {{ 'homeChallengePage.joinWorkspace.descriptionSuffix' | translate }}
       </p>
 
       <div class="mt-6 flex flex-col sm:flex-row gap-3">
@@ -1160,13 +1162,17 @@
           [disabled]="isJoining"
           class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm px-4 py-2.5 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {{ isJoining ? 'Joining...' : 'Join Workspace' }}
+          {{
+            isJoining
+              ? ('homeChallengePage.joinWorkspace.joining' | translate)
+              : ('homeChallengePage.joinWorkspace.confirm' | translate)
+          }}
         </button>
         <button
           (click)="declineJoin()"
           class="flex-1 inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
         >
-          Maybe later
+          {{ 'homeChallengePage.joinWorkspace.defer' | translate }}
         </button>
       </div>
     </div>
@@ -1200,10 +1206,10 @@
             </div>
             <div>
               <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                Choose Existing Challenges
+                {{ 'homeChallengePage.existingChallenges.title' | translate }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                Pick a challenge from the global library
+                {{ 'homeChallengePage.existingChallenges.subtitle' | translate }}
               </p>
             </div>
           </div>
@@ -1248,7 +1254,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="text-lg">Loading challenges...</span>
+            <span class="text-lg">{{ 'homeChallengePage.existingChallenges.loading' | translate }}</span>
           </div>
         </div>
 
@@ -1278,7 +1284,7 @@
             <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
             </svg>
-            <span class="text-lg">No challenges found for this category</span>
+            <span class="text-lg">{{ 'homeChallengePage.existingChallenges.empty' | translate }}</span>
           </div>
         </div>
 
@@ -1307,10 +1313,10 @@
             <!-- Content -->
             <div class="p-4 space-y-3">
               <h4 class="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
-                {{ challenge.title }}
+                {{ getExistingChallengeDisplayTitle(challenge) }}
               </h4>
               <p class="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 min-h-[2.5rem]">
-                {{ challenge.description }}
+                {{ getExistingChallengeDisplayDescription(challenge) }}
               </p>
               <button
                 (click)="addExistingChallengeToPage(challenge)"
@@ -1324,7 +1330,11 @@
                 <svg *ngIf="!isAddingExistingChallenge(challenge.id)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
-                {{ isAddingExistingChallenge(challenge.id) ? "Adding..." : "Add to Workspace" }}
+                {{
+                  isAddingExistingChallenge(challenge.id)
+                    ? ('homeChallengePage.existingChallenges.adding' | translate)
+                    : ('homeChallengePage.existingChallenges.addToWorkspace' | translate)
+                }}
               </button>
             </div>
           </div>
@@ -1335,13 +1345,13 @@
       <div class="sticky bottom-0 bg-gray-50 dark:bg-slate-800/80 backdrop-blur-sm border-t border-gray-200 dark:border-slate-700 px-6 py-4">
         <div class="flex items-center justify-between">
           <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ filteredExistingChallenges.length }} challenge{{ filteredExistingChallenges.length !== 1 ? 's' : '' }} available
+            {{ 'homeChallengePage.existingChallenges.available' | translate:{ count: filteredExistingChallenges.length } }}
           </p>
           <button
             (click)="toggle('showExistingChallenges')"
             class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 rounded-lg ring-1 ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 transition"
           >
-            Close
+            {{ 'homeChallengePage.common.close' | translate }}
           </button>
         </div>
       </div>

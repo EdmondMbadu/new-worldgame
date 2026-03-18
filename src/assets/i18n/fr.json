@@ -1235,6 +1235,97 @@
       "message": "Une erreur s'est produite. Veuillez réessayer."
     }
   },
+  "challengeCard": {
+    "descriptionLabel": "Description",
+    "startSolution": "Commencer la solution",
+    "goToSolution": "Aller a la solution",
+    "joinSolution": "Rejoindre la solution",
+    "preview": "Apercu"
+  },
+  "startChallenge": {
+    "readyTitle": "Pret a commencer ?",
+    "readyBody": "Lancez-vous directement dans la conception de solutions porteuses d'impact pour un avenir meilleur.",
+    "startSolution": "Commencer la solution",
+    "deleteChallenge": "Supprimer le defi",
+    "welcomeTitle": "Bienvenue dans votre defi",
+    "intro1": "Ce defi fait partie du NewWorld Game, une plateforme concue pour transformer vos idees audacieuses en solutions concretes a des problemes reels. Ici, votre creativite, votre experience et vos valeurs se conjuguent avec des outils, des methodes, des donnees fiables, des partenaires possibles et des financements pour concevoir, developper et mettre en oeuvre des solutions inclusives, durables et porteuses d'impact.",
+    "intro2": "Le NewWorld Game permet a des personnes comme vous d'imaginer un avenir meilleur et de transformer leurs idees en strategies qui fonctionnent pour tout le monde, pas seulement pour quelques-uns.",
+    "intro3": "Lorsque vous commencez ce defi, rappelez-vous qu'une solution commence toujours par une idee. Votre parcours ici s'inscrit dans un effort mondial plus large pour relever des defis importants et produire un changement concret.",
+    "outro": "Commencons. Vos idees pourraient faconner un avenir meilleur.",
+    "solutionCreated": "Le Solution Lab a ete cree avec succes.",
+    "loading": "Chargement...",
+    "processing": "Traitement de votre demande..."
+  },
+  "homeChallengePage": {
+    "nav": {
+      "discussion": "Discussion",
+      "meetingRoom": "Salle de reunion",
+      "teams": "Equipes"
+    },
+    "hero": {
+      "startSolving": "Commencer a resoudre"
+    },
+    "discussionCard": {
+      "title": "Aller a la discussion : {{heading}}",
+      "subtitle": "Rejoignez la conversation de cet espace de travail."
+    },
+    "meeting": {
+      "googleMeetTitle": "Salle Google Meet",
+      "googleMeetSubtitle": "Discussion video toujours ouverte.",
+      "zoomTitle": "Salle Zoom"
+    },
+    "documents": {
+      "openPdf": "Ouvrir le PDF",
+      "handouts": "Documents",
+      "download": "Telecharger"
+    },
+    "participants": {
+      "title": "Participants ({{count}})",
+      "loadingProfiles": "Chargement des profils des participants...",
+      "none": "Aucun participant n'a encore ete ajoute."
+    },
+    "existingChallenges": {
+      "title": "Choisir des defis existants",
+      "subtitle": "Choisissez un defi dans la bibliotheque globale",
+      "loading": "Chargement des defis...",
+      "empty": "Aucun defi trouve pour cette categorie",
+      "adding": "Ajout en cours...",
+      "addToWorkspace": "Ajouter a l'espace de travail",
+      "available": "{{count}} defis disponibles"
+    },
+    "privateWorkspace": {
+      "title": "Espace de travail prive",
+      "description": "Vous n'avez pas la permission d'afficher cette page. Veuillez contacter l'administrateur pour obtenir l'acces."
+    },
+    "leaveWorkspace": {
+      "badge": "Quitter l'espace de travail",
+      "title": "Voulez-vous vraiment quitter ?",
+      "description": "Vous serez retire de la liste des participants de cet espace de travail. Vous pourrez le rejoindre a nouveau a tout moment avec le lien.",
+      "confirm": "Oui, quitter",
+      "stay": "Rester"
+    },
+    "joinWorkspace": {
+      "badge": "Invitation",
+      "title": "Rejoindre cet espace de travail ?",
+      "descriptionPrefix": "Vous consultez",
+      "descriptionSuffix": "Rejoignez-le pour collaborer, voir les defis de l'equipe et participer aux discussions.",
+      "joining": "Connexion en cours...",
+      "confirm": "Rejoindre l'espace de travail",
+      "defer": "Peut-etre plus tard"
+    },
+    "common": {
+      "join": "Rejoindre",
+      "viewProfile": "Voir le profil",
+      "leave": "Quitter",
+      "profileUnavailable": "Profil indisponible",
+      "notRegistered": "Non inscrit",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "showFewer": "Afficher moins",
+      "showAll": "Tout afficher ({{count}})",
+      "close": "Fermer"
+    }
+  },
   "discussion": {
     "mentionTips": {
       "title": "Conseils de mention :",

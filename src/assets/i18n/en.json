@@ -1486,6 +1486,97 @@
       "message": "An error occurred. Please try again."
     }
   },
+  "challengeCard": {
+    "descriptionLabel": "Description",
+    "startSolution": "Start Solution",
+    "goToSolution": "Go to Solution",
+    "joinSolution": "Join Solution",
+    "preview": "Preview"
+  },
+  "startChallenge": {
+    "readyTitle": "Ready to Start?",
+    "readyBody": "Jump right into designing impactful solutions for a brighter future.",
+    "startSolution": "Start Solution",
+    "deleteChallenge": "Delete Challenge",
+    "welcomeTitle": "Welcome to Your Challenge",
+    "intro1": "This challenge is part of the NewWorld Game, a platform designed to turn your bold ideas into implementable solutions to real-world problems. Here, your creativity, experience, and values come together with proven tools, methodologies, reliable data, possible partners and funding to design, develop and implement solutions that are inclusive, sustainable, and impactful.",
+    "intro2": "The NewWorld Game empowers individuals like you to envision a better future and develop your ideas into strategies that work for everyone, not just a select few.",
+    "intro3": "As you embark on this challenge, remember: every solution starts with one idea. Your journey here is part of a larger global effort to address challenges that matter and make meaningful change.",
+    "outro": "Let's get started. Your ideas could shape a brighter future.",
+    "solutionCreated": "Solution Lab Created Successfully.",
+    "loading": "Loading...",
+    "processing": "Processing your request..."
+  },
+  "homeChallengePage": {
+    "nav": {
+      "discussion": "Discussion",
+      "meetingRoom": "Meeting Room",
+      "teams": "Teams"
+    },
+    "hero": {
+      "startSolving": "Start solving"
+    },
+    "discussionCard": {
+      "title": "Go to Discussion: {{heading}}",
+      "subtitle": "Join the conversation for this workspace."
+    },
+    "meeting": {
+      "googleMeetTitle": "Google Meet Room",
+      "googleMeetSubtitle": "Always-on video chat.",
+      "zoomTitle": "Zoom Room"
+    },
+    "documents": {
+      "openPdf": "Open PDF",
+      "handouts": "Handouts",
+      "download": "Download"
+    },
+    "participants": {
+      "title": "Participants ({{count}})",
+      "loadingProfiles": "Loading participant profiles...",
+      "none": "No participants have been added yet."
+    },
+    "existingChallenges": {
+      "title": "Choose Existing Challenges",
+      "subtitle": "Pick a challenge from the global library",
+      "loading": "Loading challenges...",
+      "empty": "No challenges found for this category",
+      "adding": "Adding...",
+      "addToWorkspace": "Add to Workspace",
+      "available": "{{count}} challenges available"
+    },
+    "privateWorkspace": {
+      "title": "Private Workspace",
+      "description": "You do not have permission to view this page. Please contact the administrator for access."
+    },
+    "leaveWorkspace": {
+      "badge": "Leave Workspace",
+      "title": "Are you sure you want to leave?",
+      "description": "You will be removed from this workspace's participants list. You can rejoin anytime with the link.",
+      "confirm": "Yes, leave",
+      "stay": "Stay"
+    },
+    "joinWorkspace": {
+      "badge": "Invitation",
+      "title": "Join this workspace?",
+      "descriptionPrefix": "You are viewing",
+      "descriptionSuffix": "Join to collaborate, view team challenges, and participate in discussions.",
+      "joining": "Joining...",
+      "confirm": "Join Workspace",
+      "defer": "Maybe later"
+    },
+    "common": {
+      "join": "Join",
+      "viewProfile": "View profile",
+      "leave": "Leave",
+      "profileUnavailable": "Profile unavailable",
+      "notRegistered": "Not registered",
+      "show": "Show",
+      "hide": "Hide",
+      "showFewer": "Show fewer",
+      "showAll": "Show all ({{count}})",
+      "close": "Close"
+    }
+  },
   "discussion": {
     "mentionTips": {
       "title": "Mention Tips:",
