@@ -643,6 +643,13 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
     this.classStudentsById = classStudentsById;
     this.students = combinedRows;
+    this.invitedCount = combinedRows.length;
+    this.verifiedCount = combinedRows.filter((row) => row.verified === true).length;
+  }
+
+  getClassStudents(classId: string | null | undefined): Row[] {
+    if (!classId) return [];
+    return this.classStudentsById[classId] || [];
   }
 
   private normalizeEmail(email: string): string {
