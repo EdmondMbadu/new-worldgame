@@ -95,6 +95,10 @@ export interface SolutionRecruitmentProfile {
 
 export class Evaluation {
   evaluatorId?: string;
+  evaluatorName?: string;
+  evaluatorEmail?: string;
+  isGuest?: boolean;
+  createdAtMs?: number;
   average?: string;
   achievable?: string;
   feasible?: string;

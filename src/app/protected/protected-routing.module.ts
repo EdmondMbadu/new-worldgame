@@ -157,7 +157,6 @@ const routes: Routes = [
   {
     path: 'problem-feedback/:id',
     component: ProblemFeedbackComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'evaluation-summary/:id',

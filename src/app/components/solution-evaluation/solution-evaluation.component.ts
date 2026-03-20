@@ -20,6 +20,7 @@ export class SolutionEvaluationComponent implements OnInit {
   @Input() timeElapsed: string = '';
   @Input() evaluationSummary: any = {};
   @Input() colors: any = {};
+  @Input() showChatbot = true;
 
   // Extra, if needed:
   comment: string = '';

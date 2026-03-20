@@ -154,12 +154,8 @@ export class EvaluationSummaryComponent {
    * Returns the best available evaluator display name for index
    */
   getEvaluatorDisplayName(index: number, evaluation: Evaluation): string {
-    const evaluatorUser = this.evaluators[index];
-    if (evaluatorUser) {
-      const fullName = `${evaluatorUser.firstName ?? ''} ${
-        evaluatorUser.lastName ?? ''
-      }`.trim();
-      return fullName || evaluatorUser.email || 'Evaluator';
+    if (evaluation?.evaluatorName) {
+      return evaluation.evaluatorName;
     }
 
     if (evaluation?.evaluator) {
@@ -169,12 +165,44 @@ export class EvaluationSummaryComponent {
       return evaluationName || evaluation.evaluator.email || 'Evaluator';
     }
 
+    if (evaluation?.evaluatorId && this.evaluatorDictionary[evaluation.evaluatorId]) {
+      const evaluatorUser = this.evaluatorDictionary[evaluation.evaluatorId];
+      const fullName = `${evaluatorUser.firstName ?? ''} ${
+        evaluatorUser.lastName ?? ''
+      }`.trim();
+      return fullName || evaluatorUser.email || 'Evaluator';
+    }
+
+    if (evaluation?.evaluatorEmail) {
+      return evaluation.evaluatorEmail;
+    }
+
+    const evaluatorUser = this.evaluators[index];
+    if (evaluatorUser) {
+      const fullName = `${evaluatorUser.firstName ?? ''} ${
+        evaluatorUser.lastName ?? ''
+      }`.trim();
+      return fullName || evaluatorUser.email || 'Evaluator';
+    }
+
     const fallbackName = this.currentSolution.evaluators?.[index]?.name;
     if (fallbackName && fallbackName.trim().length > 0) {
       return fallbackName;
     }
 
     return 'Evaluator';
+  }
+
+  getEvaluatorPhoto(evaluation: Evaluation): string | null {
+    if (evaluation?.evaluator?.profilePicture?.downloadURL) {
+      return evaluation.evaluator.profilePicture.downloadURL;
+    }
+
+    if (evaluation?.evaluatorId && this.evaluatorDictionary[evaluation.evaluatorId]?.profilePicture?.downloadURL) {
+      return this.evaluatorDictionary[evaluation.evaluatorId].profilePicture!.downloadURL!;
+    }
+
+    return null;
   }
 
   /**

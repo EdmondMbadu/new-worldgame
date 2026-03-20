@@ -199,8 +199,8 @@
                             <div class="evaluator-header">
                                 <div class="flex items-center gap-4">
                                     <div class="evaluator-avatar">
-                                        <ng-container *ngIf="evaluators[i]?.profilePicture?.downloadURL; else evaluatorInitial">
-                                            <img [src]="evaluators[i].profilePicture?.downloadURL"
+                                        <ng-container *ngIf="getEvaluatorPhoto(ev) as evaluatorPhoto; else evaluatorInitial">
+                                            <img [src]="evaluatorPhoto"
                                                 class="w-12 h-12 rounded-full object-cover ring-2 ring-white dark:ring-slate-700"
                                                 alt="Evaluator">
                                         </ng-container>
