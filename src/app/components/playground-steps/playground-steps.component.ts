@@ -140,12 +140,14 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   evaluatorInviteStatus: string = '';
   evaluatorInviteError: string = '';
   showHumanInvite: boolean = false;
+  sendEvaluatorEmailNow: boolean = true;
   recentEvaluatorInvites: Array<{
     email: string;
     name: string;
     status: 'success' | 'error' | 'exists';
     message?: string;
   }> = [];
+  evaluatorInviteSendingState: Record<string, boolean> = {};
   private evaluatorInviteSearchTimeout: any;
 
   hoverChangeReadMe: boolean = false;
@@ -1095,6 +1097,18 @@ STYLE REQUIREMENTS:
     });
   }
 
+  get pendingEvaluators(): Evaluator[] {
+    return (this.currentSolution.evaluators ?? []).filter(
+      (evaluator) => evaluator?.name && evaluator.evaluated !== 'true'
+    );
+  }
+
+  get inviteButtonLabel(): string {
+    return this.sendEvaluatorEmailNow
+      ? 'Add Evaluator & Send Email'
+      : 'Add Evaluator Only';
+  }
+
   onEvaluatorInviteInputChange() {
     if (this.evaluatorInviteSearchTimeout) {
       clearTimeout(this.evaluatorInviteSearchTimeout);
@@ -1164,6 +1178,130 @@ STYLE REQUIREMENTS:
     });
   }
 
+  private getEvaluatorInvitePayload(email: string) {
+    return {
+      email,
+      subject: `Please review this NewWorld Game solution: ${this.currentSolution.title || 'NewWorld Game Solution'}`,
+      title: this.currentSolution.title,
+      description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
+      path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
+      inviterName: `${this.auth.currentUser?.firstName || ''} ${this.auth.currentUser?.lastName || ''}`.trim(),
+    };
+  }
+
+  private async persistEvaluators(evaluators: Evaluator[]) {
+    await this.solution.addEvaluatorsToSolution(
+      evaluators,
+      this.currentSolution.solutionId!
+    );
+    this.currentSolution.evaluators = evaluators;
+    this.getEvaluators();
+  }
+
+  private async markEvaluatorInviteState(
+    email: string,
+    updates: Partial<Evaluator>
+  ) {
+    const evaluators = [...(this.currentSolution.evaluators ?? [])];
+    const index = evaluators.findIndex(
+      (evaluator) => (evaluator?.name || '').toLowerCase() === email.toLowerCase()
+    );
+
+    if (index === -1) return;
+
+    const existing = evaluators[index] || {};
+    evaluators[index] = {
+      ...existing,
+      ...updates,
+    };
+
+    await this.persistEvaluators(evaluators);
+  }
+
+  private async sendEvaluatorInviteEmail(email: string) {
+    const solutionEvaluationInvite = this.fns.httpsCallable(
+      'solutionEvaluationInvite'
+    );
+    await firstValueFrom(
+      solutionEvaluationInvite(this.getEvaluatorInvitePayload(email))
+    );
+  }
+
+  getEvaluatorDisplayName(evaluator: Evaluator): string {
+    if (evaluator.user) {
+      const fullName = `${evaluator.user.firstName || ''} ${
+        evaluator.user.lastName || ''
+      }`.trim();
+      return fullName || evaluator.user.email || evaluator.name || 'Evaluator';
+    }
+
+    return evaluator.name || 'Evaluator';
+  }
+
+  getEvaluatorInviteStateLabel(evaluator: Evaluator): string {
+    if (evaluator.evaluated === 'true') {
+      return 'Feedback received';
+    }
+
+    if (evaluator.lastInviteError) {
+      return 'Email failed';
+    }
+
+    if (evaluator.inviteEmailSentAt) {
+      return 'Email sent';
+    }
+
+    return 'Added only';
+  }
+
+  isSendingEvaluatorInvite(email?: string | null): boolean {
+    if (!email) return false;
+    return this.evaluatorInviteSendingState[email.toLowerCase()] === true;
+  }
+
+  async resendEvaluatorInvite(evaluator: Evaluator) {
+    const email = (evaluator?.name || '').trim();
+    if (!email || this.isSendingEvaluatorInvite(email)) {
+      return;
+    }
+
+    const key = email.toLowerCase();
+    this.evaluatorInviteSendingState[key] = true;
+    this.evaluatorInviteError = '';
+    this.evaluatorInviteStatus = '';
+
+    try {
+      await this.sendEvaluatorInviteEmail(email);
+      await this.markEvaluatorInviteState(email, {
+        inviteEmailSentAt: Date.now(),
+        inviteEmailSentBy: this.auth.currentUser?.uid || '',
+        inviteEmailSendCount: Number(evaluator.inviteEmailSendCount || 0) + 1,
+        lastInviteError: '',
+      });
+
+      this.evaluatorInviteStatus = `Invitation email sent to ${email}.`;
+      this.recentEvaluatorInvites.unshift({
+        email,
+        name: this.getEvaluatorDisplayName(evaluator),
+        status: 'success',
+      });
+    } catch (error) {
+      console.error('Evaluator resend invite failed:', error);
+      await this.markEvaluatorInviteState(email, {
+        lastInviteError: 'Invite failed. Try again.',
+      });
+      this.evaluatorInviteError = `We could not send an email to ${email}. Please try again.`;
+      this.recentEvaluatorInvites.unshift({
+        email,
+        name: this.getEvaluatorDisplayName(evaluator),
+        status: 'error',
+        message: 'Invite failed. Try again.',
+      });
+    } finally {
+      this.evaluatorInviteSendingState[key] = false;
+    }
+  }
+
   async inviteEvaluator() {
     if (!this.canInviteEvaluator) {
       return;
@@ -1199,38 +1337,44 @@ STYLE REQUIREMENTS:
 
     try {
       const evaluators = [...(this.currentSolution.evaluators ?? [])];
-      evaluators.push({ name: email });
-
-      await this.solution.addEvaluatorsToSolution(
-        evaluators,
-        this.currentSolution.solutionId!
-      );
-      this.currentSolution.evaluators = evaluators;
-      this.getEvaluators();
-
-      const solutionEvaluationInvite = this.fns.httpsCallable(
-        'solutionEvaluationInvite'
-      );
-      const emailData = {
-        email,
-        subject: `You have been invited to evaluate the NewWorld Game solution: ${this.currentSolution.title || 'NewWorld Game Solution'}`,
-        title: this.currentSolution.title,
-        description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
-        path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
+      const newEvaluator: Evaluator = {
+        name: email,
       };
 
-      await firstValueFrom(solutionEvaluationInvite(emailData));
+      if (this.sendEvaluatorEmailNow) {
+        newEvaluator.inviteEmailSentAt = Date.now();
+        newEvaluator.inviteEmailSentBy = this.auth.currentUser?.uid || '';
+        newEvaluator.inviteEmailSendCount = 1;
+        newEvaluator.lastInviteError = '';
+      }
+
+      evaluators.push(newEvaluator);
+      await this.persistEvaluators(evaluators);
+
+      if (this.sendEvaluatorEmailNow) {
+        await this.sendEvaluatorInviteEmail(email);
+      }
 
       this.recentEvaluatorInvites.unshift({
         email,
         name,
         status: 'success',
       });
-      this.evaluatorInviteStatus = 'Invite sent successfully.';
+      this.evaluatorInviteStatus = this.sendEvaluatorEmailNow
+        ? 'Evaluator added and invite email sent successfully.'
+        : 'Evaluator added to the list. No email was sent.';
       this.evaluatorInviteInput = '';
       this.selectedEvaluatorUser = null;
     } catch (error) {
       console.error('Evaluator invite failed:', error);
+      if (this.sendEvaluatorEmailNow && this.evaluatorExists(email)) {
+        await this.markEvaluatorInviteState(email, {
+          inviteEmailSentAt: 0,
+          inviteEmailSentBy: '',
+          inviteEmailSendCount: 0,
+          lastInviteError: 'Invite failed. Try again.',
+        });
+      }
       this.recentEvaluatorInvites.unshift({
         email,
         name,
@@ -1238,7 +1382,9 @@ STYLE REQUIREMENTS:
         message: 'Invite failed. Try again.',
       });
       this.evaluatorInviteError =
-        'We could not send the invite. Please try again.';
+        this.sendEvaluatorEmailNow
+          ? 'We added the evaluator but could not send the email. You can retry from the pending evaluators list below.'
+          : 'We could not add the evaluator. Please try again.';
     } finally {
       this.isInvitingEvaluator = false;
     }

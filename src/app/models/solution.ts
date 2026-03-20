@@ -114,6 +114,10 @@ export class Evaluator {
   name?: string;
   evaluated?: string;
   user?: User;
+  inviteEmailSentAt?: number;
+  inviteEmailSentBy?: string;
+  inviteEmailSendCount?: number;
+  lastInviteError?: string;
 }
 
 export interface Admin {
