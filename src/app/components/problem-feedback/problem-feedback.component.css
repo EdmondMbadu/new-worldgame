@@ -4,6 +4,8 @@
 }
 
 .problem-feedback-page {
+  width: 100%;
+  min-height: 100vh;
   background:
     radial-gradient(circle at top left, rgba(20, 184, 166, 0.08), transparent 24rem),
     radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 24rem),
@@ -213,6 +215,63 @@
   50% {
     transform: translateY(5px);
   }
+}
+
+.dark .problem-feedback-page {
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 24rem),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 24rem),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+}
+
+.dark .feedback-panel {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.3);
+}
+
+.dark .feedback-panel__hero {
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+.dark .feedback-panel__eyebrow,
+.dark .feedback-form-card__eyebrow {
+  color: #5eead4;
+}
+
+.dark .feedback-panel__title,
+.dark .criterion-card__title {
+  color: #f8fafc;
+}
+
+.dark .feedback-form-card,
+.dark .criterion-card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.9));
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+.dark .criterion-card__scale {
+  color: #cbd5e1;
+}
+
+.dark .criterion-score {
+  background: rgba(45, 212, 191, 0.14);
+  color: #5eead4;
+}
+
+.dark .criterion-card ::ng-deep .mdc-slider {
+  --mdc-slider-handle-color: #5eead4;
+  --mdc-slider-focus-handle-color: #5eead4;
+  --mdc-slider-hover-handle-color: #5eead4;
+  --mdc-slider-active-track-color: #5eead4;
+  --mdc-slider-inactive-track-color: rgba(148, 163, 184, 0.28);
+  --mdc-slider-with-tick-marks-inactive-container-color: rgba(148, 163, 184, 0.38);
+  --mdc-slider-with-tick-marks-active-container-color: rgba(15, 23, 42, 0.96);
+}
+
+.dark .criterion-card ::ng-deep .mdc-slider__thumb-knob {
+  border-color: #0f172a;
+  box-shadow: 0 8px 18px rgba(94, 234, 212, 0.2);
 }
 
 @media (prefers-color-scheme: dark) {
