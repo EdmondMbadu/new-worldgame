@@ -5,11 +5,31 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export type ChatMessageType = 'PROMPT' | 'RESPONSE' | 'IMAGE';
+export type ChatScopeType = 'GLOBAL' | 'SOLUTION';
+
+export interface ChatSessionScopeFilter {
+  scopeType: ChatScopeType;
+  scopeId?: string | null;
+}
+
+export function buildChatScopeKey(
+  scopeType?: ChatScopeType | null,
+  scopeId?: string | null
+): string {
+  if (scopeType === 'SOLUTION' && scopeId) {
+    return `solution:${scopeId}`;
+  }
+
+  return 'global';
+}
 
 export interface ChatSessionRecord {
   id: string;
   avatarSlug: string;
   avatarName: string;
+  scopeType?: ChatScopeType;
+  scopeId?: string | null;
+  scopeKey?: string;
   title: string;
   createdAt?: firebase.firestore.Timestamp | null;
   createdAtMs?: number;
@@ -39,6 +59,8 @@ export interface ChatMessageRecord {
 export interface CreateSessionPayload {
   avatarSlug: string;
   avatarName: string;
+  scopeType: ChatScopeType;
+  scopeId?: string | null;
   title: string;
   firstMessagePreview: string;
   createdAtMs?: number;
@@ -63,7 +85,8 @@ export class ChatSessionService {
 
   listSessionsForAvatar(
     uid: string,
-    avatarSlug: string
+    avatarSlug: string,
+    scope?: ChatSessionScopeFilter
   ): Observable<ChatSessionRecord[]> {
     return this.afs
       .collection<ChatSessionRecord>(this.sessionCollectionPath(uid), (ref) =>
@@ -72,9 +95,9 @@ export class ChatSessionService {
       .valueChanges({ idField: 'id' })
       .pipe(
         map((sessions) =>
-          [...sessions].sort(
-            (a, b) => (b.updatedAtMs ?? 0) - (a.updatedAtMs ?? 0)
-          )
+          sessions
+            .filter((session) => this.matchesScope(session, scope))
+            .sort((a, b) => (b.updatedAtMs ?? 0) - (a.updatedAtMs ?? 0))
         )
       );
   }
@@ -104,6 +127,9 @@ export class ChatSessionService {
         id: sessionId,
         avatarSlug: payload.avatarSlug,
         avatarName: payload.avatarName,
+        scopeType: payload.scopeType,
+        scopeId: payload.scopeId ?? null,
+        scopeKey: buildChatScopeKey(payload.scopeType, payload.scopeId),
         title: payload.title,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdAtMs,
@@ -199,5 +225,19 @@ export class ChatSessionService {
     }
     return cleaned.slice(0, 117) + '…';
   }
-}
 
+  private matchesScope(
+    session: ChatSessionRecord,
+    scope?: ChatSessionScopeFilter
+  ): boolean {
+    if (!scope) {
+      return true;
+    }
+
+    const sessionScopeKey =
+      session.scopeKey || buildChatScopeKey(session.scopeType, session.scopeId);
+    const targetScopeKey = buildChatScopeKey(scope.scopeType, scope.scopeId);
+
+    return sessionScopeKey === targetScopeKey;
+  }
+}

@@ -12,7 +12,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChatContextService, PlaygroundContext, PlaygroundQuestion } from 'src/app/services/chat-context.service';
-import { ChatSessionService, ChatSessionRecord, ChatMessageRecord } from 'src/app/services/chat-session.service';
+import {
+  buildChatScopeKey,
+  ChatScopeType,
+  ChatSessionService,
+  ChatSessionRecord,
+} from 'src/app/services/chat-session.service';
 
 export interface Source {
   title: string;
@@ -49,6 +54,13 @@ interface PendingPreview {
   uploading: boolean;
   path?: string;
   url?: string;
+}
+
+interface ChatScope {
+  scopeType: ChatScopeType;
+  scopeId: string | null;
+  scopeKey: string;
+  autoRestore: boolean;
 }
 
 @Component({
@@ -101,6 +113,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   private messagesSub?: Subscription;
   isLoadingHistory = false;
   isLoadingSession = false;
+  private activeScope: ChatScope = {
+    scopeType: 'GLOBAL',
+    scopeId: null,
+    scopeKey: buildChatScopeKey('GLOBAL', null),
+    autoRestore: false,
+  };
+  private shouldAutoRestoreHistory = false;
 
   aiAvatars: AiAvatar[] = [
     {
@@ -283,14 +302,24 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     if (this.user?.profilePicture?.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
     }
-    
-    // Load sessions for current avatar and restore the most recent one
+
+    this.activeScope = this.buildScope(this.chatContext.getContext());
+    this.shouldAutoRestoreHistory = this.activeScope.autoRestore;
     this.loadSessionsForCurrentAvatar();
-    
+
     // Subscribe to playground context
     this.contextSub = this.chatContext.context$.subscribe(ctx => {
+      const nextScope = this.buildScope(ctx);
+      const scopeChanged = nextScope.scopeKey !== this.activeScope.scopeKey;
+
       this.playgroundContext = ctx;
+      this.activeScope = nextScope;
       this.updateIntroMessage();
+
+      if (scopeChanged) {
+        this.handleScopeChange();
+      }
+
       this.cdRef.detectChanges();
     });
     
@@ -333,6 +362,14 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     return this.playgroundContext?.questions || [];
   }
 
+  get historyScopeLabel(): string {
+    if (this.hasContext) {
+      return 'Showing conversations for this solution';
+    }
+
+    return 'Showing general conversations only';
+  }
+
   selectAi(ai: AiAvatar): void {
     if (this.selectedAi.id === ai.id) {
       this.showAiSelector = false;
@@ -345,6 +382,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.updateIntroMessage();
     this.responses = [];
     this.currentSessionId = null;
+    this.sessions = [];
+    this.shouldAutoRestoreHistory = this.activeScope.autoRestore;
     this.showAiSelector = false;
     
     // Load sessions for the new avatar
@@ -370,14 +409,24 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     
     this.isLoadingHistory = true;
     this.sessionsSub = this.chatSession
-      .listSessionsForAvatar(uid, this.selectedAi.id)
+      .listSessionsForAvatar(uid, this.selectedAi.id, {
+        scopeType: this.activeScope.scopeType,
+        scopeId: this.activeScope.scopeId,
+      })
       .subscribe({
         next: (sessions) => {
           this.sessions = sessions;
           this.isLoadingHistory = false;
-          
-          // Auto-restore the most recent session if we don't have one active
-          if (!this.currentSessionId && sessions.length > 0 && this.responses.length === 0) {
+
+          const shouldAutoRestore = this.shouldAutoRestoreHistory;
+          this.shouldAutoRestoreHistory = false;
+
+          if (
+            shouldAutoRestore &&
+            !this.currentSessionId &&
+            sessions.length > 0 &&
+            this.responses.length === 0
+          ) {
             this.loadSession(sessions[0].id);
           }
           
@@ -446,6 +495,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.messagesSub?.unsubscribe();
     this.currentSessionId = null;
     this.responses = [];
+    this.shouldAutoRestoreHistory = false;
     this.showHistoryPanel = false;
     this.updateIntroMessage();
     this.cdRef.detectChanges();
@@ -903,6 +953,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       this.currentSessionId = await this.chatSession.createSession(uid, {
         avatarSlug: this.selectedAi.id,
         avatarName: this.selectedAi.name,
+        scopeType: this.activeScope.scopeType,
+        scopeId: this.activeScope.scopeId,
         title,
         firstMessagePreview: trimmed,
       });
@@ -1084,6 +1136,50 @@ export class ChatbotComponent implements OnInit, OnDestroy {
         unsub.unsubscribe();
       },
     });
+  }
+
+  private buildScope(context: PlaygroundContext | null): ChatScope {
+    if (context?.solutionId) {
+      return {
+        scopeType: 'SOLUTION',
+        scopeId: context.solutionId,
+        scopeKey: buildChatScopeKey('SOLUTION', context.solutionId),
+        autoRestore: true,
+      };
+    }
+
+    const routeSolutionId = this.getSolutionIdFromRoute();
+    if (routeSolutionId) {
+      return {
+        scopeType: 'SOLUTION',
+        scopeId: routeSolutionId,
+        scopeKey: buildChatScopeKey('SOLUTION', routeSolutionId),
+        autoRestore: true,
+      };
+    }
+
+    return {
+      scopeType: 'GLOBAL',
+      scopeId: null,
+      scopeKey: buildChatScopeKey('GLOBAL', null),
+      autoRestore: false,
+    };
+  }
+
+  private getSolutionIdFromRoute(): string | null {
+    const path = (this.router.url || '').split('?')[0];
+    const match = path.match(/\/playground-steps\/([^/?#]+)/);
+    return match?.[1] || null;
+  }
+
+  private handleScopeChange(): void {
+    this.messagesSub?.unsubscribe();
+    this.currentSessionId = null;
+    this.responses = [];
+    this.sessions = [];
+    this.showHistoryPanel = false;
+    this.shouldAutoRestoreHistory = this.activeScope.autoRestore;
+    this.loadSessionsForCurrentAvatar();
   }
 
   endChat() {
