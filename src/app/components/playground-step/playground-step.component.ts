@@ -85,6 +85,7 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
 
   displayPopups: boolean[] = [];
   newTitle: string = '';
+  titleDraft: string = '';
   clickedDisplayPopups: boolean[] = [];
   currentSolution: Solution = {};
   staticContentArray: string[] = [];
@@ -110,6 +111,8 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
   elements: any = [];
   @Output() submissionComplete: EventEmitter<any> = new EventEmitter();
   updateTitleBox: boolean = false;
+  isEditingTitle = false;
+  isSavingTitle = false;
 
   isLoading: boolean = false;
 
@@ -223,6 +226,8 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         if (isFirstLoad) {
           // First load - initialize everything
           this.currentSolution = data;
+          this.title = this.currentSolution.title || this.title || '';
+          this.titleDraft = this.title || '';
           if (this.currentSolution.discussion) {
             this.discussion = this.currentSolution.discussion;
             this.displayTimeDiscussion();
@@ -386,6 +391,11 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     
     // Always update non-content fields
     this.currentSolution = { ...this.currentSolution, ...data };
+    this.title = this.currentSolution.title || '';
+
+    if (!this.isEditingTitle) {
+      this.titleDraft = this.title || '';
+    }
     
     // Update discussion if changed
     if (data.discussion) {
@@ -862,20 +872,53 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.updateTitleBox = !this.updateTitleBox;
   }
 
+  beginTitleEdit() {
+    this.titleDraft = (this.currentSolution.title || this.title || '').trim();
+    this.newTitle = this.titleDraft;
+    this.isEditingTitle = true;
+  }
+
+  cancelTitleEdit() {
+    this.isEditingTitle = false;
+    this.isSavingTitle = false;
+    this.titleDraft = this.currentSolution.title || this.title || '';
+    this.newTitle = this.titleDraft;
+  }
+
   updateTitile() {
-    if (this.newTitle !== '') {
-      this.solution
-        .updateSolutionTitle(this.currentSolution.solutionId!, this.newTitle)
-        .then(() => {
-          this.title = this.newTitle;
-          this.toggleUpdateTitle();
-        })
-        .catch((error: any) => {
-          alert('Error occured while updating title. Try again!');
-        });
-    } else {
+    const trimmedTitle = (this.titleDraft || this.newTitle || '').trim();
+
+    if (!trimmedTitle) {
       alert('Enter a title');
+      return;
     }
+
+    if (trimmedTitle === (this.currentSolution.title || '').trim()) {
+      this.cancelTitleEdit();
+      if (this.updateTitleBox) {
+        this.toggleUpdateTitle();
+      }
+      return;
+    }
+
+    this.isSavingTitle = true;
+    this.solution
+      .updateSolutionTitle(this.currentSolution.solutionId!, trimmedTitle)
+      .then(() => {
+        this.title = trimmedTitle;
+        this.currentSolution.title = trimmedTitle;
+        this.titleDraft = trimmedTitle;
+        this.newTitle = trimmedTitle;
+        this.isEditingTitle = false;
+        this.isSavingTitle = false;
+        if (this.updateTitleBox) {
+          this.toggleUpdateTitle();
+        }
+      })
+      .catch((error: any) => {
+        this.isSavingTitle = false;
+        alert('Error occured while updating title. Try again!');
+      });
   }
 
   openFeedback() {
