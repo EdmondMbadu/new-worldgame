@@ -57,6 +57,10 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
 import { ChesterReportComponent } from '../blogs/chester-report/chester-report.component';
 import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
+import { SlpShellComponent } from '../components/slp-shell/slp-shell.component';
+import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
+import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
+import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
 
 @NgModule({
   declarations: [
@@ -112,6 +116,10 @@ import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorshi
     ChesterReportComponent,
     CommunitySponsorshipComponent,
     GslSponsorshipComponent,
+    SlpShellComponent,
+    SlpPublishComponent,
+    SlpFundComponent,
+    SlpPartnerComponent,
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,199 @@
+<div class="slp-page min-h-screen">
+  <div class="min-h-screen lg:flex">
+    <aside
+      class="border-b border-[color:var(--slp-border)] bg-white/30 backdrop-blur lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:flex-shrink-0 lg:border-b-0 lg:border-r"
+    >
+      <div class="flex h-full flex-col p-4 sm:p-6">
+        <div class="mb-8">
+          <div class="mb-4 flex items-center gap-3">
+            <div
+              class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--slp-primary)] text-white shadow-lg shadow-emerald-900/15"
+            >
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <div>
+              <p class="slp-display text-2xl leading-none">SLP Pathway</p>
+              <p class="slp-mono mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+                Phase: {{ phase }}
+              </p>
+            </div>
+          </div>
+          <p class="max-w-xs text-sm leading-6 text-[color:var(--slp-muted)]">
+            A curated launch lane for taking promising work into public circulation, funding, and partnership.
+          </p>
+        </div>
+
+        <div class="mb-4">
+          <p class="slp-mono mb-3 px-1 text-[0.68rem] uppercase tracking-[0.24em] text-[color:var(--slp-muted)]">
+            Milestones
+          </p>
+          <nav class="space-y-2">
+            <ng-container *ngFor="let item of sideNav">
+              <a
+                *ngIf="item.route; else staticNavItem"
+                [routerLink]="item.route"
+                class="slp-nav-item"
+                [ngClass]="{ 'slp-nav-item-active': isActive(item.route) }"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  [style.font-variation-settings]="item.state === 'complete' ? '\'FILL\' 1, \'wght\' 500, \'GRAD\' 0, \'opsz\' 24' : null"
+                >
+                  {{ item.icon }}
+                </span>
+                <span class="slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+                  {{ item.label }}
+                </span>
+                <span
+                  *ngIf="isActive(item.route)"
+                  class="ml-auto h-2.5 w-2.5 rounded-full bg-[color:var(--slp-accent)]"
+                ></span>
+              </a>
+              <ng-template #staticNavItem>
+                <div class="slp-nav-item opacity-75">
+                  <span
+                    class="material-symbols-outlined"
+                    [style.font-variation-settings]="item.state === 'complete' ? '\'FILL\' 1, \'wght\' 500, \'GRAD\' 0, \'opsz\' 24' : null"
+                  >
+                    {{ item.icon }}
+                  </span>
+                  <span class="slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+                    {{ item.label }}
+                  </span>
+                </div>
+              </ng-template>
+            </ng-container>
+          </nav>
+        </div>
+
+        <div class="mt-6 border-t border-[color:var(--slp-border)] pt-6">
+          <p class="slp-mono mb-3 px-1 text-[0.68rem] uppercase tracking-[0.24em] text-[color:var(--slp-muted)]">
+            Quick Links
+          </p>
+          <div class="space-y-2">
+            <a
+              *ngFor="let link of quickLinks"
+              [routerLink]="link.route"
+              class="slp-nav-item text-sm"
+            >
+              <span *ngIf="link.icon" class="material-symbols-outlined">{{ link.icon }}</span>
+              <span>{{ link.label }}</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-8">
+          <div class="slp-card-muted p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+              Path Status
+            </p>
+            <p class="mt-3 text-sm leading-6 text-[color:var(--slp-muted)]">
+              Your launch deck is aligned across story, capital, and ecosystem fit. Next, activate the strongest lane.
+            </p>
+            <button
+              type="button"
+              class="slp-button mt-4 w-full px-4 py-3 text-sm font-semibold"
+            >
+              View launch summary
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="min-w-0 flex-1">
+      <header
+        class="sticky top-0 z-30 border-b border-[color:var(--slp-border)] bg-[rgba(247,241,232,0.86)] backdrop-blur"
+      >
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-10">
+          <div class="flex items-center gap-8">
+            <a routerLink="/" class="slp-display text-3xl italic">NewWorld Game</a>
+            <nav class="hidden items-center gap-6 md:flex">
+              <a
+                *ngFor="let link of topLinks"
+                [routerLink]="link.route"
+                class="slp-quiet-link slp-ui text-sm font-medium"
+              >
+                {{ link.label }}
+              </a>
+            </nav>
+          </div>
+
+          <div class="flex items-center gap-3 sm:gap-4">
+            <label class="relative hidden lg:block">
+              <input
+                type="text"
+                class="slp-input w-64 px-5 py-2.5 pr-11 text-sm text-[color:var(--slp-ink)] placeholder:text-[color:var(--slp-muted)]"
+                placeholder="Search launch resources..."
+              />
+              <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[color:var(--slp-muted)]">
+                search
+              </span>
+            </label>
+            <button
+              type="button"
+              class="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--slp-border)] bg-white/70 text-[color:var(--slp-muted)] transition hover:text-[color:var(--slp-primary)]"
+            >
+              <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <button
+              type="button"
+              class="flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--slp-border)] bg-white/70 text-[color:var(--slp-muted)] transition hover:text-[color:var(--slp-primary)]"
+            >
+              <span class="material-symbols-outlined">settings</span>
+            </button>
+            <div class="h-11 w-11 overflow-hidden rounded-full border border-[color:var(--slp-border)] bg-white">
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrzg4NiPqNg1dV7EGk7Us_6tF9T-pMeRWm55rMIp2BA-yx21irF1M5TICRhgX0_rlMKUNZFbNc8jHPPEOgWYYRiGxhWEihLMIwzI4r9L7rAAJJnjIqCk_1xjq4olWjb6wVnJkGnetfbFAbcm7UC7Wg4ZuihjVwCQiTCs0I0-1G-0vW48L6_yI_Bp3Shd-SYsTpp2grFhmQc6jQ27K22lJM4hZvnssfc2r_YB8_7P-bvMavdMFAhSWWl4tNgJMJn0GbzvfarQ6VaGwE"
+                alt="Profile"
+                class="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="px-4 pb-12 pt-6 sm:px-6 lg:px-10 lg:pb-16 lg:pt-8">
+        <div class="mx-auto max-w-7xl">
+          <ng-content></ng-content>
+        </div>
+      </main>
+
+      <footer class="border-t border-[color:var(--slp-border)] bg-white/65">
+        <div
+          class="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-5 text-sm text-[color:var(--slp-muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-10"
+        >
+          <div>
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+              Current export
+            </p>
+            <p class="mt-1">
+              Climate Tech Proposal
+              <span class="mx-2 text-[color:var(--slp-border)]">|</span>
+              Phase 3 launch pathway
+            </p>
+          </div>
+
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <nav class="flex flex-wrap items-center gap-4">
+              <a
+                *ngFor="let link of footerLinks"
+                [routerLink]="link.route"
+                class="slp-quiet-link"
+              >
+                {{ link.label }}
+              </a>
+            </nav>
+            <button
+              type="button"
+              class="slp-button px-5 py-2.5 text-sm font-semibold"
+            >
+              <span class="material-symbols-outlined text-base">download</span>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>

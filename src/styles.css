@@ -2,7 +2,169 @@
 
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;1,200;1,300;1,400;1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0');
 @import "../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.25rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.slp-page {
+  --slp-bg: #f6f0e6;
+  --slp-bg-strong: #efe6d8;
+  --slp-panel: rgba(255, 255, 255, 0.88);
+  --slp-panel-muted: rgba(244, 238, 228, 0.92);
+  --slp-border: rgba(108, 92, 76, 0.16);
+  --slp-ink: #191410;
+  --slp-muted: #6a6258;
+  --slp-primary: #117a60;
+  --slp-primary-deep: #0b5d49;
+  --slp-accent: #7255d7;
+  --slp-accent-soft: rgba(114, 85, 215, 0.12);
+  --slp-highlight: rgba(17, 122, 96, 0.12);
+  background:
+    radial-gradient(circle at top left, rgba(17, 122, 96, 0.14), transparent 32%),
+    radial-gradient(circle at top right, rgba(114, 85, 215, 0.16), transparent 24%),
+    linear-gradient(180deg, #f7f1e8 0%, #f4eee5 100%);
+  color: var(--slp-ink);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.slp-display {
+  font-family: 'Instrument Serif', serif;
+}
+
+.slp-mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.slp-ui {
+  font-family: 'Inter', sans-serif;
+}
+
+.slp-card {
+  background: var(--slp-panel);
+  border: 1px solid var(--slp-border);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 50px rgba(26, 20, 16, 0.06);
+}
+
+.slp-card-muted {
+  background: var(--slp-panel-muted);
+  border: 1px solid var(--slp-border);
+  border-radius: 1.5rem;
+}
+
+.slp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 122, 96, 0.18);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0.4rem 0.85rem;
+  color: var(--slp-primary-deep);
+}
+
+.slp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  background: var(--slp-primary);
+  color: white;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    background-color 160ms ease;
+}
+
+.slp-button:hover {
+  background: var(--slp-primary-deep);
+}
+
+.slp-button:active {
+  transform: scale(0.98);
+}
+
+.slp-button-secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--slp-ink);
+  border: 1px solid var(--slp-border);
+}
+
+.slp-button-secondary:hover {
+  background: white;
+}
+
+.slp-input {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+.slp-input:focus {
+  outline: none;
+  border-color: rgba(17, 122, 96, 0.28);
+  box-shadow: 0 0 0 4px rgba(17, 122, 96, 0.09);
+  background: white;
+}
+
+.slp-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--slp-muted);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+
+.slp-nav-item:hover {
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--slp-ink);
+  transform: translateX(2px);
+}
+
+.slp-nav-item-active {
+  background: white;
+  border: 1px solid rgba(17, 122, 96, 0.14);
+  color: var(--slp-primary-deep);
+  box-shadow: 0 16px 32px rgba(17, 122, 96, 0.08);
+}
+
+.slp-quiet-link {
+  color: var(--slp-muted);
+  transition: color 160ms ease;
+}
+
+.slp-quiet-link:hover {
+  color: var(--slp-primary);
+}

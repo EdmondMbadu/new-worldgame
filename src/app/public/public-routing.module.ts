@@ -53,6 +53,9 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
 import { ChesterReportComponent } from '../blogs/chester-report/chester-report.component';
 import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
+import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
+import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
+import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -129,6 +132,9 @@ const routes: Routes = [
   { path: 'chester-report', component: ChesterReportComponent },
   { path: 'community-sponsorship', component: CommunitySponsorshipComponent },
   { path: 'gsl-sponsorship', component: GslSponsorshipComponent },
+  { path: 'slp', component: SlpPublishComponent },
+  { path: 'fund', component: SlpFundComponent },
+  { path: 'partner', component: SlpPartnerComponent },
 ];
 
 @NgModule({

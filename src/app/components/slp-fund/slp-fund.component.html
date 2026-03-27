@@ -1,0 +1,149 @@
+<app-slp-shell activeRoute="/fund" phase="Fund">
+  <section class="slp-card overflow-hidden p-8 sm:p-10">
+    <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+      <div class="max-w-3xl">
+        <div class="slp-chip slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+          <span class="material-symbols-outlined text-base">payments</span>
+          Phase 3 · execution capital
+        </div>
+        <h1 class="slp-display mt-7 text-5xl leading-none sm:text-6xl">
+          Capital and strategic support for the next leap.
+        </h1>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-[color:var(--slp-muted)]">
+          Identify the best first checks, structure your ask, and build a credible financing path before approaching larger institutions.
+        </p>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-3 xl:w-[26rem]">
+        <div class="slp-card-muted p-4">
+          <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">Open matches</p>
+          <p class="mt-3 text-3xl font-semibold">12</p>
+        </div>
+        <div class="slp-card-muted p-4">
+          <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">Best-fit lane</p>
+          <p class="mt-3 text-3xl font-semibold">Tier 1</p>
+        </div>
+        <div class="slp-card-muted p-4">
+          <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">Readiness</p>
+          <p class="mt-3 text-3xl font-semibold">86%</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-8">
+    <div class="flex gap-3 overflow-x-auto pb-2">
+      <button
+        *ngFor="let tier of tiers"
+        type="button"
+        class="rounded-full border px-5 py-3 text-left transition"
+        [ngClass]="tier.active
+          ? 'border-[color:var(--slp-primary)] bg-white text-[color:var(--slp-primary)] shadow-md'
+          : 'border-transparent bg-[color:var(--slp-panel-muted)] text-[color:var(--slp-muted)] hover:bg-white'"
+      >
+        <span class="slp-mono block text-[0.68rem] uppercase tracking-[0.22em]">{{ tier.label }}</span>
+        <span class="mt-1 block text-sm font-semibold">{{ tier.subtitle }}</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="mt-8 grid gap-6 2xl:grid-cols-[1.55fr_0.72fr]">
+    <div>
+      <div class="mb-5">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.24em] text-[color:var(--slp-muted)]">
+          Tier 1 · Micro-grants and student awards
+        </p>
+        <p class="mt-2 text-sm text-[color:var(--slp-muted)]">
+          Start with smaller, faster funding sources that validate the case and sharpen the narrative.
+        </p>
+      </div>
+
+      <div class="grid gap-6 xl:grid-cols-2">
+        <article *ngFor="let grant of grants" class="slp-card overflow-hidden">
+          <div class="relative h-56 overflow-hidden">
+            <img [src]="grant.image" [alt]="grant.title" class="h-full w-full object-cover transition duration-500 hover:scale-105" />
+            <div class="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 shadow-sm">
+              <span class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+                {{ grant.label }}
+              </span>
+            </div>
+            <div class="absolute bottom-4 right-4 rounded-full bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur">
+              <span class="slp-mono text-xs font-semibold text-[color:var(--slp-primary)]">
+                {{ grant.fitScore }}% fit
+              </span>
+            </div>
+          </div>
+
+          <div class="p-6 sm:p-7">
+            <h2 class="slp-display text-4xl leading-none">{{ grant.title }}</h2>
+            <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+              {{ grant.description }}
+            </p>
+
+            <div class="mt-7 rounded-3xl bg-[color:var(--slp-panel-muted)] p-4">
+              <div class="flex items-center justify-between gap-3">
+                <span class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                  {{ grant.amountLabel }}
+                </span>
+                <span class="text-xl font-semibold text-[color:var(--slp-primary)]">
+                  {{ grant.amount }}
+                </span>
+              </div>
+            </div>
+
+            <div class="mt-6 flex items-center gap-3">
+              <button type="button" class="slp-button flex-1 px-5 py-3 text-sm font-semibold">
+                Explore grant details
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+              </button>
+              <button type="button" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--slp-border)] text-[color:var(--slp-muted)] transition hover:text-red-500">
+                <span class="material-symbols-outlined">favorite</span>
+              </button>
+              <button type="button" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--slp-border)] text-[color:var(--slp-muted)] transition hover:text-[color:var(--slp-primary)]">
+                <span class="material-symbols-outlined">share</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <aside class="space-y-6">
+      <div class="slp-card p-7">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+          Fundraising posture
+        </p>
+        <div class="mt-6 space-y-5">
+          <div>
+            <h3 class="text-lg font-semibold">Why Tier 1 first</h3>
+            <p class="mt-2 text-sm leading-7 text-[color:var(--slp-muted)]">
+              Smaller grants convert your prototype into a validated signal. That raises credibility before you spend time on institutional pipelines.
+            </p>
+          </div>
+          <div class="rounded-3xl bg-[color:var(--slp-panel-muted)] p-5">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-accent)]">
+              Current ask framework
+            </p>
+            <ul class="mt-4 space-y-3 text-sm leading-7 text-[color:var(--slp-muted)]">
+              <li>Problem: deployment gap in scalable carbon capture validation.</li>
+              <li>Use of funds: pilot testing, field instrumentation, and reporting.</li>
+              <li>Outcome: stronger data package for larger public or philanthropic bids.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="slp-card-muted p-7">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-accent)]">
+          Curated next move
+        </p>
+        <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+          Prepare one concise budget and one high-trust summary memo. Reuse both across the first wave of micro-grant submissions.
+        </p>
+        <button type="button" class="slp-button-secondary mt-6 inline-flex rounded-full px-5 py-3 text-sm font-semibold">
+          Request curated list
+        </button>
+      </div>
+    </aside>
+  </section>
+</app-slp-shell>
