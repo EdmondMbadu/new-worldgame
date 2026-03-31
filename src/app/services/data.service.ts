@@ -211,6 +211,7 @@ export class DataService implements OnInit {
   }
   allowedMimeTypes: string[] = [
     'image/jpeg',
+    'image/jpg',
     'image/png',
     'image/webp',
     'application/webb',
@@ -225,6 +226,21 @@ export class DataService implements OnInit {
     'text/csv',
     'application/vnd.ms-excel', // many browsers use this for .csv
     'text/plain', // .txt
+  ];
+
+  allowedFileExtensions: string[] = [
+    '.jpeg',
+    '.jpg',
+    '.png',
+    '.webp',
+    '.heic',
+    '.pdf',
+    '.doc',
+    '.docx',
+    '.ppt',
+    '.pptx',
+    '.csv',
+    '.txt',
   ];
 
   url: string = '';
@@ -727,7 +743,7 @@ export class DataService implements OnInit {
     console.log(' current file data', file);
     if (!file) return;
     if (file) {
-      if (!this.allowedMimeTypes.includes(file.type)) {
+      if (!this.isAllowedUploadFile(file)) {
         console.log('unsupported file type');
         return;
       }
@@ -762,6 +778,20 @@ export class DataService implements OnInit {
     if (upload === '') this.uploadImageCloudStorage(currentPath, this.url);
     return this.url;
     // this.router.navigate(['/home']);
+  }
+
+  private isAllowedUploadFile(file: File): boolean {
+    const fileType = (file.type || '').toLowerCase();
+    const extension = this.getFileExtension(file.name);
+    return (
+      this.allowedMimeTypes.includes(fileType) ||
+      this.allowedFileExtensions.includes(extension)
+    );
+  }
+
+  private getFileExtension(name: string): string {
+    const dot = name.lastIndexOf('.');
+    return dot >= 0 ? name.slice(dot).toLowerCase() : '';
   }
 
   parseDateMMDDYYYY(dateStr?: string): number {

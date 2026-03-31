@@ -2160,6 +2160,212 @@ function ensureAuthed(context: functions.https.CallableContext) {
   }
 }
 
+type BulkEmailAttachmentInput = {
+  name?: string;
+  filename?: string;
+  storagePath?: string;
+  contentType?: string;
+  size?: number;
+};
+
+type PreparedBulkEmailAttachment = {
+  filename: string;
+  storagePath: string;
+  contentType: string;
+  size: number;
+  sendGrid: {
+    content: string;
+    filename: string;
+    type: string;
+    disposition: 'attachment';
+  };
+};
+
+const BULK_EMAIL_ATTACHMENT_ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg',
+  'image/png',
+]);
+const BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS = new Set([
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.jpg',
+  '.jpeg',
+  '.png',
+]);
+const BULK_EMAIL_ATTACHMENT_MAX_BYTES = 10_000_000;
+const BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES = 20_000_000;
+const BULK_EMAIL_ATTACHMENT_MAX_COUNT = 10;
+const BULK_EMAIL_ATTACHMENT_STORAGE_PREFIX = 'bulk-mails/';
+
+function sanitizeBulkAttachmentName(value: string): string {
+  const cleaned = value.replace(/[\\/\r\n\t]+/g, '_').trim();
+  return cleaned || 'attachment';
+}
+
+function getBulkAttachmentContentType(filename: string): string {
+  switch (path.extname(filename).toLowerCase()) {
+    case '.pdf':
+      return 'application/pdf';
+    case '.doc':
+      return 'application/msword';
+    case '.docx':
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+function isAllowedBulkAttachment(
+  contentType: string,
+  filename: string
+): boolean {
+  const normalizedType = (contentType || '').toLowerCase();
+  const extension = path.extname(filename).toLowerCase();
+  return (
+    BULK_EMAIL_ATTACHMENT_ALLOWED_MIME_TYPES.has(normalizedType) ||
+    BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS.has(extension)
+  );
+}
+
+async function prepareBulkEmailAttachments(
+  rawAttachments: any
+): Promise<PreparedBulkEmailAttachment[]> {
+  const attachments = Array.isArray(rawAttachments) ? rawAttachments : [];
+  if (!attachments.length) return [];
+
+  if (attachments.length > BULK_EMAIL_ATTACHMENT_MAX_COUNT) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      `You can attach up to ${BULK_EMAIL_ATTACHMENT_MAX_COUNT} files per email.`
+    );
+  }
+
+  const bucket = admin.storage().bucket();
+  const prepared: PreparedBulkEmailAttachment[] = [];
+  let totalBytes = 0;
+
+  for (let index = 0; index < attachments.length; index++) {
+    const item = attachments[index] as BulkEmailAttachmentInput;
+    const storagePath = (item?.storagePath || '').toString().trim();
+    if (
+      !storagePath ||
+      !storagePath.startsWith(BULK_EMAIL_ATTACHMENT_STORAGE_PREFIX)
+    ) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `Attachment ${index + 1} has an invalid storage path.`
+      );
+    }
+
+    const file = bucket.file(storagePath);
+    const [exists] = await file.exists();
+    if (!exists) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `Attachment ${index + 1} could not be found.`
+      );
+    }
+
+    const [metadata] = await file.getMetadata();
+    const requestedName = (
+      item?.filename ||
+      item?.name ||
+      path.basename(storagePath)
+    ).toString();
+    let filename = sanitizeBulkAttachmentName(requestedName);
+    const storageExtension = path.extname(storagePath).toLowerCase();
+    if (!path.extname(filename) && storageExtension) {
+      filename += storageExtension;
+    }
+
+    const contentType = (
+      metadata?.contentType ||
+      item?.contentType ||
+      getBulkAttachmentContentType(filename)
+    )
+      .toString()
+      .toLowerCase();
+
+    if (!isAllowedBulkAttachment(contentType, filename)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `${filename} is not an allowed attachment type.`
+      );
+    }
+
+    const metadataSize = Number(metadata?.size || item?.size || 0);
+    if (!Number.isFinite(metadataSize) || metadataSize <= 0) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `${filename} is empty or has an invalid size.`
+      );
+    }
+    if (metadataSize > BULK_EMAIL_ATTACHMENT_MAX_BYTES) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `${filename} exceeds the 10 MB attachment limit.`
+      );
+    }
+
+    totalBytes += metadataSize;
+    if (totalBytes > BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `Attachments cannot exceed ${Math.round(
+          BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES / (1024 * 1024)
+        )} MB total.`
+      );
+    }
+
+    const [buffer] = await file.download();
+    if (!buffer.length || buffer.length > BULK_EMAIL_ATTACHMENT_MAX_BYTES) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `${filename} could not be attached.`
+      );
+    }
+
+    prepared.push({
+      filename,
+      storagePath,
+      contentType,
+      size: buffer.length,
+      sendGrid: {
+        content: buffer.toString('base64'),
+        filename,
+        type: contentType,
+        disposition: 'attachment',
+      },
+    });
+  }
+
+  return prepared;
+}
+
+function injectHiddenPreheader(html: string, preheader: string): string {
+  if (!preheader) return html;
+  const preheaderSpan = `<span style="display:none!important;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>`;
+  return /<body([^>]*)>/i.test(html)
+    ? html.replace(/<body([^>]*)>/i, (match: string) => `${match}${preheaderSpan}`)
+    : preheaderSpan + html;
+}
+
+function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /**
  * Callable to send a single test email with raw HTML
  * data: { to: string, subject: string, html: string, preheader?: string, from?: string }
@@ -2193,26 +2399,24 @@ export const sendBulkTestEmail = functions.https.onCall(
       );
     }
 
+    const attachments = await prepareBulkEmailAttachments(data?.attachments);
+
     // Preheader injection (kept invisible in most clients)
-    if (preheader) {
-      const preheaderSpan = `<span style="display:none!important;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>`;
-      // Put preheader right after <body> if present; else prepend
-      html =
-        html.replace(/<body([^>]*)>/i, (m: any) => `${m}${preheaderSpan}`) ||
-        preheaderSpan + html;
-    }
+    html = injectHiddenPreheader(html, preheader);
 
     const msg: sgMail.MailDataRequired = {
       to,
       from: { email: fromEmail, name: 'NewWorld Game' }, // adjust branding
       subject,
       html,
+      text: htmlToPlainText(html),
       // Optional: tracking/categorization
       trackingSettings: {
         clickTracking: { enable: true, enableText: true },
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-tester'],
+      attachments: attachments.map((file) => file.sendGrid),
       // Optional: sandbox mode toggle if you want a dry-run
       // mailSettings: { sandboxMode: { enable: true } },
     };
@@ -2395,6 +2599,8 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       '"html" is required.'
     );
 
+  const attachments = await prepareBulkEmailAttachments(data?.attachments);
+
   // Normalize + validate
   const rawTokens: string[] = [];
   for (const v of toList) {
@@ -2425,17 +2631,8 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
   );
 
   // Preheader injection + text fallback
-  if (preheader) {
-    const pre = `<span style="display:none!important;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>`;
-    html =
-      html.replace(/<body([^>]*)>/i, (m: any) => `${m}${pre}`) || pre + html;
-  }
-  const strip = (s: string) =>
-    s
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  const text = strip(html);
+  html = injectHiddenPreheader(html, preheader);
+  const text = htmlToPlainText(html);
 
   // Create a run doc
   const db = admin.firestore();
@@ -2457,6 +2654,12 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
         invalid: invalid.length,
         duplicates,
       },
+      attachments: attachments.map((file) => ({
+        filename: file.filename,
+        storagePath: file.storagePath,
+        contentType: file.contentType,
+        size: file.size,
+      })),
       status: 'running',
       batches: [],
     },
@@ -2484,6 +2687,7 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-html'],
+      attachments: attachments.map((file) => file.sendGrid),
       personalizations: batch.map((email) => ({ to: [{ email }] })),
     };
 

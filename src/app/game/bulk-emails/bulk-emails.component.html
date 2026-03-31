@@ -790,6 +790,64 @@
                             </label>
                         </div>
                         </div>
+
+                        <!-- Attachments -->
+                        <div class="shrink-0 rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <div>
+                            <label class="block text-sm font-medium">Attachments</label>
+                            <p class="text-xs opacity-70">
+                                PDFs, DOC/DOCX, JPG, and PNG. Up to {{ maxAttachmentCount }} files,
+                                {{ formatBytes(maxAttachmentBytes) }} each, {{ formatBytes(maxAttachmentTotalBytes) }} total.
+                            </p>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                            <button type="button" (click)="onPickAttachments()"
+                                    [disabled]="attachmentUploading || emailAttachments.length >= maxAttachmentCount"
+                                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+                                Add attachment
+                            </button>
+                            <button type="button" (click)="clearAttachments()"
+                                    [disabled]="!emailAttachments.length"
+                                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+                                Clear attachments
+                            </button>
+                            <input #attachmentInput type="file"
+                                    [accept]="attachmentAccept"
+                                    multiple
+                                    class="hidden"
+                                    (change)="onAttachmentsChosen($event)"/>
+                            </div>
+                        </div>
+
+                        <div class="text-xs opacity-80 mb-2">{{ attachmentSummary }}</div>
+                        <div *ngIf="attachmentUploading" class="text-xs opacity-70 mb-2">
+                            Uploading… {{ attachmentUploadText }}
+                        </div>
+                        <div *ngIf="attachmentError" class="text-xs text-rose-600 dark:text-rose-400 mb-2">
+                            {{ attachmentError }}
+                        </div>
+
+                        <div *ngIf="emailAttachments.length" class="space-y-2">
+                            <div *ngFor="let file of emailAttachments"
+                                 class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs">
+                            <a [href]="file.downloadUrl"
+                               target="_blank"
+                               rel="noopener"
+                               class="min-w-0 flex-1 truncate underline decoration-slate-300 underline-offset-2 hover:text-indigo-600">
+                                {{ file.name }}
+                            </a>
+                            <span class="opacity-70">{{ file.contentType }}</span>
+                            <span class="opacity-70">{{ formatBytes(file.size) }}</span>
+                            <button type="button"
+                                    (click)="removeAttachment(file.id)"
+                                    class="rounded-md px-2 py-1 ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                Remove
+                            </button>
+                            </div>
+                        </div>
+                        </div>
                         <!-- CSV Import -->
                         <div class="shrink-0">
                         <div class="flex items-center justify-between mb-2">

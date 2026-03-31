@@ -49,6 +49,15 @@ type ContactList = {
   note?: string; // optional helper text
 };
 
+type BulkEmailAttachment = {
+  id: string;
+  name: string;
+  storagePath: string;
+  downloadUrl: string;
+  contentType: string;
+  size: number;
+};
+
 @Component({
   selector: 'app-bulk-emails',
   templateUrl: './bulk-emails.component.html',
@@ -165,6 +174,16 @@ export class BulkEmailsComponent implements OnDestroy {
   sending = false;
   sendResult = '';
 
+  readonly attachmentAccept =
+    '.pdf,.doc,.docx,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  readonly maxAttachmentBytes = 10_000_000;
+  readonly maxAttachmentTotalBytes = 20_000_000;
+  readonly maxAttachmentCount = 10;
+  emailAttachments: BulkEmailAttachment[] = [];
+  attachmentUploading = false;
+  attachmentUploadText = '';
+  attachmentError = '';
+
   // CSV state
   @ViewChild('csvInput') csvInput!: ElementRef<HTMLInputElement>;
   csvValid: string[] = [];
@@ -184,6 +203,8 @@ export class BulkEmailsComponent implements OnDestroy {
   private uploadsKey = 'bulkEmail.recentUploads.v1';
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('attachmentInput')
+  attachmentInput!: ElementRef<HTMLInputElement>;
   @ViewChild('htmlEditor') htmlEditor!: ElementRef<HTMLTextAreaElement>;
 
   constructor(
@@ -297,6 +318,10 @@ export class BulkEmailsComponent implements OnDestroy {
     this.fileInput?.nativeElement?.click();
   }
 
+  onPickAttachments(): void {
+    this.attachmentInput?.nativeElement?.click();
+  }
+
   async onImageChosen(evt: Event): Promise<void> {
     const input = evt.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
@@ -327,6 +352,50 @@ export class BulkEmailsComponent implements OnDestroy {
     } finally {
       this.isUploading = false;
       this.uploadProgressText = '';
+    }
+  }
+
+  async onAttachmentsChosen(evt: Event): Promise<void> {
+    const input = evt.target as HTMLInputElement;
+    const files = Array.from(input.files || []);
+    input.value = '';
+    if (!files.length) return;
+
+    this.attachmentError = '';
+    this.attachmentUploading = true;
+
+    let nextCount = this.emailAttachments.length;
+    let nextTotal = this.attachmentTotalBytes;
+    const errors: string[] = [];
+
+    try {
+      for (const file of files) {
+        const validationError = this.validateAttachmentFile(
+          file,
+          nextCount,
+          nextTotal
+        );
+        if (validationError) {
+          errors.push(validationError);
+          continue;
+        }
+
+        this.attachmentUploadText = file.name;
+
+        try {
+          const uploaded = await this.uploadAttachment(file);
+          this.emailAttachments = [...this.emailAttachments, uploaded];
+          nextCount += 1;
+          nextTotal += uploaded.size;
+        } catch (error) {
+          console.error('Attachment upload failed', error);
+          errors.push(`${file.name}: upload failed. Please try again.`);
+        }
+      }
+    } finally {
+      this.attachmentUploading = false;
+      this.attachmentUploadText = '';
+      this.attachmentError = errors.join(' ');
     }
   }
 
@@ -376,6 +445,132 @@ export class BulkEmailsComponent implements OnDestroy {
     return (
       'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36)
     );
+  }
+
+  get attachmentTotalBytes(): number {
+    return this.emailAttachments.reduce((sum, file) => sum + (file.size || 0), 0);
+  }
+
+  get attachmentSummary(): string {
+    if (!this.emailAttachments.length) return 'No attachments';
+    return `${this.emailAttachments.length} attachment(s) • ${this.formatBytes(
+      this.attachmentTotalBytes
+    )}`;
+  }
+
+  removeAttachment(id: string): void {
+    this.emailAttachments = this.emailAttachments.filter((file) => file.id !== id);
+  }
+
+  clearAttachments(): void {
+    this.emailAttachments = [];
+    this.attachmentError = '';
+  }
+
+  private validateAttachmentFile(
+    file: File,
+    currentCount: number,
+    currentTotalBytes: number
+  ): string {
+    if (currentCount >= this.maxAttachmentCount) {
+      return `You can attach up to ${this.maxAttachmentCount} files per email.`;
+    }
+
+    if (!this.isAllowedAttachmentFile(file)) {
+      return `${file.name}: only PDF, DOC, DOCX, JPG, JPEG, and PNG files are allowed.`;
+    }
+
+    if (file.size <= 0) {
+      return `${file.name}: the file is empty.`;
+    }
+
+    if (file.size > this.maxAttachmentBytes) {
+      return `${file.name}: attachments must be 10 MB or smaller.`;
+    }
+
+    if (currentTotalBytes + file.size > this.maxAttachmentTotalBytes) {
+      return `Attachments cannot exceed ${this.formatBytes(
+        this.maxAttachmentTotalBytes
+      )} total.`;
+    }
+
+    return '';
+  }
+
+  private isAllowedAttachmentFile(file: File): boolean {
+    const type = (file.type || '').toLowerCase();
+    const extension = this.getFileExtension(file.name);
+
+    return (
+      [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/jpeg',
+        'image/png',
+      ].includes(type) ||
+      ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'].includes(extension)
+    );
+  }
+
+  private getFileExtension(name: string): string {
+    const dot = name.lastIndexOf('.');
+    return dot >= 0 ? name.slice(dot).toLowerCase() : '';
+  }
+
+  private async uploadAttachment(file: File): Promise<BulkEmailAttachment> {
+    const uniqueId = this.safeId();
+    const storagePath = `bulk-mails/${uniqueId}/attachments/${Date.now()}-${
+      file.name
+    }`;
+    const metadata = {
+      contentType: file.type || this.inferAttachmentContentType(file.name),
+    };
+
+    const downloadUrl = await this.data.startUpload(
+      file,
+      storagePath,
+      'false',
+      metadata
+    );
+
+    if (!downloadUrl) {
+      throw new Error('No download URL returned for attachment upload.');
+    }
+
+    return {
+      id: this.safeId(),
+      name: file.name,
+      storagePath,
+      downloadUrl,
+      contentType: metadata.contentType,
+      size: file.size,
+    };
+  }
+
+  private inferAttachmentContentType(fileName: string): string {
+    switch (this.getFileExtension(fileName)) {
+      case '.pdf':
+        return 'application/pdf';
+      case '.doc':
+        return 'application/msword';
+      case '.docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.png':
+        return 'image/png';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
+  formatBytes(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   /* ---------- Preview pipeline ---------- */
@@ -490,6 +685,7 @@ export class BulkEmailsComponent implements OnDestroy {
 
   resetForm(): void {
     this.form.reset({ subject: '', html: '' });
+    this.clearAttachments();
     this.recompute();
     localStorage.removeItem(this.draftKey);
   }
@@ -541,7 +737,7 @@ export class BulkEmailsComponent implements OnDestroy {
     const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.testEmail);
     const hasSubject = !!(this.form.value.subject || '').trim();
     const hasHtml = !!(this.finalHtml || '').trim();
-    return emailOk && hasSubject && hasHtml;
+    return emailOk && hasSubject && hasHtml && !this.attachmentUploading;
   }
 
   async sendTest(): Promise<void> {
@@ -556,6 +752,12 @@ export class BulkEmailsComponent implements OnDestroy {
         subject: (this.form.value.subject || '').trim(),
         html: this.finalHtml,
         preheader: this.testPreheader || '',
+        attachments: this.emailAttachments.map((file) => ({
+          name: file.name,
+          storagePath: file.storagePath,
+          contentType: file.contentType,
+          size: file.size,
+        })),
       };
 
       const callable = this.fns.httpsCallable('sendBulkTestEmail'); // compat API returns Observable
@@ -782,7 +984,13 @@ export class BulkEmailsComponent implements OnDestroy {
     const hasEmails = this.csvValid.length > 0;
     const hasSubject = !!(this.form.value.subject || '').trim();
     const hasHtml = !!(this.finalHtml || '').trim();
-    return hasEmails && hasSubject && hasHtml && !this.sendingBulk;
+    return (
+      hasEmails &&
+      hasSubject &&
+      hasHtml &&
+      !this.sendingBulk &&
+      !this.attachmentUploading
+    );
   }
 
   async sendBulk(): Promise<void> {
@@ -810,6 +1018,12 @@ export class BulkEmailsComponent implements OnDestroy {
         html: this.finalHtml,
         preheader: this.testPreheader || '',
         title: (this.form.value.subject || '').trim(), // or a custom title field
+        attachments: this.emailAttachments.map((file) => ({
+          name: file.name,
+          storagePath: file.storagePath,
+          contentType: file.contentType,
+          size: file.size,
+        })),
       };
 
       const res: any = await firstValueFrom(callable(payload));
