@@ -1,17 +1,9 @@
 import { Component, Input } from '@angular/core';
-
-interface SlpNavItem {
-  label: string;
-  icon: string;
-  route?: string;
-  state?: 'complete' | 'active' | 'idle';
-}
-
-interface SlpLinkItem {
-  label: string;
-  icon?: string;
-  route?: string;
-}
+import {
+  SlpLane,
+  SlpNavItem,
+  SlpShellViewModel,
+} from 'src/app/services/slp-context.service';
 
 @Component({
   selector: 'app-slp-shell',
@@ -19,36 +11,20 @@ interface SlpLinkItem {
   styleUrls: ['./slp-shell.component.css'],
 })
 export class SlpShellComponent {
-  @Input() activeRoute = '/slp';
-  @Input() phase = 'Publish';
+  @Input() activeLane: SlpLane = 'publish';
+  @Input() shell!: SlpShellViewModel;
 
-  readonly sideNav: SlpNavItem[] = [
-    { label: 'Celebrate', icon: 'check_circle', state: 'complete' },
-    { label: 'Publish', icon: 'publish', route: '/slp', state: 'active' },
-    { label: 'Fund', icon: 'payments', route: '/fund' },
-    { label: 'Partner', icon: 'handshake', route: '/partner' },
-    { label: 'Archive', icon: 'inventory_2' },
-  ];
+  isActive(item: SlpNavItem): boolean {
+    return item.lane === this.activeLane;
+  }
 
-  readonly quickLinks: SlpLinkItem[] = [
-    { label: 'Solution Library', icon: 'menu_book', route: '/blogs/solution-libraries' },
-    { label: 'Impact Record', icon: 'insights', route: '/overview' },
-    { label: 'Support', icon: 'help_outline', route: '/contact' },
-  ];
-
-  readonly topLinks: SlpLinkItem[] = [
-    { label: 'Explorer', route: '/overview' },
-    { label: 'Library', route: '/blogs/solution-libraries' },
-    { label: 'Archive', route: '/archive-pictures' },
-  ];
-
-  readonly footerLinks: SlpLinkItem[] = [
-    { label: 'Programs', route: '/plans' },
-    { label: 'Privacy', route: '/privacy' },
-    { label: 'Contact', route: '/contact' },
-  ];
-
-  isActive(route?: string): boolean {
-    return !!route && route === this.activeRoute;
+  get avatarInitials(): string {
+    const source = this.shell?.solutionTitle?.trim() || 'SLP';
+    return source
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((word) => word.charAt(0))
+      .join('')
+      .toUpperCase();
   }
 }
