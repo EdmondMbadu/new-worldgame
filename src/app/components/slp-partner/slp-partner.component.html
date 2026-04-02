@@ -1,5 +1,100 @@
 <ng-container *ngIf="vm$ | async as vm">
   <app-slp-shell [activeLane]="'partner'" [shell]="vm.shell">
+    <section class="mb-8 grid gap-6 xl:grid-cols-[1.45fr_0.78fr]">
+      <div class="slp-card overflow-hidden p-7 sm:p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div class="max-w-2xl">
+            <div class="slp-chip slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+              <span class="material-symbols-outlined text-base">pin_drop</span>
+              Location precision
+            </div>
+            <h2 class="mt-5 text-3xl font-semibold">
+              Add city and country to localize the partner ecosystem.
+            </h2>
+            <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+              We use your profile location when it exists. If it does not, enter it here and we will use it to rank nearby ecosystems, implementation allies, and region-specific partner networks more precisely.
+            </p>
+          </div>
+          <div class="rounded-full bg-[color:var(--slp-highlight)] px-4 py-2 text-sm font-semibold text-[color:var(--slp-primary)]">
+            {{ locationSourceLabel }}
+          </div>
+        </div>
+
+        <div class="mt-7 grid gap-4 md:grid-cols-2">
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              City
+            </span>
+            <input
+              [(ngModel)]="city"
+              type="text"
+              class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
+              placeholder="Enter city"
+            />
+          </label>
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Country
+            </span>
+            <input
+              [(ngModel)]="country"
+              type="text"
+              class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
+              placeholder="Enter country"
+            />
+          </label>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="text-sm text-[color:var(--slp-muted)]">
+              {{ locationStatusMessage }}
+            </p>
+            <p *ngIf="locationError" class="mt-2 text-sm text-rose-600">
+              {{ locationError }}
+            </p>
+          </div>
+          <button
+            type="button"
+            (click)="applyLocation()"
+            class="slp-button px-5 py-3 text-sm font-semibold"
+            [disabled]="savingLocation"
+          >
+            <span class="material-symbols-outlined text-base">travel_explore</span>
+            {{ savingLocation ? 'Saving...' : 'Apply location' }}
+          </button>
+        </div>
+      </div>
+
+      <aside class="slp-card-muted p-7">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+          Current targeting
+        </p>
+        <div class="mt-5 space-y-4">
+          <div class="rounded-2xl bg-white/70 p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Location
+            </p>
+            <p class="mt-2 text-lg font-semibold">{{ currentLocationLabel }}</p>
+          </div>
+          <div class="rounded-2xl bg-white/70 p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Partner targets
+            </p>
+            <p class="mt-2 text-lg font-semibold">{{ vm.collaborationCards.length }}</p>
+          </div>
+          <div class="rounded-2xl bg-white/70 p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Coordination score
+            </p>
+            <p class="mt-2 text-sm leading-6 text-[color:var(--slp-muted)]">
+              {{ vm.stats[2].detail }}
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
     <section class="slp-card overflow-hidden p-8 sm:p-10">
       <div class="flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
         <div class="max-w-3xl">
@@ -53,6 +148,12 @@
                   <span class="slp-mono rounded-full bg-[color:var(--slp-panel-muted)] px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
                     {{ card.label }}
                   </span>
+                  <span
+                    *ngIf="card.badge"
+                    class="rounded-full border border-[color:var(--slp-border)] px-3 py-1 text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--slp-primary)]"
+                  >
+                    {{ card.badge }}
+                  </span>
                 </div>
                 <div class="mt-4 flex flex-wrap items-center gap-2 text-xs text-[color:var(--slp-muted)]">
                   <span
@@ -79,20 +180,33 @@
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-accent)]">
-                  Live solution handoff
+                  Partner access point
                 </p>
                 <p class="mt-2 text-sm text-[color:var(--slp-muted)]">
-                  This action opens the real room or workflow for the current solution.
+                  This action opens the partner ecosystem or network in a new tab.
                 </p>
               </div>
-              <a
-                [routerLink]="card.route"
-                [queryParams]="card.queryParams"
-                class="slp-button rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em]"
-              >
-                <span class="material-symbols-outlined text-base">arrow_forward</span>
-                {{ card.cta }}
-              </a>
+              <ng-container *ngIf="card.href; else internalPartnerLink">
+                <a
+                  [href]="card.href"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="slp-button rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em]"
+                >
+                  <span class="material-symbols-outlined text-base">open_in_new</span>
+                  {{ card.cta }}
+                </a>
+              </ng-container>
+              <ng-template #internalPartnerLink>
+                <a
+                  [routerLink]="card.route"
+                  [queryParams]="card.queryParams"
+                  class="slp-button rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em]"
+                >
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                  {{ card.cta }}
+                </a>
+              </ng-template>
             </div>
           </div>
         </article>

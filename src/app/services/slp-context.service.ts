@@ -188,6 +188,34 @@ interface SlpPublicationCatalogEntry {
   meta: string[];
 }
 
+interface SlpFundingCatalogEntry {
+  label: string;
+  title: string;
+  description: string;
+  icon: string;
+  href: string;
+  cta: string;
+  baseScore: number;
+  region: 'global' | 'north-america' | 'europe' | 'africa' | 'india' | 'asia-pacific';
+  badge: string;
+  tags: string[];
+  meta: string[];
+}
+
+interface SlpPartnerCatalogEntry {
+  label: string;
+  title: string;
+  description: string;
+  icon: string;
+  href: string;
+  cta: string;
+  baseScore: number;
+  region: 'global' | 'north-america' | 'europe' | 'africa' | 'india' | 'asia-pacific';
+  badge: string;
+  tags: string[];
+  meta: string[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -292,29 +320,39 @@ export class SlpContextService {
     );
   }
 
-  getFundViewModel(solutionId?: string): Observable<SlpFundViewModel> {
+  getFundViewModel(
+    solutionId?: string,
+    location: SlpLocationContext = {}
+  ): Observable<SlpFundViewModel> {
     return this.getBaseContext(solutionId).pipe(
       map((context) => {
         const activeTier = this.getFundingTier(context);
+        const fundingResources = this.buildFundingResources(context, location);
+        const locationLabel = this.formatLocation(location);
+        const hasLocation = this.hasLocation(location);
 
         return {
           shell: context.shell,
           heroTitle: context.hasSolution
-            ? `Build a funding case around ${context.solutionTitle}.`
-            : 'Translate the solution into a focused funding case.',
+            ? `Find real funding routes for ${context.solutionTitle}.`
+            : 'Find real funding routes for this solution.',
           heroDescription: context.hasSolution
-            ? `This lane uses the actual maturity of ${context.solutionTitle} to point you toward the next internal actions that make the funding story stronger.`
-            : 'Use this lane to prepare the materials and team signal needed before seeking funding.',
+            ? hasLocation
+              ? `These funding matches use the actual solution profile plus ${locationLabel} to balance local discovery, regional funding ecosystems, and global capital sources.`
+              : `These funding matches use the actual solution profile. Add city and country to improve local and regional funding relevance.`
+            : 'Use this lane to map a solution to concrete funding paths.',
           stats: [
+            {
+              label: 'Funding matches',
+              value: this.formatCount(fundingResources.length),
+              detail: hasLocation
+                ? `Ranked with local and regional weighting for ${locationLabel}.`
+                : 'Add location to improve local and regional funding relevance.',
+            },
             {
               label: 'Funding readiness',
               value: `${context.readinessScore}%`,
               detail: 'Based on story, evidence, team signal, and assets already in the workspace.',
-            },
-            {
-              label: 'Evidence items',
-              value: this.formatCount(context.documentCount + context.evaluationCount),
-              detail: 'Documents plus evaluation signals that support the ask.',
             },
             {
               label: 'Suggested lane',
@@ -327,72 +365,20 @@ export class SlpContextService {
             { label: 'Tier 2', subtitle: 'Mid-scale program funding', active: activeTier.label === 'Tier 2' },
             { label: 'Tier 3', subtitle: 'Institutional and strategic capital', active: activeTier.label === 'Tier 3' },
           ],
-          resources: [
-            {
-              label: 'Ask narrative',
-              title: 'Refine the funding story',
-              description: `Use the solution detail page to make the problem, proposed intervention, and desired outcome legible to someone funding ${context.focusArea.toLowerCase()}.`,
-              fitScore: this.buildFitScore(60, [
-                context.solutionSummary.length > 80,
-                context.evaluationCount > 0,
-              ]),
-              icon: 'request_quote',
-              meta: [
-                `Stage: ${context.stageLabel}`,
-                'Best for clarifying the ask',
-                `Lead focus: ${context.focusArea}`,
-              ],
-              cta: 'Open solution details',
-              route: context.routes.details,
-            },
-            {
-              label: 'Proof package',
-              title: 'Assemble evidence and attachments',
-              description: 'Funding decisions move faster when the supporting files, drafts, and proof points are easy to inspect in one place.',
-              fitScore: this.buildFitScore(56, [
-                context.documentCount > 0,
-                !!context.image,
-                context.evaluationCount > 0,
-              ]),
-              icon: 'inventory',
-              meta: [
-                `${context.documentCount} documents`,
-                `${context.evaluationCount} evaluation signals`,
-                'Best for diligence readiness',
-              ],
-              cta: 'Open document room',
-              route: context.routes.documents,
-            },
-            {
-              label: 'Capacity signal',
-              title: 'Strengthen the team profile',
-              description: 'If the project still needs operators, advisors, or researchers, use the dashboard invite tools before widening the funding ask.',
-              fitScore: this.buildFitScore(52, [
-                context.participantCount > 2,
-                context.readyAssetCount > 3,
-              ]),
-              icon: 'groups',
-              meta: [
-                `${context.participantCount} active participants`,
-                'Invite contributors directly from the dashboard',
-                'Best for execution confidence',
-              ],
-              cta: 'Open invite flow',
-              route: context.routes.dashboard,
-              queryParams: { openInvite: 'true' },
-            },
-          ],
+          resources: fundingResources,
           postureTitle: `${activeTier.label} is the right first funding posture`,
           postureDescription:
             activeTier.label === 'Tier 1'
-              ? 'The project still benefits most from smaller, faster validation dollars. Tighten the story, gather proof, and avoid overreaching too early.'
+              ? 'Start with faster and lighter capital sources that help validate the story without overengineering the ask.'
               : activeTier.label === 'Tier 2'
-                ? 'The solution has enough shape to support program-level asks, but it still needs a crisp evidence trail and a focused execution narrative.'
-                : 'The workspace signals a mature solution. The next task is packaging the evidence and partners clearly enough for larger strategic conversations.',
+                ? 'The solution can support program-level asks if the proof, scope, and use-of-funds narrative remain tight.'
+                : 'The solution profile is mature enough to justify strategic funding conversations with larger institutional backers.',
           askFramework: [
             `Problem: ${context.solutionSummary}`,
             `Why now: ${context.stageLabel} with ${context.readyAssetCount} launch signals already visible in the workspace.`,
-            `Use of funds: grow the team, strengthen evidence, and move ${context.solutionTitle} toward implementation.`,
+            hasLocation
+              ? `Where to start: prioritize funders that already support work in or around ${locationLabel}.`
+              : `Where to start: begin with high-fit global funders, then add city and country to localize the list.`,
           ],
           nextMove: context.nextStep,
         };
@@ -400,29 +386,39 @@ export class SlpContextService {
     );
   }
 
-  getPartnerViewModel(solutionId?: string): Observable<SlpPartnerViewModel> {
+  getPartnerViewModel(
+    solutionId?: string,
+    location: SlpLocationContext = {}
+  ): Observable<SlpPartnerViewModel> {
     return this.getBaseContext(solutionId).pipe(
       map((context) => {
         const activeScope = this.getPartnerScope(context);
+        const partnerResources = this.buildPartnerResources(context, location);
+        const hasLocation = this.hasLocation(location);
+        const locationLabel = this.formatLocation(location);
 
         return {
           shell: context.shell,
           heroTitle: context.hasSolution
-            ? `Coordinate partners around ${context.solutionTitle}.`
-            : 'Use the partner lane to turn a solution into a collaborative execution path.',
+            ? `Find real partner ecosystems for ${context.solutionTitle}.`
+            : 'Find real partner ecosystems for this solution.',
           heroDescription: context.hasSolution
-            ? `This lane is now tied directly to the actual discussion room, meeting room, join page, and invite flow for ${context.solutionTitle}.`
-            : 'Use the partner lane to connect the right people, rooms, and outreach steps around a solution.',
+            ? hasLocation
+              ? `These partner targets blend the solution profile with ${locationLabel} so you can start with the strongest nearby or regionally relevant ecosystems and then widen outward.`
+              : `These partner targets are ranked from the solution profile. Add city and country to improve local and regional ecosystem relevance.`
+            : 'Use the partner lane to map a solution to real collaboration ecosystems.',
           stats: [
+            {
+              label: 'Partner targets',
+              value: this.formatCount(partnerResources.length),
+              detail: hasLocation
+                ? `Ranked with local and regional weighting for ${locationLabel}.`
+                : 'Add location to improve nearby ecosystem matching.',
+            },
             {
               label: 'Active collaborators',
               value: this.formatCount(context.participantCount),
               detail: 'People already visible in the solution workspace.',
-            },
-            {
-              label: 'Conversation routes',
-              value: this.formatCount(3),
-              detail: 'Discussion, meeting, and invite flow are ready to use.',
             },
             {
               label: 'Coordination score',
@@ -435,77 +431,7 @@ export class SlpContextService {
             { label: 'Regional', active: activeScope === 'Regional' },
             { label: 'Local', active: activeScope === 'Local' },
           ],
-          collaborationCards: [
-            {
-              label: 'Discussion room',
-              title: 'Capture partner questions in context',
-              description: 'Use the full discussion room to collect feedback, requests, and commitments without losing the thread of the solution work.',
-              fitScore: this.buildFitScore(58, [
-                context.discussionCount > 0,
-                context.participantCount > 1,
-              ]),
-              icon: 'forum',
-              meta: [
-                `${context.discussionCount} current discussion signals`,
-                'Best for async partner coordination',
-                `Focus: ${context.focusArea}`,
-              ],
-              cta: 'Open discussion',
-              route: context.routes.discussion,
-            },
-            {
-              label: 'Meeting room',
-              title: 'Hold the live coordination call',
-              description: 'Bring collaborators into the meeting room tied to this exact solution when the conversation needs synchronous momentum.',
-              fitScore: this.buildFitScore(55, [
-                context.participantCount > 1,
-                context.readyAssetCount > 2,
-              ]),
-              icon: 'videocam',
-              meta: [
-                `${context.participantCount} active participants`,
-                'Best for live alignment',
-                'Use when decisions need real-time discussion',
-              ],
-              cta: 'Open meeting room',
-              route: context.routes.meeting,
-            },
-            {
-              label: 'Invite flow',
-              title: 'Add the next collaborator',
-              description: 'Open the dashboard invite flow for this solution and add a missing role without leaving the launch sequence.',
-              fitScore: this.buildFitScore(61, [
-                context.participantCount < 4,
-                context.readyAssetCount > 2,
-              ]),
-              icon: 'person_add',
-              meta: [
-                'Directly opens the workspace invite state',
-                'Best for filling gaps fast',
-                context.participantCount < 2 ? 'Priority: grow the core team' : 'Priority: add strategic roles',
-              ],
-              cta: 'Open invite flow',
-              route: context.routes.dashboard,
-              queryParams: { openInvite: 'true' },
-            },
-            {
-              label: 'Public join page',
-              title: 'Share the collaboration entry point',
-              description: 'Use the join page when a partner or contributor needs a direct route into the solution rather than a general platform link.',
-              fitScore: this.buildFitScore(57, [
-                context.hasSolution,
-                context.solutionSummary.length > 80,
-              ]),
-              icon: 'share',
-              meta: [
-                'Public route for collaborators',
-                `Stage: ${context.stageLabel}`,
-                'Best for external intake',
-              ],
-              cta: 'Open join page',
-              route: context.routes.join,
-            },
-          ],
+          collaborationCards: partnerResources,
           quickActions: [
             { label: 'Workspace home', icon: 'dashboard', route: context.routes.dashboard },
             { label: 'Public preview', icon: 'preview', route: context.routes.publicView },
@@ -515,7 +441,9 @@ export class SlpContextService {
             {
               label: 'Ready touchpoints',
               value: this.formatCount(context.readyAssetCount),
-              detail: 'Signals a prospective partner can inspect immediately.',
+              detail: hasLocation
+                ? `Start with ecosystems that already operate in or near ${locationLabel}.`
+                : 'Add location to improve local and regional partner targeting.',
             },
             {
               label: 'Feedback activity',
@@ -526,7 +454,9 @@ export class SlpContextService {
           outreachTitle: 'Partner outreach draft',
           outreachTemplate: [
             `Hello, I’m reaching out about "${context.solutionTitle}", a ${context.stageLabel.toLowerCase()} initiative focused on ${context.focusArea.toLowerCase()}.`,
-            `We already have ${context.participantCount || 1} active contributor${context.participantCount === 1 ? '' : 's'} and ${context.readyAssetCount} launch signal${context.readyAssetCount === 1 ? '' : 's'} in the workspace, and we are looking for a partner who can strengthen the next step.`,
+            hasLocation
+              ? `We are currently building from ${locationLabel} and looking for a partner who can strengthen the next step with aligned reach, expertise, or implementation capacity.`
+              : `We are looking for a partner who can strengthen the next step with aligned reach, expertise, or implementation capacity.`,
             `Would you be open to a short conversation to explore where ${context.solutionTitle} could align with your current priorities?`,
             `Best regards,\n${context.authorName}`,
           ],
@@ -1266,6 +1196,487 @@ export class SlpContextService {
     ];
   }
 
+  private buildFundingResources(
+    context: SlpBaseContext,
+    location: SlpLocationContext
+  ): SlpActionCard[] {
+    const tags = this.getTopicTags(context);
+    const region = this.getRegionForCountry(location.country);
+    const locationLabel = this.formatLocation(location);
+    const localCards = this.hasLocation(location)
+      ? this.buildLocalFundingDiscoveryCards(context, locationLabel)
+      : [];
+
+    const resources = this.getFundingCatalog()
+      .map((entry) => {
+        let score = entry.baseScore;
+        score += entry.tags.filter((tag) => tags.has(tag)).length * 8;
+        if (entry.region === region) {
+          score += 11;
+        } else if (entry.region === 'global') {
+          score += 3;
+        }
+        if (context.documentCount > 0 && entry.tags.includes('research')) {
+          score += 4;
+        }
+        if (context.participantCount > 1 && entry.tags.includes('community')) {
+          score += 4;
+        }
+        if (context.readyAssetCount > 4) {
+          score += 3;
+        }
+
+        return {
+          label: entry.label,
+          title: entry.title,
+          description: this.interpolateFundingDescription(
+            entry.description,
+            context,
+            locationLabel
+          ),
+          fitScore: Math.min(98, score),
+          icon: entry.icon,
+          meta: [
+            ...entry.meta,
+            `Focus match: ${context.focusArea}`,
+            this.hasLocation(location)
+              ? `Geo signal: ${locationLabel}`
+              : 'Add location for stronger regional matching',
+          ],
+          cta: entry.cta,
+          badge: entry.badge,
+          href: entry.href,
+          external: true,
+        } as SlpActionCard;
+      })
+      .filter((entry) => entry.fitScore >= 60)
+      .sort((a, b) => b.fitScore - a.fitScore)
+      .slice(0, this.hasLocation(location) ? 5 : 6);
+
+    return [...localCards, ...resources].slice(0, 7);
+  }
+
+  private buildLocalFundingDiscoveryCards(
+    context: SlpBaseContext,
+    locationLabel: string
+  ): SlpActionCard[] {
+    return [
+      {
+        label: 'Local grants',
+        title: `${locationLabel} grantmakers and innovation funds`,
+        description: `Search for place-based grants, municipal innovation funds, economic development programs, and foundations in ${locationLabel} that align with ${context.focusArea.toLowerCase()}.`,
+        fitScore: 91,
+        icon: 'savings',
+        meta: [
+          'Local discovery lane',
+          'Best for place-based momentum',
+          `Search built for ${locationLabel}`,
+        ],
+        cta: 'Find local funders',
+        badge: 'Local discovery',
+        href: this.buildSearchUrl(
+          `${locationLabel} innovation fund grant ${context.focusArea}`
+        ),
+        external: true,
+      },
+      {
+        label: 'Accelerators',
+        title: `${locationLabel} accelerators and incubators`,
+        description: `Search for accelerators, incubators, and challenge programs in ${locationLabel} that can fund or de-risk the next stage of ${context.solutionTitle}.`,
+        fitScore: 88,
+        icon: 'rocket_launch',
+        meta: [
+          'Local discovery lane',
+          'Best for capital plus support',
+          `Good fit for ${context.stageLabel.toLowerCase()} work`,
+        ],
+        cta: 'Find nearby programs',
+        badge: 'Local discovery',
+        href: this.buildSearchUrl(
+          `${locationLabel} accelerator incubator ${context.focusArea}`
+        ),
+        external: true,
+      },
+    ];
+  }
+
+  private getFundingCatalog(): SlpFundingCatalogEntry[] {
+    return [
+      {
+        label: 'Challenge funding',
+        title: 'MIT Solve',
+        description:
+          'A strong route for solutions that benefit from challenge-based funding, visibility, and a network of supporters around global problems.',
+        icon: 'emoji_objects',
+        href: 'https://solve.mit.edu/',
+        cta: 'Review funder',
+        baseScore: 74,
+        region: 'global',
+        badge: 'Global',
+        tags: ['climate', 'health', 'education', 'community', 'tech', 'startup'],
+        meta: ['Type: challenge funding', 'Value: funding plus network'],
+      },
+      {
+        label: 'Research and health funding',
+        title: 'Wellcome Grant Funding',
+        description:
+          'A stronger match for research-backed, health, wellbeing, data, or systems-oriented work that needs institutional grant routes.',
+        icon: 'health_and_safety',
+        href: 'https://wellcome.org/grant-funding',
+        cta: 'Review funder',
+        baseScore: 73,
+        region: 'global',
+        badge: 'Institutional',
+        tags: ['health', 'research', 'data', 'community'],
+        meta: ['Type: grants', 'Value: institutional research support'],
+      },
+      {
+        label: 'Open-source and community funding',
+        title: 'Open Collective',
+        description:
+          'A practical option for open, community, nonprofit, or public-interest work that can benefit from recurring supporter-based funding.',
+        icon: 'groups',
+        href: 'https://opencollective.com/',
+        cta: 'Open platform',
+        baseScore: 71,
+        region: 'global',
+        badge: 'Community',
+        tags: ['community', 'tech', 'education', 'policy'],
+        meta: ['Type: collective funding', 'Value: recurring community support'],
+      },
+      {
+        label: 'Product and open-source funding',
+        title: 'GitHub Sponsors',
+        description:
+          'Best for developer-facing, technical, tool-based, or open-source work that can attract sponsor-backed support.',
+        icon: 'code',
+        href: 'https://github.com/sponsors',
+        cta: 'Open platform',
+        baseScore: 70,
+        region: 'global',
+        badge: 'Product',
+        tags: ['tech', 'data', 'startup'],
+        meta: ['Type: sponsor funding', 'Value: technical community support'],
+      },
+      {
+        label: 'Social impact investment',
+        title: 'Acumen',
+        description:
+          'A better fit for social-impact work that needs patient capital, systems framing, and implementation credibility.',
+        icon: 'diversity_3',
+        href: 'https://acumen.org/',
+        cta: 'Review organization',
+        baseScore: 72,
+        region: 'global',
+        badge: 'Impact',
+        tags: ['community', 'policy', 'education', 'health', 'climate'],
+        meta: ['Type: impact investing', 'Value: long-horizon support'],
+      },
+      {
+        label: 'Tech nonprofit funding',
+        title: 'Fast Forward',
+        description:
+          'A stronger fit for nonprofit or public-interest technology teams that need both capital and accelerator-style support.',
+        icon: 'speed',
+        href: 'https://www.ffwd.org/',
+        cta: 'Review organization',
+        baseScore: 72,
+        region: 'north-america',
+        badge: 'Accelerator',
+        tags: ['tech', 'community', 'education', 'health'],
+        meta: ['Region: North America', 'Value: accelerator plus funding'],
+      },
+      {
+        label: 'Fellowship and seed support',
+        title: 'Echoing Green',
+        description:
+          'A strong route for early social innovators building ambitious solutions with clear public benefit and leadership potential.',
+        icon: 'eco',
+        href: 'https://echoinggreen.org/',
+        cta: 'Review organization',
+        baseScore: 71,
+        region: 'global',
+        badge: 'Impact',
+        tags: ['community', 'policy', 'health', 'education', 'climate', 'startup'],
+        meta: ['Type: fellowship and seed support', 'Value: early-stage founder backing'],
+      },
+      {
+        label: 'Global challenge grants',
+        title: 'Grand Challenges',
+        description:
+          'Best for research, science, health, and systems innovations that can fit challenge-based grant programs.',
+        icon: 'science',
+        href: 'https://grandchallenges.org/',
+        cta: 'Review organization',
+        baseScore: 73,
+        region: 'global',
+        badge: 'Research',
+        tags: ['research', 'health', 'data', 'climate'],
+        meta: ['Type: challenge grants', 'Value: mission-driven funding'],
+      },
+      {
+        label: 'Regional startup capital',
+        title: 'EU-Startups',
+        description:
+          'A useful route for Europe-based startup visibility and ecosystem discovery around funding and investor networks.',
+        icon: 'public',
+        href: 'https://www.eu-startups.com/',
+        cta: 'Open platform',
+        baseScore: 69,
+        region: 'europe',
+        badge: 'Regional',
+        tags: ['startup', 'tech', 'climate'],
+        meta: ['Region: Europe', 'Value: startup ecosystem visibility'],
+      },
+      {
+        label: 'Regional startup ecosystem',
+        title: 'YourStory',
+        description:
+          'A useful route for India-based startup and social-impact ecosystem visibility that can unlock investor and program attention.',
+        icon: 'newspaper',
+        href: 'https://yourstory.com/',
+        cta: 'Open platform',
+        baseScore: 70,
+        region: 'india',
+        badge: 'Regional',
+        tags: ['startup', 'community', 'tech', 'education'],
+        meta: ['Region: India', 'Value: founder and ecosystem visibility'],
+      },
+      {
+        label: 'Regional innovation ecosystem',
+        title: 'Disrupt Africa',
+        description:
+          'A strong route for Africa-based startup and innovation visibility that can lead to investor and accelerator discovery.',
+        icon: 'language',
+        href: 'https://disruptafrica.com/',
+        cta: 'Open platform',
+        baseScore: 70,
+        region: 'africa',
+        badge: 'Regional',
+        tags: ['startup', 'tech', 'climate', 'community'],
+        meta: ['Region: Africa', 'Value: startup ecosystem visibility'],
+      },
+    ];
+  }
+
+  private buildPartnerResources(
+    context: SlpBaseContext,
+    location: SlpLocationContext
+  ): SlpActionCard[] {
+    const tags = this.getTopicTags(context);
+    const region = this.getRegionForCountry(location.country);
+    const locationLabel = this.formatLocation(location);
+    const localCards = this.hasLocation(location)
+      ? this.buildLocalPartnerDiscoveryCards(context, locationLabel)
+      : [];
+
+    const resources = this.getPartnerCatalog()
+      .map((entry) => {
+        let score = entry.baseScore;
+        score += entry.tags.filter((tag) => tags.has(tag)).length * 8;
+        if (entry.region === region) {
+          score += 11;
+        } else if (entry.region === 'global') {
+          score += 3;
+        }
+        if (context.participantCount > 1 && entry.tags.includes('community')) {
+          score += 4;
+        }
+        if (context.readyAssetCount > 4) {
+          score += 3;
+        }
+
+        return {
+          label: entry.label,
+          title: entry.title,
+          description: this.interpolatePartnerDescription(
+            entry.description,
+            context,
+            locationLabel
+          ),
+          fitScore: Math.min(98, score),
+          icon: entry.icon,
+          meta: [
+            ...entry.meta,
+            `Focus match: ${context.focusArea}`,
+            this.hasLocation(location)
+              ? `Geo signal: ${locationLabel}`
+              : 'Add location for stronger ecosystem matching',
+          ],
+          cta: entry.cta,
+          badge: entry.badge,
+          href: entry.href,
+          external: true,
+        } as SlpActionCard;
+      })
+      .filter((entry) => entry.fitScore >= 60)
+      .sort((a, b) => b.fitScore - a.fitScore)
+      .slice(0, this.hasLocation(location) ? 5 : 6);
+
+    return [...localCards, ...resources].slice(0, 7);
+  }
+
+  private buildLocalPartnerDiscoveryCards(
+    context: SlpBaseContext,
+    locationLabel: string
+  ): SlpActionCard[] {
+    return [
+      {
+        label: 'Local ecosystems',
+        title: `${locationLabel} ecosystem builders and civic partners`,
+        description: `Search for civic innovation groups, nonprofits, chambers, labs, and community networks in ${locationLabel} that could help implement or amplify ${context.solutionTitle}.`,
+        fitScore: 91,
+        icon: 'diversity_2',
+        meta: [
+          'Local discovery lane',
+          'Best for implementation reach',
+          `Search built for ${locationLabel}`,
+        ],
+        cta: 'Find local partners',
+        badge: 'Local discovery',
+        href: this.buildSearchUrl(
+          `${locationLabel} nonprofit innovation network ${context.focusArea}`
+        ),
+        external: true,
+      },
+      {
+        label: 'Institutions and labs',
+        title: `${locationLabel} universities, labs, and implementation allies`,
+        description: `Search for research centers, universities, accelerators, and field partners in ${locationLabel} that can add trust, expertise, or deployment capacity.`,
+        fitScore: 88,
+        icon: 'groups_3',
+        meta: [
+          'Local discovery lane',
+          'Best for credibility and expertise',
+          `Good fit for ${context.stageLabel.toLowerCase()} work`,
+        ],
+        cta: 'Find institutional partners',
+        badge: 'Local discovery',
+        href: this.buildSearchUrl(
+          `${locationLabel} university lab incubator partner ${context.focusArea}`
+        ),
+        external: true,
+      },
+    ];
+  }
+
+  private getPartnerCatalog(): SlpPartnerCatalogEntry[] {
+    return [
+      {
+        label: 'Impact ecosystem',
+        title: 'Impact Hub',
+        description:
+          'A strong partner ecosystem when the solution needs entrepreneurial community, local chapter connections, and implementation-minded collaborators.',
+        icon: 'hub',
+        href: 'https://impacthub.net/',
+        cta: 'Open network',
+        baseScore: 74,
+        region: 'global',
+        badge: 'Global',
+        tags: ['startup', 'community', 'climate', 'education', 'policy'],
+        meta: ['Type: innovation network', 'Value: local and global community'],
+      },
+      {
+        label: 'Climate ecosystem',
+        title: 'Climatebase',
+        description:
+          'A strong route for climate-oriented talent, partner discovery, and ecosystem visibility around implementation and hiring.',
+        icon: 'public',
+        href: 'https://climatebase.org/',
+        cta: 'Open network',
+        baseScore: 75,
+        region: 'global',
+        badge: 'Climate',
+        tags: ['climate', 'startup', 'tech', 'community'],
+        meta: ['Type: climate ecosystem', 'Value: talent and partner discovery'],
+      },
+      {
+        label: 'Responsible business network',
+        title: 'B Lab / B Corp Community',
+        description:
+          'Useful when the solution needs values-aligned business partners, corporate pilots, or regenerative-economy ecosystem links.',
+        icon: 'handshake',
+        href: 'https://www.bcorporation.net/',
+        cta: 'Open network',
+        baseScore: 72,
+        region: 'global',
+        badge: 'Business',
+        tags: ['startup', 'community', 'policy', 'climate'],
+        meta: ['Type: business community', 'Value: mission-aligned companies'],
+      },
+      {
+        label: 'Social innovation network',
+        title: 'Ashoka',
+        description:
+          'A strong option for public-interest and systems-change solutions that need social-innovation partners and field credibility.',
+        icon: 'diversity_3',
+        href: 'https://www.ashoka.org/',
+        cta: 'Open network',
+        baseScore: 73,
+        region: 'global',
+        badge: 'Impact',
+        tags: ['community', 'policy', 'education', 'health', 'climate'],
+        meta: ['Type: social innovation network', 'Value: systems-change partnerships'],
+      },
+      {
+        label: 'Professional impact community',
+        title: 'Net Impact',
+        description:
+          'A useful route to students and professionals looking to work at the intersection of impact, business, and civic outcomes.',
+        icon: 'groups',
+        href: 'https://netimpact.org/',
+        cta: 'Open network',
+        baseScore: 70,
+        region: 'north-america',
+        badge: 'Regional',
+        tags: ['community', 'education', 'startup', 'policy'],
+        meta: ['Region: North America', 'Value: student and professional community'],
+      },
+      {
+        label: 'Cause partnership network',
+        title: '1% for the Planet',
+        description:
+          'A strong fit for environmental and climate-oriented work that can benefit from brand, nonprofit, and mission-aligned business partnerships.',
+        icon: 'forest',
+        href: 'https://www.onepercentfortheplanet.org/',
+        cta: 'Open network',
+        baseScore: 73,
+        region: 'global',
+        badge: 'Climate',
+        tags: ['climate', 'community', 'startup'],
+        meta: ['Type: environmental partner network', 'Value: aligned business relationships'],
+      },
+      {
+        label: 'Design and challenge community',
+        title: 'OpenIDEO',
+        description:
+          'A useful route when the solution benefits from design-minded collaborators, challenge communities, and structured co-creation.',
+        icon: 'design_services',
+        href: 'https://openideo.com/',
+        cta: 'Open network',
+        baseScore: 71,
+        region: 'global',
+        badge: 'Community',
+        tags: ['community', 'policy', 'education', 'health', 'climate'],
+        meta: ['Type: challenge and design community', 'Value: co-creation and visibility'],
+      },
+      {
+        label: 'MIT ecosystem',
+        title: 'MIT Solve',
+        description:
+          'A strong route when the solution would benefit from challenge communities, cross-sector partnerships, and credibility through a global innovation network.',
+        icon: 'emoji_objects',
+        href: 'https://solve.mit.edu/',
+        cta: 'Open network',
+        baseScore: 72,
+        region: 'global',
+        badge: 'Global',
+        tags: ['climate', 'health', 'education', 'community', 'tech', 'startup'],
+        meta: ['Type: challenge community', 'Value: cross-sector partner access'],
+      },
+    ];
+  }
+
   private getTopicTags(context: SlpBaseContext): Set<string> {
     const text = `${context.solutionTitle} ${context.solutionSummary} ${context.focusArea}`.toLowerCase();
     const tags = new Set<string>(['general']);
@@ -1392,6 +1803,28 @@ export class SlpContextService {
       return description;
     }
     return `${description} This is especially useful when positioning work around ${focusArea.toLowerCase()} for audiences connected to ${locationLabel}.`;
+  }
+
+  private interpolateFundingDescription(
+    description: string,
+    context: SlpBaseContext,
+    locationLabel?: string
+  ): string {
+    if (!locationLabel) {
+      return `${description} It is currently a strong fit for ${context.stageLabel.toLowerCase()} work in ${context.focusArea.toLowerCase()}.`;
+    }
+    return `${description} It is especially relevant when building from ${locationLabel} around ${context.focusArea.toLowerCase()}.`;
+  }
+
+  private interpolatePartnerDescription(
+    description: string,
+    context: SlpBaseContext,
+    locationLabel?: string
+  ): string {
+    if (!locationLabel) {
+      return `${description} It is a stronger match when the solution needs aligned collaborators in ${context.focusArea.toLowerCase()}.`;
+    }
+    return `${description} It becomes even more relevant when building partnerships from ${locationLabel} around ${context.focusArea.toLowerCase()}.`;
   }
 
   private buildSearchUrl(query: string): string {

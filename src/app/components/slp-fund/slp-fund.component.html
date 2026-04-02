@@ -1,5 +1,100 @@
 <ng-container *ngIf="vm$ | async as vm">
   <app-slp-shell [activeLane]="'fund'" [shell]="vm.shell">
+    <section class="mb-8 grid gap-6 xl:grid-cols-[1.45fr_0.78fr]">
+      <div class="slp-card overflow-hidden p-7 sm:p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div class="max-w-2xl">
+            <div class="slp-chip slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+              <span class="material-symbols-outlined text-base">pin_drop</span>
+              Location precision
+            </div>
+            <h2 class="mt-5 text-3xl font-semibold">
+              Add city and country to localize the funding map.
+            </h2>
+            <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+              We use your profile location when it exists. If it does not, enter it here and we will use it to rank nearby grantmakers, accelerators, and region-specific funders more precisely.
+            </p>
+          </div>
+          <div class="rounded-full bg-[color:var(--slp-highlight)] px-4 py-2 text-sm font-semibold text-[color:var(--slp-primary)]">
+            {{ locationSourceLabel }}
+          </div>
+        </div>
+
+        <div class="mt-7 grid gap-4 md:grid-cols-2">
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              City
+            </span>
+            <input
+              [(ngModel)]="city"
+              type="text"
+              class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
+              placeholder="Enter city"
+            />
+          </label>
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Country
+            </span>
+            <input
+              [(ngModel)]="country"
+              type="text"
+              class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
+              placeholder="Enter country"
+            />
+          </label>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="text-sm text-[color:var(--slp-muted)]">
+              {{ locationStatusMessage }}
+            </p>
+            <p *ngIf="locationError" class="mt-2 text-sm text-rose-600">
+              {{ locationError }}
+            </p>
+          </div>
+          <button
+            type="button"
+            (click)="applyLocation()"
+            class="slp-button px-5 py-3 text-sm font-semibold"
+            [disabled]="savingLocation"
+          >
+            <span class="material-symbols-outlined text-base">travel_explore</span>
+            {{ savingLocation ? 'Saving...' : 'Apply location' }}
+          </button>
+        </div>
+      </div>
+
+      <aside class="slp-card-muted p-7">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+          Current targeting
+        </p>
+        <div class="mt-5 space-y-4">
+          <div class="rounded-2xl bg-white/70 p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Location
+            </p>
+            <p class="mt-2 text-lg font-semibold">{{ currentLocationLabel }}</p>
+          </div>
+          <div class="rounded-2xl bg-white/70 p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Matched funders
+            </p>
+            <p class="mt-2 text-lg font-semibold">{{ vm.resources.length }}</p>
+          </div>
+          <div class="rounded-2xl bg-white/70 p-4">
+            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Funding posture
+            </p>
+            <p class="mt-2 text-sm leading-6 text-[color:var(--slp-muted)]">
+              {{ vm.postureTitle }}
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
     <section class="slp-card overflow-hidden p-8 sm:p-10">
       <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
         <div class="max-w-3xl">
@@ -45,17 +140,17 @@
 
     <section class="mt-8 grid gap-6 2xl:grid-cols-[1.55fr_0.72fr]">
       <div>
-        <div class="mb-5">
-          <p class="slp-mono text-[0.68rem] uppercase tracking-[0.24em] text-[color:var(--slp-muted)]">
-            Funding building blocks
-          </p>
-          <p class="mt-2 text-sm text-[color:var(--slp-muted)]">
-            These routes improve the quality of the ask before you spend time on external funding outreach.
-          </p>
-        </div>
+      <div class="mb-5">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.24em] text-[color:var(--slp-muted)]">
+          Specific funding routes
+        </p>
+        <p class="mt-2 text-sm text-[color:var(--slp-muted)]">
+          These are actual funders, platforms, and discovery lanes ranked for this solution.
+        </p>
+      </div>
 
-        <div class="grid gap-6 xl:grid-cols-2">
-          <article *ngFor="let resource of vm.resources" class="slp-card overflow-hidden p-6 sm:p-7">
+      <div class="grid gap-6 xl:grid-cols-2">
+        <article *ngFor="let resource of vm.resources" class="slp-card overflow-hidden p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">
               <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--slp-panel-muted)] text-[color:var(--slp-primary)]">
                 <span class="material-symbols-outlined text-3xl">{{ resource.icon }}</span>
@@ -67,15 +162,21 @@
               </div>
             </div>
 
-            <div class="mt-6">
-              <span class="slp-mono rounded-full bg-[color:var(--slp-panel-muted)] px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-                {{ resource.label }}
-              </span>
-              <h2 class="slp-display mt-4 text-4xl leading-none">{{ resource.title }}</h2>
-              <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
-                {{ resource.description }}
-              </p>
-            </div>
+          <div class="mt-6">
+            <span class="slp-mono rounded-full bg-[color:var(--slp-panel-muted)] px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              {{ resource.label }}
+            </span>
+            <span
+              *ngIf="resource.badge"
+              class="ml-2 inline-block rounded-full border border-[color:var(--slp-border)] px-3 py-1 text-[0.68rem] uppercase tracking-[0.18em] text-[color:var(--slp-primary)]"
+            >
+              {{ resource.badge }}
+            </span>
+            <h2 class="slp-display mt-4 text-4xl leading-none">{{ resource.title }}</h2>
+            <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+              {{ resource.description }}
+            </p>
+          </div>
 
             <div class="mt-6 flex flex-wrap gap-2">
               <span
@@ -86,7 +187,19 @@
               </span>
             </div>
 
-            <div class="mt-6 flex items-center gap-3">
+          <div class="mt-6 flex items-center gap-3">
+            <ng-container *ngIf="resource.href; else internalFundLink">
+              <a
+                [href]="resource.href"
+                target="_blank"
+                rel="noreferrer"
+                class="slp-button flex-1 px-5 py-3 text-sm font-semibold"
+              >
+                {{ resource.cta }}
+                <span class="material-symbols-outlined text-base">open_in_new</span>
+              </a>
+            </ng-container>
+            <ng-template #internalFundLink>
               <a
                 [routerLink]="resource.route"
                 [queryParams]="resource.queryParams"
@@ -95,10 +208,11 @@
                 {{ resource.cta }}
                 <span class="material-symbols-outlined text-base">arrow_forward</span>
               </a>
-            </div>
-          </article>
-        </div>
+            </ng-template>
+          </div>
+        </article>
       </div>
+    </div>
 
       <aside class="space-y-6">
         <div class="slp-card p-7">
