@@ -21,6 +21,15 @@
           <p class="max-w-xs text-sm leading-6 text-[color:var(--slp-muted)]">
             {{ shell.intro }}
           </p>
+          <a
+            *ngIf="shell.hasSolution && shell.summaryRoute"
+            [routerLink]="shell.summaryRoute"
+            [queryParams]="shell.summaryQueryParams"
+            class="slp-button mt-5 inline-flex w-full items-center justify-center gap-2 px-4 py-3 text-sm font-semibold"
+          >
+            <span class="material-symbols-outlined text-base">arrow_back</span>
+            Back to Dashboard
+          </a>
         </div>
 
         <div class="mb-4">
@@ -113,6 +122,15 @@
           <div class="flex items-center gap-8">
             <a [routerLink]="shell.summaryRoute || '/'" class="slp-display text-3xl italic">NewWorld Game</a>
             <nav class="hidden items-center gap-6 md:flex">
+              <a
+                *ngIf="shell.hasSolution && shell.summaryRoute"
+                [routerLink]="shell.summaryRoute"
+                [queryParams]="shell.summaryQueryParams"
+                class="inline-flex items-center gap-2 rounded-full border border-[color:var(--slp-border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--slp-primary)] transition hover:bg-white"
+              >
+                <span class="material-symbols-outlined text-base">arrow_back</span>
+                Back to Dashboard
+              </a>
               <a
                 *ngFor="let link of shell.topLinks"
                 [routerLink]="link.route"
