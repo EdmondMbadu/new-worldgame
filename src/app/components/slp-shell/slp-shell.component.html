@@ -21,6 +21,15 @@
           <p class="max-w-xs text-sm leading-6 text-[color:var(--slp-muted)]">
             {{ shell.intro }}
           </p>
+          <div class="mt-4 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-sm leading-6 text-amber-900">
+            <div class="flex items-center gap-2 font-semibold uppercase tracking-[0.18em] text-amber-700">
+              <span class="material-symbols-outlined text-base">construction</span>
+              Beta
+            </div>
+            <p class="mt-2">
+              SLP is still being actively worked on. Expect improvements, tuning, and ongoing changes across these launch pages.
+            </p>
+          </div>
           <a
             *ngIf="shell.hasSolution && shell.summaryRoute"
             [routerLink]="shell.summaryRoute"
