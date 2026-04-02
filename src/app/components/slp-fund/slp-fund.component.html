@@ -1,26 +1,49 @@
 <ng-container *ngIf="vm$ | async as vm">
   <app-slp-shell [activeLane]="'fund'" [shell]="vm.shell">
-    <section class="mb-8 grid gap-6 xl:grid-cols-[1.45fr_0.78fr]">
-      <div class="slp-card overflow-hidden p-7 sm:p-8">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div class="max-w-2xl">
-            <div class="slp-chip slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+    <section class="mb-6 grid gap-4 xl:grid-cols-[1.7fr_0.78fr]">
+      <div class="slp-card overflow-hidden p-5 sm:p-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="max-w-3xl">
+            <div class="slp-chip slp-mono inline-flex text-[0.72rem] uppercase tracking-[0.2em]">
               <span class="material-symbols-outlined text-base">pin_drop</span>
               Location precision
             </div>
-            <h2 class="mt-5 text-3xl font-semibold">
-              Add city and country to localize the funding map.
-            </h2>
-            <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
-              We use your profile location when it exists. If it does not, enter it here and we will use it to rank nearby grantmakers, accelerators, and region-specific funders more precisely.
-            </p>
-          </div>
-          <div class="rounded-full bg-[color:var(--slp-highlight)] px-4 py-2 text-sm font-semibold text-[color:var(--slp-primary)]">
-            {{ locationSourceLabel }}
+            <div class="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <h2 class="text-xl font-semibold sm:text-2xl">
+                  Localize the funding map with city and country.
+                </h2>
+                <p class="mt-2 text-sm leading-6 text-[color:var(--slp-muted)]">
+                  We use your profile location when it exists. If it does not, enter it here to rank nearby grantmakers, accelerators, and region-specific funders more precisely.
+                </p>
+              </div>
+              <div class="self-start rounded-full bg-[color:var(--slp-highlight)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--slp-primary)]">
+                {{ locationSourceLabel }}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="mt-7 grid gap-4 md:grid-cols-2">
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3">
+            <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Current location
+            </p>
+            <p class="mt-1 text-sm font-semibold text-[color:var(--slp-ink)]">
+              {{ currentLocationLabel }}
+            </p>
+          </div>
+          <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3">
+            <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+              Status
+            </p>
+            <p class="mt-1 text-sm text-[color:var(--slp-muted)]">
+              {{ locationStatusMessage }}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
           <label class="block">
             <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
               City
@@ -43,45 +66,38 @@
               placeholder="Enter country"
             />
           </label>
-        </div>
-
-        <div class="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p class="text-sm text-[color:var(--slp-muted)]">
-              {{ locationStatusMessage }}
-            </p>
-            <p *ngIf="locationError" class="mt-2 text-sm text-rose-600">
-              {{ locationError }}
-            </p>
-          </div>
           <button
             type="button"
             (click)="applyLocation()"
-            class="slp-button px-5 py-3 text-sm font-semibold"
+            class="slp-button h-[3rem] px-5 text-sm font-semibold"
             [disabled]="savingLocation"
           >
             <span class="material-symbols-outlined text-base">travel_explore</span>
             {{ savingLocation ? 'Saving...' : 'Apply location' }}
           </button>
         </div>
+
+        <p *ngIf="locationError" class="mt-3 text-sm text-rose-600">
+          {{ locationError }}
+        </p>
       </div>
 
-      <aside class="slp-card-muted p-7">
+      <aside class="slp-card-muted p-5 sm:p-6">
         <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
           Current targeting
         </p>
-        <div class="mt-5 space-y-4">
+        <div class="mt-4 space-y-3">
           <div class="rounded-2xl bg-white/70 p-4">
             <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
               Location
             </p>
-            <p class="mt-2 text-lg font-semibold">{{ currentLocationLabel }}</p>
+            <p class="mt-2 text-base font-semibold">{{ currentLocationLabel }}</p>
           </div>
           <div class="rounded-2xl bg-white/70 p-4">
             <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
               Matched funders
             </p>
-            <p class="mt-2 text-lg font-semibold">{{ vm.resources.length }}</p>
+            <p class="mt-2 text-base font-semibold">{{ vm.resources.length }}</p>
           </div>
           <div class="rounded-2xl bg-white/70 p-4">
             <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
