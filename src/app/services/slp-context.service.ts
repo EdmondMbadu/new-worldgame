@@ -14,8 +14,11 @@ export interface SlpLocationContext {
 export interface SlpLinkItem {
   label: string;
   icon?: string;
+  detail?: string;
   route?: any[] | string;
   queryParams?: Record<string, string>;
+  href?: string;
+  external?: boolean;
 }
 
 export interface SlpNavItem extends SlpLinkItem {
@@ -103,6 +106,7 @@ export interface SlpPublishViewModel {
   categoryLine: string;
   sortLabel: string;
   resources: SlpActionCard[];
+  quickActions: SlpLinkItem[];
   checklist: SlpChecklistItem[];
   editorialNote: string;
   nextStep: string;
@@ -308,6 +312,7 @@ export class SlpContextService {
             : 'Showing publication options for your next solution',
           sortLabel: hasLocation ? 'Best fit + local relevance' : 'Best fit first',
           resources,
+          quickActions: this.buildPublishQuickActions(context),
           checklist,
           editorialNote: context.hasSolution
             ? hasLocation
@@ -646,6 +651,46 @@ export class SlpContextService {
     ];
   }
 
+  private buildPublishQuickActions(context: SlpBaseContext): SlpLinkItem[] {
+    const previewUrl = this.buildAbsoluteUrl(context.routes.externalView);
+    const shareTitle = context.hasSolution
+      ? `${context.solutionTitle} | Solution Launch`
+      : 'Solution Launch on NewWorld Game';
+    const shareSummary = this.truncate(context.solutionSummary, 180);
+    const shareText = `${shareTitle} — ${shareSummary}`;
+
+    return [
+      {
+        label: 'Post on X',
+        icon: 'alternate_email',
+        detail: 'Share a concise public post',
+        href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(previewUrl)}`,
+        external: true,
+      },
+      {
+        label: 'Post on LinkedIn',
+        icon: 'work',
+        detail: 'Share the public preview professionally',
+        href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(previewUrl)}`,
+        external: true,
+      },
+      {
+        label: 'Post on Facebook',
+        icon: 'groups',
+        detail: 'Share the solution preview publicly',
+        href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(previewUrl)}`,
+        external: true,
+      },
+      {
+        label: 'Post on WhatsApp',
+        icon: 'forum',
+        detail: 'Send it directly into chats and groups',
+        href: `https://api.whatsapp.com/send?text=${encodeURIComponent(`${shareTitle}\n${previewUrl}`)}`,
+        external: true,
+      },
+    ];
+  }
+
   private buildSideNav(solutionId?: string): SlpNavItem[] {
     const routes = this.buildRoutes(solutionId);
     return [
@@ -695,6 +740,27 @@ export class SlpContextService {
       contact: '/contact',
       pricing: '/plans',
     };
+  }
+
+  private buildAbsoluteUrl(route: any[] | string | undefined): string {
+    const base = 'https://newworld-game.org';
+
+    if (!route) {
+      return base;
+    }
+
+    if (Array.isArray(route)) {
+      const segments = route
+        .map((segment) => String(segment).replace(/^\/+|\/+$/g, ''))
+        .filter(Boolean);
+      return `${base}/${segments.join('/')}`;
+    }
+
+    if (/^https?:\/\//i.test(route)) {
+      return route;
+    }
+
+    return `${base}/${String(route).replace(/^\/+/, '')}`;
   }
 
   private cleanText(value?: string): string {
