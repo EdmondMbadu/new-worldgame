@@ -75,17 +75,17 @@
         <p class="mt-1 text-slate-500 dark:text-slate-400 text-sm">Your solution workspace</p>
         <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <a
-            [routerLink]="['/slp', currentSolution.solutionId || id]"
+            [routerLink]="['/solution-launch', currentSolution.solutionId || id]"
             class="group inline-flex items-center gap-2.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
           >
             <span class="material-symbols-outlined text-[1.05rem]">rocket_launch</span>
-            <span>Launch In SLP</span>
+            <span>Open Solution Launch</span>
             <span class="inline-flex items-center rounded-full bg-white/18 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-white ring-1 ring-white/20">
               Beta
             </span>
           </a>
           <p class="max-w-md text-xs leading-5 text-slate-500 dark:text-slate-400">
-            Open the beta solution launch pathway with this exact solution loaded. It is still being actively worked on, and publish, fund, and partner steps stay tied to this workspace.
+            Open the beta Solution Launch flow with this exact solution loaded. It is still being actively worked on, and publish, fund, and partner steps stay tied to this workspace.
           </p>
         </div>
       </div>

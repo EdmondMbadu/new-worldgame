@@ -52,11 +52,11 @@ export class SlpPartnerComponent implements OnInit {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.shell.solutionTitle} | SLP Partner | NewWorld Game`
-            : 'SLP Partner Pathway | NewWorld Game',
+            ? `${vm.shell.solutionTitle} | Solution Launch Partner | NewWorld Game`
+            : 'Solution Launch Partner | NewWorld Game',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game partner pathway, solution partner workflow, collaboration room, invite flow, launch coordination',
+            'NewWorld Game Solution Launch partner pathway, solution partner workflow, collaboration room, invite flow, launch coordination',
           url: 'https://newworld-game.org/partner',
           type: 'website',
         });
@@ -107,7 +107,7 @@ export class SlpPartnerComponent implements OnInit {
     try {
       await this.slpLocation.applyLocation(city, country);
     } catch (error) {
-      console.error('Failed to save SLP partner location', error);
+      console.error('Failed to save Solution Launch partner location', error);
       this.locationError = 'The partner list updated, but the location could not be saved. Try again.';
     } finally {
       this.savingLocation = false;

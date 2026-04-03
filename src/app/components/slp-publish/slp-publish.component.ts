@@ -51,12 +51,12 @@ export class SlpPublishComponent implements OnInit {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.solutionTitle} | SLP Publish | NewWorld Game`
-            : 'SLP Publish Pathway | NewWorld Game',
+            ? `${vm.solutionTitle} | Solution Launch Publish | NewWorld Game`
+            : 'Solution Launch Publish | NewWorld Game',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game SLP, publish pathway, solution launch, public preview, launch workflow',
-          url: 'https://newworld-game.org/slp',
+            'NewWorld Game Solution Launch, publish pathway, solution launch, public preview, launch workflow',
+          url: 'https://newworld-game.org/solution-launch',
           type: 'website',
         });
       }),

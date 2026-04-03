@@ -57,7 +57,7 @@ export class SlpShellComponent {
   }
 
   get avatarInitials(): string {
-    const source = this.shell?.solutionTitle?.trim() || 'SLP';
+    const source = this.shell?.solutionTitle?.trim() || 'SL';
     return source
       .split(/\s+/)
       .slice(0, 2)

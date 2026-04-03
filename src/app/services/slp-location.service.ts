@@ -64,7 +64,7 @@ export class SlpLocationService {
           source: user?.uid ? 'manual' : 'guest',
           currentUser: user,
           statusMessage: user?.uid
-            ? 'Using the last SLP location you saved here.'
+            ? 'Using the last Solution Launch location you saved here.'
             : 'Using the last location saved in this browser.',
           initialized: true,
         });
@@ -115,7 +115,7 @@ export class SlpLocationService {
         country: normalizedCountry,
         source,
         statusMessage:
-          'Location saved to your profile and used to refresh SLP recommendations.',
+          'Location saved to your profile and used to refresh Solution Launch recommendations.',
       });
       return;
     }
@@ -129,7 +129,7 @@ export class SlpLocationService {
       country: normalizedCountry,
       source,
       statusMessage:
-        'Location saved in this browser and used to refresh SLP recommendations.',
+        'Location saved in this browser and used to refresh Solution Launch recommendations.',
     });
   }
 

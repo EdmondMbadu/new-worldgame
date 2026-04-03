@@ -52,11 +52,11 @@ export class SlpFundComponent implements OnInit {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.shell.solutionTitle} | SLP Fund | NewWorld Game`
-            : 'SLP Funding Pathway | NewWorld Game',
+            ? `${vm.shell.solutionTitle} | Solution Launch Funding | NewWorld Game`
+            : 'Solution Launch Funding | NewWorld Game',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game funding, SLP fund pathway, solution funding readiness, team signal, evidence pack',
+            'NewWorld Game funding, Solution Launch funding pathway, solution funding readiness, team signal, evidence pack',
           url: 'https://newworld-game.org/fund',
           type: 'website',
         });
@@ -107,7 +107,7 @@ export class SlpFundComponent implements OnInit {
     try {
       await this.slpLocation.applyLocation(city, country);
     } catch (error) {
-      console.error('Failed to save SLP funding location', error);
+      console.error('Failed to save Solution Launch funding location', error);
       this.locationError = 'The funding list updated, but the location could not be saved. Try again.';
     } finally {
       this.savingLocation = false;

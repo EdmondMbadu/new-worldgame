@@ -660,8 +660,8 @@ export class SlpContextService {
   private buildRoutes(solutionId?: string) {
     if (!solutionId) {
       return {
-        launch: '/slp',
-        publish: '/slp',
+        launch: '/solution-launch',
+        publish: '/solution-launch',
         fund: '/fund',
         partner: '/partner',
         dashboard: '/get-started',
@@ -679,10 +679,10 @@ export class SlpContextService {
     }
 
     return {
-      launch: ['/slp', solutionId],
-      publish: ['/slp', solutionId],
-      fund: ['/slp', solutionId, 'fund'],
-      partner: ['/slp', solutionId, 'partner'],
+      launch: ['/solution-launch', solutionId],
+      publish: ['/solution-launch', solutionId],
+      fund: ['/solution-launch', solutionId, 'fund'],
+      partner: ['/solution-launch', solutionId, 'partner'],
       dashboard: ['/dashboard', solutionId],
       details: ['/solution-details', solutionId],
       documents: ['/document-files', solutionId],
