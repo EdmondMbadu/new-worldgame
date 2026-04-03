@@ -246,6 +246,32 @@
                       </button>
                     </div>
                   </div>
+
+                  <a
+                    [routerLink]="['/solution-launch', currentSolution.solutionId || id]"
+                    class="mt-3 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-left transition hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30"
+                  >
+                    <div class="min-w-0 flex items-center gap-3">
+                      <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-emerald-200 dark:bg-slate-800 dark:ring-emerald-900/70">
+                        <span class="material-symbols-outlined text-[1.05rem] text-emerald-600 dark:text-emerald-300">rocket_launch</span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                          {{ currentLanguage === 'fr' ? 'Solution Launch' : 'Solution Launch' }}
+                        </p>
+                        <p class="truncate text-xs text-slate-500 dark:text-slate-400">
+                          {{ currentLanguage === 'fr'
+                            ? 'Passez ensuite à la publication, au financement et aux partenaires.'
+                            : 'Move next into publish, funding, and partner pathways.' }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span class="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500">
+                      {{ currentLanguage === 'fr' ? 'Ouvrir' : 'Open' }}
+                      <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </span>
+                  </a>
                 </div>
 
                 <!-- Expandable Content Panels -->
