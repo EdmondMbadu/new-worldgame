@@ -1291,9 +1291,39 @@
                   >
                     Timezone: {{ weeklyAutomationConfig.timezone }}
                   </span>
+                  <button
+                    type="button"
+                    (click)="weeklyAutomationSectionOpen = !weeklyAutomationSectionOpen"
+                    class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+                  >
+                    <span>
+                      {{ weeklyAutomationSectionOpen ? 'Hide details' : 'Show details' }}
+                    </span>
+                    <svg
+                      class="h-4 w-4 transition-transform duration-200"
+                      [class.rotate-180]="weeklyAutomationSectionOpen"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.51a.75.75 0 0 1-1.08 0l-4.25-4.51a.75.75 0 0 1 .02-1.06Z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
+              <div
+                *ngIf="!weeklyAutomationSectionOpen"
+                class="rounded-2xl border border-dashed border-slate-300 px-4 py-4 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400"
+              >
+                Automation settings are hidden by default. Expand this section to manage weekly recipients, day, time, and timezone.
+              </div>
+
+              <ng-container *ngIf="weeklyAutomationSectionOpen">
               <div class="grid gap-3 md:grid-cols-[minmax(0,220px)_1fr] md:items-center">
                 <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Automation timezone
@@ -1683,6 +1713,7 @@
                   {{ automationSaving ? 'Saving...' : 'Save automation settings' }}
                 </button>
               </div>
+              </ng-container>
             </div>
           </div>
         </div>

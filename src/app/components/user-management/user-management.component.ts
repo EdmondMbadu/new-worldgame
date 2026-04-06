@@ -311,6 +311,7 @@ export class UserManagementComponent implements OnInit {
   reminderIntroHtml =
     '<p>Keep the momentum going—here are your in-progress solutions.</p>';
   weeklyAutomationConfig = this.createDefaultWeeklyAutomationConfig();
+  weeklyAutomationSectionOpen = false;
   automationLoading = true;
   automationSaving = false;
   automationSaveError = '';
