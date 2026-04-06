@@ -3,6 +3,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import firebase from 'firebase/compat/app';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -46,12 +47,64 @@ type AIInsightsTeamMember = {
   avatarUrl?: string;
 };
 
+type WeeklyAutomationKey = 'weeklyReminder' | 'weeklyActivity';
+
+type WeeklyAutomationStatus =
+  | 'idle'
+  | 'running'
+  | 'success'
+  | 'partial'
+  | 'failed';
+
+type WeeklyAutomationDay =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday';
+
+type WeeklyAutomationSchedule = {
+  enabled: boolean;
+  dayOfWeek: WeeklyAutomationDay;
+  time: string;
+  recipientEmails: string[];
+  subject?: string;
+  introHtml?: string;
+  lastRunAt?: any;
+  lastRunStatus?: WeeklyAutomationStatus;
+  lastRunSummary?: string;
+  lastError?: string;
+  lastAttemptKey?: string;
+  lastSuccessKey?: string;
+};
+
+type WeeklyEmailAutomationConfig = {
+  timezone: string;
+  weeklyReminder: WeeklyAutomationSchedule;
+  weeklyActivity: WeeklyAutomationSchedule;
+  updatedAt?: any;
+  updatedBy?: {
+    uid?: string;
+    email?: string;
+    name?: string;
+  };
+};
+
 @Component({
   selector: 'app-user-management',
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css',
 })
 export class UserManagementComponent implements OnInit {
+  private readonly weeklyEmailAutomationDocPath =
+    'admin_settings/weekly_email_automation';
+  private readonly fallbackAutomationTimezone = 'America/Los_Angeles';
+  private readonly defaultWeeklyReminderSubject =
+    'Your weekly NewWorld Game progress';
+  private readonly defaultWeeklyReminderIntroHtml =
+    '<p>Keep the momentum going—here are your in-progress solutions.</p>';
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
@@ -257,6 +310,32 @@ export class UserManagementComponent implements OnInit {
   reminderSubject = 'Your weekly NewWorld Game progress';
   reminderIntroHtml =
     '<p>Keep the momentum going—here are your in-progress solutions.</p>';
+  weeklyAutomationConfig = this.createDefaultWeeklyAutomationConfig();
+  automationLoading = true;
+  automationSaving = false;
+  automationSaveError = '';
+  automationSaveMessage = '';
+  automationReminderSearch = '';
+  automationActivityEmailInput = '';
+  readonly automationDayOptions: Array<{
+    value: WeeklyAutomationDay;
+    label: string;
+  }> = [
+    { value: 'sunday', label: 'Sunday' },
+    { value: 'monday', label: 'Monday' },
+    { value: 'tuesday', label: 'Tuesday' },
+    { value: 'wednesday', label: 'Wednesday' },
+    { value: 'thursday', label: 'Thursday' },
+    { value: 'friday', label: 'Friday' },
+    { value: 'saturday', label: 'Saturday' },
+  ];
+  readonly automationTimezoneOptions = [
+    { value: 'America/Los_Angeles', label: 'Pacific Time' },
+    { value: 'America/Denver', label: 'Mountain Time' },
+    { value: 'America/Chicago', label: 'Central Time' },
+    { value: 'America/New_York', label: 'Eastern Time' },
+    { value: 'UTC', label: 'UTC' },
+  ];
 
   // component.ts
   solutionTab: ('all' | 'finished' | 'unfinished')[] = [];
@@ -331,6 +410,390 @@ export class UserManagementComponent implements OnInit {
 
     this.subscribeUnsubscribes();
     this.subscribeAIInsightsLogs();
+    this.subscribeWeeklyEmailAutomation();
+  }
+
+  private createDefaultWeeklyAutomationConfig(): WeeklyEmailAutomationConfig {
+    return {
+      timezone: this.detectBrowserTimezone(),
+      weeklyReminder: {
+        enabled: false,
+        dayOfWeek: 'monday',
+        time: '09:00',
+        recipientEmails: [],
+        subject: this.defaultWeeklyReminderSubject,
+        introHtml: this.defaultWeeklyReminderIntroHtml,
+        lastRunStatus: 'idle',
+        lastRunSummary: '',
+        lastError: '',
+      },
+      weeklyActivity: {
+        enabled: false,
+        dayOfWeek: 'monday',
+        time: '09:00',
+        recipientEmails: [],
+        lastRunStatus: 'idle',
+        lastRunSummary: '',
+        lastError: '',
+      },
+    };
+  }
+
+  private detectBrowserTimezone(): string {
+    return (
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      this.fallbackAutomationTimezone
+    );
+  }
+
+  private isValidAutomationDay(value: unknown): value is WeeklyAutomationDay {
+    return this.automationDayOptions.some((option) => option.value === value);
+  }
+
+  private normalizeAutomationTime(value: unknown, fallback = '09:00'): string {
+    const time = String(value || '').trim();
+    return /^\d{2}:\d{2}$/.test(time) ? time : fallback;
+  }
+
+  private normalizeAutomationRecipients(input: unknown): string[] {
+    const deduped = new Set<string>();
+    if (!Array.isArray(input)) return [];
+
+    for (const raw of input) {
+      const email = this.normalizeEmail(raw);
+      if (email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        deduped.add(email);
+      }
+    }
+
+    return Array.from(deduped).sort((a, b) => a.localeCompare(b));
+  }
+
+  private normalizeAutomationSchedule(
+    raw: any,
+    defaults: WeeklyAutomationSchedule
+  ): WeeklyAutomationSchedule {
+    return {
+      ...defaults,
+      ...(raw || {}),
+      enabled: Boolean(raw?.enabled),
+      dayOfWeek: this.isValidAutomationDay(raw?.dayOfWeek)
+        ? raw.dayOfWeek
+        : defaults.dayOfWeek,
+      time: this.normalizeAutomationTime(raw?.time, defaults.time),
+      recipientEmails: this.normalizeAutomationRecipients(raw?.recipientEmails),
+      subject:
+        typeof raw?.subject === 'string'
+          ? raw.subject
+          : defaults.subject,
+      introHtml:
+        typeof raw?.introHtml === 'string'
+          ? raw.introHtml
+          : defaults.introHtml,
+      lastRunStatus:
+        raw?.lastRunStatus === 'running' ||
+        raw?.lastRunStatus === 'success' ||
+        raw?.lastRunStatus === 'partial' ||
+        raw?.lastRunStatus === 'failed'
+          ? raw.lastRunStatus
+          : defaults.lastRunStatus,
+      lastRunSummary:
+        typeof raw?.lastRunSummary === 'string'
+          ? raw.lastRunSummary
+          : defaults.lastRunSummary,
+      lastError:
+        typeof raw?.lastError === 'string' ? raw.lastError : defaults.lastError,
+      lastAttemptKey:
+        typeof raw?.lastAttemptKey === 'string' ? raw.lastAttemptKey : '',
+      lastSuccessKey:
+        typeof raw?.lastSuccessKey === 'string' ? raw.lastSuccessKey : '',
+    };
+  }
+
+  private normalizeWeeklyAutomationConfig(
+    raw: any
+  ): WeeklyEmailAutomationConfig {
+    const defaults = this.createDefaultWeeklyAutomationConfig();
+    return {
+      timezone:
+        typeof raw?.timezone === 'string' && raw.timezone.trim()
+          ? raw.timezone.trim()
+          : defaults.timezone,
+      weeklyReminder: this.normalizeAutomationSchedule(
+        raw?.weeklyReminder,
+        defaults.weeklyReminder
+      ),
+      weeklyActivity: this.normalizeAutomationSchedule(
+        raw?.weeklyActivity,
+        defaults.weeklyActivity
+      ),
+      updatedAt: raw?.updatedAt,
+      updatedBy: raw?.updatedBy || undefined,
+    };
+  }
+
+  private subscribeWeeklyEmailAutomation(): void {
+    this.afs
+      .doc<WeeklyEmailAutomationConfig>(this.weeklyEmailAutomationDocPath)
+      .valueChanges()
+      .subscribe({
+        next: (config) => {
+          this.weeklyAutomationConfig =
+            this.normalizeWeeklyAutomationConfig(config);
+          this.automationLoading = false;
+        },
+        error: (error) => {
+          console.error('Unable to load weekly automation config', error);
+          this.automationLoading = false;
+          this.automationSaveError =
+            'Unable to load saved automation settings.';
+        },
+      });
+  }
+
+  private clearAutomationMessages(): void {
+    this.automationSaveError = '';
+    this.automationSaveMessage = '';
+  }
+
+  private updateAutomationSchedule(
+    key: WeeklyAutomationKey,
+    updater: (schedule: WeeklyAutomationSchedule) => WeeklyAutomationSchedule
+  ): void {
+    this.clearAutomationMessages();
+    this.weeklyAutomationConfig = {
+      ...this.weeklyAutomationConfig,
+      [key]: updater(this.weeklyAutomationConfig[key]),
+    };
+  }
+
+  private validateWeeklyAutomationConfig(): string {
+    const reminder = this.weeklyAutomationConfig.weeklyReminder;
+    const activity = this.weeklyAutomationConfig.weeklyActivity;
+
+    if (!this.weeklyAutomationConfig.timezone.trim()) {
+      return 'Select a timezone for the automation schedule.';
+    }
+
+    if (reminder.enabled && reminder.recipientEmails.length === 0) {
+      return 'Weekly reminder automation needs at least one NewWorld Game recipient.';
+    }
+
+    if (activity.enabled && activity.recipientEmails.length === 0) {
+      return 'Weekly activity automation needs at least one admin recipient email.';
+    }
+
+    if (
+      reminder.enabled &&
+      (!reminder.subject || !String(reminder.subject).trim())
+    ) {
+      return 'Weekly reminder automation needs a subject line.';
+    }
+
+    if (
+      reminder.enabled &&
+      (!reminder.introHtml || !String(reminder.introHtml).trim())
+    ) {
+      return 'Weekly reminder automation needs intro content.';
+    }
+
+    return '';
+  }
+
+  async saveWeeklyAutomationConfig(): Promise<void> {
+    if (this.automationSaving) return;
+
+    this.clearAutomationMessages();
+    const validationError = this.validateWeeklyAutomationConfig();
+    if (validationError) {
+      this.automationSaveError = validationError;
+      return;
+    }
+
+    this.automationSaving = true;
+
+    try {
+      const normalized = this.normalizeWeeklyAutomationConfig(
+        this.weeklyAutomationConfig
+      );
+      const authorName = `${this.auth.currentUser?.firstName || ''} ${
+        this.auth.currentUser?.lastName || ''
+      }`.trim();
+
+      await this.afs.doc(this.weeklyEmailAutomationDocPath).set(
+        {
+          ...normalized,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: {
+            uid: this.auth.currentUser?.uid || '',
+            email: this.normalizeEmail(this.auth.currentUser?.email),
+            name: authorName || this.normalizeEmail(this.auth.currentUser?.email),
+          },
+        },
+        { merge: true }
+      );
+
+      this.weeklyAutomationConfig = normalized;
+      this.automationSaveMessage = 'Weekly automation settings saved.';
+    } catch (error) {
+      console.error('Unable to save weekly automation config', error);
+      this.automationSaveError =
+        'Unable to save weekly automation settings right now.';
+    } finally {
+      this.automationSaving = false;
+    }
+  }
+
+  get filteredAutomationReminderCandidates(): User[] {
+    const search = this.automationReminderSearch.trim().toLowerCase();
+    if (!search) return [];
+
+    const existing = new Set(
+      this.weeklyAutomationConfig.weeklyReminder.recipientEmails
+    );
+
+    return this.usersByBotMode
+      .filter((user) => {
+        const email = this.normalizeEmail(user.email);
+        if (!email || existing.has(email)) return false;
+
+        const first = (user.firstName || '').toLowerCase();
+        const last = (user.lastName || '').toLowerCase();
+        const fullName = `${first} ${last}`.trim();
+
+        return (
+          email.includes(search) ||
+          first.includes(search) ||
+          last.includes(search) ||
+          fullName.includes(search)
+        );
+      })
+      .slice(0, 8);
+  }
+
+  addReminderAutomationRecipient(email: string): void {
+    const normalized = this.normalizeEmail(email);
+    if (!normalized) return;
+
+    const existsInUsers = this.allUsers.some(
+      (user) => this.normalizeEmail(user.email) === normalized
+    );
+    if (!existsInUsers) {
+      this.automationSaveError =
+        'Weekly reminder recipients must already exist as NewWorld Game users.';
+      return;
+    }
+
+    this.updateAutomationSchedule('weeklyReminder', (schedule) => ({
+      ...schedule,
+      recipientEmails: this.normalizeAutomationRecipients([
+        ...schedule.recipientEmails,
+        normalized,
+      ]),
+    }));
+    this.automationReminderSearch = '';
+  }
+
+  addSelectedUsersToReminderAutomation(): void {
+    if (!this.selectedRecipientEmails.length) return;
+
+    this.updateAutomationSchedule('weeklyReminder', (schedule) => ({
+      ...schedule,
+      recipientEmails: this.normalizeAutomationRecipients([
+        ...schedule.recipientEmails,
+        ...this.selectedRecipientEmails,
+      ]),
+    }));
+  }
+
+  addActivityAutomationRecipient(): void {
+    const normalized = this.normalizeEmail(this.automationActivityEmailInput);
+    if (!normalized) return;
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalized)) {
+      this.automationSaveError = 'Enter a valid admin email address.';
+      return;
+    }
+
+    this.updateAutomationSchedule('weeklyActivity', (schedule) => ({
+      ...schedule,
+      recipientEmails: this.normalizeAutomationRecipients([
+        ...schedule.recipientEmails,
+        normalized,
+      ]),
+    }));
+    this.automationActivityEmailInput = '';
+  }
+
+  addSelectedUsersToActivityAutomation(): void {
+    if (!this.selectedRecipientEmails.length) return;
+
+    this.updateAutomationSchedule('weeklyActivity', (schedule) => ({
+      ...schedule,
+      recipientEmails: this.normalizeAutomationRecipients([
+        ...schedule.recipientEmails,
+        ...this.selectedRecipientEmails,
+      ]),
+    }));
+  }
+
+  removeAutomationRecipient(key: WeeklyAutomationKey, email: string): void {
+    const normalized = this.normalizeEmail(email);
+    this.updateAutomationSchedule(key, (schedule) => ({
+      ...schedule,
+      recipientEmails: schedule.recipientEmails.filter(
+        (recipient) => recipient !== normalized
+      ),
+    }));
+  }
+
+  automationRecipientDisplayName(email: string): string {
+    const normalized = this.normalizeEmail(email);
+    const user = this.usersByEmail.get(normalized);
+    const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+    return fullName || this.userDirectory.get(normalized)?.name || normalized;
+  }
+
+  automationScheduleSummary(schedule: WeeklyAutomationSchedule): string {
+    const dayLabel =
+      this.automationDayOptions.find((option) => option.value === schedule.dayOfWeek)
+        ?.label || 'Monday';
+    return `Every ${dayLabel} at ${this.formatAutomationTime(
+      schedule.time
+    )} (${this.weeklyAutomationConfig.timezone})`;
+  }
+
+  private formatAutomationTime(value: string): string {
+    const [hoursRaw, minutesRaw] = value.split(':');
+    const hours = Number(hoursRaw);
+    const minutes = Number(minutesRaw);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return value;
+
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
+
+  automationLastRunText(key: WeeklyAutomationKey): string {
+    const schedule = this.weeklyAutomationConfig[key];
+    const runAtMs = this.parseUserDateToMs(schedule.lastRunAt);
+    const status =
+      schedule.lastRunStatus && schedule.lastRunStatus !== 'idle'
+        ? ` (${schedule.lastRunStatus})`
+        : '';
+
+    if (runAtMs) {
+      return `Last run ${this.formatDateTime(runAtMs)}${status}`;
+    }
+
+    if (schedule.lastError) {
+      return `Last run failed${status}`;
+    }
+
+    return 'No automated sends yet.';
   }
 
   // A simple computed property that filters users by the search term.

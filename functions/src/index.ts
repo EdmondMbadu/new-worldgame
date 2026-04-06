@@ -136,6 +136,984 @@ const twilioClient = twilio(accountSid, authToken);
 const APP_BASE_URL =
   ((functions.config() as any)?.app?.base_url as string) ||
   'https://newworld-game.org';
+const WEEKLY_EMAIL_AUTOMATION_DOC_PATH =
+  'admin_settings/weekly_email_automation';
+const DEFAULT_AUTOMATION_TIMEZONE = 'America/Los_Angeles';
+const DEFAULT_WEEKLY_REMINDER_SUBJECT =
+  'Your weekly NewWorld Game progress';
+const DEFAULT_WEEKLY_REMINDER_INTRO_HTML =
+  '<p>Keep the momentum going—here are your in-progress solutions.</p>';
+const WEEKLY_ACTIVITY_WINDOW_DAYS = 7;
+const GOAL_INTRODUCED_ON_MS = new Date(2024, 7, 26).getTime();
+
+type AutomationScheduleKey = 'weeklyReminder' | 'weeklyActivity';
+
+type AutomationScheduleConfig = {
+  enabled?: boolean;
+  dayOfWeek?: string;
+  time?: string;
+  recipientEmails?: string[];
+  subject?: string;
+  introHtml?: string;
+  lastRunAt?: any;
+  lastRunStatus?: string;
+  lastRunSummary?: string;
+  lastError?: string;
+  lastAttemptKey?: string;
+  lastSuccessKey?: string;
+};
+
+type WeeklyEmailAutomationDocument = {
+  timezone?: string;
+  weeklyReminder?: AutomationScheduleConfig;
+  weeklyActivity?: AutomationScheduleConfig;
+};
+
+type UserSolutionStatsForAutomation = {
+  started: number;
+  submitted: number;
+  lastTrackedEditMs: number;
+};
+
+function normalizeEmailForAutomation(value: unknown): string {
+  return String(value || '')
+    .trim()
+    .toLowerCase();
+}
+
+function isValidEmailForAutomation(value: string): boolean {
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
+}
+
+function normalizeRecipientEmailsForAutomation(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const deduped = new Set<string>();
+  for (const raw of input) {
+    const email = normalizeEmailForAutomation(raw);
+    if (email && isValidEmailForAutomation(email)) {
+      deduped.add(email);
+    }
+  }
+  return Array.from(deduped);
+}
+
+function normalizeParticipantEmailsForAutomation(input: unknown): string[] {
+  if (!input) return [];
+
+  if (Array.isArray(input)) {
+    return input
+      .map((item: any) => {
+        if (typeof item === 'string') return item.trim();
+        if (item && typeof item === 'object') {
+          return String(item.email || item.name || '').trim();
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .map((email) => normalizeEmailForAutomation(email));
+  }
+
+  if (typeof input === 'object') {
+    return Object.values(input as Record<string, unknown>)
+      .map((value) => normalizeEmailForAutomation(value))
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function parseDateMMDDYYYYForAutomation(value?: string): number {
+  if (!value) return 0;
+  const raw = value.trim();
+  const native = Date.parse(raw);
+  if (!Number.isNaN(native)) return native;
+
+  const separator = raw.includes('/') ? '/' : raw.includes('-') ? '-' : '';
+  if (!separator) return 0;
+
+  const [mm, dd, yyyy] = raw.split(separator);
+  const parsed = new Date(
+    Number.parseInt(yyyy || '', 10),
+    Number.parseInt(mm || '', 10) - 1,
+    Number.parseInt(dd || '', 10)
+  ).getTime();
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function parseDateToMsForAutomation(value: unknown): number {
+  if (!value) return 0;
+  if (value instanceof Date) return value.getTime();
+  if (typeof (value as any)?.toDate === 'function') {
+    return (value as any).toDate().getTime();
+  }
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'string') {
+    const native = Date.parse(value);
+    if (!Number.isNaN(native)) return native;
+    return parseDateMMDDYYYYForAutomation(value);
+  }
+  return 0;
+}
+
+function solutionTrackedEditMsForAutomation(solution: any): number {
+  return parseDateToMsForAutomation(solution?.updatedAt);
+}
+
+function solutionFallbackMsForAutomation(solution: any): number {
+  return parseDateToMsForAutomation(
+    solution?.createdAt ?? solution?.creationDate ?? solution?.submissionDate
+  );
+}
+
+function solutionActivityMsForAutomation(solution: any): number {
+  return (
+    solutionTrackedEditMsForAutomation(solution) ||
+    solutionFallbackMsForAutomation(solution)
+  );
+}
+
+function buildUserSolutionStatsForAutomation(
+  solutions: any[]
+): Map<string, UserSolutionStatsForAutomation> {
+  const solutionsByEmail = new Map<string, any[]>();
+
+  for (const solution of solutions) {
+    const emails = new Set(
+      normalizeParticipantEmailsForAutomation(solution?.participants)
+    );
+
+    emails.forEach((email) => {
+      if (!email) return;
+      if (!solutionsByEmail.has(email)) {
+        solutionsByEmail.set(email, []);
+      }
+      solutionsByEmail.get(email)?.push(solution);
+    });
+  }
+
+  const statsByEmail = new Map<string, UserSolutionStatsForAutomation>();
+  for (const [email, entries] of solutionsByEmail.entries()) {
+    const ordered = [...entries].sort(
+      (a, b) => solutionActivityMsForAutomation(b) - solutionActivityMsForAutomation(a)
+    );
+    const submitted = ordered.filter((solution) => solution?.finished === 'true')
+      .length;
+    const lastTrackedEditMs = ordered.reduce(
+      (latest, solution) =>
+        Math.max(latest, solutionTrackedEditMsForAutomation(solution)),
+      0
+    );
+
+    statsByEmail.set(email, {
+      started: ordered.length,
+      submitted,
+      lastTrackedEditMs,
+    });
+  }
+
+  return statsByEmail;
+}
+
+function hasGoalForAutomation(user: any): boolean {
+  return Boolean(String(user?.goal || '').trim());
+}
+
+function isRandomLookingNameTokenForAutomation(token: string): boolean {
+  const clean = token.replace(/[^a-zA-Z]/g, '');
+  if (clean.length < 16) return false;
+
+  const upperCount = (clean.match(/[A-Z]/g) || []).length;
+  const lowerCount = (clean.match(/[a-z]/g) || []).length;
+  if (upperCount < 4 || lowerCount < 4) return false;
+
+  const upperRatio = upperCount / clean.length;
+  return upperRatio > 0.2 && upperRatio < 0.8;
+}
+
+function hasSuspiciousNameFormatForAutomation(user: any): boolean {
+  const first = String(user?.firstName || '').trim();
+  const last = String(user?.lastName || '').trim();
+  if (!first || !last) return false;
+
+  return (
+    isRandomLookingNameTokenForAutomation(first) &&
+    isRandomLookingNameTokenForAutomation(last)
+  );
+}
+
+function isAdminUserForAutomation(user: any): boolean {
+  const role = String(user?.role || '').trim().toLowerCase();
+  const adminFlag = String(user?.admin || '').trim().toLowerCase();
+  return adminFlag === 'true' || role === 'admin' || role === 'schooladmin';
+}
+
+function isLikelyBotForAutomation(
+  user: any,
+  statsByEmail: Map<string, UserSolutionStatsForAutomation>
+): boolean {
+  if (hasGoalForAutomation(user)) return false;
+
+  const stats =
+    statsByEmail.get(normalizeEmailForAutomation(user?.email)) || {
+      started: 0,
+      submitted: 0,
+      lastTrackedEditMs: 0,
+    };
+  const hasSolutionActivity = stats.started > 0 || stats.submitted > 0;
+  if (hasSolutionActivity) return false;
+
+  if (hasSuspiciousNameFormatForAutomation(user)) {
+    return true;
+  }
+
+  if (isAdminUserForAutomation(user)) return false;
+
+  const joinedAt = parseDateMMDDYYYYForAutomation(String(user?.dateJoined || ''));
+  if (!joinedAt) return false;
+  return joinedAt >= GOAL_INTRODUCED_ON_MS;
+}
+
+function buildUserDirectoryForAutomation(users: any[]) {
+  const directory = new Map<string, { name: string; email: string; avatarUrl?: string }>();
+
+  for (const user of users) {
+    const email = normalizeEmailForAutomation(user?.email);
+    if (!email) continue;
+
+    const first = String(user?.firstName || '').trim();
+    const last = String(user?.lastName || '').trim();
+    const fullName = `${first} ${last}`.trim() || email;
+    const avatarUrl = String(user?.profilePicture?.downloadURL || '').trim();
+
+    directory.set(email, {
+      name: fullName,
+      email,
+      ...(avatarUrl ? { avatarUrl } : {}),
+    });
+  }
+
+  return directory;
+}
+
+async function loadAuthLastSignInMapsForAutomation(users: any[]) {
+  const identifiers: Array<{ uid?: string; email?: string }> = [];
+  for (const user of users) {
+    const uid = String(user?.uid || '').trim();
+    const email = normalizeEmailForAutomation(user?.email);
+    if (uid) {
+      identifiers.push({ uid });
+    } else if (email) {
+      identifiers.push({ email });
+    }
+  }
+
+  const byUid = new Map<string, string>();
+  const byEmail = new Map<string, string>();
+
+  for (let index = 0; index < identifiers.length; index += 100) {
+    const batch = identifiers.slice(index, index + 100).map((identifier) =>
+      identifier.uid ? { uid: identifier.uid } : { email: identifier.email! }
+    );
+
+    try {
+      const result = await admin.auth().getUsers(batch as any);
+      result.users.forEach((record) => {
+        const lastSignInTime = String(record.metadata.lastSignInTime || '').trim();
+        if (!lastSignInTime) return;
+        byUid.set(record.uid, lastSignInTime);
+        if (record.email) {
+          byEmail.set(normalizeEmailForAutomation(record.email), lastSignInTime);
+        }
+      });
+    } catch (error) {
+      console.error('Unable to load auth metadata for automation', error);
+    }
+  }
+
+  return { byUid, byEmail };
+}
+
+function userActivityMsForAutomation(
+  user: any,
+  authByUid: Map<string, string>,
+  authByEmail: Map<string, string>
+): number {
+  const authByUidValue = user?.uid ? authByUid.get(String(user.uid).trim()) : '';
+  const authByEmailValue = authByEmail.get(
+    normalizeEmailForAutomation(user?.email)
+  );
+
+  return parseDateToMsForAutomation(
+    user?.lastActiveAt || authByUidValue || authByEmailValue || user?.lastLogin
+  );
+}
+
+function solutionBelongsToRealUsersForAutomation(
+  solution: any,
+  realUserEmailSet: Set<string>
+): boolean {
+  const participantEmails = normalizeParticipantEmailsForAutomation(
+    solution?.participants
+  );
+  const authorEmail = normalizeEmailForAutomation(solution?.authorEmail);
+  const ownerEmail = normalizeEmailForAutomation(solution?.ownerEmail);
+
+  return [...participantEmails, authorEmail, ownerEmail].some(
+    (email) => email && realUserEmailSet.has(email)
+  );
+}
+
+function solutionWorkedInRangeForAutomation(
+  solution: any,
+  startMs: number,
+  endMs: number
+): boolean {
+  const activityMs = solutionActivityMsForAutomation(solution);
+  return activityMs >= startMs && activityMs < endMs;
+}
+
+function formatDateMDYForAutomation(ms: number): string {
+  return new Date(ms).toLocaleDateString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function formatDateTimeForAutomation(ms: number): string {
+  return new Date(ms).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+function percentChangeForAutomation(current: number, previous: number): number {
+  if (previous <= 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function percentLabelForAutomation(value: number): string {
+  return `${value > 0 ? '+' : ''}${value}%`;
+}
+
+function escapeHtmlForAutomation(value: unknown): string {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function firstNameOfAutomationUser(user: any): string {
+  return String(
+    user?.firstName || String(user?.displayName || '').split(' ')[0] || ''
+  ).trim();
+}
+
+function formatDateForAutomationEmail(value: any): string {
+  const date =
+    value && typeof value?.toDate === 'function' ? value.toDate() : new Date(value);
+  if (!date || Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function getPendingSolutionsForAutomation(
+  email: string,
+  solutions: any[],
+  directory: Map<string, { name: string; email: string }>
+) {
+  const normalized = normalizeEmailForAutomation(email);
+  const fallbackImage =
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fgeneric-image.jpg?alt=media&token=c4e8d393-50e6-4080-bfcd-923848db7007';
+
+  return solutions
+    .filter((solution) => {
+      const emails = normalizeParticipantEmailsForAutomation(solution?.participants);
+      return emails.includes(normalized);
+    })
+    .filter((solution) => solution?.finished !== 'true')
+    .map((solution) => {
+      const rawTime = solution?.updatedAt ?? solution?.createdAt ?? '';
+      const lastUpdated =
+        rawTime && typeof rawTime?.toDate === 'function'
+          ? rawTime.toDate().toISOString()
+          : rawTime;
+
+      const participants = normalizeParticipantEmailsForAutomation(
+        solution?.participants
+      ).map((participantEmail) => {
+        const fromDirectory = directory.get(participantEmail);
+        return {
+          name: fromDirectory?.name || participantEmail,
+          email: participantEmail,
+        };
+      });
+
+      return {
+        title: String(solution?.title || 'Untitled').trim() || 'Untitled',
+        summary: String(solution?.description || '').slice(0, 220),
+        image: String(solution?.image || '').trim() || fallbackImage,
+        lastUpdated,
+        ctaUrl: `${APP_BASE_URL}/dashboard/${String(solution?.solutionId || '').trim()}`,
+        participants,
+        meetLink: String(
+          solution?.meetLink || solution?.meetingLink || solution?.meetURL || ''
+        ),
+      };
+    });
+}
+
+async function sendAutomatedWeeklyReminderEmail(data: {
+  email: string;
+  subject: string;
+  userFirstName: string;
+  introHtml: string;
+  solutions: any[];
+  author: string;
+  unsubscribeUrl: string;
+}) {
+  const msg = {
+    to: data.email,
+    from: 'newworld@newworld-game.org',
+    templateId: TEMPLATE_WEEKLY_REMINDER,
+    dynamic_template_data: {
+      subject: data.subject,
+      userFirstName: data.userFirstName,
+      intro_html: data.introHtml,
+      hasSolutions: Array.isArray(data.solutions) && data.solutions.length > 0,
+      solutions: data.solutions,
+      homeUrl: APP_BASE_URL,
+      author: data.author || 'NewWorld Game',
+      unsubscribe_url: data.unsubscribeUrl,
+      year: new Date().getFullYear(),
+    },
+  };
+
+  await sgMail.send(msg as any);
+}
+
+function unsubscribeUrlForAutomation(email: string): string {
+  return `${APP_BASE_URL}/unsubscribe?e=${encodeURIComponent(
+    normalizeEmailForAutomation(email)
+  )}`;
+}
+
+function getAutomationTimezone(timeZone: unknown): string {
+  const candidate = String(timeZone || '').trim() || DEFAULT_AUTOMATION_TIMEZONE;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: candidate }).format(new Date());
+    return candidate;
+  } catch {
+    return DEFAULT_AUTOMATION_TIMEZONE;
+  }
+}
+
+function parseAutomationTime(value: unknown): { hour: number; minute: number } {
+  const raw = String(value || '').trim();
+  if (!/^\d{2}:\d{2}$/.test(raw)) return { hour: 9, minute: 0 };
+
+  const [hour, minute] = raw.split(':').map((part) => Number.parseInt(part, 10));
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) {
+    return { hour: 9, minute: 0 };
+  }
+
+  return {
+    hour: Math.max(0, Math.min(23, hour)),
+    minute: Math.max(0, Math.min(59, minute)),
+  };
+}
+
+function getTimeZoneDateParts(date: Date, timeZone: string) {
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    weekday: 'long',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  });
+  const parts = formatter.formatToParts(date);
+  const read = (type: string) =>
+    parts.find((part) => part.type === type)?.value || '';
+
+  return {
+    weekday: read('weekday').toLowerCase(),
+    year: read('year'),
+    month: read('month'),
+    day: read('day'),
+    hour: Number.parseInt(read('hour') || '0', 10),
+    minute: Number.parseInt(read('minute') || '0', 10),
+  };
+}
+
+function getDueAutomationRun(
+  schedule: AutomationScheduleConfig | undefined,
+  timeZone: string,
+  now: Date = new Date()
+) {
+  if (!schedule?.enabled) return { due: false, runKey: '' };
+
+  const zonedNow = getTimeZoneDateParts(now, timeZone);
+  if (zonedNow.weekday !== String(schedule.dayOfWeek || '').toLowerCase()) {
+    return { due: false, runKey: '' };
+  }
+
+  const scheduled = parseAutomationTime(schedule.time);
+  const currentMinutes = zonedNow.hour * 60 + zonedNow.minute;
+  const scheduledMinutes = scheduled.hour * 60 + scheduled.minute;
+  if (currentMinutes < scheduledMinutes) {
+    return { due: false, runKey: '' };
+  }
+
+  const runKey = `${zonedNow.year}-${zonedNow.month}-${zonedNow.day}`;
+  if (String(schedule.lastAttemptKey || '') === runKey) {
+    return { due: false, runKey };
+  }
+
+  return { due: true, runKey };
+}
+
+async function claimAutomationAttempt(
+  scheduleKey: AutomationScheduleKey,
+  runKey: string
+): Promise<boolean> {
+  const db = admin.firestore();
+  const ref = db.doc(WEEKLY_EMAIL_AUTOMATION_DOC_PATH);
+
+  return db.runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    const doc = (snap.data() || {}) as WeeklyEmailAutomationDocument;
+    const schedule = (doc[scheduleKey] || {}) as AutomationScheduleConfig;
+    if (String(schedule.lastAttemptKey || '') === runKey) {
+      return false;
+    }
+
+    transaction.set(
+      ref,
+      {
+        [scheduleKey]: {
+          ...schedule,
+          lastAttemptKey: runKey,
+          lastRunStatus: 'running',
+          lastRunSummary: '',
+          lastError: '',
+        },
+      },
+      { merge: true }
+    );
+    return true;
+  });
+}
+
+function buildWeeklyActivityEmailData(
+  users: any[],
+  solutions: any[],
+  authMaps: { byUid: Map<string, string>; byEmail: Map<string, string> }
+) {
+  const nowMs = Date.now();
+  const weekMs = WEEKLY_ACTIVITY_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const windowStartMs = nowMs - weekMs;
+  const previousWeekStartMs = windowStartMs - weekMs;
+  const statsByEmail = buildUserSolutionStatsForAutomation(solutions);
+
+  const realUsers = users.filter(
+    (user) => !isLikelyBotForAutomation(user, statsByEmail)
+  );
+  const realUserEmailSet = new Set(
+    realUsers
+      .map((user) => normalizeEmailForAutomation(user?.email))
+      .filter(Boolean)
+  );
+
+  const weeklyActiveUsers = realUsers.filter(
+    (user) =>
+      userActivityMsForAutomation(user, authMaps.byUid, authMaps.byEmail) >=
+      windowStartMs
+  ).length;
+  const previousWeeklyActiveUsers = realUsers.filter((user) => {
+    const activityMs = userActivityMsForAutomation(
+      user,
+      authMaps.byUid,
+      authMaps.byEmail
+    );
+    return activityMs >= previousWeekStartMs && activityMs < windowStartMs;
+  }).length;
+
+  const weeklyNewSignups = realUsers.filter(
+    (user) =>
+      parseDateMMDDYYYYForAutomation(String(user?.dateJoined || '')) >=
+      windowStartMs
+  ).length;
+  const previousWeeklyNewSignups = realUsers.filter((user) => {
+    const joinedAt = parseDateMMDDYYYYForAutomation(String(user?.dateJoined || ''));
+    return joinedAt >= previousWeekStartMs && joinedAt < windowStartMs;
+  }).length;
+
+  const totalOpenSolutions = solutions.filter((solution) => {
+    if (solution?.finished === 'true') return false;
+    return solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet);
+  }).length;
+
+  const weeklyWorkedSolutions = solutions.filter(
+    (solution) =>
+      solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet) &&
+      solutionWorkedInRangeForAutomation(solution, windowStartMs, nowMs)
+  ).length;
+  const previousWeeklyWorkedSolutions = solutions.filter(
+    (solution) =>
+      solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet) &&
+      solutionWorkedInRangeForAutomation(
+        solution,
+        previousWeekStartMs,
+        windowStartMs
+      )
+  ).length;
+
+  const weeklyActiveRate =
+    realUsers.length > 0
+      ? Math.round((weeklyActiveUsers / realUsers.length) * 100)
+      : 0;
+
+  const workedSolutions = solutions
+    .filter(
+      (solution) =>
+        solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet) &&
+        solutionWorkedInRangeForAutomation(solution, windowStartMs, nowMs)
+    )
+    .sort(
+      (a, b) => solutionActivityMsForAutomation(b) - solutionActivityMsForAutomation(a)
+    )
+    .slice(0, 12)
+    .map((solution) => ({
+      title:
+        String(solution?.title || 'Untitled').trim() || 'Untitled',
+      description: String(solution?.description || '').trim(),
+      solutionArea: String(solution?.solutionArea || '').trim(),
+      authorName:
+        String(solution?.authorName || '').trim() ||
+        normalizeEmailForAutomation(solution?.authorEmail) ||
+        'Unknown author',
+      lastActivityMs: solutionActivityMsForAutomation(solution),
+      dashboardUrl: `${APP_BASE_URL}/dashboard/${String(solution?.solutionId || '').trim()}`,
+    }));
+
+  return {
+    totalRealUsers: realUsers.length,
+    weeklyActiveUsers,
+    weeklyNewSignups,
+    totalOpenSolutions,
+    weeklyWorkedSolutions,
+    previousWeeklyWorkedSolutions,
+    weeklyActiveRate,
+    weeklyActiveIncreasePct: percentChangeForAutomation(
+      weeklyActiveUsers,
+      previousWeeklyActiveUsers
+    ),
+    weeklySignupIncreasePct: percentChangeForAutomation(
+      weeklyNewSignups,
+      previousWeeklyNewSignups
+    ),
+    weeklyWorkedSolutionsIncreasePct: percentChangeForAutomation(
+      weeklyWorkedSolutions,
+      previousWeeklyWorkedSolutions
+    ),
+    windowStartMs,
+    nowMs,
+    workedSolutions,
+  };
+}
+
+function buildWeeklyActivityReportHtmlForAutomation(
+  report: ReturnType<typeof buildWeeklyActivityEmailData>
+): string {
+  const generatedAt = formatDateMDYForAutomation(report.nowMs);
+  const fromDate = formatDateMDYForAutomation(report.windowStartMs);
+  const toDate = formatDateMDYForAutomation(report.nowMs);
+  const activeDeltaColor =
+    report.weeklyActiveIncreasePct >= 0 ? '#059669' : '#dc2626';
+  const signupDeltaColor =
+    report.weeklySignupIncreasePct >= 0 ? '#059669' : '#dc2626';
+  const workedDeltaColor =
+    report.weeklyWorkedSolutionsIncreasePct >= 0 ? '#059669' : '#dc2626';
+  const logoUrl = `${APP_BASE_URL}/assets/img/earth-triangle-test.png`;
+  const metricCard = (
+    label: string,
+    value: string | number,
+    detail?: string,
+    detailColor = '#64748b'
+  ) => `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#f8fafc;">
+      <tr>
+        <td style="padding:16px 16px 14px;vertical-align:top;">
+          <div style="font-size:12px;line-height:1.4;color:#64748b;text-transform:uppercase;letter-spacing:.04em;font-weight:700;">${escapeHtmlForAutomation(label)}</div>
+          <div style="padding-top:6px;font-size:28px;line-height:1.1;font-weight:800;color:#0f172a;">${escapeHtmlForAutomation(value)}</div>
+          ${
+            detail
+              ? `<div style="padding-top:8px;font-size:12px;line-height:1.5;color:${detailColor};font-weight:700;">${escapeHtmlForAutomation(detail)}</div>`
+              : ''
+          }
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const workedSolutionsHtml = report.workedSolutions.length
+    ? report.workedSolutions
+        .map((solution) => {
+          const meta = [
+            solution.authorName,
+            solution.solutionArea,
+            `Last activity ${formatDateMDYForAutomation(solution.lastActivityMs)}`,
+          ]
+            .filter(Boolean)
+            .join(' • ');
+          const description = solution.description
+            ? escapeHtmlForAutomation(
+                solution.description.length > 180
+                  ? `${solution.description.slice(0, 177)}...`
+                  : solution.description
+              )
+            : '';
+
+          return `
+            <tr>
+              <td style="padding:0 0 14px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#ffffff;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <div style="font-size:18px;line-height:1.35;font-weight:800;color:#0f172a;">
+                        <a href="${escapeHtmlForAutomation(solution.dashboardUrl)}" style="color:#0f172a;text-decoration:none;">${escapeHtmlForAutomation(solution.title)}</a>
+                      </div>
+                      <div style="padding-top:6px;font-size:12px;line-height:1.5;color:#64748b;">${escapeHtmlForAutomation(meta)}</div>
+                      ${
+                        description
+                          ? `<div style="padding-top:10px;font-size:14px;line-height:1.7;color:#475569;">${description}</div>`
+                          : ''
+                      }
+                      <div style="padding-top:14px;">
+                        <a href="${escapeHtmlForAutomation(solution.dashboardUrl)}" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;letter-spacing:.02em;">
+                          Open solution
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          `;
+        })
+        .join('')
+    : `
+      <tr>
+        <td>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#ffffff;">
+            <tr>
+              <td style="padding:18px;font-size:14px;line-height:1.7;color:#475569;">
+                No real-user solutions were worked on during this reporting window.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `;
+
+  return `
+    <div style="margin:0;padding:0;background:#f1f5f9;font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 0;">
+        <tr>
+          <td align="center">
+            <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;">
+              <tr>
+                <td align="center" style="padding:0 20px 16px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                    <tr>
+                      <td style="vertical-align:middle;padding-right:8px;">
+                        <img src="${logoUrl}" alt="NewWorld Game" width="40" style="display:block;width:40px;max-width:40px;height:auto;">
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">NewWorld Game</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="background:#ffffff;border:1px solid #dbe3ef;border-radius:16px;overflow:hidden;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:12px 24px;background:linear-gradient(90deg,#0f766e 0%,#0ea5a3 100%);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#ecfeff;font-weight:700;">
+                        Weekly Activity Report
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:22px 24px 8px;">
+                        <h2 style="margin:0;color:#0f172a;font-size:24px;line-height:1.2;font-weight:800;">NewWorld Game Community Snapshot</h2>
+                        <p style="margin:8px 0 0;color:#475569;font-size:13px;">
+                          Reporting window: <strong>${fromDate}</strong> to <strong>${toDate}</strong>
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+                    <tr>
+                      <td style="padding:0 16px 8px;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+                          <tr>
+                            <td width="33.33%" style="padding:8px;vertical-align:top;">
+                              ${metricCard('Total Real Users', report.totalRealUsers)}
+                            </td>
+                            <td width="33.33%" style="padding:8px;vertical-align:top;">
+                              ${metricCard('Total Open Solutions', report.totalOpenSolutions)}
+                            </td>
+                            <td width="33.33%" style="padding:8px;vertical-align:top;">
+                              ${metricCard(
+                                'Solutions Worked On',
+                                report.weeklyWorkedSolutions,
+                                `${percentLabelForAutomation(
+                                  report.weeklyWorkedSolutionsIncreasePct
+                                )} vs prev week`,
+                                workedDeltaColor
+                              )}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:0 16px 6px;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+                          <tr>
+                            <td width="50%" style="padding:8px;vertical-align:top;">
+                              ${metricCard(
+                                'Weekly Active Users',
+                                report.weeklyActiveUsers,
+                                `${report.weeklyActiveRate}% active • ${percentLabelForAutomation(
+                                  report.weeklyActiveIncreasePct
+                                )} vs prev week`,
+                                activeDeltaColor
+                              )}
+                            </td>
+                            <td width="50%" style="padding:8px;vertical-align:top;">
+                              ${metricCard(
+                                'New Signups',
+                                report.weeklyNewSignups,
+                                `${percentLabelForAutomation(
+                                  report.weeklySignupIncreasePct
+                                )} vs prev week`,
+                                signupDeltaColor
+                              )}
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:10px 24px 4px;">
+                        <div style="font-size:12px;line-height:1.6;color:#64748b;">
+                          Window: ${formatDateTimeForAutomation(
+                            report.windowStartMs
+                          )} to ${formatDateTimeForAutomation(report.nowMs)}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:12px 24px 4px;">
+                        <div style="font-size:12px;line-height:1.4;color:#0f766e;text-transform:uppercase;letter-spacing:.08em;font-weight:800;">
+                          Weekly Solution Activity
+                        </div>
+                        <h3 style="margin:8px 0 0;font-size:22px;line-height:1.25;font-weight:800;color:#0f172a;">
+                          Solutions worked on this week
+                        </h3>
+                        <p style="margin:8px 0 0;font-size:14px;line-height:1.7;color:#475569;">
+                          A live list of recent solution activity from real users during this reporting window.
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:16px 24px 8px;">
+                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                          ${workedSolutionsHtml}
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:12px 24px 20px;">
+                        <a href="${APP_BASE_URL}/user-management" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;">
+                          Open NewWorld Game Admin
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="border-top:1px solid #e2e8f0;padding:12px 24px;background:#f8fafc;font-size:12px;color:#64748b;">
+                        Sent by <strong style="color:#0f172a;">NewWorld Game</strong> •
+                        <a href="${APP_BASE_URL}" style="color:#0f766e;text-decoration:none;">newworld-game.org</a><br>
+                        Generated on ${generatedAt}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
+}
+
+async function sendWeeklyActivityReportEmailsForAutomation(
+  recipients: string[],
+  subject: string,
+  html: string
+) {
+  const validRecipients = normalizeRecipientEmailsForAutomation(recipients);
+  let successCount = 0;
+  let failureCount = 0;
+
+  const finalHtml = injectHiddenPreheader(
+    html,
+    'NewWorld Game weekly activity summary'
+  );
+  const text = htmlToPlainText(finalHtml);
+
+  for (const email of validRecipients) {
+    try {
+      await sgMail.send({
+        to: email,
+        from: 'newworld@newworld-game.org',
+        subject,
+        html: finalHtml,
+        text,
+      } as any);
+      successCount += 1;
+    } catch (error) {
+      failureCount += 1;
+      console.error('Weekly activity automation send failed', email, error);
+    }
+  }
+
+  return { successCount, failureCount, recipientCount: validRecipients.length };
+}
 
 export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
   const msg = {
@@ -199,6 +1177,200 @@ export const weeklyReminder = functions.https.onCall(
     return { success: true };
   }
 );
+
+export const runWeeklyEmailAutomation = functions.pubsub
+  .schedule('every 15 minutes')
+  .timeZone('Etc/UTC')
+  .onRun(async () => {
+    const db = admin.firestore();
+    const automationRef = db.doc(WEEKLY_EMAIL_AUTOMATION_DOC_PATH);
+    const configSnap = await automationRef.get();
+    if (!configSnap.exists) return null;
+
+    const config = (configSnap.data() || {}) as WeeklyEmailAutomationDocument;
+    const timezone = getAutomationTimezone(config.timezone);
+    const dueRuns = [
+      {
+        key: 'weeklyReminder' as const,
+        schedule: config.weeklyReminder || {},
+        due: getDueAutomationRun(config.weeklyReminder, timezone),
+      },
+      {
+        key: 'weeklyActivity' as const,
+        schedule: config.weeklyActivity || {},
+        due: getDueAutomationRun(config.weeklyActivity, timezone),
+      },
+    ].filter((item) => item.due.due && item.due.runKey);
+
+    if (!dueRuns.length) return null;
+
+    const usersSnap = await db.collection('users').get();
+    const users = usersSnap.docs.map((doc) => doc.data() || {});
+    const solutionsSnap = await db.collection('solutions').get();
+    const solutions = solutionsSnap.docs.map((doc) => doc.data() || {});
+    const userDirectory = buildUserDirectoryForAutomation(users);
+    const usersByEmail = new Map<string, any>();
+    users.forEach((user) => {
+      const email = normalizeEmailForAutomation(user?.email);
+      if (email) usersByEmail.set(email, user);
+    });
+
+    let unsubscribed = new Set<string>();
+    if (dueRuns.some((item) => item.key === 'weeklyReminder')) {
+      const unsubscribedSnap = await db.collection('mailing_unsubscribes').get();
+      unsubscribed = new Set(
+        unsubscribedSnap.docs
+          .map((doc) => normalizeEmailForAutomation(doc.data()?.email))
+          .filter(Boolean)
+      );
+    }
+
+    let authMaps = { byUid: new Map<string, string>(), byEmail: new Map<string, string>() };
+    if (dueRuns.some((item) => item.key === 'weeklyActivity')) {
+      authMaps = await loadAuthLastSignInMapsForAutomation(users);
+    }
+
+    for (const run of dueRuns) {
+      const claimed = await claimAutomationAttempt(run.key, run.due.runKey);
+      if (!claimed) continue;
+
+      try {
+        if (run.key === 'weeklyReminder') {
+          const recipientEmails = normalizeRecipientEmailsForAutomation(
+            run.schedule.recipientEmails
+          );
+          let sentCount = 0;
+          let skippedCount = 0;
+          let failureCount = 0;
+
+          for (const email of recipientEmails) {
+            const user = usersByEmail.get(email);
+            if (!user || unsubscribed.has(email)) {
+              skippedCount += 1;
+              continue;
+            }
+
+            const pending = getPendingSolutionsForAutomation(
+              email,
+              solutions,
+              userDirectory
+            )
+              .slice(0, 8)
+              .map((solution) => ({
+                title: solution.title,
+                summary: solution.summary,
+                image: solution.image,
+                lastUpdated: solution.lastUpdated
+                  ? formatDateForAutomationEmail(solution.lastUpdated)
+                  : '',
+                ctaUrl: solution.ctaUrl,
+                meetLink: solution.meetLink || '',
+                participants: solution.participants || [],
+              }));
+
+            try {
+              await sendAutomatedWeeklyReminderEmail({
+                email,
+                subject:
+                  String(run.schedule.subject || '').trim() ||
+                  DEFAULT_WEEKLY_REMINDER_SUBJECT,
+                userFirstName: firstNameOfAutomationUser(user) || 'there',
+                introHtml:
+                  String(run.schedule.introHtml || '').trim() ||
+                  DEFAULT_WEEKLY_REMINDER_INTRO_HTML,
+                solutions: pending,
+                author: 'NewWorld Game automation',
+                unsubscribeUrl: unsubscribeUrlForAutomation(email),
+              });
+              sentCount += 1;
+            } catch (error) {
+              failureCount += 1;
+              console.error('Weekly reminder automation send failed', email, error);
+            }
+          }
+
+          await automationRef.set(
+            {
+              weeklyReminder: {
+                ...run.schedule,
+                lastAttemptKey: run.due.runKey,
+                lastSuccessKey: sentCount > 0 ? run.due.runKey : run.schedule.lastSuccessKey || '',
+                lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+                lastRunStatus:
+                  failureCount > 0
+                    ? sentCount > 0
+                      ? 'partial'
+                      : 'failed'
+                    : 'success',
+                lastRunSummary: `Sent ${sentCount} reminder(s). Skipped ${skippedCount}. Failed ${failureCount}.`,
+                lastError:
+                  failureCount > 0
+                    ? `${failureCount} reminder send(s) failed.`
+                    : '',
+              },
+            },
+            { merge: true }
+          );
+        }
+
+        if (run.key === 'weeklyActivity') {
+          const report = buildWeeklyActivityEmailData(users, solutions, authMaps);
+          const subject = `Weekly Activity Report • ${formatDateMDYForAutomation(
+            report.nowMs
+          )}`;
+          const html = buildWeeklyActivityReportHtmlForAutomation(report);
+          const sendResult = await sendWeeklyActivityReportEmailsForAutomation(
+            normalizeRecipientEmailsForAutomation(run.schedule.recipientEmails),
+            subject,
+            html
+          );
+
+          await automationRef.set(
+            {
+              weeklyActivity: {
+                ...run.schedule,
+                lastAttemptKey: run.due.runKey,
+                lastSuccessKey:
+                  sendResult.successCount > 0
+                    ? run.due.runKey
+                    : run.schedule.lastSuccessKey || '',
+                lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+                lastRunStatus:
+                  sendResult.failureCount > 0
+                    ? sendResult.successCount > 0
+                      ? 'partial'
+                      : 'failed'
+                    : 'success',
+                lastRunSummary: `Sent ${sendResult.successCount} activity report(s). Failed ${sendResult.failureCount}. Solutions worked this week: ${report.weeklyWorkedSolutions}.`,
+                lastError:
+                  sendResult.failureCount > 0
+                    ? `${sendResult.failureCount} weekly activity email(s) failed.`
+                    : '',
+              },
+            },
+            { merge: true }
+          );
+        }
+      } catch (error: any) {
+        console.error(`Weekly email automation failed for ${run.key}`, error);
+        await automationRef.set(
+          {
+            [run.key]: {
+              ...run.schedule,
+              lastAttemptKey: run.due.runKey,
+              lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+              lastRunStatus: 'failed',
+              lastError: error?.message || 'Unknown automation error.',
+              lastRunSummary: '',
+            },
+          },
+          { merge: true }
+        );
+      }
+    }
+
+    return null;
+  });
 
 export const touchLastActive = functions
   .runWith({ timeoutSeconds: 30, memory: '256MB' })
