@@ -1205,7 +1205,9 @@ export const runWeeklyEmailAutomation = functions.pubsub
     if (!dueRuns.length) return null;
 
     const usersSnap = await db.collection('users').get();
-    const users = usersSnap.docs.map((doc) => doc.data() || {});
+    const users = usersSnap.docs
+      .map((doc) => doc.data() || {})
+      .filter((user) => normalizeEmailForAutomation(user?.email).length > 0);
     const solutionsSnap = await db.collection('solutions').get();
     const solutions = solutionsSnap.docs.map((doc) => doc.data() || {});
     const userDirectory = buildUserDirectoryForAutomation(users);
