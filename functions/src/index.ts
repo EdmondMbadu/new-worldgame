@@ -675,7 +675,10 @@ function getDueAutomationRun(
     return { due: false, runKey: '' };
   }
 
-  const runKey = `${zonedNow.year}-${zonedNow.month}-${zonedNow.day}`;
+  const normalizedTime = `${String(scheduled.hour).padStart(2, '0')}:${String(
+    scheduled.minute
+  ).padStart(2, '0')}`;
+  const runKey = `${zonedNow.year}-${zonedNow.month}-${zonedNow.day}@${normalizedTime}`;
   if (String(schedule.lastAttemptKey || '') === runKey) {
     return { due: false, runKey };
   }
