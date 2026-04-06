@@ -557,6 +557,24 @@ export class UserManagementComponent implements OnInit {
     this.automationSaveMessage = '';
   }
 
+  private stripUndefinedDeep<T>(value: T): T {
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => this.stripUndefinedDeep(item))
+        .filter((item) => item !== undefined) as T;
+    }
+
+    if (value && typeof value === 'object') {
+      const cleanedEntries = Object.entries(value as Record<string, unknown>)
+        .filter(([, entryValue]) => entryValue !== undefined)
+        .map(([key, entryValue]) => [key, this.stripUndefinedDeep(entryValue)]);
+
+      return Object.fromEntries(cleanedEntries) as T;
+    }
+
+    return value;
+  }
+
   private updateAutomationSchedule(
     key: WeeklyAutomationKey,
     updater: (schedule: WeeklyAutomationSchedule) => WeeklyAutomationSchedule
@@ -620,19 +638,19 @@ export class UserManagementComponent implements OnInit {
       const authorName = `${this.auth.currentUser?.firstName || ''} ${
         this.auth.currentUser?.lastName || ''
       }`.trim();
-
-      await this.afs.doc(this.weeklyEmailAutomationDocPath).set(
-        {
-          ...normalized,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedBy: {
-            uid: this.auth.currentUser?.uid || '',
-            email: this.normalizeEmail(this.auth.currentUser?.email),
-            name: authorName || this.normalizeEmail(this.auth.currentUser?.email),
-          },
+      const payload = this.stripUndefinedDeep({
+        ...normalized,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: {
+          uid: this.auth.currentUser?.uid || '',
+          email: this.normalizeEmail(this.auth.currentUser?.email),
+          name: authorName || this.normalizeEmail(this.auth.currentUser?.email),
         },
-        { merge: true }
-      );
+      });
+
+      await this.afs
+        .doc(this.weeklyEmailAutomationDocPath)
+        .set(payload, { merge: true });
 
       this.weeklyAutomationConfig = normalized;
       this.automationSaveMessage = 'Weekly automation settings saved.';
