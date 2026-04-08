@@ -15,7 +15,7 @@ import {
   styleUrl: './global-lab.component.css',
 })
 export class GlobalLabComponent implements OnInit, OnDestroy {
-  videoPlaying = false;
+  heroVideoPlaying = false;
   loadedVideoIds: Record<string, boolean> = {};
   reachOutVisa = 'info@1earthgame.org';
   currentLanguage: 'en' | 'fr' = 'en';
@@ -51,6 +51,10 @@ export class GlobalLabComponent implements OnInit, OnDestroy {
 
   get aiOptions(): TeamProfile[] {
     return this.copy.aiTeam.members;
+  }
+
+  playHeroVideo(): void {
+    this.heroVideoPlaying = true;
   }
 
   playGalleryVideo(id: string): void {

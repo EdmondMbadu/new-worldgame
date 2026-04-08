@@ -1,6 +1,7 @@
 export interface VideoCard {
   id: string;
   src: string;
+  thumbnailSrc: string;
   title: string;
   label: string;
   heading: string;
@@ -116,14 +117,17 @@ const videoSources = [
   {
     id: 'differentiation',
     src: 'https://app.heygen.com/embeds/968bdd6e41df46d2b759fef5caabe0d3',
+    thumbnailSrc: '../../../assets/img/zara-agent.png',
   },
   {
     id: 'promo',
     src: 'https://app.heygen.com/embeds/625a1fb51b704c7796b455de9cdb2970',
+    thumbnailSrc: '../../../assets/img/sofia-agent.png',
   },
   {
     id: 'mission',
     src: 'https://app.heygen.com/embeds/f6e00c1aab4d4135bf51dfb9e4d314e0',
+    thumbnailSrc: '../../../assets/img/li-agent.png',
   },
 ] as const;
 

@@ -67,29 +67,37 @@
 
         <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg flex flex-col">
           <div class="relative w-full" style="padding-bottom: 56.25%;">
-            <div
-              *ngIf="!videoPlaying"
-              (click)="videoPlaying = true"
-              class="absolute inset-0 flex items-center justify-center cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900"
+            <button
+              *ngIf="!heroVideoPlaying"
+              type="button"
+              (click)="playHeroVideo()"
+              class="absolute inset-0 overflow-hidden text-left"
+              [attr.aria-label]="copy.videos.playLabelPrefix + ' ' + copy.videos.cards[0].title"
             >
+              <img
+                [src]="copy.videos.cards[0].thumbnailSrc"
+                [alt]="copy.videos.cards[0].title"
+                class="absolute inset-0 w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/35 to-slate-900/10"></div>
               <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                <span class="text-white/70 text-xs uppercase tracking-widest font-semibold">
+                <span class="text-white/75 text-xs uppercase tracking-widest font-semibold">
                   {{ copy.hero.title }}
                 </span>
-                <span class="text-white font-bold text-lg leading-snug">
+                <span class="text-white font-bold text-lg leading-snug max-w-md">
                   {{ copy.videos.cards[0].heading }}
                 </span>
               </div>
-              <div
-                class="relative z-10 w-16 h-16 rounded-full bg-white/20 border-2 border-white/60 flex items-center justify-center hover:bg-white/30 transition-all duration-200 shadow-xl mt-10"
+              <span
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center w-16 h-16 rounded-full bg-black/30 backdrop-blur-sm border-2 border-white/70 text-white shadow-xl transition-all duration-200 hover:bg-black/40"
               >
-                <svg class="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-              </div>
-            </div>
+              </span>
+            </button>
             <iframe
-              *ngIf="videoPlaying"
+              *ngIf="heroVideoPlaying"
               class="absolute inset-0 w-full h-full"
               [src]="trustedVideoUrl(copy.videos.cards[0].src)"
               [title]="copy.videos.cards[0].title"
@@ -143,20 +151,28 @@
               *ngIf="!loadedVideoIds[video.id]"
               type="button"
               (click)="playGalleryVideo(video.id)"
-              class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-800 via-slate-900 to-black px-6 text-center"
+              class="absolute inset-0 overflow-hidden text-left"
               [attr.aria-label]="copy.videos.playLabelPrefix + ' ' + video.title"
             >
-              <span class="text-white/70 text-xs uppercase tracking-[0.28em] font-semibold">
-                {{ video.label }}
-              </span>
-              <span class="text-white text-xl font-bold leading-snug max-w-xs">
-                {{ video.heading }}
-              </span>
-              <span class="text-white/75 text-sm leading-relaxed max-w-sm">
-                {{ video.description }}
-              </span>
+              <img
+                [src]="video.thumbnailSrc"
+                [alt]="video.title"
+                class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/88 via-slate-900/45 to-slate-900/10"></div>
+              <div class="absolute inset-x-0 bottom-0 p-5 text-center">
+                <span class="block text-white/75 text-xs uppercase tracking-[0.28em] font-semibold mb-2">
+                  {{ video.label }}
+                </span>
+                <span class="block text-white text-xl font-bold leading-snug max-w-xs mx-auto mb-2">
+                  {{ video.heading }}
+                </span>
+                <span class="block text-white/80 text-sm leading-relaxed max-w-sm mx-auto">
+                  {{ video.description }}
+                </span>
+              </div>
               <span
-                class="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-white/60 bg-white/15 text-white shadow-xl transition-all duration-200 group-hover:bg-white/25"
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-white/70 bg-black/30 backdrop-blur-sm text-white shadow-xl transition-all duration-200 group-hover:bg-black/40"
               >
                 <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
