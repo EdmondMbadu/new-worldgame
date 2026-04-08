@@ -3978,13 +3978,79 @@ export const sendDemoInvite = functions.firestore
     }
   });
 
-export const onChatPrompt = functions
-  .region('us-central1')
-  .firestore.document('users/{uid}/discussions/{docId}')
-  .onCreate(async (snap) => {
+const AVATAR_CHAT_COLLECTIONS = new Set([
+  'discussions',
+  'zara',
+  'arjun',
+  'sofia',
+  'li',
+  'amina',
+  'elena',
+  'tane',
+  'business',
+  'marie',
+  'rachel',
+  'bucky',
+  'albert',
+  'nelson',
+  'gandhi',
+  'twain',
+  'mark',
+]);
+
+const MARK_TWAIN_COLLECTIONS = new Set(['twain', 'mark']);
+
+function getAvatarSystemInstruction(collectionId: string): string {
+  if (MARK_TWAIN_COLLECTIONS.has(collectionId)) {
+    return `
+You are “Twain-ish Curator.” Rules:
+1) Always respond ONLY in quotation marks.
+2) Prefer short, wry, skeptical quotations that fit almost any topic.
+3) When known, attribute: —Mark Twain. If not Twain, use the correct source; if uncertain, say —attributed.
+4) If no fitting quote is available, use a pithy proverb with —proverb.
+5) Never explain or add text outside the quotes.
+    `.trim();
+  }
+
+  return '';
+}
+
+function normalizeAvatarAnswer(collectionId: string, answer: string): string {
+  const trimmed = String(answer || '').replace(/\r/g, '').trim();
+  if (!trimmed) return '';
+
+  if (!MARK_TWAIN_COLLECTIONS.has(collectionId)) {
+    return trimmed;
+  }
+
+  const lines = trimmed
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const quoteWithAttribution = trimmed.match(
+    /[“"]([^”"]{3,280})[”"]\s*(?:[—-]\s*[^\n]{2,120})?/
+  );
+  if (quoteWithAttribution?.[0]) {
+    return quoteWithAttribution[0].trim();
+  }
+
+  const quoteLineIndex = lines.findIndex((line) => /[“"].+[”"]/.test(line));
+  if (quoteLineIndex !== -1) {
+    return lines.slice(quoteLineIndex, quoteLineIndex + 2).join('\n').trim();
+  }
+
+  return lines.slice(0, 2).join('\n').trim();
+}
+
+const processChatPrompt = async (snap: any): Promise<void> => {
     try {
       const prompt: string = (snap.data()?.['prompt'] || '').trim();
       if (!prompt) return;
+      const collectionId = String(snap.ref.parent?.id || '')
+        .trim()
+        .toLowerCase();
+      const avatarSystemInstruction = getAvatarSystemInstruction(collectionId);
 
       /* mark as processing */
       await snap.ref.update({
@@ -3996,9 +4062,9 @@ export const onChatPrompt = functions
       const colRef = snap.ref.parent!;
       const allDocs = await colRef.get();
       const sorted = allDocs.docs
-        .filter((d) => d.id !== snap.id)
+        .filter((d: any) => d.id !== snap.id)
         .sort(
-          (a, b) =>
+          (a: any, b: any) =>
             (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
             (b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0)
         );
@@ -4054,6 +4120,12 @@ export const onChatPrompt = functions
 
       /* finally the fresh user prompt */
       history += `User: ${prompt}\nAssistant:`;
+      if (avatarSystemInstruction) {
+        history =
+          `${avatarSystemInstruction}\n\n` +
+          `Stay in character for the full reply.\n\n` +
+          history;
+      }
 
       // ────────── 2. pick model ─────────────────────────────────
       // Enhanced detection for image generation requests (English and French)
@@ -4090,7 +4162,9 @@ export const onChatPrompt = functions
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
       const modelConfig: Record<string, unknown> = { model: textModelName };
       // Enable Google Search grounding for factual responses with sources
-      modelConfig['tools'] = [{ google_search: {} }];
+      if (!MARK_TWAIN_COLLECTIONS.has(collectionId)) {
+        modelConfig['tools'] = [{ google_search: {} }];
+      }
       const model = genAI.getGenerativeModel(modelConfig as any);
 
       // For image generation, create a clean, focused prompt
@@ -4250,6 +4324,8 @@ export const onChatPrompt = functions
           }
         }
       }
+
+      answer = normalizeAvatarAnswer(collectionId, answer);
 
       // ────────── 4. extract sources from grounding metadata ───────────────────────
       const sources: Array<{ title: string; url: string; priority: number }> = [];
@@ -4443,6 +4519,31 @@ export const onChatPrompt = functions
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }
+  };
+
+export const onChatPrompt = functions
+  .region('us-central1')
+  .firestore.document('users/{uid}/discussions/{docId}')
+  .onCreate(processChatPrompt);
+
+export const onAvatarChatPrompt = functions
+  .region('us-central1')
+  .firestore.document('users/{uid}/{collectionId}/{docId}')
+  .onCreate(async (snap, context) => {
+    const collectionId = String(context.params.collectionId || '')
+      .trim()
+      .toLowerCase();
+
+    if (collectionId === 'discussions') {
+      return null;
+    }
+
+    if (!AVATAR_CHAT_COLLECTIONS.has(collectionId)) {
+      return null;
+    }
+
+    await processChatPrompt(snap);
+    return null;
   });
 
 /**

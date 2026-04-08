@@ -24,7 +24,7 @@ export class AvatarRegistryService {
       'Albert Einstein': 'albert',
       'Nelson Mandela': 'nelson',
       'Mahatma Gandhi': 'gandhi',
-      'Mark Twain': 'mark',
+      'Mark Twain': 'twain',
 
       // colleagues (first name keys)
       'Zara Nkosi': 'zara',
@@ -140,6 +140,7 @@ export class AvatarRegistryService {
         group: 'elder',
         sdgs: [2, 6],
         intro: `Wry storyteller who disarms with humor and insight—perfect for cutting through noise and cliché.`,
+        requiresAdmin: false,
       },
       {
         avatarPath: '../../../assets/img/logos.png',
@@ -156,7 +157,7 @@ export class AvatarRegistryService {
         ...b,
         slug: this.slugify(b.name!),
         collectionPath: `users/${uid}/${key}/`,
-        requiresAdmin: undefined,
+        requiresAdmin: b.requiresAdmin ?? undefined,
       };
     });
   }
