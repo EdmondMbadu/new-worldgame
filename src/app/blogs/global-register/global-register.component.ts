@@ -1,9 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
+import { LanguageService } from 'src/app/services/language.service';
 import { TimeService } from 'src/app/services/time.service';
+import {
+  GLOBAL_REGISTER_CONTENT,
+  GlobalRegisterContent,
+  RegisterBenefit,
+  RegisterTargetGroupOption,
+} from './global-register.content';
 
 @Component({
   selector: 'app-global-register',
@@ -11,7 +19,7 @@ import { TimeService } from 'src/app/services/time.service';
   templateUrl: './global-register.component.html',
   styleUrl: './global-register.component.css',
 })
-export class GlobalRegisterComponent implements OnInit {
+export class GlobalRegisterComponent implements OnInit, OnDestroy {
   isDrexelOnly: boolean = false;
   email: string = '';
   firstName: string = '';
@@ -39,6 +47,9 @@ export class GlobalRegisterComponent implements OnInit {
   reachOutVisa: string = 'info@1earthgame.org';
 
   isLoading: boolean = false;
+  currentLanguage: 'en' | 'fr' = 'en';
+  private readonly destroy$ = new Subject<void>();
+  private countdownIntervalId?: ReturnType<typeof setInterval>;
 
   constructor(
     public auth: AuthService,
@@ -46,11 +57,18 @@ export class GlobalRegisterComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private fns: AngularFireFunctions,
-    private time: TimeService
+    private time: TimeService,
+    private readonly languageService: LanguageService
   ) {}
 
   ngOnInit(): void {
     window.scroll(0, 0);
+    this.currentLanguage = this.resolveLanguage(this.languageService.currentLanguage);
+    this.languageService.languageChanges$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ lang }) => {
+        this.currentLanguage = this.resolveLanguage(lang);
+      });
     this.isDrexelOnly = !!this.route.snapshot.data['drexelOnly'];
     if (this.isDrexelOnly) {
       this.targetGroup = 'drexelStudent';
@@ -75,35 +93,141 @@ export class GlobalRegisterComponent implements OnInit {
     this.initializeCountdown();
   }
 
+  ngOnDestroy(): void {
+    if (this.countdownIntervalId) {
+      clearInterval(this.countdownIntervalId);
+    }
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  get copy(): GlobalRegisterContent {
+    return GLOBAL_REGISTER_CONTENT[this.currentLanguage];
+  }
+
+  get modeCopy() {
+    return this.labMode === 'online' ? this.copy.online : this.copy.inPerson;
+  }
+
+  get formTitle(): string {
+    if (this.labMode === 'online') {
+      return this.isDrexelOnly
+        ? this.copy.online.drexelFormTitle
+        : this.copy.online.formTitle;
+    }
+
+    return this.isDrexelOnly
+      ? this.copy.inPerson.drexelFormTitle
+      : this.copy.inPerson.formTitle;
+  }
+
+  get tuitionTitle(): string {
+    if (this.labMode === 'online') {
+      return this.isDrexelOnly
+        ? this.copy.online.drexelTuitionTitle
+        : this.copy.online.tuitionTitle;
+    }
+
+    return this.isDrexelOnly
+      ? this.copy.inPerson.drexelTuitionTitle
+      : this.copy.inPerson.tuitionTitle;
+  }
+
+  get targetGroupOptions(): RegisterTargetGroupOption[] {
+    return this.labMode === 'online'
+      ? this.copy.form.onlineTargetGroupOptions
+      : this.copy.form.inPersonTargetGroupOptions;
+  }
+
+  get registrationSteps(): string[] {
+    if (this.labMode !== 'online') {
+      return [];
+    }
+
+    if (!this.isDrexelOnly) {
+      return this.copy.online.steps;
+    }
+
+    return [
+      this.copy.online.steps[0],
+      this.currentLanguage === 'fr'
+        ? 'Nous vous enverrons une confirmation après votre inscription.'
+        : 'We will send you a confirmation after you register.',
+      this.copy.online.steps[2],
+    ];
+  }
+
+  get benefits(): RegisterBenefit[] {
+    if (!this.isDrexelOnly) {
+      return this.copy.benefits.items;
+    }
+
+    return this.copy.benefits.items.map((item, index) => {
+      if (index === 3) {
+        return {
+          ...item,
+          description:
+            this.currentLanguage === 'fr'
+              ? 'Apprenez à utiliser l’IA pour le bien commun, à mobiliser des IA avancées et des jeux de données mondiaux pour développer de vraies stratégies évolutives alignées avec vos valeurs et les objectifs de développement durable de l’ONU.'
+              : 'Learn to harness AI for good, use advanced AIs and global datasets to develop real, scalable strategies aligned with your values and the UN Sustainable Development Goals.',
+        };
+      }
+
+      if (index === 4) {
+        return {
+          ...item,
+          description:
+            this.currentLanguage === 'fr'
+              ? 'Travaillez aux côtés de professionnels, de chercheurs, d’autres étudiants et d’experts internationaux qui vous apporteront des conseils précieux et des retours pour faire avancer vos idées.'
+              : 'Work alongside professionals, researchers, other students, and global experts who will provide valuable guidance and review to shape your ideas.',
+        };
+      }
+
+      if (index === 5) {
+        return {
+          ...item,
+          title:
+            this.currentLanguage === 'fr'
+              ? 'Visibilité dans le tournoi et prix'
+              : 'Tournament Visibility & Awards',
+          description:
+            this.currentLanguage === 'fr'
+              ? 'Soumettez votre projet au tournoi NewWorld, où les solutions gagnantes obtiennent de la visibilité et parfois des prix qui aident à concrétiser votre idée.'
+              : 'Submit your project to the NewWorld Tournament where winning solutions gain visibility and possible awards that help bring your idea to life.',
+        };
+      }
+
+      return item;
+    });
+  }
+
   async submitGlobalLabRegistration() {
     if (this.firstName.trim() === '' || this.lastName.trim() === '') {
-      alert('Enter your first and last name.');
+      alert(this.copy.alerts.firstLastName);
       return;
     } else if (!this.data.isValidEmail(this.email)) {
-      alert('Enter a valid email.');
+      alert(this.copy.alerts.invalidEmail);
       return;
     } else if (
       (this.age === null || this.age <= 17) &&
       this.labMode === 'inPerson'
     ) {
-      alert(
-        'You should be at least 18 years old to participate to the In Person Lab.'
-      );
+      alert(this.copy.alerts.ageInPerson);
       return;
     } else if (this.organization.trim() === '') {
-      alert('Enter your organization, school, or employer.');
+      alert(this.copy.alerts.organization);
       return;
     } else if (this.phone.trim() === '') {
-      alert('Enter your phone number.');
+      alert(this.copy.alerts.phone);
       return;
     } else if (this.address.trim() === '') {
-      alert('Enter your address.');
+      alert(this.copy.alerts.address);
       return;
     } else if (this.city.trim() === '') {
-      alert('Enter your city.');
+      alert(this.copy.alerts.city);
       return;
     } else if (this.stateProvince.trim() === '') {
-      alert('Enter your state or province.');
+      alert(this.copy.alerts.stateProvince);
       return;
     }
     // else if (this.postalCode.trim() === '') {
@@ -111,20 +235,20 @@ export class GlobalRegisterComponent implements OnInit {
     //   return;
     // }
     else if (this.country.trim() === '') {
-      alert('Enter your country.');
+      alert(this.copy.alerts.country);
       return;
     } else if (this.occupation.trim() === '') {
-      alert('Enter what you do.');
+      alert(this.copy.alerts.occupation);
       return;
     } else if (this.whyAttend.trim() === '') {
-      alert('Enter why you want to attend the Lab.');
+      alert(this.copy.alerts.whyAttend);
       return;
     } else if (this.focusTopic.trim() === '') {
-      alert('Enter a specific topic you want to focus on.');
+      alert(this.copy.alerts.focusTopic);
       return;
     } else if (this.targetGroup.trim() === '') {
       console.log('target group', this.targetGroup);
-      alert('Enter your target group. (Professionals, Students, etc.)');
+      alert(this.copy.alerts.targetGroup);
       return;
     } else {
       try {
@@ -178,9 +302,7 @@ export class GlobalRegisterComponent implements OnInit {
         // alert('Registration successful! We will contact you soon.');
         // this.router.navigate(['/thank-you']);
       } catch (error) {
-        alert(
-          'There was an error during the registration process. Please try again.'
-        );
+        alert(this.copy.alerts.submissionError);
         console.log('Error while entering Global Lab registration data', error);
         this.isLoading = false;
       }
@@ -188,33 +310,31 @@ export class GlobalRegisterComponent implements OnInit {
   }
   async submitGlobalLabRegistrationWithoutPaying() {
     if (this.firstName.trim() === '' || this.lastName.trim() === '') {
-      alert('Enter your first and last name.');
+      alert(this.copy.alerts.firstLastName);
       return;
     } else if (!this.data.isValidEmail(this.email)) {
-      alert('Enter a valid email.');
+      alert(this.copy.alerts.invalidEmail);
       return;
     } else if (
       (this.age === null || this.age <= 17) &&
       this.labMode === 'inPerson'
     ) {
-      alert(
-        'You should be at least 18 years old to participate to the In Person Lab.'
-      );
+      alert(this.copy.alerts.ageInPerson);
       return;
     } else if (this.organization.trim() === '') {
-      alert('Enter your organization, school, or employer.');
+      alert(this.copy.alerts.organization);
       return;
     } else if (this.phone.trim() === '') {
-      alert('Enter your phone number.');
+      alert(this.copy.alerts.phone);
       return;
     } else if (this.address.trim() === '') {
-      alert('Enter your address.');
+      alert(this.copy.alerts.address);
       return;
     } else if (this.city.trim() === '') {
-      alert('Enter your city.');
+      alert(this.copy.alerts.city);
       return;
     } else if (this.stateProvince.trim() === '') {
-      alert('Enter your state or province.');
+      alert(this.copy.alerts.stateProvince);
       return;
     }
     // else if (this.postalCode.trim() === '') {
@@ -222,20 +342,20 @@ export class GlobalRegisterComponent implements OnInit {
     //   return;
     // }
     else if (this.country.trim() === '') {
-      alert('Enter your country.');
+      alert(this.copy.alerts.country);
       return;
     } else if (this.occupation.trim() === '') {
-      alert('Enter what you do.');
+      alert(this.copy.alerts.occupation);
       return;
     } else if (this.whyAttend.trim() === '') {
-      alert('Enter why you want to attend the Lab.');
+      alert(this.copy.alerts.whyAttend);
       return;
     } else if (this.focusTopic.trim() === '') {
-      alert('Enter a specific topic you want to focus on.');
+      alert(this.copy.alerts.focusTopic);
       return;
     } else if (this.targetGroup.trim() === '') {
       console.log('target group', this.targetGroup);
-      alert('Enter your target group. (Professionals, Students, etc.)');
+      alert(this.copy.alerts.targetGroup);
       return;
     } else {
       try {
@@ -312,9 +432,7 @@ export class GlobalRegisterComponent implements OnInit {
         // alert('Registration successful! We will contact you soon.');
         this.router.navigate(['/thank-you']);
       } catch (error) {
-        alert(
-          'There was an error during the registration process. Please try again.'
-        );
+        alert(this.copy.alerts.submissionError);
         console.log('Error while entering Global Lab registration data', error);
         this.isLoading = false;
       }
@@ -367,6 +485,18 @@ export class GlobalRegisterComponent implements OnInit {
     return this.isDrexelOnly ? 'drexelStudent' : this.targetGroup;
   }
 
+  formatScholarshipNote(template: string): string {
+    return template.replace('{email}', this.reachOutEmail);
+  }
+
+  formatTeamDiscountNotice(template: string): string {
+    return template.replace('{email}', this.reachOutEmail);
+  }
+
+  formatPayAndRegisterLabel(price: number): string {
+    return this.copy.form.payAndRegisterLabel.replace('{price}', `$${price}`);
+  }
+
   private initializeCountdown(): void {
     const eventDate = new Date('June 15, 2026 12:00:00 EST').getTime();
     const daysElement = document.getElementById('days');
@@ -374,17 +504,19 @@ export class GlobalRegisterComponent implements OnInit {
     const minutesElement = document.getElementById('minutes');
     const secondsElement = document.getElementById('seconds');
 
-    function pad(value: number): string {
+    const pad = (value: number): string => {
       return value < 10 ? `0${value}` : `${value}`;
-    }
+    };
 
-    function updateTimer() {
+    const updateTimer = () => {
       const now = new Date().getTime();
       const timeLeft = eventDate - now;
 
       if (timeLeft < 0) {
         const countdownElement = document.getElementById('countdown');
-        countdownElement!.innerHTML = 'The event has started!';
+        if (countdownElement) {
+          countdownElement.innerHTML = this.copy.countdown.started;
+        }
         return;
       }
 
@@ -401,9 +533,13 @@ export class GlobalRegisterComponent implements OnInit {
         minutesElement.innerHTML = pad(minutes);
         secondsElement.innerHTML = pad(seconds);
       }
-    }
+    };
 
     updateTimer();
-    setInterval(updateTimer, 1000);
+    this.countdownIntervalId = setInterval(updateTimer, 1000);
+  }
+
+  private resolveLanguage(language: string): 'en' | 'fr' {
+    return language === 'fr' ? 'fr' : 'en';
   }
 }

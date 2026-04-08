@@ -1,7 +1,6 @@
 <div class="dark:bg-slate-900 min-h-screen flex flex-col">
   <app-navbar [currenPageLabBanner]="false" [showLoginButton]="false"></app-navbar>
 
-  <!-- HERO / TOP SECTION -->
   <section
     class="relative mt-28 pb-16 bg-cover bg-center bg-no-repeat"
     style="background-image: url('https://designsciencelab.com/wordpress/wp-content/uploads/2016/06/IMG_0431.jpg');"
@@ -10,21 +9,19 @@
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-6 pt-10">
-        Global Solutions Lab 2026
+        {{ copy.hero.title }}
       </h1>
       <p class="text-lg md:text-xl font-semibold text-gray-200 mb-4">
-        Research and development for the world and your community <br />
-        June 15-24, 2026
+        {{ copy.hero.subtitle }}<br />
+        {{ copy.hero.dates }}
       </p>
       <p class="text-base md:text-lg text-gray-200 mb-4">
-        Hosted by the Charles D. Close School of Entrepreneurship at Drexel University<br />
-        <span class="font-semibold">Real Problems | Real Solutions | Real Impact</span>
+        {{ copy.hero.host }}<br />
+        <span class="font-semibold">{{ copy.hero.impactLine }}</span>
       </p>
 
       <p class="max-w-3xl mx-auto text-gray-200 text-base md:text-lg mb-6">
-        The 2026 Global Solutions Lab will be both in-person and online. Discover how we combine
-        human ingenuity and custom-trained AIs to develop innovative, affordable, and immediately
-        implementable solutions to your community or regional and global problems for achieving the UN SDGs.
+        {{ copy.hero.intro }}
       </p>
 
       <div class="mt-8">
@@ -32,84 +29,70 @@
           routerLink="/global-register"
           class="inline-block px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
         >
-          Register Here
+          {{ copy.hero.registerCta }}
         </a>
       </div>
     </div>
   </section>
 
-  <!-- SECTION: Focus Areas + Platform -->
   <section class="bg-gray-50 dark:bg-gray-900 py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid gap-8 lg:grid-cols-2">
         <div>
-          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">Focus Areas</h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-3">2026 Lab Main Focus Areas include:</p>
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+            {{ copy.focus.title }}
+          </h2>
+          <p class="text-gray-700 dark:text-gray-300 mb-3">{{ copy.focus.lead }}</p>
           <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-4">
-            <li>Climate Resilience: for your community or globally</li>
-            <li>Clean Energy and Electrification</li>
-            <li>Sustainable Cities</li>
-            <li>Strengthening Democracy and civic engagement</li>
-            <li>Food Systems</li>
-            <li>Your Own Challenge: A problem you care about in your own community, organization, or business startup</li>
+            <li *ngFor="let area of copy.focus.areas">{{ area }}</li>
           </ul>
 
-          <p class="text-gray-700 dark:text-gray-300 mb-3">Other options include:</p>
-          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
-            <li>Working with teams in Democratic Republic of Congo on solutions to their challenges</li>
-            <li>Meeting the food needs of your community/world through regenerative local food systems</li>
-            <li>Meeting energy needs from clean renewable sources</li>
-            <li>Developing a start-up business to meet any of the above needs</li>
-            <li>Working with your community or organization's members on your critical problem</li>
-          </ul>
-
-          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">AI For Good . . . For Real</h2>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            The 2026 Global Solutions Lab will use the latest version of the extraordinary AI-empowered research,
-            problem-solving/solution development and implementation platform- the NewWorld Game. This platform
-            combines the Lab's problem-solving methodology with our set of unique custom-trained AIs. There's also
-            over 100 global statistical databases, 600+ state-of-the-world reports from every UN agency and many
-            international research organizations, as well as a dozen+ libraries of global solutions that add additional
-            real-world depth to any problem solving.
+          <p class="text-gray-700 dark:text-gray-300 mb-3">
+            {{ copy.focus.otherOptionsLead }}
           </p>
-          <p class="text-gray-700 dark:text-gray-300 mb-4">
-            With your perspective, knowledge, values, and experience, the process of researching and developing new,
-            innovative, affordable, regenerative, and immediately implementable strategies for achieving one or more
-            of the UN SDGs will be faster, more thorough, and more creative. Plus, there's the NewWorld Tournament
-            where the Lab's best strategies compete for prizes adds yet another level to the Lab's work.*
+          <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300 mb-6">
+            <li *ngFor="let option of copy.focus.otherOptions">{{ option }}</li>
+          </ul>
+
+          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-900 dark:text-white">
+            {{ copy.focus.aiTitle }}
+          </h2>
+          <p
+            *ngFor="let paragraph of copy.focus.aiParagraphs"
+            class="text-gray-700 dark:text-gray-300 mb-4"
+          >
+            {{ paragraph }}
           </p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg flex flex-col">
-          <!-- Responsive 16:9 click-to-play embed -->
           <div class="relative w-full" style="padding-bottom: 56.25%;">
-            <!-- Poster / play button — shown until user clicks -->
             <div
               *ngIf="!videoPlaying"
               (click)="videoPlaying = true"
-              class="absolute inset-0 flex items-center justify-center cursor-pointer
-                     bg-gradient-to-br from-slate-800 to-slate-900"
+              class="absolute inset-0 flex items-center justify-center cursor-pointer bg-gradient-to-br from-slate-800 to-slate-900"
             >
-              <!-- thumbnail overlay text -->
               <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
-                <span class="text-white/70 text-xs uppercase tracking-widest font-semibold">Global Solutions Lab 2026</span>
-                <span class="text-white font-bold text-lg leading-snug">What Sets This Lab Apart</span>
+                <span class="text-white/70 text-xs uppercase tracking-widest font-semibold">
+                  {{ copy.hero.title }}
+                </span>
+                <span class="text-white font-bold text-lg leading-snug">
+                  {{ copy.videos.cards[0].heading }}
+                </span>
               </div>
-              <!-- play button circle -->
-              <div class="relative z-10 w-16 h-16 rounded-full bg-white/20 border-2 border-white/60
-                          flex items-center justify-center
-                          hover:bg-white/30 transition-all duration-200 shadow-xl mt-10">
+              <div
+                class="relative z-10 w-16 h-16 rounded-full bg-white/20 border-2 border-white/60 flex items-center justify-center hover:bg-white/30 transition-all duration-200 shadow-xl mt-10"
+              >
                 <svg class="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
+                  <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
             </div>
-            <!-- Iframe — only injected after click -->
             <iframe
               *ngIf="videoPlaying"
               class="absolute inset-0 w-full h-full"
-              src="https://app.heygen.com/embeds/968bdd6e41df46d2b759fef5caabe0d3"
-              title="Global Solutions Lab - Differentiation"
+              [src]="trustedVideoUrl(copy.videos.cards[0].src)"
+              [title]="copy.videos.cards[0].title"
               frameborder="0"
               allow="encrypted-media; fullscreen;"
               allowfullscreen
@@ -117,17 +100,16 @@
           </div>
 
           <div class="flex flex-col justify-center p-8">
-            <h3 class="text-xl md:text-2xl font-bold mb-4 text-gray-900 dark:text-white">Everyone in the World</h3>
+            <h3 class="text-xl md:text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+              {{ copy.focus.featureTitle }}
+            </h3>
             <p class="text-gray-700 dark:text-gray-300 mb-4 italic">
-              "Make the world work for 100% of humanity in the shortest possible time through spontaneous cooperation
-              without ecological offense or disadvantage of anyone."
+              {{ copy.focus.quote }}
               <br />
-              - Buckminster Fuller
+              - {{ copy.focus.quoteAuthor }}
             </p>
             <p class="text-gray-700 dark:text-gray-300">
-              The Global Solutions Lab is for researching and developing the means to achieve this vision. Join us and
-              harness AI-driven research, design and planning to develop solutions for solving the world's problems and
-              achieving the UN SDGs.
+              {{ copy.focus.featureDescription }}
             </p>
           </div>
         </div>
@@ -138,30 +120,23 @@
   <section class="py-20 bg-gray-50 dark:bg-gray-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-14">
-        <span class="inline-flex items-center rounded-full
-                     bg-emerald-50 dark:bg-emerald-500/10
-                     border border-emerald-200 dark:border-emerald-500/20
-                     px-3 py-1 text-[11px] font-semibold uppercase tracking-widest
-                     text-emerald-700 dark:text-emerald-400 mb-5">
-          Video Series
+        <span
+          class="inline-flex items-center rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-5"
+        >
+          {{ copy.videos.badge }}
         </span>
         <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
-          Global Solutions Lab in Action
+          {{ copy.videos.title }}
         </h2>
         <p class="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-base leading-relaxed">
-          Explore our video series and discover how you can make an impact at the 2026 Global Solutions Lab.
+          {{ copy.videos.subtitle }}
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
         <div
           *ngFor="let video of videoCards; let index = index"
-          class="group flex flex-col rounded-2xl overflow-hidden
-                    bg-white dark:bg-gray-900
-                    ring-1 ring-gray-200 dark:ring-white/8
-                    hover:ring-teal-400 dark:hover:ring-teal-500/40
-                    hover:-translate-y-1 transition-all duration-300
-                    shadow-md hover:shadow-xl dark:hover:shadow-teal-900/40"
+          class="group flex flex-col rounded-2xl overflow-hidden bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/8 hover:ring-teal-400 dark:hover:ring-teal-500/40 hover:-translate-y-1 transition-all duration-300 shadow-md hover:shadow-xl dark:hover:shadow-teal-900/40"
         >
           <div class="relative w-full" style="padding-bottom: 56.25%;">
             <button
@@ -169,16 +144,22 @@
               type="button"
               (click)="playGalleryVideo(video.id)"
               class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-800 via-slate-900 to-black px-6 text-center"
-              [attr.aria-label]="'Play ' + video.title"
+              [attr.aria-label]="copy.videos.playLabelPrefix + ' ' + video.title"
             >
-              <span class="text-white/70 text-xs uppercase tracking-[0.28em] font-semibold">{{ video.label }}</span>
-              <span class="text-white text-xl font-bold leading-snug max-w-xs">{{ video.heading }}</span>
-              <span class="text-white/75 text-sm leading-relaxed max-w-sm">{{ video.description }}</span>
+              <span class="text-white/70 text-xs uppercase tracking-[0.28em] font-semibold">
+                {{ video.label }}
+              </span>
+              <span class="text-white text-xl font-bold leading-snug max-w-xs">
+                {{ video.heading }}
+              </span>
+              <span class="text-white/75 text-sm leading-relaxed max-w-sm">
+                {{ video.description }}
+              </span>
               <span
                 class="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-white/60 bg-white/15 text-white shadow-xl transition-all duration-200 group-hover:bg-white/25"
               >
                 <svg class="w-7 h-7 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
+                  <path d="M8 5v14l11-7z" />
                 </svg>
               </span>
             </button>
@@ -195,140 +176,46 @@
           </div>
           <div class="p-6 flex flex-col flex-1">
             <div class="flex items-center gap-2 mb-3">
-              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full
-                           bg-teal-100 dark:bg-teal-500/15
-                           border border-teal-300 dark:border-teal-500/25
-                           text-teal-700 dark:text-teal-400
-                           text-[10px] font-bold">{{ index + 1 }}</span>
-              <span class="text-[10px] font-semibold uppercase tracking-widest text-teal-700 dark:text-teal-400">{{ video.label }}</span>
+              <span
+                class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-100 dark:bg-teal-500/15 border border-teal-300 dark:border-teal-500/25 text-teal-700 dark:text-teal-400 text-[10px] font-bold"
+              >
+                {{ index + 1 }}
+              </span>
+              <span
+                class="text-[10px] font-semibold uppercase tracking-widest text-teal-700 dark:text-teal-400"
+              >
+                {{ video.label }}
+              </span>
             </div>
-            <h3 class="text-gray-900 dark:text-white font-bold text-lg leading-snug mb-2">{{ video.heading }}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-1">{{ video.description }}</p>
+            <h3 class="text-gray-900 dark:text-white font-bold text-lg leading-snug mb-2">
+              {{ video.heading }}
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-1">
+              {{ video.description }}
+            </p>
           </div>
         </div>
       </div>
-
     </div>
   </section>
 
-  <!-- SECTION: Why Participate -->
   <section class="bg-gray-50 dark:bg-gray-900 py-16">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-3xl md:text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">
-        Why Participate
+        {{ copy.whyParticipate.title }}
       </h2>
       <p class="text-center text-gray-700 dark:text-gray-300 mb-12 max-w-3xl mx-auto">
-        This isn't a lecture series. It's not a simulation. And it's not just talk. It's a working design lab.
+        {{ copy.whyParticipate.subtitle }}
       </p>
       <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-2">
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🤖</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Hands-On AI Experience</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              AI for Good for Real: Learn to harness advanced AIs and customize prompts to develop real strategies for
-              solving your global or community's problems while achieving the Sustainable Development Goals. Learn to
-              work with AI Colleagues on developing solutions that are sustainable, resilient, equitable and affordable.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🕹️</div>
+        <div *ngFor="let item of copy.whyParticipate.items" class="flex items-start">
+          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">{{ item.icon }}</div>
           <div>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Free Access to the NewWorld Game Platform, for Life
+              {{ item.title }}
             </h3>
             <p class="text-gray-700 dark:text-gray-300">
-              Join an interactive platform where you'll take on global and local challenges, get access to the latest AI
-              tools for problem solving, collaborate with change-makers from around the world, unlock new levels of
-              innovation, strategy, and social impact. And, after the Global Solutions Lab, continue to have access to
-              all its current and new features, for free.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🔎</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Have Your Own AI Agent Researcher Working for You
-            </h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              What you work on at the Lab is of great importance. During and after the Lab, you will have the benefit
-              of an AI Agent - a super-researcher working full time for you and your work focus in the Lab. This Agent
-              will tirelessly search for useful-to your-work technology, resources, partners, and funding.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📖</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Your Work Published</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Your work will be featured in a published book shared with UN agencies, NGOs, universities, and global
-              networks-putting your solution in front of global decision-makers. Additionally, the NewWorld Game
-              platform can customize your work so it is suitable for publication as an article, Op-Ed, research report,
-              social media post(s), funding proposal, etc.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🌍</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Global Network</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Connect with participants from Africa, Asia, Europe, around the world-be part of an international
-              cross-cultural, community of collaboration, diversity, and purpose.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">💡</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Mentorship &amp; Expert Feedback</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Work alongside professionals, researchers, and global experts who will provide valuable guidance and
-              review to shape your ideas.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">🚀</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">A Transformative Experience</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Engage in an immersive, high-impact program that will challenge your thinking, expand your skills, and
-              connect your passion to purpose.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📬</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">After the Lab.</h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              You leave with ongoing support. After the Lab, your team's private AI assistant continues sending you
-              weekly updates on new research, funding opportunities, and potential partners related to your project.
-            </p>
-          </div>
-        </div>
-
-        <div class="flex items-start">
-          <div class="text-3xl text-teal-600 dark:text-teal-400 mr-4">📘</div>
-          <div>
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-              Free Copy of new edition of Tools for Changing the World -A Design Science Primer
-            </h3>
-            <p class="text-gray-700 dark:text-gray-300">
-              Receive a digital copy of our exclusive handbook filled with insights to drive impactful solutions locally
-              and globally. Plus, get the new addendum to book- <em>Community and Vision: Designing for Solutions-Not
-              Problems.</em>
+              {{ item.description }}
             </p>
           </div>
         </div>
@@ -336,33 +223,32 @@
     </div>
   </section>
 
-  <!-- SECTION: More Details / Format / Tuition -->
   <section class="py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="mb-10">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">More Details</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+          {{ copy.details.title }}
+        </h2>
         <div class="mx-auto max-w-xl mb-4 text-left">
           <blockquote class="italic text-gray-700 dark:text-gray-300 pl-4 border-l-4 border-teal-500">
-            "We are called to be architects of the future, not its victims."
+            {{ copy.details.quote }}
           </blockquote>
-          <p class="mt-2 pl-4 text-gray-600 dark:text-gray-400">— Buckminster Fuller</p>
+          <p class="mt-2 pl-4 text-gray-600 dark:text-gray-400">
+            — {{ copy.details.quoteAuthor }}
+          </p>
         </div>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          The Global Solutions Lab is generally focused on making real the above quote by Buckminster Fuller and
-          specifically on solving local and global basic human need and environmental challenges- and achieving the UN's
-          Sustainable Development Goals. It is an intense experience- participants are expected to make a substantial
-          time contribution every day throughout the Lab.
+          {{ copy.details.intro }}
         </p>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          <strong>Format:</strong> The Lab will be in-person and online. It will use the NewWorld Game global research
-          and problem-solving platform for creative work. Participants can participate in a variety of formats- from as
-          an individual to being a part of an international, cross-cultural, multi-disciplinary, intergenerational,
-          collaborative Design Team. Participant time commitment is 4 to 6 hours per day. The Lab culminates with presentations of the work to a group of corporate,
-          philanthropic, academic, and NGO leaders.
+          <strong>{{ copy.details.formatLabel }}</strong>
+          {{ copy.details.formatText }}
         </p>
 
         <div class="text-gray-700 dark:text-gray-300 mb-4">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">In-person Lab Participation</h2>
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+            {{ copy.details.inPersonTitle }}
+          </h2>
 
           <div class="flex flex-col md:items-start md:gap-10 mb-6">
             <div class="flex-shrink-0 md:w-1/2 mb-4 md:mb-0">
@@ -377,191 +263,197 @@
 
             <div class="md:w-1/2">
               <p class="mb-4">
-                <strong>Host &amp; Location:</strong> Charles D. Close School of Entrepreneurship, Drexel University,
-                Philadelphia, PA, USA.
+                <strong>{{ copy.details.hostLocationLabel }}</strong>
+                {{ copy.details.hostLocation }}
               </p>
               <p class="mb-4">
-                <strong>Age Range:</strong> 17 and above. There is no upper age limit. We have found that
-                inter-generational, international, cross-cultural, and multi-disciplinary teams work exceptionally well.
+                <strong>{{ copy.details.ageRangeLabel }}</strong>
+                {{ copy.details.ageRange }}
               </p>
             </div>
           </div>
         </div>
 
         <div class="text-gray-700 dark:text-gray-300 mb-4">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">Tuition Costs for the Lab</h2>
+          <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
+            {{ copy.details.tuitionTitle }}
+          </h2>
 
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">In-person:</h3>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {{ copy.details.inPersonLabel }}
+          </h3>
           <ul class="list-disc pl-5 mb-4">
-            <li>$800 for professionals</li>
-            <li>$400 for students</li>
-            <li>$0 for UN, Community Organizations and Drexel University students</li>
+            <li *ngFor="let item of copy.details.inPersonCosts">{{ item }}</li>
           </ul>
 
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Online:</h3>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {{ copy.details.onlineLabel }}
+          </h3>
           <ul class="list-disc pl-5 mb-4">
-            <li>$250 for professionals</li>
-            <li>$200 for students and seniors</li>
-            <li>$0 for Drexel University students</li>
-            <li>Tuition scholarships are available for a limited number of students, including international students.</li>
+            <li *ngFor="let item of copy.details.onlineCosts">{{ item }}</li>
           </ul>
 
           <small class="italic">
-            *It is our conviction that no one should be denied access to the Lab for financial reasons. Scholarship funds
-            are limited and variable according to expenses and donations. You can contribute to the Global Solutions Lab
-            Scholarship Fund by becoming a NewWorld Game Sponsor. See Sponsorship Opportunities for details on how you
-            or your organization can participate.
+            {{ copy.details.scholarshipNote }}
           </small>
         </div>
-
       </div>
 
       <div class="mb-10">
-        <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">On-line Lab Participation</h2>
+        <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          {{ copy.details.onlineParticipationTitle }}
+        </h2>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          The Lab has participants from all over the world. Different parts of the world don't all have the same level
-          of telecommunications infrastructure, so here is what you will need to participate:
+          {{ copy.details.onlineParticipationIntro }}
         </p>
         <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4">
-          <li>Reliable internet connection (as high speed as possible)</li>
-          <li>A computer or tablet (with video &amp; audio) and a relatively quiet space</li>
-          <li>A time commitment of at least 4 to 6 hours per day, starting around 10:00 am Eastern U.S. time</li>
+          <li *ngFor="let need of copy.details.onlineParticipationNeeds">{{ need }}</li>
         </ul>
       </div>
 
       <div>
-        <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">Application</h2>
+        <h2 class="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+          {{ copy.details.applicationTitle }}
+        </h2>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          The number of participants in the Lab will be limited. The sooner we hear from you, the better.
+          {{ copy.details.applicationText }}
         </p>
         <a
           id="register"
           routerLink="/global-register"
           class="inline-block px-5 py-3 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md shadow"
         >
-          Apply Here
+          {{ copy.details.applicationCta }}
         </a>
       </div>
     </div>
   </section>
 
-  <!-- SECTION: Previous Tournament Winner -->
   <section class="py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Previous NewWorld Tournament Winner</h3>
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+        {{ copy.winner.title }}
+      </h3>
       <p class="text-gray-700 dark:text-gray-200 mb-4">
-        <strong>Electrifying Health Clinics in Democratic Republic of Congo</strong><br />
-        The first NewWorld Tournament award went to a team in the D.R. Congo who used the award to electrify a village
-        health clinic (where 60% of the health clinics don't have electricity). It is serving as a proof-of-concept for
-        their solution. Next steps include scaling their solution to meet health clinic electricity needs for the rest
-        of the country.
+        <strong>{{ copy.winner.projectTitle }}</strong><br />
+        {{ copy.winner.description }}
         <a
           target="_blank"
           href="https://new-worldgame.web.app/solution-view-external/o0eqjssL6yn1qZVqAY60"
           class="text-blue-600 hover:text-blue-500"
-          >Learn more here</a
-        >.
+        >
+          {{ copy.winner.linkText }}
+        </a>
+        .
       </p>
     </div>
   </section>
 
-  <!-- SECTION: Summary -->
   <section class="py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="mb-8">
-        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">SUMMARY</h2>
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          {{ copy.summary.title }}
+        </h2>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          Students and young professionals from around the world will be coming to the 2026 Lab. You are invited.
+          {{ copy.summary.intro }}
         </p>
         <p class="text-gray-700 dark:text-gray-300 mb-4">
-          <strong>When &amp; Where:</strong> June 15-24, 2026, in-person and online.
+          <strong>{{ copy.summary.whenWhereLabel }}</strong>
+          {{ copy.summary.whenWhere }}
         </p>
       </div>
       <div class="mb-8">
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Past Participants</h3>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          {{ copy.summary.pastParticipantsTitle }}
+        </h3>
         <p class="text-gray-700 dark:text-gray-300 mb-2">
-          Previous Lab participants have come from Spain, France, Germany, England, Ireland, Poland, Georgia,
-          Lithuania, Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Ivory Coast, Kenya, Uganda,
-          Zimbabwe, DR Congo, Haiti, Canada, Mexico, Honduras, Venezuela, China, Hong Kong, Vietnam, Singapore,
-          Thailand, Japan, New Zealand, Australia, India, Pakistan, Bangladesh, Palestine, Saudi Arabia, Nepal,
-          Turkey, and all over the U.S.
+          {{ copy.summary.pastParticipants }}
         </p>
         <p class="text-gray-700 dark:text-gray-300">
-          UN presenters have included representatives from WHO, UNDP, UNEP, UNESCO, UNICEF, UNFAO, WFP, UN Energy-
-          Sustainable Energy for All, UNSDSN, UN Office of Secretary General, UN Department of Economic and Social
-          Affairs, UN Population Fund, UN-Habitat, UN Academic Impact, UN OHCHR, UN SDG Action Campaign, UN
-          Children's Fund, and others.
+          {{ copy.summary.presenters }}
         </p>
       </div>
     </div>
   </section>
 
-  <!-- SECTION: AI Team -->
   <section id="ai-team" class="py-10 mt-20">
     <div class="max-w-sm md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center">
-        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Recent Additions</h2>
-        <p class="mt-4 text-lg leading-6 text-gray-500 dark:text-gray-300">Part of the AI Team from NewWorld Game</p>
+        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">
+          {{ copy.aiTeam.title }}
+        </h2>
+        <p class="mt-4 text-lg leading-6 text-gray-500 dark:text-gray-300">
+          {{ copy.aiTeam.subtitle }}
+        </p>
       </div>
 
-      <div class="mt-10 mx-auto justify-center grid grid-cols-1 sm:grid-cols-1 2xl:grid-cols-4 2xl:gap-2 md:grid-cols-3 lg:grid-cols-3 gap-10">
-        <div *ngFor="let t of aiOptions" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-sm">
-          <img class="w-full h-1/2 px-4 py-8 mx-auto object-cover" src="{{t.profilePicPath}}" alt="Person Image" />
+      <div
+        class="mt-10 mx-auto justify-center grid grid-cols-1 sm:grid-cols-1 2xl:grid-cols-4 2xl:gap-2 md:grid-cols-3 lg:grid-cols-3 gap-10"
+      >
+        <div
+          *ngFor="let member of aiOptions"
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden max-w-sm"
+        >
+          <img
+            class="w-full h-1/2 px-4 py-8 mx-auto object-cover"
+            [src]="member.profilePicPath"
+            [alt]="member.name"
+          />
           <div class="p-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">{{t.name}}</h3>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-300 font-semibold">{{t.title}}</p>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-300">{{t.description}}</p>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+              {{ member.name }}
+            </h3>
+            <p *ngIf="member.title" class="mt-2 text-sm text-gray-500 dark:text-gray-300 font-semibold">
+              {{ member.title }}
+            </p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-300">
+              {{ member.description }}
+            </p>
           </div>
         </div>
       </div>
       <div class="mt-12 flex justify-center">
-        <a routerLink="/other-ais" class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300">
-          Chat with the AIs
+        <a
+          routerLink="/other-ais"
+          class="inline-block bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-9 rounded-full shadow-md transition duration-300"
+        >
+          {{ copy.aiTeam.cta }}
         </a>
       </div>
     </div>
   </section>
 
-  <!-- SECTION: Sponsorship Opportunities -->
   <section id="sponsorship-opportunities" class="py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">Sponsorship Opportunities*</h2>
-      <p class="text-sm italic text-gray-600 dark:text-gray-400 mb-4">* NewWorld Tournament and prizes as described in the AI For Good section above.</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        {{ copy.sponsorship.title }}
+      </h2>
+      <p class="text-sm italic text-gray-600 dark:text-gray-400 mb-4">
+        {{ copy.sponsorship.note }}
+      </p>
       <p class="text-gray-700 dark:text-gray-300 mb-6">
-        The below opportunities are available for joining the NewWorld Game development team. We are a non-profit,
-        tax-exempt organization. Any contribution helps us continue to grow and improve NewWorld Game. Thank you for
-        your consideration.
+        {{ copy.sponsorship.intro }}
       </p>
       <div class="flex flex-col sm:flex-row sm:items-center gap-3">
         <a
           routerLink="/gsl-sponsorship"
-          class="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold
-                 text-white
-                 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900
-                 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800
-                 hover:from-slate-600 hover:via-slate-700 hover:to-slate-800
-                 dark:hover:from-slate-700 dark:hover:to-slate-600
-                 shadow-lg shadow-slate-900/30 dark:shadow-black/40
-                 ring-1 ring-slate-600/50 dark:ring-white/10
-                 transition-all duration-200"
+          class="inline-flex items-center justify-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 hover:from-slate-600 hover:via-slate-700 hover:to-slate-800 dark:hover:from-slate-700 dark:hover:to-slate-600 shadow-lg shadow-slate-900/30 dark:shadow-black/40 ring-1 ring-slate-600/50 dark:ring-white/10 transition-all duration-200"
         >
           <svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
           </svg>
-          View Sponsorship Opportunities
+          {{ copy.sponsorship.opportunitiesCta }}
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
           </svg>
         </a>
         <a
           target="_blank"
           href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
-          class="inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold
-                 text-teal-900 bg-teal-200 hover:bg-teal-300
-                 dark:text-teal-100 dark:bg-teal-700 dark:hover:bg-teal-600
-                 shadow-md ring-1 ring-teal-300/70 dark:ring-teal-500/60 transition-all duration-200"
+          class="inline-flex items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-teal-900 bg-teal-200 hover:bg-teal-300 dark:text-teal-100 dark:bg-teal-700 dark:hover:bg-teal-600 shadow-md ring-1 ring-teal-300/70 dark:ring-teal-500/60 transition-all duration-200"
         >
-          Donate to EarthGame
+          {{ copy.sponsorship.donateCta }}
         </a>
       </div>
     </div>
@@ -570,8 +462,7 @@
   <section class="pb-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <p class="text-sm md:text-base text-gray-700 dark:text-gray-300">
-        The Global Solutions Lab was developed by and is conducted by <em>EarthGame</em>, a non-profit research and
-        education NGO officially associated with the United Nations Department of Global Communications.
+        {{ copy.footerNote }}
       </p>
     </div>
   </section>
@@ -580,15 +471,11 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <a
         routerLink="/global-register"
-        class="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold
-               text-white bg-teal-600 hover:bg-teal-700
-               dark:text-slate-900 dark:bg-gradient-to-r dark:from-emerald-400 dark:to-teal-400
-               dark:hover:from-emerald-300 dark:hover:to-teal-300
-               shadow-md transition-all duration-200"
+        class="inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 dark:text-slate-900 dark:bg-gradient-to-r dark:from-emerald-400 dark:to-teal-400 dark:hover:from-emerald-300 dark:hover:to-teal-300 shadow-md transition-all duration-200"
       >
-        Register for the Lab
+        {{ copy.finalCta }}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
         </svg>
       </a>
     </div>
