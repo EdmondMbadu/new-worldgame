@@ -1693,6 +1693,18 @@ type ReachLookupPerson = {
   location?: string;
 };
 
+type ReachLookupCacheDocument = {
+  solutionId: string;
+  cacheKey: string;
+  city?: string;
+  country?: string;
+  summary?: string;
+  people?: ReachLookupPerson[];
+  createdAtIso?: string;
+  lastSearchedAtIso?: string;
+  expiresAfterMonths?: number;
+};
+
 const REACH_GENERIC_EMAIL_LOCALS = new Set([
   'admin',
   'admissions',
@@ -1860,6 +1872,56 @@ const dedupeReachPeople = (people: ReachLookupPerson[]): ReachLookupPerson[] => 
   }
 
   return deduped;
+};
+
+const buildReachCacheKey = (city: string, country: string): string => {
+  const raw = [city, country]
+    .map((value) =>
+      normalizeReachText(value, 80)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+    )
+    .filter(Boolean)
+    .join('__');
+
+  return raw || 'global';
+};
+
+const getReachFreshnessCutoffMs = (nowMs = Date.now()): number => {
+  const cutoff = new Date(nowMs);
+  cutoff.setMonth(cutoff.getMonth() - 3);
+  return cutoff.getTime();
+};
+
+const parseReachIsoToMs = (value: unknown): number => {
+  const text = normalizeReachText(value, 80);
+  if (!text) return 0;
+  const parsed = Date.parse(text);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const isReachCacheExpired = (
+  cache: ReachLookupCacheDocument | undefined,
+  nowMs = Date.now()
+): boolean => {
+  if (!cache) return false;
+  const lastSearchedAtMs =
+    parseReachIsoToMs(cache.lastSearchedAtIso) ||
+    parseReachIsoToMs(cache.createdAtIso);
+  if (!lastSearchedAtMs) {
+    return true;
+  }
+  return lastSearchedAtMs < getReachFreshnessCutoffMs(nowMs);
+};
+
+const normalizeCachedReachPeople = (input: unknown): ReachLookupPerson[] => {
+  if (!Array.isArray(input)) return [];
+  return dedupeReachPeople(
+    input
+      .map((person) => normalizeReachPersonCandidate(person))
+      .filter((person): person is ReachLookupPerson => !!person)
+  );
 };
 
 const buildReachLookupPrompt = (params: {
@@ -5056,19 +5118,22 @@ export const findSolutionReachPeople = functions
           .map((value: unknown) => normalizeReachText(value, 80))
           .filter(Boolean)
       : [];
+    const cacheKey = buildReachCacheKey(city, country);
+    const cacheRef = admin
+      .firestore()
+      .doc(`solutions/${solutionId}/solution_launch_reach/${cacheKey}`);
+    const nowIso = new Date().toISOString();
+    const nowMs = Date.now();
 
-    const prompt = buildReachLookupPrompt({
-      solutionTitle,
-      solutionSummary,
-      focusArea,
-      sdgs,
-      category,
-      city,
-      country,
-      page,
-      pageSize,
-      excludedIds,
-    });
+    const cacheSnap = await cacheRef.get();
+    let cache = cacheSnap.exists
+      ? (cacheSnap.data() as ReachLookupCacheDocument)
+      : undefined;
+
+    if (isReachCacheExpired(cache, nowMs)) {
+      await cacheRef.delete().catch(() => null);
+      cache = undefined;
+    }
 
     try {
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
@@ -5081,43 +5146,126 @@ export const findSolutionReachPeople = functions
         tools: [{ google_search: {} }],
       } as any);
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text() || '';
-      const parsed = parseReachLookupPayload(text);
-
-      const normalized = parsed.people
-        .map((person) => normalizeReachPersonCandidate(person))
-        .filter((person): person is ReachLookupPerson => !!person)
-        .filter((person) => !excludedIds.includes(person.id))
-        .slice(0, pageSize * 2);
-
-      const validated = await Promise.all(
-        normalized.map(async (person) => ({
-          person,
-          valid: await isUrlUsableForReport(person.url, 4000),
-        }))
+      let cachedPeople = normalizeCachedReachPeople(cache?.people);
+      let summary = normalizeReachText(cache?.summary, 280);
+      let lastSearchedAtIso = normalizeReachText(cache?.lastSearchedAtIso, 80);
+      let availablePeople = cachedPeople.filter(
+        (person) => !excludedIds.includes(person.id)
       );
 
-      const people = dedupeReachPeople(
-        validated.filter((entry) => entry.valid).map((entry) => entry.person)
-      ).slice(0, pageSize);
+      const maxCachePeople = 120;
+      const fetchAttemptsLimit = 3;
+      let attempts = 0;
 
-      const locationLabel =
-        city && country ? `${city}, ${country}` : '';
-      const summary =
-        parsed.summary ||
-        (locationLabel
-          ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${locationLabel}.`
-          : `This batch favors people closely aligned to ${solutionTitle}.`);
+      while (
+        availablePeople.length < pageSize &&
+        cachedPeople.length < maxCachePeople &&
+        attempts < fetchAttemptsLimit
+      ) {
+        attempts += 1;
+
+        const searchExcludedIds = Array.from(
+          new Set([
+            ...excludedIds,
+            ...cachedPeople.map((person) => person.id),
+          ])
+        );
+
+        const prompt = buildReachLookupPrompt({
+          solutionTitle,
+          solutionSummary,
+          focusArea,
+          sdgs,
+          category,
+          city,
+          country,
+          page: page + attempts - 1,
+          pageSize,
+          excludedIds: searchExcludedIds,
+        });
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text() || '';
+        const parsed = parseReachLookupPayload(text);
+
+        const normalized = parsed.people
+          .map((person) => normalizeReachPersonCandidate(person))
+          .filter((person): person is ReachLookupPerson => !!person)
+          .filter((person) => !searchExcludedIds.includes(person.id))
+          .slice(0, pageSize * 2);
+
+        const validated = await Promise.all(
+          normalized.map(async (person) => ({
+            person,
+            valid: await isUrlUsableForReport(person.url, 4000),
+          }))
+        );
+
+        const freshPeople = dedupeReachPeople(
+          validated.filter((entry) => entry.valid).map((entry) => entry.person)
+        ).slice(0, pageSize);
+
+        if (!freshPeople.length) {
+          break;
+        }
+
+        cachedPeople = dedupeReachPeople([...cachedPeople, ...freshPeople]).slice(
+          0,
+          maxCachePeople
+        );
+        availablePeople = cachedPeople.filter(
+          (person) => !excludedIds.includes(person.id)
+        );
+        summary =
+          normalizeReachText(parsed.summary, 280) ||
+          summary ||
+          (city && country
+            ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${city}, ${country}.`
+            : `This batch favors people closely aligned to ${solutionTitle}.`);
+        lastSearchedAtIso = new Date().toISOString();
+      }
+
+      if (!cache || attempts > 0) {
+        const nextCache: ReachLookupCacheDocument = {
+          solutionId,
+          cacheKey,
+          city: city || undefined,
+          country: country || undefined,
+          summary:
+            summary ||
+            (city && country
+              ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${city}, ${country}.`
+              : `This batch favors people closely aligned to ${solutionTitle}.`),
+          people: cachedPeople,
+          createdAtIso:
+            normalizeReachText(cache?.createdAtIso, 80) || nowIso,
+          lastSearchedAtIso: lastSearchedAtIso || nowIso,
+          expiresAfterMonths: 3,
+        };
+
+        await cacheRef.set(nextCache, { merge: false });
+        cache = nextCache;
+      }
+
+      availablePeople = cachedPeople.filter(
+        (person) => !excludedIds.includes(person.id)
+      );
+      const people = availablePeople.slice(0, pageSize);
+      const hasMore = availablePeople.length > pageSize;
 
       return {
         people,
         page,
         nextPage: page + 1,
-        hasMore: people.length === pageSize,
-        summary,
-        generatedAt: new Date().toISOString(),
+        hasMore,
+        summary:
+          summary ||
+          (city && country
+            ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${city}, ${country}.`
+            : `This batch favors people closely aligned to ${solutionTitle}.`),
+        generatedAt:
+          normalizeReachText(cache?.lastSearchedAtIso, 80) || nowIso,
       };
     } catch (error: any) {
       console.error('findSolutionReachPeople failed', error);
