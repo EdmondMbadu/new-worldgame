@@ -240,7 +240,8 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   private async fetchPage(
     page: number,
     reset: boolean,
-    forceRefresh = false
+    forceRefresh = false,
+    attemptedRecovery = false
   ): Promise<void> {
     if (!this.solutionId) {
       return;
@@ -255,10 +256,13 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     this.loadError = '';
 
     try {
+      const dismissedIds = this.slpReach.readDismissedIds(this.solutionId);
       const excludedIds = Array.from(
         new Set([
-          ...this.people.map((person) => person.id),
-          ...this.slpReach.readDismissedIds(this.solutionId),
+          ...(forceRefresh && reset
+            ? []
+            : this.people.map((person) => person.id)),
+          ...dismissedIds,
         ])
       );
       const response = await this.slpReach.findPeople({
@@ -273,6 +277,24 @@ export class SlpReachComponent implements OnInit, OnDestroy {
       const incoming = response.people.filter(
         (person) => !excludedIds.includes(person.id)
       );
+
+      if (
+        reset &&
+        page === 1 &&
+        incoming.length === 0 &&
+        !forceRefresh &&
+        !attemptedRecovery
+      ) {
+        this.slpReach.clearCachedSearch({
+          solutionId: this.solutionId,
+          city: this.city.trim(),
+          country: this.country.trim(),
+        });
+        this.hasStoredResults = false;
+        this.usingStoredResults = false;
+        await this.fetchPage(1, true, true, true);
+        return;
+      }
 
       this.people = reset
         ? incoming

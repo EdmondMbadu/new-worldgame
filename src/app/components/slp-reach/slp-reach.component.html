@@ -425,7 +425,18 @@
           *ngIf="!loading && !people.length && vm.shell.hasSolution && !loadError"
           class="slp-card overflow-hidden p-6 text-sm leading-7 text-[color:var(--slp-muted)]"
         >
-          No contacts are loaded yet. Start with the current solution and location, then wait for the first search pass to finish.
+          <p>
+            No contacts are loaded yet. Start with the current solution and location, then wait for the first search pass to finish.
+          </p>
+          <button
+            type="button"
+            (click)="refreshResults()"
+            class="slp-button mt-4 px-5 py-3 text-sm font-semibold uppercase tracking-[0.16em]"
+            [disabled]="loading"
+          >
+            <span class="material-symbols-outlined text-base">refresh</span>
+            Build fresh results
+          </button>
         </div>
 
         <div class="slp-card-muted p-6">
