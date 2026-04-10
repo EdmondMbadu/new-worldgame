@@ -2,6 +2,24 @@
   display: block;
 }
 
+.slp-reach-disclosure {
+  transition: background-color 180ms ease;
+}
+
+.slp-reach-disclosure:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+.slp-reach-disclosure-icon {
+  color: var(--slp-muted);
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.slp-reach-disclosure-icon-open {
+  transform: rotate(180deg);
+  color: var(--slp-primary);
+}
+
 .slp-reach-loading-shell {
   background: var(--slp-panel-muted);
 }

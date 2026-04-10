@@ -1,136 +1,196 @@
 <ng-container *ngIf="vm$ | async as vm">
   <app-slp-shell [activeLane]="'reach'" [shell]="vm.shell">
-    <section class="mb-6 grid gap-4 xl:grid-cols-[1.7fr_0.78fr]">
-      <div class="slp-card overflow-hidden p-5 sm:p-6">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div class="max-w-3xl">
-            <div class="slp-chip slp-mono inline-flex text-[0.72rem] uppercase tracking-[0.2em]">
+    <section class="mb-4">
+      <div class="slp-card overflow-hidden">
+        <button
+          type="button"
+          (click)="toggleSetupSection()"
+          class="slp-reach-disclosure w-full px-5 py-4 text-left sm:px-6"
+          [attr.aria-expanded]="setupSectionOpen"
+        >
+          <div class="flex min-w-0 items-center gap-4">
+            <div class="slp-chip slp-mono inline-flex text-[0.7rem] uppercase tracking-[0.2em]">
               <span class="material-symbols-outlined text-base">pin_drop</span>
-              Location precision
+              Search setup
             </div>
-            <div class="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 class="text-xl font-semibold sm:text-2xl">
-                  Localize the contact search with city and country.
-                </h2>
-                <p class="mt-2 text-sm leading-6 text-[color:var(--slp-muted)]">
-                  We use your profile location when it exists. If it does not, enter it here to push the search toward nearby experts, operators, funders, researchers, and public-interest leaders.
-                </p>
-              </div>
-              <div class="self-start rounded-full bg-[color:var(--slp-highlight)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--slp-primary)]">
-                {{ locationSourceLabel }}
-              </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-[color:var(--slp-ink)]">
+                Location precision and current targeting
+              </p>
+              <p class="mt-1 text-xs uppercase tracking-[0.18em] text-[color:var(--slp-muted)]">
+                {{ setupSectionOpen ? 'Open' : 'Closed' }}
+              </p>
             </div>
-          </div>
-        </div>
-
-        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-          <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3">
-            <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              Current location
-            </p>
-            <p class="mt-1 text-sm font-semibold text-[color:var(--slp-ink)]">
-              {{ currentLocationLabel }}
-            </p>
-          </div>
-          <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3">
-            <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              Status
-            </p>
-            <p class="mt-1 text-sm text-[color:var(--slp-muted)]">
-              {{ locationStatusMessage }}
-            </p>
-          </div>
-        </div>
-
-        <div class="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
-          <label class="block">
-            <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              City
+            <span class="material-symbols-outlined slp-reach-disclosure-icon" [class.slp-reach-disclosure-icon-open]="setupSectionOpen">
+              expand_more
             </span>
-            <input
-              [(ngModel)]="city"
-              type="text"
-              class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
-              placeholder="Enter city"
-            />
-          </label>
-          <label class="block">
-            <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              Country
-            </span>
-            <input
-              [(ngModel)]="country"
-              type="text"
-              class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
-              placeholder="Enter country"
-            />
-          </label>
-          <button
-            type="button"
-            (click)="applyLocation()"
-            class="slp-button h-[3rem] px-5 text-sm font-semibold"
-            [disabled]="savingLocation"
-          >
-            <span class="material-symbols-outlined text-base">travel_explore</span>
-            {{ savingLocation ? 'Saving...' : 'Apply location' }}
-          </button>
-        </div>
+          </div>
+        </button>
 
-        <p *ngIf="locationError" class="mt-3 text-sm text-rose-600">
-          {{ locationError }}
-        </p>
+        <div *ngIf="setupSectionOpen" class="border-t border-[color:var(--slp-border)] p-5 sm:p-6">
+          <div class="grid gap-4 xl:grid-cols-[1.7fr_0.78fr]">
+            <div>
+              <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="max-w-3xl">
+                  <div class="slp-chip slp-mono inline-flex text-[0.72rem] uppercase tracking-[0.2em]">
+                    <span class="material-symbols-outlined text-base">pin_drop</span>
+                    Location precision
+                  </div>
+                  <div class="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <h2 class="text-xl font-semibold sm:text-2xl">
+                        Localize the contact search with city and country.
+                      </h2>
+                      <p class="mt-2 text-sm leading-6 text-[color:var(--slp-muted)]">
+                        We use your profile location when it exists. If it does not, enter it here to push the search toward nearby experts, operators, funders, researchers, and public-interest leaders.
+                      </p>
+                    </div>
+                    <div class="self-start rounded-full bg-[color:var(--slp-highlight)] px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--slp-primary)]">
+                      {{ locationSourceLabel }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+                <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3">
+                  <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Current location
+                  </p>
+                  <p class="mt-1 text-sm font-semibold text-[color:var(--slp-ink)]">
+                    {{ currentLocationLabel }}
+                  </p>
+                </div>
+                <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3">
+                  <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Status
+                  </p>
+                  <p class="mt-1 text-sm text-[color:var(--slp-muted)]">
+                    {{ locationStatusMessage }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
+                <label class="block">
+                  <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    City
+                  </span>
+                  <input
+                    [(ngModel)]="city"
+                    type="text"
+                    class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
+                    placeholder="Enter city"
+                  />
+                </label>
+                <label class="block">
+                  <span class="slp-mono mb-2 block text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Country
+                  </span>
+                  <input
+                    [(ngModel)]="country"
+                    type="text"
+                    class="slp-input w-full px-4 py-3 text-sm text-[color:var(--slp-ink)]"
+                    placeholder="Enter country"
+                  />
+                </label>
+                <button
+                  type="button"
+                  (click)="applyLocation()"
+                  class="slp-button h-[3rem] px-5 text-sm font-semibold"
+                  [disabled]="savingLocation"
+                >
+                  <span class="material-symbols-outlined text-base">travel_explore</span>
+                  {{ savingLocation ? 'Saving...' : 'Apply location' }}
+                </button>
+              </div>
+
+              <p *ngIf="locationError" class="mt-3 text-sm text-rose-600">
+                {{ locationError }}
+              </p>
+            </div>
+
+            <aside class="slp-card-muted p-5 sm:p-6">
+              <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+                Current targeting
+              </p>
+              <div class="mt-4 space-y-3">
+                <div class="rounded-2xl bg-white/70 p-4">
+                  <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Location
+                  </p>
+                  <p class="mt-2 text-base font-semibold">{{ currentLocationLabel }}</p>
+                </div>
+                <div class="rounded-2xl bg-white/70 p-4">
+                  <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Loaded contacts
+                  </p>
+                  <p class="mt-2 text-base font-semibold">{{ people.length }}</p>
+                </div>
+                <div class="rounded-2xl bg-white/70 p-4">
+                  <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Removed
+                  </p>
+                  <p class="mt-2 text-base font-semibold">{{ removedCount }}</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
-
-      <aside class="slp-card-muted p-5 sm:p-6">
-        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
-          Current targeting
-        </p>
-        <div class="mt-4 space-y-3">
-          <div class="rounded-2xl bg-white/70 p-4">
-            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              Location
-            </p>
-            <p class="mt-2 text-base font-semibold">{{ currentLocationLabel }}</p>
-          </div>
-          <div class="rounded-2xl bg-white/70 p-4">
-            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              Loaded contacts
-            </p>
-            <p class="mt-2 text-base font-semibold">{{ people.length }}</p>
-          </div>
-          <div class="rounded-2xl bg-white/70 p-4">
-            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
-              Removed
-            </p>
-            <p class="mt-2 text-base font-semibold">{{ removedCount }}</p>
-          </div>
-        </div>
-      </aside>
     </section>
 
-    <section class="slp-card overflow-hidden p-8 sm:p-10">
-      <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-        <div class="max-w-3xl">
-          <div class="slp-chip slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
-            <span class="material-symbols-outlined text-base">person_search</span>
-            Launch lane: reach
+    <section class="mb-4">
+      <div class="slp-card overflow-hidden">
+        <button
+          type="button"
+          (click)="toggleBriefSection()"
+          class="slp-reach-disclosure w-full px-5 py-4 text-left sm:px-6"
+          [attr.aria-expanded]="briefSectionOpen"
+        >
+          <div class="flex min-w-0 items-center gap-4">
+            <div class="slp-chip slp-mono text-[0.7rem] uppercase tracking-[0.2em]">
+              <span class="material-symbols-outlined text-base">person_search</span>
+              Reach brief
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-[color:var(--slp-ink)]">
+                {{ vm.heroTitle }}
+              </p>
+              <p class="mt-1 text-xs uppercase tracking-[0.18em] text-[color:var(--slp-muted)]">
+                {{ briefSectionOpen ? 'Open' : 'Closed' }}
+              </p>
+            </div>
+            <span class="material-symbols-outlined slp-reach-disclosure-icon" [class.slp-reach-disclosure-icon-open]="briefSectionOpen">
+              expand_more
+            </span>
           </div>
-          <h1 class="slp-display mt-7 text-5xl leading-none sm:text-6xl">
-            {{ vm.heroTitle }}
-          </h1>
-          <p class="mt-6 max-w-3xl text-lg leading-8 text-[color:var(--slp-muted)]">
-            {{ vm.heroDescription }}
-          </p>
-        </div>
+        </button>
 
-        <div class="grid gap-4 sm:grid-cols-3 xl:w-[34rem]">
-          <div *ngFor="let stat of vm.stats" class="slp-card-muted p-4">
-            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
-              {{ stat.label }}
-            </p>
-            <p class="mt-3 text-3xl font-semibold">{{ stat.value }}</p>
-            <p class="mt-2 text-sm text-[color:var(--slp-muted)]">{{ stat.detail }}</p>
+        <div *ngIf="briefSectionOpen" class="border-t border-[color:var(--slp-border)] p-8 sm:p-10">
+          <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div class="max-w-3xl">
+              <div class="slp-chip slp-mono text-[0.72rem] uppercase tracking-[0.2em]">
+                <span class="material-symbols-outlined text-base">person_search</span>
+                Launch lane: reach
+              </div>
+              <h1 class="slp-display mt-7 text-5xl leading-none sm:text-6xl">
+                {{ vm.heroTitle }}
+              </h1>
+              <p class="mt-6 max-w-3xl text-lg leading-8 text-[color:var(--slp-muted)]">
+                {{ vm.heroDescription }}
+              </p>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-3 xl:w-[34rem]">
+              <div *ngFor="let stat of vm.stats" class="slp-card-muted p-4">
+                <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+                  {{ stat.label }}
+                </p>
+                <p class="mt-3 text-3xl font-semibold">{{ stat.value }}</p>
+                <p class="mt-2 text-sm text-[color:var(--slp-muted)]">{{ stat.detail }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

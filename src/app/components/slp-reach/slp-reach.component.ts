@@ -37,6 +37,8 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   ];
   readonly loadingSkeletonCards = [0, 1, 2];
   vm$!: Observable<SlpReachViewModel>;
+  setupSectionOpen = false;
+  briefSectionOpen = false;
   city = '';
   country = '';
   locationError = '';
@@ -197,6 +199,14 @@ export class SlpReachComponent implements OnInit, OnDestroy {
 
   trackByPerson(_index: number, person: SlpReachPerson): string {
     return person.id;
+  }
+
+  toggleSetupSection(): void {
+    this.setupSectionOpen = !this.setupSectionOpen;
+  }
+
+  toggleBriefSection(): void {
+    this.briefSectionOpen = !this.briefSectionOpen;
   }
 
   get currentLoadingStep(): string {
