@@ -698,7 +698,7 @@ export class SlpContextService {
       { label: 'Publish', icon: 'publish', lane: 'publish', route: routes.publish, state: 'active' },
       { label: 'Fund', icon: 'payments', lane: 'fund', route: routes.fund },
       { label: 'Partner', icon: 'handshake', lane: 'partner', route: routes.partner },
-      { label: 'Archive', icon: 'inventory_2', route: routes.publicView },
+      { label: 'Reach', icon: 'inventory_2', route: routes.publicView },
     ];
   }
 
