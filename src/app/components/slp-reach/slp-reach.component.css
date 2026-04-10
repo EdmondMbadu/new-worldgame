@@ -1,3 +1,121 @@
 :host {
   display: block;
 }
+
+.slp-reach-loading-shell {
+  background: var(--slp-panel-muted);
+}
+
+.slp-reach-spinner {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 9999px;
+  border: 2px solid rgba(110, 98, 88, 0.18);
+  border-top-color: var(--slp-primary);
+  animation: slp-reach-spin 0.9s linear infinite;
+}
+
+.slp-reach-progress-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: rgba(110, 98, 88, 0.16);
+  transform: scale(0.92);
+  transition: transform 180ms ease, background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.slp-reach-progress-dot-active {
+  background: var(--slp-accent);
+  box-shadow: 0 0 0 6px rgba(198, 159, 76, 0.12);
+  transform: scale(1.08);
+}
+
+.slp-reach-skeleton-card {
+  border: 1px solid var(--slp-border);
+  border-radius: 1.85rem;
+  background: rgba(255, 255, 255, 0.78);
+  padding: 1.5rem;
+  box-shadow: 0 14px 32px rgba(71, 57, 34, 0.06);
+  animation: slp-reach-float 2.8s ease-in-out infinite;
+}
+
+.slp-reach-skeleton-avatar,
+.slp-reach-skeleton-line,
+.slp-reach-skeleton-pill {
+  position: relative;
+  overflow: hidden;
+  background: rgba(110, 98, 88, 0.1);
+}
+
+.slp-reach-skeleton-avatar::after,
+.slp-reach-skeleton-line::after,
+.slp-reach-skeleton-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.75),
+    transparent
+  );
+  animation: slp-reach-shimmer 1.45s ease-in-out infinite;
+}
+
+.slp-reach-skeleton-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+}
+
+.slp-reach-skeleton-line {
+  height: 0.8rem;
+  border-radius: 9999px;
+  width: 100%;
+}
+
+.slp-reach-skeleton-line-lg {
+  width: min(22rem, 88%);
+  height: 1.1rem;
+}
+
+.slp-reach-skeleton-line-md {
+  width: min(16rem, 65%);
+}
+
+.slp-reach-skeleton-line-sm {
+  width: min(10rem, 45%);
+}
+
+.slp-reach-skeleton-pill {
+  width: 6.5rem;
+  height: 2.4rem;
+  border-radius: 9999px;
+  flex: 0 0 auto;
+}
+
+@keyframes slp-reach-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slp-reach-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slp-reach-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}

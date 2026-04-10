@@ -181,18 +181,92 @@
 
         <div
           *ngIf="loading && !people.length"
-          class="slp-card overflow-hidden p-7"
+          class="slp-card overflow-hidden p-0"
         >
-          <div class="animate-pulse">
-            <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
-              Searching
-            </p>
-            <p class="mt-4 text-lg font-semibold">
-              Looking for ten strong public contacts tied to this solution.
-            </p>
-            <p class="mt-3 text-sm leading-7 text-[color:var(--slp-muted)]">
-              This can take a little while because the search is filtered for current role fit, public email, and a page worth opening.
-            </p>
+          <div class="slp-reach-loading-shell p-7 sm:p-8">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div class="max-w-2xl">
+                <div class="inline-flex items-center gap-3 rounded-full bg-white/85 px-4 py-2 shadow-sm">
+                  <span class="slp-reach-spinner"></span>
+                  <span class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+                    Live search in progress
+                  </span>
+                </div>
+                <h3 class="mt-5 text-2xl font-semibold sm:text-3xl">
+                  Building your first outreach batch
+                </h3>
+                <p class="mt-3 text-sm leading-7 text-[color:var(--slp-muted)]">
+                  The system is checking real organizations and public profile pages, then filtering for current role match, public email, and useful detail links.
+                </p>
+                <div class="mt-5 rounded-[1.4rem] border border-white/70 bg-white/75 px-5 py-4 shadow-sm">
+                  <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-accent)]">
+                    Current step
+                  </p>
+                  <p class="mt-2 text-base font-semibold text-[color:var(--slp-ink)]">
+                    {{ currentLoadingStep }}
+                  </p>
+                  <div class="mt-4 flex gap-2">
+                    <span
+                      *ngFor="let step of loadingSteps; let i = index"
+                      class="slp-reach-progress-dot"
+                      [class.slp-reach-progress-dot-active]="i === currentLoadingStepIndex"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid min-w-[15rem] gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                <div class="rounded-2xl bg-white/80 px-4 py-4 shadow-sm">
+                  <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Target batch
+                  </p>
+                  <p class="mt-2 text-3xl font-semibold text-[color:var(--slp-primary)]">
+                    10
+                  </p>
+                </div>
+                <div class="rounded-2xl bg-white/80 px-4 py-4 shadow-sm">
+                  <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Contact filter
+                  </p>
+                  <p class="mt-2 text-sm font-semibold text-[color:var(--slp-ink)]">
+                    Public email only
+                  </p>
+                </div>
+                <div class="rounded-2xl bg-white/80 px-4 py-4 shadow-sm">
+                  <p class="slp-mono text-[0.66rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">
+                    Match bar
+                  </p>
+                  <p class="mt-2 text-sm font-semibold text-[color:var(--slp-ink)]">
+                    Topic-specific fit
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 grid gap-4">
+              <div
+                *ngFor="let card of loadingSkeletonCards; let i = index"
+                class="slp-reach-skeleton-card"
+                [style.animationDelay.ms]="i * 180"
+              >
+                <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                  <div class="flex gap-4">
+                    <div class="slp-reach-skeleton-avatar"></div>
+                    <div class="min-w-0 flex-1">
+                      <div class="slp-reach-skeleton-line slp-reach-skeleton-line-lg"></div>
+                      <div class="mt-3 slp-reach-skeleton-line slp-reach-skeleton-line-md"></div>
+                      <div class="mt-2 slp-reach-skeleton-line slp-reach-skeleton-line-sm"></div>
+                    </div>
+                  </div>
+                  <div class="slp-reach-skeleton-pill"></div>
+                </div>
+                <div class="mt-6 rounded-[1.4rem] bg-white/70 p-5">
+                  <div class="slp-reach-skeleton-line slp-reach-skeleton-line-sm"></div>
+                  <div class="mt-3 slp-reach-skeleton-line"></div>
+                  <div class="mt-2 slp-reach-skeleton-line"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

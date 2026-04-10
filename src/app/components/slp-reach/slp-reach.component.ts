@@ -29,6 +29,13 @@ import { SeoService } from 'src/app/services/seo.service';
   styleUrls: ['./slp-reach.component.css'],
 })
 export class SlpReachComponent implements OnInit, OnDestroy {
+  readonly loadingSteps = [
+    'Scanning solution topic and key terms',
+    'Checking public profiles and staff pages',
+    'Filtering for person-specific public emails',
+    'Removing weak fits and duplicate organizations',
+  ];
+  readonly loadingSkeletonCards = [0, 1, 2];
   vm$!: Observable<SlpReachViewModel>;
   city = '';
   country = '';
@@ -45,6 +52,8 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   generatedAtLabel = '';
   private solutionId?: string;
   private contextSub?: Subscription;
+  private loadingStepIndex = 0;
+  private loadingStepTimer?: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly seoService: SeoService,
@@ -122,6 +131,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.contextSub?.unsubscribe();
+    this.stopLoadingMotion();
   }
 
   get locationSourceLabel(): string {
@@ -189,6 +199,14 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     return person.id;
   }
 
+  get currentLoadingStep(): string {
+    return this.loadingSteps[this.loadingStepIndex] || this.loadingSteps[0];
+  }
+
+  get currentLoadingStepIndex(): number {
+    return this.loadingStepIndex;
+  }
+
   private async fetchPage(page: number, reset: boolean): Promise<void> {
     if (!this.solutionId) {
       return;
@@ -196,6 +214,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
 
     if (reset) {
       this.loading = true;
+      this.startLoadingMotion();
     } else {
       this.loadingMore = true;
     }
@@ -236,6 +255,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     } finally {
       this.loading = false;
       this.loadingMore = false;
+      this.stopLoadingMotion();
     }
   }
 
@@ -269,5 +289,22 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     const { city, country } = this.slpLocation.snapshot as SlpLocationContext;
     this.city = city?.trim() || '';
     this.country = country?.trim() || '';
+  }
+
+  private startLoadingMotion(): void {
+    this.stopLoadingMotion();
+    this.loadingStepIndex = 0;
+    this.loadingStepTimer = setInterval(() => {
+      this.loadingStepIndex =
+        (this.loadingStepIndex + 1) % this.loadingSteps.length;
+    }, 1500);
+  }
+
+  private stopLoadingMotion(): void {
+    if (this.loadingStepTimer) {
+      clearInterval(this.loadingStepTimer);
+      this.loadingStepTimer = undefined;
+    }
+    this.loadingStepIndex = 0;
   }
 }
