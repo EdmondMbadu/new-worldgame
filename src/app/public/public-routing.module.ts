@@ -56,6 +56,7 @@ import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorshi
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
+import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -134,14 +135,17 @@ const routes: Routes = [
   { path: 'gsl-sponsorship', component: GslSponsorshipComponent },
   { path: 'solution-launch/:solutionId/fund', component: SlpFundComponent },
   { path: 'solution-launch/:solutionId/partner', component: SlpPartnerComponent },
+  { path: 'solution-launch/:solutionId/reach', component: SlpReachComponent },
   { path: 'solution-launch/:solutionId', component: SlpPublishComponent },
   { path: 'solution-launch', component: SlpPublishComponent },
   { path: 'slp/:solutionId/fund', component: SlpFundComponent },
   { path: 'slp/:solutionId/partner', component: SlpPartnerComponent },
+  { path: 'slp/:solutionId/reach', component: SlpReachComponent },
   { path: 'slp/:solutionId', component: SlpPublishComponent },
   { path: 'slp', component: SlpPublishComponent },
   { path: 'fund', component: SlpFundComponent },
   { path: 'partner', component: SlpPartnerComponent },
+  { path: 'reach', component: SlpReachComponent },
 ];
 
 @NgModule({

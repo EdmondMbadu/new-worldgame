@@ -3,7 +3,7 @@ import { Solution } from '../models/solution';
 import { map, Observable, of } from 'rxjs';
 import { SolutionService } from './solution.service';
 
-export type SlpLane = 'publish' | 'fund' | 'partner';
+export type SlpLane = 'publish' | 'fund' | 'partner' | 'reach';
 
 export interface SlpLocationContext {
   city?: string;
@@ -139,6 +139,15 @@ export interface SlpPartnerViewModel {
   guidanceNote: string;
 }
 
+export interface SlpReachViewModel {
+  shell: SlpShellViewModel;
+  heroTitle: string;
+  heroDescription: string;
+  stats: SlpStat[];
+  principles: string[];
+  guidanceNote: string;
+}
+
 interface SlpBaseContext {
   solutionId?: string;
   hasSolution: boolean;
@@ -162,6 +171,7 @@ interface SlpBaseContext {
     publish: any[] | string;
     fund: any[] | string;
     partner: any[] | string;
+    reach: any[] | string;
     dashboard: any[] | string;
     details: any[] | string;
     documents: any[] | string;
@@ -472,6 +482,56 @@ export class SlpContextService {
     );
   }
 
+  getReachViewModel(
+    solutionId?: string,
+    location: SlpLocationContext = {}
+  ): Observable<SlpReachViewModel> {
+    return this.getBaseContext(solutionId).pipe(
+      map((context) => {
+        const hasLocation = this.hasLocation(location);
+        const locationLabel = this.formatLocation(location);
+
+        return {
+          shell: context.shell,
+          heroTitle: context.hasSolution
+            ? `Find real people to reach for ${context.solutionTitle}.`
+            : 'Find real people to reach for this solution.',
+          heroDescription: context.hasSolution
+            ? hasLocation
+              ? `Each batch looks for public, source-backed people tied to ${context.solutionTitle} and weighted for ${locationLabel}. Results only keep people with a visible professional role, a public email, and a credible page to learn more.`
+              : `Each batch looks for public, source-backed people tied to ${context.solutionTitle}. Add city and country to strengthen local and regional relevance before widening outward.`
+            : 'Use the reach lane to identify real people with public contact details who align with a specific solution.',
+          stats: [
+            {
+              label: 'Batch size',
+              value: '10',
+              detail: 'Load another ten when you want the next research pass.',
+            },
+            {
+              label: 'Match method',
+              value: hasLocation ? 'Topic + place' : 'Topic first',
+              detail: hasLocation
+                ? `Searches are tuned for ${locationLabel} plus the solution itself.`
+                : 'Add location to improve local and regional targeting.',
+            },
+            {
+              label: 'Quality bar',
+              value: 'Public only',
+              detail: 'We aim for people with a current role, public email, and a detail page worth opening.',
+            },
+          ],
+          principles: [
+            'Only keep people whose current work clearly fits the exact solution topic.',
+            'Only keep people with a public email and a usable page for more detail.',
+            'Remove weak fits and load another ten to keep refining the list.',
+          ],
+          guidanceNote:
+            'Good outreach lists are narrow on fit and high on evidence. A shorter precise list is better than a longer generic one.',
+        };
+      })
+    );
+  }
+
   private getBaseContext(solutionId?: string): Observable<SlpBaseContext> {
     if (!solutionId) {
       return of(this.buildBaseContext(undefined, solutionId));
@@ -643,10 +703,11 @@ export class SlpContextService {
         route: context.routes.partner,
       },
       {
-        label: 'Public preview',
-        description: 'See how the solution reads when shared externally.',
-        icon: 'visibility',
-        route: context.routes.publicView,
+        label: 'Reach',
+        description: 'Find actual people with public contact paths related to the solution.',
+        icon: 'person_search',
+        lane: 'reach',
+        route: context.routes.reach,
       },
     ];
   }
@@ -698,7 +759,7 @@ export class SlpContextService {
       { label: 'Publish', icon: 'publish', lane: 'publish', route: routes.publish, state: 'active' },
       { label: 'Fund', icon: 'payments', lane: 'fund', route: routes.fund },
       { label: 'Partner', icon: 'handshake', lane: 'partner', route: routes.partner },
-      { label: 'Reach', icon: 'inventory_2', route: routes.publicView },
+      { label: 'Reach', icon: 'person_search', lane: 'reach', route: routes.reach },
     ];
   }
 
@@ -709,6 +770,7 @@ export class SlpContextService {
         publish: '/solution-launch',
         fund: '/fund',
         partner: '/partner',
+        reach: '/reach',
         dashboard: '/get-started',
         details: '/get-started',
         documents: '/blogs/solution-libraries',
@@ -728,6 +790,7 @@ export class SlpContextService {
       publish: ['/solution-launch', solutionId],
       fund: ['/solution-launch', solutionId, 'fund'],
       partner: ['/solution-launch', solutionId, 'partner'],
+      reach: ['/solution-launch', solutionId, 'reach'],
       dashboard: ['/dashboard', solutionId],
       details: ['/solution-details', solutionId],
       documents: ['/document-files', solutionId],

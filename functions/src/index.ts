@@ -1673,6 +1673,273 @@ const validateLinks = async <T extends { url: string }>(items: T[]) => {
   return results.filter((r) => r.valid).map((r) => r.item);
 };
 
+type ReachLookupRequest = {
+  solutionId?: string;
+  page?: number;
+  pageSize?: number;
+  city?: string;
+  country?: string;
+  excludedIds?: string[];
+};
+
+type ReachLookupPerson = {
+  id: string;
+  name: string;
+  title: string;
+  organization: string;
+  email: string;
+  url: string;
+  whyRelevant: string;
+  location?: string;
+};
+
+const REACH_GENERIC_EMAIL_LOCALS = new Set([
+  'admin',
+  'admissions',
+  'career',
+  'careers',
+  'communications',
+  'contact',
+  'hello',
+  'help',
+  'info',
+  'inquiries',
+  'jobs',
+  'mail',
+  'media',
+  'office',
+  'partnerships',
+  'press',
+  'recruiting',
+  'recruitment',
+  'support',
+  'team',
+]);
+
+const normalizeReachText = (value: unknown, maxLength = 400): string =>
+  String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+
+const normalizeReachExcludedIds = (input: unknown): string[] => {
+  if (!Array.isArray(input)) return [];
+  return Array.from(
+    new Set(
+      input
+        .map((value) => normalizeReachText(value, 240).toLowerCase())
+        .filter(Boolean)
+    )
+  ).slice(0, 80);
+};
+
+const sanitizeReachUrl = (value: unknown): string => {
+  const raw = normalizeReachText(value, 500);
+  if (!raw) return '';
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return '';
+    }
+    return parsed.toString();
+  } catch {
+    return '';
+  }
+};
+
+const sanitizeReachEmail = (value: unknown): string => {
+  const email = normalizeReachText(value, 200).toLowerCase();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return '';
+  }
+
+  const [localPart] = email.split('@');
+  if (!localPart || REACH_GENERIC_EMAIL_LOCALS.has(localPart)) {
+    return '';
+  }
+
+  return email;
+};
+
+const buildReachPersonId = (email: string, url: string, name: string): string => {
+  const base = email || url || name;
+  return base.trim().toLowerCase();
+};
+
+const parseReachLookupPayload = (
+  raw: string
+): { summary: string; people: any[] } => {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) {
+    return { summary: '', people: [] };
+  }
+
+  const candidates: string[] = [trimmed];
+  const fencedJson = trimmed.match(/```json\s*([\s\S]*?)```/i)?.[1];
+  const fencedAny = trimmed.match(/```\s*([\s\S]*?)```/i)?.[1];
+  if (fencedJson) candidates.push(fencedJson.trim());
+  if (fencedAny) candidates.push(fencedAny.trim());
+
+  const objectStart = trimmed.indexOf('{');
+  const objectEnd = trimmed.lastIndexOf('}');
+  if (objectStart >= 0 && objectEnd > objectStart) {
+    candidates.push(trimmed.slice(objectStart, objectEnd + 1));
+  }
+
+  const arrayStart = trimmed.indexOf('[');
+  const arrayEnd = trimmed.lastIndexOf(']');
+  if (arrayStart >= 0 && arrayEnd > arrayStart) {
+    candidates.push(trimmed.slice(arrayStart, arrayEnd + 1));
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (Array.isArray(parsed)) {
+        return { summary: '', people: parsed };
+      }
+      if (Array.isArray(parsed?.people)) {
+        return {
+          summary: normalizeReachText(parsed.summary, 280),
+          people: parsed.people,
+        };
+      }
+    } catch {
+      // Try the next candidate.
+    }
+  }
+
+  return { summary: '', people: [] };
+};
+
+const normalizeReachPersonCandidate = (candidate: any): ReachLookupPerson | null => {
+  const name = normalizeReachText(candidate?.name, 120);
+  const title = normalizeReachText(candidate?.title, 160);
+  const organization = normalizeReachText(candidate?.organization, 160);
+  const email = sanitizeReachEmail(candidate?.email);
+  const url = sanitizeReachUrl(candidate?.url);
+  const whyRelevant = normalizeReachText(
+    candidate?.whyRelevant || candidate?.reason || candidate?.fit,
+    500
+  );
+  const location = normalizeReachText(candidate?.location, 120);
+
+  if (!name || !title || !organization || !email || !url || !whyRelevant) {
+    return null;
+  }
+
+  const id = buildReachPersonId(email, url, name);
+  if (!id) {
+    return null;
+  }
+
+  return {
+    id,
+    name,
+    title,
+    organization,
+    email,
+    url,
+    whyRelevant,
+    location: location || undefined,
+  };
+};
+
+const dedupeReachPeople = (people: ReachLookupPerson[]): ReachLookupPerson[] => {
+  const seen = new Set<string>();
+  const deduped: ReachLookupPerson[] = [];
+
+  for (const person of people) {
+    const orgKey = normalizeReachText(person.organization, 160).toLowerCase();
+    const dedupeKey = `${person.id}::${orgKey}`;
+    if (seen.has(dedupeKey)) {
+      continue;
+    }
+    seen.add(dedupeKey);
+    deduped.push(person);
+  }
+
+  return deduped;
+};
+
+const buildReachLookupPrompt = (params: {
+  solutionTitle: string;
+  solutionSummary: string;
+  focusArea: string;
+  sdgs: string[];
+  category: string;
+  city: string;
+  country: string;
+  page: number;
+  pageSize: number;
+  excludedIds: string[];
+}) => {
+  const locationLabel =
+    params.city && params.country
+      ? `${params.city}, ${params.country}`
+      : '';
+
+  const contextLines = [
+    `Solution title: ${params.solutionTitle}`,
+    `Solution summary: ${params.solutionSummary}`,
+    `Focus area: ${params.focusArea || 'Not specified'}`,
+    `Category: ${params.category || 'Not specified'}`,
+    params.sdgs.length ? `SDGs: ${params.sdgs.join(', ')}` : '',
+    locationLabel ? `Location preference: ${locationLabel}` : '',
+    params.excludedIds.length
+      ? `Already shown or rejected contacts. Do not repeat them: ${params.excludedIds.join(', ')}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return `You are a meticulous outreach researcher for a solution team.
+
+Your task is to find ${params.pageSize} REAL, CURRENT people who are specifically relevant to this solution.
+
+Solution context:
+${contextLines}
+
+This is batch ${params.page}. If this is not the first batch, deliberately find different people and different organizations than earlier batches.
+
+People can include:
+- subject-matter experts
+- nonprofit or NGO leaders
+- program officers and foundation staff
+- university center directors or researchers
+- ecosystem builders
+- government or policy leaders
+- startup or implementation leaders
+
+Strict rules:
+- Relevance must be specific to the solution topic, not just broad innovation or sustainability.
+- Every person must have a current title.
+- Every person must have a PUBLICLY LISTED, person-specific email address.
+- Do not use generic emails like info@, contact@, office@, support@, press@, or hello@.
+- Use the best page for learning more about the person, preferably an official staff, faculty, lab, leadership, or organization page.
+- Do not use social media or organization homepages unless they are clearly the best authoritative source about that person.
+- Avoid duplicate organizations unless the people are materially different and both are strong fits.
+- Only include people you can stand behind as solid matches for this exact solution.
+
+Return JSON only in this exact shape:
+{
+  "summary": "one short sentence on how the batch was targeted",
+  "people": [
+    {
+      "name": "Full name",
+      "title": "Current title",
+      "organization": "Organization name",
+      "email": "public person-specific email",
+      "url": "https://...",
+      "whyRelevant": "One concise sentence on why this exact person fits this exact solution.",
+      "location": "City, Country or Region if clearly available"
+    }
+  ]
+}
+
+Do not include markdown. Do not include commentary outside JSON.`;
+};
+
 const formatFundersForEmail = (
   items: Array<{ name: string; desc: string; url: string }>
 ): string => {
@@ -4737,6 +5004,127 @@ export const onReportRequest = functions
         response: userFriendlyError,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
+    }
+  });
+
+export const findSolutionReachPeople = functions
+  .region('us-central1')
+  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .https.onCall(async (data: ReachLookupRequest) => {
+    const solutionId = normalizeReachText(data?.solutionId, 120);
+    const page = Math.max(Number(data?.page) || 1, 1);
+    const pageSize = Math.min(Math.max(Number(data?.pageSize) || 10, 1), 10);
+    const city = normalizeReachText(data?.city, 120);
+    const country = normalizeReachText(data?.country, 120);
+    const excludedIds = normalizeReachExcludedIds(data?.excludedIds);
+
+    if (!solutionId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A solutionId is required.'
+      );
+    }
+
+    const solutionSnap = await admin.firestore().doc(`solutions/${solutionId}`).get();
+    if (!solutionSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'The requested solution could not be found.'
+      );
+    }
+
+    const solution = solutionSnap.data() || {};
+    const solutionTitle =
+      normalizeReachText(solution?.title, 180) || 'Untitled solution';
+    const solutionSummary =
+      normalizeReachText(
+        solution?.description ||
+          solution?.preview ||
+          solution?.content ||
+          solution?.recruitmentProfile?.challengeDescription,
+        1800
+      ) || `A developing solution called ${solutionTitle}.`;
+    const focusArea = normalizeReachText(
+      solution?.solutionArea ||
+        solution?.recruitmentProfile?.focusArea ||
+        (Array.isArray(solution?.sdgs) ? solution.sdgs.join(', ') : solution?.sdg),
+      220
+    );
+    const category = normalizeReachText(solution?.category, 120);
+    const sdgs = Array.isArray(solution?.sdgs)
+      ? solution.sdgs
+          .map((value: unknown) => normalizeReachText(value, 80))
+          .filter(Boolean)
+      : [];
+
+    const prompt = buildReachLookupPrompt({
+      solutionTitle,
+      solutionSummary,
+      focusArea,
+      sdgs,
+      category,
+      city,
+      country,
+      page,
+      pageSize,
+      excludedIds,
+    });
+
+    try {
+      const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        generationConfig: {
+          temperature: 0.15,
+          maxOutputTokens: 5000,
+        },
+        tools: [{ google_search: {} }],
+      } as any);
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text() || '';
+      const parsed = parseReachLookupPayload(text);
+
+      const normalized = parsed.people
+        .map((person) => normalizeReachPersonCandidate(person))
+        .filter((person): person is ReachLookupPerson => !!person)
+        .filter((person) => !excludedIds.includes(person.id))
+        .slice(0, pageSize * 2);
+
+      const validated = await Promise.all(
+        normalized.map(async (person) => ({
+          person,
+          valid: await isUrlUsableForReport(person.url, 4000),
+        }))
+      );
+
+      const people = dedupeReachPeople(
+        validated.filter((entry) => entry.valid).map((entry) => entry.person)
+      ).slice(0, pageSize);
+
+      const locationLabel =
+        city && country ? `${city}, ${country}` : '';
+      const summary =
+        parsed.summary ||
+        (locationLabel
+          ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${locationLabel}.`
+          : `This batch favors people closely aligned to ${solutionTitle}.`);
+
+      return {
+        people,
+        page,
+        nextPage: page + 1,
+        hasMore: people.length === pageSize,
+        summary,
+        generatedAt: new Date().toISOString(),
+      };
+    } catch (error: any) {
+      console.error('findSolutionReachPeople failed', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        error?.message || 'Reach lookup failed.'
+      );
     }
   });
 

@@ -61,6 +61,7 @@ import { SlpShellComponent } from '../components/slp-shell/slp-shell.component';
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
+import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
 
 @NgModule({
   declarations: [
@@ -120,6 +121,7 @@ import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.compo
     SlpPublishComponent,
     SlpFundComponent,
     SlpPartnerComponent,
+    SlpReachComponent,
   ],
   imports: [
     CommonModule,
