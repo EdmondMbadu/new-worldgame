@@ -1680,6 +1680,7 @@ type ReachLookupRequest = {
   city?: string;
   country?: string;
   excludedIds?: string[];
+  forceRefresh?: boolean;
 };
 
 type ReachLookupPerson = {
@@ -5079,6 +5080,7 @@ export const findSolutionReachPeople = functions
     const city = normalizeReachText(data?.city, 120);
     const country = normalizeReachText(data?.country, 120);
     const excludedIds = normalizeReachExcludedIds(data?.excludedIds);
+    const forceRefresh = data?.forceRefresh === true;
 
     if (!solutionId) {
       throw new functions.https.HttpsError(
@@ -5130,7 +5132,10 @@ export const findSolutionReachPeople = functions
       ? (cacheSnap.data() as ReachLookupCacheDocument)
       : undefined;
 
-    if (isReachCacheExpired(cache, nowMs)) {
+    if (forceRefresh && cacheSnap.exists) {
+      await cacheRef.delete().catch(() => null);
+      cache = undefined;
+    } else if (isReachCacheExpired(cache, nowMs)) {
       await cacheRef.delete().catch(() => null);
       cache = undefined;
     }

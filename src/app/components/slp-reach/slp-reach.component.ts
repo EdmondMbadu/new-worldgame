@@ -17,6 +17,7 @@ import {
   SlpReachViewModel,
 } from 'src/app/services/slp-context.service';
 import {
+  SlpReachCachedSearch,
   SlpReachPerson,
   SlpReachService,
 } from 'src/app/services/slp-reach.service';
@@ -52,6 +53,8 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   hasMore = true;
   searchSummary = '';
   generatedAtLabel = '';
+  hasStoredResults = false;
+  usingStoredResults = false;
   private solutionId?: string;
   private contextSub?: Subscription;
   private loadingStepIndex = 0;
@@ -124,7 +127,10 @@ export class SlpReachComponent implements OnInit, OnDestroy {
         this.country = context.country;
         this.resetSearchState();
         if (this.solutionId) {
-          void this.fetchPage(1, true);
+          const usedCached = this.loadCachedSearch();
+          if (!usedCached) {
+            void this.fetchPage(1, true);
+          }
         }
       });
 
@@ -191,6 +197,20 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     await this.fetchPage(this.currentPage + 1, false);
   }
 
+  async refreshResults(): Promise<void> {
+    if (!this.solutionId || this.loading || this.loadingMore) {
+      return;
+    }
+
+    this.slpReach.clearCachedSearch({
+      solutionId: this.solutionId,
+      city: this.city.trim(),
+      country: this.country.trim(),
+    });
+    this.usingStoredResults = false;
+    await this.fetchPage(1, true, true);
+  }
+
   removePerson(person: SlpReachPerson): void {
     this.people = this.people.filter((entry) => entry.id !== person.id);
     this.removedCount += 1;
@@ -217,7 +237,11 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     return this.loadingStepIndex;
   }
 
-  private async fetchPage(page: number, reset: boolean): Promise<void> {
+  private async fetchPage(
+    page: number,
+    reset: boolean,
+    forceRefresh = false
+  ): Promise<void> {
     if (!this.solutionId) {
       return;
     }
@@ -244,6 +268,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
         city: this.city.trim(),
         country: this.country.trim(),
         excludedIds,
+        forceRefresh,
       });
       const incoming = response.people.filter(
         (person) => !excludedIds.includes(person.id)
@@ -256,6 +281,22 @@ export class SlpReachComponent implements OnInit, OnDestroy {
       this.hasMore = response.hasMore && incoming.length > 0;
       this.searchSummary = response.summary;
       this.generatedAtLabel = this.formatGeneratedAt(response.generatedAt);
+      this.hasStoredResults = true;
+      this.usingStoredResults = false;
+      this.slpReach.writeCachedSearch(
+        {
+          solutionId: this.solutionId,
+          city: this.city.trim(),
+          country: this.country.trim(),
+        },
+        {
+          ...response,
+          people: this.people,
+          page: this.currentPage,
+          nextPage: response.nextPage,
+          hasMore: this.hasMore,
+        }
+      );
     } catch (error: any) {
       console.error('Reach people lookup failed', error);
       this.loadError =
@@ -276,6 +317,8 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     this.loadError = '';
     this.searchSummary = '';
     this.generatedAtLabel = '';
+    this.hasStoredResults = false;
+    this.usingStoredResults = false;
     this.removedCount = this.slpReach.readDismissedIds(this.solutionId).length;
   }
 
@@ -299,6 +342,41 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     const { city, country } = this.slpLocation.snapshot as SlpLocationContext;
     this.city = city?.trim() || '';
     this.country = country?.trim() || '';
+  }
+
+  private loadCachedSearch(): boolean {
+    const cached = this.slpReach.readCachedSearch({
+      solutionId: this.solutionId,
+      city: this.city.trim(),
+      country: this.country.trim(),
+    });
+    if (!cached) {
+      return false;
+    }
+
+    const dismissedIds = new Set(this.slpReach.readDismissedIds(this.solutionId));
+    const filteredPeople = cached.people.filter(
+      (person) => !dismissedIds.has(person.id)
+    );
+    if (!filteredPeople.length) {
+      return false;
+    }
+
+    this.applyCachedSearch({
+      ...cached,
+      people: filteredPeople,
+    });
+    return true;
+  }
+
+  private applyCachedSearch(cached: SlpReachCachedSearch): void {
+    this.people = cached.people;
+    this.currentPage = cached.page;
+    this.hasMore = cached.hasMore;
+    this.searchSummary = cached.summary;
+    this.generatedAtLabel = this.formatGeneratedAt(cached.generatedAt);
+    this.hasStoredResults = true;
+    this.usingStoredResults = true;
   }
 
   private startLoadingMotion(): void {
