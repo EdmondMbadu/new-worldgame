@@ -19,6 +19,11 @@ interface WorkflowStep {
   description: string;
 }
 
+interface FeatureItem {
+  title: string;
+  description: string;
+}
+
 interface FeatureCluster {
   title: string;
   description: string;
@@ -111,6 +116,79 @@ export class FeaturesComponent implements OnInit {
       title: 'Receive weekly intelligence',
       description:
         'Get a recurring intelligence brief with new funding, relevant headlines, collaboration opportunities, and prompts to keep moving.',
+    },
+  ];
+
+  readonly featureIndex: FeatureItem[] = [
+    {
+      title: 'Simple onboarding',
+      description:
+        'Quick account creation and sign-in so users can move directly into solution building.',
+    },
+    {
+      title: 'Personalized dashboard',
+      description:
+        'A home base for navigating challenges, active work, and progress across the platform.',
+    },
+    {
+      title: 'Launch your solution',
+      description:
+        'Create a custom or pre-built challenge with title, SDGs, image, team, and evaluators.',
+    },
+    {
+      title: '5-step solution builder',
+      description:
+        'Define the problem state, preferred future, strategy, resources, and final review in a structured workflow.',
+    },
+    {
+      title: 'Ask Bucky',
+      description:
+        'Get AI support for systems thinking, writing, framing, and solution development.',
+    },
+    {
+      title: 'Specialized AI colleagues',
+      description:
+        'Work with multiple AI perspectives for storytelling, planning, inclusion, energy, and ecosystem thinking.',
+    },
+    {
+      title: 'Auto-save progress',
+      description:
+        'Keep work safe as solutions evolve over time instead of losing momentum between sessions.',
+    },
+    {
+      title: 'Team collaboration',
+      description:
+        'Invite collaborators, work asynchronously, and build solutions as a real team.',
+    },
+    {
+      title: 'In-app video calling',
+      description:
+        'Meet directly inside the solution workspace for live reviews, planning, and coordination.',
+    },
+    {
+      title: 'Submit and manage solutions',
+      description:
+        'Move from working draft to submitted solution, then continue to edit and manage it.',
+    },
+    {
+      title: 'Peer evaluation',
+      description:
+        'Use structured evaluation to improve quality and support tournament readiness.',
+    },
+    {
+      title: 'Tournament pathways',
+      description:
+        'Strong solutions can move into competitive visibility, recognition, and prize opportunities.',
+    },
+    {
+      title: 'Rich content editor',
+      description:
+        'Add images and richer content so ideas are easier to communicate and present.',
+    },
+    {
+      title: 'Broadcast and visibility',
+      description:
+        'Position solutions for wider discovery, collaboration, and public-facing storytelling.',
     },
   ];
 
