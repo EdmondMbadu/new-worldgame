@@ -219,9 +219,9 @@ export class SeoService {
         url: `${baseUrl}/contact`
       },
       '/blogs/features': {
-        title: 'NewWorld Game Features - Platform Capabilities & Tools',
-        description: 'Discover all the features of NewWorld Game including AI avatars, solution libraries, collaborative tools, and tournament systems.',
-        keywords: 'NewWorld Game features, platform tools, AI avatars, solution library, collaboration tools',
+        title: 'NewWorld Game Features - Weekly Intelligence Reports, AI Tools, and Collaboration',
+        description: 'Explore NewWorld Game features including the Weekly Intelligence Report, Ask Bucky, AI colleagues, collaborative solution building, and tournament pathways.',
+        keywords: 'NewWorld Game features, Weekly Intelligence Report, Ask Bucky, AI collaboration, solution platform, funding intelligence',
         url: `${baseUrl}/blogs/features`
       },
       '/ask-bucky': {

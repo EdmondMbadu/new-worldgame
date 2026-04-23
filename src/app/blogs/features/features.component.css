@@ -1,0 +1,39 @@
+.features-page {
+  position: relative;
+  min-height: 100vh;
+}
+
+.feature-brief-card {
+  position: relative;
+  box-shadow: 0 24px 60px -42px rgba(15, 23, 42, 0.28);
+}
+
+.feature-brief-card::before {
+  content: '';
+  position: absolute;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: -1rem;
+  width: 2px;
+  background: rgba(4, 120, 87, 0.65);
+  border-radius: 9999px;
+}
+
+.dark .feature-brief-card {
+  box-shadow: none;
+}
+
+.dark .feature-brief-card::before {
+  background: rgba(110, 231, 183, 0.6);
+}
+
+@media (max-width: 1023px) {
+  .feature-brief-card::before {
+    top: auto;
+    bottom: auto;
+    left: 1.5rem;
+    right: 1.5rem;
+    width: auto;
+    height: 2px;
+  }
+}
