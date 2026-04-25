@@ -44,8 +44,8 @@ export class UnsubscribeComponent implements OnInit {
   }
 
   async ngOnInit() {
-    const user = await this.auth.getCurrentUserPromise();
-    this.isLoggedIn = !!user;
+    await this.auth.getCurrentUserPromise();
+    this.isLoggedIn = !!this.auth.currentUser;
 
     // Prefill from query params:
     //   ?email=   plain email
@@ -66,9 +66,9 @@ export class UnsubscribeComponent implements OnInit {
 
     if (prefill) {
       this.emailFromUrl = true;
-    } else if (user?.email) {
+    } else if (this.auth.currentUser?.email) {
       // Logged-in user: use their account email
-      prefill = user.email;
+      prefill = this.auth.currentUser.email;
     }
 
     if (prefill) {
