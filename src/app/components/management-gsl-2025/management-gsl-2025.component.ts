@@ -255,6 +255,16 @@ export class ManagementGsl2025Component implements OnInit {
       'Country',
       'Register Date',
       'Target Group',
+      'Phone',
+      'Address',
+      'City',
+      'State/Province',
+      'Age',
+      'Organization',
+      'Occupation',
+      'Why Attend',
+      'Focus Topic',
+      'In Person vs Online',
     ];
 
     // 2) Map your filteredData into CSV rows
@@ -267,9 +277,23 @@ export class ManagementGsl2025Component implements OnInit {
       const targetGroup = `${user.targetGroup} - $${(
         user.amountPaid / 100
       ).toFixed(2)}`;
+      const phone = user.phone ?? '';
+      const address = user.address ?? '';
+      const city = user.city ?? '';
+      const stateProvince = user.stateProvince ?? '';
+      const age = user.age ?? '';
+      const organization = user.organization ?? '';
+      const occupation = user.occupation ?? '';
+      const whyAttend = user.whyAttend ?? '';
+      const focusTopic = user.focusTopic ?? '';
+      const labMode = user.labMode ?? '';
       // Escape any commas in fields by wrapping in quotes
-      return [name, email, country, registerDate, targetGroup]
-        .map((field) => `"${field.replace(/"/g, '""')}"`)
+      return [
+        name, email, country, registerDate, targetGroup,
+        phone, address, city, stateProvince, age,
+        organization, occupation, whyAttend, focusTopic, labMode,
+      ]
+        .map((field) => `"${String(field).replace(/"/g, '""')}"`)
         .join(',');
     });
 
