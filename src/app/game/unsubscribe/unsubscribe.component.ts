@@ -15,6 +15,8 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class UnsubscribeComponent implements OnInit {
   isLoggedIn = false;
+  /** Email was pre-filled from a URL param (came from an email link) */
+  emailFromUrl = false;
 
   form: FormGroup;
   submitting = false;
@@ -42,24 +44,41 @@ export class UnsubscribeComponent implements OnInit {
   }
 
   async ngOnInit() {
-    // auth state
-    this.auth.getCurrentUserPromise().then((u) => (this.isLoggedIn = !!u));
+    const user = await this.auth.getCurrentUserPromise();
+    this.isLoggedIn = !!user;
 
-    // Prefill from query ?email= or ?u=base64(email)
+    // Prefill from query params:
+    //   ?email=   plain email
+    //   ?u=       base64-encoded email
+    //   ?e=       encodeURIComponent(email)  ← used by all cloud-function automation emails
     const qp = this.route.snapshot.queryParamMap;
     const emailParam = qp.get('email');
     const uParam = qp.get('u');
+    const eParam = qp.get('e');
 
     let prefill = (emailParam || '').trim();
     if (!prefill && uParam) {
-      try {
-        prefill = atob(uParam).trim();
-      } catch {}
+      try { prefill = atob(uParam).trim(); } catch {}
     }
+    if (!prefill && eParam) {
+      try { prefill = decodeURIComponent(eParam).trim(); } catch {}
+    }
+
+    if (prefill) {
+      this.emailFromUrl = true;
+    } else if (user?.email) {
+      // Logged-in user: use their account email
+      prefill = user.email;
+    }
+
     if (prefill) {
       this.form.patchValue({ email: prefill });
       if (this.emailControl.valid) {
-        await this.checkStatus(); // auto check
+        await this.checkStatus();
+        // Auto-submit when email came from a link (one-click unsubscribe)
+        if (this.emailFromUrl && !this.alreadyUnsubscribed) {
+          await this.onSubmit();
+        }
       }
     }
   }
@@ -83,6 +102,10 @@ export class UnsubscribeComponent implements OnInit {
         .toPromise();
       this.alreadyUnsubscribed = !!snap?.exists;
       this.checked = true;
+      // Already unsubscribed and came from a link — show success immediately
+      if (this.emailFromUrl && this.alreadyUnsubscribed) {
+        this.success = true;
+      }
     } catch (e) {
       console.error('checkStatus', e);
       this.errorMsg = 'Could not check current status. Try again.';
@@ -109,7 +132,6 @@ export class UnsubscribeComponent implements OnInit {
       const now = new Date();
 
       if (snap?.exists) {
-        // Already unsubscribed: optionally update reason/details
         const updates: any = { updatedAt: now };
         if (reason) updates.reason = reason;
         if (details) updates.details = details;
@@ -121,7 +143,6 @@ export class UnsubscribeComponent implements OnInit {
         return;
       }
 
-      // Create new record
       await ref.set({
         email,
         reason: reason || null,

@@ -4195,7 +4195,15 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       },
       categories: ['bulk-mail-html'],
       attachments: attachments.map((file) => file.sendGrid),
-      personalizations: batch.map((email) => ({ to: [{ email }] })),
+      // Per-recipient substitution: {{unsubscribe_url}} in the HTML template
+      // is replaced with each recipient's personal one-click unsubscribe link.
+      substitutionWrappers: ['{{', '}}'] as [string, string],
+      personalizations: batch.map((email) => ({
+        to: [{ email }],
+        substitutions: {
+          '{{unsubscribe_url}}': `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(email)}`,
+        },
+      })),
     };
 
     try {
