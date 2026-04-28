@@ -65,11 +65,17 @@ type BulkEmailAttachment = {
 })
 export class BulkEmailsComponent implements OnDestroy {
   // ===== Unsubscribed state =====
+  allUnsubscribedRows: Array<{
+    email: string;
+    reason?: string;
+    updatedAt: Date;
+  }> = [];
   unsubscribedEmails: string[] = [];
   unsubscribedRows: Array<{ email: string; reason?: string; updatedAt: Date }> =
     [];
   public unsubSet: Set<string> = new Set();
   autoExcludeUnsubs = true; // toggle in UI
+  selectedUnsubMonth = this.toMonthInputValue(new Date());
   // Inner-collapsible toggles (default: open CSV, collapsed Unsubs—tweak as you like)
   showCsvLists = true;
   showUnsubs = false;
@@ -85,6 +91,7 @@ export class BulkEmailsComponent implements OnDestroy {
 
   contactLists: ContactList[] = [];
   private contactListsSub?: Subscription;
+  private unsubscribesSub?: Subscription;
 
   contactUploading = false;
   contactUploadText = '';
@@ -731,6 +738,7 @@ export class BulkEmailsComponent implements OnDestroy {
     this.saveDraft();
     this.templatesSub?.unsubscribe();
     this.contactListsSub?.unsubscribe();
+    this.unsubscribesSub?.unsubscribe();
   }
 
   get canSendTest(): boolean {
@@ -1696,7 +1704,7 @@ export class BulkEmailsComponent implements OnDestroy {
 
   private subscribeUnsubscribes() {
     // We’re pulling all docs; if you later scope per-project/tenant, add a where().
-    this.afs
+    this.unsubscribesSub = this.afs
       .collection('mailing_unsubscribes', (ref) =>
         ref.orderBy('updatedAt', 'desc').limit(5000)
       )
@@ -1721,11 +1729,11 @@ export class BulkEmailsComponent implements OnDestroy {
             latestByEmail.set(row.email, row);
         }
 
-        this.unsubscribedRows = Array.from(latestByEmail.values()).sort(
+        this.allUnsubscribedRows = Array.from(latestByEmail.values()).sort(
           (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
         );
-        this.unsubscribedEmails = this.unsubscribedRows.map((r) => r.email);
-        this.unsubSet = new Set(this.unsubscribedEmails);
+        this.unsubSet = new Set(this.allUnsubscribedRows.map((r) => r.email));
+        this.applyUnsubscribeMonthFilter();
 
         // If a CSV is already loaded and auto-exclude is on, refresh the valid list
         if (this.autoExcludeUnsubs && this.csvValid?.length) {
@@ -1733,6 +1741,53 @@ export class BulkEmailsComponent implements OnDestroy {
         }
       });
   }
+
+  get selectedUnsubMonthLabel(): string {
+    const [year, month] = this.selectedUnsubMonth
+      .split('-')
+      .map((value) => parseInt(value, 10));
+    if (!year || !month) return 'Selected month';
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date(year, month - 1, 1));
+  }
+
+  onUnsubMonthChange(evt: Event): void {
+    const el = evt.target as HTMLInputElement;
+    const value = (el.value || '').trim();
+    if (!value) return;
+    this.selectedUnsubMonth = value;
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  shiftUnsubMonth(deltaMonths: number): void {
+    const [y, m] = this.selectedUnsubMonth
+      .split('-')
+      .map((n) => parseInt(n, 10));
+    const dt = new Date(y, m - 1, 1);
+    dt.setMonth(dt.getMonth() + deltaMonths);
+    this.selectedUnsubMonth = this.toMonthInputValue(dt);
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  resetUnsubsToThisMonth(): void {
+    this.selectedUnsubMonth = this.toMonthInputValue(new Date());
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  private applyUnsubscribeMonthFilter(): void {
+    const { start, end } = this.getMonthBoundsLocalFromYYYYMM(
+      this.selectedUnsubMonth
+    );
+
+    this.unsubscribedRows = this.allUnsubscribedRows.filter((row) => {
+      const updatedAt = row.updatedAt;
+      return updatedAt >= start && updatedAt < end;
+    });
+    this.unsubscribedEmails = this.unsubscribedRows.map((row) => row.email);
+  }
+
   private applyUnsubFilter() {
     if (!this.csvValid?.length) return;
     // Keep only emails NOT in unsub set
