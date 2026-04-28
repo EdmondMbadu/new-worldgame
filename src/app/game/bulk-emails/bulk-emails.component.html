@@ -507,6 +507,26 @@
           </summary>
 
           <div class="px-3 pb-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+              <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 px-4 py-3">
+                <div class="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Total Unsubscribed
+                </div>
+                <div class="text-2xl font-extrabold text-slate-900 dark:text-white tabular-nums">
+                  {{ allUnsubscribedRows.length }}
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/30 px-4 py-3">
+                <div class="text-[11px] uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+                  {{ selectedUnsubMonthLabel }}
+                </div>
+                <div class="text-2xl font-extrabold text-indigo-700 dark:text-indigo-300 tabular-nums">
+                  {{ unsubscribedRows.length }}
+                </div>
+              </div>
+            </div>
+
             <div class="flex flex-wrap items-center gap-2 mb-3">
               <button type="button"
                       (click)="shiftUnsubMonth(-1)"
