@@ -11,6 +11,7 @@ import { TimeService } from 'src/app/services/time.service';
   styleUrl: './management-gsl-2025.component.css',
 })
 export class ManagementGsl2025Component implements OnInit {
+  private readonly bulkEmailImportKey = 'bulkEmail.recipientImport.v1';
   globalLabData: any[] = [];
   filteredData: any[] = [];
   searchQuery: string = '';
@@ -314,5 +315,51 @@ export class ManagementGsl2025Component implements OnInit {
 
     // close dropdown
     this.dropdownOpen = false;
+  }
+
+  composeBulkEmail() {
+    if (!this.filteredData.length) {
+      alert(`No registrations found for GSL ${this.selectedYear}.`);
+      this.dropdownOpen = false;
+      return;
+    }
+
+    const recipients = this.filteredData.map((user) => ({
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      fullName: `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim(),
+      email: user.email ?? '',
+      country: user.country ?? '',
+      registerDate: user.registerDate ?? '',
+      targetGroup: user.targetGroup ?? '',
+      amountPaid: user.amountPaid ?? 0,
+      amountPaidDollars:
+        typeof user.amountPaid === 'number'
+          ? (user.amountPaid / 100).toFixed(2)
+          : '',
+      phone: user.phone ?? '',
+      address: user.address ?? '',
+      city: user.city ?? '',
+      stateProvince: user.stateProvince ?? '',
+      age: user.age ?? '',
+      organization: user.organization ?? '',
+      occupation: user.occupation ?? '',
+      whyAttend: user.whyAttend ?? '',
+      focusTopic: user.focusTopic ?? '',
+      labMode: user.labMode ?? '',
+      gslYear: this.selectedYear,
+    }));
+
+    localStorage.setItem(
+      this.bulkEmailImportKey,
+      JSON.stringify({
+        source: 'management-gsl',
+        label: `GSL ${this.selectedYear} filtered registrations (${recipients.length})`,
+        recipients,
+      })
+    );
+
+    this.dropdownOpen = false;
+    this.router.navigate(['/bulk-emails']);
   }
 }

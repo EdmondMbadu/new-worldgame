@@ -4109,27 +4109,128 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
   const attachments = await prepareBulkEmailAttachments(data?.attachments);
 
   // Normalize + validate
+  const normalizeMergeFieldKey = (raw: string): string => {
+    const cleaned = (raw || '')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[^A-Za-z0-9]+/g, ' ')
+      .trim()
+      .toLowerCase();
+
+    if (!cleaned) return '';
+
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    return parts
+      .map((part, index) =>
+        index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
+      )
+      .join('');
+  };
+
+  const mergeFieldAliases = (key: string): string[] => {
+    const normalized = normalizeMergeFieldKey(key);
+    const snake = normalized
+      .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+      .toLowerCase();
+    const compact = normalized.replace(/_/g, '').toLowerCase();
+
+    return Array.from(
+      new Set(
+        [key, key?.trim?.() || '', normalized, snake, compact].filter(Boolean)
+      )
+    );
+  };
+
+  const normalizeRecipientFields = (fields: Record<string, any>) => {
+    const normalized: Record<string, string> = {};
+
+    Object.entries(fields || {}).forEach(([rawKey, rawValue]) => {
+      const key = normalizeMergeFieldKey(rawKey);
+      if (!key) return;
+      normalized[key] = rawValue == null ? '' : String(rawValue).trim();
+    });
+
+    return normalized;
+  };
+
+  const extractEmailFromRecipient = (recipient: any): string => {
+    if (typeof recipient === 'string') return recipient;
+    if (recipient && typeof recipient === 'object') {
+      if (recipient.email != null) return String(recipient.email).trim();
+      const match = Object.keys(recipient).find((key) => /email/i.test(key));
+      if (match) return String(recipient[match] ?? '').trim();
+    }
+    return '';
+  };
+
+  const buildRecipientSubstitutions = (
+    email: string,
+    fields: Record<string, string>
+  ) => {
+    const baseFields: Record<string, string> = {
+      ...fields,
+      email,
+      unsubscribeUrl: `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
+        email
+      )}`,
+      unsubscribe_url: `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
+        email
+      )}`,
+    };
+
+    const substitutions: Record<string, string> = {};
+    Object.entries(baseFields).forEach(([key, value]) => {
+      mergeFieldAliases(key).forEach((alias) => {
+        substitutions[`{{${alias}}}`] = value ?? '';
+      });
+    });
+
+    return substitutions;
+  };
+
   const rawTokens: string[] = [];
-  for (const v of toList) {
-    if (typeof v !== 'string') continue;
-    const parts = v
+  const normalizedRecipients: Array<{
+    email: string;
+    fields: Record<string, string>;
+  }> = [];
+
+  for (const recipient of toList) {
+    const emailValue = extractEmailFromRecipient(recipient);
+    if (!emailValue) continue;
+
+    const fields =
+      recipient && typeof recipient === 'object'
+        ? normalizeRecipientFields(recipient.fields || recipient)
+        : {};
+
+    const parts = emailValue
       .split(/[;,]/)
       .map((s) => s.trim())
       .filter(Boolean);
-    rawTokens.push(...parts);
+
+    for (const part of parts) {
+      rawTokens.push(part);
+      normalizedRecipients.push({
+        email: part,
+        fields,
+      });
+    }
   }
+
   const seen = new Set<string>();
-  const valid: string[] = [];
+  const valid: Array<{ email: string; fields: Record<string, string> }> = [];
   const invalid: string[] = [];
-  for (const token of rawTokens) {
-    const lower = token.toLowerCase();
+  for (const recipient of normalizedRecipients) {
+    const lower = recipient.email.toLowerCase();
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lower)) {
       if (!seen.has(lower)) {
         seen.add(lower);
-        valid.push(lower);
+        valid.push({
+          email: lower,
+          fields: recipient.fields,
+        });
       }
     } else {
-      invalid.push(token);
+      invalid.push(recipient.email);
     }
   }
   const duplicates = Math.max(
@@ -4195,14 +4296,13 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       },
       categories: ['bulk-mail-html'],
       attachments: attachments.map((file) => file.sendGrid),
-      // Per-recipient substitution: {{unsubscribe_url}} in the HTML template
-      // is replaced with each recipient's personal one-click unsubscribe link.
       substitutionWrappers: ['{{', '}}'] as [string, string],
-      personalizations: batch.map((email) => ({
-        to: [{ email }],
-        substitutions: {
-          '{{unsubscribe_url}}': `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(email)}`,
-        },
+      personalizations: batch.map((recipient) => ({
+        to: [{ email: recipient.email }],
+        substitutions: buildRecipientSubstitutions(
+          recipient.email,
+          recipient.fields
+        ),
       })),
     };
 
@@ -4243,6 +4343,8 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
   return {
     ok: true,
     runId,
+    total: valid.length,
+    batches: results,
     summary: {
       requested: rawTokens.length,
       valid: valid.length,

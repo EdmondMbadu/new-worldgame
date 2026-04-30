@@ -58,12 +58,26 @@ type BulkEmailAttachment = {
   size: number;
 };
 
+type BulkRecipient = {
+  email: string;
+  fields: Record<string, string>;
+  rowNumber?: number;
+  source?: string;
+};
+
+type PendingRecipientImport = {
+  source?: string;
+  label?: string;
+  recipients?: Array<Record<string, any>>;
+};
+
 @Component({
   selector: 'app-bulk-emails',
   templateUrl: './bulk-emails.component.html',
   styleUrls: ['./bulk-emails.component.css'],
 })
 export class BulkEmailsComponent implements OnDestroy {
+  private readonly recipientImportKey = 'bulkEmail.recipientImport.v1';
   // ===== Unsubscribed state =====
   allUnsubscribedRows: Array<{
     email: string;
@@ -171,6 +185,7 @@ export class BulkEmailsComponent implements OnDestroy {
   wrapHtml = true; // uses [(ngModel)] with standalone:true
   baseUrl = ''; // uses [(ngModel)] with standalone:true
   previewWidth: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+  rawFinalHtml = '';
   finalHtml = '';
 
   isUploading = false;
@@ -193,9 +208,12 @@ export class BulkEmailsComponent implements OnDestroy {
 
   // CSV state
   @ViewChild('csvInput') csvInput!: ElementRef<HTMLInputElement>;
+  csvRecipients: BulkRecipient[] = [];
   csvValid: string[] = [];
   csvInvalid: string[] = [];
   csvDupes = 0;
+  csvFieldKeys: string[] = [];
+  importedAudienceLabel = '';
 
   sendingBulk = false;
   bulkProgressText = '';
@@ -259,9 +277,14 @@ export class BulkEmailsComponent implements OnDestroy {
       | 'builderOpen'
       | 'contactListsOpen'
       | 'showCsvLists'
-      | 'showUnsubs'
+      | 'showUnsubs',
+    event?: Event
   ): void {
-    // avoid toggling <details> twice if called from inside <summary>
+    const details = event?.target as HTMLDetailsElement | undefined;
+    if (details && typeof details.open === 'boolean') {
+      (this as any)[key] = details.open;
+      return;
+    }
     (this as any)[key] = !(this as any)[key];
   }
   ngOnInit() {
@@ -271,6 +294,7 @@ export class BulkEmailsComponent implements OnDestroy {
       this.subscribeTemplates(); // NEW – after auth
       this.subscribeContactLists();
       this.subscribeUnsubscribes();
+      this.loadPendingRecipientImport();
     });
   }
 
@@ -590,9 +614,13 @@ export class BulkEmailsComponent implements OnDestroy {
 
     const sanitized = this.stripScripts(rawHtml);
     const withBase = this.injectBaseTagIfNeeded(sanitized, this.baseUrl);
-    this.finalHtml = this.wrapHtml
+    this.rawFinalHtml = this.wrapHtml
       ? this.wrapEnvelope(withBase, subject)
       : withBase;
+    this.finalHtml = this.renderMergeFields(
+      this.rawFinalHtml,
+      this.previewMergeFields
+    );
   }
 
   private stripScripts(html: string): string {
@@ -668,7 +696,9 @@ export class BulkEmailsComponent implements OnDestroy {
       (this.form.value.subject || 'email') + '.html'
     );
     a.href = URL.createObjectURL(
-      new Blob([this.finalHtml || this.placeholderHtml], { type: 'text/html' })
+      new Blob([this.rawFinalHtml || this.placeholderHtml], {
+        type: 'text/html',
+      })
     );
     document.body.appendChild(a);
     a.click();
@@ -744,7 +774,7 @@ export class BulkEmailsComponent implements OnDestroy {
   get canSendTest(): boolean {
     const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.testEmail);
     const hasSubject = !!(this.form.value.subject || '').trim();
-    const hasHtml = !!(this.finalHtml || '').trim();
+    const hasHtml = !!(this.rawFinalHtml || '').trim();
     return emailOk && hasSubject && hasHtml && !this.attachmentUploading;
   }
 
@@ -757,9 +787,15 @@ export class BulkEmailsComponent implements OnDestroy {
 
       const payload = {
         to: this.testEmail.trim(),
-        subject: (this.form.value.subject || '').trim(),
-        html: this.finalHtml,
-        preheader: this.testPreheader || '',
+        subject: this.renderMergeFields(
+          (this.form.value.subject || '').trim(),
+          this.testMergeFields
+        ),
+        html: this.renderMergeFields(this.rawFinalHtml, this.testMergeFields),
+        preheader: this.renderMergeFields(
+          this.testPreheader || '',
+          this.testMergeFields
+        ),
         attachments: this.emailAttachments.map((file) => ({
           name: file.name,
           storagePath: file.storagePath,
@@ -792,12 +828,16 @@ export class BulkEmailsComponent implements OnDestroy {
   }
 
   clearCsv(): void {
+    this.csvRecipients = [];
     this.csvValid = [];
     this.csvInvalid = [];
     this.csvDupes = 0;
+    this.csvFieldKeys = [];
+    this.importedAudienceLabel = '';
     this.bulkResult = '';
     this.bulkProgressText = '';
     if (this.csvInput?.nativeElement) this.csvInput.nativeElement.value = '';
+    this.recompute();
   }
 
   async onCsvChosen(evt: Event): Promise<void> {
@@ -830,25 +870,9 @@ export class BulkEmailsComponent implements OnDestroy {
     }
 
     // header row
-    const header = rows[0].map((h) => h.trim().toLowerCase());
-    // try to find email column
-    const emailCandidates = [
-      'email',
-      'emails',
-      'email_address',
-      'emailaddress',
-      'e-mail',
-    ];
-    let emailIdx = -1;
-    for (const key of emailCandidates) {
-      emailIdx = header.indexOf(key);
-      if (emailIdx !== -1) break;
-    }
-
-    // if still not found, attempt fuzzy match
-    if (emailIdx === -1) {
-      emailIdx = header.findIndex((h) => /email/.test(h));
-    }
+    const rawHeader = rows[0].map((h) => h.trim());
+    const header = rawHeader.map((h) => this.normalizeMergeFieldKey(h));
+    const emailIdx = this.findEmailColumnIndex(header);
 
     if (emailIdx === -1) {
       alert(
@@ -860,14 +884,17 @@ export class BulkEmailsComponent implements OnDestroy {
 
     // collect values
     const emails: string[] = [];
+    const recipients: BulkRecipient[] = [];
     const invalid: string[] = [];
     const seen = new Set<string>();
+    const fieldKeys = new Set<string>(['email']);
 
     for (let i = 1; i < rows.length; i++) {
       const cols = rows[i];
       if (!cols || !cols.length) continue;
       const value = (cols[emailIdx] || '').toString().trim();
       if (!value) continue;
+      const rowFields = this.extractRecipientFields(rawHeader, cols, emailIdx);
 
       // support multiple recipients in a single cell separated by ; or ,
       const parts = value
@@ -880,6 +907,14 @@ export class BulkEmailsComponent implements OnDestroy {
           if (!seen.has(lower)) {
             seen.add(lower);
             emails.push(lower);
+            const recipientFields = { ...rowFields, email: lower };
+            Object.keys(recipientFields).forEach((key) => fieldKeys.add(key));
+            recipients.push({
+              email: lower,
+              fields: recipientFields,
+              rowNumber: i + 1,
+              source: 'csv',
+            });
           }
         } else {
           invalid.push(`Row ${i + 1}: "${p}"`);
@@ -887,8 +922,11 @@ export class BulkEmailsComponent implements OnDestroy {
       }
     }
 
+    this.csvRecipients = recipients;
     this.csvValid = emails;
     this.csvInvalid = invalid;
+    this.csvFieldKeys = Array.from(fieldKeys);
+    this.importedAudienceLabel = '';
     // crude duplicate estimate: invalid for bad format; dupes are total unique vs total raw tokens
     const totalTokens = rows
       .slice(1)
@@ -900,6 +938,7 @@ export class BulkEmailsComponent implements OnDestroy {
     this.csvDupes = Math.max(0, totalTokens - emails.length - invalid.length);
 
     if (this.autoExcludeUnsubs) this.applyUnsubFilter(); // apply unsubscribe
+    this.recompute();
   }
 
   /**
@@ -991,7 +1030,7 @@ export class BulkEmailsComponent implements OnDestroy {
   get canSendBulk(): boolean {
     const hasEmails = this.csvValid.length > 0;
     const hasSubject = !!(this.form.value.subject || '').trim();
-    const hasHtml = !!(this.finalHtml || '').trim();
+    const hasHtml = !!(this.rawFinalHtml || '').trim();
     return (
       hasEmails &&
       hasSubject &&
@@ -1010,8 +1049,10 @@ export class BulkEmailsComponent implements OnDestroy {
       this.sendingBulk = true;
       this.bulkProgressText = `0 / ${this.csvValid.length}`;
       const recipients = this.autoExcludeUnsubs
-        ? this.csvValid.filter((e) => !this.unsubSet.has(e))
-        : this.csvValid.slice();
+        ? this.csvRecipients.filter(
+            (recipient) => !this.unsubSet.has(recipient.email)
+          )
+        : this.csvRecipients.slice();
 
       if (!recipients.length) {
         this.bulkResult = 'No recipients left after excluding unsubscribes.';
@@ -1023,7 +1064,7 @@ export class BulkEmailsComponent implements OnDestroy {
       const payload = {
         recipients,
         subject: (this.form.value.subject || '').trim(),
-        html: this.finalHtml,
+        html: this.rawFinalHtml,
         preheader: this.testPreheader || '',
         title: (this.form.value.subject || '').trim(), // or a custom title field
         attachments: this.emailAttachments.map((file) => ({
@@ -1792,6 +1833,251 @@ export class BulkEmailsComponent implements OnDestroy {
     if (!this.csvValid?.length) return;
     // Keep only emails NOT in unsub set
     this.csvValid = this.csvValid.filter((e) => !this.unsubSet.has(e));
+    this.csvRecipients = this.csvRecipients.filter(
+      (recipient) => !this.unsubSet.has(recipient.email)
+    );
+    this.recompute();
+  }
+
+  get mergeFieldTokens(): string[] {
+    const fields = [
+      ...(this.csvFieldKeys.length ? this.csvFieldKeys : ['email']),
+      'unsubscribe_url',
+    ];
+    return Array.from(new Set(fields)).map((field) => `{{${field}}}`);
+  }
+
+  get previewRecipient(): BulkRecipient | null {
+    return this.csvRecipients[0] || null;
+  }
+
+  private getRecipientByEmail(email: string): BulkRecipient | null {
+    const normalized = (email || '').trim().toLowerCase();
+    if (!normalized) return null;
+    return (
+      this.csvRecipients.find((recipient) => recipient.email === normalized) ||
+      null
+    );
+  }
+
+  get previewMergeFields(): Record<string, string> {
+    const sample = this.previewRecipient;
+    return this.buildMergeFieldsForRecipient(sample);
+  }
+
+  get testMergeFields(): Record<string, string> {
+    const matchingRecipient = this.getRecipientByEmail(this.testEmail);
+    return this.buildMergeFieldsForRecipient(
+      matchingRecipient || this.previewRecipient
+    );
+  }
+
+  private buildMergeFieldsForRecipient(
+    recipient: BulkRecipient | null
+  ): Record<string, string> {
+    const sample = recipient;
+    const fields = { ...(sample?.fields || {}) };
+    const email = (sample?.email || fields['email'] || 'preview@example.com')
+      .trim();
+
+    fields['email'] = email;
+    if (!fields['firstName']) fields['firstName'] = 'First';
+    if (!fields['lastName']) fields['lastName'] = 'Last';
+    if (!fields['unsubscribeUrl']) {
+      fields['unsubscribeUrl'] =
+        'https://newworld-game.org/unsubscribe?e=' +
+        encodeURIComponent(email);
+    }
+    if (!fields['unsubscribe_url']) {
+      fields['unsubscribe_url'] = fields['unsubscribeUrl'];
+    }
+
+    return fields;
+  }
+
+  insertMergeField(fieldToken: string): void {
+    this.insertAtCursor(fieldToken);
+  }
+
+  private renderMergeFields(
+    template: string,
+    fields: Record<string, string>
+  ): string {
+    if (!template) return '';
+
+    const tokenValues = new Map<string, string>();
+    Object.entries(fields || {}).forEach(([key, value]) => {
+      for (const alias of this.getMergeFieldAliases(key)) {
+        tokenValues.set(alias, value ?? '');
+      }
+    });
+
+    return template.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, (full, key) => {
+      return tokenValues.has(key) ? tokenValues.get(key)! : full;
+    });
+  }
+
+  private getMergeFieldAliases(key: string): string[] {
+    const normalized = this.normalizeMergeFieldKey(key);
+    const snake = normalized
+      .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
+      .toLowerCase();
+    const compact = normalized.replace(/_/g, '').toLowerCase();
+
+    return Array.from(
+      new Set(
+        [key, key?.trim?.() || '', normalized, snake, compact].filter(Boolean)
+      )
+    );
+  }
+
+  private normalizeMergeFieldKey(raw: string): string {
+    const cleaned = (raw || '')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[^A-Za-z0-9]+/g, ' ')
+      .trim()
+      .toLowerCase();
+
+    if (!cleaned) return '';
+
+    const parts = cleaned.split(/\s+/).filter(Boolean);
+    return parts
+      .map((part, index) =>
+        index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
+      )
+      .join('');
+  }
+
+  private findEmailColumnIndex(header: string[]): number {
+    const candidates = new Set(['email', 'emails', 'emailAddress']);
+    let emailIdx = header.findIndex((key) => candidates.has(key));
+    if (emailIdx === -1) {
+      emailIdx = header.findIndex((key) => /email/.test(key));
+    }
+    return emailIdx;
+  }
+
+  private extractRecipientFields(
+    rawHeader: string[],
+    cols: string[],
+    emailIdx: number
+  ): Record<string, string> {
+    const fields: Record<string, string> = {};
+
+    rawHeader.forEach((rawKey, index) => {
+      if (index === emailIdx) return;
+      const key = this.normalizeMergeFieldKey(rawKey);
+      if (!key) return;
+      fields[key] = (cols[index] || '').toString().trim();
+    });
+
+    return fields;
+  }
+
+  private loadPendingRecipientImport(): void {
+    const saved = localStorage.getItem(this.recipientImportKey);
+    if (!saved) return;
+
+    localStorage.removeItem(this.recipientImportKey);
+
+    try {
+      const payload: PendingRecipientImport = JSON.parse(saved);
+      const imported = Array.isArray(payload?.recipients)
+        ? payload.recipients
+        : [];
+      if (!imported.length) return;
+
+      this.loadRecipientObjects(
+        imported,
+        payload?.label || payload?.source || 'Imported audience'
+      );
+      this.builderOpen = true;
+      this.openModal();
+    } catch (error) {
+      console.error('Failed to load imported audience', error);
+    }
+  }
+
+  private loadRecipientObjects(
+    rows: Array<Record<string, any>>,
+    label: string
+  ): void {
+    const seen = new Set<string>();
+    const recipients: BulkRecipient[] = [];
+    const invalid: string[] = [];
+    const fieldKeys = new Set<string>(['email']);
+    let rawCount = 0;
+
+    rows.forEach((row, index) => {
+      const fields = this.normalizeRecipientObjectFields(row || {});
+      const emailValue =
+        fields['email'] ||
+        this.extractEmailFromUnknownObject(row || {}) ||
+        '';
+
+      const tokens = emailValue
+        .split(/[;,]/)
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+      if (!tokens.length) {
+        invalid.push(`Row ${index + 1}: missing email`);
+        return;
+      }
+
+      rawCount += tokens.length;
+
+      for (const token of tokens) {
+        const lower = token.toLowerCase();
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lower)) {
+          invalid.push(`Row ${index + 1}: "${token}"`);
+          continue;
+        }
+        if (seen.has(lower)) continue;
+
+        seen.add(lower);
+        const recipientFields = { ...fields, email: lower };
+        Object.keys(recipientFields).forEach((key) => fieldKeys.add(key));
+        recipients.push({
+          email: lower,
+          fields: recipientFields,
+          rowNumber: index + 1,
+          source: label,
+        });
+      }
+    });
+
+    this.csvRecipients = recipients;
+    this.csvValid = recipients.map((recipient) => recipient.email);
+    this.csvInvalid = invalid;
+    this.csvDupes = Math.max(0, rawCount - recipients.length - invalid.length);
+    this.csvFieldKeys = Array.from(fieldKeys);
+    this.importedAudienceLabel = label;
+
+    if (this.autoExcludeUnsubs) this.applyUnsubFilter();
+    this.recompute();
+  }
+
+  private normalizeRecipientObjectFields(
+    row: Record<string, any>
+  ): Record<string, string> {
+    const fields: Record<string, string> = {};
+
+    Object.entries(row || {}).forEach(([rawKey, rawValue]) => {
+      const key = this.normalizeMergeFieldKey(rawKey);
+      if (!key) return;
+      fields[key] = rawValue == null ? '' : String(rawValue).trim();
+    });
+
+    return fields;
+  }
+
+  private extractEmailFromUnknownObject(row: Record<string, any>): string {
+    const keys = Object.keys(row || {});
+    const match = keys.find((key) => /email/i.test(key));
+    if (!match) return '';
+    const value = row[match];
+    return value == null ? '' : String(value).trim();
   }
 
   copyUnsubs() {
