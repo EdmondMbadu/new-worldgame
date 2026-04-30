@@ -4180,11 +4180,29 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
     const substitutions: Record<string, string> = {};
     Object.entries(baseFields).forEach(([key, value]) => {
       mergeFieldAliases(key).forEach((alias) => {
-        substitutions[`{{${alias}}}`] = value ?? '';
+        substitutions[alias] = value ?? '';
       });
     });
 
     return substitutions;
+  };
+
+  const renderMergeFields = (
+    template: string,
+    fields: Record<string, string>
+  ): string => {
+    if (!template) return '';
+
+    const tokenValues = new Map<string, string>();
+    Object.entries(fields || {}).forEach(([key, value]) => {
+      mergeFieldAliases(key).forEach((alias) => {
+        tokenValues.set(alias, value ?? '');
+      });
+    });
+
+    return template.replace(/\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g, (full, key) => {
+      return tokenValues.has(key) ? tokenValues.get(key)! : full;
+    });
   };
 
   const rawTokens: string[] = [];
@@ -4299,10 +4317,17 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       substitutionWrappers: ['{{', '}}'] as [string, string],
       personalizations: batch.map((recipient) => ({
         to: [{ email: recipient.email }],
-        substitutions: buildRecipientSubstitutions(
-          recipient.email,
-          recipient.fields
-        ),
+        subject: renderMergeFields(subject, {
+          ...recipient.fields,
+          email: recipient.email,
+          unsubscribeUrl: `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
+            recipient.email
+          )}`,
+          unsubscribe_url: `https://newworld-game.org/unsubscribe?e=${encodeURIComponent(
+            recipient.email
+          )}`,
+        }),
+        substitutions: buildRecipientSubstitutions(recipient.email, recipient.fields),
       })),
     };
 
