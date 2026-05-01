@@ -634,7 +634,9 @@ export class SolutionService {
       `solutions/${solutionId}`
     );
 
-    return solutionRef.set(data, { merge: true });
+    return solutionRef.set(data, { merge: true }).then(() => {
+      void this.activity.recordEvent('edit', solutionId);
+    });
   }
   updateSolutionBoard(solutionId: string, boardDataUrl: string): Promise<void> {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
@@ -664,7 +666,9 @@ export class SolutionService {
       `solutions/${solutionId}`
     );
 
-    return solutionRef.set(data, { merge: true });
+    return solutionRef.set(data, { merge: true }).then(() => {
+      void this.activity.recordEvent('edit', solutionId);
+    });
   }
 
   addParticipantsToSolution(participants: any, solutionId: string) {

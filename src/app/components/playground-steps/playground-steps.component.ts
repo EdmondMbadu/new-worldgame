@@ -5,7 +5,6 @@ import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
 import { AuthService } from 'src/app/services/auth.service';
-import { ActivityService } from 'src/app/services/activity.service';
 import { ActivatedRoute } from '@angular/router';
 import { Evaluator, Roles, Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -389,7 +388,6 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     public data: DataService,
     private router: Router,
     private fns: AngularFireFunctions,
-    private activity: ActivityService,
     private languageService: LanguageService,
     private afs: AngularFirestore,
     private chatContext: ChatContextService
@@ -1571,10 +1569,6 @@ STYLE REQUIREMENTS:
         const updatedReadMe = await this.solution.updateSolutionReadMe(
           this.currentSolution.solutionId!,
           this.newReadMe
-        );
-        void this.activity.recordEvent(
-          'edit',
-          this.currentSolution.solutionId
         );
         this.currentSolution.description = this.newReadMe;
         this.toggleUpdateReadMe();

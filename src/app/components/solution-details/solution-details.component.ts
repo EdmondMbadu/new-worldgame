@@ -5,7 +5,6 @@ import { firstValueFrom, take } from 'rxjs';
 import { Admin, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
-import { ActivityService } from 'src/app/services/activity.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
@@ -49,7 +48,6 @@ export class SolutionDetailsComponent implements OnInit {
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
-    private activity: ActivityService,
     public data: DataService,
     private router: Router,
     private fns: AngularFireFunctions
@@ -214,10 +212,6 @@ export class SolutionDetailsComponent implements OnInit {
         const updatedReadMe = await this.solution.updateSolutionReadMe(
           this.currentSolution.solutionId!,
           this.newReadMe
-        );
-        void this.activity.recordEvent(
-          'edit',
-          this.currentSolution.solutionId
         );
         this.currentSolution.description = this.newReadMe;
         this.toggle('updateReadMeBox');
@@ -973,10 +967,6 @@ export class SolutionDetailsComponent implements OnInit {
       this.solution
         .updateSolutionTitle(this.currentSolution.solutionId!, this.newTitle)
         .then(() => {
-          void this.activity.recordEvent(
-            'edit',
-            this.currentSolution.solutionId
-          );
           this.title = this.newTitle;
           this.toggle('updateTitleBox');
         })
