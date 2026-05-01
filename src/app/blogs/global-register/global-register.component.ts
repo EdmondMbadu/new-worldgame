@@ -35,6 +35,8 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
   occupation: string = '';
   whyAttend: string = '';
   focusTopic: string = '';
+  heardAboutUs: string = '';
+  heardAboutUsOther: string = '';
   readyToSubmit: boolean = false;
   success = false;
   isLoggedIn: boolean = false;
@@ -270,6 +272,9 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
           occupation: this.occupation,
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
+          heardAboutUs: this.heardAboutUs,
+          heardAboutUsOther:
+            this.heardAboutUs === 'other' ? this.heardAboutUsOther.trim() : '',
           targetGroup: this.getRegistrationTargetGroup(),
           labMode: this.labMode, // pass the new field
           letterOfInvitation: this.letterOfInvitation, // pass the new field
@@ -377,6 +382,9 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
           occupation: this.occupation,
           whyAttend: this.whyAttend,
           focusTopic: this.focusTopic,
+          heardAboutUs: this.heardAboutUs,
+          heardAboutUsOther:
+            this.heardAboutUs === 'other' ? this.heardAboutUsOther.trim() : '',
           targetGroup: this.getRegistrationTargetGroup(),
           labMode: this.labMode,
           letterOfInvitation: this.letterOfInvitation,
@@ -472,6 +480,8 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
     this.occupation = '';
     this.whyAttend = '';
     this.focusTopic = '';
+    this.heardAboutUs = '';
+    this.heardAboutUsOther = '';
     this.readyToSubmit = false;
     this.success = false;
     this.labMode = 'inPerson';
@@ -495,6 +505,13 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
 
   formatPayAndRegisterLabel(price: number): string {
     return this.copy.form.payAndRegisterLabel.replace('{price}', `$${price}`);
+  }
+
+  onHeardAboutUsChange(value: string): void {
+    this.heardAboutUs = value;
+    if (value !== 'other') {
+      this.heardAboutUsOther = '';
+    }
   }
 
   private initializeCountdown(): void {

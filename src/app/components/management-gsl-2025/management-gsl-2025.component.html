@@ -132,7 +132,8 @@
                                         <strong>Occupation:</strong> {{ user.occupation }} <br>
                                         <strong>Why Attend:</strong> {{ user.whyAttend }} <br>
                                         <strong>Focus Topic:</strong> {{ user.focusTopic }}<br>
-                                        <strong>In Person vs Online: {{user.labMode}}  </strong>
+                                        <strong>In Person vs Online:</strong> {{ user.labMode }} <br>
+                                        <strong>How Heard About Us:</strong> {{ formatHeardAboutUs(user) }}
                                     </td>
                                 </tr>
                             </ng-container>

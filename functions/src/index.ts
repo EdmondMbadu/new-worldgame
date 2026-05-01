@@ -6164,6 +6164,8 @@ export const createCheckoutSession = functions.https.onCall(
         occupation,
         whyAttend,
         focusTopic,
+        heardAboutUs,
+        heardAboutUsOther,
         pid,
         registerDate,
         labMode, // <-- NEW
@@ -6225,6 +6227,8 @@ export const createCheckoutSession = functions.https.onCall(
           occupation,
           whyAttend,
           focusTopic,
+          heardAboutUs: heardAboutUs || '',
+          heardAboutUsOther: heardAboutUsOther || '',
           registerDate,
           pid, // add the pid from your form data or your component
           labMode, // store the new field
@@ -6282,6 +6286,8 @@ export const stripeWebhook2 = functions.https.onRequest(
         occupation,
         whyAttend,
         focusTopic,
+        heardAboutUs,
+        heardAboutUsOther,
         registerDate,
         pid, // we passed this in metadata
         labMode, // read new field
@@ -6304,6 +6310,8 @@ export const stripeWebhook2 = functions.https.onRequest(
         occupation,
         whyAttend,
         focusTopic,
+        heardAboutUs: heardAboutUs || '',
+        heardAboutUsOther: heardAboutUsOther || '',
         paid: true,
         amountPaid, // e.g. 39900
         paymentIntent: session.payment_intent,
@@ -6351,6 +6359,8 @@ export const stripeWebhook2 = functions.https.onRequest(
           occupation,
           whyAttend,
           focusTopic,
+          heardAboutUs: heardAboutUs || '',
+          heardAboutUsOther: heardAboutUsOther || '',
           targetGroup: targetGroup,
           labMode,
           letterOfInvitation,
@@ -6824,6 +6834,8 @@ export const gslAdminNotificationEmail = functions.https.onCall(
         occupation: data.occupation || 'N/A',
         why_attend: data.whyAttend || 'N/A',
         focus_topic: data.focusTopic || 'N/A',
+        heard_about_us: data.heardAboutUs || 'N/A',
+        heard_about_us_other: data.heardAboutUsOther || 'N/A',
         target_group: data.targetGroup || 'N/A',
         lab_mode: data.labMode || 'N/A',
         letter_of_invitation: data.letterOfInvitation || 'N/A',
@@ -6877,6 +6889,8 @@ async function runGslAdminNotificationEmail(data: any) {
       occupation: data.occupation || 'N/A',
       why_attend: data.whyAttend || 'N/A',
       focus_topic: data.focusTopic || 'N/A',
+      heard_about_us: data.heardAboutUs || 'N/A',
+      heard_about_us_other: data.heardAboutUsOther || 'N/A',
       target_group: data.targetGroup || 'N/A',
       lab_mode: data.labMode || 'N/A',
       letter_of_invitation: data.letterOfInvitation || 'N/A',

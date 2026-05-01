@@ -79,6 +79,13 @@ export interface GlobalRegisterContent {
     occupationLabel: string;
     whyAttendLabel: string;
     focusTopicLabel: string;
+    heardAboutUsLabel: string;
+    heardAboutUsPlaceholder: string;
+    heardAboutUsOtherPlaceholder: string;
+    heardAboutUsOptions: {
+      value: 'discord' | 'email' | 'friend' | 'google' | 'other';
+      label: string;
+    }[];
     visaLabel: string;
     visaIntro: string;
     visaItems: string[];
@@ -216,6 +223,16 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
       whyAttendLabel: 'Why do you want to attend the Lab? (Required)',
       focusTopicLabel:
         'What specific topic(s) do you want to focus on at the Lab this year? (Required)',
+      heardAboutUsLabel: 'How did you hear about us? (Optional)',
+      heardAboutUsPlaceholder: 'Select one',
+      heardAboutUsOtherPlaceholder: 'Please tell us where you heard about us',
+      heardAboutUsOptions: [
+        { value: 'discord', label: 'Discord' },
+        { value: 'email', label: 'Email' },
+        { value: 'friend', label: 'Friend' },
+        { value: 'google', label: 'Google' },
+        { value: 'other', label: 'Other' },
+      ],
       visaLabel: 'Letter of Invitation needed for Visa?',
       visaIntro:
         'Those seeking a letter of invitation for obtaining a visa to the US to participate in the Lab need to send the following information to',
@@ -432,6 +449,17 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
         'Pourquoi souhaitez-vous participer au laboratoire ? (obligatoire)',
       focusTopicLabel:
         'Sur quel(s) sujet(s) précis souhaitez-vous vous concentrer cette année au laboratoire ? (obligatoire)',
+      heardAboutUsLabel: 'Comment avez-vous entendu parler de nous ? (facultatif)',
+      heardAboutUsPlaceholder: 'Sélectionnez une option',
+      heardAboutUsOtherPlaceholder:
+        'Merci de préciser où vous avez entendu parler de nous',
+      heardAboutUsOptions: [
+        { value: 'discord', label: 'Discord' },
+        { value: 'email', label: 'E-mail' },
+        { value: 'friend', label: 'Ami(e)' },
+        { value: 'google', label: 'Google' },
+        { value: 'other', label: 'Autre' },
+      ],
       visaLabel: "Avez-vous besoin d'une lettre d'invitation pour le visa ?",
       visaIntro:
         "Les personnes qui ont besoin d'une lettre d'invitation pour obtenir un visa pour les États-Unis afin de participer au laboratoire doivent envoyer les informations suivantes à",

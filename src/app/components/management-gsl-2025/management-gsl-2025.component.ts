@@ -191,6 +191,33 @@ export class ManagementGsl2025Component implements OnInit {
     return this.availableYears;
   }
 
+  formatHeardAboutUs(user: any): string {
+    const heardAboutUs = user?.heardAboutUs ?? '';
+    const heardAboutUsOther = user?.heardAboutUsOther?.trim?.() ?? '';
+
+    if (!heardAboutUs && !heardAboutUsOther) {
+      return 'Not provided';
+    }
+
+    if (heardAboutUs === 'other') {
+      return heardAboutUsOther ? `Other: ${heardAboutUsOther}` : 'Other';
+    }
+
+    if (!heardAboutUs) {
+      return heardAboutUsOther;
+    }
+
+    const labels: { [key: string]: string } = {
+      discord: 'Discord',
+      email: 'Email',
+      friend: 'Friend',
+      google: 'Google',
+      other: 'Other',
+    };
+
+    return labels[heardAboutUs] || heardAboutUs;
+  }
+
   private applyFilters() {
     const query = this.searchQuery.toLowerCase().trim();
     this.filteredData = this.globalLabData.filter((user) => {
@@ -266,6 +293,7 @@ export class ManagementGsl2025Component implements OnInit {
       'Why Attend',
       'Focus Topic',
       'In Person vs Online',
+      'How Heard About Us',
     ];
 
     // 2) Map your filteredData into CSV rows
@@ -288,11 +316,13 @@ export class ManagementGsl2025Component implements OnInit {
       const whyAttend = user.whyAttend ?? '';
       const focusTopic = user.focusTopic ?? '';
       const labMode = user.labMode ?? '';
+      const heardAboutUs = this.formatHeardAboutUs(user);
       // Escape any commas in fields by wrapping in quotes
       return [
         name, email, country, registerDate, targetGroup,
         phone, address, city, stateProvince, age,
         organization, occupation, whyAttend, focusTopic, labMode,
+        heardAboutUs,
       ]
         .map((field) => `"${String(field).replace(/"/g, '""')}"`)
         .join(',');
@@ -347,6 +377,8 @@ export class ManagementGsl2025Component implements OnInit {
       whyAttend: user.whyAttend ?? '',
       focusTopic: user.focusTopic ?? '',
       labMode: user.labMode ?? '',
+      heardAboutUs: user.heardAboutUs ?? '',
+      heardAboutUsOther: user.heardAboutUsOther ?? '',
       gslYear: this.selectedYear,
     }));
 
