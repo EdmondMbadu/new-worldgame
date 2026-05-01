@@ -134,6 +134,10 @@ export class BulkEmailsComponent implements OnDestroy {
   templateSaving = false;
   templateError = '';
   templateModalOpen = false;
+  unsubscribeDeleteModalOpen = false;
+  unsubscribeDeletePendingEmail = '';
+  unsubscribeDeleteSaving = false;
+  unsubscribeDeleteError = '';
 
   // --- View mode ---
   isMonthMode = false;
@@ -1740,6 +1744,40 @@ export class BulkEmailsComponent implements OnDestroy {
     } catch (e) {
       console.error('deleteContactList', e);
       alert('Failed to delete contact list.');
+    }
+  }
+
+  openRemoveUnsubscribeModal(email: string): void {
+    const normalized = (email || '').trim().toLowerCase();
+    if (!normalized) return;
+    this.unsubscribeDeletePendingEmail = normalized;
+    this.unsubscribeDeleteError = '';
+    this.unsubscribeDeleteModalOpen = true;
+  }
+
+  closeRemoveUnsubscribeModal(force = false): void {
+    if (this.unsubscribeDeleteSaving && !force) return;
+    this.unsubscribeDeleteModalOpen = false;
+    this.unsubscribeDeletePendingEmail = '';
+    this.unsubscribeDeleteError = '';
+  }
+
+  async confirmRemoveUnsubscribe(): Promise<void> {
+    const email = this.unsubscribeDeletePendingEmail;
+    if (!email || this.unsubscribeDeleteSaving) return;
+
+    this.unsubscribeDeleteSaving = true;
+    this.unsubscribeDeleteError = '';
+
+    try {
+      await this.afs.doc(`mailing_unsubscribes/${email}`).delete();
+      this.unsubscribeDeleteSaving = false;
+      this.closeRemoveUnsubscribeModal(true);
+    } catch (error) {
+      console.error('confirmRemoveUnsubscribe', error);
+      this.unsubscribeDeleteSaving = false;
+      this.unsubscribeDeleteError =
+        'Failed to remove this email from the unsubscribed list.';
     }
   }
 

@@ -157,6 +157,71 @@
 
  
 
+<!-- Remove Unsubscribe Modal -->
+<div *ngIf="unsubscribeDeleteModalOpen" class="fixed inset-0 z-[110]">
+  <div
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+    (click)="closeRemoveUnsubscribeModal()"></div>
+  <div class="fixed inset-0 overflow-y-auto">
+    <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="removeUnsubscribeModalTitle"
+        class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10 overflow-hidden text-slate-900 dark:text-slate-100">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+          <h3 id="removeUnsubscribeModalTitle" class="text-base md:text-lg font-semibold">
+            Remove unsubscribed email?
+          </h3>
+          <button
+            type="button"
+            (click)="closeRemoveUnsubscribeModal()"
+            [disabled]="unsubscribeDeleteSaving"
+            class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+            Close
+          </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <p class="text-sm leading-6 text-slate-600 dark:text-slate-300">
+            You are removing
+            <span class="font-semibold text-slate-900 dark:text-slate-100">
+              {{ unsubscribeDeletePendingEmail }}
+            </span>
+            from the unsubscribed list.
+          </p>
+          <p class="text-sm leading-6 text-slate-600 dark:text-slate-300">
+            After this, that email may receive future bulk emails again unless the person unsubscribes again.
+          </p>
+
+          <div class="flex items-center justify-end gap-2">
+            <span
+              *ngIf="unsubscribeDeleteError"
+              class="mr-auto text-xs text-rose-600 dark:text-rose-400">
+              {{ unsubscribeDeleteError }}
+            </span>
+            <button
+              type="button"
+              (click)="closeRemoveUnsubscribeModal()"
+              [disabled]="unsubscribeDeleteSaving"
+              class="rounded-lg px-3 py-2 text-sm ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+              Cancel
+            </button>
+            <button
+              type="button"
+              (click)="confirmRemoveUnsubscribe()"
+              [disabled]="unsubscribeDeleteSaving"
+              class="rounded-lg px-3 py-2 text-sm bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50">
+              <span *ngIf="!unsubscribeDeleteSaving">Remove email</span>
+              <span *ngIf="unsubscribeDeleteSaving">Removing…</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Daily Report (Summary + Histogram) -->
 <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
   <div class="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 md:p-5">
@@ -589,6 +654,7 @@
                     <th class="py-1 pr-2">Email</th>
                     <th class="py-1 pr-2">Reason</th>
                     <th class="py-1 pr-2">Updated</th>
+                    <th class="py-1 pr-2 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
@@ -596,9 +662,17 @@
                     <td class="py-1 pr-2">{{ u.email }}</td>
                     <td class="py-1 pr-2 truncate">{{ u.reason || '—' }}</td>
                     <td class="py-1 pr-2">{{ u.updatedAt | date:'MMM d, y, h:mm a' }}</td>
+                    <td class="py-1 pl-2 text-right">
+                      <button
+                        type="button"
+                        (click)="openRemoveUnsubscribeModal(u.email)"
+                        class="rounded-lg px-2.5 py-1.5 text-[11px] ring-1 ring-rose-300 dark:ring-rose-800 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                        Remove
+                      </button>
+                    </td>
                   </tr>
                   <tr *ngIf="!unsubscribedRows.length">
-                    <td class="py-2 text-slate-500 dark:text-slate-400" colspan="3">
+                    <td class="py-2 text-slate-500 dark:text-slate-400" colspan="4">
                       No unsubscribes in {{ selectedUnsubMonthLabel }}.
                     </td>
                   </tr>
