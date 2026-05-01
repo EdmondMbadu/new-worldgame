@@ -8,25 +8,16 @@
   current="''">
 </app-navbar>
 
-<div class="min-h-screen dark:bg-slate-950">
-  <!-- ambient glow -->
-  <div aria-hidden="true"
-       class="pointer-events-none fixed -top-24 -left-24 hidden md:block h-80 w-80 rounded-full
-              bg-gradient-to-tr from-violet-500 to-sky-400 opacity-20 blur-3xl"></div>
-  <div aria-hidden="true"
-       class="pointer-events-none fixed -bottom-28 -right-28 hidden md:block h-[28rem] w-[28rem] rounded-full
-              bg-gradient-to-tr from-teal-500 to-emerald-400 opacity-20 blur-3xl"></div>
-
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950">
   <!-- widened container -->
   <div class="mx-auto max-w-7xl px-6 pt-24 pb-10">
     <!-- PROFILE HEADER -->
     <section
-      class="relative isolate overflow-visible rounded-3xl border border-slate-200/70 bg-white/70 shadow-xl
-             backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
-      <div class="h-28 bg-gradient-to-r from-violet-500/20 via-sky-500/20 to-teal-500/20
-                  dark:from-violet-500/15 dark:via-sky-500/15 dark:to-teal-500/15"></div>
+      class="relative isolate overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm
+             dark:border-slate-800 dark:bg-slate-900">
+      <div class="h-20 rounded-t-2xl bg-slate-100 dark:bg-slate-800"></div>
 
-      <div class="-mt-12 px-6 pb-6 sm:px-8">
+      <div class="-mt-10 px-6 pb-6 sm:px-8">
         <div class="flex flex-col gap-6 md:flex-row md:items-center">
           <!-- AVATAR + DROPZONE -->
           <div class="relative shrink-0"
@@ -41,8 +32,8 @@
             <!-- exclusive avatar modes -->
             <ng-container *ngIf="avatarMode === 'initials'; else avatarNonInitials">
               <div
-                class="grid h-28 w-28 place-items-center rounded-3xl ring-2 ring-white shadow-2xl
-                       bg-gradient-to-br from-sky-500 to-violet-600 text-white text-4xl font-semibold
+                class="grid h-28 w-28 place-items-center rounded-2xl ring-4 ring-white shadow-md
+                       bg-emerald-600 text-white text-4xl font-semibold
                        dark:ring-slate-900">
                 {{ initials }}
               </div>
@@ -52,13 +43,13 @@
               <ng-container *ngIf="avatarMode === 'photo'; else avatarSilhouette">
                 <img [src]="profilePicturePath"
                      [attr.alt]="('profile.avatar.alt' | translate)"
-                     class="h-28 w-28 rounded-3xl object-cover ring-2 ring-white shadow-2xl
+                     class="h-28 w-28 rounded-2xl object-cover ring-4 ring-white shadow-md
                             dark:ring-slate-900"/>
               </ng-container>
               <ng-template #avatarSilhouette>
                 <div
-                  class="grid h-28 w-28 place-items-center rounded-3xl bg-slate-100 text-slate-400
-                         ring-2 ring-white shadow-2xl dark:bg-slate-800 dark:text-slate-500 dark:ring-slate-900">
+                  class="grid h-28 w-28 place-items-center rounded-2xl bg-slate-100 text-slate-400
+                         ring-4 ring-white shadow-md dark:bg-slate-800 dark:text-slate-500 dark:ring-slate-900">
                   <svg class="h-14 w-14" viewBox="0 0 24 24" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                   </svg>
@@ -68,9 +59,9 @@
 
             <!-- edit chip -->
             <button onclick="document.getElementById('getFile').click()"
-                    class="absolute -bottom-2 -right-2 inline-flex items-center gap-1 rounded-xl
-                           bg-white/90 px-3 py-1.5 text-xs font-medium text-slate-700 shadow
-                           ring-1 ring-slate-200 hover:bg-white dark:bg-slate-800/90 dark:text-slate-200 dark:ring-slate-700">
+                    class="absolute -bottom-2 -right-2 inline-flex items-center gap-1 rounded-lg
+                           bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm
+                           border border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                 <path fill-rule="evenodd" clip-rule="evenodd"
                   d="M20.848 1.879c-1.172-1.172-3.071-1.172-4.243 0L2.447 16.036a3 3 0 00-.82 1.533l-.587 2.935A2 2 0 003.393 22.858l2.936-.587a3 3 0 001.533-.82L22.019 7.293c1.171-1.172 1.171-3.071 0-4.243l-1.171-1.171z"/>
@@ -92,15 +83,15 @@
 
                 <!-- Credential chip + edit button -->
                 <div class="mt-2 flex items-center gap-2">
-                  <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm
-                                border-slate-200 bg-white text-slate-700 shadow-sm
-                                dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm
+                                bg-emerald-50 text-emerald-700 border border-emerald-100
+                                dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800">
                     {{ user.profileCredential || '—' }}
                   </span>
                   <button (click)="toggleProfileCredential()"
-                          class="inline-flex items-center rounded-lg border border-slate-300
-                                 bg-white p-2 text-xs text-slate-700 shadow-sm hover:bg-slate-50
-                                 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                          class="inline-flex items-center rounded-md border border-slate-200
+                                 bg-white p-1.5 text-xs text-slate-600 hover:bg-slate-50
+                                 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                           [attr.aria-label]="
                             'profile.buttons.editProfileCredential' | translate
                           ">
@@ -131,16 +122,16 @@
                     {{ user.profileDescription }}
                   </ng-container>
                   <ng-template #addDesc>
-                    <span class="text-sky-600 hover:underline cursor-pointer"
+                    <span class="text-emerald-600 hover:underline cursor-pointer dark:text-emerald-400"
                           (click)="toggleProfileDescription()">
                       {{ 'profile.description.addPrompt' | translate }}
                     </span>
                   </ng-template>
                 </p>
                 <button (click)="toggleProfileDescription()"
-                        class="mt-0.5 inline-flex items-center rounded-lg border border-slate-300
-                               bg-white p-2 text-xs text-slate-700 shadow-sm hover:bg-slate-50
-                               dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                        class="mt-0.5 inline-flex items-center rounded-md border border-slate-200
+                               bg-white p-1.5 text-xs text-slate-600 hover:bg-slate-50
+                               dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
                   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                     <path fill-rule="evenodd" clip-rule="evenodd"
                       d="M20.848 1.879c-1.172-1.172-3.071-1.172-4.243 0L2.447 16.036a3 3 0 00-.82 1.533l-.587 2.935A2 2 0 003.393 22.858l2.936-.587a3 3 0 001.533-.82L22.019 7.293c1.171-1.172 1.171-3.071 0-4.243l-1.171-1.171z"/>
@@ -167,15 +158,15 @@
                 <div class="relative">
                   <img (mouseenter)="onHoverImageToggle('solution-completed')"
                        (mouseleave)="onHoverImageToggle('solution-completed')"
-                       class="h-16 w-16 cursor-pointer rounded-xl border border-slate-200 bg-white p-2 shadow-sm
+                       class="h-16 w-16 cursor-pointer rounded-lg border border-slate-200 bg-white p-2
                               dark:border-slate-700 dark:bg-slate-800"
                        src="../../../assets/img/solution-completed-badge.png"
                        [attr.alt]="
                          'profile.achievements.solutionCompleted.alt' | translate
                        "/>
                   <div *ngIf="showSolutionCompletedBadge"
-                       class="absolute left-20 top-1 z-50 w-72 rounded-xl border border-slate-200 bg-white p-4
-                              text-sm shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                       class="absolute left-20 top-1 z-50 w-72 rounded-lg border border-slate-200 bg-white p-4
+                              text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900">
                     <img class="mb-3 h-24 w-full rounded-lg object-contain"
                          src="../../../assets/img/solution-completed-badge.png" alt="" />
                     <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">
@@ -190,15 +181,15 @@
                 <div class="relative" *ngIf="points !== 0">
                   <img (mouseenter)="onHoverImageToggle('points')"
                        (mouseleave)="onHoverImageToggle('points')"
-                       class="h-16 w-16 cursor-pointer rounded-full border border-slate-200 bg-white p-2 shadow-sm
+                       class="h-16 w-16 cursor-pointer rounded-full border border-slate-200 bg-white p-2
                               dark:border-slate-700 dark:bg-slate-800"
                        src="../../../assets/img/nwg-solution-badge.png"
                        [attr.alt]="
                          'profile.achievements.points.alt' | translate
                        "/>
                   <div *ngIf="showSolutionWithPointsBadge"
-                       class="absolute left-20 top-1 z-50 w-72 rounded-xl border border-slate-200 bg-white p-4
-                              text-sm shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                       class="absolute left-20 top-1 z-50 w-72 rounded-lg border border-slate-200 bg-white p-4
+                              text-sm shadow-lg dark:border-slate-700 dark:bg-slate-900">
                     <img class="mb-3 h-24 w-full rounded-lg object-contain"
                          src="../../../assets/img/nwg-solution-badge.png" alt="" />
                     <h3 class="mb-1 text-base font-semibold text-slate-900 dark:text-white">
@@ -222,8 +213,8 @@
       <div class="lg:col-span-2"></div>
 
       <aside
-        class="rounded-3xl border border-slate-200/70 bg-white/70 p-6 shadow-xl backdrop-blur
-               dark:border-slate-800 dark:bg-slate-900/70">
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm
+               dark:border-slate-800 dark:bg-slate-900">
         <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
           {{ 'profile.sidebar.title' | translate }}
         </h2>
@@ -243,8 +234,8 @@
               <span *ngIf="user.employement === ''" class="text-slate-500">—</span>
             </div>
             <button (click)="toggleEmployementCredential()"
-                    class="ml-2 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-700 shadow-sm
-                           hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    class="ml-2 rounded-md border border-slate-200 bg-white p-1.5 text-xs text-slate-600
+                           hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
               {{ 'profile.buttons.edit' | translate }}
             </button>
           </li>
@@ -262,8 +253,8 @@
               <span *ngIf="user.education === ''" class="text-slate-500">—</span>
             </div>
             <button (click)="toggleEducationCredential()"
-                    class="ml-2 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-700 shadow-sm
-                           hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    class="ml-2 rounded-md border border-slate-200 bg-white p-1.5 text-xs text-slate-600
+                           hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
               {{ 'profile.buttons.edit' | translate }}
             </button>
           </li>
@@ -280,8 +271,8 @@
               <span *ngIf="user.location === ''" class="text-slate-500">—</span>
             </div>
             <button (click)="toggleLocationCredential()"
-                    class="ml-2 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-700 shadow-sm
-                           hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    class="ml-2 rounded-md border border-slate-200 bg-white p-1.5 text-xs text-slate-600
+                           hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
               {{ 'profile.buttons.edit' | translate }}
             </button>
           </li>
@@ -311,12 +302,15 @@
 
     <!-- SOLUTIONS -->
     <section class="mt-10">
-      <h2 class="text-center text-2xl font-bold text-slate-900 underline underline-offset-8 dark:text-white">
-        {{
-          'profile.solutions.title'
-            | translate: { count: completedSolutions.length }
-        }}
-      </h2>
+      <div class="flex items-center gap-4">
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-white">
+          {{
+            'profile.solutions.title'
+              | translate: { count: completedSolutions.length }
+          }}
+        </h2>
+        <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+      </div>
 
       <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         <div *ngFor="let solution of completedSolutions; let i = index"
