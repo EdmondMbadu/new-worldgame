@@ -138,8 +138,20 @@ export class ActivityHeatmapComponent implements OnInit, OnChanges {
   trackWeek = (i: number) => i;
   trackDay = (_: number, c: DayCell) => c.key;
 
-  onCellEnter(cell: DayCell) {
-    if (cell.inRange) this.hover = cell;
+  hoverX = 0;
+  hoverY = 0;
+
+  onCellEnter(cell: DayCell, ev: MouseEvent) {
+    if (!cell.inRange) return;
+    this.hover = cell;
+    const target = ev.currentTarget as HTMLElement;
+    const grid = target.closest('[data-heatmap-grid]') as HTMLElement | null;
+    if (!grid) return;
+    const cellRect = target.getBoundingClientRect();
+    const gridRect = grid.getBoundingClientRect();
+    // Position tooltip just above-right of the cell, relative to the grid wrapper.
+    this.hoverX = cellRect.left - gridRect.left + cellRect.width / 2;
+    this.hoverY = cellRect.top - gridRect.top;
   }
   onCellLeave() {
     this.hover = null;

@@ -41,7 +41,7 @@
 
   <!-- Grid -->
   <div *ngIf="!loading" class="mt-4 overflow-x-auto">
-    <div class="relative inline-block min-w-full">
+    <div data-heatmap-grid class="relative inline-block min-w-full">
       <!-- Month labels row -->
       <div class="ml-7 flex h-4 text-[10px] text-slate-500 dark:text-slate-400">
         <ng-container *ngFor="let m of monthLabels">
@@ -61,7 +61,7 @@
         <div class="flex gap-[3px]">
           <div *ngFor="let week of weeks; trackBy: trackWeek" class="flex flex-col gap-[3px]">
             <div *ngFor="let day of week; trackBy: trackDay"
-                 (mouseenter)="onCellEnter(day)"
+                 (mouseenter)="onCellEnter(day, $event)"
                  (mouseleave)="onCellLeave()"
                  class="h-[10px] w-[10px] rounded-[2px] transition"
                  [class.invisible]="!day.inRange"
@@ -80,9 +80,11 @@
         </div>
       </div>
 
-      <!-- Hover tooltip -->
+      <!-- Floating hover tooltip (absolute, anchored to the cell) -->
       <div *ngIf="hover"
-           class="pointer-events-none mt-3 inline-block rounded-md border border-slate-200 bg-white px-3 py-2 text-xs shadow-md dark:border-slate-700 dark:bg-slate-800">
+           class="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs shadow-md dark:border-slate-700 dark:bg-slate-800"
+           [style.left.px]="hoverX"
+           [style.top.px]="hoverY - 6">
         <div class="font-medium text-slate-900 dark:text-white">{{ formatHoverDate(hover.date) }}</div>
         <div class="mt-0.5 text-slate-600 dark:text-slate-300">
           <ng-container *ngIf="hover.score > 0; else noActivity">
