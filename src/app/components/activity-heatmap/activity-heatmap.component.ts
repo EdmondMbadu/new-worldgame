@@ -15,6 +15,7 @@ interface DayCell {
   score: number;
   level: 0 | 1 | 2 | 3 | 4;
   editSeconds: number;
+  edits: number;
   comments: number;
   evaluations: number;
   publishes: number;
@@ -206,16 +207,17 @@ function buildCell(
   inRange: boolean
 ): DayCell {
   const editSeconds = Number(doc?.editSeconds || 0);
+  const edits = Number(doc?.edits || 0);
   const comments = Number(doc?.comments || 0);
   const evaluations = Number(doc?.evaluations || 0);
   const publishes = Number(doc?.publishes || 0);
 
   // Composite score:
-  //   ≥ 5 min editing = 1
+  //   a saved edit OR ≥ 5 min editing = 1
   //   each comment/eval up to 3
   //   publishing = 2
   const score =
-    (editSeconds >= 300 ? 1 : 0) +
+    Math.max(editSeconds >= 300 ? 1 : 0, edits > 0 ? 1 : 0) +
     Math.min(comments, 3) +
     Math.min(evaluations, 3) +
     (publishes > 0 ? 2 : 0);
@@ -232,6 +234,7 @@ function buildCell(
     score,
     level,
     editSeconds,
+    edits,
     comments,
     evaluations,
     publishes,

@@ -21,12 +21,13 @@ const FLUSH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const IDLE_TIMEOUT_MS = 60 * 1000;       // 60s without a beat -> idle
 const MIN_FLUSH_SECONDS = 30;            // don't flush sub-30s slivers
 
-export type ActivityEvent = 'comment' | 'evaluation' | 'publish';
+export type ActivityEvent = 'comment' | 'evaluation' | 'publish' | 'edit';
 
 interface ActivityDoc {
   date: string;
   editSeconds?: number;
   solutions?: { [solutionId: string]: number };
+  edits?: number;
   comments?: number;
   evaluations?: number;
   publishes?: number;
@@ -104,6 +105,7 @@ export class ActivityService implements OnDestroy {
     );
     const FieldValue = firebase.firestore.FieldValue;
     const fieldByKind: Record<ActivityEvent, string> = {
+      edit: 'edits',
       comment: 'comments',
       evaluation: 'evaluations',
       publish: 'publishes',
@@ -127,23 +129,11 @@ export class ActivityService implements OnDestroy {
     const start = new Date();
     start.setDate(start.getDate() - daysBack);
     const startKey = isoDateKey(start);
-    return new Observable<ActivityDoc[]>((sub) => {
-      this.afs.firestore
-        .collection(`users/${uid}/activity`)
-        .where('date', '>=', startKey)
-        .get()
-        .then((snap) => {
-          const docs: ActivityDoc[] = [];
-          snap.forEach((d) => docs.push(d.data() as ActivityDoc));
-          sub.next(docs);
-          sub.complete();
-        })
-        .catch((err) => {
-          console.warn('activity.getActivityForUser failed', err);
-          sub.next([]);
-          sub.complete();
-        });
-    });
+    return this.afs
+      .collection<ActivityDoc>(`users/${uid}/activity`, (ref) =>
+        ref.where('date', '>=', startKey)
+      )
+      .valueChanges();
   }
 
   ngOnDestroy() {

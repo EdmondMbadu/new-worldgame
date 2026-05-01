@@ -89,6 +89,7 @@
         <div class="mt-0.5 text-slate-600 dark:text-slate-300">
           <ng-container *ngIf="hover.score > 0; else noActivity">
             <span *ngIf="hover.editSeconds">{{ formatMinutes(hover.editSeconds) }} editing</span>
+            <span *ngIf="hover.edits"> · {{ hover.edits }} saved edit{{ hover.edits === 1 ? '' : 's' }}</span>
             <span *ngIf="hover.comments"> · {{ hover.comments }} comment{{ hover.comments === 1 ? '' : 's' }}</span>
             <span *ngIf="hover.evaluations"> · {{ hover.evaluations }} evaluation{{ hover.evaluations === 1 ? '' : 's' }}</span>
             <span *ngIf="hover.publishes"> · published</span>
