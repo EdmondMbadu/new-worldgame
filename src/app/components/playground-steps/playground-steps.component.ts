@@ -2239,6 +2239,7 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     'business-model-canvas',
     'funder-brief',
     'funding-sources',
+    'op-ed',
     'press-release',
   ];
 
