@@ -58,6 +58,7 @@ import { JoinSuccessComponent } from '../components/join-success/join-success.co
 import { BroadcastedSolutionsComponent } from '../components/broadcasted-solutions/broadcasted-solutions.component';
 import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from '../components/avatar-detail/avatar-detail.component';
+import { ActivityHeatmapComponent } from '../components/activity-heatmap/activity-heatmap.component';
 
 @NgModule({
   declarations: [
@@ -113,6 +114,7 @@ import { AvatarDetailComponent } from '../components/avatar-detail/avatar-detail
     BroadcastedSolutionsComponent,
     UnsubscribeComponent,
     AvatarDetailComponent,
+    ActivityHeatmapComponent,
   ],
   imports: [
     CommonModule,

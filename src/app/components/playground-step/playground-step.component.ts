@@ -22,6 +22,7 @@ import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { environment } from 'environments/environments';
 import { Subscription } from 'rxjs';
+import { ActivityService } from 'src/app/services/activity.service';
 import { DataService } from 'src/app/services/data.service';
 import { LanguageService } from 'src/app/services/language.service';
 
@@ -128,7 +129,8 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
     private storage: AngularFireStorage,
     private dataService: DataService,
     private languageService: LanguageService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private activity: ActivityService
   ) {}
   aiOptions = [
     {
@@ -212,6 +214,9 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   private isReceivingRemoteUpdate = false;
   ngOnInit() {
     window.scrollTo(0, 0);
+    if (this.solutionId) {
+      this.activity.startEditing(this.solutionId);
+    }
     this.initializeLanguageSupport();
     // this.initializeContents();
 
@@ -363,6 +368,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       // Track local edit time for real-time sync conflict prevention
       if (!this.isReceivingRemoteUpdate) {
         this.lastLocalEditTime = Date.now();
+        this.activity.beat();
       }
       
       // console.log('Content changed:', editor.getData());
@@ -940,6 +946,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.langSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     clearTimeout(this.saveTimeout);
+    this.activity.stopEditing();
   }
 
   private initializeLanguageSupport() {

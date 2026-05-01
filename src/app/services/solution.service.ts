@@ -10,6 +10,7 @@ import {
   Roles,
   Solution,
 } from '../models/solution';
+import { ActivityService } from './activity.service';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import {
@@ -47,7 +48,8 @@ export class SolutionService {
     private auth: AuthService,
     private afs: AngularFirestore,
     private time: TimeService,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private activity: ActivityService
   ) {
     this.auth.user$.subscribe((user) => {
       if (user && user.email) {
@@ -275,6 +277,7 @@ export class SolutionService {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solution.solutionId}`
     );
+    void this.activity.recordEvent('comment', solution.solutionId);
     return solutionRef.set(data, { merge: true });
   }
   // updateSolutionStatus(solutionId: string, updateData: any) {
@@ -450,6 +453,7 @@ export class SolutionService {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solution.solutionId}`
     );
+    void this.activity.recordEvent('evaluation', solution.solutionId);
     return solutionRef.set(data, { merge: true });
   }
   updateSolutionField(id: string, key: string, value: any) {
@@ -469,6 +473,9 @@ export class SolutionService {
       data = { [key]: value };
     }
 
+    if (key === 'finished' && value === 'true') {
+      void this.activity.recordEvent('publish', id);
+    }
     return solutionRef.set(this.withSolutionUpdatedAt(data), { merge: true });
   }
 
@@ -476,6 +483,9 @@ export class SolutionService {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${id}`
     );
+    if (values.finished === 'true') {
+      void this.activity.recordEvent('publish', id);
+    }
     return solutionRef.set(this.withSolutionUpdatedAt(values), { merge: true });
   }
 
