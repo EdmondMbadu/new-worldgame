@@ -12,6 +12,12 @@
     </div>
 
     <div class="flex items-center gap-1">
+      <button
+        type="button"
+        (click)="toggleTrackingInfo()"
+        class="rounded-md px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100">
+        {{ showTrackingInfo ? 'Hide tracking info' : 'How it is tracked' }}
+      </button>
       <button type="button"
               (click)="shiftYear(-1)"
               class="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -37,6 +43,22 @@
         </svg>
       </button>
     </div>
+  </div>
+
+  <div
+    *ngIf="showTrackingInfo"
+    class="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-600 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-300">
+    <p class="font-medium text-slate-900 dark:text-white">How activity is tracked</p>
+    <p class="mt-1">
+      Saved title and ReadMe edits count as activity shortly after you save.
+      Comments, evaluations, and publishing count too.
+    </p>
+    <p class="mt-2">
+      Longer writing sessions are tracked without logging every keystroke. The app batches activity and writes it later when you leave the page, switch tabs, or the periodic flush runs.
+    </p>
+    <p class="mt-2">
+      To control cost, tiny scraps are not written immediately and there is no per-keystroke logging.
+    </p>
   </div>
 
   <!-- Grid -->

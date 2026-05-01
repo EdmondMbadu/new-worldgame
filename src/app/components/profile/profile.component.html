@@ -13,7 +13,7 @@
   <div class="mx-auto max-w-7xl px-6 pt-24 pb-10">
     <!-- PROFILE HEADER -->
     <section
-      class="relative isolate overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm
+      class="relative isolate z-20 overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm
              dark:border-slate-800 dark:bg-slate-900">
       <div class="h-20 rounded-t-2xl bg-slate-100 dark:bg-slate-800"></div>
 
@@ -244,7 +244,7 @@
     </section>
 
     <!-- ACTIVITY HEATMAP -->
-    <section class="mt-6">
+    <section class="relative z-0 mt-6">
       <app-activity-heatmap [uid]="user.uid"></app-activity-heatmap>
     </section>
 

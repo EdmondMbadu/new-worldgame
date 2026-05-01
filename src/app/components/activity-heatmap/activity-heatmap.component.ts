@@ -45,6 +45,7 @@ export class ActivityHeatmapComponent implements OnInit, OnChanges {
   activeDays: number = 0;
   loading: boolean = true;
   hover: DayCell | null = null;
+  showTrackingInfo = false;
 
   private activityByKey: { [k: string]: any } = {};
 
@@ -85,6 +86,10 @@ export class ActivityHeatmapComponent implements OnInit, OnChanges {
   resetToToday() {
     this.anchor = new Date();
     this.rebuild();
+  }
+
+  toggleTrackingInfo() {
+    this.showTrackingInfo = !this.showTrackingInfo;
   }
 
   isFutureWindow(): boolean {
