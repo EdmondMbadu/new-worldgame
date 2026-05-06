@@ -21,6 +21,31 @@
   //    },
   //   ]
   // ]
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "solutions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statusForPublication", "order": "ASCENDING" },
+        { "fieldPath": "title", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "solutions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statusForPublication", "order": "ASCENDING" },
+        { "fieldPath": "authorName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "solutions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "statusForPublication", "order": "ASCENDING" },
+        { "fieldPath": "submissionDate", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }

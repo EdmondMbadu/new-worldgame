@@ -10,21 +10,32 @@ import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
 import {
   combineLatest,
+  catchError,
   debounceTime,
   distinctUntilChanged,
+  map,
   of,
   switchMap,
   takeUntil,
   Subject,
 } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
-import { ChallengePage } from 'src/app/models/user';
+import { ChallengePage, User } from 'src/app/models/user';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { SchoolService } from 'src/app/services/school.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { environment } from 'environments/environments';
+
+interface NavbarSearchItem {
+  type: 'solution' | 'person';
+  id: string;
+  title: string;
+  subtitle: string;
+  initials: string;
+  route: any[];
+}
 
 @Component({
   selector: 'app-navbar',
@@ -45,7 +56,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Input() lastName: string = '';
   @Input() email: string = '';
   showDropDown: boolean = false;
-  filteredItems: Solution[] = [];
+  filteredItems: NavbarSearchItem[] = [];
   isSearching: boolean = false;
   displayHamburgerMenu: boolean = true;
   displayHamburgerMenuClose: boolean = false;
@@ -158,15 +169,32 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
+        map((value) => String(value || '').trim()),
         distinctUntilChanged(),
         switchMap((value) => {
-          if (!value || value.trim().length < 2) {
+          if (!value || value.length < 2) {
             this.isSearching = false;
             return of([]);
           }
           this.isSearching = true;
-          // Use efficient server-side search with limit
-          return this.solution.searchFinishedSolutions(value, 20);
+          return combineLatest([
+            this.solution.searchPublishedSolutions(value, 6),
+            this.auth.searchUsers(value, 6),
+          ]).pipe(
+            map(([solutions, users]) => [
+              ...solutions.map((solution) =>
+                this.toSolutionSearchItem(solution)
+              ),
+              ...users
+                .filter((user) => !!user.uid)
+                .map((user) => this.toPersonSearchItem(user)),
+            ]),
+            map((items) => items.slice(0, 8)),
+            catchError((error) => {
+              console.error('Navbar search failed:', error);
+              return of([]);
+            })
+          );
         }),
         takeUntil(this.destroy$)
       )
@@ -298,6 +326,48 @@ export class NavbarComponent implements OnInit, OnDestroy {
   clearSearch() {
     this.searchControl.setValue('');
     this.filteredItems = [];
+    this.isSearching = false;
+  }
+
+  trackSearchItem(index: number, item: NavbarSearchItem) {
+    return `${item.type}:${item.id || index}`;
+  }
+
+  private toSolutionSearchItem(solution: Solution): NavbarSearchItem {
+    const author = solution.authorName || 'Published solution';
+
+    return {
+      type: 'solution',
+      id: solution.solutionId || solution.title || '',
+      title: solution.title || 'Untitled solution',
+      subtitle: `Solution${author ? ` by ${author}` : ''}`,
+      initials: this.getInitialsFromText(author || solution.title || 'S'),
+      route: ['/solution-view', solution.solutionId],
+    };
+  }
+
+  private toPersonSearchItem(user: User): NavbarSearchItem {
+    const name =
+      `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+      user.email ||
+      'NewWorld Game member';
+    const isCurrentUser = user.uid === this.auth.currentUser?.uid;
+
+    return {
+      type: 'person',
+      id: user.uid || user.email || name,
+      title: name,
+      subtitle: user.email || 'Person',
+      initials: this.getInitialsFromText(name || user.email || 'P'),
+      route: isCurrentUser ? ['/profile'] : ['/user-profile', user.uid],
+    };
+  }
+
+  private getInitialsFromText(text: string): string {
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return '?';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase();
   }
 
   // lightMode() {

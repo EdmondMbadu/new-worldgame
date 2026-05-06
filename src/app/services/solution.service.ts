@@ -429,6 +429,101 @@ export class SolutionService {
   }
 
   /**
+   * Search only solutions that have been approved for publication.
+   *
+   * Firestore does not provide contains/full-text search, so this keeps the
+   * query bounded with server-side prefix searches and a small recent-published
+   * fallback for case-insensitive matching.
+   */
+  searchPublishedSolutions(
+    searchTerm: string,
+    limit: number = 10
+  ): Observable<Solution[]> {
+    if (!searchTerm || searchTerm.trim().length < 2) {
+      return of([]);
+    }
+
+    const term = searchTerm.trim();
+    const normalizedTerm = term.toLowerCase();
+    const variants = this.getSearchTermVariants(term);
+    const perQueryLimit = Math.max(limit, 6);
+
+    const titleQueries = variants.map((variant) =>
+      this.searchPublishedSolutionsByPrefix('title', variant, perQueryLimit)
+    );
+    const authorQueries = variants.map((variant) =>
+      this.searchPublishedSolutionsByPrefix('authorName', variant, perQueryLimit)
+    );
+    const recentPublished$ = this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref
+          .where('statusForPublication', '==', 'approved')
+          .orderBy('submissionDate', 'desc')
+          .limit(30)
+      )
+      .valueChanges();
+
+    return combineLatest([...titleQueries, ...authorQueries, recentPublished$]).pipe(
+      map((groups) => {
+        const unique = new Map<string, Solution>();
+
+        for (const solution of groups.flat()) {
+          if (solution?.statusForPublication !== 'approved') continue;
+
+          const haystack = [
+            solution.title || '',
+            solution.authorName || '',
+            solution.description || '',
+          ]
+            .join(' ')
+            .toLowerCase();
+
+          if (!haystack.includes(normalizedTerm)) continue;
+
+          const key =
+            solution.solutionId ||
+            `${solution.title || ''}|${solution.authorName || ''}|${solution.submissionDate || ''}`;
+          if (!unique.has(key)) {
+            unique.set(key, solution);
+          }
+        }
+
+        return Array.from(unique.values()).slice(0, limit);
+      })
+    );
+  }
+
+  private searchPublishedSolutionsByPrefix(
+    field: 'title' | 'authorName',
+    term: string,
+    limitCount: number
+  ): Observable<Solution[]> {
+    const endTerm = term + '\uf8ff';
+
+    return this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref
+          .where('statusForPublication', '==', 'approved')
+          .orderBy(field)
+          .startAt(term)
+          .endAt(endTerm)
+          .limit(limitCount)
+      )
+      .valueChanges();
+  }
+
+  private getSearchTermVariants(term: string): string[] {
+    const trimmed = term.trim();
+    const lower = trimmed.toLowerCase();
+    const titleCase = lower.replace(/\b\w/g, (char) => char.toUpperCase());
+    const firstUpper = lower.charAt(0).toUpperCase() + lower.slice(1);
+
+    return Array.from(new Set([trimmed, lower, titleCase, firstUpper])).filter(
+      Boolean
+    );
+  }
+
+  /**
    * Get limited recent finished solutions (for initial search cache)
    * Much more efficient than loading all solutions
    */

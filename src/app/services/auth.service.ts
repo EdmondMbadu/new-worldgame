@@ -8,7 +8,14 @@ import {
   DocumentReference,
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
-import { Observable, firstValueFrom, of, switchMap } from 'rxjs';
+import {
+  Observable,
+  combineLatest,
+  firstValueFrom,
+  map,
+  of,
+  switchMap,
+} from 'rxjs';
 import { NewUser, PlanKey, PRICE_BOOK, School, User } from '../models/user';
 import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
@@ -224,19 +231,83 @@ export class AuthService {
   searchUsers(searchTerm: string, limitCount: number = 15) {
     const term = searchTerm.toLowerCase().trim();
     if (!term) {
-      return new Observable<User[]>(observer => observer.next([]));
+      return of([]);
     }
-    
-    // Search by email prefix (most reliable for Firestore)
-    const endTerm = term + '\uf8ff';
+
+    const prefixTerm = term.split(/\s+/)[0];
+    const variants = this.getUserSearchTermVariants(prefixTerm);
+    const perFieldLimit = Math.min(Math.max(limitCount, 5), 10);
+
+    const searches = [
+      this.searchUsersByPrefixField('email', term, perFieldLimit),
+      this.searchUsersByPrefixField('emailLower', term, perFieldLimit),
+      this.searchUsersByPrefixField('firstNameLower', prefixTerm, perFieldLimit),
+      this.searchUsersByPrefixField('lastNameLower', prefixTerm, perFieldLimit),
+      ...variants.map((variant) =>
+        this.searchUsersByPrefixField('firstName', variant, perFieldLimit)
+      ),
+      ...variants.map((variant) =>
+        this.searchUsersByPrefixField('lastName', variant, perFieldLimit)
+      ),
+    ];
+
+    return combineLatest(searches).pipe(
+      map((groups) => {
+        const unique = new Map<string, User>();
+
+        for (const user of groups.flat()) {
+          const haystack = [
+            user.email || '',
+            user.firstName || '',
+            user.lastName || '',
+            `${user.firstName || ''} ${user.lastName || ''}`,
+            user.profileCredential || '',
+            user.profileDescription || '',
+          ]
+            .join(' ')
+            .toLowerCase();
+
+          if (!haystack.includes(term)) continue;
+
+          const key = user.uid || user.email || `${user.firstName}|${user.lastName}`;
+          if (key && !unique.has(key)) {
+            unique.set(key, user);
+          }
+        }
+
+        return Array.from(unique.values()).slice(0, limitCount);
+      })
+    );
+  }
+
+  private searchUsersByPrefixField(
+    field: string,
+    term: string,
+    limitCount: number
+  ): Observable<User[]> {
+    const normalized = term.trim();
+    if (!normalized) return of([]);
+
+    const endTerm = normalized + '\uf8ff';
     return this.afs
       .collection<User>(`users`, (ref) =>
         ref
-          .where('email', '>=', term)
-          .where('email', '<=', endTerm)
+          .where(field, '>=', normalized)
+          .where(field, '<=', endTerm)
           .limit(limitCount)
       )
       .valueChanges();
+  }
+
+  private getUserSearchTermVariants(term: string): string[] {
+    const trimmed = term.trim();
+    const lower = trimmed.toLowerCase();
+    const firstUpper = lower.charAt(0).toUpperCase() + lower.slice(1);
+    const upper = trimmed.toUpperCase();
+
+    return Array.from(new Set([trimmed, lower, firstUpper, upper])).filter(
+      Boolean
+    );
   }
 
   getUserFromEmail(email: string) {
@@ -265,8 +336,11 @@ export class AuthService {
     const data = {
       uid: user.uid,
       email: user.email,
+      emailLower: (user.email || '').toLowerCase(),
       firstName: firstName,
+      firstNameLower: (firstName || '').toLowerCase(),
       lastName: lastName,
+      lastNameLower: (lastName || '').toLowerCase(),
       followers: '0',
       following: '0',
       employement: '',
@@ -480,8 +554,11 @@ export class AuthService {
     const data = {
       uid: user.uid,
       email: user.email,
+      emailLower: (user.email || '').toLowerCase(),
       firstName: firstName,
+      firstNameLower: (firstName || '').toLowerCase(),
       lastName: lastName,
+      lastNameLower: (lastName || '').toLowerCase(),
       followers: '0',
       following: '0',
       employement: '',
@@ -655,8 +732,11 @@ export class AuthService {
       {
         uid: cred.user!.uid,
         firstName,
+        firstNameLower: (firstName || '').toLowerCase(),
         lastName,
+        lastNameLower: (lastName || '').toLowerCase(),
         email,
+        emailLower: (email || '').toLowerCase(),
         role: 'schoolAdmin', // provisional
         createdAt: this.time.getCurrentDate(),
         status: 'pendingPayment',
@@ -802,8 +882,11 @@ export class AuthService {
         {
           uid: user.uid,
           email,
+          emailLower: (email || '').toLowerCase(),
           firstName,
+          firstNameLower: (firstName || '').toLowerCase(),
           lastName,
+          lastNameLower: (lastName || '').toLowerCase(),
           followers: '0',
           following: '0',
           employement: '',
@@ -830,11 +913,20 @@ export class AuthService {
     if (email && !current?.email) {
       updates.email = email;
     }
+    if (email && current?.emailLower !== email.toLowerCase()) {
+      updates.emailLower = email.toLowerCase();
+    }
     if (!current?.firstName && firstName) {
       updates.firstName = firstName;
     }
+    if (firstName && current?.firstNameLower !== firstName.toLowerCase()) {
+      updates.firstNameLower = firstName.toLowerCase();
+    }
     if (!current?.lastName && lastName) {
       updates.lastName = lastName;
+    }
+    if (lastName && current?.lastNameLower !== lastName.toLowerCase()) {
+      updates.lastNameLower = lastName.toLowerCase();
     }
 
     if (Object.keys(updates).length) {

@@ -3,8 +3,11 @@ import { Comment } from './solution';
 export class User {
   uid?: string;
   email?: string;
+  emailLower?: string;
   firstName?: string;
+  firstNameLower?: string;
   lastName?: string;
+  lastNameLower?: string;
   status?: string;
   profilePicture?: Avatar;
   profileCredential?: string;
