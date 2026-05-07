@@ -1,0 +1,17 @@
+.comment-author-popover {
+  transform-origin: bottom left;
+}
+
+.comment-author-popover__description {
+  display: -webkit-box;
+  max-height: 3.75rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (max-width: 640px) {
+  .comment-author-popover {
+    left: -0.75rem;
+  }
+}

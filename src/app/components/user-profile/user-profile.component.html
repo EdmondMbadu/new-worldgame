@@ -72,14 +72,14 @@
               </div>
 
               <div class="shrink-0">
-                <button *ngIf="!followingThisUser"
+                <button *ngIf="canFollowProfile && !followingThisUser"
                         (click)="followThisUser()"
                         class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600
                                px-5 py-2 text-sm font-medium text-white shadow-sm hover:shadow-md hover:from-emerald-500 hover:to-teal-500
                                transition active:scale-[.98]">
                   Follow
                 </button>
-                <button *ngIf="followingThisUser"
+                <button *ngIf="canFollowProfile && followingThisUser"
                         (click)="UnFollowThisUser()"
                         class="inline-flex items-center gap-2 rounded-full border border-slate-300
                                bg-white px-5 py-2 text-sm font-medium text-slate-700
@@ -204,4 +204,4 @@
   <app-footer class="md:hidden"></app-footer>
 </div>
 
-<app-chatbot></app-chatbot>
+<app-chatbot *ngIf="auth.currentUser?.uid"></app-chatbot>

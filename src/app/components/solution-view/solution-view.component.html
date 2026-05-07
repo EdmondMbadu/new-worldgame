@@ -662,34 +662,111 @@
       >
         <footer class="flex justify-between items-center mb-2">
           <div class="flex items-center">
-            <div
-              class="inline-flex items-center mr-3 font-semibold text-sm text-gray-900 dark:text-white"
-            >
-              <!-- <img
-                            *ngIf="commentUserProfilePicturePath[i]" 
-                                class="mr-2 w-6 h-6 rounded-full"
-                               [src]="commentUserProfilePicturePath[i]"
-                               alt="">
-                              -->
-              <!-- <div >
-                                <svg class=" w-8 h-8 me-2 rounded-full" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg> 
-                       
-                            </div> -->
-              <div
-                class="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600 mr-2"
+            <div class="relative mr-3">
+              <a
+                [routerLink]="getCommentAuthorRoute(commentAuthors[i])"
+                class="group inline-flex items-center rounded-full pr-2 text-sm font-semibold text-gray-900 outline-none transition hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-white dark:hover:text-emerald-300 dark:focus-visible:ring-offset-gray-900"
+                [class.pointer-events-none]="!commentAuthors[i]?.uid"
+                [attr.aria-label]="'View profile for ' + getCommentAuthorName(commentAuthors[i], comment)"
               >
                 <span
-                  *ngIf="commentUserNames[i] !== undefined"
-                  class="font-medium text-gray-600 dark:text-gray-300"
-                  >{{ commentUserNames[i].substring(0, 2) }}</span
+                  class="relative mr-2 inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 shadow-sm transition group-hover:ring-2 group-hover:ring-emerald-400 dark:border-gray-700 dark:bg-gray-600"
                 >
-              </div>
-              <h1
-                *ngIf="commentUserNames[i] !== undefined"
-                class="text-sm text-gray-600 dark:text-gray-400"
-              >
-                {{ commentUserNames[i] }}
-              </h1>
+                  <img
+                    *ngIf="commentUserProfilePicturePath[i]; else commentInitials"
+                    [src]="commentUserProfilePicturePath[i]"
+                    [alt]="getCommentAuthorName(commentAuthors[i], comment)"
+                    class="h-full w-full object-cover"
+                  />
+                  <ng-template #commentInitials>
+                    <span class="font-medium text-gray-600 dark:text-gray-200">
+                      {{
+                        getCommentAuthorInitials(commentAuthors[i], comment)
+                      }}
+                    </span>
+                  </ng-template>
+                </span>
+
+                <span class="max-w-[14rem] truncate text-sm text-gray-700 dark:text-gray-300">
+                  {{ getCommentAuthorName(commentAuthors[i], comment) }}
+                </span>
+
+                <span
+                  *ngIf="commentAuthors[i] as author"
+                  class="comment-author-popover pointer-events-none absolute bottom-full left-0 z-50 mb-3 w-[min(20rem,calc(100vw-3rem))] translate-y-1 rounded-2xl border border-slate-200 bg-white p-0 text-left opacity-0 shadow-2xl shadow-slate-900/15 ring-1 ring-black/5 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40"
+                >
+                  <span
+                    class="block h-16 rounded-t-2xl bg-[linear-gradient(135deg,#0f766e,#2563eb)]"
+                  ></span>
+                  <span class="-mt-7 flex items-end gap-3 px-4">
+                    <span
+                      class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-slate-100 text-base font-bold text-slate-700 shadow-md dark:border-slate-900 dark:bg-slate-700 dark:text-slate-100"
+                    >
+                      <img
+                        *ngIf="commentUserProfilePicturePath[i]; else popoverInitials"
+                        [src]="commentUserProfilePicturePath[i]"
+                        [alt]="getCommentAuthorName(author, comment)"
+                        class="h-full w-full object-cover"
+                      />
+                      <ng-template #popoverInitials>
+                        {{ getCommentAuthorInitials(author, comment) }}
+                      </ng-template>
+                    </span>
+                    <span class="min-w-0 pb-1">
+                      <span class="block truncate text-base font-bold text-slate-950 dark:text-white">
+                        {{ getCommentAuthorName(author, comment) }}
+                      </span>
+                      <span class="block truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+                        {{ author.email }}
+                      </span>
+                    </span>
+                  </span>
+                  <span class="block px-4 pb-4 pt-3">
+                    <span
+                      *ngIf="author.profileCredential"
+                      class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200"
+                    >
+                      {{ author.profileCredential }}
+                    </span>
+                    <span
+                      *ngIf="author.profileDescription"
+                      class="comment-author-popover__description mb-3 block text-sm leading-5 text-slate-600 dark:text-slate-300"
+                    >
+                      {{ author.profileDescription }}
+                    </span>
+                    <span class="mb-3 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+                      <span
+                        *ngIf="author.location"
+                        class="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800"
+                      >
+                        {{ author.location }}
+                      </span>
+                      <span
+                        *ngIf="author.employement"
+                        class="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800"
+                      >
+                        {{ author.employement }}
+                      </span>
+                    </span>
+                    <span class="flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+                      <span class="font-semibold text-slate-900 dark:text-white">
+                        {{ getUserCount(author, 'followers', 'followersArray') }}
+                        <span class="font-medium text-slate-500 dark:text-slate-400">followers</span>
+                      </span>
+                      <span class="font-semibold text-slate-900 dark:text-white">
+                        {{ getUserCount(author, 'following', 'followingArray') }}
+                        <span class="font-medium text-slate-500 dark:text-slate-400">following</span>
+                      </span>
+                      <span class="font-semibold text-emerald-700 dark:text-emerald-300">
+                        View profile
+                      </span>
+                    </span>
+                  </span>
+                  <span
+                    class="absolute -bottom-2 left-7 h-4 w-4 rotate-45 border-b border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                  ></span>
+                </span>
+              </a>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400">
               <time pubdate datetime="2022-02-08" title="February 8th, 2022">{{

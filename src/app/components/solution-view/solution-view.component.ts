@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { Evaluation, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -33,12 +34,13 @@ export class SolutionViewComponent implements OnInit {
   timeElapsed: string = '';
   evaluationSummary: any = {};
   colors: any = {};
-  comments: any = {};
+  comments: any[] = [];
   commentUserProfilePicturePath: string[] = [];
   numberOfcomments: number = 0;
   commentTimeElapsed: string[] = [];
   comment: string = '';
   commentUserNames: string[] = [];
+  commentAuthors: (User | null)[] = [];
   hoverTournament: boolean = false;
   evaluatorsAdmin: any = {};
 
@@ -78,43 +80,43 @@ export class SolutionViewComponent implements OnInit {
   }
 
   async initializeComments() {
-    if (this.comments && this.comments.length > 0) {
-      this.numberOfcomments = this.comments.length;
+    this.numberOfcomments = this.comments?.length || 0;
+    this.commentTimeElapsed = [];
+    this.commentUserNames = [];
+    this.commentUserProfilePicturePath = [];
+    this.commentAuthors = [];
 
-      // An array to store promises for user data fetching
-      const userPromises = this.comments.map((comment: any) => {
-        // Assuming 'date' is the time of the comment, similar to the previous key.split('#')[1]
-        if (comment.date) {
-          this.commentTimeElapsed.push(this.time.timeAgo(comment.date));
-        }
-
-        return new Promise<any>((resolve, reject) => {
-          if (comment.authorId) {
-            this.auth.getAUser(comment.authorId).subscribe(
-              (data: any) => resolve(data),
-              (error) => reject(error)
-            );
-          } else {
-            resolve(null); // Or handle the lack of an authorId as needed
-          }
-        });
-      });
-
-      const users = await Promise.all(userPromises);
-      users.forEach((data: any) => {
-        if (data) {
-          this.commentUserNames.push(data.firstName + ' ' + data.lastName);
-
-          if (data.profilePicture && data.profilePicture.downloadURL) {
-            this.commentUserProfilePicturePath.push(
-              data.profilePicture.downloadURL
-            );
-          } else {
-            this.commentUserProfilePicturePath.push();
-          }
-        }
-      });
+    if (!this.comments || this.comments.length === 0) {
+      return;
     }
+
+    const userPromises = this.comments.map(async (comment: any) => {
+      this.commentTimeElapsed.push(
+        comment.date ? this.time.timeAgo(comment.date) : ''
+      );
+
+      if (!comment.authorId) {
+        return null;
+      }
+
+      try {
+        return await firstValueFrom(this.auth.getAUser(comment.authorId));
+      } catch (error) {
+        console.error('Unable to load comment author', error);
+        return null;
+      }
+    });
+
+    const users = await Promise.all(userPromises);
+    users.forEach((user: User | null | undefined, index: number) => {
+      const author = user || null;
+      this.commentAuthors[index] = author;
+      this.commentUserNames[index] = this.getCommentAuthorName(
+        author,
+        this.comments[index]
+      );
+      this.commentUserProfilePicturePath[index] = this.getUserAvatarUrl(author);
+    });
   }
 
   loadSolutionData(solutionId: string): void {
@@ -140,7 +142,9 @@ export class SolutionViewComponent implements OnInit {
         this.colors = this.data.mapEvaluationToColors(
           this.currentSolution.evaluationSummary!
         );
-        this.comments = this.currentSolution.comments;
+        this.comments = Array.isArray(this.currentSolution.comments)
+          ? this.currentSolution.comments
+          : [];
         this.getMembers();
         this.solution
           .getAllSolutionsOfThisUser(this.currentSolution!.authorAccountId!)
@@ -468,6 +472,13 @@ export class SolutionViewComponent implements OnInit {
     let newCommentDate = this.time.todaysDate();
     let timeElapsedForNewComment = this.time.timeAgo(newCommentDate);
     this.commentTimeElapsed.push(timeElapsedForNewComment);
+    this.commentAuthors.push(this.auth.currentUser);
+    this.commentUserNames.push(
+      this.getCommentAuthorName(this.auth.currentUser)
+    );
+    this.commentUserProfilePicturePath.push(
+      this.getUserAvatarUrl(this.auth.currentUser)
+    );
     try {
       this.solution.addCommentToSolution(this.currentSolution, this.comments);
       this.comment = '';
@@ -477,6 +488,57 @@ export class SolutionViewComponent implements OnInit {
       console.log(error);
     }
     this.confirmSubmitComment = false;
+  }
+
+  getCommentAuthorName(user?: User | null, comment?: any): string {
+    const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+
+    return (
+      fullName ||
+      user?.email ||
+      comment?.authorName ||
+      comment?.email ||
+      'NewWorld Game member'
+    );
+  }
+
+  getCommentAuthorInitials(user?: User | null, comment?: any): string {
+    const name = this.getCommentAuthorName(user, comment);
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+
+    if (parts.length === 1 && parts[0].length >= 2) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+
+    return 'NW';
+  }
+
+  getUserAvatarUrl(user?: User | null): string {
+    return user?.profilePicture?.downloadURL || user?.profilePicPath || '';
+  }
+
+  getCommentAuthorRoute(user?: User | null): string[] | null {
+    if (!user?.uid) {
+      return null;
+    }
+
+    if (this.auth.currentUser?.uid && user.uid === this.auth.currentUser.uid) {
+      return ['/profile'];
+    }
+
+    return ['/user-profile', user.uid];
+  }
+
+  getUserCount(
+    user: User | null | undefined,
+    countKey: 'followers' | 'following',
+    arrayKey: 'followersArray' | 'followingArray'
+  ): string | number {
+    return user?.[countKey] || user?.[arrayKey]?.length || 0;
   }
 
   redirectToLogin(action: 'like' | 'comment') {

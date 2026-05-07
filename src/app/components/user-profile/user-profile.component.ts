@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -32,7 +32,8 @@ export class UserProfileComponent implements OnInit {
     public auth: AuthService,
     private solution: SolutionService,
     private time: TimeService,
-    private data: DataService
+    private data: DataService,
+    private router: Router
   ) {
     this.activatedRoute.paramMap.subscribe((params) => {
       this.profilePicturePath = '';
@@ -47,7 +48,7 @@ export class UserProfileComponent implements OnInit {
     this.auth.getAUser(id).subscribe((data) => {
       this.user = data;
       this.dateJoined = this.time.getMonthYear(this.user.dateJoined!);
-      if (this.auth.currentUser.followingArray !== undefined) {
+      if (this.auth.currentUser?.followingArray !== undefined) {
         this.following = this.auth.currentUser.followingArray;
       }
       if (this.user.followersArray !== undefined) {
@@ -69,6 +70,11 @@ export class UserProfileComponent implements OnInit {
   }
 
   checkIfFollowing() {
+    if (!this.auth.currentUser?.uid) {
+      this.followingThisUser = false;
+      return;
+    }
+
     this.followingThisUser =
       this.followers.indexOf(this.auth.currentUser.uid) > -1;
   }
@@ -81,6 +87,16 @@ export class UserProfileComponent implements OnInit {
   }
 
   followThisUser() {
+    if (!this.auth.currentUser?.uid) {
+      this.router.navigate(['/login'], {
+        queryParams: {
+          redirectTo: this.router.url,
+          intent: 'follow',
+        },
+      });
+      return;
+    }
+
     this.followers.push(this.auth.currentUser.uid);
     this.following.push(this.user.uid);
     this.checkIfFollowing();
@@ -88,6 +104,10 @@ export class UserProfileComponent implements OnInit {
     this.data.updateFollowing(this.auth.currentUser.uid, this.following);
   }
   UnFollowThisUser() {
+    if (!this.auth.currentUser?.uid) {
+      return;
+    }
+
     this.followers = this.followers.filter((item) => {
       return item !== this.auth.currentUser.uid;
     });
@@ -98,6 +118,13 @@ export class UserProfileComponent implements OnInit {
     this.data.updateFollowers(this.user.uid, this.followers);
     this.data.updateFollowing(this.auth.currentUser.uid!, this.following);
   }
+
+  get canFollowProfile(): boolean {
+    return (
+      !!this.auth.currentUser?.uid && this.auth.currentUser.uid !== this.user?.uid
+    );
+  }
+
   findCompletedSolutions() {
     this.completedSolutions = [];
     this.points = 0;
