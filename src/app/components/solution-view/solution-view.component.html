@@ -693,14 +693,11 @@
 
                 <span
                   *ngIf="commentAuthors[i] as author"
-                  class="comment-author-popover pointer-events-none absolute bottom-full left-0 z-50 mb-3 w-[min(20rem,calc(100vw-3rem))] translate-y-1 rounded-2xl border border-slate-200 bg-white p-0 text-left opacity-0 shadow-2xl shadow-slate-900/15 ring-1 ring-black/5 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40"
+                  class="comment-author-popover pointer-events-none absolute bottom-full left-0 z-50 mb-3 w-[min(20rem,calc(100vw-3rem))] translate-y-1 rounded-xl border border-slate-200 bg-white p-4 text-left opacity-0 shadow-xl shadow-slate-900/10 ring-1 ring-black/5 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40"
                 >
-                  <span
-                    class="block h-16 rounded-t-2xl bg-[linear-gradient(135deg,#0f766e,#2563eb)]"
-                  ></span>
-                  <span class="-mt-7 flex items-end gap-3 px-4">
+                  <span class="flex items-center gap-3">
                     <span
-                      class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-white bg-slate-100 text-base font-bold text-slate-700 shadow-md dark:border-slate-900 dark:bg-slate-700 dark:text-slate-100"
+                      class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-base font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                     >
                       <img
                         *ngIf="commentUserProfilePicturePath[i]; else popoverInitials"
@@ -712,7 +709,7 @@
                         {{ getCommentAuthorInitials(author, comment) }}
                       </ng-template>
                     </span>
-                    <span class="min-w-0 pb-1">
+                    <span class="min-w-0">
                       <span class="block truncate text-base font-bold text-slate-950 dark:text-white">
                         {{ getCommentAuthorName(author, comment) }}
                       </span>
@@ -721,7 +718,7 @@
                       </span>
                     </span>
                   </span>
-                  <span class="block px-4 pb-4 pt-3">
+                  <span class="block pt-3">
                     <span
                       *ngIf="author.profileCredential"
                       class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200"
