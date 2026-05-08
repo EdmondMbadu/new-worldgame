@@ -129,7 +129,6 @@ export class UserManagementComponent implements OnInit {
   private authLastSignInByEmail = new Map<string, string>();
   private lastAuthSyncKey = '';
   includeBotsInList = false;
-  private readonly goalIntroducedOnMs = new Date(2024, 7, 26).getTime();
   private readonly solutionStepGroups = [
     { step: 1, label: 'Step 1', subtitle: 'Problem State', keys: ['S1-A', 'S1-B', 'S1-C', 'S1-D'] },
     { step: 2, label: 'Step 2', subtitle: 'Preferred State', keys: ['S2-A', 'S2-B'] },
@@ -872,24 +871,45 @@ export class UserManagementComponent implements OnInit {
 
   private isRandomLookingNameToken(token: string): boolean {
     const clean = (token || '').replace(/[^a-zA-Z]/g, '');
-    if (clean.length < 16) return false;
+    if (clean.length < 14) return false;
 
     const upperCount = (clean.match(/[A-Z]/g) || []).length;
     const lowerCount = (clean.match(/[a-z]/g) || []).length;
-    if (upperCount < 4 || lowerCount < 4) return false;
+    if (upperCount < 3 || lowerCount < 6) return false;
 
     const upperRatio = upperCount / clean.length;
-    return upperRatio > 0.2 && upperRatio < 0.8;
+    const caseTransitions = clean
+      .slice(1)
+      .split('')
+      .reduce((count, char, index) => {
+        const prev = clean[index];
+        const changedCase =
+          (/[A-Z]/.test(prev) && /[a-z]/.test(char)) ||
+          (/[a-z]/.test(prev) && /[A-Z]/.test(char));
+        return count + (changedCase ? 1 : 0);
+      }, 0);
+
+    const hasGeneratedCaseMix =
+      clean.length >= 18 &&
+      upperRatio > 0.18 &&
+      upperRatio < 0.82 &&
+      caseTransitions >= 4;
+
+    const hasDenseMixedCase =
+      upperRatio > 0.25 && upperRatio < 0.75 && caseTransitions >= 3;
+
+    return hasGeneratedCaseMix || hasDenseMixedCase;
   }
 
   private hasSuspiciousNameFormat(user: User): boolean {
     const first = (user.firstName || '').trim();
     const last = (user.lastName || '').trim();
-    if (!first || !last) return false;
-    return (
-      this.isRandomLookingNameToken(first) &&
-      this.isRandomLookingNameToken(last)
-    );
+    const firstRandom = this.isRandomLookingNameToken(first);
+    const lastRandom = this.isRandomLookingNameToken(last);
+    if (firstRandom && lastRandom) return true;
+
+    const combinedLength = `${first}${last}`.replace(/[^a-zA-Z]/g, '').length;
+    return combinedLength >= 24 && (firstRandom || lastRandom);
   }
 
   private hasNoActivity(user: User): boolean {
@@ -912,18 +932,15 @@ export class UserManagementComponent implements OnInit {
   }
 
   isLikelyBot(user: User): boolean {
-    if (this.hasGoal(user)) return false;
-    if (this.hasSolutionActivity(user)) return false;
-
-    if (this.hasNoActivity(user) && this.hasSuspiciousNameFormat(user)) {
+    if (this.hasSuspiciousNameFormat(user)) {
       return true;
     }
 
     if (this.isAdminUser(user)) return false;
+    if (this.hasGoal(user)) return false;
+    if (this.hasSolutionActivity(user)) return false;
 
-    const joinedAt = this.data.parseDateMMDDYYYY(user.dateJoined);
-    if (!joinedAt) return false;
-    return joinedAt >= this.goalIntroducedOnMs;
+    return false;
   }
 
   toggleUserDetails(index: number) {

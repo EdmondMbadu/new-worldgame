@@ -1806,7 +1806,7 @@
                         *ngIf="!includeBotsInList && botUsersCount > 0"
                         class="font-semibold text-amber-700 dark:text-amber-300"
                       >
-                        {{ botUsersCount }} bot(s) hidden
+                        {{ botUsersCount }} likely bot(s) hidden
                       </span>
                       <span class="opacity-40">|</span>
                       <span class="font-semibold">{{ selected.size }}</span>
@@ -1822,7 +1822,7 @@
                           (ngModelChange)="onIncludeBotsChange($event)"
                         />
                         <span class="text-slate-700 dark:text-slate-200"
-                          >Include bots ({{ botUsersCount }})</span
+                          >Include likely bots ({{ botUsersCount }})</span
                         >
                       </label>
 
