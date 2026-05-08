@@ -2479,10 +2479,24 @@ const buildAIInsightsEmailFromCache = (
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 <a href="https://newworld-game.org/email-feedback" style="color:#2563eb;text-decoration:underline;">We'd also appreciate your feedback</a> as we improve this experience.
               </p>
-              <p style="margin:16px 0 0;font-size:15px;color:#4b5563;line-height:1.7;">
-                Want future weekly briefs to focus on a different solution?
-                <a href="${manageBriefUrl}" style="color:#2563eb;text-decoration:underline;">Choose your weekly brief solution</a>.
-              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0 0;background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;">
+                <tr>
+                  <td style="padding:18px 18px 16px;">
+                    <p style="margin:0 0 6px;font-size:12px;color:#1d4ed8;text-transform:uppercase;letter-spacing:1px;font-weight:700;">
+                      Weekly brief preference
+                    </p>
+                    <p style="margin:0 0 8px;font-size:18px;line-height:1.35;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">
+                      Choose which solution receives your weekly brief
+                    </p>
+                    <p style="margin:0 0 14px;font-size:14px;line-height:1.65;color:#4b5563;">
+                      You can change this anytime. If you do not choose one, NewWorld Game will use the weekly fallback selection.
+                    </p>
+                    <a href="${manageBriefUrl}" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 18px;font-size:14px;font-weight:700;border-radius:10px;">
+                      Choose My Weekly Brief Solution
+                    </a>
+                  </td>
+                </tr>
+              </table>
               <p style="margin:24px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 With appreciation,
               </p>
