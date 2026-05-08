@@ -158,15 +158,33 @@
                 The weekly email will use your saved solution. If no choice is saved, NewWorld Game will use the weekly fallback rule.
               </p>
             </div>
-            <div class="md:text-right">
-              <p class="text-xs text-gray-500 dark:text-gray-400">Current choice</p>
-              <p class="mt-1 max-w-sm text-sm font-semibold text-gray-900 dark:text-white">
-                {{
-                  weeklyBriefSelectedSolution?.title ||
-                    auth.currentUser.weeklyBriefSolutionTitle ||
-                    "No solution selected"
-                }}
-              </p>
+            <div class="w-full md:w-auto md:min-w-[280px]">
+              <div
+                class="rounded-xl border px-4 py-3 shadow-sm"
+                [ngClass]="
+                  weeklyBriefSolutionId
+                    ? 'border-blue-300 bg-white dark:border-blue-600 dark:bg-blue-950/40'
+                    : 'border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30'
+                "
+              >
+                <p
+                  class="text-xs font-semibold uppercase tracking-wide"
+                  [ngClass]="
+                    weeklyBriefSolutionId
+                      ? 'text-blue-700 dark:text-blue-300'
+                      : 'text-amber-700 dark:text-amber-300'
+                  "
+                >
+                  Current weekly brief solution
+                </p>
+                <p class="mt-1 max-w-sm text-lg font-bold leading-tight text-gray-950 dark:text-white">
+                  {{
+                    weeklyBriefSelectedSolution?.title ||
+                      auth.currentUser.weeklyBriefSolutionTitle ||
+                      "No solution selected"
+                  }}
+                </p>
+              </div>
               <button
                 *ngIf="weeklyBriefSolutionId"
                 type="button"
