@@ -35,6 +35,9 @@ export class User {
   schoolId?: string;
   verified?: boolean;
   profilePicPath?: string;
+  weeklyBriefSolutionId?: string;
+  weeklyBriefSolutionTitle?: string;
+  weeklyBriefSolutionUpdatedAt?: string;
 }
 
 export class Avatar {

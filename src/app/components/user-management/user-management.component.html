@@ -1113,6 +1113,25 @@
                 (ngModelChange)="buildBulkAIInsightsList()"
                 class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400"
               >
+                <option value="user_selected">User-selected weekly brief solution</option>
+                <option value="most_recent">Most recent created solution</option>
+                <option value="second_recent">Second most recent solution</option>
+                <option value="random">Random solution per participant</option>
+              </select>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Main mode uses the solution each recipient saved on their problem list page.
+              </p>
+            </div>
+
+            <div *ngIf="aiInsightsBulkCriteria === 'user_selected'">
+              <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">
+                Backup criteria when a user has no saved choice
+              </label>
+              <select
+                [(ngModel)]="aiInsightsBulkFallbackCriteria"
+                (ngModelChange)="buildBulkAIInsightsList()"
+                class="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-400"
+              >
                 <option value="most_recent">Most recent created solution</option>
                 <option value="second_recent">Second most recent solution</option>
                 <option value="random">Random solution per participant</option>
@@ -1217,6 +1236,18 @@
                 <p class="text-xs text-slate-500 dark:text-slate-400">No solutions</p>
                 <p class="text-lg font-semibold text-slate-900 dark:text-white">{{ aiInsightsBulkStats.noSolutions }}</p>
               </div>
+              <div class="rounded-lg bg-white dark:bg-slate-800 px-3 py-2 border border-slate-200 dark:border-slate-700">
+                <p class="text-xs text-slate-500 dark:text-slate-400">User-selected</p>
+                <p class="text-lg font-semibold text-blue-600 dark:text-blue-300">{{ aiInsightsBulkStats.userSelected }}</p>
+              </div>
+              <div class="rounded-lg bg-white dark:bg-slate-800 px-3 py-2 border border-slate-200 dark:border-slate-700">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Fallback used</p>
+                <p class="text-lg font-semibold text-slate-900 dark:text-white">{{ aiInsightsBulkStats.fallback }}</p>
+              </div>
+              <div class="rounded-lg bg-white dark:bg-slate-800 px-3 py-2 border border-slate-200 dark:border-slate-700">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Saved choice unavailable</p>
+                <p class="text-lg font-semibold text-amber-600 dark:text-amber-400">{{ aiInsightsBulkStats.invalidPreference }}</p>
+              </div>
             </div>
 
             <div *ngIf="aiInsightsBulkSelections.length > 0; else noBulkList" class="max-h-80 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-700">
@@ -1228,6 +1259,9 @@
                   </p>
                   <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
                     Solution: {{ item.solutionTitle }}
+                  </p>
+                  <p class="mt-1 text-[11px] uppercase tracking-wide" [ngClass]="item.pickSource === 'user_selected' ? 'text-blue-600 dark:text-blue-300' : 'text-slate-400'">
+                    {{ item.pickSource === 'user_selected' ? 'User selected' : 'Fallback' }}
                   </p>
                 </div>
                 <button

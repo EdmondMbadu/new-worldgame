@@ -220,13 +220,19 @@ export class UserManagementComponent implements OnInit {
   aiInsightsError = '';
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
   aiInsightsMode: 'single' | 'bulk' = 'single';
-  aiInsightsBulkCriteria: 'most_recent' | 'second_recent' | 'random' =
+  aiInsightsBulkCriteria:
+    | 'user_selected'
+    | 'most_recent'
+    | 'second_recent'
+    | 'random' = 'user_selected';
+  aiInsightsBulkFallbackCriteria: 'most_recent' | 'second_recent' | 'random' =
     'most_recent';
   aiInsightsBulkSelections: Array<{
     email: string;
     name: string;
     solution: Solution;
     solutionTitle: string;
+    pickSource: 'user_selected' | 'fallback';
   }> = [];
   aiInsightsBulkSending = false;
   aiInsightsBulkSent = false;
@@ -238,6 +244,9 @@ export class UserManagementComponent implements OnInit {
     noSolutions: 0,
     unsubscribed: 0,
     excluded: 0,
+    userSelected: 0,
+    fallback: 0,
+    invalidPreference: 0,
     finalRecipients: 0,
   };
   aiInsightsSendLogs: Array<{
@@ -2754,6 +2763,68 @@ export class UserManagementComponent implements OnInit {
     return ordered[0];
   }
 
+  private pickBulkSolutionForEmail(
+    email: string,
+    solutions: Solution[]
+  ): {
+    solution: Solution | null;
+    pickSource: 'user_selected' | 'fallback';
+    invalidPreference: boolean;
+  } {
+    if (!solutions.length) {
+      return {
+        solution: null,
+        pickSource: 'fallback',
+        invalidPreference: false,
+      };
+    }
+
+    if (this.aiInsightsBulkCriteria !== 'user_selected') {
+      return {
+        solution: this.pickSolutionForEmail(
+          solutions,
+          this.aiInsightsBulkCriteria
+        ),
+        pickSource: 'fallback',
+        invalidPreference: false,
+      };
+    }
+
+    const user = this.usersByEmail.get(this.normalizeEmail(email));
+    const preferredSolutionId = String(
+      (user as any)?.weeklyBriefSolutionId || ''
+    ).trim();
+    if (preferredSolutionId) {
+      const preferred = solutions.find(
+        (solution) => solution.solutionId === preferredSolutionId
+      );
+      if (preferred) {
+        return {
+          solution: preferred,
+          pickSource: 'user_selected',
+          invalidPreference: false,
+        };
+      }
+      return {
+        solution: this.pickSolutionForEmail(
+          solutions,
+          this.aiInsightsBulkFallbackCriteria
+        ),
+        pickSource: 'fallback',
+        invalidPreference: true,
+      };
+    }
+
+    return {
+      solution: this.pickSolutionForEmail(
+        solutions,
+        this.aiInsightsBulkFallbackCriteria
+      ),
+      pickSource: 'fallback',
+      invalidPreference: false,
+    };
+  }
+
   // Parse excluded emails from textarea (supports newlines, commas, spaces)
   parseExcludedEmails(): Set<string> {
     const raw = this.aiInsightsBulkExcludeEmails || '';
@@ -2772,17 +2843,18 @@ export class UserManagementComponent implements OnInit {
       name: string;
       solution: Solution;
       solutionTitle: string;
+      pickSource: 'user_selected' | 'fallback';
     }> = [];
     let noSolutions = 0;
     let unsubscribedSkipped = 0;
     let excludedSkipped = 0;
+    let userSelected = 0;
+    let fallback = 0;
+    let invalidPreference = 0;
 
     for (const [email, solutions] of map.entries()) {
-      const picked = this.pickSolutionForEmail(
-        solutions,
-        this.aiInsightsBulkCriteria
-      );
-      if (!picked || !picked.solutionId) {
+      const picked = this.pickBulkSolutionForEmail(email, solutions);
+      if (!picked.solution || !picked.solution.solutionId) {
         noSolutions += 1;
         continue;
       }
@@ -2794,12 +2866,21 @@ export class UserManagementComponent implements OnInit {
         excludedSkipped += 1;
         continue;
       }
+      if (picked.pickSource === 'user_selected') {
+        userSelected += 1;
+      } else {
+        fallback += 1;
+      }
+      if (picked.invalidPreference) {
+        invalidPreference += 1;
+      }
       const fromDir = this.userDirectory.get(email);
       selections.push({
         email,
         name: fromDir?.name || email,
-        solution: picked,
-        solutionTitle: picked.title || 'Untitled Solution',
+        solution: picked.solution,
+        solutionTitle: picked.solution.title || 'Untitled Solution',
+        pickSource: picked.pickSource,
       });
     }
 
@@ -2813,6 +2894,9 @@ export class UserManagementComponent implements OnInit {
         noSolutions,
         unsubscribed: unsubscribedSkipped,
         excluded: excludedSkipped,
+        userSelected,
+        fallback,
+        invalidPreference,
         finalRecipients: selections.length,
       };
   }

@@ -1,4 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
@@ -37,11 +39,18 @@ export class ProblemListViewComponent implements OnInit {
   /** 🆕 bound to the search box */
   searchTerm = '';
   viewMode: 'list' | 'grid' = 'grid';
+  weeklyBriefSolutionId = '';
+  weeklyBriefSavingId = '';
+  weeklyBriefMessage = '';
+  weeklyBriefError = '';
+  weeklyBriefFromEmailLink = false;
 
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
-    private router: Router
+    private router: Router,
+    private afs: AngularFirestore,
+    private route: ActivatedRoute
   ) {
     solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       this.solutions = data;
@@ -51,6 +60,13 @@ export class ProblemListViewComponent implements OnInit {
   }
   ngOnInit(): void {
     window.scroll(0, 0);
+    this.route.queryParamMap.subscribe((params) => {
+      this.weeklyBriefFromEmailLink = params.get('weeklyBrief') === '1';
+    });
+    this.auth.getObservableUser().subscribe((user) => {
+      if (!user) return;
+      this.weeklyBriefSolutionId = user.weeklyBriefSolutionId || '';
+    });
   }
   @Input() title: string = 'problemListView.tabs.pending';
 
@@ -144,6 +160,104 @@ export class ProblemListViewComponent implements OnInit {
       return;
     }
     this.router.navigate(['/dashboard', solution.solutionId]);
+  }
+
+  isWeeklyBriefSelected(solution: Solution): boolean {
+    return !!solution.solutionId && solution.solutionId === this.weeklyBriefSolutionId;
+  }
+
+  get weeklyBriefSelectedSolution(): Solution | undefined {
+    if (!this.weeklyBriefSolutionId) {
+      return undefined;
+    }
+    return this.pendingSolutions.find(
+      (solution) => solution.solutionId === this.weeklyBriefSolutionId
+    );
+  }
+
+  async saveWeeklyBriefSolution(solution: Solution, event?: Event) {
+    event?.stopPropagation();
+    this.weeklyBriefMessage = '';
+    this.weeklyBriefError = '';
+
+    if (!solution.solutionId) {
+      this.weeklyBriefError = 'This solution cannot be selected yet.';
+      return;
+    }
+
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) {
+      this.weeklyBriefError = 'Please sign in again before saving your weekly brief choice.';
+      return;
+    }
+
+    this.weeklyBriefSavingId = solution.solutionId;
+    try {
+      const title = solution.title || 'Untitled Solution';
+      await this.afs.doc(`users/${uid}`).set(
+        {
+          weeklyBriefSolutionId: solution.solutionId,
+          weeklyBriefSolutionTitle: title,
+          weeklyBriefSolutionUpdatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      this.weeklyBriefSolutionId = solution.solutionId;
+      this.auth.currentUser.weeklyBriefSolutionId = solution.solutionId;
+      this.auth.currentUser.weeklyBriefSolutionTitle = title;
+      this.weeklyBriefMessage = `${title} is now your weekly brief solution.`;
+    } catch (error: any) {
+      console.error('Unable to save weekly brief solution', error);
+      this.weeklyBriefError =
+        error?.message || 'Unable to save your weekly brief solution right now.';
+    } finally {
+      this.weeklyBriefSavingId = '';
+    }
+  }
+
+  saveWeeklyBriefSolutionById(solutionId: string) {
+    if (!solutionId) {
+      void this.clearWeeklyBriefSolution();
+      return;
+    }
+    const solution = this.pendingSolutions.find(
+      (item) => item.solutionId === solutionId
+    );
+    if (!solution) {
+      return;
+    }
+    void this.saveWeeklyBriefSolution(solution);
+  }
+
+  async clearWeeklyBriefSolution(event?: Event) {
+    event?.stopPropagation();
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+
+    this.weeklyBriefMessage = '';
+    this.weeklyBriefError = '';
+    this.weeklyBriefSavingId = '__clear__';
+    try {
+      await this.afs.doc(`users/${uid}`).set(
+        {
+          weeklyBriefSolutionId: '',
+          weeklyBriefSolutionTitle: '',
+          weeklyBriefSolutionUpdatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      this.weeklyBriefSolutionId = '';
+      this.auth.currentUser.weeklyBriefSolutionId = '';
+      this.auth.currentUser.weeklyBriefSolutionTitle = '';
+      this.weeklyBriefMessage =
+        'Weekly brief choice cleared. The weekly sender will use its fallback rule.';
+    } catch (error: any) {
+      console.error('Unable to clear weekly brief solution', error);
+      this.weeklyBriefError =
+        error?.message || 'Unable to clear your weekly brief solution right now.';
+    } finally {
+      this.weeklyBriefSavingId = '';
+    }
   }
 
   getSolutionDate(solution: Solution): string {
