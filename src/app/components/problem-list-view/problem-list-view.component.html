@@ -178,23 +178,14 @@
               </button>
             </div>
           </div>
-          <div class="mt-4 max-w-xl">
-            <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Pick solution
-            </label>
-            <select
-              [ngModel]="weeklyBriefSolutionId"
-              (ngModelChange)="saveWeeklyBriefSolutionById($event)"
-              class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-slate-900 dark:text-white"
+          <div class="mt-4">
+            <button
+              type="button"
+              (click)="openWeeklyBriefModal($event)"
+              class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
             >
-              <option value="">Use NewWorld Game fallback</option>
-              <option
-                *ngFor="let solution of pendingSolutions"
-                [value]="solution.solutionId"
-              >
-                {{ solution.title || "Untitled Solution" }}
-              </option>
-            </select>
+              Change weekly brief solution
+            </button>
           </div>
           <p *ngIf="weeklyBriefMessage" class="mt-3 text-sm text-emerald-700 dark:text-emerald-300">
             {{ weeklyBriefMessage }}
@@ -424,6 +415,152 @@
     </section>
 
     <!-- (Your two modal blocks remain unchanged below) -->
+  </div>
+</div>
+
+<div
+  *ngIf="weeklyBriefModalOpen"
+  class="fixed inset-0 z-[120] flex items-center justify-center p-4 dark:text-white"
+>
+  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" (click)="closeWeeklyBriefModal()"></div>
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="weeklyBriefModalTitle"
+    class="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+  >
+    <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">
+          Weekly intelligence brief
+        </p>
+        <h2 id="weeklyBriefModalTitle" class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">
+          Choose your weekly brief solution
+        </h2>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+          Pick the solution you want future weekly intelligence briefs to focus on.
+        </p>
+      </div>
+      <button
+        type="button"
+        (click)="closeWeeklyBriefModal()"
+        class="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-slate-800"
+        aria-label="Close"
+      >
+        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="space-y-4 px-5 py-5">
+      <div class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-slate-800">
+        <p class="text-xs text-gray-500 dark:text-gray-400">Current choice</p>
+        <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+          {{
+            weeklyBriefSelectedSolution?.title ||
+              auth.currentUser.weeklyBriefSolutionTitle ||
+              "No solution selected"
+          }}
+        </p>
+      </div>
+
+      <div class="relative">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          Search solutions
+        </label>
+        <div class="relative mt-2">
+          <input
+            type="text"
+            [value]="weeklyBriefPickerValue"
+            (focus)="openWeeklyBriefPicker()"
+            (input)="onWeeklyBriefPickerInput($event)"
+            placeholder="Type a solution title, description, or area..."
+            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 pr-10 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-slate-950 dark:text-white"
+          />
+          <svg
+            class="pointer-events-none absolute right-3 top-3 h-4 w-4 text-gray-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+
+        <div class="mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-slate-950">
+          <button
+            type="button"
+            (click)="selectWeeklyBriefFallback($event)"
+            class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-800"
+          >
+            <span class="font-medium text-gray-900 dark:text-white">
+              Use NewWorld Game fallback
+            </span>
+            <span
+              *ngIf="!weeklyBriefSolutionId"
+              class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"
+            >
+              Current
+            </span>
+          </button>
+
+          <div class="max-h-80 overflow-y-auto border-t border-gray-100 dark:border-gray-800">
+            <button
+              *ngFor="let solution of filteredWeeklyBriefSolutions"
+              type="button"
+              (click)="selectWeeklyBriefSolution(solution, $event)"
+              class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-500/10"
+            >
+              <span
+                class="mt-0.5 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-600 dark:bg-slate-800 dark:text-gray-300"
+              >
+                {{ tileInitial(solution) }}
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold text-gray-900 dark:text-white">
+                  {{ solution.title || "Untitled Solution" }}
+                </span>
+                <span class="mt-0.5 block truncate text-xs text-gray-500 dark:text-gray-400">
+                  {{ solution.solutionArea || getSolutionDate(solution) }}
+                </span>
+              </span>
+              <span
+                *ngIf="isWeeklyBriefSelected(solution)"
+                class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"
+              >
+                Current
+              </span>
+            </button>
+
+            <div
+              *ngIf="filteredWeeklyBriefSolutions.length === 0"
+              class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
+            >
+              No solutions match that search.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="weeklyBriefMessage" class="text-sm text-emerald-700 dark:text-emerald-300">
+        {{ weeklyBriefMessage }}
+      </p>
+      <p *ngIf="weeklyBriefError" class="text-sm text-red-700 dark:text-red-300">
+        {{ weeklyBriefError }}
+      </p>
+    </div>
+
+    <div class="flex items-center justify-end gap-2 border-t border-gray-200 px-5 py-4 dark:border-gray-800">
+      <button
+        type="button"
+        (click)="closeWeeklyBriefModal()"
+        class="rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 dark:text-gray-200 dark:ring-gray-600 dark:hover:bg-slate-800"
+      >
+        Done
+      </button>
+    </div>
   </div>
 </div>
 

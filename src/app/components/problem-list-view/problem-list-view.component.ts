@@ -44,6 +44,9 @@ export class ProblemListViewComponent implements OnInit {
   weeklyBriefMessage = '';
   weeklyBriefError = '';
   weeklyBriefFromEmailLink = false;
+  weeklyBriefPickerOpen = false;
+  weeklyBriefSolutionSearch = '';
+  weeklyBriefModalOpen = false;
 
   constructor(
     public auth: AuthService,
@@ -62,6 +65,9 @@ export class ProblemListViewComponent implements OnInit {
     window.scroll(0, 0);
     this.route.queryParamMap.subscribe((params) => {
       this.weeklyBriefFromEmailLink = params.get('weeklyBrief') === '1';
+      if (this.weeklyBriefFromEmailLink) {
+        this.openWeeklyBriefModal();
+      }
     });
     this.auth.getObservableUser().subscribe((user) => {
       if (!user) return;
@@ -175,6 +181,67 @@ export class ProblemListViewComponent implements OnInit {
     );
   }
 
+  get weeklyBriefPickerLabel(): string {
+    return (
+      this.weeklyBriefSelectedSolution?.title ||
+      this.auth.currentUser.weeklyBriefSolutionTitle ||
+      'Use NewWorld Game fallback'
+    );
+  }
+
+  get filteredWeeklyBriefSolutions(): Solution[] {
+    const term = this.weeklyBriefSolutionSearch.trim().toLowerCase();
+    if (!term) {
+      return this.pendingSolutions;
+    }
+    return this.pendingSolutions.filter((solution) => {
+      const title = (solution.title || '').toLowerCase();
+      const description = (solution.description || '').toLowerCase();
+      const area = (solution.solutionArea || '').toLowerCase();
+      return (
+        title.includes(term) ||
+        description.includes(term) ||
+        area.includes(term)
+      );
+    });
+  }
+
+  get weeklyBriefPickerValue(): string {
+    return this.weeklyBriefPickerOpen
+      ? this.weeklyBriefSolutionSearch
+      : this.weeklyBriefPickerLabel;
+  }
+
+  openWeeklyBriefPicker() {
+    this.weeklyBriefPickerOpen = true;
+    this.weeklyBriefSolutionSearch = '';
+  }
+
+  openWeeklyBriefModal(event?: Event) {
+    event?.stopPropagation();
+    this.weeklyBriefModalOpen = true;
+    this.openWeeklyBriefPicker();
+  }
+
+  closeWeeklyBriefModal() {
+    this.weeklyBriefModalOpen = false;
+    this.weeklyBriefPickerOpen = false;
+    this.weeklyBriefSolutionSearch = '';
+  }
+
+  onWeeklyBriefPickerInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.weeklyBriefSolutionSearch = input.value || '';
+    this.weeklyBriefPickerOpen = true;
+  }
+
+  closeWeeklyBriefPickerSoon() {
+    window.setTimeout(() => {
+      this.weeklyBriefPickerOpen = false;
+      this.weeklyBriefSolutionSearch = '';
+    }, 120);
+  }
+
   async saveWeeklyBriefSolution(solution: Solution, event?: Event) {
     event?.stopPropagation();
     this.weeklyBriefMessage = '';
@@ -227,6 +294,20 @@ export class ProblemListViewComponent implements OnInit {
       return;
     }
     void this.saveWeeklyBriefSolution(solution);
+  }
+
+  selectWeeklyBriefSolution(solution: Solution, event?: Event) {
+    event?.stopPropagation();
+    this.weeklyBriefPickerOpen = false;
+    this.weeklyBriefSolutionSearch = '';
+    void this.saveWeeklyBriefSolution(solution, event);
+  }
+
+  selectWeeklyBriefFallback(event?: Event) {
+    event?.stopPropagation();
+    this.weeklyBriefPickerOpen = false;
+    this.weeklyBriefSolutionSearch = '';
+    void this.clearWeeklyBriefSolution(event);
   }
 
   async clearWeeklyBriefSolution(event?: Event) {
