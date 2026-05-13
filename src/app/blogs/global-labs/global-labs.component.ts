@@ -150,6 +150,13 @@ export class GlobalLabsComponent implements OnInit {
     this.loadedVideoIds[id] = true;
   }
 
+  scrollToSection(sectionId: string): void {
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
   trustedVideoUrl(src: string): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(src);
   }
