@@ -1,0 +1,18 @@
+.global-labs-page {
+  font-family: 'Inter', 'DM Sans', sans-serif;
+}
+
+.global-labs-page h1,
+.global-labs-page h2,
+.global-labs-page h3,
+.global-labs-page p,
+.global-labs-page a,
+.global-labs-page dd,
+.global-labs-page dt,
+.global-labs-page li {
+  letter-spacing: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}

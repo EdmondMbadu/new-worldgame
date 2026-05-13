@@ -31,7 +31,9 @@ import { CustomGptDesignScienceStoryboardComponent } from '../blogs/custom-gpt-d
 import { NwgSolutionTourComponent } from '../blogs/nwg-solution-tour/nwg-solution-tour.component';
 import { WelcomeComponent } from '../components/welcome/welcome.component';
 import { GlobalLabComponent } from '../blogs/global-lab/global-lab.component';
+import { GlobalLabsComponent } from '../blogs/global-labs/global-labs.component';
 import { GlobalRegisterComponent } from '../blogs/global-register/global-register.component';
+import { GlobalRegistersComponent } from '../blogs/global-registers/global-registers.component';
 import { NewFeaturesComponent } from '../blogs/new-features/new-features.component';
 import { WorkshopComponent } from '../blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from '../blogs/workshop-register/workshop-register.component';
@@ -100,7 +102,9 @@ const routes: Routes = [
   { path: 'get-started', component: WelcomeComponent },
   { path: 'welcome', component: WelcomeComponent },
   { path: 'global-lab', component: GlobalLabComponent },
+  { path: 'global-labs', component: GlobalLabsComponent },
   { path: 'global-register', component: GlobalRegisterComponent },
+  { path: 'global-registers', component: GlobalRegistersComponent },
   {
     path: 'drexel-register',
     component: GlobalRegisterComponent,

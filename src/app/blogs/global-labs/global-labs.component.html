@@ -1,0 +1,312 @@
+<div class="global-labs-page min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-white">
+  <app-navbar [currenPageLabBanner]="false" [showLoginButton]="false"></app-navbar>
+
+  <main>
+    <section class="relative isolate mt-28 overflow-hidden bg-slate-950 text-white">
+      <img
+        src="https://designsciencelab.com/wordpress/wp-content/uploads/2016/06/IMG_0431.jpg"
+        alt="Global Solutions Lab participants"
+        class="absolute inset-0 h-full w-full object-cover opacity-45"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/82 to-slate-900/35"></div>
+
+      <div class="relative mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-20">
+        <div class="max-w-3xl">
+          <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-100">
+            <span class="material-symbols-outlined text-base" aria-hidden="true">rocket_launch</span>
+            June 15-24, 2026
+          </p>
+          <h1 class="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-normal sm:text-5xl lg:text-6xl">
+            Join the Global Solutions Lab 2026
+          </h1>
+          <p class="mt-6 max-w-2xl text-lg font-semibold leading-8 text-slate-100 sm:text-xl">
+            Spend 10 days building a real-world solution for your community or a global challenge, with AI tools, expert feedback, and a collaborative international Lab.
+          </p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a
+              routerLink="/global-registers"
+              class="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-400 px-7 py-4 text-base font-extrabold text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-300"
+            >
+              Apply for the Lab
+              <span class="material-symbols-outlined text-xl" aria-hidden="true">arrow_forward</span>
+            </a>
+            <a
+              href="#lab-details"
+              class="inline-flex items-center justify-center gap-2 rounded-md border border-white/25 bg-white/10 px-7 py-4 text-base font-bold text-white transition hover:bg-white/15"
+            >
+              See dates, cost, and format
+            </a>
+          </div>
+          <p class="mt-4 text-sm font-medium text-slate-200">
+            In-person at Drexel University in Philadelphia or online from anywhere.
+          </p>
+        </div>
+
+        <aside class="self-end rounded-lg border border-white/15 bg-white/95 p-6 text-slate-950 shadow-2xl dark:bg-slate-900/95 dark:text-white">
+          <h2 class="text-xl font-extrabold">At a glance</h2>
+          <dl class="mt-5 grid gap-4">
+            <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
+              <dt class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Format</dt>
+              <dd class="mt-1 text-base font-bold">In-person and online</dd>
+            </div>
+            <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
+              <dt class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Time commitment</dt>
+              <dd class="mt-1 text-base font-bold">4 to 6 hours per day, starting around 10:00 am Eastern U.S. time</dd>
+            </div>
+            <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
+              <dt class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Hosted by</dt>
+              <dd class="mt-1 text-base font-bold">Charles D. Close School of Entrepreneurship at Drexel University</dd>
+            </div>
+          </dl>
+          <a
+            routerLink="/global-registers"
+            class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-teal-700"
+          >
+            Start registration
+            <span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+          </a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="border-b border-slate-200 bg-white py-6 dark:border-white/10 dark:bg-slate-900">
+      <div class="mx-auto grid max-w-7xl gap-4 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-teal-600 dark:text-emerald-300" aria-hidden="true">calendar_month</span>
+          <p class="text-sm font-bold">June 15-24, 2026</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-teal-600 dark:text-emerald-300" aria-hidden="true">location_on</span>
+          <p class="text-sm font-bold">Philadelphia and online</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-teal-600 dark:text-emerald-300" aria-hidden="true">school</span>
+          <p class="text-sm font-bold">Open to ages 17 and above</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-teal-600 dark:text-emerald-300" aria-hidden="true">volunteer_activism</span>
+          <p class="text-sm font-bold">Scholarships are available</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white py-14 dark:bg-slate-900">
+      <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <div>
+          <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Watch before you apply</p>
+          <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white md:text-4xl">
+            See why this is a real working Lab.
+          </h2>
+          <p class="mt-5 max-w-2xl text-base leading-8 text-slate-700 dark:text-slate-300">
+            In a few minutes, these videos show the Lab experience, the AI-supported workflow, and how participants turn a challenge into practical solution work.
+          </p>
+
+          <div class="mt-7 rounded-lg border border-slate-200 bg-slate-50 p-5 dark:border-white/10 dark:bg-slate-950">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p class="text-xs font-extrabold uppercase tracking-widest text-slate-500 dark:text-slate-400">Recommended first watch</p>
+                <h3 class="mt-2 text-xl font-extrabold">{{ videos[0].heading }}</h3>
+              </div>
+              <a
+                routerLink="/global-registers"
+                class="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-emerald-300"
+              >
+                Apply now
+                <span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-4">
+          <article
+            *ngFor="let video of videos"
+            class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 shadow-sm dark:border-white/10 dark:bg-slate-950"
+          >
+            <div class="grid gap-0 md:grid-cols-[0.95fr_1.05fr]">
+              <div class="relative min-h-52">
+                <button
+                  *ngIf="!loadedVideoIds[video.id]"
+                  type="button"
+                  (click)="playVideo(video.id)"
+                  class="absolute inset-0 w-full overflow-hidden text-left"
+                  [attr.aria-label]="'Play ' + video.title"
+                >
+                  <img
+                    [src]="video.thumbnailSrc"
+                    [alt]="video.title"
+                    class="absolute inset-0 h-full w-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-slate-950/55"></div>
+                  <span class="absolute left-1/2 top-1/2 inline-flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white/80 bg-black/35 text-white shadow-xl">
+                    <span class="material-symbols-outlined ml-0.5 text-3xl" aria-hidden="true">play_arrow</span>
+                  </span>
+                </button>
+                <iframe
+                  *ngIf="loadedVideoIds[video.id]"
+                  class="absolute inset-0 h-full w-full"
+                  [src]="trustedVideoUrl(video.src)"
+                  [title]="video.title"
+                  frameborder="0"
+                  loading="lazy"
+                  allow="encrypted-media; fullscreen;"
+                  allowfullscreen
+                ></iframe>
+              </div>
+              <div class="p-5">
+                <p class="text-xs font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">{{ video.eyebrow }}</p>
+                <h3 class="mt-2 text-lg font-extrabold text-slate-950 dark:text-white">{{ video.heading }}</h3>
+                <p class="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{{ video.body }}</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-50 py-14 dark:bg-slate-950">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Why sign up</p>
+            <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white md:text-4xl">
+              This is a working design lab, not a lecture series.
+            </h2>
+            <p class="mt-5 text-base leading-8 text-slate-700 dark:text-slate-300">
+              You will research, design, test, and present practical strategies for achieving one or more UN Sustainable Development Goals. Bring your own challenge or choose a Lab focus area.
+            </p>
+            <a
+              routerLink="/global-registers"
+              class="mt-7 inline-flex items-center justify-center gap-2 rounded-md bg-slate-950 px-6 py-3 text-sm font-extrabold text-white transition hover:bg-slate-800 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
+            >
+              Reserve your place
+              <span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+            </a>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <article *ngFor="let outcome of outcomes" class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+              <span class="material-symbols-outlined text-3xl text-teal-700 dark:text-emerald-300" aria-hidden="true">{{ outcome.icon }}</span>
+              <h3 class="mt-4 text-lg font-extrabold text-slate-950 dark:text-white">{{ outcome.title }}</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{{ outcome.body }}</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab-details" class="bg-white py-14 dark:bg-slate-900">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-8 lg:grid-cols-3">
+          <div class="lg:col-span-1">
+            <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Dates, cost, and format</p>
+            <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white">Know exactly what you are signing up for.</h2>
+            <p class="mt-5 text-base leading-8 text-slate-700 dark:text-slate-300">
+              The number of participants is limited. The sooner you apply, the better.
+            </p>
+          </div>
+
+          <div class="grid gap-5 lg:col-span-2">
+            <div class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+              <h3 class="text-xl font-extrabold">Program details</h3>
+              <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                <p class="rounded-md bg-white p-4 text-sm leading-6 dark:bg-slate-900">
+                  <strong class="block text-slate-950 dark:text-white">Dates</strong>
+                  June 15-24, 2026
+                </p>
+                <p class="rounded-md bg-white p-4 text-sm leading-6 dark:bg-slate-900">
+                  <strong class="block text-slate-950 dark:text-white">Location</strong>
+                  Drexel University, Philadelphia, PA, USA, plus online participation
+                </p>
+                <p class="rounded-md bg-white p-4 text-sm leading-6 dark:bg-slate-900">
+                  <strong class="block text-slate-950 dark:text-white">Age range</strong>
+                  17 and above, with no upper age limit
+                </p>
+                <p class="rounded-md bg-white p-4 text-sm leading-6 dark:bg-slate-900">
+                  <strong class="block text-slate-950 dark:text-white">Daily commitment</strong>
+                  4 to 6 hours per day
+                </p>
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              <article *ngFor="let group of tuitionGroups" class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+                <h3 class="text-xl font-extrabold">{{ group.label }}</h3>
+                <ul class="mt-4 space-y-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                  <li *ngFor="let item of group.items" class="flex gap-3">
+                    <span class="material-symbols-outlined mt-0.5 text-lg text-teal-700 dark:text-emerald-300" aria-hidden="true">check_circle</span>
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-50 py-14 dark:bg-slate-950">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Choose your mission</p>
+            <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white">Bring a problem you care about.</h2>
+            <p class="mt-5 text-base leading-8 text-slate-700 dark:text-slate-300">
+              The 2026 Lab is built for local, regional, and global problems. You can work on one of the focus areas or bring a challenge from your community, organization, or startup.
+            </p>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div *ngFor="let area of focusAreas" class="flex items-start gap-3 rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
+              <span class="material-symbols-outlined text-teal-700 dark:text-emerald-300" aria-hidden="true">task_alt</span>
+              <p class="text-sm font-bold leading-6">{{ area }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white py-14 dark:bg-slate-900">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Credibility</p>
+          <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white">A Lab with global reach and practical outcomes.</h2>
+        </div>
+        <div class="mt-9 grid gap-5 md:grid-cols-3">
+          <article *ngFor="let point of proofPoints" class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+            <span class="material-symbols-outlined text-3xl text-teal-700 dark:text-emerald-300" aria-hidden="true">{{ point.icon }}</span>
+            <h3 class="mt-4 text-lg font-extrabold">{{ point.title }}</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{{ point.body }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-950 py-14 text-white">
+      <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-extrabold tracking-normal md:text-4xl">Ready to apply for the Global Solutions Lab?</h2>
+        <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
+          The Lab is developed and conducted by EarthGame, a nonprofit research and education NGO officially associated with the United Nations Department of Global Communications.
+        </p>
+        <a
+          routerLink="/global-registers"
+          class="mt-8 inline-flex items-center justify-center gap-2 rounded-md bg-emerald-400 px-8 py-4 text-base font-extrabold text-slate-950 shadow-lg shadow-black/25 transition hover:bg-emerald-300"
+        >
+          Apply now
+          <span class="material-symbols-outlined text-xl" aria-hidden="true">arrow_forward</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <div class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-slate-950/95 md:hidden">
+    <a
+      routerLink="/global-registers"
+      class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-5 py-3 text-sm font-extrabold text-white"
+    >
+      Apply for the Lab
+      <span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_forward</span>
+    </a>
+  </div>
+
+  <app-footer></app-footer>
+</div>

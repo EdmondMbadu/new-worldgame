@@ -35,7 +35,9 @@ import { NwgSolutionTourComponent } from '../blogs/nwg-solution-tour/nwg-solutio
 import { WelcomeComponent } from '../components/welcome/welcome.component';
 import { WelcomeStepsComponent } from '../components/welcome-steps/welcome-steps.component';
 import { GlobalLabComponent } from '../blogs/global-lab/global-lab.component';
+import { GlobalLabsComponent } from '../blogs/global-labs/global-labs.component';
 import { GlobalRegisterComponent } from '../blogs/global-register/global-register.component';
+import { GlobalRegistersComponent } from '../blogs/global-registers/global-registers.component';
 import { NewFeaturesComponent } from '../blogs/new-features/new-features.component';
 import { WorkshopComponent } from '../blogs/workshop/workshop.component';
 import { WorkshopRegisterComponent } from '../blogs/workshop-register/workshop-register.component';
@@ -95,7 +97,9 @@ import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
     WelcomeComponent,
     WelcomeStepsComponent,
     GlobalLabComponent,
+    GlobalLabsComponent,
     GlobalRegisterComponent,
+    GlobalRegistersComponent,
     NewFeaturesComponent,
     WorkshopComponent,
     WorkshopRegisterComponent,

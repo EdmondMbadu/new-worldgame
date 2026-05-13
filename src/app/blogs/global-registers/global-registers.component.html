@@ -1,0 +1,504 @@
+<div class="global-registers-page min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-white">
+  <app-navbar
+    [currenPageLabBanner]="false"
+    [showLoginButton]="false"
+    [showLogo]="false"
+  ></app-navbar>
+
+  <main class="pt-20">
+    <section class="relative isolate overflow-hidden bg-slate-950 text-white">
+      <img
+        src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fglobal-lab-un.JPEG?alt=media&token=f9322408-b6ee-4b80-b83f-65a5aa3d092d"
+        alt="Global Solutions Lab session"
+        class="absolute inset-0 h-full w-full object-cover opacity-38"
+      />
+      <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/88 to-slate-900/45"></div>
+
+      <div class="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-16">
+        <div class="flex flex-col justify-center">
+          <div class="mb-6 flex flex-wrap items-center gap-4">
+            <img
+              src="assets/img/earth-triangle-test.png"
+              alt="NewWorld Game"
+              class="h-16 w-16 rounded-lg object-cover shadow-lg"
+            />
+            <img
+              src="assets/img/earthgame.png"
+              alt="EarthGame"
+              class="h-12 w-auto rounded bg-white/95 px-2 py-1"
+            />
+            <img
+              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fdrexel.webp?alt=media&token=0f5ceb45-a3e2-4223-8391-84c02867372b"
+              alt="Drexel University"
+              class="h-12 w-auto rounded bg-white/95 px-2 py-1"
+            />
+          </div>
+
+          <p class="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-extrabold uppercase tracking-widest text-emerald-100">
+            <span class="material-symbols-outlined text-base" aria-hidden="true">how_to_reg</span>
+            Registration is open
+          </p>
+          <h1 class="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-normal sm:text-5xl">
+            {{ isDrexelOnly ? copy.hero.drexelTitle : copy.hero.standardTitle }}
+          </h1>
+          <p class="mt-5 max-w-2xl text-lg font-semibold leading-8 text-slate-100">
+            Register for the June 15-24, 2026 Global Solutions Lab. Choose in-person or online, then complete the form to reserve your place.
+          </p>
+
+          <div class="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4" id="countdown">
+            <div class="rounded-md border border-white/15 bg-white/10 p-3 text-center">
+              <div class="text-2xl font-extrabold text-emerald-200" id="days">00</div>
+              <div class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-300">{{ copy.hero.countdownLabels.days }}</div>
+            </div>
+            <div class="rounded-md border border-white/15 bg-white/10 p-3 text-center">
+              <div class="text-2xl font-extrabold text-emerald-200" id="hours">00</div>
+              <div class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-300">{{ copy.hero.countdownLabels.hours }}</div>
+            </div>
+            <div class="rounded-md border border-white/15 bg-white/10 p-3 text-center">
+              <div class="text-2xl font-extrabold text-emerald-200" id="minutes">00</div>
+              <div class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-300">{{ copy.hero.countdownLabels.minutes }}</div>
+            </div>
+            <div class="rounded-md border border-white/15 bg-white/10 p-3 text-center">
+              <div class="text-2xl font-extrabold text-emerald-200" id="seconds">00</div>
+              <div class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-300">{{ copy.hero.countdownLabels.seconds }}</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="rounded-lg border border-white/15 bg-white/95 p-5 text-slate-950 shadow-2xl dark:bg-slate-900/95 dark:text-white sm:p-6">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p class="text-xs font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Your registration</p>
+              <h2 class="mt-2 text-2xl font-extrabold">{{ formTitle }}</h2>
+            </div>
+            <div *ngIf="!isDrexelOnly" class="rounded-md bg-emerald-50 px-4 py-3 text-right dark:bg-emerald-500/10">
+              <p class="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">Price</p>
+              <p class="text-2xl font-extrabold">${{ getPrice() }}</p>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 rounded-md bg-slate-100 p-1 dark:bg-slate-800">
+            <button
+              type="button"
+              (click)="labMode = 'inPerson'"
+              class="rounded px-4 py-3 text-sm font-extrabold transition"
+              [ngClass]="{
+                'bg-teal-600 text-white shadow': labMode === 'inPerson',
+                'text-slate-700 dark:text-slate-300': labMode !== 'inPerson'
+              }"
+            >
+              {{ copy.modes.inPerson }}
+            </button>
+            <button
+              type="button"
+              (click)="labMode = 'online'"
+              class="rounded px-4 py-3 text-sm font-extrabold transition"
+              [ngClass]="{
+                'bg-teal-600 text-white shadow': labMode === 'online',
+                'text-slate-700 dark:text-slate-300': labMode !== 'online'
+              }"
+            >
+              {{ copy.modes.online }}
+            </button>
+          </div>
+
+          <div class="mt-5 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-950 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100">
+            {{ copy.hero.deadlineNotice }}
+          </div>
+
+          <div class="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+            <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
+              <p class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Format</p>
+              <p class="mt-1 font-extrabold">{{ labMode === 'online' ? 'Online' : 'In-person at Drexel' }}</p>
+            </div>
+            <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
+              <p class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Next step</p>
+              <p class="mt-1 font-extrabold">{{ !isDrexelOnly ? 'Register now or pay later' : 'Free Drexel registration' }}</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="bg-white py-10 dark:bg-slate-900">
+      <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:px-8">
+        <aside class="space-y-5">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+            <p class="text-xs font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">What happens after this form</p>
+            <h2 class="mt-2 text-2xl font-extrabold">{{ modeCopy.processTitle }}</h2>
+            <p class="mt-4 text-sm leading-7 text-slate-700 dark:text-slate-300">{{ modeCopy.intro }}</p>
+            <ul *ngIf="labMode === 'online'" class="mt-4 space-y-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
+              <li *ngFor="let step of registrationSteps" class="flex gap-2">
+                <span class="material-symbols-outlined mt-0.5 text-base text-teal-700 dark:text-emerald-300" aria-hidden="true">check_circle</span>
+                <span>{{ step }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+            <h3 class="text-xl font-extrabold">{{ tuitionTitle }}</h3>
+            <ng-container *ngIf="isDrexelOnly; else paidTuition">
+              <p class="mt-4 text-base font-extrabold text-teal-700 dark:text-emerald-300">
+                {{ modeCopy.freeForDrexel }}
+              </p>
+            </ng-container>
+            <ng-template #paidTuition>
+              <ul class="mt-4 space-y-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+                <li *ngFor="let item of modeCopy.tuitionItems" class="flex gap-2">
+                  <span class="material-symbols-outlined mt-0.5 text-base text-teal-700 dark:text-emerald-300" aria-hidden="true">check_circle</span>
+                  <span>{{ item }}</span>
+                </li>
+              </ul>
+              <p class="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                {{ formatScholarshipNote(modeCopy.scholarshipNote) }}
+              </p>
+            </ng-template>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+            <h3 class="text-xl font-extrabold">You will get</h3>
+            <div class="mt-4 space-y-4">
+              <div *ngFor="let benefit of benefits | slice: 0:4" class="flex gap-3">
+                <div class="text-2xl">{{ benefit.icon }}</div>
+                <div>
+                  <p class="text-sm font-extrabold">{{ benefit.title }}</p>
+                  <p class="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">{{ benefit.description }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-white/10 dark:bg-slate-950 sm:p-7">
+          <div class="mb-7">
+            <p class="text-xs font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Step 1 of 1</p>
+            <h2 class="mt-2 text-3xl font-extrabold tracking-normal">{{ formTitle }}</h2>
+            <p class="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+              Required fields help us confirm your registration and place you in the right Lab experience.
+            </p>
+          </div>
+
+          <div class="grid gap-5">
+            <div>
+              <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                {{ copy.form.nameLabel }}
+              </label>
+              <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                <input
+                  type="text"
+                  [placeholder]="copy.form.firstPlaceholder"
+                  [(ngModel)]="firstName"
+                  name="firstName"
+                  required
+                  class="global-registers-input"
+                />
+                <input
+                  type="text"
+                  [placeholder]="copy.form.lastPlaceholder"
+                  [(ngModel)]="lastName"
+                  name="lastName"
+                  required
+                  class="global-registers-input"
+                />
+              </div>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.emailLabel }}
+                </label>
+                <input
+                  type="email"
+                  [placeholder]="copy.form.emailPlaceholder"
+                  [(ngModel)]="email"
+                  name="email"
+                  required
+                  class="global-registers-input mt-2"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.phoneLabel }}
+                </label>
+                <input
+                  type="tel"
+                  [placeholder]="copy.form.phonePlaceholder"
+                  [(ngModel)]="phone"
+                  name="phone"
+                  class="global-registers-input mt-2"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                {{ copy.form.addressLabel }}
+              </label>
+              <input
+                type="text"
+                [placeholder]="copy.form.addressPlaceholder"
+                [(ngModel)]="address"
+                name="address"
+                required
+                class="global-registers-input mt-2"
+              />
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-3">
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.cityLabel }}
+                </label>
+                <input
+                  type="text"
+                  [placeholder]="copy.form.cityPlaceholder"
+                  [(ngModel)]="city"
+                  name="city"
+                  required
+                  class="global-registers-input mt-2"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.stateProvinceLabel }}
+                </label>
+                <input
+                  type="text"
+                  [placeholder]="copy.form.stateProvincePlaceholder"
+                  [(ngModel)]="stateProvince"
+                  name="stateProvince"
+                  required
+                  class="global-registers-input mt-2"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.countryLabel }}
+                </label>
+                <input
+                  type="text"
+                  [placeholder]="copy.form.countryPlaceholder"
+                  [(ngModel)]="country"
+                  name="country"
+                  required
+                  class="global-registers-input mt-2"
+                />
+              </div>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.ageLabel }}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="120"
+                  [(ngModel)]="age"
+                  name="age"
+                  required
+                  class="global-registers-input mt-2"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.organizationLabel }}
+                </label>
+                <input
+                  type="text"
+                  [placeholder]="copy.form.organizationPlaceholder"
+                  [(ngModel)]="organization"
+                  name="organization"
+                  required
+                  class="global-registers-input mt-2"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                {{ copy.form.occupationLabel }}
+              </label>
+              <textarea
+                rows="3"
+                [(ngModel)]="occupation"
+                name="occupation"
+                required
+                class="global-registers-input mt-2"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                {{ copy.form.whyAttendLabel }}
+              </label>
+              <textarea
+                rows="3"
+                [(ngModel)]="whyAttend"
+                name="whyAttend"
+                required
+                class="global-registers-input mt-2"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                {{ copy.form.focusTopicLabel }}
+              </label>
+              <textarea
+                rows="3"
+                [(ngModel)]="focusTopic"
+                name="focusTopic"
+                required
+                class="global-registers-input mt-2"
+              ></textarea>
+            </div>
+
+            <div *ngIf="labMode === 'inPerson'" class="rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
+              <label for="letterVisaInPersonClone" class="flex cursor-pointer items-start gap-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  id="letterVisaInPersonClone"
+                  [(ngModel)]="letterOfInvitation"
+                  class="mt-1"
+                />
+                <span>{{ copy.form.visaLabel }}</span>
+              </label>
+              <div
+                *ngIf="letterOfInvitation"
+                class="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100"
+              >
+                <p>
+                  {{ copy.form.visaIntro }}
+                  <a class="font-bold underline" [href]="'mailto:' + reachOutVisa">{{ reachOutVisa }}</a>:
+                </p>
+                <ul class="mt-2 list-disc pl-5">
+                  <li *ngFor="let item of copy.form.visaItems">{{ item }}</li>
+                </ul>
+              </div>
+            </div>
+
+            <div *ngIf="!isDrexelOnly" class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label
+                  [for]="labMode === 'online' ? 'targetGroupOnlineClone' : 'targetGroupInPersonClone'"
+                  class="block text-sm font-extrabold text-slate-800 dark:text-slate-100"
+                >
+                  {{ copy.form.targetGroupLabel }}
+                </label>
+                <select
+                  [(ngModel)]="targetGroup"
+                  [id]="labMode === 'online' ? 'targetGroupOnlineClone' : 'targetGroupInPersonClone'"
+                  class="global-registers-input mt-2"
+                >
+                  <option *ngFor="let option of targetGroupOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                  {{ copy.form.heardAboutUsLabel }}
+                </label>
+                <select
+                  [ngModel]="heardAboutUs"
+                  (ngModelChange)="onHeardAboutUsChange($event)"
+                  name="heardAboutUs"
+                  class="global-registers-input mt-2"
+                >
+                  <option value="">{{ copy.form.heardAboutUsPlaceholder }}</option>
+                  <option *ngFor="let option of copy.form.heardAboutUsOptions" [value]="option.value">
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div *ngIf="heardAboutUs === 'other'">
+              <input
+                type="text"
+                [placeholder]="copy.form.heardAboutUsOtherPlaceholder"
+                [(ngModel)]="heardAboutUsOther"
+                name="heardAboutUsOther"
+                class="global-registers-input"
+              />
+            </div>
+
+            <div *ngIf="!isDrexelOnly" class="rounded-md border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+              <p>{{ copy.form.payLaterNotice }}</p>
+              <p class="mt-2">
+                {{ copy.form.scholarshipPrefix }}
+                <a class="font-bold text-teal-700 underline dark:text-emerald-300" [href]="'mailto:' + reachOutEmail">{{ reachOutEmail }}</a>
+                {{ copy.form.scholarshipSuffix }}
+              </p>
+              <p class="mt-2">{{ formatTeamDiscountNotice(copy.form.teamDiscountNotice) }}</p>
+            </div>
+
+            <div
+              *ngIf="!isDrexelOnly; else drexelRegisterButton"
+              class="grid gap-3 sm:grid-cols-2"
+            >
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald-500 px-5 py-4 text-base font-extrabold text-slate-950 shadow transition hover:bg-emerald-400"
+                (click)="submitGlobalLabRegistration()"
+              >
+                {{ formatPayAndRegisterLabel(getPrice()) }}
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">arrow_forward</span>
+              </button>
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center rounded-md bg-slate-700 px-5 py-4 text-base font-extrabold text-white shadow transition hover:bg-slate-600"
+                (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+                {{ copy.form.registerNowPayLaterLabel }}
+              </button>
+            </div>
+
+            <ng-template #drexelRegisterButton>
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-emerald-500 px-5 py-4 text-base font-extrabold text-slate-950 shadow transition hover:bg-emerald-400"
+                (click)="submitGlobalLabRegistrationWithoutPaying()"
+              >
+                {{ copy.form.registerLabel }}
+                <span class="material-symbols-outlined text-xl" aria-hidden="true">arrow_forward</span>
+              </button>
+            </ng-template>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+</div>
+
+<div
+  *ngIf="isLoading"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70"
+>
+  <div role="status" class="flex flex-col items-center rounded-lg bg-white p-8 text-slate-950 shadow-2xl dark:bg-slate-900 dark:text-white">
+    <svg
+      aria-hidden="true"
+      class="h-12 w-12 animate-spin text-slate-200 fill-teal-600 dark:text-slate-700"
+      viewBox="0 0 100 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+        fill="currentColor"
+      />
+      <path
+        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+        fill="currentFill"
+      />
+    </svg>
+    <span class="sr-only">{{ copy.spinner.srOnly }}</span>
+    <div class="mt-3 font-bold">{{ copy.spinner.text }}</div>
+  </div>
+</div>
