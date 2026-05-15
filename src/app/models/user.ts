@@ -94,6 +94,8 @@ export class ChallengePage {
   challengePageId?: string;
   challengeListIds?: string[];
   authorId?: string;
+  adminEmails?: string[];
+  adminUids?: string[];
   invitedUsers?: string[];
   restricted?: string;
   discussion?: Comment[];

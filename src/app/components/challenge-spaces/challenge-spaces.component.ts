@@ -89,14 +89,44 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     );
   }
 
+  memberCount(space: ChallengePage): number {
+    const memberEmails = new Set<string>();
+
+    (space.participants || []).forEach((email) => {
+      const normalized = this.normalizeEmail(email);
+      if (normalized) memberEmails.add(normalized);
+    });
+
+    (space.adminEmails || []).forEach((email) => {
+      const normalized = this.normalizeEmail(email);
+      if (normalized) memberEmails.add(normalized);
+    });
+
+    if (memberEmails.size) return memberEmails.size;
+
+    const memberUids = new Set<string>();
+    if (space.authorId) memberUids.add(space.authorId);
+    (space.adminUids || []).forEach((uid) => {
+      const normalized = String(uid || '').trim();
+      if (normalized) memberUids.add(normalized);
+    });
+
+    return memberUids.size;
+  }
+
+  memberLabel(space: ChallengePage): string {
+    const count = this.memberCount(space);
+    return `${count} member${count === 1 ? '' : 's'}`;
+  }
+
   isCurrentUserInSpace(space: ChallengePage): boolean {
     const user = this.auth.currentUser;
     const email = this.normalizeEmail(user?.email || '');
     const uid = user?.uid || '';
-    const adminEmails = ((space as any).adminEmails || []).map((value: string) =>
+    const adminEmails = (space.adminEmails || []).map((value: string) =>
       this.normalizeEmail(value)
     );
-    const adminUids = ((space as any).adminUids || []).map((value: string) =>
+    const adminUids = (space.adminUids || []).map((value: string) =>
       String(value || '').trim()
     );
     const participants = (space.participants || []).map((value) =>
