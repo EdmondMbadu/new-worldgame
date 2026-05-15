@@ -453,6 +453,13 @@
                   <h3 class="text-lg font-bold text-slate-900 dark:text-white">
                     {{ 'homeChallengePage.participants.title' | translate:{ count: participants.length } }}
                   </h3>
+                  <span
+                    *ngIf="participantProfiles.length"
+                    class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200"
+                  >
+                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    {{ onlineParticipantCount }} online
+                  </span>
                 </div>
                 <button
                   *ngIf="participants.length && isAuthorPage"
@@ -491,6 +498,11 @@
                         >
                           {{ participantInitial(participant) }}
                         </div>
+                        <span
+                          *ngIf="participant.isOnline"
+                          class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"
+                          title="Online"
+                        ></span>
                       </div>
                       <div class="min-w-0">
                         <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">

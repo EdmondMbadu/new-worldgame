@@ -10,6 +10,7 @@ import { ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
+import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 import { ToastService } from 'src/app/services/toast.service';
@@ -62,10 +63,15 @@ export class HomeChallengeComponent implements OnDestroy {
     displayName: string;
     uid?: string;
     photoUrl?: string;
+    lastActiveAt?: string;
+    isOnline?: boolean;
     exists: boolean;
     isCurrentUser: boolean;
   }[] = [];
   isLoadingParticipantProfiles = false;
+  onlineParticipantCount = 0;
+  private onlineParticipantUids = new Set<string>();
+  private participantPresenceSub?: Subscription;
   adminProfiles: {
     email: string;
     displayName: string;
@@ -209,7 +215,8 @@ export class HomeChallengeComponent implements OnDestroy {
     private challenge: ChallengesService,
     private fns: AngularFireFunctions,
     private toast: ToastService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private presence: PresenceService
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -236,6 +243,7 @@ export class HomeChallengeComponent implements OnDestroy {
   }
   ngOnDestroy(): void {
     this.languageSub?.unsubscribe();
+    this.participantPresenceSub?.unsubscribe();
   }
   private resetPageState(): void {
     // everything that can legitimately be “missing” on a page
@@ -245,6 +253,10 @@ export class HomeChallengeComponent implements OnDestroy {
     this.zoomLink = '';
     this.chatNote = '';
     this.participants = [];
+    this.participantProfiles = [];
+    this.onlineParticipantCount = 0;
+    this.onlineParticipantUids = new Set<string>();
+    this.participantPresenceSub?.unsubscribe();
     this.logoImage = '';
     this.image = '';
   }
@@ -710,6 +722,9 @@ export class HomeChallengeComponent implements OnDestroy {
 
     if (!rawEmails.length) {
       this.participantProfiles = [];
+      this.onlineParticipantCount = 0;
+      this.onlineParticipantUids = new Set<string>();
+      this.participantPresenceSub?.unsubscribe();
       this.isLoadingParticipantProfiles = false;
       return;
     }
@@ -724,6 +739,32 @@ export class HomeChallengeComponent implements OnDestroy {
       const results = await Promise.all(
         uniqueEmails.map(async (email) => {
           try {
+            const currentUserEmail = this.normalizeEmail(
+              this.auth.currentUser?.email || ''
+            );
+            const currentUid =
+              this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+            if (email === currentUserEmail && currentUid) {
+              const currentUser = this.auth.currentUser || {};
+              const name = [currentUser.firstName, currentUser.lastName]
+                .filter(Boolean)
+                .join(' ')
+                .trim();
+              return {
+                email,
+                displayName: name || currentUser.email || email,
+                uid: currentUid,
+                photoUrl:
+                  currentUser.profilePicture?.downloadURL ||
+                  currentUser.profilePicPath ||
+                  '',
+                lastActiveAt: new Date().toISOString(),
+                isOnline: true,
+                exists: true,
+                isCurrentUser: true,
+              };
+            }
+
             const users = await firstValueFrom(
               this.auth.getUserFromEmail(email)
             );
@@ -739,6 +780,8 @@ export class HomeChallengeComponent implements OnDestroy {
                 uid: user.uid,
                 photoUrl:
                   user.profilePicture?.downloadURL || user.profilePicPath || '',
+                lastActiveAt: user.lastActiveAt,
+                isOnline: false,
                 exists: true,
                 isCurrentUser: user.uid === this.auth.currentUser?.uid,
               };
@@ -749,6 +792,7 @@ export class HomeChallengeComponent implements OnDestroy {
             email,
             displayName: email,
             exists: false,
+            isOnline: false,
             isCurrentUser: false,
           };
         })
@@ -770,12 +814,42 @@ export class HomeChallengeComponent implements OnDestroy {
           email,
           displayName: email,
           exists: false,
+          isOnline: false,
           isCurrentUser: false,
         };
       });
+      this.subscribeToParticipantPresence();
     } finally {
       this.isLoadingParticipantProfiles = false;
     }
+  }
+
+  private subscribeToParticipantPresence(): void {
+    const fallbackLastActiveByUid = new Map<string, string | undefined>();
+    const uids = this.participantProfiles
+      .map((participant) => {
+        const uid = String(participant.uid || '').trim();
+        if (uid) {
+          fallbackLastActiveByUid.set(uid, participant.lastActiveAt);
+        }
+        return uid;
+      })
+      .filter(Boolean);
+
+    this.participantPresenceSub?.unsubscribe();
+    this.onlineParticipantCount = 0;
+    this.onlineParticipantUids = new Set<string>();
+
+    this.participantPresenceSub = this.presence
+      .watchOnlineUids$(uids, fallbackLastActiveByUid)
+      .subscribe((onlineUids) => {
+        this.onlineParticipantUids = onlineUids;
+        this.onlineParticipantCount = onlineUids.size;
+        this.participantProfiles = this.participantProfiles.map((participant) => ({
+          ...participant,
+          isOnline: !!participant.uid && onlineUids.has(participant.uid),
+        }));
+      });
   }
 
   async loadAdminProfiles(): Promise<void> {

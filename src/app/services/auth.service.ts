@@ -21,6 +21,7 @@ import { TimeService } from './time.service';
 import { DemoBooking } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
+import { PresenceService } from './presence.service';
 // Add this where you keep shared types (optional)
 
 interface RegisterSchoolMeta {
@@ -42,6 +43,7 @@ export class AuthService {
   user$: Observable<any>;
   email?: Observable<any>;
   currentUser: any = {};
+  currentAuthUid: string | null = null;
   newUser: NewUser = {};
   logingError?: Observable<any>;
   private redirectUrl: string = '';
@@ -55,7 +57,8 @@ export class AuthService {
     private afs: AngularFirestore,
     private fns: AngularFireFunctions,
     private router: Router,
-    private time: TimeService
+    private time: TimeService,
+    private presence: PresenceService
   ) {
     this.newUser = {
       firstName: '',
@@ -68,7 +71,15 @@ export class AuthService {
       switchMap((user) => {
         if (user) {
           this.email = of(user.email);
-          return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
+          return this.afs.doc<User>(`users/${user.uid}`).valueChanges().pipe(
+            map((profile) => ({
+              ...(profile || {}),
+              uid: profile?.uid || user.uid,
+              email: profile?.email || user.email || '',
+              emailLower:
+                profile?.emailLower || (profile?.email || user.email || '').toLowerCase(),
+            }))
+          );
         } else {
           return of(null);
         }
@@ -311,9 +322,31 @@ export class AuthService {
   }
 
   getUserFromEmail(email: string) {
-    return this.afs
-      .collection<User>(`users`, (ref) => ref.where('email', '==', email))
-      .valueChanges();
+    const trimmed = String(email || '').trim();
+    const normalized = trimmed.toLowerCase();
+    const exactValues = Array.from(new Set([trimmed, normalized])).filter(Boolean);
+    const queries = [
+      ...exactValues.map((value) =>
+        this.afs
+          .collection<User>(`users`, (ref) => ref.where('email', '==', value))
+          .valueChanges()
+      ),
+      this.afs
+        .collection<User>(`users`, (ref) => ref.where('emailLower', '==', normalized))
+        .valueChanges(),
+    ];
+
+    return combineLatest(queries).pipe(
+      map((results) => {
+        const seen = new Set<string>();
+        return results.flat().filter((user) => {
+          const key = user.uid || user.email || user.emailLower || '';
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      })
+    );
   }
   getAllOtherUsers(email: string) {
     return this.afs
@@ -805,10 +838,12 @@ export class AuthService {
   private initLastActiveTracking() {
     this.fireauth.authState.subscribe((authUser) => {
       const nextUid = authUser?.uid ?? null;
+      this.currentAuthUid = nextUid;
       if (nextUid !== this.activeUid) {
         this.activeUid = nextUid;
         this.lastActiveWriteAtMs = 0;
       }
+      this.presence.setCurrentUser(nextUid);
       if (nextUid) {
         void this.writeLastActive(nextUid, true);
       }
