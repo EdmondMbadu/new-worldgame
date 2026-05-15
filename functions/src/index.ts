@@ -144,7 +144,6 @@ const DEFAULT_WEEKLY_REMINDER_SUBJECT =
 const DEFAULT_WEEKLY_REMINDER_INTRO_HTML =
   '<p>Keep the momentum going—here are your in-progress solutions.</p>';
 const WEEKLY_ACTIVITY_WINDOW_DAYS = 7;
-const GOAL_INTRODUCED_ON_MS = new Date(2024, 7, 26).getTime();
 
 type AutomationScheduleKey = 'weeklyReminder' | 'weeklyActivity';
 
@@ -319,26 +318,46 @@ function hasGoalForAutomation(user: any): boolean {
 }
 
 function isRandomLookingNameTokenForAutomation(token: string): boolean {
-  const clean = token.replace(/[^a-zA-Z]/g, '');
-  if (clean.length < 16) return false;
+  const clean = String(token || '').replace(/[^a-zA-Z]/g, '');
+  if (clean.length < 14) return false;
 
   const upperCount = (clean.match(/[A-Z]/g) || []).length;
   const lowerCount = (clean.match(/[a-z]/g) || []).length;
-  if (upperCount < 4 || lowerCount < 4) return false;
+  if (upperCount < 3 || lowerCount < 6) return false;
 
   const upperRatio = upperCount / clean.length;
-  return upperRatio > 0.2 && upperRatio < 0.8;
+  const caseTransitions = clean
+    .slice(1)
+    .split('')
+    .reduce((count, char, index) => {
+      const previous = clean[index];
+      const changedCase =
+        (/[A-Z]/.test(previous) && /[a-z]/.test(char)) ||
+        (/[a-z]/.test(previous) && /[A-Z]/.test(char));
+      return count + (changedCase ? 1 : 0);
+    }, 0);
+
+  const hasGeneratedCaseMix =
+    clean.length >= 18 &&
+    upperRatio > 0.18 &&
+    upperRatio < 0.82 &&
+    caseTransitions >= 4;
+
+  const hasDenseMixedCase =
+    upperRatio > 0.25 && upperRatio < 0.75 && caseTransitions >= 3;
+
+  return hasGeneratedCaseMix || hasDenseMixedCase;
 }
 
 function hasSuspiciousNameFormatForAutomation(user: any): boolean {
   const first = String(user?.firstName || '').trim();
   const last = String(user?.lastName || '').trim();
-  if (!first || !last) return false;
+  const firstRandom = isRandomLookingNameTokenForAutomation(first);
+  const lastRandom = isRandomLookingNameTokenForAutomation(last);
+  if (firstRandom && lastRandom) return true;
 
-  return (
-    isRandomLookingNameTokenForAutomation(first) &&
-    isRandomLookingNameTokenForAutomation(last)
-  );
+  const combinedLength = `${first}${last}`.replace(/[^a-zA-Z]/g, '').length;
+  return combinedLength >= 24 && (firstRandom || lastRandom);
 }
 
 function isAdminUserForAutomation(user: any): boolean {
@@ -351,6 +370,11 @@ function isLikelyBotForAutomation(
   user: any,
   statsByEmail: Map<string, UserSolutionStatsForAutomation>
 ): boolean {
+  if (hasSuspiciousNameFormatForAutomation(user)) {
+    return true;
+  }
+
+  if (isAdminUserForAutomation(user)) return false;
   if (hasGoalForAutomation(user)) return false;
 
   const stats =
@@ -362,15 +386,7 @@ function isLikelyBotForAutomation(
   const hasSolutionActivity = stats.started > 0 || stats.submitted > 0;
   if (hasSolutionActivity) return false;
 
-  if (hasSuspiciousNameFormatForAutomation(user)) {
-    return true;
-  }
-
-  if (isAdminUserForAutomation(user)) return false;
-
-  const joinedAt = parseDateMMDDYYYYForAutomation(String(user?.dateJoined || ''));
-  if (!joinedAt) return false;
-  return joinedAt >= GOAL_INTRODUCED_ON_MS;
+  return false;
 }
 
 function buildUserDirectoryForAutomation(users: any[]) {
@@ -729,21 +745,21 @@ function buildWeeklyActivityEmailData(
   const previousWeekStartMs = windowStartMs - weekMs;
   const statsByEmail = buildUserSolutionStatsForAutomation(solutions);
 
-  const realUsers = users.filter(
+  const reportingUsers = users.filter(
     (user) => !isLikelyBotForAutomation(user, statsByEmail)
   );
-  const realUserEmailSet = new Set(
-    realUsers
+  const reportingUserEmailSet = new Set(
+    reportingUsers
       .map((user) => normalizeEmailForAutomation(user?.email))
       .filter(Boolean)
   );
 
-  const weeklyActiveUsers = realUsers.filter(
+  const weeklyActiveUsers = reportingUsers.filter(
     (user) =>
       userActivityMsForAutomation(user, authMaps.byUid, authMaps.byEmail) >=
       windowStartMs
   ).length;
-  const previousWeeklyActiveUsers = realUsers.filter((user) => {
+  const previousWeeklyActiveUsers = reportingUsers.filter((user) => {
     const activityMs = userActivityMsForAutomation(
       user,
       authMaps.byUid,
@@ -752,29 +768,38 @@ function buildWeeklyActivityEmailData(
     return activityMs >= previousWeekStartMs && activityMs < windowStartMs;
   }).length;
 
-  const weeklyNewSignups = realUsers.filter(
+  const weeklyNewSignups = reportingUsers.filter(
     (user) =>
       parseDateMMDDYYYYForAutomation(String(user?.dateJoined || '')) >=
       windowStartMs
   ).length;
-  const previousWeeklyNewSignups = realUsers.filter((user) => {
+  const previousWeeklyNewSignups = reportingUsers.filter((user) => {
     const joinedAt = parseDateMMDDYYYYForAutomation(String(user?.dateJoined || ''));
     return joinedAt >= previousWeekStartMs && joinedAt < windowStartMs;
   }).length;
 
   const totalOpenSolutions = solutions.filter((solution) => {
     if (solution?.finished === 'true') return false;
-    return solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet);
+    return solutionBelongsToRealUsersForAutomation(
+      solution,
+      reportingUserEmailSet
+    );
   }).length;
 
   const weeklyWorkedSolutions = solutions.filter(
     (solution) =>
-      solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet) &&
+      solutionBelongsToRealUsersForAutomation(
+        solution,
+        reportingUserEmailSet
+      ) &&
       solutionWorkedInRangeForAutomation(solution, windowStartMs, nowMs)
   ).length;
   const previousWeeklyWorkedSolutions = solutions.filter(
     (solution) =>
-      solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet) &&
+      solutionBelongsToRealUsersForAutomation(
+        solution,
+        reportingUserEmailSet
+      ) &&
       solutionWorkedInRangeForAutomation(
         solution,
         previousWeekStartMs,
@@ -783,14 +808,17 @@ function buildWeeklyActivityEmailData(
   ).length;
 
   const weeklyActiveRate =
-    realUsers.length > 0
-      ? Math.round((weeklyActiveUsers / realUsers.length) * 100)
+    reportingUsers.length > 0
+      ? Math.round((weeklyActiveUsers / reportingUsers.length) * 100)
       : 0;
 
   const workedSolutions = solutions
     .filter(
       (solution) =>
-        solutionBelongsToRealUsersForAutomation(solution, realUserEmailSet) &&
+        solutionBelongsToRealUsersForAutomation(
+          solution,
+          reportingUserEmailSet
+        ) &&
         solutionWorkedInRangeForAutomation(solution, windowStartMs, nowMs)
     )
     .sort(
@@ -811,7 +839,7 @@ function buildWeeklyActivityEmailData(
     }));
 
   return {
-    totalRealUsers: realUsers.length,
+    totalUsers: reportingUsers.length,
     weeklyActiveUsers,
     weeklyNewSignups,
     totalOpenSolutions,
@@ -974,7 +1002,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
                         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
                           <tr>
                             <td width="33.33%" style="padding:8px;vertical-align:top;">
-                              ${metricCard('Total Real Users', report.totalRealUsers)}
+                              ${metricCard('Total Users', report.totalUsers)}
                             </td>
                             <td width="33.33%" style="padding:8px;vertical-align:top;">
                               ${metricCard('Total Open Solutions', report.totalOpenSolutions)}

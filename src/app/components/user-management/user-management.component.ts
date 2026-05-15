@@ -825,7 +825,7 @@ export class UserManagementComponent implements OnInit {
 
   // A simple computed property that filters users by the search term.
   get filteredUsers(): User[] {
-    const baseUsers = this.usersByBotMode;
+    const baseUsers = this.reportingUsers;
     if (!this.searchTerm.trim()) {
       return baseUsers;
     }
@@ -840,6 +840,10 @@ export class UserManagementComponent implements OnInit {
         email.includes(lowerTerm)
       );
     });
+  }
+
+  get reportingUsers(): User[] {
+    return this.usersByBotMode;
   }
 
   get usersByBotMode(): User[] {
@@ -981,8 +985,8 @@ export class UserManagementComponent implements OnInit {
       'Solutions Submitted',
     ];
 
-    // Map user data to match the headers
-    const rows = this.filteredUsers.map((user) => [
+    // Map the same user source as the dashboard total so exported totals match.
+    const rows = this.reportingUsers.map((user) => [
       user.firstName,
       user.lastName,
       user.email,
@@ -996,10 +1000,17 @@ export class UserManagementComponent implements OnInit {
       user.tempSolutionSubmitted || '0', // Default to '0' if undefined
     ]);
 
+    const escapeCsvValue = (value: unknown): string => {
+      const text = String(value ?? '');
+      return /[",\n\r]/.test(text)
+        ? `"${text.replace(/"/g, '""')}"`
+        : text;
+    };
+
     // Combine headers and rows into CSV format
     const csvContent = [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
+      headers.map(escapeCsvValue).join(','),
+      ...rows.map((row) => row.map(escapeCsvValue).join(',')),
     ].join('\n');
 
     // Create a Blob for the CSV content
@@ -1666,7 +1677,7 @@ export class UserManagementComponent implements OnInit {
 
   // ===== Dashboard Stats =====
   get dashboardStats() {
-    const userPool = this.usersByBotMode;
+    const userPool = this.reportingUsers;
     const totalUsers = userPool.length;
     const totalSolutions = this.everySolution.length;
 
@@ -1821,45 +1832,45 @@ export class UserManagementComponent implements OnInit {
     const weekStartMs =
       nowMs - weekMs;
     const previousWeekStartMs = weekStartMs - weekMs;
-    const realUsers = this.allUsers.filter((u) => !this.isLikelyBot(u));
-    const totalRealUsers = realUsers.length;
-    const weeklyActiveUsers = realUsers.filter(
+    const userPool = this.reportingUsers;
+    const totalUsers = userPool.length;
+    const weeklyActiveUsers = userPool.filter(
       (u) => this.userActivityMs(u) >= weekStartMs
     ).length;
-    const previousWeeklyActiveUsers = realUsers.filter((u) => {
+    const previousWeeklyActiveUsers = userPool.filter((u) => {
       const activeMs = this.userActivityMs(u);
       return activeMs >= previousWeekStartMs && activeMs < weekStartMs;
     }).length;
-    const weeklyNewSignups = realUsers.filter(
+    const weeklyNewSignups = userPool.filter(
       (u) => this.data.parseDateMMDDYYYY(u.dateJoined) >= weekStartMs
     ).length;
-    const previousWeeklyNewSignups = realUsers.filter((u) => {
+    const previousWeeklyNewSignups = userPool.filter((u) => {
       const joinedMs = this.data.parseDateMMDDYYYY(u.dateJoined);
       return joinedMs >= previousWeekStartMs && joinedMs < weekStartMs;
     }).length;
-    const realUserEmailSet = new Set(
-      realUsers
+    const reportingUserEmailSet = new Set(
+      userPool
         .map((u) => this.normalizeEmail(u.email))
         .filter((email) => email.length > 0)
     );
     const totalOpenSolutions = this.everySolution.filter((sol) => {
       if ((sol as any).finished === 'true') return false;
-      return this.solutionBelongsToRealUsers(sol, realUserEmailSet);
+      return this.solutionBelongsToRealUsers(sol, reportingUserEmailSet);
     }).length;
     const weeklyWorkedSolutions = this.everySolution.filter(
       (sol) =>
-        this.solutionBelongsToRealUsers(sol, realUserEmailSet) &&
+        this.solutionBelongsToRealUsers(sol, reportingUserEmailSet) &&
         this.solutionWorkedInRange(sol, weekStartMs, nowMs)
     ).length;
     const previousWeeklyWorkedSolutions = this.everySolution.filter(
       (sol) =>
-        this.solutionBelongsToRealUsers(sol, realUserEmailSet) &&
+        this.solutionBelongsToRealUsers(sol, reportingUserEmailSet) &&
         this.solutionWorkedInRange(sol, previousWeekStartMs, weekStartMs)
     ).length;
 
     const weeklyActiveRate =
-      totalRealUsers > 0
-        ? Math.round((weeklyActiveUsers / totalRealUsers) * 100)
+      totalUsers > 0
+        ? Math.round((weeklyActiveUsers / totalUsers) * 100)
         : 0;
     const weeklyActiveIncreasePct = this.percentChange(
       weeklyActiveUsers,
@@ -1875,7 +1886,7 @@ export class UserManagementComponent implements OnInit {
     );
 
     return {
-      totalRealUsers,
+      totalUsers,
       weeklyActiveUsers,
       weeklyNewSignups,
       totalOpenSolutions,
@@ -1895,9 +1906,8 @@ export class UserManagementComponent implements OnInit {
 
   private weeklyWorkedSolutionsForReport() {
     const m = this.weeklyActivityMetrics;
-    const realUsers = this.allUsers.filter((u) => !this.isLikelyBot(u));
-    const realUserEmailSet = new Set(
-      realUsers
+    const reportingUserEmailSet = new Set(
+      this.reportingUsers
         .map((u) => this.normalizeEmail(u.email))
         .filter((email) => email.length > 0)
     );
@@ -1905,7 +1915,7 @@ export class UserManagementComponent implements OnInit {
     return this.everySolution
       .filter(
         (sol) =>
-          this.solutionBelongsToRealUsers(sol, realUserEmailSet) &&
+          this.solutionBelongsToRealUsers(sol, reportingUserEmailSet) &&
           this.solutionWorkedInRange(sol, m.windowStartMs, m.nowMs)
       )
       .sort((a, b) => this.solutionActivityMs(b) - this.solutionActivityMs(a))
@@ -2074,7 +2084,7 @@ export class UserManagementComponent implements OnInit {
                           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
                             <tr>
                               <td width="33.33%" style="padding:8px;vertical-align:top;">
-                                ${metricCard('Total Real Users', m.totalRealUsers)}
+                                ${metricCard('Total Users', m.totalUsers)}
                               </td>
                               <td width="33.33%" style="padding:8px;vertical-align:top;">
                                 ${metricCard('Total Open Solutions', m.totalOpenSolutions)}
