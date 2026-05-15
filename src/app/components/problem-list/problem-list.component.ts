@@ -27,6 +27,8 @@ export class ProblemListComponent {
   @Input() users: User[] = [];
   @Input() margin = '';
   @Input() home: boolean = false;
+  @Input() memberCountBySolutionId = new Map<string, number>();
+  @Input() onlineCountBySolutionId = new Map<string, number>();
 
   @Input() path: string = '/problem-feedback';
   @Input() viewAllPath: string = '/problem-list-view';
@@ -57,6 +59,42 @@ export class ProblemListComponent {
       return solution.authorAccountId === this.auth.currentUser.uid;
     }
     return false;
+  }
+
+  memberLabel(solution: Solution): string {
+    const count =
+      this.memberCountBySolutionId.get(this.solutionKey(solution)) ??
+      this.participantCount(solution);
+    return `${count} member${count === 1 ? '' : 's'}`;
+  }
+
+  onlineLabel(solution: Solution): string {
+    const count = this.onlineCountBySolutionId.get(this.solutionKey(solution)) || 0;
+    return `${count} online`;
+  }
+
+  private participantCount(solution: Solution): number {
+    const emails = new Set<string>();
+    const addEmail = (value: any) => {
+      const email = String(value?.name || value?.email || value || '')
+        .trim()
+        .toLowerCase();
+      if (email) emails.add(email);
+    };
+
+    if (Array.isArray(solution.participants)) {
+      solution.participants.forEach(addEmail);
+    } else if (solution.participants && typeof solution.participants === 'object') {
+      Object.values(solution.participants).forEach(addEmail);
+    }
+    (solution.participantsHolder || []).forEach(addEmail);
+    addEmail(solution.authorEmail);
+
+    return emails.size || (solution.authorAccountId ? 1 : 0);
+  }
+
+  private solutionKey(solution: Solution): string {
+    return solution.solutionId || solution.title || '';
   }
   // get isAdminOfSolution(currentSolution: Solution): boolean {
   //   if (currentSolution || !this.auth.currentUser) return false;

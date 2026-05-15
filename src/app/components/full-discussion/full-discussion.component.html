@@ -96,6 +96,7 @@
         </div>
       </div>
   
+      <div class="flex min-h-[520px] flex-1 overflow-hidden border-t border-slate-200 dark:border-slate-700">
       <!-- Main chat area. Use flex-1 to occupy remaining space. -->
       <div
         id="chatboxDiscussion"
@@ -253,6 +254,49 @@
           </div>
         </ng-container>
          <div #bottomAnchor></div>
+      </div>
+
+      <aside class="hidden w-72 shrink-0 border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50 lg:block">
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+              Online Now
+            </p>
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white">
+              {{ onlineParticipants.length }} teammate{{ onlineParticipants.length === 1 ? '' : 's' }}
+            </h2>
+          </div>
+          <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+        </div>
+
+        <ul *ngIf="onlineParticipants.length; else noOnlineParticipants" class="space-y-2">
+          <li
+            *ngFor="let participant of onlineParticipants"
+            class="flex items-center gap-3 rounded-lg bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+          >
+            <div class="relative">
+              <div class="grid h-9 w-9 place-content-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+                {{ getInitial(participant.displayName) }}
+              </div>
+              <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"></span>
+            </div>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                {{ participant.displayName }}
+              </p>
+              <p *ngIf="participant.email" class="truncate text-xs text-slate-500 dark:text-slate-400">
+                {{ participant.email }}
+              </p>
+            </div>
+          </li>
+        </ul>
+
+        <ng-template #noOnlineParticipants>
+          <p class="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+            No teammates are online right now.
+          </p>
+        </ng-template>
+      </aside>
       </div>
   
       <!-- Input area at the bottom -->

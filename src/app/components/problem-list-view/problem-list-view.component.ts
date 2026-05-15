@@ -1,10 +1,20 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
+import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
+
+interface SolutionMember {
+  email: string;
+  displayName: string;
+  uid?: string;
+  lastActiveAt?: string;
+}
 
 @Component({
   selector: 'app-problem-list-view',
@@ -47,18 +57,29 @@ export class ProblemListViewComponent implements OnInit {
   weeklyBriefPickerOpen = false;
   weeklyBriefSolutionSearch = '';
   weeklyBriefModalOpen = false;
+  memberCountBySolutionId = new Map<string, number>();
+  onlineCountBySolutionId = new Map<string, number>();
+  onlineMembersBySolutionId = new Map<string, SolutionMember[]>();
+  private memberByEmail = new Map<string, SolutionMember | null>();
+  private memberByUid = new Map<string, SolutionMember>();
+  private solutionMemberUids = new Map<string, string[]>();
+  private memberLastActiveByUid = new Map<string, string | undefined>();
+  private solutionsSub?: Subscription;
+  private presenceSub?: Subscription;
 
   constructor(
     public auth: AuthService,
     private solution: SolutionService,
     private router: Router,
     private afs: AngularFirestore,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private presence: PresenceService
   ) {
-    solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
+    this.solutionsSub = solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
       this.solutions = data;
       console.log('all solutions I am in', this.solutions);
       this.findPendingSolutions();
+      void this.refreshPresenceForSolutions();
     });
   }
   ngOnInit(): void {
@@ -73,6 +94,11 @@ export class ProblemListViewComponent implements OnInit {
       if (!user) return;
       this.weeklyBriefSolutionId = user.weeklyBriefSolutionId || '';
     });
+  }
+
+  ngOnDestroy(): void {
+    this.solutionsSub?.unsubscribe();
+    this.presenceSub?.unsubscribe();
   }
   @Input() title: string = 'problemListView.tabs.pending';
 
@@ -351,14 +377,30 @@ export class ProblemListViewComponent implements OnInit {
   }
 
   participantCount(solution: Solution): number {
-    const participants = solution.participants;
-    if (!participants) {
-      return 0;
-    }
-    if (Array.isArray(participants)) {
-      return participants.length;
-    }
-    return Object.keys(participants).length;
+    return this.solutionMemberEmails(solution).length || (solution.authorAccountId ? 1 : 0);
+  }
+
+  memberLabel(solution: Solution): string {
+    const count =
+      this.memberCountBySolutionId.get(this.solutionKey(solution)) ??
+      this.participantCount(solution);
+    return `${count} member${count === 1 ? '' : 's'}`;
+  }
+
+  onlineLabel(solution: Solution): string {
+    const count = this.onlineCountBySolutionId.get(this.solutionKey(solution)) || 0;
+    return `${count} online`;
+  }
+
+  onlineMembers(solution: Solution): SolutionMember[] {
+    return this.onlineMembersBySolutionId.get(this.solutionKey(solution)) || [];
+  }
+
+  onlineMemberNames(solution: Solution): string {
+    return this.onlineMembers(solution)
+      .slice(0, 3)
+      .map((member) => member.displayName)
+      .join(', ');
   }
 
   previewText(solution: Solution): string {
@@ -490,6 +532,148 @@ export class ProblemListViewComponent implements OnInit {
     }
 
     return undefined;
+  }
+
+  private async refreshPresenceForSolutions(): Promise<void> {
+    const emails = Array.from(
+      new Set(
+        this.pendingSolutions
+          .flatMap((solution) => this.solutionMemberEmails(solution))
+          .map((email) => this.normalizeEmail(email))
+          .filter(Boolean)
+      )
+    );
+
+    await Promise.all(emails.map((email) => this.resolveMemberByEmail(email)));
+
+    const allUids = new Set<string>();
+    this.solutionMemberUids.clear();
+    this.memberLastActiveByUid.clear();
+    this.memberByUid.clear();
+
+    this.pendingSolutions.forEach((solution) => {
+      const key = this.solutionKey(solution);
+      const uids = new Set<string>();
+      const memberEmails = this.solutionMemberEmails(solution);
+
+      memberEmails.forEach((email) => {
+        const member = this.memberByEmail.get(this.normalizeEmail(email));
+        if (!member?.uid) return;
+        uids.add(member.uid);
+        this.memberByUid.set(member.uid, member);
+        this.memberLastActiveByUid.set(member.uid, member.lastActiveAt);
+      });
+
+      if (solution.authorAccountId) {
+        uids.add(solution.authorAccountId);
+        const authorMember = this.memberFromSolutionAuthor(solution);
+        if (authorMember) this.memberByUid.set(solution.authorAccountId, authorMember);
+      }
+
+      const uidList = Array.from(uids);
+      this.solutionMemberUids.set(key, uidList);
+      this.memberCountBySolutionId.set(key, memberEmails.length || uidList.length);
+      uidList.forEach((uid) => allUids.add(uid));
+    });
+
+    this.presenceSub?.unsubscribe();
+    this.presenceSub = this.presence
+      .watchOnlineUids$(Array.from(allUids), this.memberLastActiveByUid)
+      .subscribe((onlineUids) => {
+        this.onlineCountBySolutionId.clear();
+        this.onlineMembersBySolutionId.clear();
+
+        this.pendingSolutions.forEach((solution) => {
+          const key = this.solutionKey(solution);
+          const members = (this.solutionMemberUids.get(key) || [])
+            .filter((uid) => onlineUids.has(uid))
+            .map((uid) => this.memberByUid.get(uid))
+            .filter((member): member is SolutionMember => !!member);
+          this.onlineCountBySolutionId.set(key, members.length);
+          this.onlineMembersBySolutionId.set(key, members);
+        });
+      });
+  }
+
+  private solutionMemberEmails(solution: Solution): string[] {
+    const emails = new Set<string>();
+    const addEmail = (value: any) => {
+      const email = this.normalizeEmail(value?.name || value?.email || value);
+      if (email) emails.add(email);
+    };
+
+    const participants = solution.participants;
+    if (Array.isArray(participants)) {
+      participants.forEach(addEmail);
+    } else if (participants && typeof participants === 'object') {
+      Object.values(participants).forEach(addEmail);
+    }
+    (solution.participantsHolder || []).forEach(addEmail);
+    addEmail(solution.authorEmail);
+
+    return Array.from(emails);
+  }
+
+  private async resolveMemberByEmail(email: string): Promise<SolutionMember | null> {
+    const normalizedEmail = this.normalizeEmail(email);
+    if (this.memberByEmail.has(normalizedEmail)) {
+      return this.memberByEmail.get(normalizedEmail) || null;
+    }
+
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email || '');
+    const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (normalizedEmail === currentEmail && currentUid) {
+      const member = {
+        email: normalizedEmail,
+        displayName:
+          [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .trim() || normalizedEmail,
+        uid: currentUid,
+        lastActiveAt: new Date().toISOString(),
+      };
+      this.memberByEmail.set(normalizedEmail, member);
+      return member;
+    }
+
+    try {
+      const users = await firstValueFrom(this.auth.getUserFromEmail(normalizedEmail));
+      const user = users?.[0] as User | undefined;
+      const member = user?.uid
+        ? {
+            email: normalizedEmail,
+            displayName:
+              [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
+              user.email ||
+              normalizedEmail,
+            uid: user.uid,
+            lastActiveAt: user.lastActiveAt,
+          }
+        : null;
+      this.memberByEmail.set(normalizedEmail, member);
+      return member;
+    } catch {
+      this.memberByEmail.set(normalizedEmail, null);
+      return null;
+    }
+  }
+
+  private memberFromSolutionAuthor(solution: Solution): SolutionMember | null {
+    if (!solution.authorAccountId) return null;
+    return {
+      email: this.normalizeEmail(solution.authorEmail || ''),
+      displayName: solution.authorName || solution.authorEmail || 'Solution owner',
+      uid: solution.authorAccountId,
+    };
+  }
+
+  private solutionKey(solution: Solution): string {
+    return solution.solutionId || solution.title || '';
+  }
+
+  private normalizeEmail(value: any): string {
+    return String(value || '').trim().toLowerCase();
   }
 
   private containsTimeInformation(raw: string, date: Date): boolean {

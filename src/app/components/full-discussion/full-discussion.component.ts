@@ -15,10 +15,11 @@ import {
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Attachment, Comment, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
@@ -26,6 +27,8 @@ interface ParticipantInfo {
   email: string;
   displayName: string;
   uid?: string;
+  lastActiveAt?: string;
+  isOnline?: boolean;
   isAI?: boolean;
   avatarPath?: string;
   collectionKey?: string;
@@ -101,6 +104,7 @@ export class FullDiscussionComponent
 
   // @mention functionality
   participants: ParticipantInfo[] = [];
+  onlineParticipants: ParticipantInfo[] = [];
   showMentionDropdown = false;
   mentionSearchText = '';
   filteredParticipants: ParticipantInfo[] = [];
@@ -108,6 +112,7 @@ export class FullDiscussionComponent
   mentionStartIndex = -1;
 
   private hasScrolled = false;
+  private participantPresenceSub?: Subscription;
 
   constructor(
     private afs: AngularFirestore,
@@ -118,7 +123,8 @@ export class FullDiscussionComponent
     private solution: SolutionService,
     private router: Router,
     private storage: AngularFireStorage,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private presence: PresenceService
   ) {
     this.user = this.auth.currentUser;
     if (this.user?.profilePicture?.downloadURL) {
@@ -382,7 +388,7 @@ Please choose a file under 5 MB.`);
   }
 
   ngOnDestroy(): void {
-    // Cleanup if needed
+    this.participantPresenceSub?.unsubscribe();
   }
   linkify(text: string): string {
     if (!text) return '';
@@ -445,15 +451,25 @@ Please choose a file under 5 MB.`);
         if (!normalizedEmail || seenEmails.has(normalizedEmail)) continue;
         seenEmails.add(normalizedEmail);
 
-        // Try to find user in database
+        const currentEmail = (this.auth.currentUser?.email || '').trim().toLowerCase();
+        const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+        if (normalizedEmail === currentEmail && currentUid) {
+          participants.push({
+            email: normalizedEmail,
+            displayName:
+              [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
+                .filter(Boolean)
+                .join(' ')
+                .trim() || normalizedEmail,
+            uid: currentUid,
+            lastActiveAt: new Date().toISOString(),
+            isOnline: true,
+          });
+          continue;
+        }
+
         try {
-          const userQuery = await firstValueFrom(
-            this.afs
-              .collection('users', (ref) =>
-                ref.where('email', '==', normalizedEmail).limit(1)
-              )
-              .valueChanges()
-          );
+          const userQuery = await firstValueFrom(this.auth.getUserFromEmail(normalizedEmail));
           
           if (userQuery && userQuery.length > 0) {
             const user: any = userQuery[0];
@@ -461,17 +477,21 @@ Please choose a file under 5 MB.`);
               email: normalizedEmail,
               displayName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || normalizedEmail,
               uid: user.uid,
+              lastActiveAt: user.lastActiveAt,
+              isOnline: false,
             });
           } else {
             participants.push({
               email: normalizedEmail,
               displayName: normalizedEmail,
+              isOnline: false,
             });
           }
         } catch {
           participants.push({
             email: normalizedEmail,
             displayName: normalizedEmail,
+            isOnline: false,
           });
         }
       }
@@ -483,6 +503,7 @@ Please choose a file under 5 MB.`);
     this.addAIParticipants();
 
     console.log('Loaded participants for mentions:', this.participants);
+    this.subscribeToParticipantPresence();
   }
 
   /** Add AI avatars to the participants list */
@@ -513,8 +534,36 @@ Please choose a file under 5 MB.`);
         email: '', // We don't have email from comments, will lookup
         displayName: comment.authorName || 'Unknown',
         uid: comment.authorId,
+        isOnline: false,
       });
     }
+    this.subscribeToParticipantPresence();
+  }
+
+  private subscribeToParticipantPresence(): void {
+    const humans = this.participants.filter((participant) => !participant.isAI);
+    const fallbackLastActiveByUid = new Map<string, string | undefined>();
+    const uids = humans
+      .map((participant) => {
+        const uid = String(participant.uid || '').trim();
+        if (uid) fallbackLastActiveByUid.set(uid, participant.lastActiveAt);
+        return uid;
+      })
+      .filter(Boolean);
+
+    this.participantPresenceSub?.unsubscribe();
+    this.onlineParticipants = [];
+    this.participantPresenceSub = this.presence
+      .watchOnlineUids$(uids, fallbackLastActiveByUid)
+      .subscribe((onlineUids) => {
+        this.participants = this.participants.map((participant) => ({
+          ...participant,
+          isOnline: !!participant.uid && onlineUids.has(participant.uid),
+        }));
+        this.onlineParticipants = this.participants.filter(
+          (participant) => !participant.isAI && participant.isOnline
+        );
+      });
   }
 
   /** Handle input changes to detect @ mentions */

@@ -1,26 +1,35 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Solution, SolutionRecruitmentProfile } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
+import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
+
+interface OnlineTeamMember {
+  email: string;
+  displayName: string;
+  uid: string;
+  lastActiveAt?: string;
+}
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
     public data: DataService,
     private router: Router,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private presence: PresenceService
   ) {}
   showInviteModal = false;
   toggleInviteModal() {
@@ -68,14 +77,21 @@ export class DashboardComponent implements OnInit {
     name: string;
     user?: User;
   }> = [];
+  teamMemberCount = 0;
+  onlineTeamMembers: OnlineTeamMember[] = [];
+  private teamMembersByEmail = new Map<string, OnlineTeamMember | null>();
+  private teamMembersByUid = new Map<string, OnlineTeamMember>();
+  private teamPresenceSub?: Subscription;
+  private solutionSub?: Subscription;
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.solution.getSolution(this.id).subscribe((data: any) => {
+    this.solutionSub = this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
       this.ensureRecruitmentProfile();
       this.profileSaved = false;
       this.profileMessage = '';
+      void this.refreshTeamPresence();
     });
 
     // Load all users for autocomplete
@@ -92,6 +108,11 @@ export class DashboardComponent implements OnInit {
         }, 500);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.solutionSub?.unsubscribe();
+    this.teamPresenceSub?.unsubscribe();
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -116,6 +137,22 @@ export class DashboardComponent implements OnInit {
     return `https://newworld-game.org/join/${
       this.currentSolution.solutionId || this.id
     }`;
+  }
+
+  get onlineTeamLabel(): string {
+    const count = this.onlineTeamMembers.length;
+    return `${count} online`;
+  }
+
+  get teamMemberLabel(): string {
+    return `${this.teamMemberCount} member${this.teamMemberCount === 1 ? '' : 's'}`;
+  }
+
+  get onlineTeamPreview(): string {
+    return this.onlineTeamMembers
+      .slice(0, 3)
+      .map((member) => member.displayName)
+      .join(', ');
   }
 
   get allBroadcasts(): string {
@@ -712,5 +749,120 @@ export class DashboardComponent implements OnInit {
     } catch (error) {
       console.error(`Error sending invite to ${this.newTeamMember}:`, error);
     }
+  }
+
+  private async refreshTeamPresence(): Promise<void> {
+    const emails = this.solutionMemberEmails(this.currentSolution);
+    this.teamMemberCount = emails.length || (this.currentSolution.authorAccountId ? 1 : 0);
+
+    await Promise.all(emails.map((email) => this.resolveTeamMemberByEmail(email)));
+
+    const uids = new Set<string>();
+    const fallbackLastActiveByUid = new Map<string, string | undefined>();
+    this.teamMembersByUid.clear();
+
+    emails.forEach((email) => {
+      const member = this.teamMembersByEmail.get(this.normalizeEmail(email));
+      if (!member?.uid) return;
+      uids.add(member.uid);
+      this.teamMembersByUid.set(member.uid, member);
+      fallbackLastActiveByUid.set(member.uid, member.lastActiveAt);
+    });
+
+    if (this.currentSolution.authorAccountId) {
+      const author = this.memberFromSolutionAuthor(this.currentSolution);
+      if (author) {
+        uids.add(author.uid);
+        this.teamMembersByUid.set(author.uid, author);
+      }
+    }
+
+    this.teamPresenceSub?.unsubscribe();
+    this.onlineTeamMembers = [];
+    this.teamPresenceSub = this.presence
+      .watchOnlineUids$(Array.from(uids), fallbackLastActiveByUid)
+      .subscribe((onlineUids) => {
+        this.onlineTeamMembers = Array.from(onlineUids)
+          .map((uid) => this.teamMembersByUid.get(uid))
+          .filter((member): member is OnlineTeamMember => !!member);
+      });
+  }
+
+  private solutionMemberEmails(solution: Solution): string[] {
+    const emails = new Set<string>();
+    const addEmail = (value: any) => {
+      const email = this.normalizeEmail(value?.name || value?.email || value);
+      if (email) emails.add(email);
+    };
+
+    if (Array.isArray(solution.participants)) {
+      solution.participants.forEach(addEmail);
+    } else if (solution.participants && typeof solution.participants === 'object') {
+      Object.values(solution.participants).forEach(addEmail);
+    }
+    (solution.participantsHolder || []).forEach(addEmail);
+    addEmail(solution.authorEmail);
+
+    return Array.from(emails);
+  }
+
+  private async resolveTeamMemberByEmail(
+    email: string
+  ): Promise<OnlineTeamMember | null> {
+    const normalizedEmail = this.normalizeEmail(email);
+    if (this.teamMembersByEmail.has(normalizedEmail)) {
+      return this.teamMembersByEmail.get(normalizedEmail) || null;
+    }
+
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email || '');
+    const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (normalizedEmail === currentEmail && currentUid) {
+      const member = {
+        email: normalizedEmail,
+        displayName:
+          [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .trim() || normalizedEmail,
+        uid: currentUid,
+        lastActiveAt: new Date().toISOString(),
+      };
+      this.teamMembersByEmail.set(normalizedEmail, member);
+      return member;
+    }
+
+    try {
+      const users = await firstValueFrom(this.auth.getUserFromEmail(normalizedEmail));
+      const user = users?.[0] as User | undefined;
+      const member = user?.uid
+        ? {
+            email: normalizedEmail,
+            displayName:
+              [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
+              user.email ||
+              normalizedEmail,
+            uid: user.uid,
+            lastActiveAt: user.lastActiveAt,
+          }
+        : null;
+      this.teamMembersByEmail.set(normalizedEmail, member);
+      return member;
+    } catch {
+      this.teamMembersByEmail.set(normalizedEmail, null);
+      return null;
+    }
+  }
+
+  private memberFromSolutionAuthor(solution: Solution): OnlineTeamMember | null {
+    if (!solution.authorAccountId) return null;
+    return {
+      email: this.normalizeEmail(solution.authorEmail || ''),
+      displayName: solution.authorName || solution.authorEmail || 'Solution owner',
+      uid: solution.authorAccountId,
+    };
+  }
+
+  private normalizeEmail(value: any): string {
+    return String(value || '').trim().toLowerCase();
   }
 }
