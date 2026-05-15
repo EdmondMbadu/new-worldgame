@@ -148,13 +148,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return `${this.teamMemberCount} member${this.teamMemberCount === 1 ? '' : 's'}`;
   }
 
-  get onlineTeamPreview(): string {
-    return this.onlineTeamMembers
-      .slice(0, 3)
-      .map((member) => member.displayName)
-      .join(', ');
-  }
-
   get allBroadcasts(): string {
     return `broadcasts/`;
   }
