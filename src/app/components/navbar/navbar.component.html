@@ -381,6 +381,44 @@
 
         <li>
           <a
+            routerLink="/challenge-spaces"
+            class="{{
+              hoveredChallengeSpacesPath
+            }} flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+          >
+            <svg
+              class="w-[20px] h-[20px] text-gray-800 dark:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-11Z"
+              />
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 8h8M8 12h8M8 16h5"
+              />
+            </svg>
+
+            <span class="flex-1 ms-3 whitespace-nowrap">{{
+              "navbar.myChallengeSpaces" | translate
+            }}</span>
+          </a>
+        </li>
+
+        <li>
+          <a
             routerLink="/operating-manual"
             class="{{
               hoveredManualPath
@@ -670,66 +708,6 @@
           </a>
         </li>
 
-        <!-- My Pages Section -->
-        <li class="cursor-pointer" *ngIf="userChallengePages.length > 0">
-          <div
-            (click)="toggle('showMyPages')"
-            class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-          >
-            <svg
-              class="w-[20px] h-[20px] text-gray-800 dark:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6H20M4 12H20M4 18H20"
-              />
-            </svg>
-            <span class="flex-1 ms-3 whitespace-nowrap">{{
-              "navbar.myChallengeSpaces" | translate
-            }}</span>
-            <svg
-              class="w-3 h-3 ml-1"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 10 6"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="m1 1 4 4 4-4"
-              />
-            </svg>
-          </div>
-
-          <!-- Nested Challenge Pages -->
-          <ul *ngIf="showMyPages" class="ml-6 space-y-2">
-            <li *ngFor="let page of userChallengePages">
-              <a
-                [routerLink]="'/home-challenge/' + page.challengePageId"
-                class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-              >
-                <img
-                  [src]="page.imageChallenge"
-                  alt="{{ page.name }}"
-                  class="w-6 h-6 rounded-full mr-3"
-                />
-                <span class="flex-1 whitespace-nowrap">{{ page.name }}</span>
-              </a>
-            </li>
-          </ul>
-        </li>
       </ul>
 
       <!-- ── Global Solutions Lab 2026 Sidebar Banner ── -->
@@ -975,6 +953,39 @@
             </svg>
 
             <!-- <span class="flex-1 ms-3 whitespace-nowrap">Pending</span> -->
+          </a>
+        </li>
+        <li>
+          <a
+            routerLink="/challenge-spaces"
+            class="{{
+              hoveredChallengeSpacesPath
+            }} flex items-center px-1 py-2  text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+          >
+            <svg
+              class="flex-shrink-0 w-[26px] h-[26px] text-gray-800 dark:text-white"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5v-11Z"
+              />
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 8h8M8 12h8M8 16h5"
+              />
+            </svg>
           </a>
         </li>
         <li>

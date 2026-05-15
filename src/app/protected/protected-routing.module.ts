@@ -43,6 +43,7 @@ import { JoinSuccessComponent } from '../components/join-success/join-success.co
 import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component';
 import { InvitationsComponent } from '../components/invitations/invitations.component';
 import { SchoolDashboardComponent } from '../components/school-dashboard/school-dashboard.component';
+import { ChallengeSpacesComponent } from '../components/challenge-spaces/challenge-spaces.component';
 
 const routes: Routes = [
   { path: 'game', component: GameComponent },
@@ -110,6 +111,11 @@ const routes: Routes = [
   {
     path: 'problem-list-view',
     component: ProblemListViewComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'challenge-spaces',
+    component: ChallengeSpacesComponent,
     canActivate: [AuthGuard],
   },
   {

@@ -248,6 +248,20 @@ export class ChallengesService {
     }
   }
 
+  getAllChallengePages(): Observable<ChallengePage[]> {
+    return this.afs
+      .collection<ChallengePage>('challengePages')
+      .valueChanges({ idField: 'id' } as any)
+      .pipe(
+        map((pages: any[]) =>
+          (pages || []).map((page) => ({
+            ...page,
+            challengePageId: page.challengePageId || page.id,
+          }))
+        )
+      );
+  }
+
   // Get all challengePages where this user is participant
   getAllChallengesWhereUserIsParticipant(): Observable<ChallengePage[]> {
     const user = this.auth.currentUser;

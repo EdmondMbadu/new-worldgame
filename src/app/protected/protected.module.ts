@@ -59,6 +59,7 @@ import { BroadcastedSolutionsComponent } from '../components/broadcasted-solutio
 import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from '../components/avatar-detail/avatar-detail.component';
 import { ActivityHeatmapComponent } from '../components/activity-heatmap/activity-heatmap.component';
+import { ChallengeSpacesComponent } from '../components/challenge-spaces/challenge-spaces.component';
 
 @NgModule({
   declarations: [
@@ -115,6 +116,7 @@ import { ActivityHeatmapComponent } from '../components/activity-heatmap/activit
     UnsubscribeComponent,
     AvatarDetailComponent,
     ActivityHeatmapComponent,
+    ChallengeSpacesComponent,
   ],
   imports: [
     CommonModule,

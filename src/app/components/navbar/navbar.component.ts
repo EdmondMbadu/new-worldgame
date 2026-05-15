@@ -110,6 +110,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Input() hoveredSchoolAdmin: string = ``;
   @Input() hoveredDiscoverPath: string = ``;
   @Input() hoveredCollaboratePath: string = '';
+  @Input() hoveredChallengeSpacesPath: string = '';
 
   beta: boolean = true;
   lab: boolean = true;
