@@ -179,6 +179,11 @@
                         {{ getInitials(user.firstName, user.lastName, user.email) }}
                       </span>
                     </div>
+                    <span
+                      *ngIf="isUserOnline(user)"
+                      class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"
+                      title="Online"
+                    ></span>
                   </div>
                   <!-- Hover Popup -->
                   <div *ngIf="showPopUpTeam[i]"
@@ -261,6 +266,11 @@
                         {{ getInitials(user.firstName, user.lastName, user.email) }}
                       </span>
                     </div>
+                    <span
+                      *ngIf="isUserOnline(user)"
+                      class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"
+                      title="Online"
+                    ></span>
                   </div>
                   <!-- Hover Popup -->
                   <div *ngIf="showPopUpEvaluators[i]"
@@ -339,6 +349,11 @@
                       {{ getInitials(undefined, undefined, admin.authorEmail, admin.authorName) }}
                     </span>
                   </div>
+                  <span
+                    *ngIf="isAdminOnline(admin)"
+                    class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"
+                    title="Online"
+                  ></span>
                 </div>
               </div>
               <p *ngIf="admins.length === 0" class="text-sm text-gray-500 dark:text-gray-400 italic">No admins configured</p>

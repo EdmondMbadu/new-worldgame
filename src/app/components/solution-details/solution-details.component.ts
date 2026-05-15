@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, take } from 'rxjs';
+import { Subscription, firstValueFrom, take } from 'rxjs';
 import { Admin, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
+import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 /** Full SDG titles in the order 1 → 17.
@@ -43,14 +44,15 @@ type InviteRole = 'designer' | 'evaluator' | 'admin';
   templateUrl: './solution-details.component.html',
   styleUrl: './solution-details.component.css',
 })
-export class SolutionDetailsComponent implements OnInit {
+export class SolutionDetailsComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
     private solution: SolutionService,
     public data: DataService,
     private router: Router,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private presence: PresenceService
   ) {}
 
   copied = false;
@@ -103,6 +105,11 @@ export class SolutionDetailsComponent implements OnInit {
   showPopUpEvaluators: boolean[] = [];
   evaluators: User[] = [];
   filteredEvaluators: User[] = [];
+  onlineUids = new Set<string>();
+  private memberLastActiveByUid = new Map<string, string | undefined>();
+  private memberUidByEmail = new Map<string, string | null>();
+  private presenceSub?: Subscription;
+  private solutionSub?: Subscription;
 
   /* ––– NEW STATE ––– */
   admins: Admin[] = [];
@@ -146,7 +153,7 @@ export class SolutionDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.solution.getSolution(this.id).subscribe((data: any) => {
+    this.solutionSub = this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
       console.log('the current solution sdgs', this.currentSolution.sdgs);
       // edge case if the solution has no description
@@ -157,11 +164,17 @@ export class SolutionDetailsComponent implements OnInit {
       this.title = this.currentSolution.title || '';
       this.getMembers();
       this.getEvaluators();
+      void this.refreshPresence();
     });
 
     this.auth.getALlUsers().subscribe((users) => {
       this.allUsers = users;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.solutionSub?.unsubscribe();
+    this.presenceSub?.unsubscribe();
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -260,6 +273,14 @@ export class SolutionDetailsComponent implements OnInit {
         }
       }
     }
+  }
+
+  isUserOnline(user: User): boolean {
+    return !!user.uid && this.onlineUids.has(user.uid);
+  }
+
+  isAdminOnline(admin: Admin): boolean {
+    return !!admin.authorAccountId && this.onlineUids.has(admin.authorAccountId);
   }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
@@ -668,6 +689,83 @@ export class SolutionDetailsComponent implements OnInit {
     }
 
     return [];
+  }
+
+  private async refreshPresence(): Promise<void> {
+    const uids = new Set<string>();
+    this.memberLastActiveByUid.clear();
+
+    const emails = this.solutionMemberEmails();
+    await Promise.all(emails.map((email) => this.resolveMemberUidByEmail(email)));
+
+    emails.forEach((email) => {
+      const uid = this.memberUidByEmail.get(email);
+      if (uid) uids.add(uid);
+    });
+
+    if (this.currentSolution.authorAccountId) {
+      uids.add(this.currentSolution.authorAccountId);
+    }
+    (this.currentSolution.chosenAdmins || []).forEach((admin) => {
+      if (admin.authorAccountId) uids.add(admin.authorAccountId);
+    });
+
+    this.presenceSub?.unsubscribe();
+    this.onlineUids = new Set<string>();
+    this.presenceSub = this.presence
+      .watchOnlineUids$(Array.from(uids), this.memberLastActiveByUid)
+      .subscribe((onlineUids) => {
+        this.onlineUids = onlineUids;
+      });
+  }
+
+  private solutionMemberEmails(): string[] {
+    const emails = new Set<string>();
+    const addEmail = (value: any) => {
+      const email = this.normalizeEmail(value?.name || value?.email || value);
+      if (email) emails.add(email);
+    };
+
+    this.getParticipantsArray().forEach(addEmail);
+    (this.currentSolution.evaluators || []).forEach(addEmail);
+    (this.currentSolution.evaluatorsHolder || []).forEach(addEmail);
+    (this.currentSolution.participantsHolder || []).forEach(addEmail);
+    (this.currentSolution.chosenAdmins || []).forEach((admin) =>
+      addEmail(admin.authorEmail)
+    );
+    addEmail(this.currentSolution.authorEmail);
+
+    return Array.from(emails);
+  }
+
+  private async resolveMemberUidByEmail(email: string): Promise<string | null> {
+    if (this.memberUidByEmail.has(email)) {
+      return this.memberUidByEmail.get(email) || null;
+    }
+
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email || '');
+    const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (email === currentEmail && currentUid) {
+      this.memberUidByEmail.set(email, currentUid);
+      this.memberLastActiveByUid.set(currentUid, new Date().toISOString());
+      return currentUid;
+    }
+
+    try {
+      const users = await firstValueFrom(this.auth.getUserFromEmail(email));
+      const user = users?.[0];
+      const uid = user?.uid || null;
+      this.memberUidByEmail.set(email, uid);
+      if (uid) this.memberLastActiveByUid.set(uid, user.lastActiveAt);
+      return uid;
+    } catch {
+      this.memberUidByEmail.set(email, null);
+      return null;
+    }
+  }
+
+  private normalizeEmail(value: any): string {
+    return String(value || '').trim().toLowerCase();
   }
 
   private getParticipantEmails(): string[] {
