@@ -1,5 +1,17 @@
 <section class="features-page bg-stone-100 dark:bg-slate-950 min-h-screen">
-  <app-navbar></app-navbar>
+  <div *ngIf="!isLoggedIn">
+    <app-navbar></app-navbar>
+  </div>
+  <div *ngIf="isLoggedIn">
+    <app-navbar
+      [sideBarSmall]="true"
+      [sideBarBig]="false"
+      [email]="auth.currentUser.email"
+      [firstName]="auth.currentUser.firstName"
+      [lastName]="auth.currentUser.lastName"
+      [path]="'home'"
+    ></app-navbar>
+  </div>
 
   <div class="relative overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 pt-28 pb-20 md:px-6 lg:px-8">

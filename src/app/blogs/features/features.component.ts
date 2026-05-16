@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from 'src/app/services/auth.service';
 
 interface HighlightStat {
   value: string;
@@ -36,6 +37,10 @@ interface FeatureCluster {
   styleUrl: './features.component.css',
 })
 export class FeaturesComponent implements OnInit {
+  isLoggedIn = false;
+
+  constructor(public auth: AuthService) {}
+
   readonly highlightStats: HighlightStat[] = [
     {
       value: 'Weekly',
@@ -269,5 +274,8 @@ export class FeaturesComponent implements OnInit {
 
   ngOnInit(): void {
     window.scrollTo(0, 0);
+    this.auth
+      .getCurrentUserPromise()
+      .then((user) => (this.isLoggedIn = !!user));
   }
 }
