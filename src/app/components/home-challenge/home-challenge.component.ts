@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
-import { ChallengePage } from 'src/app/models/user';
+import { ChallengeJoinRequest, ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
@@ -81,6 +81,9 @@ export class HomeChallengeComponent implements OnDestroy {
     isCurrentUser: boolean;
   }[] = [];
   isLoadingAdminProfiles = false;
+  challengeJoinRequests: ChallengeJoinRequest[] = [];
+  processingJoinRequestIds = new Set<string>();
+  private challengeJoinRequestsSub?: Subscription;
   googleMeetLink: string = '';
   newParticipant: string = '';
   teamMemberToDelete: string = '';
@@ -240,10 +243,22 @@ export class HomeChallengeComponent implements OnDestroy {
       this.allUsers = users || [];
       console.log(`Loaded ${this.allUsers.length} users for search`);
     });
+
+    this.challengeJoinRequestsSub = this.challenge
+      .getChallengeJoinRequests()
+      .subscribe({
+        next: (requests) => {
+          this.challengeJoinRequests = requests || [];
+        },
+        error: (error) => {
+          console.error('Unable to load challenge join requests', error);
+        },
+      });
   }
   ngOnDestroy(): void {
     this.languageSub?.unsubscribe();
     this.participantPresenceSub?.unsubscribe();
+    this.challengeJoinRequestsSub?.unsubscribe();
   }
   private resetPageState(): void {
     // everything that can legitimately be “missing” on a page
@@ -430,6 +445,66 @@ export class HomeChallengeComponent implements OnDestroy {
       (this.adminUids || []).includes(meUid);
 
     return isAuthor || isPageAdmin;
+  }
+
+  get pendingJoinRequestsForPage(): ChallengeJoinRequest[] {
+    if (!this.challengePageId || !this.isAuthorPage) {
+      return [];
+    }
+
+    return (this.challengeJoinRequests || [])
+      .filter(
+        (request) =>
+          request.challengePageId === this.challengePageId &&
+          request.status === 'pending'
+      )
+      .sort((a, b) => this.requestDateMs(b.createdAt) - this.requestDateMs(a.createdAt));
+  }
+
+  isProcessingJoinRequest(request: ChallengeJoinRequest): boolean {
+    return !!request.id && this.processingJoinRequestIds.has(request.id);
+  }
+
+  async acceptJoinRequest(request: ChallengeJoinRequest): Promise<void> {
+    if (!request.id || this.processingJoinRequestIds.has(request.id)) {
+      return;
+    }
+
+    this.processingJoinRequestIds.add(request.id);
+    try {
+      await this.challenge.acceptChallengeJoinRequest(request.id);
+      this.toast.success(`${request.requesterName || request.requesterEmail} was added.`);
+    } catch (error) {
+      console.error('Unable to accept challenge join request:', error);
+      this.toast.error('Could not accept this request.');
+    } finally {
+      this.processingJoinRequestIds.delete(request.id);
+    }
+  }
+
+  async rejectJoinRequest(request: ChallengeJoinRequest): Promise<void> {
+    if (!request.id || this.processingJoinRequestIds.has(request.id)) {
+      return;
+    }
+
+    this.processingJoinRequestIds.add(request.id);
+    try {
+      await this.challenge.rejectChallengeJoinRequest(request.id);
+      this.toast.success('Request rejected.');
+    } catch (error) {
+      console.error('Unable to reject challenge join request:', error);
+      this.toast.error('Could not reject this request.');
+    } finally {
+      this.processingJoinRequestIds.delete(request.id);
+    }
+  }
+
+  private requestDateMs(value: any): number {
+    if (!value) return 0;
+    if (typeof value.toMillis === 'function') return value.toMillis();
+    if (typeof value.seconds === 'number') return value.seconds * 1000;
+    const parsed = Date.parse(String(value));
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   toggleAside() {
