@@ -779,15 +779,26 @@ export class HomeChallengeComponent implements OnDestroy {
     }
   }
   get participantsProfilesToRender() {
+    const sortedProfiles = this.participantProfilesSortedByPresence();
     return this.showAllParticipants
-      ? this.participantProfiles
-      : this.participantProfiles.slice(0, 5);
+      ? sortedProfiles
+      : sortedProfiles.slice(0, 5);
   }
 
   get adminProfilesToRender() {
     return this.showAllAdmins
       ? this.adminProfiles
       : this.adminProfiles.slice(0, 5);
+  }
+
+  private participantProfilesSortedByPresence(): typeof this.participantProfiles {
+    return [...this.participantProfiles].sort((a, b) => {
+      if (!!a.isOnline === !!b.isOnline) {
+        return 0;
+      }
+
+      return a.isOnline ? -1 : 1;
+    });
   }
 
   async loadParticipantProfiles(): Promise<void> {
