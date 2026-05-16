@@ -3,9 +3,10 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { BehaviorSubject, Observable, firstValueFrom, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ChallengePage } from '../models/user';
+import { ChallengeJoinRequest, ChallengePage } from '../models/user';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import { SolutionService } from './solution.service';
@@ -16,6 +17,7 @@ import { SolutionService } from './solution.service';
 export class ChallengesService {
   constructor(
     private afs: AngularFirestore,
+    private fns: AngularFireFunctions,
     private auth: AuthService,
     private time: TimeService,
     private solution: SolutionService
@@ -176,6 +178,49 @@ export class ChallengesService {
     };
     return challengeRef.set(data, { merge: true });
   }
+
+  getChallengeJoinRequests(): Observable<ChallengeJoinRequest[]> {
+    return this.afs
+      .collection<ChallengeJoinRequest>('challengeJoinRequests', (ref) =>
+        ref.where('status', '==', 'pending')
+      )
+      .valueChanges({ idField: 'id' } as any);
+  }
+
+  getMyChallengeJoinRequests(): Observable<ChallengeJoinRequest[]> {
+    const email = String(this.auth.currentUser?.email || '')
+      .trim()
+      .toLowerCase();
+
+    if (!email) {
+      return of([]);
+    }
+
+    return this.afs
+      .collection<ChallengeJoinRequest>('challengeJoinRequests', (ref) =>
+        ref.where('requesterEmail', '==', email)
+      )
+      .valueChanges({ idField: 'id' } as any);
+  }
+
+  async requestToJoinChallengePage(
+    challengePageId: string,
+    message: string
+  ): Promise<void> {
+    const requestJoin = this.fns.httpsCallable('requestChallengePageJoin');
+    await firstValueFrom(requestJoin({ challengePageId, message }));
+  }
+
+  async acceptChallengeJoinRequest(requestId: string): Promise<void> {
+    const acceptJoin = this.fns.httpsCallable('acceptChallengePageJoinRequest');
+    await firstValueFrom(acceptJoin({ requestId }));
+  }
+
+  async rejectChallengeJoinRequest(requestId: string): Promise<void> {
+    const rejectJoin = this.fns.httpsCallable('rejectChallengePageJoinRequest');
+    await firstValueFrom(rejectJoin({ requestId }));
+  }
+
   deleteChallenge(challengeId: string) {
     return this.afs.doc(`challenges/${challengeId}`).delete();
   }

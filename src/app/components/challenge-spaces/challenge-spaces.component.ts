@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { ChallengePage, User } from 'src/app/models/user';
+import { ChallengeJoinRequest, ChallengePage, User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { PresenceService } from 'src/app/services/presence.service';
+import { ToastService } from 'src/app/services/toast.service';
 
 interface ChallengeSpaceMember {
   uid: string;
@@ -18,17 +19,27 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   searchTerm = '';
   loading = true;
   challengeSpaces: ChallengePage[] = [];
+  joinRequests: ChallengeJoinRequest[] = [];
+  myJoinRequests: ChallengeJoinRequest[] = [];
+  selectedRequestSpace: ChallengePage | null = null;
+  requestMessage = '';
+  requestError = '';
+  submittingRequest = false;
+  processingRequestIds = new Set<string>();
   onlineUids = new Set<string>();
   private memberUsersByEmail = new Map<string, ChallengeSpaceMember | null>();
   private memberUidsBySpace = new Map<string, string[]>();
   private memberLastActiveByUid = new Map<string, string | undefined>();
   private challengeSpacesSub?: Subscription;
+  private joinRequestsSub?: Subscription;
+  private myJoinRequestsSub?: Subscription;
   private presenceSub?: Subscription;
 
   constructor(
     public auth: AuthService,
     private challenges: ChallengesService,
-    private presence: PresenceService
+    private presence: PresenceService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -47,10 +58,32 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
         this.loading = false;
       },
     });
+
+    this.joinRequestsSub = this.challenges.getChallengeJoinRequests().subscribe({
+      next: (requests) => {
+        this.joinRequests = requests || [];
+      },
+      error: (error) => {
+        console.error('Unable to load challenge join requests', error);
+      },
+    });
+
+    this.myJoinRequestsSub = this.challenges
+      .getMyChallengeJoinRequests()
+      .subscribe({
+        next: (requests) => {
+          this.myJoinRequests = requests || [];
+        },
+        error: (error) => {
+          console.error('Unable to load your challenge join requests', error);
+        },
+      });
   }
 
   ngOnDestroy(): void {
     this.challengeSpacesSub?.unsubscribe();
+    this.joinRequestsSub?.unsubscribe();
+    this.myJoinRequestsSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
   }
 
@@ -93,6 +126,131 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   routeTarget(space: ChallengePage): string[] {
     return ['/home-challenge', space.challengePageId || space.customUrl || ''];
+  }
+
+  adminPendingRequests(): ChallengeJoinRequest[] {
+    const adminSpaces = new Map(
+      this.challengeSpaces
+        .filter((space) => this.isCurrentUserAdminForSpace(space))
+        .map((space) => [this.spaceKey(space), space])
+    );
+
+    return (this.joinRequests || [])
+      .filter((request) => adminSpaces.has(request.challengePageId))
+      .sort((a, b) =>
+        this.requestDateMs(b.createdAt) - this.requestDateMs(a.createdAt)
+      );
+  }
+
+  requestSpaceTitle(request: ChallengeJoinRequest): string {
+    const space = this.challengeSpaces.find(
+      (item) => this.spaceKey(item) === request.challengePageId
+    );
+    return space ? this.displayTitle(space) : request.challengePageTitle;
+  }
+
+  requestButtonLabel(space: ChallengePage): string {
+    const status = this.myRequestStatus(space);
+    if (status === 'pending') return 'Request pending';
+    if (status === 'accepted') return 'Accepted';
+    return 'Request to join';
+  }
+
+  canRequestToJoin(space: ChallengePage): boolean {
+    return this.myRequestStatus(space) !== 'pending';
+  }
+
+  openJoinRequest(space: ChallengePage): void {
+    if (!this.canRequestToJoin(space)) {
+      return;
+    }
+
+    this.selectedRequestSpace = space;
+    this.requestMessage = '';
+    this.requestError = '';
+  }
+
+  closeJoinRequest(): void {
+    if (this.submittingRequest) {
+      return;
+    }
+
+    this.selectedRequestSpace = null;
+    this.requestMessage = '';
+    this.requestError = '';
+  }
+
+  async submitJoinRequest(): Promise<void> {
+    const space = this.selectedRequestSpace;
+    const message = this.requestMessage.trim();
+
+    if (!space) {
+      return;
+    }
+
+    if (!message) {
+      this.requestError = 'Please write a short note before requesting access.';
+      return;
+    }
+
+    const challengePageId = this.spaceKey(space);
+    if (!challengePageId) {
+      this.requestError = 'This challenge space is missing an ID.';
+      return;
+    }
+
+    this.submittingRequest = true;
+    this.requestError = '';
+
+    try {
+      await this.challenges.requestToJoinChallengePage(challengePageId, message);
+      this.toast.success('Your request was sent to the challenge space admin.');
+      this.selectedRequestSpace = null;
+      this.requestMessage = '';
+    } catch (error) {
+      console.error('Unable to request challenge space access', error);
+      this.requestError = 'Could not send this request. Please try again.';
+    } finally {
+      this.submittingRequest = false;
+    }
+  }
+
+  async acceptRequest(request: ChallengeJoinRequest): Promise<void> {
+    if (!request.id || this.processingRequestIds.has(request.id)) {
+      return;
+    }
+
+    this.processingRequestIds.add(request.id);
+    try {
+      await this.challenges.acceptChallengeJoinRequest(request.id);
+      this.toast.success(`${request.requesterName || request.requesterEmail} was added.`);
+    } catch (error) {
+      console.error('Unable to accept challenge join request', error);
+      this.toast.error('Could not accept this request.');
+    } finally {
+      this.processingRequestIds.delete(request.id);
+    }
+  }
+
+  async rejectRequest(request: ChallengeJoinRequest): Promise<void> {
+    if (!request.id || this.processingRequestIds.has(request.id)) {
+      return;
+    }
+
+    this.processingRequestIds.add(request.id);
+    try {
+      await this.challenges.rejectChallengeJoinRequest(request.id);
+      this.toast.success('Request rejected.');
+    } catch (error) {
+      console.error('Unable to reject challenge join request', error);
+      this.toast.error('Could not reject this request.');
+    } finally {
+      this.processingRequestIds.delete(request.id);
+    }
+  }
+
+  isProcessingRequest(request: ChallengeJoinRequest): boolean {
+    return !!request.id && this.processingRequestIds.has(request.id);
   }
 
   imageUrl(space: ChallengePage): string {
@@ -162,6 +320,24 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
       (!!uid && space.authorId === uid) ||
       (!!uid && adminUids.includes(uid)) ||
       (!!email && (participants.includes(email) || adminEmails.includes(email)))
+    );
+  }
+
+  isCurrentUserAdminForSpace(space: ChallengePage): boolean {
+    const user = this.auth.currentUser;
+    const email = this.normalizeEmail(user?.email || '');
+    const uid = user?.uid || '';
+    const adminEmails = (space.adminEmails || []).map((value: string) =>
+      this.normalizeEmail(value)
+    );
+    const adminUids = (space.adminUids || []).map((value: string) =>
+      String(value || '').trim()
+    );
+
+    return (
+      (!!uid && space.authorId === uid) ||
+      (!!uid && adminUids.includes(uid)) ||
+      (!!email && adminEmails.includes(email))
     );
   }
 
@@ -266,6 +442,24 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   private spaceKey(space: ChallengePage): string {
     return space.challengePageId || space.customUrl || this.displayTitle(space);
+  }
+
+  private myRequestStatus(
+    space: ChallengePage
+  ): ChallengeJoinRequest['status'] | '' {
+    const challengePageId = this.spaceKey(space);
+    const request = (this.myJoinRequests || []).find(
+      (item) => item.challengePageId === challengePageId
+    );
+    return request?.status || '';
+  }
+
+  private requestDateMs(value: any): number {
+    if (!value) return 0;
+    if (typeof value.toMillis === 'function') return value.toMillis();
+    if (typeof value.seconds === 'number') return value.seconds * 1000;
+    const parsed = Date.parse(String(value));
+    return Number.isNaN(parsed) ? 0 : parsed;
   }
 
   private normalizeEmail(value: string): string {

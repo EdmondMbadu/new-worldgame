@@ -109,6 +109,25 @@ export class ChallengePage {
   programPDF?: { title: string; url: string } | null = null;
   customUrl?: string; // Custom URL slug for the page
 }
+
+export type ChallengeJoinRequestStatus = 'pending' | 'accepted' | 'rejected';
+
+export interface ChallengeJoinRequest {
+  id?: string;
+  challengePageId: string;
+  challengePageTitle: string;
+  challengePagePath: string;
+  requesterUid: string;
+  requesterEmail: string;
+  requesterName: string;
+  message: string;
+  status: ChallengeJoinRequestStatus;
+  createdAt?: any;
+  updatedAt?: any;
+  decidedAt?: any;
+  decidedByUid?: string;
+  decidedByEmail?: string;
+}
 // models/school.ts
 export interface School {
   id?: string;

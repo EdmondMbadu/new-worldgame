@@ -3360,6 +3360,374 @@ export const processAIInsightsBulkJob = functions
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const escapeEmailHtml = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const normalizeEmailValue = (value: unknown): string =>
+  String(value || '').trim().toLowerCase();
+
+const challengeJoinRequestId = (challengePageId: string, uid: string): string =>
+  `${challengePageId}_${uid}`.replace(/[\/\s]+/g, '_');
+
+async function getUserProfileByUid(uid: string): Promise<Record<string, any>> {
+  if (!uid) return {};
+  const snap = await admin.firestore().doc(`users/${uid}`).get();
+  return snap.exists ? snap.data() || {} : {};
+}
+
+async function getChallengePageAdminEmails(
+  page: Record<string, any>,
+  requesterEmail?: string
+): Promise<string[]> {
+  const recipients = new Set<string>();
+  const addEmail = (value: unknown) => {
+    const email = normalizeEmailValue(value);
+    if (!emailRegex.test(email) || email === requesterEmail) return;
+    recipients.add(email);
+  };
+
+  if (Array.isArray(page['adminEmails'])) {
+    page['adminEmails'].forEach(addEmail);
+  }
+
+  const uidLookups = new Set<string>();
+  if (page['authorId']) uidLookups.add(String(page['authorId']));
+  if (Array.isArray(page['adminUids'])) {
+    page['adminUids'].forEach((uid: unknown) => {
+      const normalized = String(uid || '').trim();
+      if (normalized) uidLookups.add(normalized);
+    });
+  }
+
+  await Promise.all(
+    Array.from(uidLookups).map(async (uid) => {
+      const user = await getUserProfileByUid(uid);
+      addEmail(user['email']);
+    })
+  );
+
+  return Array.from(recipients);
+}
+
+function isChallengePageAdmin(
+  page: Record<string, any>,
+  uid: string,
+  email: string
+): boolean {
+  const adminEmails = Array.isArray(page['adminEmails'])
+    ? page['adminEmails'].map((value: unknown) => normalizeEmailValue(value))
+    : [];
+  const adminUids = Array.isArray(page['adminUids'])
+    ? page['adminUids'].map((value: unknown) => String(value || '').trim())
+    : [];
+
+  return (
+    (!!uid && page['authorId'] === uid) ||
+    (!!uid && adminUids.includes(uid)) ||
+    (!!email && adminEmails.includes(email))
+  );
+}
+
+async function assertChallengePageAdmin(
+  page: Record<string, any>,
+  context: functions.https.CallableContext
+): Promise<{ uid: string; email: string }> {
+  const uid = context.auth?.uid || '';
+  const email = normalizeEmailValue(context.auth?.token?.email);
+
+  if (!uid || !email) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'Authentication is required.'
+    );
+  }
+
+  if (isChallengePageAdmin(page, uid, email)) {
+    return { uid, email };
+  }
+
+  throw new functions.https.HttpsError(
+    'permission-denied',
+    'Only challenge space admins can respond to join requests.'
+  );
+}
+
+export const requestChallengePageJoin = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const uid = context.auth?.uid || '';
+    const authEmail = normalizeEmailValue(context.auth?.token?.email);
+    const challengePageId = String(data?.challengePageId || '').trim();
+    const message = String(data?.message || '').trim();
+
+    if (!uid || !authEmail) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Authentication is required to request access.'
+      );
+    }
+
+    if (!challengePageId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'challengePageId is required.'
+      );
+    }
+
+    if (!message) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A note is required to request access.'
+      );
+    }
+
+    if (message.length > 2000) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Please keep the request note under 2000 characters.'
+      );
+    }
+
+    const db = admin.firestore();
+    const pageRef = db.doc(`challengePages/${challengePageId}`);
+    const pageSnap = await pageRef.get();
+    if (!pageSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Challenge space not found.'
+      );
+    }
+
+    const page = pageSnap.data() || {};
+    const participants = Array.isArray(page['participants'])
+      ? page['participants'].map((value: unknown) => normalizeEmailValue(value))
+      : [];
+    if (participants.includes(authEmail) || isChallengePageAdmin(page, uid, authEmail)) {
+      return { success: true, alreadyMember: true };
+    }
+
+    const requesterProfile = await getUserProfileByUid(uid);
+    const firstName = String(requesterProfile['firstName'] || '').trim();
+    const lastName = String(requesterProfile['lastName'] || '').trim();
+    const tokenName = String(context.auth?.token?.name || '').trim();
+    const requesterName =
+      [firstName, lastName].filter(Boolean).join(' ').trim() ||
+      tokenName ||
+      authEmail;
+    const title = String(
+      page['name'] || page['heading'] || 'Challenge Space'
+    ).trim();
+    const pagePath = `${APP_BASE_URL.replace(
+      /\/$/,
+      ''
+    )}/home-challenge/${encodeURIComponent(
+      String(page['customUrl'] || challengePageId)
+    )}`;
+    const requestRef = db
+      .collection('challengeJoinRequests')
+      .doc(challengeJoinRequestId(challengePageId, uid));
+    const existingRequestSnap = await requestRef.get();
+    const existingRequest = existingRequestSnap.data() || {};
+
+    await requestRef.set(
+      {
+        challengePageId,
+        challengePageTitle: title,
+        challengePagePath: pagePath,
+        requesterUid: uid,
+        requesterEmail: authEmail,
+        requesterName,
+        message,
+        status: 'pending',
+        createdAt:
+          existingRequest['createdAt'] ||
+          admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    const recipients = await getChallengePageAdminEmails(page, authEmail);
+    if (!recipients.length) {
+      return { success: true, recipients: 0 };
+    }
+
+    const safeRequester = escapeEmailHtml(requesterName);
+    const safeEmail = escapeEmailHtml(authEmail);
+    const safeTitle = escapeEmailHtml(title);
+    const safeMessage = escapeEmailHtml(message).replace(/\r?\n/g, '<br />');
+    const manageUrl = `${APP_BASE_URL.replace(/\/$/, '')}/challenge-spaces`;
+
+    await sgMail.send({
+      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      subject: `New request to join ${title}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; color:#0f172a; line-height:1.6;">
+          <h2 style="margin:0 0 12px;">New challenge space join request</h2>
+          <p><strong>${safeRequester}</strong> (<a href="mailto:${safeEmail}">${safeEmail}</a>) requested to join <strong>${safeTitle}</strong>.</p>
+          <div style="margin:18px 0; padding:16px; border-radius:12px; background:#f1f5f9;">
+            <div style="font-size:12px; font-weight:700; color:#047857; text-transform:uppercase; letter-spacing:0.08em;">Their note</div>
+            <p style="margin:8px 0 0;">${safeMessage}</p>
+          </div>
+          <a href="${manageUrl}" style="display:inline-block; padding:12px 18px; background:#047857; color:#ffffff; border-radius:10px; text-decoration:none; font-weight:700;">Review request</a>
+        </div>
+      `,
+      text: `${requesterName} (${authEmail}) requested to join ${title}.\n\n${message}\n\nReview: ${manageUrl}`,
+      personalizations: recipients.map((email) => ({ to: [{ email }] })),
+    } as sgMail.MailDataRequired);
+
+    return { success: true, recipients: recipients.length };
+  }
+);
+
+export const acceptChallengePageJoinRequest = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const requestId = String(data?.requestId || '').trim();
+    if (!requestId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'requestId is required.'
+      );
+    }
+
+    const db = admin.firestore();
+    const requestRef = db.collection('challengeJoinRequests').doc(requestId);
+    const requestSnap = await requestRef.get();
+    if (!requestSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Join request not found.'
+      );
+    }
+
+    const request = requestSnap.data() || {};
+    const challengePageId = String(request['challengePageId'] || '').trim();
+    const requesterEmail = normalizeEmailValue(request['requesterEmail']);
+    if (!challengePageId || !emailRegex.test(requesterEmail)) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'Join request is missing required data.'
+      );
+    }
+
+    const pageRef = db.doc(`challengePages/${challengePageId}`);
+    const pageSnap = await pageRef.get();
+    if (!pageSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Challenge space not found.'
+      );
+    }
+
+    const actor = await assertChallengePageAdmin(pageSnap.data() || {}, context);
+
+    await db.runTransaction(async (transaction) => {
+      transaction.set(
+        pageRef,
+        {
+          participants: admin.firestore.FieldValue.arrayUnion(requesterEmail),
+        },
+        { merge: true }
+      );
+      transaction.set(
+        requestRef,
+        {
+          status: 'accepted',
+          decidedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          decidedByUid: actor.uid,
+          decidedByEmail: actor.email,
+        },
+        { merge: true }
+      );
+    });
+
+    const title = String(
+      request['challengePageTitle'] || 'the challenge space'
+    ).trim();
+    const path = String(
+      request['challengePagePath'] ||
+        `${APP_BASE_URL.replace(/\/$/, '')}/home-challenge/${encodeURIComponent(
+          challengePageId
+        )}`
+    );
+    const requesterName = String(
+      request['requesterName'] || requesterEmail
+    ).trim();
+
+    try {
+      await sgMail.send({
+        to: requesterEmail,
+        from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+        subject: `Your request to join ${title} was accepted`,
+        html: `
+          <div style="font-family: Arial, sans-serif; color:#0f172a; line-height:1.6;">
+            <h2 style="margin:0 0 12px;">Your request was accepted</h2>
+            <p>Hi ${escapeEmailHtml(requesterName)},</p>
+            <p>You are now a member of <strong>${escapeEmailHtml(title)}</strong>.</p>
+            <a href="${escapeEmailHtml(path)}" style="display:inline-block; padding:12px 18px; background:#047857; color:#ffffff; border-radius:10px; text-decoration:none; font-weight:700;">Open challenge space</a>
+          </div>
+        `,
+        text: `Your request to join ${title} was accepted. Open the challenge space: ${path}`,
+      } as sgMail.MailDataRequired);
+    } catch (error) {
+      console.error('Could not email accepted challenge join request', error);
+    }
+
+    return { success: true };
+  }
+);
+
+export const rejectChallengePageJoinRequest = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const requestId = String(data?.requestId || '').trim();
+    if (!requestId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'requestId is required.'
+      );
+    }
+
+    const db = admin.firestore();
+    const requestRef = db.collection('challengeJoinRequests').doc(requestId);
+    const requestSnap = await requestRef.get();
+    if (!requestSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Join request not found.'
+      );
+    }
+
+    const request = requestSnap.data() || {};
+    const challengePageId = String(request['challengePageId'] || '').trim();
+    const pageSnap = await db.doc(`challengePages/${challengePageId}`).get();
+    if (!pageSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Challenge space not found.'
+      );
+    }
+
+    const actor = await assertChallengePageAdmin(pageSnap.data() || {}, context);
+    await requestRef.set(
+      {
+        status: 'rejected',
+        decidedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        decidedByUid: actor.uid,
+        decidedByEmail: actor.email,
+      },
+      { merge: true }
+    );
+
+    return { success: true };
+  }
+);
+
 export const notifyJoinRequest = functions.https.onCall(
   async (data: any, context: functions.https.CallableContext) => {
     if (!context.auth?.token?.email) {
