@@ -47,7 +47,16 @@ type AIInsightsTeamMember = {
   avatarUrl?: string;
 };
 
-type WeeklyAutomationKey = 'weeklyReminder' | 'weeklyActivity';
+type AIInsightsBulkCriteria =
+  | 'user_selected'
+  | 'most_recent'
+  | 'second_recent'
+  | 'random';
+
+type WeeklyAutomationKey =
+  | 'weeklyReminder'
+  | 'weeklyActivity'
+  | 'aiInsightsBrief';
 
 type WeeklyAutomationStatus =
   | 'idle'
@@ -72,18 +81,25 @@ type WeeklyAutomationSchedule = {
   recipientEmails: string[];
   subject?: string;
   introHtml?: string;
+  criteria?: AIInsightsBulkCriteria;
+  fallbackCriteria?: Exclude<AIInsightsBulkCriteria, 'user_selected'>;
+  includeUnsubscribed?: boolean;
+  excludeEmails?: string[];
   lastRunAt?: any;
   lastRunStatus?: WeeklyAutomationStatus;
   lastRunSummary?: string;
   lastError?: string;
   lastAttemptKey?: string;
   lastSuccessKey?: string;
+  lastJobId?: string;
+  lastLogId?: string;
 };
 
 type WeeklyEmailAutomationConfig = {
   timezone: string;
   weeklyReminder: WeeklyAutomationSchedule;
   weeklyActivity: WeeklyAutomationSchedule;
+  aiInsightsBrief: WeeklyAutomationSchedule;
   updatedAt?: any;
   updatedBy?: {
     uid?: string;
@@ -219,13 +235,11 @@ export class UserManagementComponent implements OnInit {
   aiInsightsError = '';
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
   aiInsightsMode: 'single' | 'bulk' = 'single';
-  aiInsightsBulkCriteria:
-    | 'user_selected'
-    | 'most_recent'
-    | 'second_recent'
-    | 'random' = 'user_selected';
-  aiInsightsBulkFallbackCriteria: 'most_recent' | 'second_recent' | 'random' =
-    'most_recent';
+  aiInsightsBulkCriteria: AIInsightsBulkCriteria = 'user_selected';
+  aiInsightsBulkFallbackCriteria: Exclude<
+    AIInsightsBulkCriteria,
+    'user_selected'
+  > = 'most_recent';
   aiInsightsBulkSelections: Array<{
     email: string;
     name: string;
@@ -326,6 +340,7 @@ export class UserManagementComponent implements OnInit {
   automationSaveMessage = '';
   automationReminderSearch = '';
   automationActivityEmailInput = '';
+  automationAIInsightsExcludeEmailsDraft = '';
   readonly automationDayOptions: Array<{
     value: WeeklyAutomationDay;
     label: string;
@@ -344,6 +359,23 @@ export class UserManagementComponent implements OnInit {
     { value: 'America/Chicago', label: 'Central Time' },
     { value: 'America/New_York', label: 'Eastern Time' },
     { value: 'UTC', label: 'UTC' },
+  ];
+  readonly aiInsightsCriteriaOptions: Array<{
+    value: AIInsightsBulkCriteria;
+    label: string;
+  }> = [
+    { value: 'user_selected', label: 'User-selected solution' },
+    { value: 'most_recent', label: 'Most recent solution' },
+    { value: 'second_recent', label: 'Second most recent solution' },
+    { value: 'random', label: 'Random solution' },
+  ];
+  readonly aiInsightsFallbackCriteriaOptions: Array<{
+    value: Exclude<AIInsightsBulkCriteria, 'user_selected'>;
+    label: string;
+  }> = [
+    { value: 'most_recent', label: 'Most recent solution' },
+    { value: 'second_recent', label: 'Second most recent solution' },
+    { value: 'random', label: 'Random solution' },
   ];
 
   // component.ts
@@ -445,6 +477,19 @@ export class UserManagementComponent implements OnInit {
         lastRunSummary: '',
         lastError: '',
       },
+      aiInsightsBrief: {
+        enabled: false,
+        dayOfWeek: 'saturday',
+        time: '09:00',
+        recipientEmails: [],
+        criteria: 'user_selected',
+        fallbackCriteria: 'most_recent',
+        includeUnsubscribed: false,
+        excludeEmails: [],
+        lastRunStatus: 'idle',
+        lastRunSummary: '',
+        lastError: '',
+      },
     };
   }
 
@@ -478,6 +523,29 @@ export class UserManagementComponent implements OnInit {
     return Array.from(deduped).sort((a, b) => a.localeCompare(b));
   }
 
+  private normalizeAIInsightsCriteria(value: unknown): AIInsightsBulkCriteria {
+    return this.aiInsightsCriteriaOptions.some((option) => option.value === value)
+      ? (value as AIInsightsBulkCriteria)
+      : 'user_selected';
+  }
+
+  private normalizeAIInsightsFallbackCriteria(
+    value: unknown
+  ): Exclude<AIInsightsBulkCriteria, 'user_selected'> {
+    return this.aiInsightsFallbackCriteriaOptions.some(
+      (option) => option.value === value
+    )
+      ? (value as Exclude<AIInsightsBulkCriteria, 'user_selected'>)
+      : 'most_recent';
+  }
+
+  private normalizeAutomationEmailList(input: unknown): string[] {
+    const raw = Array.isArray(input)
+      ? input
+      : String(input || '').split(/[\n,;\s]+/);
+    return this.normalizeAutomationRecipients(raw);
+  }
+
   private normalizeAutomationSchedule(
     raw: any,
     defaults: WeeklyAutomationSchedule
@@ -499,6 +567,19 @@ export class UserManagementComponent implements OnInit {
         typeof raw?.introHtml === 'string'
           ? raw.introHtml
           : defaults.introHtml,
+      criteria: defaults.criteria
+        ? this.normalizeAIInsightsCriteria(raw?.criteria)
+        : undefined,
+      fallbackCriteria: defaults.fallbackCriteria
+        ? this.normalizeAIInsightsFallbackCriteria(raw?.fallbackCriteria)
+        : undefined,
+      includeUnsubscribed:
+        defaults.includeUnsubscribed !== undefined
+          ? Boolean(raw?.includeUnsubscribed)
+          : undefined,
+      excludeEmails: defaults.excludeEmails
+        ? this.normalizeAutomationEmailList(raw?.excludeEmails)
+        : undefined,
       lastRunStatus:
         raw?.lastRunStatus === 'running' ||
         raw?.lastRunStatus === 'success' ||
@@ -516,6 +597,8 @@ export class UserManagementComponent implements OnInit {
         typeof raw?.lastAttemptKey === 'string' ? raw.lastAttemptKey : '',
       lastSuccessKey:
         typeof raw?.lastSuccessKey === 'string' ? raw.lastSuccessKey : '',
+      lastJobId: typeof raw?.lastJobId === 'string' ? raw.lastJobId : '',
+      lastLogId: typeof raw?.lastLogId === 'string' ? raw.lastLogId : '',
     };
   }
 
@@ -536,6 +619,10 @@ export class UserManagementComponent implements OnInit {
         raw?.weeklyActivity,
         defaults.weeklyActivity
       ),
+      aiInsightsBrief: this.normalizeAutomationSchedule(
+        raw?.aiInsightsBrief,
+        defaults.aiInsightsBrief
+      ),
       updatedAt: raw?.updatedAt,
       updatedBy: raw?.updatedBy || undefined,
     };
@@ -549,6 +636,9 @@ export class UserManagementComponent implements OnInit {
         next: (config) => {
           this.weeklyAutomationConfig =
             this.normalizeWeeklyAutomationConfig(config);
+          this.automationAIInsightsExcludeEmailsDraft = (
+            this.weeklyAutomationConfig.aiInsightsBrief.excludeEmails || []
+          ).join('\n');
           this.automationLoading = false;
         },
         error: (error) => {
@@ -762,6 +852,35 @@ export class UserManagementComponent implements OnInit {
         ...this.selectedRecipientEmails,
       ]),
     }));
+  }
+
+  automationAIInsightsExcludeEmailsText(): string {
+    return this.automationAIInsightsExcludeEmailsDraft;
+  }
+
+  setAutomationAIInsightsExcludeEmails(value: string): void {
+    this.automationAIInsightsExcludeEmailsDraft = value;
+    this.updateAutomationSchedule('aiInsightsBrief', (schedule) => ({
+      ...schedule,
+      excludeEmails: this.normalizeAutomationEmailList(value),
+    }));
+  }
+
+  previewAIInsightsAutomationRecipients(): void {
+    const schedule = this.weeklyAutomationConfig.aiInsightsBrief;
+    this.aiInsightsMode = 'bulk';
+    this.aiInsightsBulkCriteria = schedule.criteria || 'user_selected';
+    this.aiInsightsBulkFallbackCriteria =
+      schedule.fallbackCriteria || 'most_recent';
+    this.aiInsightsBulkIncludeUnsubscribed = Boolean(
+      schedule.includeUnsubscribed
+    );
+    this.aiInsightsBulkExcludeEmails = (schedule.excludeEmails || []).join('\n');
+    this.buildBulkAIInsightsList();
+    this.weeklyAutomationSectionOpen = true;
+    this.automationSaveMessage =
+      'Preview generated below in the manual bulk intelligence brief list.';
+    this.automationSaveError = '';
   }
 
   removeAutomationRecipient(key: WeeklyAutomationKey, email: string): void {

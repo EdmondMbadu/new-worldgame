@@ -1301,14 +1301,12 @@
                     Weekly Automation
                   </p>
                   <h4 class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
-                    Automate the two existing weekly email actions
+                    Automate the weekly email actions
                   </h4>
                   <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                    This saves a recurring schedule and recipient lists in Firestore for the existing
-                    <span class="font-semibold text-emerald-700 dark:text-emerald-300">Send Weekly Reminder</span>
-                    and
-                    <span class="font-semibold text-indigo-700 dark:text-indigo-300">Generate Weekly Activity Email</span>
-                    flows. The manual buttons below stay exactly as they are.
+                    This saves recurring schedules in Firestore for the existing weekly reminder,
+                    activity report, and intelligence brief flows. The manual buttons below stay
+                    exactly as they are for testing.
                   </p>
                 </div>
 
@@ -1390,7 +1388,7 @@
                 {{ automationSaveMessage }}
               </div>
 
-              <div class="grid gap-4 xl:grid-cols-2">
+              <div class="grid gap-4 xl:grid-cols-3">
                 <div class="rounded-3xl border border-emerald-200/80 bg-emerald-50/70 p-5 dark:border-emerald-900/60 dark:bg-emerald-950/20">
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -1730,6 +1728,155 @@
                         No weekly activity recipients configured yet.
                       </div>
                     </ng-template>
+                  </div>
+                </div>
+
+                <div class="rounded-3xl border border-sky-200/80 bg-sky-50/70 p-5 dark:border-sky-900/60 dark:bg-sky-950/20">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-700 dark:bg-slate-900/70 dark:text-sky-300">
+                        Existing bulk brief
+                      </div>
+                      <h5 class="mt-3 text-xl font-bold text-slate-900 dark:text-white">
+                        Intelligence Brief Automation
+                      </h5>
+                      <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Generates the bulk recipient list at send time and queues the current Weekly NewWorld Game Intelligence Brief.
+                      </p>
+                    </div>
+
+                    <label class="inline-flex items-center gap-3 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:ring-slate-700">
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="weeklyAutomationConfig.aiInsightsBrief.enabled"
+                        [ngModelOptions]="{ standalone: true }"
+                        class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                      />
+                      Enabled
+                    </label>
+                  </div>
+
+                  <div class="mt-4 grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Day of week
+                      </label>
+                      <select
+                        [(ngModel)]="weeklyAutomationConfig.aiInsightsBrief.dayOfWeek"
+                        [ngModelOptions]="{ standalone: true }"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      >
+                        <option
+                          *ngFor="let day of automationDayOptions"
+                          [ngValue]="day.value"
+                        >
+                          {{ day.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Send time
+                      </label>
+                      <input
+                        type="time"
+                        [(ngModel)]="weeklyAutomationConfig.aiInsightsBrief.time"
+                        [ngModelOptions]="{ standalone: true }"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="mt-4 rounded-2xl border border-sky-200 bg-white/80 px-4 py-3 text-sm dark:border-sky-900/40 dark:bg-slate-900/60">
+                    <p class="font-semibold text-slate-800 dark:text-slate-100">
+                      {{ automationScheduleSummary(weeklyAutomationConfig.aiInsightsBrief) }}
+                    </p>
+                    <p class="mt-1 text-slate-500 dark:text-slate-400">
+                      {{ automationLastRunText('aiInsightsBrief') }}
+                    </p>
+                    <p
+                      *ngIf="weeklyAutomationConfig.aiInsightsBrief.lastRunSummary"
+                      class="mt-2 text-xs text-slate-500 dark:text-slate-400"
+                    >
+                      {{ weeklyAutomationConfig.aiInsightsBrief.lastRunSummary }}
+                    </p>
+                    <p
+                      *ngIf="weeklyAutomationConfig.aiInsightsBrief.lastError"
+                      class="mt-2 text-xs text-rose-600 dark:text-rose-300"
+                    >
+                      {{ weeklyAutomationConfig.aiInsightsBrief.lastError }}
+                    </p>
+                  </div>
+
+                  <div class="mt-4 grid gap-4">
+                    <div>
+                      <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Recipient solution rule
+                      </label>
+                      <select
+                        [(ngModel)]="weeklyAutomationConfig.aiInsightsBrief.criteria"
+                        [ngModelOptions]="{ standalone: true }"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      >
+                        <option
+                          *ngFor="let option of aiInsightsCriteriaOptions"
+                          [ngValue]="option.value"
+                        >
+                          {{ option.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Fallback if user-selected is unavailable
+                      </label>
+                      <select
+                        [(ngModel)]="weeklyAutomationConfig.aiInsightsBrief.fallbackCriteria"
+                        [ngModelOptions]="{ standalone: true }"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      >
+                        <option
+                          *ngFor="let option of aiInsightsFallbackCriteriaOptions"
+                          [ngValue]="option.value"
+                        >
+                          {{ option.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <label class="inline-flex items-center gap-3 rounded-2xl border border-sky-200 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-800 dark:border-sky-900/40 dark:bg-slate-900/60 dark:text-slate-100">
+                      <input
+                        type="checkbox"
+                        [(ngModel)]="weeklyAutomationConfig.aiInsightsBrief.includeUnsubscribed"
+                        [ngModelOptions]="{ standalone: true }"
+                        class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                      />
+                      Include unsubscribed recipients
+                    </label>
+
+                    <div>
+                      <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Exclude emails
+                      </label>
+                      <textarea
+                        rows="4"
+                        [ngModel]="automationAIInsightsExcludeEmailsText()"
+                        (ngModelChange)="setAutomationAIInsightsExcludeEmails($event)"
+                        [ngModelOptions]="{ standalone: true }"
+                        placeholder="One email per line"
+                        class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      ></textarea>
+                    </div>
+
+                    <button
+                      type="button"
+                      (click)="previewAIInsightsAutomationRecipients()"
+                      class="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-800"
+                    >
+                      Preview generated recipients
+                    </button>
                   </div>
                 </div>
               </div>

@@ -145,7 +145,10 @@ const DEFAULT_WEEKLY_REMINDER_INTRO_HTML =
   '<p>Keep the momentum going—here are your in-progress solutions.</p>';
 const WEEKLY_ACTIVITY_WINDOW_DAYS = 7;
 
-type AutomationScheduleKey = 'weeklyReminder' | 'weeklyActivity';
+type AutomationScheduleKey =
+  | 'weeklyReminder'
+  | 'weeklyActivity'
+  | 'aiInsightsBrief';
 
 type AutomationScheduleConfig = {
   enabled?: boolean;
@@ -154,18 +157,25 @@ type AutomationScheduleConfig = {
   recipientEmails?: string[];
   subject?: string;
   introHtml?: string;
+  criteria?: string;
+  fallbackCriteria?: string;
+  includeUnsubscribed?: boolean;
+  excludeEmails?: string[];
   lastRunAt?: any;
   lastRunStatus?: string;
   lastRunSummary?: string;
   lastError?: string;
   lastAttemptKey?: string;
   lastSuccessKey?: string;
+  lastJobId?: string;
+  lastLogId?: string;
 };
 
 type WeeklyEmailAutomationDocument = {
   timezone?: string;
   weeklyReminder?: AutomationScheduleConfig;
   weeklyActivity?: AutomationScheduleConfig;
+  aiInsightsBrief?: AutomationScheduleConfig;
 };
 
 type UserSolutionStatsForAutomation = {
@@ -1231,6 +1241,11 @@ export const runWeeklyEmailAutomation = functions.pubsub
         schedule: config.weeklyActivity || {},
         due: getDueAutomationRun(config.weeklyActivity, timezone),
       },
+      {
+        key: 'aiInsightsBrief' as const,
+        schedule: config.aiInsightsBrief || {},
+        due: getDueAutomationRun(config.aiInsightsBrief, timezone),
+      },
     ].filter((item) => item.due.due && item.due.runKey);
 
     if (!dueRuns.length) return null;
@@ -1249,7 +1264,11 @@ export const runWeeklyEmailAutomation = functions.pubsub
     });
 
     let unsubscribed = new Set<string>();
-    if (dueRuns.some((item) => item.key === 'weeklyReminder')) {
+    if (
+      dueRuns.some(
+        (item) => item.key === 'weeklyReminder' || item.key === 'aiInsightsBrief'
+      )
+    ) {
       const unsubscribedSnap = await db.collection('mailing_unsubscribes').get();
       unsubscribed = new Set(
         unsubscribedSnap.docs
@@ -1379,6 +1398,58 @@ export const runWeeklyEmailAutomation = functions.pubsub
                   sendResult.failureCount > 0
                     ? `${sendResult.failureCount} weekly activity email(s) failed.`
                     : '',
+              },
+            },
+            { merge: true }
+          );
+        }
+
+        if (run.key === 'aiInsightsBrief') {
+          const { recipients, stats } = buildAIInsightsAutomationRecipients({
+            users,
+            solutions,
+            unsubscribedEmails: unsubscribed,
+            schedule: run.schedule,
+          });
+
+          if (!recipients.length) {
+            await automationRef.set(
+              {
+                aiInsightsBrief: {
+                  ...run.schedule,
+                  lastAttemptKey: run.due.runKey,
+                  lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+                  lastRunStatus: 'failed',
+                  lastRunSummary: `No eligible intelligence brief recipients generated. Participants checked: ${stats.totalParticipants}. Skipped unsubscribed ${stats.unsubscribed}, excluded ${stats.excluded}, without solution ${stats.noSolutions}.`,
+                  lastError:
+                    'No eligible recipients generated for the weekly intelligence brief.',
+                },
+              },
+              { merge: true }
+            );
+            continue;
+          }
+
+          const queued = await enqueueAIInsightsBulkJob({
+            recipients,
+            concurrency: 4,
+            createdBy: 'weekly-ai-insights-automation',
+            source: 'automation',
+            automationRunKey: run.due.runKey,
+          });
+
+          await automationRef.set(
+            {
+              aiInsightsBrief: {
+                ...run.schedule,
+                lastAttemptKey: run.due.runKey,
+                lastSuccessKey: run.due.runKey,
+                lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+                lastRunStatus: 'success',
+                lastRunSummary: `Queued ${stats.finalRecipients} intelligence brief recipient(s). User-selected ${stats.userSelected}. Fallback ${stats.fallback}. Skipped unsubscribed ${stats.unsubscribed}, excluded ${stats.excluded}.`,
+                lastError: '',
+                lastJobId: queued.jobId,
+                lastLogId: queued.logId,
               },
             },
             { merge: true }
@@ -3039,6 +3110,313 @@ export const sendAIInsightsEmail = functions.https.onCall(
 // Batch size for processing - keeps each function invocation under timeout
 const AI_INSIGHTS_BATCH_SIZE = 25;
 
+type AIInsightsBulkCriteria = 'user_selected' | 'most_recent' | 'second_recent' | 'random';
+
+function normalizeAIInsightsBulkCriteria(
+  value: unknown,
+  fallback: AIInsightsBulkCriteria
+): AIInsightsBulkCriteria {
+  const raw = String(value || '').trim();
+  if (
+    raw === 'user_selected' ||
+    raw === 'most_recent' ||
+    raw === 'second_recent' ||
+    raw === 'random'
+  ) {
+    return raw;
+  }
+  return fallback;
+}
+
+function parseAutomationExcludedEmailSet(value: unknown): Set<string> {
+  if (Array.isArray(value)) {
+    return new Set(
+      value
+        .map((item) => normalizeEmailForAutomation(item))
+        .filter(isValidEmailForAutomation)
+    );
+  }
+
+  return new Set(
+    String(value || '')
+      .split(/[\n,;\s]+/)
+      .map((item) => normalizeEmailForAutomation(item))
+      .filter(isValidEmailForAutomation)
+  );
+}
+
+function solutionDateMsForAIInsightsAutomation(solution: any): number {
+  return parseDateToMsForAutomation(
+    solution?.updatedAt ?? solution?.submissionDate ?? solution?.createdAt
+  );
+}
+
+function buildSolutionsByParticipantForAIInsightsAutomation(
+  solutions: any[]
+): Map<string, any[]> {
+  const map = new Map<string, any[]>();
+
+  for (const solution of solutions) {
+    const emails = new Set<string>([
+      ...normalizeParticipantEmailsForAutomation(solution?.participants),
+    ]);
+    const authorEmail = normalizeEmailForAutomation(solution?.authorEmail);
+    if (authorEmail) emails.add(authorEmail);
+
+    emails.forEach((email) => {
+      if (!isValidEmailForAutomation(email)) return;
+      if (!map.has(email)) map.set(email, []);
+      map.get(email)?.push(solution);
+    });
+  }
+
+  return map;
+}
+
+function pickAIInsightsAutomationSolution(
+  solutions: any[],
+  criteria: Exclude<AIInsightsBulkCriteria, 'user_selected'>
+): any | null {
+  if (!solutions.length) return null;
+
+  const ordered = [...solutions].sort(
+    (a, b) =>
+      solutionDateMsForAIInsightsAutomation(b) -
+      solutionDateMsForAIInsightsAutomation(a)
+  );
+
+  if (criteria === 'random') {
+    const index = Math.floor(Math.random() * ordered.length);
+    return ordered[index] || ordered[0] || null;
+  }
+
+  if (criteria === 'second_recent') {
+    return ordered[1] || ordered[0] || null;
+  }
+
+  return ordered[0] || null;
+}
+
+function pickAIInsightsAutomationSolutionForEmail(
+  email: string,
+  solutions: any[],
+  usersByEmail: Map<string, any>,
+  criteria: AIInsightsBulkCriteria,
+  fallbackCriteria: Exclude<AIInsightsBulkCriteria, 'user_selected'>
+): { solution: any | null; pickSource: 'user_selected' | 'fallback'; invalidPreference: boolean } {
+  if (!solutions.length) {
+    return { solution: null, pickSource: 'fallback', invalidPreference: false };
+  }
+
+  if (criteria !== 'user_selected') {
+    return {
+      solution: pickAIInsightsAutomationSolution(solutions, criteria),
+      pickSource: 'fallback',
+      invalidPreference: false,
+    };
+  }
+
+  const user = usersByEmail.get(normalizeEmailForAutomation(email));
+  const preferredSolutionId = String(user?.weeklyBriefSolutionId || '').trim();
+  if (!preferredSolutionId) {
+    return {
+      solution: pickAIInsightsAutomationSolution(solutions, fallbackCriteria),
+      pickSource: 'fallback',
+      invalidPreference: false,
+    };
+  }
+
+  const preferred = solutions.find(
+    (solution) => String(solution?.solutionId || '').trim() === preferredSolutionId
+  );
+  if (preferred) {
+    return {
+      solution: preferred,
+      pickSource: 'user_selected',
+      invalidPreference: false,
+    };
+  }
+
+  return {
+    solution: pickAIInsightsAutomationSolution(solutions, fallbackCriteria),
+    pickSource: 'fallback',
+    invalidPreference: true,
+  };
+}
+
+function buildAIInsightsAutomationRecipients(data: {
+  users: any[];
+  solutions: any[];
+  unsubscribedEmails: Set<string>;
+  schedule: AutomationScheduleConfig;
+}): {
+  recipients: AIInsightsPayload[];
+  stats: {
+    totalParticipants: number;
+    noSolutions: number;
+    unsubscribed: number;
+    excluded: number;
+    userSelected: number;
+    fallback: number;
+    invalidPreference: number;
+    finalRecipients: number;
+  };
+} {
+  const usersByEmail = new Map<string, any>();
+  data.users.forEach((user) => {
+    const email = normalizeEmailForAutomation(user?.email);
+    if (email) usersByEmail.set(email, user);
+  });
+
+  const directory = buildUserDirectoryForAutomation(data.users);
+  const solutionsByParticipant = buildSolutionsByParticipantForAIInsightsAutomation(
+    data.solutions
+  );
+  const criteria = normalizeAIInsightsBulkCriteria(
+    data.schedule.criteria,
+    'user_selected'
+  );
+  const normalizedFallbackCriteria = normalizeAIInsightsBulkCriteria(
+    data.schedule.fallbackCriteria,
+    'most_recent'
+  );
+  const fallbackCriteria: Exclude<AIInsightsBulkCriteria, 'user_selected'> =
+    normalizedFallbackCriteria === 'user_selected'
+      ? 'most_recent'
+      : normalizedFallbackCriteria;
+  const excludedEmails = parseAutomationExcludedEmailSet(
+    data.schedule.excludeEmails
+  );
+
+  const recipients: AIInsightsPayload[] = [];
+  const stats = {
+    totalParticipants: solutionsByParticipant.size,
+    noSolutions: 0,
+    unsubscribed: 0,
+    excluded: 0,
+    userSelected: 0,
+    fallback: 0,
+    invalidPreference: 0,
+    finalRecipients: 0,
+  };
+
+  for (const [email, participantSolutions] of solutionsByParticipant.entries()) {
+    if (!data.schedule.includeUnsubscribed && data.unsubscribedEmails.has(email)) {
+      stats.unsubscribed += 1;
+      continue;
+    }
+
+    if (excludedEmails.has(email)) {
+      stats.excluded += 1;
+      continue;
+    }
+
+    const picked = pickAIInsightsAutomationSolutionForEmail(
+      email,
+      participantSolutions,
+      usersByEmail,
+      criteria,
+      fallbackCriteria
+    );
+
+    if (!picked.solution || !String(picked.solution?.solutionId || '').trim()) {
+      stats.noSolutions += 1;
+      continue;
+    }
+
+    if (picked.pickSource === 'user_selected') {
+      stats.userSelected += 1;
+    } else {
+      stats.fallback += 1;
+    }
+
+    if (picked.invalidPreference) {
+      stats.invalidPreference += 1;
+    }
+
+    const user = usersByEmail.get(email);
+    const displayName = directory.get(email)?.name || email;
+    const firstName =
+      firstNameOfAutomationUser(user) || displayName.split(/\s+/)[0] || 'there';
+
+    recipients.push({
+      userEmail: email,
+      userFirstName: firstName,
+      solutionId: String(picked.solution.solutionId || '').trim(),
+      solutionTitle: String(picked.solution.title || 'Untitled Solution').trim(),
+      solutionDescription: String(picked.solution.description || ''),
+      solutionArea: String(picked.solution.solutionArea || ''),
+      sdgs: Array.isArray(picked.solution.sdgs) ? picked.solution.sdgs : [],
+      meetLink: String(
+        picked.solution.meetLink ||
+          picked.solution.meetingLink ||
+          picked.solution.meetURL ||
+          ''
+      ),
+      solutionImage: String(picked.solution.image || ''),
+    });
+  }
+
+  recipients.sort((a, b) => a.userEmail.localeCompare(b.userEmail));
+  stats.finalRecipients = recipients.length;
+
+  return { recipients, stats };
+}
+
+async function enqueueAIInsightsBulkJob(data: {
+  recipients: AIInsightsPayload[];
+  concurrency?: number;
+  createdBy: string;
+  source?: string;
+  automationRunKey?: string;
+}) {
+  const recipients = Array.isArray(data.recipients) ? data.recipients : [];
+  const concurrency = Math.min(
+    Math.max(Number(data.concurrency) || 4, 1),
+    6
+  );
+  const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
+
+  const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
+    mode: 'bulk',
+    subject,
+    createdBy: data.createdBy,
+    source: data.source || 'manual',
+    automationRunKey: data.automationRunKey || '',
+    recipients: recipients.map((r: AIInsightsPayload) => ({
+      email: r.userEmail,
+      solutionId: r.solutionId,
+      solutionTitle: r.solutionTitle,
+    })),
+    total: recipients.length,
+    successCount: 0,
+    failureCount: 0,
+    failures: [],
+    successfulEmails: [],
+    status: 'processing',
+    sentAt: admin.firestore.FieldValue.serverTimestamp(),
+    batchInfo: {
+      totalBatches: Math.ceil(recipients.length / AI_INSIGHTS_BATCH_SIZE),
+      completedBatches: 0,
+    },
+  });
+
+  const jobRef = await admin.firestore().collection('ai_insights_bulk_jobs').add({
+    status: 'queued',
+    createdBy: data.createdBy,
+    source: data.source || 'manual',
+    automationRunKey: data.automationRunKey || '',
+    recipients,
+    concurrency,
+    logId: logRef.id,
+    batchIndex: 0,
+    totalRecipients: recipients.length,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return { jobId: jobRef.id, logId: logRef.id };
+}
+
 export const startAIInsightsBulkJob = functions
   .runWith({ timeoutSeconds: 60, memory: '256MB' })
   .https.onCall(
@@ -3062,48 +3440,14 @@ export const startAIInsightsBulkJob = functions
       }
 
       const createdBy = context.auth?.token?.email || 'unknown';
-      const concurrency = Math.min(
-        Math.max(Number(data.concurrency) || 4, 1),
-        6
-      );
-      const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
-
-      // Create the log entry FIRST so we have a single log ID for all batches
-      const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
-        mode: 'bulk',
-        subject,
-        createdBy,
-        recipients: recipients.map((r: AIInsightsPayload) => ({
-          email: r.userEmail,
-          solutionId: r.solutionId,
-          solutionTitle: r.solutionTitle,
-        })),
-        total: recipients.length,
-        successCount: 0,
-        failureCount: 0,
-        failures: [],
-        successfulEmails: [],
-        status: 'processing',
-        sentAt: admin.firestore.FieldValue.serverTimestamp(),
-        batchInfo: {
-          totalBatches: Math.ceil(recipients.length / AI_INSIGHTS_BATCH_SIZE),
-          completedBatches: 0,
-        },
-      });
-
-      // Create the first batch job with the log ID
-      const jobRef = await admin.firestore().collection('ai_insights_bulk_jobs').add({
-        status: 'queued',
-        createdBy,
+      const result = await enqueueAIInsightsBulkJob({
         recipients,
-        concurrency,
-        logId: logRef.id,        // Share log ID across all batches
-        batchIndex: 0,           // Track which batch this is
-        totalRecipients: recipients.length,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        concurrency: data.concurrency,
+        createdBy,
+        source: 'manual',
       });
 
-      return { success: true, jobId: jobRef.id, logId: logRef.id };
+      return { success: true, ...result };
     }
   );
 
