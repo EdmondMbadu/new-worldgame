@@ -113,7 +113,14 @@
           </span>
           <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
         </div>
-          <div class="flex items-start space-x-3 group">
+          <div
+            [attr.id]="comment.messageId ? 'message-' + comment.messageId : null"
+            class="flex items-start space-x-3 group rounded-xl transition"
+            [class.ring-2]="highlightedMessageId && highlightedMessageId === comment.messageId"
+            [class.ring-emerald-400]="highlightedMessageId && highlightedMessageId === comment.messageId"
+            [class.bg-emerald-50]="highlightedMessageId && highlightedMessageId === comment.messageId"
+            [class.dark:bg-emerald-950]="highlightedMessageId && highlightedMessageId === comment.messageId"
+          >
             <!-- Avatar with AI badge if applicable -->
             <div class="relative flex-shrink-0">
               <ng-container *ngIf="comment.profilePic; else letterAvatar">

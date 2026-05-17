@@ -45,6 +45,22 @@
         { "fieldPath": "statusForPublication", "order": "ASCENDING" },
         { "fieldPath": "submissionDate", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "messageNotifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "unread", "order": "ASCENDING" },
+        { "fieldPath": "createdAtMs", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "messageNotifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "unread", "order": "ASCENDING" },
+        { "fieldPath": "sourceDocPath", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

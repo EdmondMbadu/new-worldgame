@@ -19,6 +19,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { Attachment, Comment, Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
+import { DiscussionNotificationsService } from 'src/app/services/discussion-notifications.service';
 import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
@@ -113,6 +114,8 @@ export class FullDiscussionComponent
 
   private hasScrolled = false;
   private participantPresenceSub?: Subscription;
+  private lastReadMarkerKey = '';
+  highlightedMessageId = '';
 
   constructor(
     private afs: AngularFirestore,
@@ -124,7 +127,8 @@ export class FullDiscussionComponent
     private router: Router,
     private storage: AngularFireStorage,
     private fns: AngularFireFunctions,
-    private presence: PresenceService
+    private presence: PresenceService,
+    private discussionNotifications: DiscussionNotificationsService
   ) {
     this.user = this.auth.currentUser;
     if (this.user?.profilePicture?.downloadURL) {
@@ -157,7 +161,11 @@ export class FullDiscussionComponent
             this.lastMsgIso = latest.date;
           }
           this.firstSnapshot = false;
-          this.scrollToBottom();
+          if (!this.hasRouteMessageId()) {
+            this.scrollToBottom();
+          }
+          this.markCurrentDiscussionRead();
+          this.scrollToRouteMessage();
           const qp = this.activatedRoute.snapshot.queryParamMap;
           const qpTitle = qp.get('title');
           if (qpTitle) this.currentSolution.title = qpTitle;
@@ -194,11 +202,15 @@ export class FullDiscussionComponent
         // keep the ISO string so the pipe works
         return c;
       });
+      this.markCurrentDiscussionRead();
+      this.scrollToRouteMessage();
 
       // Once data is loaded, scroll to bottom
-      this.ngZone.runOutsideAngular(() => {
-        setTimeout(() => this.scrollToBottom(), 0);
-      });
+      if (!this.hasRouteMessageId()) {
+        this.ngZone.runOutsideAngular(() => {
+          setTimeout(() => this.scrollToBottom(), 0);
+        });
+      }
       this.hasScrolled = false;
 
       // Load participants for @mention from solution participants
@@ -257,6 +269,10 @@ export class FullDiscussionComponent
   }
 
   ngAfterViewChecked() {
+    if (this.hasRouteMessageId()) {
+      this.hasScrolled = true;
+      return;
+    }
     if (!this.hasScrolled) {
       this.ngZone.runOutsideAngular(() => {
         setTimeout(() => this.scrollToBottom(), 0);
@@ -299,7 +315,9 @@ Please choose a file under 5 MB.`);
     const content = this.prompt.trim(); // may be empty
     if (!content && !this.pendingFiles.length) return; // nothing at all
     const nowIso = new Date().toISOString();
+    const messageId = this.afs.createId();
     const msg: Comment = {
+      messageId,
       date: nowIso,
 
       authorId: this.auth.currentUser.uid,
@@ -366,7 +384,8 @@ Please choose a file under 5 MB.`);
     this.playPing();
     const path =
       this.docPath || `solutions/${this.currentSolution!.solutionId}`;
-    this.afs.doc(path).set({ discussion: toSave }, { merge: true });
+    await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
+    await this.createUnreadNotificationsForMessage(msg);
   }
 
   // “Close” might navigate away or handle a different route
@@ -435,6 +454,92 @@ Please choose a file under 5 MB.`);
     const path =
       this.docPath || `solutions/${this.currentSolution!.solutionId}`;
     await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
+  }
+
+  private getDiscussionDocPath(): string {
+    return this.docPath || `solutions/${this.currentSolution!.solutionId || this.id}`;
+  }
+
+  private getDiscussionContextType(): 'solution' | 'challenge' {
+    return this.getDiscussionDocPath().startsWith('challengePages/')
+      ? 'challenge'
+      : 'solution';
+  }
+
+  private getDiscussionRoute(): string {
+    const contextType = this.getDiscussionContextType();
+    return contextType === 'challenge'
+      ? `/challenge-discussion/${this.id}`
+      : `/full-discussion/${this.currentSolution!.solutionId || this.id}`;
+  }
+
+  private markCurrentDiscussionRead(): void {
+    const uid = this.auth.currentUser?.uid || '';
+    const sourceDocPath = this.getDiscussionDocPath();
+    const latest = this.comments.at(-1);
+    const latestKey = latest?.messageId || latest?.date || '';
+    const markerKey = `${sourceDocPath}:${latestKey}`;
+    if (!uid || !sourceDocPath || markerKey === this.lastReadMarkerKey) return;
+
+    this.lastReadMarkerKey = markerKey;
+    this.discussionNotifications
+      .markDiscussionRead(uid, sourceDocPath)
+      .catch((error) =>
+        console.error('Unable to mark discussion notifications read', error)
+      );
+  }
+
+  private hasRouteMessageId(): boolean {
+    return !!this.activatedRoute.snapshot.queryParamMap.get('messageId');
+  }
+
+  private scrollToRouteMessage(): void {
+    const messageId =
+      this.activatedRoute.snapshot.queryParamMap.get('messageId') || '';
+    if (!messageId) return;
+
+    this.highlightedMessageId = messageId;
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`message-${messageId}`)
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  }
+
+  private async createUnreadNotificationsForMessage(
+    message: Comment
+  ): Promise<void> {
+    const senderUid = this.auth.currentUser?.uid || '';
+    const messageId = message.messageId || '';
+    if (!senderUid || !messageId) return;
+
+    try {
+      await this.discussionNotifications.createForDiscussionMessage({
+        recipients: this.participants,
+        senderUid,
+        senderName:
+          message.authorName ||
+          `${this.auth.currentUser.firstName || ''} ${
+            this.auth.currentUser.lastName || ''
+          }`.trim() ||
+          'NewWorld Game teammate',
+        senderAvatar: message.profilePic || '',
+        messageId,
+        messageText:
+          message.content ||
+          (message.attachments?.length
+            ? `${message.attachments.length} attachment(s)`
+            : ''),
+        contextId: String(this.currentSolution!.solutionId || this.id || ''),
+        contextTitle: this.currentSolution?.title || 'Team discussion',
+        contextType: this.getDiscussionContextType(),
+        sourceDocPath: this.getDiscussionDocPath(),
+        discussionPath: this.getDiscussionRoute(),
+        createdAtMs: Date.parse(message.date || '') || Date.now(),
+      });
+    } catch (error) {
+      console.error('Unable to create discussion unread notifications', error);
+    }
   }
 
   // ============ @Mention functionality ============

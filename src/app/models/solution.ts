@@ -127,6 +127,7 @@ export interface Admin {
   authorProfilePicture?: Avatar;
 }
 export class Comment {
+  messageId?: string;
   authorId?: string;
   authorName?: string;
   date?: string;

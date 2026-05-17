@@ -1439,6 +1439,34 @@
         </button>
       </div>
     </div>
+    <a
+      routerLink="/notifications"
+      class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+      aria-label="Discussion notifications"
+      title="Discussion notifications"
+    >
+      <svg
+        class="h-5 w-5"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0m6 0H9"
+        />
+      </svg>
+      <span
+        *ngIf="unreadDiscussionNotificationCount > 0"
+        class="absolute -right-1 -top-1 min-w-[1.25rem] rounded-full bg-rose-600 px-1.5 py-0.5 text-center text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-slate-900"
+      >
+        {{ discussionNotificationBadgeLabel }}
+      </span>
+    </a>
     <a class="lg:mx-4 mx-16 cursor-pointer">
       <svg
         *ngIf="!dark"

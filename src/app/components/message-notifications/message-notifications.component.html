@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser?.email || ''"
+    [firstName]="auth.currentUser?.firstName || ''"
+    [lastName]="auth.currentUser?.lastName || ''"
+    path="home"
+    current=""
+  ></app-navbar>
+
+  <main class="mx-auto w-full max-w-5xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+    <section class="mb-8 flex flex-col gap-4 border-b border-slate-200 pb-6 dark:border-slate-800 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-400">
+          Team Discussion Inbox
+        </p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">
+          Notifications
+        </h1>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+          Messages from team discussions you participate in appear here. Opening a message takes you back to the discussion where it was posted.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        (click)="markAllRead()"
+        [disabled]="unreadCount === 0 || markingAllRead"
+        class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+      >
+        {{ markingAllRead ? 'Marking...' : 'Mark all read' }}
+      </button>
+    </section>
+
+    <section class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Unread</p>
+        <p class="mt-1 text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ unreadCount }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Recent</p>
+        <p class="mt-1 text-3xl font-bold">{{ notifications.length }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Source</p>
+        <p class="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Team discussions</p>
+      </div>
+    </section>
+
+    <section class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <h2 class="text-base font-bold">Recent messages</h2>
+      </div>
+
+      <div *ngIf="loading" class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+        Loading notifications...
+      </div>
+
+      <div *ngIf="!loading && notifications.length === 0" class="p-10 text-center">
+        <div class="mx-auto grid h-14 w-14 place-content-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+          <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 0 1-6 0m6 0H9"/>
+          </svg>
+        </div>
+        <p class="mt-4 text-sm font-semibold text-slate-800 dark:text-slate-100">No discussion notifications yet</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">New team messages will appear here.</p>
+      </div>
+
+      <div *ngIf="!loading && notifications.length > 0" class="divide-y divide-slate-200 dark:divide-slate-800">
+        <button
+          type="button"
+          *ngFor="let notification of notifications; trackBy: trackNotification"
+          (click)="openNotification(notification)"
+          class="group flex w-full items-start gap-4 px-5 py-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/70"
+          [class.bg-emerald-50]="notification.unread"
+          [class.dark:bg-emerald-950]="notification.unread"
+        >
+          <div class="relative shrink-0">
+            <img
+              *ngIf="notification.senderAvatar; else initialsAvatar"
+              [src]="notification.senderAvatar"
+              alt=""
+              class="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+            />
+            <ng-template #initialsAvatar>
+              <div class="grid h-11 w-11 place-content-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-slate-900">
+                {{ senderInitials(notification) }}
+              </div>
+            </ng-template>
+            <span
+              *ngIf="notification.unread"
+              class="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"
+            ></span>
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p class="font-semibold text-slate-950 dark:text-white">
+                {{ notification.senderName }}
+              </p>
+              <span class="text-xs text-slate-400">in</span>
+              <p class="truncate text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                {{ notification.contextTitle }}
+              </p>
+            </div>
+            <p class="mt-1 line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              {{ notification.messageText || 'Shared an attachment.' }}
+            </p>
+            <div class="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <span>{{ notificationTime(notification) }}</span>
+              <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+              <span>{{ notification.contextType === 'challenge' ? 'Challenge discussion' : 'Solution discussion' }}</span>
+            </div>
+          </div>
+
+          <span class="mt-2 hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 transition group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700 sm:inline-flex">
+            Open
+          </span>
+        </button>
+      </div>
+    </section>
+  </main>
+</div>

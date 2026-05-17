@@ -54,6 +54,7 @@ import { SchedulerComponent } from '../game/scheduler/scheduler.component';
 import { JoinSolutionComponent } from '../components/join-solution/join-solution.component';
 import { SchoolDashboardComponent } from '../components/school-dashboard/school-dashboard.component';
 import { InvitationsComponent } from '../components/invitations/invitations.component';
+import { MessageNotificationsComponent } from '../components/message-notifications/message-notifications.component';
 import { JoinSuccessComponent } from '../components/join-success/join-success.component';
 import { BroadcastedSolutionsComponent } from '../components/broadcasted-solutions/broadcasted-solutions.component';
 import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component';
@@ -111,6 +112,7 @@ import { ChallengeSpacesComponent } from '../components/challenge-spaces/challen
     JoinSolutionComponent,
     SchoolDashboardComponent,
     InvitationsComponent,
+    MessageNotificationsComponent,
     JoinSuccessComponent,
     BroadcastedSolutionsComponent,
     UnsubscribeComponent,

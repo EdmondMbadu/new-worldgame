@@ -42,6 +42,7 @@ import { MeetingComponent } from '../components/meeting/meeting.component';
 import { JoinSuccessComponent } from '../components/join-success/join-success.component';
 import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component';
 import { InvitationsComponent } from '../components/invitations/invitations.component';
+import { MessageNotificationsComponent } from '../components/message-notifications/message-notifications.component';
 import { SchoolDashboardComponent } from '../components/school-dashboard/school-dashboard.component';
 import { ChallengeSpacesComponent } from '../components/challenge-spaces/challenge-spaces.component';
 
@@ -204,6 +205,11 @@ const routes: Routes = [
   {
     path: 'invitations',
     component: InvitationsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'notifications',
+    component: MessageNotificationsComponent,
     canActivate: [AuthGuard],
   },
   {
