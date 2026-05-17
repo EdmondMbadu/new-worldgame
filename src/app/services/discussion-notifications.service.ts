@@ -264,6 +264,47 @@ export class DiscussionNotificationsService {
     }
   }
 
+  async removeMissingTargetNotifications(
+    uid: string,
+    notifications: DiscussionMessageNotification[]
+  ): Promise<DiscussionMessageNotification[]> {
+    if (!uid || !notifications.length) return notifications;
+
+    const uniqueSourcePaths = Array.from(
+      new Set(
+        notifications
+          .map((notification) => notification.sourceDocPath)
+          .filter(Boolean)
+      )
+    );
+    if (!uniqueSourcePaths.length) return notifications;
+
+    const existenceChecks = await Promise.all(
+      uniqueSourcePaths.map(async (sourceDocPath) => {
+        try {
+          const snap = await this.afs.firestore.doc(sourceDocPath).get();
+          return [sourceDocPath, snap.exists] as const;
+        } catch (error) {
+          console.error('Unable to verify notification target', error);
+          return [sourceDocPath, true] as const;
+        }
+      })
+    );
+
+    const existsByPath = new Map<string, boolean>(existenceChecks);
+    const missingTargetNotifications = notifications.filter(
+      (notification) => !existsByPath.get(notification.sourceDocPath)
+    );
+
+    if (missingTargetNotifications.length) {
+      await this.deleteNotifications(uid, missingTargetNotifications);
+    }
+
+    return notifications.filter((notification) =>
+      existsByPath.get(notification.sourceDocPath)
+    );
+  }
+
   private userNotificationsPath(uid: string): string {
     return `users/${uid}/${this.notificationCollectionName}`;
   }
@@ -286,6 +327,35 @@ export class DiscussionNotificationsService {
         { merge: true }
       );
     });
+  }
+
+  private async deleteNotifications(
+    uid: string,
+    notifications: DiscussionMessageNotification[]
+  ): Promise<void> {
+    const validNotifications = notifications.filter(
+      (notification) => notification.notificationId || notification.id
+    );
+    if (!uid || !validNotifications.length) return;
+
+    const batch = this.afs.firestore.batch();
+    let unreadDeleted = 0;
+    validNotifications.forEach((notification) => {
+      const notificationId = notification.notificationId || notification.id;
+      batch.delete(
+        this.afs.firestore.doc(
+          `${this.userNotificationsPath(uid)}/${notificationId}`
+        )
+      );
+      if (notification.unread) {
+        unreadDeleted += 1;
+      }
+    });
+
+    await batch.commit();
+    if (unreadDeleted > 0) {
+      await this.decrementUnreadCount(uid, unreadDeleted);
+    }
   }
 
   private uniqueHumanRecipients(

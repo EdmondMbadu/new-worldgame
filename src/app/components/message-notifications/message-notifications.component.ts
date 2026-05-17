@@ -17,6 +17,7 @@ export class MessageNotificationsComponent implements OnInit, OnDestroy {
   loading = true;
   markingAllRead = false;
   currentUid = '';
+  private notificationLoadRun = 0;
   private readonly destroy$ = new Subject<void>();
 
   constructor(
@@ -31,26 +32,43 @@ export class MessageNotificationsComponent implements OnInit, OnDestroy {
         switchMap((user) => {
           this.currentUid = user?.uid || '';
           return user?.uid
-            ? this.discussionNotifications.watchRecent(user.uid)
+            ? this.discussionNotifications.watchUnread(user.uid)
             : of([]);
         }),
         takeUntil(this.destroy$)
       )
-      .subscribe((notifications) => {
-        this.notifications = notifications;
+      .subscribe(async (notifications) => {
+        const runId = ++this.notificationLoadRun;
+        const visibleNotifications = this.currentUid
+          ? await this.discussionNotifications.removeMissingTargetNotifications(
+              this.currentUid,
+              notifications
+            )
+          : [];
+        if (runId !== this.notificationLoadRun) return;
+
+        this.notifications = visibleNotifications;
         this.loading = false;
       });
   }
 
   get unreadCount(): number {
-    return this.notifications.filter((notification) => notification.unread)
-      .length;
+    return this.notifications.length;
   }
 
   async openNotification(
     notification: DiscussionMessageNotification
   ): Promise<void> {
     const uid = this.currentUid || this.auth.currentUser?.uid || '';
+    if (uid) {
+      const validNotifications =
+        await this.discussionNotifications.removeMissingTargetNotifications(
+          uid,
+          [notification]
+        );
+      if (!validNotifications.length) return;
+    }
+
     if (uid && notification.notificationId) {
       await this.discussionNotifications.markRead(
         uid,
