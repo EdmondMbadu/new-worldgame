@@ -24,10 +24,10 @@
       class=" flex flex-col mx-auto md:rounded-lg shadow-lg overflow-hidden 
              dark:bg-slate-800 bg-white 
              dark:text-white text-slate-800 
-             mt-20 w-full max-w-5xl"
+             mt-20 w-full max-w-5xl h-[calc(100vh-5rem)] min-h-0"
     >
       <!-- Top bar / header -->
-      <div class="flex items-center justify-between px-4 py-2 
+      <div class="flex shrink-0 items-center justify-between px-4 py-2
                   dark:bg-slate-700 bg-slate-200">
         <!-- Left side: channel name -->
         <div class="flex items-center space-x-2">
@@ -63,8 +63,8 @@
       </div>
   
       <!-- Optional pinned/intro area -->
-      <div class="px-4 py-2 text-sm 
-                  dark:bg-slate-800 bg-white 
+      <div class="shrink-0 px-4 py-2 text-sm
+                  dark:bg-slate-800 bg-white
                   dark:text-gray-300 text-gray-600"
       >
         {{ introMessage }}
@@ -78,8 +78,8 @@
       </div>
 
       <!-- Mention Rules Banner -->
-      <div class="mx-4 my-2 p-3 rounded-lg 
-                  dark:bg-indigo-900/40 bg-indigo-50 
+      <div class="mx-4 my-2 shrink-0 p-3 rounded-lg
+                  dark:bg-indigo-900/40 bg-indigo-50
                   border dark:border-indigo-700 border-indigo-200">
         <div class="flex items-start space-x-2">
           <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,11 +96,11 @@
         </div>
       </div>
   
-      <div class="flex min-h-[520px] flex-1 overflow-hidden border-t border-slate-200 dark:border-slate-700">
+      <div class="flex min-h-0 flex-1 overflow-hidden border-t border-slate-200 dark:border-slate-700">
       <!-- Main chat area. Use flex-1 to occupy remaining space. -->
       <div
         id="chatboxDiscussion"
-        class="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        class="min-h-0 flex-1 overflow-y-auto px-4 py-4 space-y-4"
       >
         <ng-container *ngFor="let comment of comments; let i=index">
 
@@ -256,7 +256,7 @@
          <div #bottomAnchor></div>
       </div>
 
-      <aside class="hidden w-72 shrink-0 border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50 lg:block">
+      <aside class="hidden h-full w-72 shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50 lg:block">
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
@@ -301,9 +301,9 @@
   
       <!-- Input area at the bottom -->
       <div
-        class="p-3 
+        class="shrink-0 p-3
                dark:bg-slate-800 bg-white
-               dark:border-slate-700 border-t border-slate-300 
+               dark:border-slate-700 border-t border-slate-300
                flex items-center space-x-2"
       >
 <button type="button"
