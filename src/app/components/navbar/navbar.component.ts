@@ -24,10 +24,7 @@ import { ChallengePage, User } from 'src/app/models/user';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
-import {
-  DiscussionMessageNotification,
-  DiscussionNotificationsService,
-} from 'src/app/services/discussion-notifications.service';
+import { DiscussionNotificationsService } from 'src/app/services/discussion-notifications.service';
 import { SchoolService } from 'src/app/services/school.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { environment } from 'environments/environments';
@@ -88,7 +85,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   schoolRoute: any[] = ['/school-admin'];
   schoolQuery: any = {}; // { sid: '...' } when student only has an invite
   pendingInvitesCount = 0;
-  unreadDiscussionNotifications: DiscussionMessageNotification[] = [];
   unreadDiscussionNotificationCount = 0;
   languageOptions: { code: string; labelKey: string }[] = [];
   currentLanguage = 'en';
@@ -273,20 +269,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.auth.user$
       .pipe(
         switchMap((u) =>
-          u?.uid ? this.discussionNotifications.watchUnread(u.uid) : of([])
+          u?.uid ? this.discussionNotifications.watchUnreadCount(u.uid) : of(0)
         ),
         takeUntil(this.destroy$)
       )
-      .subscribe((notifications) => {
-        this.unreadDiscussionNotifications = notifications;
-        this.unreadDiscussionNotificationCount = notifications.length;
+      .subscribe((count) => {
+        this.unreadDiscussionNotificationCount = count;
       });
   }
 
   get discussionNotificationBadgeLabel(): string {
-    return this.unreadDiscussionNotificationCount > 49
-      ? '50+'
-      : String(this.unreadDiscussionNotificationCount);
+    return String(this.unreadDiscussionNotificationCount);
   }
 
   get schoolNavLabel(): string {

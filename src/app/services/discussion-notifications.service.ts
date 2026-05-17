@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest, map } from 'rxjs';
 
 export interface DiscussionNotificationRecipient {
   uid?: string;
@@ -37,8 +37,30 @@ export interface DiscussionMessageNotification {
 })
 export class DiscussionNotificationsService {
   private readonly notificationCollectionName = 'messageNotifications';
+  private readonly notificationMetaDocName = 'discussionNotifications';
 
   constructor(private afs: AngularFirestore) {}
+
+  watchUnreadCount(uid: string): Observable<number> {
+    const storedCounter$ = this.afs
+      .doc<{ unreadCount?: number }>(this.userNotificationMetaPath(uid))
+      .valueChanges()
+      .pipe(map((meta) => Math.max(0, Number(meta?.unreadCount || 0))));
+
+    const unreadDocsFallback$ = this.afs
+      .collection<DiscussionMessageNotification>(
+        this.userNotificationsPath(uid),
+        (ref) => ref.where('unread', '==', true).limit(50)
+      )
+      .valueChanges()
+      .pipe(map((items) => items.length));
+
+    return combineLatest([storedCounter$, unreadDocsFallback$]).pipe(
+      map(([storedCounter, unreadDocsFallback]) =>
+        Math.max(storedCounter, unreadDocsFallback)
+      )
+    );
+  }
 
   watchUnread(uid: string): Observable<DiscussionMessageNotification[]> {
     return this.afs
@@ -79,61 +101,97 @@ export class DiscussionNotificationsService {
     );
     if (!recipients.length) return 0;
 
-    const batch = this.afs.firestore.batch();
     const now = firebase.firestore.FieldValue.serverTimestamp();
     const cleanText = this.previewText(params.messageText);
+    const created = await Promise.all(
+      recipients.map(async (recipient) => {
+        const notificationId = this.notificationId(
+          params.contextType,
+          params.contextId,
+          params.messageId,
+          recipient.uid!
+        );
+        const ref = this.afs.firestore.doc(
+          `${this.userNotificationsPath(recipient.uid!)}/${notificationId}`
+        );
+        const metaRef = this.afs.firestore.doc(
+          this.userNotificationMetaPath(recipient.uid!)
+        );
 
-    recipients.forEach((recipient) => {
-      const notificationId = this.notificationId(
-        params.contextType,
-        params.contextId,
-        params.messageId,
-        recipient.uid!
-      );
-      const ref = this.afs.firestore.doc(
-        `${this.userNotificationsPath(recipient.uid!)}/${notificationId}`
-      );
+        return this.afs.firestore.runTransaction(async (transaction) => {
+          const existing = await transaction.get(ref);
+          if (existing.exists) return 0;
 
-      batch.set(
-        ref,
-        {
-          notificationId,
-          unread: true,
-          recipientUid: recipient.uid,
-          recipientEmail: this.normalizeEmail(recipient.email),
-          senderUid: params.senderUid,
-          senderName: params.senderName || 'NewWorld Game teammate',
-          senderAvatar: params.senderAvatar || '',
-          messageId: params.messageId,
-          messageText: cleanText,
-          contextId: params.contextId,
-          contextTitle: params.contextTitle || 'Team discussion',
-          contextType: params.contextType,
-          sourceDocPath: params.sourceDocPath,
-          discussionPath: params.discussionPath,
-          createdAt: now,
-          createdAtMs: params.createdAtMs,
-          readAt: null,
-        } as DiscussionMessageNotification,
-        { merge: true }
-      );
-    });
+          transaction.set(
+            ref,
+            {
+              notificationId,
+              unread: true,
+              recipientUid: recipient.uid,
+              recipientEmail: this.normalizeEmail(recipient.email),
+              senderUid: params.senderUid,
+              senderName: params.senderName || 'NewWorld Game teammate',
+              senderAvatar: params.senderAvatar || '',
+              messageId: params.messageId,
+              messageText: cleanText,
+              contextId: params.contextId,
+              contextTitle: params.contextTitle || 'Team discussion',
+              contextType: params.contextType,
+              sourceDocPath: params.sourceDocPath,
+              discussionPath: params.discussionPath,
+              createdAt: now,
+              createdAtMs: params.createdAtMs,
+              readAt: null,
+            } as DiscussionMessageNotification,
+            { merge: true }
+          );
+          transaction.set(
+            metaRef,
+            {
+              unreadCount: firebase.firestore.FieldValue.increment(1),
+              updatedAt: now,
+            },
+            { merge: true }
+          );
+          return 1;
+        });
+      })
+    );
 
-    await batch.commit();
-    return recipients.length;
+    return created.reduce<number>((sum, value) => sum + value, 0);
   }
 
   async markRead(uid: string, notificationId: string): Promise<void> {
     if (!uid || !notificationId) return;
-    await this.afs
-      .doc(`${this.userNotificationsPath(uid)}/${notificationId}`)
-      .set(
+    const ref = this.afs.firestore.doc(
+      `${this.userNotificationsPath(uid)}/${notificationId}`
+    );
+    const metaRef = this.afs.firestore.doc(this.userNotificationMetaPath(uid));
+
+    await this.afs.firestore.runTransaction(async (transaction) => {
+      const doc = await transaction.get(ref);
+      if (!doc.exists || !doc.data()?.['unread']) return;
+      const meta = await transaction.get(metaRef);
+      const currentCount = Number(meta.data()?.['unreadCount'] || 0);
+
+      const now = firebase.firestore.FieldValue.serverTimestamp();
+      transaction.set(
+        ref,
         {
           unread: false,
-          readAt: firebase.firestore.FieldValue.serverTimestamp(),
+          readAt: now,
         },
         { merge: true }
       );
+      transaction.set(
+        metaRef,
+        {
+          unreadCount: Math.max(0, currentCount - 1),
+          updatedAt: now,
+        },
+        { merge: true }
+      );
+    });
   }
 
   async markDiscussionRead(uid: string, sourceDocPath: string): Promise<void> {
@@ -148,12 +206,13 @@ export class DiscussionNotificationsService {
 
     const batch = this.afs.firestore.batch();
     let writes = 0;
+    const now = firebase.firestore.FieldValue.serverTimestamp();
     snap.docs.forEach((doc) => {
       batch.set(
         doc.ref,
         {
           unread: false,
-          readAt: firebase.firestore.FieldValue.serverTimestamp(),
+          readAt: now,
         },
         { merge: true }
       );
@@ -162,37 +221,71 @@ export class DiscussionNotificationsService {
 
     if (writes > 0) {
       await batch.commit();
+      await this.decrementUnreadCount(uid, writes);
     }
   }
 
   async markAllRead(uid: string): Promise<void> {
     if (!uid) return;
 
-    const snap = await this.afs.firestore
-      .collection(this.userNotificationsPath(uid))
-      .where('unread', '==', true)
-      .limit(200)
-      .get();
+    let totalMarked = 0;
+    let hasMore = true;
 
-    const batch = this.afs.firestore.batch();
-    snap.docs.forEach((doc) => {
-      batch.set(
-        doc.ref,
-        {
-          unread: false,
-          readAt: firebase.firestore.FieldValue.serverTimestamp(),
-        },
-        { merge: true }
-      );
-    });
+    while (hasMore) {
+      const snap = await this.afs.firestore
+        .collection(this.userNotificationsPath(uid))
+        .where('unread', '==', true)
+        .limit(200)
+        .get();
 
-    if (!snap.empty) {
-      await batch.commit();
+      const batch = this.afs.firestore.batch();
+      const now = firebase.firestore.FieldValue.serverTimestamp();
+      snap.docs.forEach((doc) => {
+        batch.set(
+          doc.ref,
+          {
+            unread: false,
+            readAt: now,
+          },
+          { merge: true }
+        );
+      });
+
+      if (!snap.empty) {
+        await batch.commit();
+        totalMarked += snap.size;
+      }
+
+      hasMore = snap.size === 200;
+    }
+
+    if (totalMarked > 0) {
+      await this.decrementUnreadCount(uid, totalMarked);
     }
   }
 
   private userNotificationsPath(uid: string): string {
     return `users/${uid}/${this.notificationCollectionName}`;
+  }
+
+  private userNotificationMetaPath(uid: string): string {
+    return `users/${uid}/notificationMeta/${this.notificationMetaDocName}`;
+  }
+
+  private async decrementUnreadCount(uid: string, amount: number): Promise<void> {
+    const metaRef = this.afs.firestore.doc(this.userNotificationMetaPath(uid));
+    await this.afs.firestore.runTransaction(async (transaction) => {
+      const snap = await transaction.get(metaRef);
+      const current = Number(snap.data()?.['unreadCount'] || 0);
+      transaction.set(
+        metaRef,
+        {
+          unreadCount: Math.max(0, current - amount),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
   }
 
   private uniqueHumanRecipients(
