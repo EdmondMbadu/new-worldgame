@@ -86,6 +86,25 @@ export class SolutionService {
     };
   }
 
+  private withSolutionSubstantiveEditAt<T extends Record<string, any>>(data: T) {
+    const now = this.serverTimestamp();
+    return {
+      ...data,
+      updatedAt: now,
+      lastSubstantiveEditAt: now,
+    };
+  }
+
+  private isSubstantiveSolutionField(key: string): boolean {
+    return (
+      key === 'title' ||
+      key === 'description' ||
+      key === 'content' ||
+      key === 'strategyReview' ||
+      key.startsWith('status.')
+    );
+  }
+
   private withSolutionCreatedAndUpdatedAt<T extends Record<string, any>>(
     data: T
   ) {
@@ -568,20 +587,40 @@ export class SolutionService {
       data = { [key]: value };
     }
 
+    const hasSubstantiveEdit = this.isSubstantiveSolutionField(key);
+    if (hasSubstantiveEdit) {
+      void this.activity.recordEvent('edit', id);
+    }
     if (key === 'finished' && value === 'true') {
       void this.activity.recordEvent('publish', id);
     }
-    return solutionRef.set(this.withSolutionUpdatedAt(data), { merge: true });
+    return solutionRef.set(
+      hasSubstantiveEdit
+        ? this.withSolutionSubstantiveEditAt(data)
+        : this.withSolutionUpdatedAt(data),
+      { merge: true }
+    );
   }
 
   updateSolutionFields(id: string, values: Partial<Solution>) {
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${id}`
     );
+    const hasSubstantiveEdit = Object.keys(values).some((key) =>
+      this.isSubstantiveSolutionField(key)
+    );
+    if (hasSubstantiveEdit) {
+      void this.activity.recordEvent('edit', id);
+    }
     if (values.finished === 'true') {
       void this.activity.recordEvent('publish', id);
     }
-    return solutionRef.set(this.withSolutionUpdatedAt(values), { merge: true });
+    return solutionRef.set(
+      hasSubstantiveEdit
+        ? this.withSolutionSubstantiveEditAt(values)
+        : this.withSolutionUpdatedAt(values),
+      { merge: true }
+    );
   }
 
   updateSolutionForTournament(solution: Solution) {
@@ -629,22 +668,26 @@ export class SolutionService {
 
   saveSolutionStrategyReview(solutionId: string, review: string) {
     // console.log('saving solution strategy review', review);
-    const data = this.withSolutionUpdatedAt({
+    const data = this.withSolutionSubstantiveEditAt({
       strategyReview: review,
     });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
-    return solutionRef.set(data, { merge: true });
+    return solutionRef.set(data, { merge: true }).then(() => {
+      void this.activity.recordEvent('edit', solutionId);
+    });
   }
   saveSolutionStatus(solutionId: string, status: any) {
-    const data = this.withSolutionUpdatedAt({
+    const data = this.withSolutionSubstantiveEditAt({
       status: status,
     });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
-    return solutionRef.set(data, { merge: true });
+    return solutionRef.set(data, { merge: true }).then(() => {
+      void this.activity.recordEvent('edit', solutionId);
+    });
   }
   submitSolution(solutionId: string) {
     const data = this.withSolutionUpdatedAt({
@@ -660,7 +703,7 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
   submitPreviewSolution(solutionId: string, content: string) {
-    const data = this.withSolutionUpdatedAt({
+    const data = this.withSolutionSubstantiveEditAt({
       content: content,
       preview: 'true',
     });
@@ -668,7 +711,9 @@ export class SolutionService {
       `solutions/${solutionId}`
     );
 
-    return solutionRef.set(data, { merge: true });
+    return solutionRef.set(data, { merge: true }).then(() => {
+      void this.activity.recordEvent('edit', solutionId);
+    });
   }
 
   editSolutionAfterInitialSubmission(
@@ -722,7 +767,7 @@ export class SolutionService {
   }
 
   updateSolutionTitle(solutionId: string, title: string) {
-    const data = this.withSolutionUpdatedAt({
+    const data = this.withSolutionSubstantiveEditAt({
       title: title,
     });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
@@ -754,7 +799,7 @@ export class SolutionService {
   }
 
   updateSolutionReadMe(solutionId: string, readMe: string) {
-    const data = this.withSolutionUpdatedAt({
+    const data = this.withSolutionSubstantiveEditAt({
       description: readMe,
     });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(

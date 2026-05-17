@@ -72,6 +72,7 @@ export class Solution {
   // broadcastUpdatedAt?: serverTimestam;
   updatedAt?: any;
   createdAt?: any;
+  lastSubstantiveEditAt?: any;
 }
 
 export interface SolutionRecruitmentProfile {

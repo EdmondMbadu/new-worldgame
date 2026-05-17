@@ -265,20 +265,11 @@ function parseDateToMsForAutomation(value: unknown): number {
 }
 
 function solutionTrackedEditMsForAutomation(solution: any): number {
-  return parseDateToMsForAutomation(solution?.updatedAt);
-}
-
-function solutionFallbackMsForAutomation(solution: any): number {
-  return parseDateToMsForAutomation(
-    solution?.createdAt ?? solution?.creationDate ?? solution?.submissionDate
-  );
+  return parseDateToMsForAutomation(solution?.lastSubstantiveEditAt);
 }
 
 function solutionActivityMsForAutomation(solution: any): number {
-  return (
-    solutionTrackedEditMsForAutomation(solution) ||
-    solutionFallbackMsForAutomation(solution)
-  );
+  return solutionTrackedEditMsForAutomation(solution);
 }
 
 function buildUserSolutionStatsForAutomation(
@@ -914,7 +905,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
           const meta = [
             solution.authorName,
             solution.solutionArea,
-            `Last activity ${formatDateMDYForAutomation(solution.lastActivityMs)}`,
+            `Last written edit ${formatDateMDYForAutomation(solution.lastActivityMs)}`,
           ]
             .filter(Boolean)
             .join(' • ');
@@ -960,7 +951,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dbe3ef;border-radius:14px;background:#ffffff;">
             <tr>
               <td style="padding:18px;font-size:14px;line-height:1.7;color:#475569;">
-                No real-user solutions were worked on during this reporting window.
+                No real-user solutions had saved writing activity during this reporting window.
               </td>
             </tr>
           </table>
@@ -1066,6 +1057,9 @@ function buildWeeklyActivityReportHtmlForAutomation(
                             report.windowStartMs
                           )} to ${formatDateTimeForAutomation(report.nowMs)}
                         </div>
+                        <div style="padding-top:4px;font-size:11px;line-height:1.6;color:#94a3b8;">
+                          Weekly Active Users includes people who logged in or were active in the system; Solutions Worked On only counts saved writing activity.
+                        </div>
                       </td>
                     </tr>
                   </table>
@@ -1080,7 +1074,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
                           Solutions worked on this week
                         </h3>
                         <p style="margin:8px 0 0;font-size:14px;line-height:1.7;color:#475569;">
-                          A live list of recent solution activity from real users during this reporting window.
+                          This list only includes solutions with saved writing activity during this reporting window. New solution creation, simple logins, and page visits are excluded.
                         </p>
                       </td>
                     </tr>
