@@ -792,8 +792,8 @@
     <div class="flex min-h-full items-start justify-center p-4 sm:p-6">
       <!-- Panel -->
       <div role="dialog" aria-modal="true" aria-labelledby="templateModalTitle"
-           class="w-full max-w-6xl rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10
-                  overflow-hidden flex flex-col max-h-screen text-slate-900 dark:text-slate-100">
+           class="w-full max-w-6xl h-[calc(100dvh-2rem)] sm:h-[calc(100dvh-3rem)] rounded-2xl bg-white dark:bg-slate-900 shadow-2xl ring-1 ring-black/10 dark:ring-white/10
+                  overflow-hidden flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-3rem)] text-slate-900 dark:text-slate-100">
 
         <!-- Header -->
         <div class="flex items-center justify-between px-4 md:px-6 py-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
@@ -941,63 +941,6 @@
                         </div>
                         </div>
 
-                        <!-- Attachments -->
-                        <div class="shrink-0 rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div>
-                            <label class="block text-sm font-medium">Attachments</label>
-                            <p class="text-xs opacity-70">
-                                PDFs, DOC/DOCX, JPG, and PNG. Up to {{ maxAttachmentCount }} files,
-                                {{ formatBytes(maxAttachmentBytes) }} each, {{ formatBytes(maxAttachmentTotalBytes) }} total.
-                            </p>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                            <button type="button" (click)="onPickAttachments()"
-                                    [disabled]="attachmentUploading || emailAttachments.length >= maxAttachmentCount"
-                                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
-                                Add attachment
-                            </button>
-                            <button type="button" (click)="clearAttachments()"
-                                    [disabled]="!emailAttachments.length"
-                                    class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
-                                Clear attachments
-                            </button>
-                            <input #attachmentInput type="file"
-                                    [accept]="attachmentAccept"
-                                    multiple
-                                    class="hidden"
-                                    (change)="onAttachmentsChosen($event)"/>
-                            </div>
-                        </div>
-
-                        <div class="text-xs opacity-80 mb-2">{{ attachmentSummary }}</div>
-                        <div *ngIf="attachmentUploading" class="text-xs opacity-70 mb-2">
-                            Uploading… {{ attachmentUploadText }}
-                        </div>
-                        <div *ngIf="attachmentError" class="text-xs text-rose-600 dark:text-rose-400 mb-2">
-                            {{ attachmentError }}
-                        </div>
-
-                        <div *ngIf="emailAttachments.length" class="space-y-2">
-                            <div *ngFor="let file of emailAttachments"
-                                 class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs">
-                            <a [href]="file.downloadUrl"
-                               target="_blank"
-                               rel="noopener"
-                               class="min-w-0 flex-1 truncate underline decoration-slate-300 underline-offset-2 hover:text-indigo-600">
-                                {{ file.name }}
-                            </a>
-                            <span class="opacity-70">{{ file.contentType }}</span>
-                            <span class="opacity-70">{{ formatBytes(file.size) }}</span>
-                            <button type="button"
-                                    (click)="removeAttachment(file.id)"
-                                    class="rounded-md px-2 py-1 ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
-                                Remove
-                            </button>
-                            </div>
-                        </div>
-                        </div>
                         <!-- CSV Import -->
                         <div class="shrink-0">
                         <div class="flex items-center justify-between mb-2">
@@ -1088,7 +1031,64 @@
                         </div>
                     </form>
 
-                <!-- Sticky footer actions (always visible) -->
+                    <!-- Attachments stay visible while the editor content scrolls -->
+                    <div class="shrink-0 mt-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="min-w-0">
+                        <label class="block text-sm font-medium">Attachments</label>
+                        <p class="text-xs opacity-70">
+                            PDFs, DOC/DOCX, JPG, and PNG. Up to {{ maxAttachmentCount }} files,
+                            {{ formatBytes(maxAttachmentBytes) }} each, {{ formatBytes(maxAttachmentTotalBytes) }} total.
+                        </p>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                        <button type="button" (click)="onPickAttachments()"
+                                [disabled]="attachmentUploading || emailAttachments.length >= maxAttachmentCount"
+                                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+                            Add attachment
+                        </button>
+                        <button type="button" (click)="clearAttachments()"
+                                [disabled]="!emailAttachments.length"
+                                class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50">
+                            Clear attachments
+                        </button>
+                        <input #attachmentInput type="file"
+                                [accept]="attachmentAccept"
+                                multiple
+                                class="hidden"
+                                (change)="onAttachmentsChosen($event)"/>
+                        </div>
+                    </div>
+
+                    <div class="text-xs opacity-80 mb-2">{{ attachmentSummary }}</div>
+                    <div *ngIf="attachmentUploading" class="text-xs opacity-70 mb-2">
+                        Uploading… {{ attachmentUploadText }}
+                    </div>
+                    <div *ngIf="attachmentError" class="text-xs text-rose-600 dark:text-rose-400 mb-2">
+                        {{ attachmentError }}
+                    </div>
+
+                    <div *ngIf="emailAttachments.length" class="max-h-28 space-y-2 overflow-auto pr-1">
+                        <div *ngFor="let file of emailAttachments"
+                             class="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs">
+                        <a [href]="file.downloadUrl"
+                           target="_blank"
+                           rel="noopener"
+                           class="min-w-0 flex-1 truncate underline decoration-slate-300 underline-offset-2 hover:text-indigo-600">
+                            {{ file.name }}
+                        </a>
+                        <span class="opacity-70">{{ file.contentType }}</span>
+                        <span class="opacity-70">{{ formatBytes(file.size) }}</span>
+                        <button type="button"
+                                (click)="removeAttachment(file.id)"
+                                class="rounded-md px-2 py-1 ring-1 ring-slate-300 dark:ring-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Remove
+                        </button>
+                        </div>
+                    </div>
+                    </div>
+
                 <!-- Sticky footer actions (always visible) -->
                     <div class="shrink-0 sticky bottom-0 left-0 right-0 pt-2
                                 bg-white/90 dark:bg-slate-900/90 backdrop-blur supports-[backdrop-filter]:backdrop-blur
