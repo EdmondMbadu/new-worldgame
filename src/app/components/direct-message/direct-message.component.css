@@ -1,0 +1,11 @@
+:host {
+  display: contents;
+}
+
+div[role='log'] {
+  scroll-behavior: smooth;
+}
+
+textarea {
+  scrollbar-width: thin;
+}

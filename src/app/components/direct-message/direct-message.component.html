@@ -1,0 +1,129 @@
+<div
+  *ngIf="open && canMessage"
+  class="fixed inset-x-3 bottom-4 z-50 sm:inset-x-auto sm:right-6 sm:w-[26rem]"
+>
+  <section
+    class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+    aria-label="Direct message"
+  >
+    <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+      <div class="flex min-w-0 items-center gap-3">
+        <img
+          *ngIf="recipientAvatar; else initialsAvatar"
+          [src]="recipientAvatar"
+          alt=""
+          class="h-10 w-10 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+        />
+        <ng-template #initialsAvatar>
+          <div class="grid h-10 w-10 place-content-center rounded-full bg-slate-900 text-sm font-bold text-white dark:bg-white dark:text-slate-900">
+            {{ recipientInitials }}
+          </div>
+        </ng-template>
+
+        <div class="min-w-0">
+          <h2 class="truncate text-sm font-bold text-slate-950 dark:text-white">
+            {{ recipientName }}
+          </h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Direct message</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        (click)="close()"
+        class="grid h-9 w-9 place-content-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+        aria-label="Close direct message"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    </header>
+
+    <div
+      #messageList
+      class="h-[22rem] overflow-y-auto bg-slate-50 px-4 py-4 dark:bg-slate-950"
+    >
+      <div *ngIf="loading" class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+        Loading messages...
+      </div>
+
+      <div *ngIf="!loading && messages.length === 0" class="flex h-full items-center justify-center text-center">
+        <div class="max-w-[15rem]">
+          <div class="mx-auto grid h-12 w-12 place-content-center rounded-full bg-white text-slate-500 shadow-sm dark:bg-slate-900 dark:text-slate-300">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" />
+            </svg>
+          </div>
+          <p class="mt-3 text-sm font-semibold text-slate-800 dark:text-slate-100">
+            Start a conversation
+          </p>
+          <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            Messages are saved privately between you and {{ recipientName }}.
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && messages.length > 0" class="space-y-3">
+        <div
+          *ngFor="let message of messages; trackBy: trackMessage"
+          class="flex"
+          [class.justify-end]="isMine(message)"
+          [class.justify-start]="!isMine(message)"
+        >
+          <div
+            class="max-w-[82%] rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
+            [class.rounded-br-md]="isMine(message)"
+            [class.bg-emerald-600]="isMine(message)"
+            [class.text-white]="isMine(message)"
+            [class.rounded-bl-md]="!isMine(message)"
+            [class.bg-white]="!isMine(message)"
+            [class.text-slate-800]="!isMine(message)"
+            [class.dark:bg-slate-800]="!isMine(message)"
+            [class.dark:text-slate-100]="!isMine(message)"
+          >
+            <p class="whitespace-pre-wrap break-words">{{ message.text }}</p>
+            <p
+              class="mt-1 text-[11px]"
+              [class.text-emerald-50]="isMine(message)"
+              [class.text-slate-400]="!isMine(message)"
+            >
+              {{ messageTime(message) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form class="border-t border-slate-200 p-3 dark:border-slate-800" (ngSubmit)="send()">
+      <p *ngIf="errorMessage" class="mb-2 text-xs font-medium text-red-600 dark:text-red-400">
+        {{ errorMessage }}
+      </p>
+
+      <div class="flex items-end gap-2">
+        <textarea
+          [(ngModel)]="draft"
+          name="directMessage"
+          rows="1"
+          maxlength="2000"
+          (keydown)="onComposerKeydown($event)"
+          placeholder="Message..."
+          class="max-h-28 min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+        ></textarea>
+
+        <button
+          type="submit"
+          [disabled]="sending || !draft.trim()"
+          class="grid h-11 w-11 shrink-0 place-content-center rounded-full bg-emerald-600 text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+          aria-label="Send direct message"
+        >
+          <svg *ngIf="!sending" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M22 2 11 13" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="m22 2-7 20-4-9-9-4 20-7Z" />
+          </svg>
+          <span *ngIf="sending" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -12,7 +13,7 @@ import { TimeService } from 'src/app/services/time.service';
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css'],
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent implements OnInit, OnDestroy {
   id: any = '';
   user: any = {};
   dateJoined: string = '';
@@ -25,8 +26,14 @@ export class UserProfileComponent implements OnInit {
   points: number = 0;
   showSolutionCompletedBadge: boolean = false;
   showSolutionWithPointsBadge: boolean = false;
+  dmOpen = false;
 
   solutions: Solution[] = [];
+  private profileSub?: Subscription;
+  private solutionsSub?: Subscription;
+  private queryParamSub?: Subscription;
+  private routeSub?: Subscription;
+
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
@@ -35,17 +42,27 @@ export class UserProfileComponent implements OnInit {
     private data: DataService,
     private router: Router
   ) {
-    this.activatedRoute.paramMap.subscribe((params) => {
+    this.routeSub = this.activatedRoute.paramMap.subscribe((params) => {
       this.profilePicturePath = '';
+      this.dmOpen = false;
       this.id = params.get('id');
       this.loadUserProfileData(this.id);
       window.scroll(0, 0);
     });
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.queryParamSub = this.activatedRoute.queryParamMap.subscribe((params) => {
+      if (params.get('dm') === 'open') {
+        this.dmOpen = true;
+      }
+    });
+  }
 
   loadUserProfileData(id: string) {
-    this.auth.getAUser(id).subscribe((data) => {
+    this.profileSub?.unsubscribe();
+    this.solutionsSub?.unsubscribe();
+
+    this.profileSub = this.auth.getAUser(id).subscribe((data) => {
       this.user = data;
       this.dateJoined = this.time.getMonthYear(this.user.dateJoined!);
       if (this.auth.currentUser?.followingArray !== undefined) {
@@ -56,7 +73,7 @@ export class UserProfileComponent implements OnInit {
       }
       this.checkIfFollowing();
 
-      this.solution
+      this.solutionsSub = this.solution
         .getAllSolutionsOfThisUser(data?.email!)
         .subscribe((data: any) => {
           this.solutions = data;
@@ -120,9 +137,26 @@ export class UserProfileComponent implements OnInit {
   }
 
   get canFollowProfile(): boolean {
-    return (
-      !!this.auth.currentUser?.uid && this.auth.currentUser.uid !== this.user?.uid
-    );
+    return !!this.user?.uid && this.auth.currentUser?.uid !== this.user.uid;
+  }
+
+  get canMessageProfile(): boolean {
+    return !!this.user?.uid && this.auth.currentUser?.uid !== this.user.uid;
+  }
+
+  openDirectMessage() {
+    if (!this.auth.currentUser?.uid) {
+      this.router.navigate(['/login'], {
+        queryParams: {
+          redirectTo: this.router.url,
+          intent: 'message',
+        },
+      });
+      return;
+    }
+
+    if (!this.canMessageProfile) return;
+    this.dmOpen = true;
   }
 
   findCompletedSolutions() {
@@ -175,5 +209,12 @@ export class UserProfileComponent implements OnInit {
       return 'photo';
     }
     return 'silhouette';
+  }
+
+  ngOnDestroy(): void {
+    this.profileSub?.unsubscribe();
+    this.solutionsSub?.unsubscribe();
+    this.queryParamSub?.unsubscribe();
+    this.routeSub?.unsubscribe();
   }
 }

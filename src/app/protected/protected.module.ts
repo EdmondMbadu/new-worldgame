@@ -61,6 +61,7 @@ import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component'
 import { AvatarDetailComponent } from '../components/avatar-detail/avatar-detail.component';
 import { ActivityHeatmapComponent } from '../components/activity-heatmap/activity-heatmap.component';
 import { ChallengeSpacesComponent } from '../components/challenge-spaces/challenge-spaces.component';
+import { DirectMessageComponent } from '../components/direct-message/direct-message.component';
 
 @NgModule({
   declarations: [
@@ -119,6 +120,7 @@ import { ChallengeSpacesComponent } from '../components/challenge-spaces/challen
     AvatarDetailComponent,
     ActivityHeatmapComponent,
     ChallengeSpacesComponent,
+    DirectMessageComponent,
   ],
   imports: [
     CommonModule,

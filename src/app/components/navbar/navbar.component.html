@@ -1442,8 +1442,8 @@
     <a
       routerLink="/notifications"
       class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-      aria-label="Discussion notifications"
-      title="Discussion notifications"
+      aria-label="Messages and notifications"
+      title="Messages and notifications"
     >
       <svg
         class="h-5 w-5"
@@ -1461,7 +1461,7 @@
         />
       </svg>
       <span
-        *ngIf="unreadDiscussionNotificationCount > 0"
+        *ngIf="totalUnreadNotificationCount > 0"
         class="absolute -right-2 -top-2 flex min-h-[1.35rem] min-w-[1.35rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-extrabold leading-none text-white shadow-md ring-2 ring-white dark:ring-slate-900"
       >
         {{ discussionNotificationBadgeLabel }}
@@ -1846,8 +1846,8 @@
       <a
         routerLink="/notifications"
         class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-        aria-label="Discussion notifications"
-        title="Discussion notifications"
+        aria-label="Messages and notifications"
+        title="Messages and notifications"
       >
         <svg
           class="h-5 w-5"
@@ -1865,7 +1865,7 @@
           />
         </svg>
         <span
-          *ngIf="unreadDiscussionNotificationCount > 0"
+          *ngIf="totalUnreadNotificationCount > 0"
           class="absolute -right-2 -top-2 flex min-h-[1.35rem] min-w-[1.35rem] items-center justify-center rounded-full bg-red-600 px-1.5 text-[11px] font-extrabold leading-none text-white shadow-md ring-2 ring-white dark:ring-slate-900"
         >
           {{ discussionNotificationBadgeLabel }}

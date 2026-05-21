@@ -28,6 +28,7 @@ import { DiscussionNotificationsService } from 'src/app/services/discussion-noti
 import { SchoolService } from 'src/app/services/school.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { environment } from 'environments/environments';
+import { DirectMessageService } from 'src/app/services/direct-message.service';
 
 interface NavbarSearchItem {
   type: 'solution' | 'person';
@@ -86,6 +87,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   schoolQuery: any = {}; // { sid: '...' } when student only has an invite
   pendingInvitesCount = 0;
   unreadDiscussionNotificationCount = 0;
+  unreadDirectMessageCount = 0;
   languageOptions: { code: string; labelKey: string }[] = [];
   currentLanguage = 'en';
   showLanguageDropdown = false;
@@ -99,7 +101,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private challenge: ChallengesService,
     private schoolService: SchoolService,
     private languageService: LanguageService,
-    private discussionNotifications: DiscussionNotificationsService
+    private discussionNotifications: DiscussionNotificationsService,
+    private directMessages: DirectMessageService
   ) {}
 
   @Input() hoveredHomePath: string = ``;
@@ -276,10 +279,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
       .subscribe((count) => {
         this.unreadDiscussionNotificationCount = count;
       });
+
+    this.auth.user$
+      .pipe(
+        switchMap((u) =>
+          u?.uid ? this.directMessages.watchUnreadCount(u.uid) : of(0)
+        ),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((count) => {
+        this.unreadDirectMessageCount = count;
+      });
   }
 
   get discussionNotificationBadgeLabel(): string {
-    return String(this.unreadDiscussionNotificationCount);
+    return String(this.totalUnreadNotificationCount);
+  }
+
+  get totalUnreadNotificationCount(): number {
+    return this.unreadDiscussionNotificationCount + this.unreadDirectMessageCount;
   }
 
   get schoolNavLabel(): string {
