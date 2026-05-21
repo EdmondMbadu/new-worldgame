@@ -108,6 +108,13 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     this.openChange.emit(false);
   }
 
+  openChat(): void {
+    if (!this.canMessage) return;
+    this.open = true;
+    this.openChange.emit(true);
+    this.connectIfReady();
+  }
+
   toggleExpanded(): void {
     this.expanded = !this.expanded;
     this.scrollToBottomSoon();
