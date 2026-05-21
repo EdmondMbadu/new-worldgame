@@ -67,12 +67,26 @@
       <div *ngIf="!loading && messages.length > 0" class="space-y-3">
         <div
           *ngFor="let message of messages; trackBy: trackMessage"
-          class="flex"
+          class="flex items-end gap-2"
           [class.justify-end]="isMine(message)"
           [class.justify-start]="!isMine(message)"
         >
+          <ng-container *ngIf="!isMine(message)">
+            <img
+              *ngIf="messageAvatar(message); else incomingMessageInitials"
+              [src]="messageAvatar(message)"
+              alt=""
+              class="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+            />
+            <ng-template #incomingMessageInitials>
+              <div class="grid h-8 w-8 shrink-0 place-content-center rounded-full bg-slate-900 text-[11px] font-bold text-white dark:bg-white dark:text-slate-900">
+                {{ messageInitials(message) }}
+              </div>
+            </ng-template>
+          </ng-container>
+
           <div
-            class="max-w-[82%] rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
+            class="max-w-[76%] rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
             [class.rounded-br-md]="isMine(message)"
             [class.bg-emerald-600]="isMine(message)"
             [class.text-white]="isMine(message)"
@@ -91,6 +105,20 @@
               {{ messageTime(message) }}
             </p>
           </div>
+
+          <ng-container *ngIf="isMine(message)">
+            <img
+              *ngIf="messageAvatar(message); else outgoingMessageInitials"
+              [src]="messageAvatar(message)"
+              alt=""
+              class="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-emerald-200 dark:ring-emerald-700"
+            />
+            <ng-template #outgoingMessageInitials>
+              <div class="grid h-8 w-8 shrink-0 place-content-center rounded-full bg-emerald-700 text-[11px] font-bold text-white">
+                {{ messageInitials(message) }}
+              </div>
+            </ng-template>
+          </ng-container>
         </div>
       </div>
     </div>

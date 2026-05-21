@@ -87,6 +87,21 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     );
   }
 
+  get currentUserName(): string {
+    const user = this.currentUser || this.auth.currentUser;
+    const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+    return fullName || user?.email || 'You';
+  }
+
+  get currentUserAvatar(): string {
+    const user = this.currentUser || this.auth.currentUser;
+    return user?.profilePicture?.downloadURL || user?.profilePicPath || '';
+  }
+
+  get currentUserInitials(): string {
+    return this.initialsFromLabel(this.currentUserName);
+  }
+
   close(): void {
     this.open = false;
     this.openChange.emit(false);
@@ -127,6 +142,17 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   isMine(message: DirectMessageRecord): boolean {
     const currentUid = this.currentUser?.uid || this.auth.currentUser?.uid || '';
     return message.senderUid === currentUid;
+  }
+
+  messageAvatar(message: DirectMessageRecord): string {
+    if (message.senderAvatar) return message.senderAvatar;
+    return this.isMine(message) ? this.currentUserAvatar : this.recipientAvatar;
+  }
+
+  messageInitials(message: DirectMessageRecord): string {
+    return this.isMine(message)
+      ? this.currentUserInitials
+      : this.initialsFromLabel(message.senderName || this.recipientName);
   }
 
   messageTime(message: DirectMessageRecord): string {
@@ -192,6 +218,16 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
       if (!el) return;
       el.scrollTop = el.scrollHeight;
     });
+  }
+
+  private initialsFromLabel(label: string): string {
+    const words = String(label || '')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (!words.length) return '?';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase();
   }
 
   ngOnDestroy(): void {
