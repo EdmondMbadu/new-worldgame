@@ -93,6 +93,31 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showLanguageDropdown = false;
   readonly canShowLanguageSwitcher = environment.enableLanguageSwitcher;
   private readonly destroy$ = new Subject<void>();
+  private dmNotificationAudio?: HTMLAudioElement;
+  private dmNotificationAudioUnlocked = false;
+  private lastUnreadDirectMessageCount: number | null = null;
+  private lastDmSoundAtMs = 0;
+  private readonly dmSoundMinIntervalMs = 3000;
+  private readonly unlockDmNotificationSound = () => {
+    if (!this.dmNotificationAudio || this.dmNotificationAudioUnlocked) return;
+
+    const audio = this.dmNotificationAudio;
+    const previousVolume = audio.volume;
+    audio.volume = 0;
+
+    audio
+      .play()
+      .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = previousVolume;
+        this.dmNotificationAudioUnlocked = true;
+        this.removeDmSoundUnlockListeners();
+      })
+      .catch(() => {
+        audio.volume = previousVolume;
+      });
+  };
 
   constructor(
     public auth: AuthService,
@@ -136,6 +161,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.setupDmNotificationSound();
+
     this.languageOptions = this.languageService.getLanguageOptions();
     this.currentLanguage = this.languageService.currentLanguage;
     this.languageService.languageChanges$
@@ -288,6 +315,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe((count) => {
+        this.playDmNotificationSoundWhenUnreadIncreases(count);
         this.unreadDirectMessageCount = count;
       });
   }
@@ -474,8 +502,49 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.removeDmSoundUnlockListeners();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private setupDmNotificationSound(): void {
+    if (typeof Audio === 'undefined') return;
+
+    this.dmNotificationAudio = new Audio('assets/sounds/live-chat.mp3');
+    this.dmNotificationAudio.preload = 'auto';
+    this.dmNotificationAudio.volume = 0.55;
+
+    if (typeof document === 'undefined') return;
+    document.addEventListener('pointerdown', this.unlockDmNotificationSound);
+    document.addEventListener('keydown', this.unlockDmNotificationSound);
+  }
+
+  private removeDmSoundUnlockListeners(): void {
+    if (typeof document === 'undefined') return;
+    document.removeEventListener('pointerdown', this.unlockDmNotificationSound);
+    document.removeEventListener('keydown', this.unlockDmNotificationSound);
+  }
+
+  private playDmNotificationSoundWhenUnreadIncreases(count: number): void {
+    const previous = this.lastUnreadDirectMessageCount;
+    this.lastUnreadDirectMessageCount = count;
+
+    if (previous === null || count <= previous) return;
+    if (typeof document !== 'undefined' && !document.hidden && document.hasFocus()) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - this.lastDmSoundAtMs < this.dmSoundMinIntervalMs) return;
+
+    const audio = this.dmNotificationAudio;
+    if (!audio) return;
+
+    this.lastDmSoundAtMs = now;
+    audio.currentTime = 0;
+    audio.play().catch(() => {
+      this.dmNotificationAudioUnlocked = false;
+    });
   }
 
   changeLanguage(language: string) {
