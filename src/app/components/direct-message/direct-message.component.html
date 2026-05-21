@@ -1,5 +1,11 @@
+<ng-container *ngIf="open && canMessage">
 <div
-  *ngIf="open && canMessage"
+  *ngIf="expanded"
+  class="fixed inset-x-0 bottom-0 top-20 z-[45] bg-slate-950/35 backdrop-blur-[1px] md:top-24"
+  aria-hidden="true"
+></div>
+
+<div
   class="fixed z-[100]"
   [ngClass]="
     expanded
@@ -8,12 +14,25 @@
   "
 >
   <section
-    class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+    class="flex flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl dark:bg-slate-900"
+    [ngClass]="expanded ? 'ring-4 ring-slate-900/10 dark:ring-white/10' : ''"
     [class.h-full]="expanded"
     [class.max-h-[calc(100vh-2rem)]]="!expanded"
+    [class.border-slate-300]="expanded"
+    [class.dark:border-slate-500]="expanded"
+    [class.border-slate-200]="!expanded"
+    [class.dark:border-slate-700]="!expanded"
     aria-label="Direct message"
   >
-    <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+    <header
+      class="flex items-center justify-between border-b px-4 py-3"
+      [class.border-slate-300]="expanded"
+      [class.bg-white]="expanded"
+      [class.dark:border-slate-600]="expanded"
+      [class.dark:bg-slate-900]="expanded"
+      [class.border-slate-200]="!expanded"
+      [class.dark:border-slate-800]="!expanded"
+    >
       <div class="flex min-w-0 items-center gap-3">
         <img
           *ngIf="recipientAvatar; else initialsAvatar"
@@ -67,8 +86,8 @@
 
     <div
       #messageList
-      class="overflow-y-auto bg-slate-50 px-4 py-4 dark:bg-slate-950"
-      [ngClass]="expanded ? 'flex-1 md:px-8 md:py-6' : 'h-[28rem]'"
+      class="overflow-y-auto px-4 py-4"
+      [ngClass]="expanded ? 'flex-1 bg-slate-100 md:px-8 md:py-6 dark:bg-slate-950' : 'h-[28rem] bg-slate-50 dark:bg-slate-950'"
     >
       <div *ngIf="loading" class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
         Loading messages...
@@ -150,7 +169,16 @@
       </div>
     </div>
 
-    <form class="border-t border-slate-200 p-3 dark:border-slate-800" (ngSubmit)="send()">
+    <form
+      class="border-t p-3"
+      [class.border-slate-300]="expanded"
+      [class.bg-white]="expanded"
+      [class.dark:border-slate-600]="expanded"
+      [class.dark:bg-slate-900]="expanded"
+      [class.border-slate-200]="!expanded"
+      [class.dark:border-slate-800]="!expanded"
+      (ngSubmit)="send()"
+    >
       <p *ngIf="errorMessage" class="mb-2 text-xs font-medium text-red-600 dark:text-red-400">
         {{ errorMessage }}
       </p>
@@ -182,3 +210,4 @@
     </form>
   </section>
 </div>
+</ng-container>
