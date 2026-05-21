@@ -1,9 +1,16 @@
 <div
   *ngIf="open && canMessage"
-  class="fixed inset-x-3 bottom-4 z-50 sm:inset-x-auto sm:right-6 sm:w-[26rem]"
+  class="fixed z-[100]"
+  [ngClass]="
+    expanded
+      ? 'top-20 inset-x-3 bottom-3 md:top-24 md:left-6 md:right-6 md:bottom-6 lg:left-10 lg:right-10 lg:bottom-10'
+      : 'inset-x-3 bottom-4 sm:inset-x-auto sm:right-6 sm:w-[30rem]'
+  "
 >
   <section
-    class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+    class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+    [class.h-full]="expanded"
+    [class.max-h-[calc(100vh-2rem)]]="!expanded"
     aria-label="Direct message"
   >
     <header class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
@@ -28,21 +35,40 @@
         </div>
       </div>
 
-      <button
-        type="button"
-        (click)="close()"
-        class="grid h-9 w-9 place-content-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-        aria-label="Close direct message"
-      >
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
-        </svg>
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          (click)="toggleExpanded()"
+          class="grid h-9 w-9 place-content-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          [attr.aria-label]="expanded ? 'Collapse direct message' : 'Expand direct message'"
+          [attr.title]="expanded ? 'Collapse' : 'Expand'"
+        >
+          <svg *ngIf="!expanded" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+          </svg>
+          <svg *ngIf="expanded" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v6H3M15 21v-6h6M3 9l6-6M21 15l-6 6" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          (click)="close()"
+          class="grid h-9 w-9 place-content-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          aria-label="Close direct message"
+          title="Close"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
     </header>
 
     <div
       #messageList
-      class="h-[22rem] overflow-y-auto bg-slate-50 px-4 py-4 dark:bg-slate-950"
+      class="overflow-y-auto bg-slate-50 px-4 py-4 dark:bg-slate-950"
+      [ngClass]="expanded ? 'flex-1 md:px-8 md:py-6' : 'h-[28rem]'"
     >
       <div *ngIf="loading" class="py-10 text-center text-sm text-slate-500 dark:text-slate-400">
         Loading messages...
@@ -86,7 +112,8 @@
           </ng-container>
 
           <div
-            class="max-w-[76%] rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
+            class="rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
+            [ngClass]="expanded ? 'max-w-[min(42rem,76%)]' : 'max-w-[76%]'"
             [class.rounded-br-md]="isMine(message)"
             [class.bg-emerald-600]="isMine(message)"
             [class.text-white]="isMine(message)"

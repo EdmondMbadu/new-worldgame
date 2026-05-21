@@ -35,6 +35,7 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   loading = false;
   sending = false;
   errorMessage = '';
+  expanded = false;
 
   private authSub?: Subscription;
   private messagesSub?: Subscription;
@@ -105,6 +106,11 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   close(): void {
     this.open = false;
     this.openChange.emit(false);
+  }
+
+  toggleExpanded(): void {
+    this.expanded = !this.expanded;
+    this.scrollToBottomSoon();
   }
 
   async send(): Promise<void> {
