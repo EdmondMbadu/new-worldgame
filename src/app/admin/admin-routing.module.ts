@@ -14,6 +14,7 @@ import { ManagementDemoComponent } from '../components/management-demo/managemen
 import { ManagementAskComponent } from '../components/management-ask/management-ask.component';
 import { BulkEmailsComponent } from '../game/bulk-emails/bulk-emails.component';
 import { SolutionPublicationComponent } from '../components/solution-publication/solution-publication.component';
+import { ContactEmailsManagementComponent } from '../components/contact-emails-management/contact-emails-management.component';
 
 const routes: Routes = [
   {
@@ -84,6 +85,12 @@ const routes: Routes = [
   {
     path: 'bulk-emails',
     component: BulkEmailsComponent,
+    canActivate: [AuthGuard],
+    data: { requireAdmin: true },
+  },
+  {
+    path: 'contact-emails',
+    component: ContactEmailsManagementComponent,
     canActivate: [AuthGuard],
     data: { requireAdmin: true },
   },

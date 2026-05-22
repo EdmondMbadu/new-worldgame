@@ -18,6 +18,7 @@ import { ManagementAskComponent } from '../components/management-ask/management-
 import { BulkEmailsComponent } from '../game/bulk-emails/bulk-emails.component';
 import { SolutionPublicationComponent } from '../components/solution-publication/solution-publication.component';
 import { ManagementToolbarComponent } from '../game/management-toolbar/management-toolbar.component';
+import { ContactEmailsManagementComponent } from '../components/contact-emails-management/contact-emails-management.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { ManagementToolbarComponent } from '../game/management-toolbar/managemen
     ManagementDemoComponent,
     ManagementAskComponent,
     BulkEmailsComponent,
+    ContactEmailsManagementComponent,
     SolutionPublicationComponent,
     ManagementToolbarComponent,
   ],

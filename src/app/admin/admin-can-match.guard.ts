@@ -13,6 +13,7 @@ const ADMIN_PATHS = new Set<string>([
   'management-demo',
   'management-ask',
   'bulk-emails',
+  'contact-emails',
   'solution-publication',
 ]);
 

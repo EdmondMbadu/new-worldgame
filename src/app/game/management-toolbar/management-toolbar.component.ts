@@ -25,6 +25,7 @@ export class ManagementToolbarComponent {
     { path: '/management-ask', label: 'Questions' },
     { path: '/feedback-management', label: 'NWG Feedback' },
     { path: '/bulk-emails', label: 'Bulk Emails' },
+    { path: '/contact-emails', label: 'Contact Emails' },
     { path: '/admin-invite', label: 'Publish Invite' },
   ];
 }

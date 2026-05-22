@@ -470,6 +470,13 @@
 
       <h2 class="text-sm font-semibold">Contact Lists</h2>
 
+      <a
+        routerLink="/contact-emails"
+        (click)="$event.stopPropagation()"
+        class="rounded-lg px-3 py-1.5 text-xs ring-1 ring-slate-300 hover:bg-slate-100 dark:ring-slate-600 dark:hover:bg-slate-800">
+        Contact Emails management
+      </a>
+
       <div class="text-xs opacity-70 ml-auto">
         {{ contactLists.length }} list(s)
       </div>

@@ -1,0 +1,440 @@
+<div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <app-navbar
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="auth.currentUser?.email"
+    [firstName]="auth.currentUser?.firstName"
+    [lastName]="auth.currentUser?.lastName"
+    [path]="'home'">
+  </app-navbar>
+
+  <app-management-toolbar></app-management-toolbar>
+
+  <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 mt-10 space-y-6">
+    <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight md:text-3xl">Contact Emails</h1>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+          Unified audiences from registered users, primer signups, uploaded lists, and unsubscribes.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <input
+          #contactImportInput
+          type="file"
+          accept=".csv,.txt,text/csv,text/plain"
+          class="hidden"
+          (change)="onContactImportChosen($event)" />
+        <button
+          type="button"
+          (click)="pickImportFile()"
+          [disabled]="importSaving"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+          Upload CSV/TXT
+        </button>
+        <button
+          type="button"
+          (click)="useFilteredInBulkEmail()"
+          [disabled]="!filteredContacts.length"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+          Use in Bulk Email
+        </button>
+      </div>
+    </section>
+
+    <section *ngIf="errorMessage" class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
+      {{ errorMessage }}
+    </section>
+
+    <section class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Unique emails</div>
+        <div class="mt-2 text-2xl font-bold tabular-nums">{{ totalContacts | number }}</div>
+      </div>
+      <div class="rounded-lg border border-emerald-200 bg-white p-4 shadow-sm dark:border-emerald-900 dark:bg-slate-900">
+        <div class="text-xs uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Sendable</div>
+        <div class="mt-2 text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-300">{{ sendableContacts | number }}</div>
+      </div>
+      <div class="rounded-lg border border-rose-200 bg-white p-4 shadow-sm dark:border-rose-900 dark:bg-slate-900">
+        <div class="text-xs uppercase tracking-wide text-rose-600 dark:text-rose-300">Unsubscribed</div>
+        <div class="mt-2 text-2xl font-bold tabular-nums text-rose-600 dark:text-rose-300">{{ unsubscribedCount | number }}</div>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Registered</div>
+        <div class="mt-2 text-2xl font-bold tabular-nums">{{ registeredCount | number }}</div>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Primer</div>
+        <div class="mt-2 text-2xl font-bold tabular-nums">{{ primerCount | number }}</div>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Uploaded lists</div>
+        <div class="mt-2 text-2xl font-bold tabular-nums">{{ contactListCount | number }}</div>
+      </div>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-semibold">Domain Share</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Top domains across the unified contact pool.</p>
+          </div>
+          <span class="text-xs text-slate-500" *ngIf="parsingContactLists">Reading uploaded lists...</span>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-[220px_1fr]">
+          <div class="flex items-center justify-center">
+            <svg viewBox="0 0 100 100" class="h-48 w-48">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="18" class="text-slate-100 dark:text-slate-800"></circle>
+              <ng-container *ngFor="let segment of pieSegments">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  [attr.stroke]="segment.color"
+                  stroke-width="18"
+                  [attr.stroke-dasharray]="segment.dasharray"
+                  [attr.stroke-dashoffset]="segment.dashoffset"
+                  transform="rotate(-90 50 50)">
+                </circle>
+              </ng-container>
+              <text x="50" y="48" text-anchor="middle" class="fill-current text-[10px] font-bold">{{ totalContacts | number }}</text>
+              <text x="50" y="59" text-anchor="middle" class="fill-current text-[5px] uppercase tracking-wide opacity-60">emails</text>
+            </svg>
+          </div>
+
+          <div class="space-y-2">
+            <button
+              type="button"
+              *ngFor="let group of domainGroups | slice:0:8"
+              (click)="selectDomain(group)"
+              class="grid w-full grid-cols-[12px_1fr_auto] items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800"
+              [class.bg-indigo-50]="selectedDomain === group.domain"
+              [class.dark:bg-indigo-950]="selectedDomain === group.domain">
+              <span class="h-3 w-3 rounded-sm" [style.background]="group.color"></span>
+              <span class="min-w-0">
+                <span class="block truncate text-sm font-medium">{{ group.label }}</span>
+                <span class="block truncate text-xs text-slate-500">{{ group.domain }} - {{ group.category }}</span>
+              </span>
+              <span class="text-right text-sm font-semibold tabular-nums">{{ group.count | number }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <h2 class="text-base font-semibold">Source Mix</h2>
+        <p class="mb-4 text-xs text-slate-500 dark:text-slate-400">A contact can appear in more than one source.</p>
+        <div class="space-y-4">
+          <div *ngFor="let source of sourceSummaries">
+            <div class="mb-1 flex items-center justify-between text-sm">
+              <span>{{ source.label }}</span>
+              <span class="font-semibold tabular-nums">{{ source.count | number }}</span>
+            </div>
+            <div class="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <div class="h-full rounded-full" [style.background]="source.color" [style.width.%]="totalContacts ? (source.count / totalContacts) * 100 : 0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
+      <div class="space-y-6">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 class="text-base font-semibold">Upload Label</h2>
+          <div class="mt-4 space-y-3">
+            <label class="block text-xs font-medium text-slate-500">Audience label</label>
+            <input
+              type="text"
+              [(ngModel)]="uploadAudienceLabel"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Chestnut Hill College"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950" />
+
+            <label class="block text-xs font-medium text-slate-500">Category</label>
+            <select
+              [(ngModel)]="uploadAudienceCategory"
+              [ngModelOptions]="{standalone: true}"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950">
+              <option value="school">School</option>
+              <option value="organization">Organization</option>
+              <option value="partner">Partner</option>
+              <option value="custom">Custom</option>
+            </select>
+
+            <label class="block text-xs font-medium text-slate-500">Tags</label>
+            <input
+              type="text"
+              [(ngModel)]="uploadTags"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="students, prospects, faculty"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950" />
+
+            <div class="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                (click)="pickImportFile()"
+                [disabled]="importSaving"
+                class="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+                Import File
+              </button>
+              <span class="text-xs text-slate-500" *ngIf="importSaving">Importing...</span>
+            </div>
+            <p class="text-xs text-emerald-600 dark:text-emerald-300" *ngIf="uploadResult">{{ uploadResult }}</p>
+            <p class="text-xs text-rose-600 dark:text-rose-300" *ngIf="uploadError">{{ uploadError }}</p>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" *ngIf="selectedDomainForEdit">
+          <div class="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-semibold">Label Domain</h2>
+              <p class="text-xs text-slate-500">{{ selectedDomainForEdit }}</p>
+            </div>
+            <button type="button" (click)="cancelDomainLabelEdit()" class="rounded-md px-2 py-1 text-xs ring-1 ring-slate-300 dark:ring-slate-700">Close</button>
+          </div>
+          <div class="space-y-3">
+            <input
+              type="text"
+              [(ngModel)]="labelName"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Drexel University"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950" />
+            <select
+              [(ngModel)]="labelCategory"
+              [ngModelOptions]="{standalone: true}"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950">
+              <option value="school">School</option>
+              <option value="organization">Organization</option>
+              <option value="company">Company</option>
+              <option value="personal">Personal</option>
+              <option value="custom">Custom</option>
+            </select>
+            <textarea
+              rows="3"
+              [(ngModel)]="labelNotes"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Notes"
+              class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950"></textarea>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="saveDomainLabel()"
+                [disabled]="labelSaving || !labelName.trim()"
+                class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 dark:bg-white dark:text-slate-900">
+                Save Label
+              </button>
+              <button
+                type="button"
+                (click)="deleteDomainLabel(selectedDomainForEdit)"
+                class="rounded-lg px-3 py-2 text-sm text-rose-600 ring-1 ring-rose-300 hover:bg-rose-50 dark:ring-rose-900 dark:hover:bg-rose-950/30">
+                Remove Label
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="border-b border-slate-200 p-5 dark:border-slate-800">
+          <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h2 class="text-base font-semibold">Audience Builder</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">{{ filteredContacts.length | number }} selected email(s)</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" (click)="copyFilteredEmails()" [disabled]="!filteredContacts.length" class="rounded-lg px-3 py-2 text-xs ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50 dark:ring-slate-700 dark:hover:bg-slate-800">Copy</button>
+              <button type="button" (click)="downloadFilteredCsv()" [disabled]="!filteredContacts.length" class="rounded-lg px-3 py-2 text-xs ring-1 ring-slate-300 hover:bg-slate-50 disabled:opacity-50 dark:ring-slate-700 dark:hover:bg-slate-800">Download CSV</button>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <input
+              type="search"
+              [(ngModel)]="searchTerm"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onFilterChange()"
+              placeholder="Search email, domain, label"
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950 xl:col-span-2" />
+            <select
+              [(ngModel)]="selectedDomain"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onFilterChange()"
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950">
+              <option value="">All domains</option>
+              <option *ngFor="let group of domainGroups" [value]="group.domain">{{ group.label }} ({{ group.domain }})</option>
+            </select>
+            <select
+              [(ngModel)]="selectedSource"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onFilterChange()"
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950">
+              <option value="all">All sources</option>
+              <option value="registered">Registered users</option>
+              <option value="primer">Primer signups</option>
+              <option value="contact_list">Uploaded lists</option>
+            </select>
+            <select
+              [(ngModel)]="selectedLabel"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onFilterChange()"
+              class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950">
+              <option value="">All labels</option>
+              <option *ngFor="let label of knownLabelOptions" [value]="label">{{ label }}</option>
+            </select>
+          </div>
+
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            <label class="inline-flex items-center gap-2 text-xs">
+              <input type="checkbox" [(ngModel)]="excludeUnsubscribed" [ngModelOptions]="{standalone: true}" (ngModelChange)="onFilterChange()" />
+              <span>Exclude unsubscribed</span>
+            </label>
+            <button type="button" (click)="clearFilters()" class="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-300">Reset filters</button>
+          </div>
+        </div>
+
+        <div class="max-h-[34rem] overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+              <tr>
+                <th class="px-4 py-3">Email</th>
+                <th class="px-4 py-3">Domain</th>
+                <th class="px-4 py-3">Labels</th>
+                <th class="px-4 py-3">Sources</th>
+                <th class="px-4 py-3">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              <tr *ngFor="let contact of filteredContacts | slice:0:500" class="hover:bg-slate-50 dark:hover:bg-slate-800/70">
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ contact.email }}</div>
+                  <div class="text-xs text-slate-500" *ngIf="contact.firstName || contact.lastName">{{ contact.firstName }} {{ contact.lastName }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <button type="button" (click)="editDomainByName(contact.domain)" class="font-medium text-indigo-600 hover:underline dark:text-indigo-300">{{ contact.domain }}</button>
+                  <div class="text-xs text-slate-500" *ngIf="contact.domainLabel">{{ contact.domainLabel.label }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex max-w-xs flex-wrap gap-1">
+                    <span *ngIf="contact.domainLabel" class="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200">{{ contact.domainLabel.label }}</span>
+                    <span *ngFor="let label of contact.labels" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700 dark:bg-slate-800 dark:text-slate-200">{{ label }}</span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-xs text-slate-500">{{ contact.sourceLabels.join(', ') }}</td>
+                <td class="px-4 py-3">
+                  <span class="rounded-full px-2 py-0.5 text-xs" [class.bg-rose-50]="contact.unsubscribed" [class.text-rose-700]="contact.unsubscribed" [class.bg-emerald-50]="!contact.unsubscribed" [class.text-emerald-700]="!contact.unsubscribed">
+                    {{ contact.unsubscribed ? 'Unsubscribed' : 'Sendable' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="!filteredContacts.length">
+                <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">No contacts match the current filters.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-6 xl:grid-cols-2">
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-base font-semibold">Domains</h2>
+          <span class="text-xs text-slate-500">{{ domainGroups.length | number }} domain(s)</span>
+        </div>
+        <div class="max-h-96 overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-white text-left text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-900">
+              <tr>
+                <th class="py-2 pr-2">Domain</th>
+                <th class="py-2 pr-2">Label</th>
+                <th class="py-2 pr-2 text-right">Emails</th>
+                <th class="py-2 pr-2 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+              <tr *ngFor="let group of domainGroups">
+                <td class="py-2 pr-2 font-medium">{{ group.domain }}</td>
+                <td class="py-2 pr-2">
+                  <span>{{ group.label }}</span>
+                  <span class="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ group.category }}</span>
+                </td>
+                <td class="py-2 pr-2 text-right tabular-nums">{{ group.count | number }}</td>
+                <td class="py-2 pr-2 text-right">
+                  <button type="button" (click)="editDomainLabel(group)" class="rounded-md px-2 py-1 text-xs ring-1 ring-slate-300 hover:bg-slate-50 dark:ring-slate-700 dark:hover:bg-slate-800">Label</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-base font-semibold">Lists and Unsubscribes</h2>
+          <span class="text-xs text-slate-500">{{ contactLists.length | number }} list(s)</span>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <h3 class="mb-2 text-sm font-semibold">Uploaded Contact Lists</h3>
+            <div class="max-h-48 overflow-auto rounded-lg border border-slate-200 dark:border-slate-800">
+              <table class="w-full text-xs">
+                <thead class="bg-slate-50 text-left uppercase tracking-wide text-slate-500 dark:bg-slate-800">
+                  <tr>
+                    <th class="px-3 py-2">Name</th>
+                    <th class="px-3 py-2 text-right">Valid</th>
+                    <th class="px-3 py-2 text-right">Invalid</th>
+                    <th class="px-3 py-2 text-right">Dupes</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tr *ngFor="let list of contactLists">
+                    <td class="px-3 py-2">
+                      <div class="font-medium">{{ list.name }}</div>
+                      <div class="text-slate-500" *ngIf="list.audienceLabel">{{ list.audienceLabel }}</div>
+                    </td>
+                    <td class="px-3 py-2 text-right tabular-nums">{{ list.countValid | number }}</td>
+                    <td class="px-3 py-2 text-right tabular-nums">{{ list.countInvalid | number }}</td>
+                    <td class="px-3 py-2 text-right tabular-nums">{{ list.countDupes | number }}</td>
+                  </tr>
+                  <tr *ngIf="!contactLists.length">
+                    <td colspan="4" class="px-3 py-4 text-center text-slate-500">No uploaded lists yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div *ngIf="contactListErrors.length" class="mt-2 space-y-1 text-xs text-amber-700 dark:text-amber-300">
+              <div *ngFor="let item of contactListErrors">{{ item.listName }}: {{ item.message }}</div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="mb-2 text-sm font-semibold">Unsubscribed Emails</h3>
+            <div class="max-h-48 overflow-auto rounded-lg border border-slate-200 dark:border-slate-800">
+              <table class="w-full text-xs">
+                <thead class="bg-slate-50 text-left uppercase tracking-wide text-slate-500 dark:bg-slate-800">
+                  <tr>
+                    <th class="px-3 py-2">Email</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tr *ngFor="let email of unsubscribedList | slice:0:500">
+                    <td class="px-3 py-2">{{ email }}</td>
+                  </tr>
+                  <tr *ngIf="!unsubscribedList.length">
+                    <td class="px-3 py-4 text-center text-slate-500">No unsubscribed emails found.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
