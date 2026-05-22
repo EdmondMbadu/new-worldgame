@@ -264,6 +264,46 @@ export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
     return 'Filtered contact emails';
   }
 
+  get selectedAudienceDescription(): string {
+    const parts: string[] = [];
+    if (this.selectedDomain) parts.push(`Domain: ${this.selectedDomain}`);
+    if (this.selectedSource !== 'all') parts.push(`Source: ${this.sourceLabel(this.selectedSource)}`);
+    if (this.selectedLabel) parts.push(`Label: ${this.selectedLabel}`);
+    if (this.searchTerm.trim()) parts.push(`Search: "${this.searchTerm.trim()}"`);
+    if (this.excludeUnsubscribed) parts.push('Unsubscribed excluded');
+    return parts.length ? parts.join(' • ') : 'All contacts, excluding unsubscribed by default';
+  }
+
+  get selectedSendableCount(): number {
+    return this.filteredContacts.filter((contact) => !contact.unsubscribed).length;
+  }
+
+  get selectedUnsubscribedCount(): number {
+    return this.filteredContacts.filter((contact) => contact.unsubscribed).length;
+  }
+
+  get selectedRegisteredCount(): number {
+    return this.filteredContacts.filter((contact) =>
+      contact.sources.includes('registered')
+    ).length;
+  }
+
+  get selectedPrimerCount(): number {
+    return this.filteredContacts.filter((contact) =>
+      contact.sources.includes('primer')
+    ).length;
+  }
+
+  get selectedUploadedCount(): number {
+    return this.filteredContacts.filter((contact) =>
+      contact.sources.includes('contact_list')
+    ).length;
+  }
+
+  get selectedDomainCount(): number {
+    return new Set(this.filteredContacts.map((contact) => contact.domain)).size;
+  }
+
   get knownLabelOptions(): string[] {
     const labels = new Set<string>();
     this.contacts.forEach((contact) => {
