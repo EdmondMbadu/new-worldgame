@@ -1,11 +1,21 @@
 {
   "rules": {
-    ".read": "auth != null",
+    ".read": false,
+    ".write": false,
     "status": {
       "$uid": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid == $uid",
-        ".validate": "newData.hasChildren(['state', 'lastChanged']) && (newData.child('state').val() == 'online' || newData.child('state').val() == 'offline') && newData.child('lastChanged').isNumber()"
+        ".validate": "newData.hasChildren(['state', 'lastChanged'])",
+        "state": {
+          ".validate": "newData.val() == 'online' || newData.val() == 'offline'"
+        },
+        "lastChanged": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }
