@@ -1,0 +1,17 @@
+[
+  {
+    "origin": [
+      "https://newworld-game.org",
+      "https://www.newworld-game.org",
+      "https://new-worldgame.web.app",
+      "https://new-worldgame.firebaseapp.com",
+      "http://localhost:4200",
+      "http://127.0.0.1:4200",
+      "http://localhost:4300",
+      "http://127.0.0.1:4300"
+    ],
+    "method": ["GET", "HEAD", "OPTIONS"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "maxAgeSeconds": 3600
+  }
+]
