@@ -105,6 +105,11 @@ export interface GlobalRegisterContent {
     title: string;
     items: RegisterBenefit[];
   };
+  award: {
+    eyebrow: string;
+    title: string;
+    body: string;
+  };
   spinner: {
     srOnly: string;
     text: string;
@@ -302,9 +307,9 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
         },
         {
           icon: '🏆',
-          title: 'Eligibility for a Cash Prize',
+          title: '$1,000 NW Tournament Award',
           description:
-            'Submit your project to the NewWorld Tournament and compete for a cash award to help bring your idea to life.',
+            'Submit your Lab solution to the NewWorld Tournament. The winning solution receives $1,000 in award/seed funding to help bring the idea to life.',
         },
         {
           icon: '🚀',
@@ -326,6 +331,12 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
             'Join an interactive platform where you will take on global missions, collaborate with changemakers, and unlock new levels of innovation, strategy, and social impact.',
         },
       ],
+    },
+    award: {
+      eyebrow: 'NW Tournament award',
+      title: '$1,000 award/seed funding for the winning solution',
+      body:
+        'Your Lab project can be entered into the NewWorld Tournament. The winning solution receives $1,000 in award/seed funding to help move from concept toward implementation.',
     },
     spinner: {
       srOnly: 'Loading...',
@@ -529,9 +540,9 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
         },
         {
           icon: '🏆',
-          title: 'Éligibilité à un prix en argent',
+          title: 'Prix de 1 000 $ du tournoi NewWorld',
           description:
-            'Soumettez votre projet au tournoi NewWorld et concourez pour un prix en espèces qui peut aider à concrétiser votre idée.',
+            'Soumettez votre solution au tournoi NewWorld. La solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour aider à concrétiser l’idée.',
         },
         {
           icon: '🚀',
@@ -553,6 +564,12 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
             'Rejoignez une plateforme interactive où vous relèverez des missions mondiales, collaborerez avec des acteurs du changement et débloquerez de nouveaux niveaux d’innovation, de stratégie et d’impact social.',
         },
       ],
+    },
+    award: {
+      eyebrow: 'Prix du tournoi NewWorld',
+      title: '1 000 $ de prix/financement de démarrage pour la solution gagnante',
+      body:
+        'Votre projet du Lab peut être présenté au tournoi NewWorld. La solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour passer du concept à la mise en oeuvre.',
     },
     spinner: {
       srOnly: 'Chargement...',

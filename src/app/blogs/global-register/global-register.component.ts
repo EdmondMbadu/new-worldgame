@@ -190,12 +190,12 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
           ...item,
           title:
             this.currentLanguage === 'fr'
-              ? 'Visibilité dans le tournoi et prix'
-              : 'Tournament Visibility & Awards',
+              ? 'Visibilité et prix de 1 000 $ au tournoi'
+              : '$1,000 Tournament Visibility & Award',
           description:
             this.currentLanguage === 'fr'
-              ? 'Soumettez votre projet au tournoi NewWorld, où les solutions gagnantes obtiennent de la visibilité et parfois des prix qui aident à concrétiser votre idée.'
-              : 'Submit your project to the NewWorld Tournament where winning solutions gain visibility and possible awards that help bring your idea to life.',
+              ? 'Soumettez votre projet au tournoi NewWorld, où la solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour aider à concrétiser votre idée.'
+              : 'Submit your project to the NewWorld Tournament where the winning solution receives $1,000 in award/seed funding to help bring your idea to life.',
         };
       }
 

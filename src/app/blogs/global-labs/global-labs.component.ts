@@ -95,7 +95,7 @@ export class GlobalLabsComponent implements OnInit {
       icon: 'travel_explore',
       title: 'Keep support after the Lab',
       body:
-        'Participants continue with NewWorld Game access and project support, including AI-assisted updates on research, funding, and partners.',
+        'Participants continue with NewWorld Game access and project support, including AI-assisted updates on research, funding, partners, and NewWorld Tournament readiness.',
     },
   ];
 
@@ -134,9 +134,9 @@ export class GlobalLabsComponent implements OnInit {
     },
     {
       icon: 'bolt',
-      title: 'Work that reaches implementation',
+      title: '$1,000 seed funding pathway',
       body:
-        'A previous NewWorld Tournament award helped a DR Congo team electrify a village health clinic as proof of concept for scaling clinic power access.',
+        'The winning NewWorld Tournament solution receives $1,000 in award/seed funding, and past tournament support helped a DR Congo team electrify a village health clinic proof of concept.',
     },
   ];
 
