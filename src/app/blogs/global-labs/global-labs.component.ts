@@ -134,9 +134,9 @@ export class GlobalLabsComponent implements OnInit {
     },
     {
       icon: 'bolt',
-      title: '$1,000 seed funding pathway',
+      title: 'Work that reaches implementation',
       body:
-        'The winning NewWorld Tournament solution receives $1,000 in award/seed funding, and past tournament support helped a DR Congo team electrify a village health clinic proof of concept.',
+        'A previous NewWorld Tournament award helped a DR Congo team electrify a village health clinic as proof of concept for scaling clinic power access.',
     },
   ];
 

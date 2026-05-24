@@ -20,11 +20,11 @@
             Join the Global Solutions Lab 2026
           </h1>
           <p class="mt-6 max-w-2xl text-lg font-semibold leading-8 text-slate-100 sm:text-xl">
-            Spend 10 days building a real-world solution for your community or a global challenge, with AI tools, expert feedback, and a collaborative international Lab.
+            Spend 10 days building a real-world solution for the world or your community, with AI tools, expert feedback, and a collaborative international Lab.
           </p>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row">
             <a
-              routerLink="/global-registers"
+              href="/global-registers"
               class="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-400 px-7 py-4 text-base font-extrabold text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-emerald-300"
             >
               Apply for the Lab
@@ -35,7 +35,7 @@
               (click)="scrollToSection('lab-details')"
               class="inline-flex items-center justify-center gap-2 rounded-md border border-white/25 bg-white/10 px-7 py-4 text-base font-bold text-white transition hover:bg-white/15"
             >
-              See dates, cost, and format
+              See how the Lab works
             </button>
           </div>
           <p class="mt-4 text-sm font-medium text-slate-200">
@@ -62,16 +62,12 @@
               <dd class="mt-1 text-base font-bold">In-person and online</dd>
             </div>
             <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
-              <dt class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Time commitment</dt>
-              <dd class="mt-1 text-base font-bold">4 to 6 hours per day, starting around 10:00 am Eastern U.S. time</dd>
-            </div>
-            <div class="rounded-md bg-slate-100 p-4 dark:bg-slate-800">
               <dt class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Hosted by</dt>
               <dd class="mt-1 text-base font-bold">Charles D. Close School of Entrepreneurship at Drexel University</dd>
             </div>
           </dl>
           <a
-            routerLink="/global-registers"
+            href="/global-registers"
             class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-teal-700"
           >
             Start registration
@@ -107,6 +103,41 @@
     </section>
 
     <section class="bg-white py-14 dark:bg-slate-900">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-3xl text-center">
+          <h2 class="text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white md:text-4xl">A Lab with global reach and practical outcomes.</h2>
+        </div>
+        <div class="mt-9 grid gap-5 md:grid-cols-3">
+          <article *ngFor="let point of proofPoints" class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
+            <span class="material-symbols-outlined text-3xl text-teal-700 dark:text-emerald-300" aria-hidden="true">{{ point.icon }}</span>
+            <h3 class="mt-4 text-lg font-extrabold">{{ point.title }}</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{{ point.body }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-slate-50 py-14 dark:bg-slate-950">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+          <div>
+            <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Choose your mission</p>
+            <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white">Bring a problem you care about.</h2>
+            <p class="mt-5 text-base leading-8 text-slate-700 dark:text-slate-300">
+              The 2026 Lab is built for local, regional, and global problems. You can work on one of the focus areas or bring a challenge from your community, organization, or startup.
+            </p>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div *ngFor="let area of focusAreas" class="flex items-start gap-3 rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
+              <span class="material-symbols-outlined text-teal-700 dark:text-emerald-300" aria-hidden="true">task_alt</span>
+              <p class="text-sm font-bold leading-6">{{ area }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white py-14 dark:bg-slate-900">
       <div class="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
         <div>
           <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Watch before you apply</p>
@@ -124,7 +155,7 @@
                 <h3 class="mt-2 text-xl font-extrabold">{{ videos[0].heading }}</h3>
               </div>
               <a
-                routerLink="/global-registers"
+                href="/global-registers"
                 class="inline-flex items-center justify-center gap-2 rounded-md bg-emerald-400 px-5 py-3 text-sm font-extrabold text-slate-950 transition hover:bg-emerald-300"
               >
                 Apply now
@@ -203,7 +234,7 @@
               </div>
             </div>
             <a
-              routerLink="/global-registers"
+              href="/global-registers"
               class="mt-7 inline-flex items-center justify-center gap-2 rounded-md bg-slate-950 px-6 py-3 text-sm font-extrabold text-white transition hover:bg-slate-800 dark:bg-emerald-400 dark:text-slate-950 dark:hover:bg-emerald-300"
             >
               Reserve your place
@@ -272,42 +303,6 @@
       </div>
     </section>
 
-    <section class="bg-slate-50 py-14 dark:bg-slate-950">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Choose your mission</p>
-            <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white">Bring a problem you care about.</h2>
-            <p class="mt-5 text-base leading-8 text-slate-700 dark:text-slate-300">
-              The 2026 Lab is built for local, regional, and global problems. You can work on one of the focus areas or bring a challenge from your community, organization, or startup.
-            </p>
-          </div>
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div *ngFor="let area of focusAreas" class="flex items-start gap-3 rounded-md border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
-              <span class="material-symbols-outlined text-teal-700 dark:text-emerald-300" aria-hidden="true">task_alt</span>
-              <p class="text-sm font-bold leading-6">{{ area }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-white py-14 dark:bg-slate-900">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-3xl text-center">
-          <p class="text-sm font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Credibility</p>
-          <h2 class="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white">A Lab with global reach and practical outcomes.</h2>
-        </div>
-        <div class="mt-9 grid gap-5 md:grid-cols-3">
-          <article *ngFor="let point of proofPoints" class="rounded-lg border border-slate-200 bg-slate-50 p-6 dark:border-white/10 dark:bg-slate-950">
-            <span class="material-symbols-outlined text-3xl text-teal-700 dark:text-emerald-300" aria-hidden="true">{{ point.icon }}</span>
-            <h3 class="mt-4 text-lg font-extrabold">{{ point.title }}</h3>
-            <p class="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">{{ point.body }}</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
     <section class="bg-slate-950 py-14 text-white">
       <div class="mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
         <h2 class="text-3xl font-extrabold tracking-normal md:text-4xl">Ready to apply for the Global Solutions Lab?</h2>
@@ -315,7 +310,7 @@
           The Lab is developed and conducted by EarthGame, a nonprofit research and education NGO officially associated with the United Nations Department of Global Communications. Winning NewWorld Tournament solutions are eligible for $1,000 in award/seed funding.
         </p>
         <a
-          routerLink="/global-registers"
+          href="/global-registers"
           class="mt-8 inline-flex items-center justify-center gap-2 rounded-md bg-emerald-400 px-8 py-4 text-base font-extrabold text-slate-950 shadow-lg shadow-black/25 transition hover:bg-emerald-300"
         >
           Apply now
@@ -327,7 +322,7 @@
 
   <div class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-slate-950/95 md:hidden">
     <a
-      routerLink="/global-registers"
+      href="/global-registers"
       class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-600 px-5 py-3 text-sm font-extrabold text-white"
     >
       Apply for the Lab
