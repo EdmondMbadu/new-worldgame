@@ -635,7 +635,15 @@ export class DataService implements OnInit {
   }
 
   getGlobalLab2025Data() {
-    return this.afs.collection<any>(`global-lab-2025`).valueChanges();
+    return this.afs
+      .collection<any>(`global-lab-2025`)
+      .valueChanges({ idField: 'id' });
+  }
+
+  removeGlobalLabRegistration(pid: string, registration: any): Promise<void> {
+    return this.afs.doc(`global-lab-2025/${pid}`).update({
+      registrations: firebase.firestore.FieldValue.arrayRemove(registration),
+    });
   }
   mapEvaluationToNumeric(evaluation: Evaluation) {
     let user: any = {};

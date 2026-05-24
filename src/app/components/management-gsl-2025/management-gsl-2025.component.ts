@@ -38,6 +38,7 @@ export class ManagementGsl2025Component implements OnInit {
   summaryByOccupation: { [key: string]: number } = {};
   dropdownOpen = false;
   summaryByFocusTopic: { [key: string]: number } = {};
+  removingRegistrationKey: string | null = null;
   constructor(
     public auth: AuthService,
     private data: DataService,
@@ -66,11 +67,7 @@ export class ManagementGsl2025Component implements OnInit {
           const dateB = this.data.parseDateMMDDYYYY(b.registerDate);
           return dateB - dateA;
         });
-        this.availableYears = this.computeAvailableYears(this.globalLabData);
-        this.registrationsByYear = this.computeRegistrationsByYear(
-          this.globalLabData
-        );
-        this.applyFilters();
+        this.refreshRegistrationData();
       }
     });
   }
@@ -218,6 +215,52 @@ export class ManagementGsl2025Component implements OnInit {
     return labels[heardAboutUs] || heardAboutUs;
   }
 
+  isRemovingRegistration(user: any, index: number): boolean {
+    return this.removingRegistrationKey === this.getRegistrationKey(user, index);
+  }
+
+  async removeRegistration(user: any, index: number, event?: Event): Promise<void> {
+    event?.stopPropagation();
+
+    if (this.removingRegistrationKey) {
+      return;
+    }
+
+    if (!this.gid) {
+      alert('Could not identify the Global Solutions Lab registration list.');
+      return;
+    }
+
+    const displayName =
+      `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() ||
+      user.email ||
+      'this registration';
+    const confirmed = window.confirm(
+      `Remove ${displayName} from GSL ${this.extractYear(
+        user.registerDate
+      )}? This cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const registrationKey = this.getRegistrationKey(user, index);
+    this.removingRegistrationKey = registrationKey;
+
+    try {
+      await this.data.removeGlobalLabRegistration(this.gid, user);
+      this.globalLabData = this.globalLabData.filter((entry) => entry !== user);
+      this.expandedRows = {};
+      this.refreshRegistrationData();
+    } catch (error) {
+      console.error('Failed to remove GSL registration', error);
+      alert('Could not remove this registration. Please try again.');
+    } finally {
+      this.removingRegistrationKey = null;
+    }
+  }
+
   private applyFilters() {
     const query = this.searchQuery.toLowerCase().trim();
     this.filteredData = this.globalLabData.filter((user) => {
@@ -234,6 +277,25 @@ export class ManagementGsl2025Component implements OnInit {
       return matchesYear && matchesQuery;
     });
     this.generateSummary();
+  }
+
+  private refreshRegistrationData() {
+    this.availableYears = this.computeAvailableYears(this.globalLabData);
+    this.registrationsByYear = this.computeRegistrationsByYear(
+      this.globalLabData
+    );
+    this.applyFilters();
+  }
+
+  private getRegistrationKey(user: any, index: number): string {
+    return [
+      user.paymentIntent ?? '',
+      user.email ?? '',
+      user.registerDate ?? '',
+      user.firstName ?? '',
+      user.lastName ?? '',
+      index,
+    ].join('|');
   }
 
   private computeAvailableYears(data: any[]): number[] {
