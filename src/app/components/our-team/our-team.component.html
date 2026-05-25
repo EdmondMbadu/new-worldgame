@@ -62,6 +62,16 @@
                   : t.description
               }}
             </p>
+
+            <a
+              *ngIf="t.profileUrl"
+              [href]="t.profileUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-4 inline-flex items-center text-sm font-semibold text-teal-700 transition hover:text-teal-800 hover:underline dark:text-teal-300 dark:hover:text-teal-200"
+            >
+              See more
+            </a>
           </div>
 
           <!-- subtle hover ring -->

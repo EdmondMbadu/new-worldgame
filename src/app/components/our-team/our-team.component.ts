@@ -21,6 +21,7 @@ export class OurTeamComponent implements OnInit {
       descriptionKey: 'ourTeamPage.human.members.medard.description',
       profilePicPath:
         'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/avatar%2FNG73q08IBlW39QiC3CzwTGe6zVo2-medard-jpeg.jpeg?alt=media&token=111999e5-6382-4868-b6df-0db2d06ba419',
+      profileUrl: 'https://www.bigpicturesmallworld.com/medard-gabel.shtml',
     },
     {
       name: 'Jim Walker',
@@ -108,4 +109,5 @@ interface Team {
   twitter?: string;
   github?: string;
   fit?: 'contain' | 'cover'; // 👈 optional per-item override
+  profileUrl?: string;
 }
