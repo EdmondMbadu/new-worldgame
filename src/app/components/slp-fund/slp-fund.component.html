@@ -192,7 +192,7 @@
           Specific funding routes
         </p>
         <p class="mt-2 text-sm text-[color:var(--slp-muted)]">
-          {{ researchCards.length ? 'These are grounded funding results researched for this solution and targeting choice.' : 'These are actual funders, platforms, and discovery lanes ranked for this solution.' }}
+          {{ researchCards.length ? 'These are grounded funding results researched for this solution and targeting choice.' : researchError ? 'Live local research did not return yet, so these are fallback funding channels rather than city-specific recommendations.' : 'These are actual funders, platforms, and discovery lanes ranked for this solution.' }}
         </p>
       </div>
       <div class="mb-5 flex flex-col gap-3 rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white/75 px-5 py-4 text-sm leading-6 text-[color:var(--slp-muted)] sm:flex-row sm:items-center sm:justify-between">

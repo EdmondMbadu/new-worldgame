@@ -1994,7 +1994,7 @@ const normalizeReachPersonCandidate = (candidate: any): ReachLookupPerson | null
     email,
     url,
     whyRelevant,
-    location: location || undefined,
+    ...(location ? { location } : {}),
   };
 };
 
@@ -2267,14 +2267,14 @@ const normalizeSolutionLaunchResourceCandidate = (
     name,
     type,
     url,
-    location: location || undefined,
     whyRelevant,
     specificFit,
     nextAction,
-    sourceTitle: sourceTitle || undefined,
-    eligibility: eligibility || undefined,
-    deadline: deadline || undefined,
-    contactHint: contactHint || undefined,
+    ...(location ? { location } : {}),
+    ...(sourceTitle ? { sourceTitle } : {}),
+    ...(eligibility ? { eligibility } : {}),
+    ...(deadline ? { deadline } : {}),
+    ...(contactHint ? { contactHint } : {}),
     fitScore,
   };
 };
@@ -2355,6 +2355,98 @@ const normalizeCachedSolutionLaunchResources = (
   );
 };
 
+const getSolutionLaunchLocalSignalScore = (
+  resource: SolutionLaunchResource,
+  city: string,
+  region: string,
+  country: string
+): number => {
+  const haystack = [
+    resource.name,
+    resource.type,
+    resource.location,
+    resource.whyRelevant,
+    resource.specificFit,
+    resource.sourceTitle,
+    resource.contactHint,
+    resource.url,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  const cityValue = city.trim().toLowerCase();
+  const regionValue = region.trim().toLowerCase();
+  const countryValue = country.trim().toLowerCase();
+  let score = 0;
+
+  if (cityValue && haystack.includes(cityValue)) score += 3;
+  if (regionValue && haystack.includes(regionValue)) score += 2;
+  if (
+    countryValue &&
+    countryValue !== 'united states' &&
+    haystack.includes(countryValue)
+  ) {
+    score += 1;
+  }
+
+  return score;
+};
+
+const isGenericGlobalLaunchHost = (url: string): boolean => {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+    return [
+      'linkedin.com',
+      'medium.com',
+      'substack.com',
+      'zenodo.org',
+      'researchgate.net',
+      'theconversation.com',
+      'osf.io',
+      'github.com',
+    ].some((blockedHost) => host === blockedHost || host.endsWith(`.${blockedHost}`));
+  } catch {
+    return false;
+  }
+};
+
+const rankSolutionLaunchResourcesForTarget = (
+  resources: SolutionLaunchResource[],
+  params: {
+    locationMode: 'location' | 'global';
+    city: string;
+    region: string;
+    country: string;
+  }
+): SolutionLaunchResource[] => {
+  if (params.locationMode === 'global') {
+    return [...resources].sort((a, b) => b.fitScore - a.fitScore);
+  }
+
+  return [...resources]
+    .map((resource) => {
+      const localScore = getSolutionLaunchLocalSignalScore(
+        resource,
+        params.city,
+        params.region,
+        params.country
+      );
+      const genericPenalty = isGenericGlobalLaunchHost(resource.url) ? 8 : 0;
+      return {
+        resource,
+        rankScore: resource.fitScore + localScore * 10 - genericPenalty,
+      };
+    })
+    .sort((a, b) => b.rankScore - a.rankScore)
+    .map((entry) => ({
+      ...entry.resource,
+      fitScore: Math.max(
+        55,
+        Math.min(98, Math.round(entry.rankScore))
+      ),
+    }));
+};
+
 const buildSolutionLaunchResourcePrompt = (params: {
   lane: SolutionLaunchResourceLane;
   solutionTitle: string;
@@ -2378,14 +2470,29 @@ const buildSolutionLaunchResourcePrompt = (params: {
       : [params.city, params.region, params.country].filter(Boolean).join(', ');
   const laneBrief =
     params.lane === 'publish'
-      ? `Find concrete publication and visibility targets: local newsrooms, civic media, university news channels, public-interest publishers, submission pages, newsletters, and platforms that can feature or publish this exact solution.`
+      ? `Find concrete publication and visibility targets: city and regional newsrooms, civic media, education reporters, university news channels, school-system communications pages, public-interest publishers, submission pages, newsletters, and topic-specific platforms that can feature or publish this exact solution.`
       : params.lane === 'fund'
-        ? `Find concrete funding routes: active grantmakers, foundations, challenge programs, accelerators, city/state/federal programs, and funder pages that fit this exact solution.`
-        : `Find concrete partner organizations: local implementation allies, nonprofit coalitions, civic agencies, university centers, labs, ecosystem builders, and mission-aligned organizations that could help execute or amplify this exact solution.`;
+        ? `Find concrete funding routes: local and regional grantmakers, education foundations, civic innovation programs, challenge programs, accelerators, city/state/federal programs, and funder pages that fit this exact solution.`
+        : `Find concrete partner organizations: local implementation allies, education nonprofits, school-district adjacent organizations, civic agencies, university centers, labs, ecosystem builders, and mission-aligned organizations that could help execute or amplify this exact solution.`;
   const locationRule =
     params.locationMode === 'global'
       ? `The user explicitly chose global targeting. Rank by strongest thematic fit, credibility, current activity, and direct actionability. Do not pretend a result is local.`
-      : `The user chose location targeting for ${locationLabel}. Prioritize organizations, chapters, programs, publications, or offices with real operations in or directly serving that place. If a state/regional result is stronger than a city result, include it only when you explain the local relevance.`;
+      : `The user chose location targeting for ${locationLabel}. At least ${Math.max(4, Math.ceil(params.pageSize * 0.7))} results must be organizations, programs, publications, offices, or pages with real operations in ${params.city}, ${params.region || params.country}, or the directly surrounding region. Use global platforms only after exhausting strong local/regional matches, and label them as global rather than local.`;
+  const laneSpecificRules =
+    params.lane === 'publish'
+      ? [
+          `For publish, prefer pages for local outlets, education desks, public-interest news, university newsrooms, civic newsletters, and submission/contact pages. A result like Medium, LinkedIn, Substack, Zenodo, ResearchGate, or The Conversation is acceptable only as a last-resort global channel.`,
+          `For each result, "nextAction" must name the concrete pitch/submission/contact action and "contactHint" should name the relevant desk, form, or editor/contact route if visible.`,
+        ]
+      : params.lane === 'fund'
+        ? [
+            `For fund, prefer active local/regional funders, education grant programs, city/state innovation funds, foundations, accelerators, and challenge programs. Avoid generic VC directories and broad fundraising advice pages.`,
+            `For each result, "eligibility" and "deadline" must be filled from the page when visible. If the page does not show a current cycle, use "Check current cycle" rather than inventing a date.`,
+          ]
+        : [
+            `For partner, prefer organizations that could realistically pilot, implement, evaluate, distribute, or validate the solution. Avoid broad business directories and generic networking platforms.`,
+            `For each result, "specificFit" must identify the partnership angle: pilot site, research validation, educator network, implementation ally, curriculum/program fit, policy/civic channel, or funder-to-partner bridge.`,
+          ];
 
   const contextLines = [
     `Solution title: ${params.solutionTitle}`,
@@ -2415,11 +2522,13 @@ Strict quality rules:
 - Return ${params.pageSize} real, current, source-backed results.
 - Every result must be specific to this solution topic, not just broad "innovation", "sustainability", or "community".
 - Prefer direct program, submission, staff, grants, newsroom, partnership, or initiative pages over generic homepages.
+- For local targeting, do not return a global/general platform when a relevant ${params.city || 'city'} or regional organization exists.
 - Do not return Google, search result pages, social media feeds, URL shorteners, or directory pages unless the directory is the authoritative program page.
 - Include only results you can stand behind as meaningful next steps for this exact solution.
 - For funding, include eligibility or deadline when visible. If not visible, say "Check current cycle".
 - For partner, include the likely partnership angle.
 - For publish, include the likely publication/access point.
+${laneSpecificRules.map((rule) => `- ${rule}`).join('\n')}
 
 Return JSON only in this exact shape:
 {
@@ -6533,9 +6642,9 @@ export const findSolutionReachPeople = functions
         const nextCache: ReachLookupCacheDocument = {
           solutionId,
           cacheKey,
-          city: city || undefined,
-          region: region || undefined,
-          country: country || undefined,
+          ...(city ? { city } : {}),
+          ...(region ? { region } : {}),
+          ...(country ? { country } : {}),
           summary:
             summary ||
             (city && country
@@ -6763,13 +6872,19 @@ export const findSolutionLaunchResources = functions
           }))
         );
 
-        resources = dedupeSolutionLaunchResources(
-          validated
-            .filter((entry) => entry.valid)
-            .map((entry) => entry.resource)
-        )
-          .sort((a, b) => b.fitScore - a.fitScore)
-          .slice(0, pageSize);
+        resources = rankSolutionLaunchResourcesForTarget(
+          dedupeSolutionLaunchResources(
+            validated
+              .filter((entry) => entry.valid)
+              .map((entry) => entry.resource)
+          ),
+          {
+            locationMode,
+            city,
+            region,
+            country,
+          }
+        ).slice(0, pageSize);
 
         summary =
           normalizeReachText(parsed.summary, 320) ||
@@ -6789,9 +6904,9 @@ export const findSolutionLaunchResources = functions
           lane,
           cacheKey,
           locationMode,
-          city: city || undefined,
-          region: region || undefined,
-          country: country || undefined,
+          ...(city ? { city } : {}),
+          ...(region ? { region } : {}),
+          ...(country ? { country } : {}),
           summary,
           resources,
           createdAtIso: nowIso,

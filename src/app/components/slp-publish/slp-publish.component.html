@@ -235,15 +235,15 @@
         <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
           <p class="slp-mono text-[0.68rem] uppercase tracking-[0.24em] text-[color:var(--slp-muted)]">
-            {{ researchCards.length ? 'Live researched publication targets' : vm.categoryLine }}
+            {{ researchCards.length ? 'Live researched publication targets' : researchError ? 'Fallback publication channels' : vm.categoryLine }}
           </p>
           <p class="mt-2 text-sm text-[color:var(--slp-muted)]">
-            {{ researchCards.length ? 'These results were researched server-side with the solution context and your targeting choice.' : 'These are actual publication surfaces and discovery lanes, ranked by solution fit and location relevance.' }}
+            {{ researchCards.length ? 'These results were researched server-side with the solution context and your targeting choice.' : researchError ? 'Live local research did not return yet, so these are fallback launch channels rather than city-specific recommendations.' : 'These are actual publication surfaces and discovery lanes, ranked by solution fit and location relevance.' }}
           </p>
         </div>
         <div class="slp-card-muted inline-flex items-center gap-3 self-start px-4 py-3">
           <span class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-muted)]">Sorted by</span>
-          <span class="text-sm font-semibold">{{ researchCards.length ? 'Grounded fit' : vm.sortLabel }}</span>
+          <span class="text-sm font-semibold">{{ researchCards.length ? 'Grounded local fit' : researchError ? 'Fallback fit' : vm.sortLabel }}</span>
             <button
               *ngIf="vm.shell.hasSolution"
               type="button"

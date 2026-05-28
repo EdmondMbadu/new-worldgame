@@ -16,6 +16,59 @@ export interface SlpLocationState extends SlpLocationContext {
 })
 export class SlpLocationService {
   private readonly storageKey = 'slp_publish_location';
+  private readonly usStateCodes = new Set([
+    'AL',
+    'AK',
+    'AZ',
+    'AR',
+    'CA',
+    'CO',
+    'CT',
+    'DE',
+    'FL',
+    'GA',
+    'HI',
+    'ID',
+    'IL',
+    'IN',
+    'IA',
+    'KS',
+    'KY',
+    'LA',
+    'ME',
+    'MD',
+    'MA',
+    'MI',
+    'MN',
+    'MS',
+    'MO',
+    'MT',
+    'NE',
+    'NV',
+    'NH',
+    'NJ',
+    'NM',
+    'NY',
+    'NC',
+    'ND',
+    'OH',
+    'OK',
+    'OR',
+    'PA',
+    'RI',
+    'SC',
+    'SD',
+    'TN',
+    'TX',
+    'UT',
+    'VT',
+    'VA',
+    'WA',
+    'WV',
+    'WI',
+    'WY',
+    'DC',
+  ]);
   private initializingPromise?: Promise<void>;
   private readonly stateSubject = new BehaviorSubject<SlpLocationState>({
     mode: 'unset',
@@ -112,9 +165,11 @@ export class SlpLocationService {
     country: string,
     region: string = ''
   ): Promise<void> {
-    const normalizedCity = city.trim();
-    const normalizedRegion = region.trim();
-    const normalizedCountry = country.trim();
+    const {
+      city: normalizedCity,
+      region: normalizedRegion,
+      country: normalizedCountry,
+    } = this.normalizeLocationParts(city, region, country);
     const currentUser = this.snapshot.currentUser;
     const source: SlpLocationContext['source'] = currentUser?.uid
       ? 'manual'
@@ -209,11 +264,16 @@ export class SlpLocationService {
       .filter(Boolean);
 
     if (parts.length >= 2) {
+      const normalized = this.normalizeLocationParts(
+        parts[0],
+        parts.length > 2 ? parts.slice(1, -1).join(', ') : '',
+        parts[parts.length - 1]
+      );
       return {
         mode: 'location',
-        city: parts[0],
-        region: parts.length > 2 ? parts.slice(1, -1).join(', ') : '',
-        country: parts[parts.length - 1],
+        city: normalized.city,
+        region: normalized.region,
+        country: normalized.country,
       };
     }
 
@@ -244,15 +304,44 @@ export class SlpLocationService {
       if (!parsed.city || !parsed.country) {
         return null;
       }
+      const normalized = this.normalizeLocationParts(
+        parsed.city,
+        parsed.region || '',
+        parsed.country
+      );
 
       return {
         mode: 'location',
-        city: parsed.city,
-        region: parsed.region || '',
-        country: parsed.country,
+        city: normalized.city,
+        region: normalized.region,
+        country: normalized.country,
       };
     } catch {
       return null;
     }
+  }
+
+  private normalizeLocationParts(
+    city: string,
+    region: string,
+    country: string
+  ): { city: string; region: string; country: string } {
+    const normalizedCity = city.trim();
+    let normalizedRegion = region.trim();
+    let normalizedCountry = country.trim();
+    const countryUpper = normalizedCountry.toUpperCase();
+
+    if (!normalizedRegion && this.usStateCodes.has(countryUpper)) {
+      normalizedRegion = countryUpper;
+      normalizedCountry = 'United States';
+    } else if (['US', 'USA', 'U.S.', 'U.S.A.'].includes(countryUpper)) {
+      normalizedCountry = 'United States';
+    }
+
+    return {
+      city: normalizedCity,
+      region: normalizedRegion,
+      country: normalizedCountry,
+    };
   }
 }
