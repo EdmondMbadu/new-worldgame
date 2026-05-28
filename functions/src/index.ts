@@ -1875,6 +1875,26 @@ const normalizeReachText = (value: unknown, maxLength = 400): string =>
     .trim()
     .slice(0, maxLength);
 
+const stripUndefinedValues = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value.map((entry) => stripUndefinedValues(entry)) as T;
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>).reduce(
+      (acc, [key, entry]) => {
+        if (entry !== undefined) {
+          acc[key] = stripUndefinedValues(entry);
+        }
+        return acc;
+      },
+      {} as Record<string, unknown>
+    ) as T;
+  }
+
+  return value;
+};
+
 const normalizeReachExcludedIds = (input: unknown): string[] => {
   if (!Array.isArray(input)) return [];
   return Array.from(
@@ -6663,7 +6683,7 @@ export const findSolutionReachPeople = functions
           expiresAfterMonths: 3,
         };
 
-        await cacheRef.set(nextCache, { merge: false });
+        await cacheRef.set(stripUndefinedValues(nextCache), { merge: false });
         cache = nextCache;
       }
 
@@ -6914,7 +6934,7 @@ export const findSolutionLaunchResources = functions
           expiresAfterDays: 30,
         };
 
-        await cacheRef.set(nextCache, { merge: false });
+        await cacheRef.set(stripUndefinedValues(nextCache), { merge: false });
         cache = nextCache;
       }
 

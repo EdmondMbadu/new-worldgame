@@ -285,8 +285,11 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('Publish research failed', error);
       const message = String(error?.message || '').trim();
+      const technicalMessage =
+        /firestore|undefined|valid firestore document|value for argument/i.test(message);
       this.researchError =
         message &&
+        !technicalMessage &&
         !['internal', 'not-found', 'unknown'].includes(message.toLowerCase())
           ? message
           : 'Live publication research is unavailable. Showing the fallback launch list.';

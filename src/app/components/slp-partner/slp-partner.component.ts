@@ -273,8 +273,11 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
     } catch (error: any) {
       console.error('Partner research failed', error);
       const message = String(error?.message || '').trim();
+      const technicalMessage =
+        /firestore|undefined|valid firestore document|value for argument/i.test(message);
       this.researchError =
         message &&
+        !technicalMessage &&
         !['internal', 'not-found', 'unknown'].includes(message.toLowerCase())
           ? message
           : 'Live partner research is unavailable. Showing the fallback partner list.';
