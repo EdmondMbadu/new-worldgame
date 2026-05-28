@@ -1,0 +1,106 @@
+<div
+  *ngIf="visible"
+  class="slp-targeting-backdrop"
+  role="presentation"
+>
+  <section
+    class="slp-targeting-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="slp-targeting-title"
+  >
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+      <div class="max-w-2xl">
+        <div class="slp-chip slp-mono inline-flex text-[0.7rem] uppercase tracking-[0.2em]">
+          <span class="material-symbols-outlined text-base">travel_explore</span>
+          Launch targeting
+        </div>
+        <h2 id="slp-targeting-title" class="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">
+          Choose where this {{ laneLabel }} research should look first.
+        </h2>
+        <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+          Local targeting asks the system to prioritize organizations, funders, publishers, and partners with a real connection to that place. Global targeting looks anywhere and ranks by topic fit, credibility, and actionability.
+        </p>
+      </div>
+      <div class="rounded-2xl bg-[color:var(--slp-panel-muted)] px-4 py-3 text-sm text-[color:var(--slp-muted)] lg:max-w-[17rem]">
+        Results stay inside NewWorld Game. The browser will not open a Google search page.
+      </div>
+    </div>
+
+    <div class="mt-7 grid gap-4 lg:grid-cols-[1fr_0.72fr]">
+      <form
+        class="rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white p-5"
+        (ngSubmit)="submitLocation()"
+      >
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+          Search from a place
+        </p>
+        <div class="mt-4 grid gap-3 sm:grid-cols-3">
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--slp-muted)]">
+              City
+            </span>
+            <input
+              [(ngModel)]="draftCity"
+              name="targetCity"
+              class="slp-input w-full px-4 py-3 text-sm"
+              placeholder="Philadelphia"
+            />
+          </label>
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--slp-muted)]">
+              State / region
+            </span>
+            <input
+              [(ngModel)]="draftRegion"
+              name="targetRegion"
+              class="slp-input w-full px-4 py-3 text-sm"
+              placeholder="PA"
+            />
+          </label>
+          <label class="block">
+            <span class="slp-mono mb-2 block text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--slp-muted)]">
+              Country
+            </span>
+            <input
+              [(ngModel)]="draftCountry"
+              name="targetCountry"
+              class="slp-input w-full px-4 py-3 text-sm"
+              placeholder="United States"
+            />
+          </label>
+        </div>
+        <button
+          type="submit"
+          class="slp-button mt-5 w-full px-5 py-3 text-sm font-semibold"
+          [disabled]="saving"
+        >
+          <span class="material-symbols-outlined text-base">pin_drop</span>
+          {{ saving ? 'Saving...' : 'Use this location' }}
+        </button>
+      </form>
+
+      <div class="rounded-[1.5rem] border border-[color:var(--slp-border)] bg-[color:var(--slp-panel-muted)] p-5">
+        <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+          Search anywhere
+        </p>
+        <p class="mt-4 text-sm leading-7 text-[color:var(--slp-muted)]">
+          Use this when the solution is not tied to one geography or when the strongest funders, publishers, or partner ecosystems may be global.
+        </p>
+        <button
+          type="button"
+          (click)="useGlobal.emit()"
+          class="slp-button-secondary mt-5 w-full rounded-full px-5 py-3 text-sm font-semibold"
+          [disabled]="saving"
+        >
+          <span class="material-symbols-outlined text-base">public</span>
+          Global / anywhere
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="error" class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+      {{ error }}
+    </p>
+  </section>
+</div>

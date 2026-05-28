@@ -6,7 +6,9 @@ import { SolutionService } from './solution.service';
 export type SlpLane = 'publish' | 'fund' | 'partner' | 'reach';
 
 export interface SlpLocationContext {
+  mode?: 'location' | 'global' | 'unset';
   city?: string;
+  region?: string;
   country?: string;
   source?: 'profile' | 'manual' | 'guest' | 'none';
 }
@@ -243,6 +245,7 @@ export class SlpContextService {
     return this.getBaseContext(solutionId).pipe(
       map((context) => {
         const hasLocation = this.hasLocation(location);
+        const isGlobal = location.mode === 'global';
         const locationLabel = this.formatLocation(location);
         const resources = this.buildPublishResources(context, location);
 
@@ -279,6 +282,8 @@ export class SlpContextService {
           heroDescription: context.hasSolution
             ? hasLocation
               ? `These recommendations are ranked from the actual solution data for ${context.solutionTitle} and tuned for ${locationLabel}. We blend location-aware discovery lanes with actual publication platforms that fit the solution’s theme and maturity.`
+              : isGlobal
+                ? `These recommendations are ranked from the actual solution data for ${context.solutionTitle} and tuned for global discovery. Live research will prioritize credible publication surfaces with the strongest topic fit.`
               : `These recommendations are ranked from the actual solution data for ${context.solutionTitle}. Add city and country to bring local and regional publication channels into the mix.`
             : 'This publish lane maps a solution to publication channels, discovery routes, and story surfaces.',
           stats: [
@@ -287,6 +292,8 @@ export class SlpContextService {
               value: this.formatCount(resources.length),
               detail: hasLocation
                 ? `Ranked with local and regional weighting for ${locationLabel}.`
+                : isGlobal
+                  ? 'Ranked by global fit, credibility, and actionability.'
                 : 'Add city and country to surface nearby publication routes.',
             },
             {
@@ -294,6 +301,8 @@ export class SlpContextService {
               value: hasLocation ? this.truncate(locationLabel, 18) : 'Pending',
               detail: hasLocation
                 ? `Source: ${location.source === 'profile' ? 'profile' : location.source === 'manual' ? 'saved here' : 'this browser'}`
+                : isGlobal
+                  ? 'Global / anywhere targeting selected.'
                 : 'No city/country set yet.',
             },
             {
@@ -307,20 +316,30 @@ export class SlpContextService {
             { label: 'Stage', value: context.stageLabel },
             {
               label: 'Location',
-              value: hasLocation ? locationLabel : 'Add city + country',
+              value: hasLocation ? locationLabel : isGlobal ? 'Global / anywhere' : 'Choose targeting',
             },
             {
               label: 'Publication mix',
-              value: hasLocation ? 'Local + regional + global' : 'Regional + global',
+              value: hasLocation
+                ? 'Local + regional + global'
+                : isGlobal
+                  ? 'Global best fit'
+                  : 'Choose targeting',
             },
           ],
           intents: this.buildIntents(context),
           categoryLine: context.hasSolution
             ? hasLocation
               ? `Showing ${resources.length} publication options tuned for ${locationLabel}`
+              : isGlobal
+                ? `Showing ${resources.length} globally ranked publication options`
               : `Showing ${resources.length} publication options for ${context.focusArea}`
             : 'Showing publication options for your next solution',
-          sortLabel: hasLocation ? 'Best fit + local relevance' : 'Best fit first',
+          sortLabel: hasLocation
+            ? 'Best fit + local relevance'
+            : isGlobal
+              ? 'Global fit first'
+              : 'Best fit first',
           resources,
           quickActions: this.buildPublishQuickActions(context),
           checklist,
@@ -345,6 +364,7 @@ export class SlpContextService {
         const fundingResources = this.buildFundingResources(context, location);
         const locationLabel = this.formatLocation(location);
         const hasLocation = this.hasLocation(location);
+        const isGlobal = location.mode === 'global';
 
         return {
           shell: context.shell,
@@ -354,6 +374,8 @@ export class SlpContextService {
           heroDescription: context.hasSolution
             ? hasLocation
               ? `These funding matches use the actual solution profile plus ${locationLabel} to balance local discovery, regional funding ecosystems, and global capital sources.`
+              : isGlobal
+                ? `These funding matches use the actual solution profile and global targeting to prioritize credible, actionable funders with strong topic fit.`
               : `These funding matches use the actual solution profile. Add city and country to improve local and regional funding relevance.`
             : 'Use this lane to map a solution to concrete funding paths.',
           stats: [
@@ -362,6 +384,8 @@ export class SlpContextService {
               value: this.formatCount(fundingResources.length),
               detail: hasLocation
                 ? `Ranked with local and regional weighting for ${locationLabel}.`
+                : isGlobal
+                  ? 'Ranked by global funding fit, credibility, and actionability.'
                 : 'Add location to improve local and regional funding relevance.',
             },
             {
@@ -393,6 +417,8 @@ export class SlpContextService {
             `Why now: ${context.stageLabel} with ${context.readyAssetCount} launch signals already visible in the workspace.`,
             hasLocation
               ? `Where to start: prioritize funders that already support work in or around ${locationLabel}.`
+              : isGlobal
+                ? `Where to start: prioritize funders with direct fit to the topic and a clear current application path.`
               : `Where to start: begin with high-fit global funders, then add city and country to localize the list.`,
           ],
           nextMove: context.nextStep,
@@ -410,6 +436,7 @@ export class SlpContextService {
         const activeScope = this.getPartnerScope(context);
         const partnerResources = this.buildPartnerResources(context, location);
         const hasLocation = this.hasLocation(location);
+        const isGlobal = location.mode === 'global';
         const locationLabel = this.formatLocation(location);
 
         return {
@@ -420,6 +447,8 @@ export class SlpContextService {
           heroDescription: context.hasSolution
             ? hasLocation
               ? `These partner targets blend the solution profile with ${locationLabel} so you can start with the strongest nearby or regionally relevant ecosystems and then widen outward.`
+              : isGlobal
+                ? `These partner targets use global targeting to prioritize organizations with the strongest mission fit, credibility, and execution relevance.`
               : `These partner targets are ranked from the solution profile. Add city and country to improve local and regional ecosystem relevance.`
             : 'Use the partner lane to map a solution to real collaboration ecosystems.',
           stats: [
@@ -428,6 +457,8 @@ export class SlpContextService {
               value: this.formatCount(partnerResources.length),
               detail: hasLocation
                 ? `Ranked with local and regional weighting for ${locationLabel}.`
+                : isGlobal
+                  ? 'Ranked by mission fit, credibility, and execution relevance.'
                 : 'Add location to improve nearby ecosystem matching.',
             },
             {
@@ -458,6 +489,8 @@ export class SlpContextService {
               value: this.formatCount(context.readyAssetCount),
               detail: hasLocation
                 ? `Start with ecosystems that already operate in or near ${locationLabel}.`
+                : isGlobal
+                  ? 'Start with organizations whose mission and programs directly fit this solution.'
                 : 'Add location to improve local and regional partner targeting.',
             },
             {
@@ -471,6 +504,8 @@ export class SlpContextService {
             `Hello, I’m reaching out about "${context.solutionTitle}", a ${context.stageLabel.toLowerCase()} initiative focused on ${context.focusArea.toLowerCase()}.`,
             hasLocation
               ? `We are currently building from ${locationLabel} and looking for a partner who can strengthen the next step with aligned reach, expertise, or implementation capacity.`
+              : isGlobal
+                ? `We are looking globally for a partner who can strengthen the next step with aligned reach, expertise, or implementation capacity.`
               : `We are looking for a partner who can strengthen the next step with aligned reach, expertise, or implementation capacity.`,
             `Would you be open to a short conversation to explore where ${context.solutionTitle} could align with your current priorities?`,
             `Best regards,\n${context.authorName}`,
@@ -489,6 +524,7 @@ export class SlpContextService {
     return this.getBaseContext(solutionId).pipe(
       map((context) => {
         const hasLocation = this.hasLocation(location);
+        const isGlobal = location.mode === 'global';
         const locationLabel = this.formatLocation(location);
 
         return {
@@ -499,6 +535,8 @@ export class SlpContextService {
           heroDescription: context.hasSolution
             ? hasLocation
               ? `Each batch looks for public, source-backed people tied to ${context.solutionTitle} and weighted for ${locationLabel}. Results only keep people with a visible professional role, a public email, and a credible page to learn more.`
+              : isGlobal
+                ? `Each batch looks globally for public, source-backed people tied to ${context.solutionTitle}. Results only keep people with a visible professional role, a public email, and a credible page to learn more.`
               : `Each batch looks for public, source-backed people tied to ${context.solutionTitle}. Add city and country to strengthen local and regional relevance before widening outward.`
             : 'Use the reach lane to identify real people with public contact details who align with a specific solution.',
           stats: [
@@ -509,9 +547,11 @@ export class SlpContextService {
             },
             {
               label: 'Match method',
-              value: hasLocation ? 'Topic + place' : 'Topic first',
+              value: hasLocation ? 'Topic + place' : isGlobal ? 'Global fit' : 'Topic first',
               detail: hasLocation
                 ? `Searches are tuned for ${locationLabel} plus the solution itself.`
+                : isGlobal
+                  ? 'Searches are ranked by solution fit regardless of geography.'
                 : 'Add location to improve local and regional targeting.',
             },
             {
@@ -973,9 +1013,7 @@ export class SlpContextService {
     const tags = this.getTopicTags(context);
     const region = this.getRegionForCountry(location.country);
     const locationLabel = this.formatLocation(location);
-    const localCards = this.hasLocation(location)
-      ? this.buildLocalDiscoveryCards(context, locationLabel)
-      : [];
+    const localCards: SlpActionCard[] = [];
 
     const catalog = this.getPublicationCatalog();
     const scoredCatalog = catalog
@@ -1022,50 +1060,6 @@ export class SlpContextService {
       .slice(0, this.hasLocation(location) ? 5 : 6);
 
     return [...localCards, ...scoredCatalog].slice(0, 7);
-  }
-
-  private buildLocalDiscoveryCards(
-    context: SlpBaseContext,
-    locationLabel: string
-  ): SlpActionCard[] {
-    return [
-      {
-        label: 'Local media',
-        title: `${locationLabel} news desks and opinion editors`,
-        description: `Use a location-specific search to find actual local newspapers, city magazines, and public-interest editors that would cover ${context.focusArea.toLowerCase()}.`,
-        fitScore: 92,
-        icon: 'newspaper',
-        meta: [
-          'Local discovery lane',
-          'Best for civic relevance and nearby visibility',
-          `Search built for ${locationLabel}`,
-        ],
-        cta: 'Find local outlets',
-        badge: 'Local discovery',
-        href: this.buildSearchUrl(
-          `${locationLabel} local newspaper opinion submit ${context.focusArea}`
-        ),
-        external: true,
-      },
-      {
-        label: 'Universities and incubators',
-        title: `${locationLabel} labs, incubators, and campus channels`,
-        description: `Search for universities, research centers, and incubators in ${locationLabel} that regularly publish or feature applied solution work.`,
-        fitScore: 89,
-        icon: 'school',
-        meta: [
-          'Local discovery lane',
-          'Best for institutional credibility',
-          `Good fit for ${context.stageLabel.toLowerCase()} work`,
-        ],
-        cta: 'Find institutional channels',
-        badge: 'Local discovery',
-        href: this.buildSearchUrl(
-          `${locationLabel} university innovation center news ${context.focusArea}`
-        ),
-        external: true,
-      },
-    ];
   }
 
   private getPublicationCatalog(): SlpPublicationCatalogEntry[] {
@@ -1332,9 +1326,7 @@ export class SlpContextService {
     const tags = this.getTopicTags(context);
     const region = this.getRegionForCountry(location.country);
     const locationLabel = this.formatLocation(location);
-    const localCards = this.hasLocation(location)
-      ? this.buildLocalFundingDiscoveryCards(context, locationLabel)
-      : [];
+    const localCards: SlpActionCard[] = [];
 
     const resources = this.getFundingCatalog()
       .map((entry) => {
@@ -1383,50 +1375,6 @@ export class SlpContextService {
       .slice(0, this.hasLocation(location) ? 5 : 6);
 
     return [...localCards, ...resources].slice(0, 7);
-  }
-
-  private buildLocalFundingDiscoveryCards(
-    context: SlpBaseContext,
-    locationLabel: string
-  ): SlpActionCard[] {
-    return [
-      {
-        label: 'Local grants',
-        title: `${locationLabel} grantmakers and innovation funds`,
-        description: `Search for place-based grants, municipal innovation funds, economic development programs, and foundations in ${locationLabel} that align with ${context.focusArea.toLowerCase()}.`,
-        fitScore: 91,
-        icon: 'savings',
-        meta: [
-          'Local discovery lane',
-          'Best for place-based momentum',
-          `Search built for ${locationLabel}`,
-        ],
-        cta: 'Find local funders',
-        badge: 'Local discovery',
-        href: this.buildSearchUrl(
-          `${locationLabel} innovation fund grant ${context.focusArea}`
-        ),
-        external: true,
-      },
-      {
-        label: 'Accelerators',
-        title: `${locationLabel} accelerators and incubators`,
-        description: `Search for accelerators, incubators, and challenge programs in ${locationLabel} that can fund or de-risk the next stage of ${context.solutionTitle}.`,
-        fitScore: 88,
-        icon: 'rocket_launch',
-        meta: [
-          'Local discovery lane',
-          'Best for capital plus support',
-          `Good fit for ${context.stageLabel.toLowerCase()} work`,
-        ],
-        cta: 'Find nearby programs',
-        badge: 'Local discovery',
-        href: this.buildSearchUrl(
-          `${locationLabel} accelerator incubator ${context.focusArea}`
-        ),
-        external: true,
-      },
-    ];
   }
 
   private getFundingCatalog(): SlpFundingCatalogEntry[] {
@@ -1595,9 +1543,7 @@ export class SlpContextService {
     const tags = this.getTopicTags(context);
     const region = this.getRegionForCountry(location.country);
     const locationLabel = this.formatLocation(location);
-    const localCards = this.hasLocation(location)
-      ? this.buildLocalPartnerDiscoveryCards(context, locationLabel)
-      : [];
+    const localCards: SlpActionCard[] = [];
 
     const resources = this.getPartnerCatalog()
       .map((entry) => {
@@ -1643,50 +1589,6 @@ export class SlpContextService {
       .slice(0, this.hasLocation(location) ? 5 : 6);
 
     return [...localCards, ...resources].slice(0, 7);
-  }
-
-  private buildLocalPartnerDiscoveryCards(
-    context: SlpBaseContext,
-    locationLabel: string
-  ): SlpActionCard[] {
-    return [
-      {
-        label: 'Local ecosystems',
-        title: `${locationLabel} ecosystem builders and civic partners`,
-        description: `Search for civic innovation groups, nonprofits, chambers, labs, and community networks in ${locationLabel} that could help implement or amplify ${context.solutionTitle}.`,
-        fitScore: 91,
-        icon: 'diversity_2',
-        meta: [
-          'Local discovery lane',
-          'Best for implementation reach',
-          `Search built for ${locationLabel}`,
-        ],
-        cta: 'Find local partners',
-        badge: 'Local discovery',
-        href: this.buildSearchUrl(
-          `${locationLabel} nonprofit innovation network ${context.focusArea}`
-        ),
-        external: true,
-      },
-      {
-        label: 'Institutions and labs',
-        title: `${locationLabel} universities, labs, and implementation allies`,
-        description: `Search for research centers, universities, accelerators, and field partners in ${locationLabel} that can add trust, expertise, or deployment capacity.`,
-        fitScore: 88,
-        icon: 'groups_3',
-        meta: [
-          'Local discovery lane',
-          'Best for credibility and expertise',
-          `Good fit for ${context.stageLabel.toLowerCase()} work`,
-        ],
-        cta: 'Find institutional partners',
-        badge: 'Local discovery',
-        href: this.buildSearchUrl(
-          `${locationLabel} university lab incubator partner ${context.focusArea}`
-        ),
-        external: true,
-      },
-    ];
   }
 
   private getPartnerCatalog(): SlpPartnerCatalogEntry[] {
@@ -1928,7 +1830,7 @@ export class SlpContextService {
     focusArea: string,
     locationLabel?: string
   ): string {
-    if (!locationLabel) {
+    if (!locationLabel || locationLabel === 'Global / anywhere') {
       return description;
     }
     return `${description} This is especially useful when positioning work around ${focusArea.toLowerCase()} for audiences connected to ${locationLabel}.`;
@@ -1939,7 +1841,7 @@ export class SlpContextService {
     context: SlpBaseContext,
     locationLabel?: string
   ): string {
-    if (!locationLabel) {
+    if (!locationLabel || locationLabel === 'Global / anywhere') {
       return `${description} It is currently a strong fit for ${context.stageLabel.toLowerCase()} work in ${context.focusArea.toLowerCase()}.`;
     }
     return `${description} It is especially relevant when building from ${locationLabel} around ${context.focusArea.toLowerCase()}.`;
@@ -1950,25 +1852,29 @@ export class SlpContextService {
     context: SlpBaseContext,
     locationLabel?: string
   ): string {
-    if (!locationLabel) {
+    if (!locationLabel || locationLabel === 'Global / anywhere') {
       return `${description} It is a stronger match when the solution needs aligned collaborators in ${context.focusArea.toLowerCase()}.`;
     }
     return `${description} It becomes even more relevant when building partnerships from ${locationLabel} around ${context.focusArea.toLowerCase()}.`;
   }
 
-  private buildSearchUrl(query: string): string {
-    return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-  }
-
   private hasLocation(location: SlpLocationContext): boolean {
-    return !!location.city?.trim() && !!location.country?.trim();
+    return (
+      location.mode !== 'global' &&
+      !!location.city?.trim() &&
+      !!location.country?.trim()
+    );
   }
 
   private formatLocation(location: SlpLocationContext): string {
+    if (location.mode === 'global') {
+      return 'Global / anywhere';
+    }
     const city = location.city?.trim();
+    const region = location.region?.trim();
     const country = location.country?.trim();
     if (city && country) {
-      return `${city}, ${country}`;
+      return [city, region, country].filter(Boolean).join(', ');
     }
     return country || city || '';
   }

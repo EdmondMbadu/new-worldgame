@@ -1,0 +1,25 @@
+:host {
+  display: contents;
+}
+
+.slp-targeting-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.42);
+  padding: 1rem;
+}
+
+.slp-targeting-modal {
+  width: min(58rem, 100%);
+  max-height: min(44rem, calc(100vh - 2rem));
+  overflow: auto;
+  border: 1px solid var(--slp-border);
+  border-radius: 1.75rem;
+  background: rgba(255, 252, 247, 0.98);
+  box-shadow: 0 32px 90px -34px rgba(15, 23, 42, 0.52);
+  padding: clamp(1.25rem, 3vw, 2rem);
+}

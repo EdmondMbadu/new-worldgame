@@ -64,6 +64,7 @@ import { SlpPublishComponent } from '../components/slp-publish/slp-publish.compo
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
 import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
+import { SlpTargetingModalComponent } from '../components/slp-targeting-modal/slp-targeting-modal.component';
 
 @NgModule({
   declarations: [
@@ -126,6 +127,7 @@ import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
     SlpFundComponent,
     SlpPartnerComponent,
     SlpReachComponent,
+    SlpTargetingModalComponent,
   ],
   imports: [
     CommonModule,

@@ -1771,6 +1771,7 @@ type ReachLookupRequest = {
   page?: number;
   pageSize?: number;
   city?: string;
+  region?: string;
   country?: string;
   excludedIds?: string[];
   forceRefresh?: boolean;
@@ -1791,12 +1792,58 @@ type ReachLookupCacheDocument = {
   solutionId: string;
   cacheKey: string;
   city?: string;
+  region?: string;
   country?: string;
   summary?: string;
   people?: ReachLookupPerson[];
   createdAtIso?: string;
   lastSearchedAtIso?: string;
   expiresAfterMonths?: number;
+};
+
+type SolutionLaunchResourceLane = 'publish' | 'fund' | 'partner';
+
+type SolutionLaunchResourceRequest = {
+  solutionId?: string;
+  lane?: SolutionLaunchResourceLane;
+  city?: string;
+  region?: string;
+  country?: string;
+  locationMode?: 'location' | 'global';
+  pageSize?: number;
+  forceRefresh?: boolean;
+};
+
+type SolutionLaunchResource = {
+  id: string;
+  lane: SolutionLaunchResourceLane;
+  name: string;
+  type: string;
+  url: string;
+  location?: string;
+  whyRelevant: string;
+  specificFit: string;
+  nextAction: string;
+  sourceTitle?: string;
+  eligibility?: string;
+  deadline?: string;
+  contactHint?: string;
+  fitScore: number;
+};
+
+type SolutionLaunchResourceCacheDocument = {
+  solutionId: string;
+  lane: SolutionLaunchResourceLane;
+  cacheKey: string;
+  locationMode: 'location' | 'global';
+  city?: string;
+  region?: string;
+  country?: string;
+  summary?: string;
+  resources?: SolutionLaunchResource[];
+  createdAtIso?: string;
+  lastSearchedAtIso?: string;
+  expiresAfterDays?: number;
 };
 
 const REACH_GENERIC_EMAIL_LOCALS = new Set([
@@ -1968,8 +2015,12 @@ const dedupeReachPeople = (people: ReachLookupPerson[]): ReachLookupPerson[] => 
   return deduped;
 };
 
-const buildReachCacheKey = (city: string, country: string): string => {
-  const raw = [city, country]
+const buildReachCacheKey = (
+  city: string,
+  country: string,
+  region: string = ''
+): string => {
+  const raw = [city, region, country]
     .map((value) =>
       normalizeReachText(value, 80)
         .toLowerCase()
@@ -2025,6 +2076,7 @@ const buildReachLookupPrompt = (params: {
   sdgs: string[];
   category: string;
   city: string;
+  region: string;
   country: string;
   page: number;
   pageSize: number;
@@ -2032,7 +2084,7 @@ const buildReachLookupPrompt = (params: {
 }) => {
   const locationLabel =
     params.city && params.country
-      ? `${params.city}, ${params.country}`
+      ? [params.city, params.region, params.country].filter(Boolean).join(', ')
       : '';
 
   const contextLines = [
@@ -2089,6 +2141,303 @@ Return JSON only in this exact shape:
       "url": "https://...",
       "whyRelevant": "One concise sentence on why this exact person fits this exact solution.",
       "location": "City, Country or Region if clearly available"
+    }
+  ]
+}
+
+Do not include markdown. Do not include commentary outside JSON.`;
+};
+
+const parseSolutionLaunchResourcePayload = (
+  raw: string
+): { summary: string; resources: any[] } => {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) {
+    return { summary: '', resources: [] };
+  }
+
+  const candidates: string[] = [trimmed];
+  const fencedJson = trimmed.match(/```json\s*([\s\S]*?)```/i)?.[1];
+  const fencedAny = trimmed.match(/```\s*([\s\S]*?)```/i)?.[1];
+  if (fencedJson) candidates.push(fencedJson.trim());
+  if (fencedAny) candidates.push(fencedAny.trim());
+
+  const objectStart = trimmed.indexOf('{');
+  const objectEnd = trimmed.lastIndexOf('}');
+  if (objectStart >= 0 && objectEnd > objectStart) {
+    candidates.push(trimmed.slice(objectStart, objectEnd + 1));
+  }
+
+  const arrayStart = trimmed.indexOf('[');
+  const arrayEnd = trimmed.lastIndexOf(']');
+  if (arrayStart >= 0 && arrayEnd > arrayStart) {
+    candidates.push(trimmed.slice(arrayStart, arrayEnd + 1));
+  }
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (Array.isArray(parsed)) {
+        return { summary: '', resources: parsed };
+      }
+      if (Array.isArray(parsed?.resources)) {
+        return {
+          summary: normalizeReachText(parsed.summary, 320),
+          resources: parsed.resources,
+        };
+      }
+    } catch {
+      // Try the next candidate.
+    }
+  }
+
+  return { summary: '', resources: [] };
+};
+
+const sanitizeSolutionLaunchUrl = (value: unknown): string => {
+  const url = sanitizeReachUrl(value);
+  if (!url) return '';
+
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'google.com' || host === 'www.google.com') {
+      return '';
+    }
+    if (host.includes('bing.com') || host.includes('duckduckgo.com')) {
+      return '';
+    }
+    return parsed.toString();
+  } catch {
+    return '';
+  }
+};
+
+const buildSolutionLaunchResourceId = (
+  lane: SolutionLaunchResourceLane,
+  name: string,
+  url: string
+): string => {
+  const host = (() => {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+    } catch {
+      return '';
+    }
+  })();
+  return `${lane}:${name}:${host}`
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9:]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+const normalizeSolutionLaunchResourceCandidate = (
+  candidate: any,
+  lane: SolutionLaunchResourceLane
+): SolutionLaunchResource | null => {
+  const name = normalizeReachText(candidate?.name, 180);
+  const type = normalizeReachText(candidate?.type, 120);
+  const url = sanitizeSolutionLaunchUrl(candidate?.url);
+  const location = normalizeReachText(candidate?.location, 180);
+  const whyRelevant = normalizeReachText(candidate?.whyRelevant, 520);
+  const specificFit = normalizeReachText(candidate?.specificFit, 520);
+  const nextAction = normalizeReachText(candidate?.nextAction, 260);
+  const sourceTitle = normalizeReachText(candidate?.sourceTitle, 180);
+  const eligibility = normalizeReachText(candidate?.eligibility, 260);
+  const deadline = normalizeReachText(candidate?.deadline, 120);
+  const contactHint = normalizeReachText(candidate?.contactHint, 220);
+  const fitScore = Math.max(
+    55,
+    Math.min(98, Math.round(Number(candidate?.fitScore) || 82))
+  );
+
+  if (!name || !type || !url || !whyRelevant || !specificFit || !nextAction) {
+    return null;
+  }
+
+  const id = buildSolutionLaunchResourceId(lane, name, url);
+  if (!id) {
+    return null;
+  }
+
+  return {
+    id,
+    lane,
+    name,
+    type,
+    url,
+    location: location || undefined,
+    whyRelevant,
+    specificFit,
+    nextAction,
+    sourceTitle: sourceTitle || undefined,
+    eligibility: eligibility || undefined,
+    deadline: deadline || undefined,
+    contactHint: contactHint || undefined,
+    fitScore,
+  };
+};
+
+const dedupeSolutionLaunchResources = (
+  resources: SolutionLaunchResource[]
+): SolutionLaunchResource[] => {
+  const seen = new Set<string>();
+  const deduped: SolutionLaunchResource[] = [];
+
+  for (const resource of resources) {
+    const host = (() => {
+      try {
+        return new URL(resource.url).hostname.replace(/^www\./, '').toLowerCase();
+      } catch {
+        return resource.url.toLowerCase();
+      }
+    })();
+    const key = `${resource.lane}:${resource.name.toLowerCase()}:${host}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(resource);
+  }
+
+  return deduped;
+};
+
+const buildSolutionLaunchResourceCacheKey = (
+  lane: SolutionLaunchResourceLane,
+  locationMode: 'location' | 'global',
+  city: string,
+  region: string,
+  country: string
+): string => {
+  const locationKey =
+    locationMode === 'global'
+      ? 'global'
+      : [city, region, country]
+          .map((value) =>
+            normalizeReachText(value, 90)
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+          )
+          .filter(Boolean)
+          .join('__') || 'global';
+
+  return `${lane}_${locationKey}`;
+};
+
+const isSolutionLaunchResourceCacheExpired = (
+  cache: SolutionLaunchResourceCacheDocument | undefined,
+  nowMs = Date.now()
+): boolean => {
+  if (!cache) return false;
+  const lastSearchedAtMs =
+    parseReachIsoToMs(cache.lastSearchedAtIso) ||
+    parseReachIsoToMs(cache.createdAtIso);
+  if (!lastSearchedAtMs) {
+    return true;
+  }
+  const cutoff = new Date(nowMs);
+  cutoff.setDate(cutoff.getDate() - 30);
+  return lastSearchedAtMs < cutoff.getTime();
+};
+
+const normalizeCachedSolutionLaunchResources = (
+  input: unknown,
+  lane: SolutionLaunchResourceLane
+): SolutionLaunchResource[] => {
+  if (!Array.isArray(input)) return [];
+  return dedupeSolutionLaunchResources(
+    input
+      .map((resource) => normalizeSolutionLaunchResourceCandidate(resource, lane))
+      .filter((resource): resource is SolutionLaunchResource => !!resource)
+  );
+};
+
+const buildSolutionLaunchResourcePrompt = (params: {
+  lane: SolutionLaunchResourceLane;
+  solutionTitle: string;
+  solutionSummary: string;
+  focusArea: string;
+  category: string;
+  sdgs: string[];
+  recruitmentProfile: string;
+  participantCount: number;
+  documentCount: number;
+  evaluationCount: number;
+  city: string;
+  region: string;
+  country: string;
+  locationMode: 'location' | 'global';
+  pageSize: number;
+}) => {
+  const locationLabel =
+    params.locationMode === 'global'
+      ? 'Global / anywhere'
+      : [params.city, params.region, params.country].filter(Boolean).join(', ');
+  const laneBrief =
+    params.lane === 'publish'
+      ? `Find concrete publication and visibility targets: local newsrooms, civic media, university news channels, public-interest publishers, submission pages, newsletters, and platforms that can feature or publish this exact solution.`
+      : params.lane === 'fund'
+        ? `Find concrete funding routes: active grantmakers, foundations, challenge programs, accelerators, city/state/federal programs, and funder pages that fit this exact solution.`
+        : `Find concrete partner organizations: local implementation allies, nonprofit coalitions, civic agencies, university centers, labs, ecosystem builders, and mission-aligned organizations that could help execute or amplify this exact solution.`;
+  const locationRule =
+    params.locationMode === 'global'
+      ? `The user explicitly chose global targeting. Rank by strongest thematic fit, credibility, current activity, and direct actionability. Do not pretend a result is local.`
+      : `The user chose location targeting for ${locationLabel}. Prioritize organizations, chapters, programs, publications, or offices with real operations in or directly serving that place. If a state/regional result is stronger than a city result, include it only when you explain the local relevance.`;
+
+  const contextLines = [
+    `Solution title: ${params.solutionTitle}`,
+    `Solution summary: ${params.solutionSummary}`,
+    `Focus area: ${params.focusArea || 'Not specified'}`,
+    `Category: ${params.category || 'Not specified'}`,
+    params.sdgs.length ? `SDGs: ${params.sdgs.join(', ')}` : '',
+    params.recruitmentProfile ? `Recruitment / implementation profile: ${params.recruitmentProfile}` : '',
+    `Workspace signals: ${params.participantCount} participant(s), ${params.documentCount} document(s), ${params.evaluationCount} evaluation(s).`,
+    `Targeting: ${locationLabel}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return `You are a meticulous Solution Launch researcher for NewWorld Game.
+
+Task:
+${laneBrief}
+
+Solution context:
+${contextLines}
+
+Targeting rule:
+${locationRule}
+
+Strict quality rules:
+- Return ${params.pageSize} real, current, source-backed results.
+- Every result must be specific to this solution topic, not just broad "innovation", "sustainability", or "community".
+- Prefer direct program, submission, staff, grants, newsroom, partnership, or initiative pages over generic homepages.
+- Do not return Google, search result pages, social media feeds, URL shorteners, or directory pages unless the directory is the authoritative program page.
+- Include only results you can stand behind as meaningful next steps for this exact solution.
+- For funding, include eligibility or deadline when visible. If not visible, say "Check current cycle".
+- For partner, include the likely partnership angle.
+- For publish, include the likely publication/access point.
+
+Return JSON only in this exact shape:
+{
+  "summary": "one concise sentence explaining how the results were targeted",
+  "resources": [
+    {
+      "name": "Organization, program, outlet, or platform name",
+      "type": "short category",
+      "url": "https://direct-useful-page.example",
+      "sourceTitle": "title of the page or source",
+      "location": "City, State/Region, Country or Global",
+      "whyRelevant": "One concise sentence explaining why this result matters for the solution.",
+      "specificFit": "One concrete fit note tied to the actual solution context.",
+      "nextAction": "Specific next action the user should take on this page.",
+      "eligibility": "Funding eligibility or partner/publication requirements if relevant, otherwise empty string",
+      "deadline": "Deadline or cycle if visible, otherwise empty string",
+      "contactHint": "Relevant contact route if visible, otherwise empty string",
+      "fitScore": 55-98
     }
   ]
 }
@@ -6019,6 +6368,7 @@ export const findSolutionReachPeople = functions
     const page = Math.max(Number(data?.page) || 1, 1);
     const pageSize = Math.min(Math.max(Number(data?.pageSize) || 10, 1), 10);
     const city = normalizeReachText(data?.city, 120);
+    const region = normalizeReachText(data?.region, 120);
     const country = normalizeReachText(data?.country, 120);
     const excludedIds = normalizeReachExcludedIds(data?.excludedIds);
     const forceRefresh = data?.forceRefresh === true;
@@ -6061,7 +6411,7 @@ export const findSolutionReachPeople = functions
           .map((value: unknown) => normalizeReachText(value, 80))
           .filter(Boolean)
       : [];
-    const cacheKey = buildReachCacheKey(city, country);
+    const cacheKey = buildReachCacheKey(city, country, region);
     const cacheRef = admin
       .firestore()
       .doc(`solutions/${solutionId}/solution_launch_reach/${cacheKey}`);
@@ -6124,6 +6474,7 @@ export const findSolutionReachPeople = functions
           sdgs,
           category,
           city,
+          region,
           country,
           page: page + attempts - 1,
           pageSize,
@@ -6167,7 +6518,13 @@ export const findSolutionReachPeople = functions
           normalizeReachText(parsed.summary, 280) ||
           summary ||
           (city && country
-            ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${city}, ${country}.`
+            ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${[
+                city,
+                region,
+                country,
+              ]
+                .filter(Boolean)
+                .join(', ')}.`
             : `This batch favors people closely aligned to ${solutionTitle}.`);
         lastSearchedAtIso = new Date().toISOString();
       }
@@ -6177,11 +6534,18 @@ export const findSolutionReachPeople = functions
           solutionId,
           cacheKey,
           city: city || undefined,
+          region: region || undefined,
           country: country || undefined,
           summary:
             summary ||
             (city && country
-              ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${city}, ${country}.`
+              ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${[
+                  city,
+                  region,
+                  country,
+                ]
+                  .filter(Boolean)
+                  .join(', ')}.`
               : `This batch favors people closely aligned to ${solutionTitle}.`),
           people: cachedPeople,
           createdAtIso:
@@ -6208,7 +6572,13 @@ export const findSolutionReachPeople = functions
         summary:
           summary ||
           (city && country
-            ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${city}, ${country}.`
+            ? `This batch favors people closely aligned to ${solutionTitle} and weighted for ${[
+                city,
+                region,
+                country,
+              ]
+                .filter(Boolean)
+                .join(', ')}.`
             : `This batch favors people closely aligned to ${solutionTitle}.`),
         generatedAt:
           normalizeReachText(cache?.lastSearchedAtIso, 80) || nowIso,
@@ -6218,6 +6588,240 @@ export const findSolutionReachPeople = functions
       throw new functions.https.HttpsError(
         'internal',
         error?.message || 'Reach lookup failed.'
+      );
+    }
+  });
+
+export const findSolutionLaunchResources = functions
+  .region('us-central1')
+  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .https.onCall(async (data: SolutionLaunchResourceRequest) => {
+    const solutionId = normalizeReachText(data?.solutionId, 120);
+    const lane = normalizeReachText(data?.lane, 40) as SolutionLaunchResourceLane;
+    const pageSize = Math.min(Math.max(Number(data?.pageSize) || 8, 4), 10);
+    const city = normalizeReachText(data?.city, 120);
+    const region = normalizeReachText(data?.region, 120);
+    const country = normalizeReachText(data?.country, 120);
+    const requestedLocationMode =
+      data?.locationMode === 'global' ? 'global' : 'location';
+    const locationMode: 'location' | 'global' =
+      requestedLocationMode === 'global' || (city && country)
+        ? requestedLocationMode
+        : 'global';
+    const forceRefresh = data?.forceRefresh === true;
+
+    if (!solutionId) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A solutionId is required.'
+      );
+    }
+    if (!['publish', 'fund', 'partner'].includes(lane)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A valid launch lane is required.'
+      );
+    }
+
+    const solutionSnap = await admin.firestore().doc(`solutions/${solutionId}`).get();
+    if (!solutionSnap.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'The requested solution could not be found.'
+      );
+    }
+
+    const solution = solutionSnap.data() || {};
+    const solutionTitle =
+      normalizeReachText(solution?.title, 180) || 'Untitled solution';
+    const solutionSummary =
+      normalizeReachText(
+        solution?.description ||
+          solution?.preview ||
+          solution?.content ||
+          solution?.recruitmentProfile?.challengeDescription,
+        2200
+      ) || `A developing solution called ${solutionTitle}.`;
+    const focusArea = normalizeReachText(
+      solution?.solutionArea ||
+        solution?.recruitmentProfile?.focusArea ||
+        (Array.isArray(solution?.sdgs) ? solution.sdgs.join(', ') : solution?.sdg),
+      260
+    );
+    const category = normalizeReachText(solution?.category, 140);
+    const sdgs = Array.isArray(solution?.sdgs)
+      ? solution.sdgs
+          .map((value: unknown) => normalizeReachText(value, 90))
+          .filter(Boolean)
+      : [];
+    const recruitmentProfile = normalizeReachText(
+      [
+        solution?.recruitmentProfile?.scopeOfWork,
+        solution?.recruitmentProfile?.finalProduct,
+        solution?.recruitmentProfile?.perspectives,
+        solution?.recruitmentProfile?.interests,
+        solution?.recruitmentProfile?.knowledge,
+        solution?.recruitmentProfile?.skills,
+        solution?.recruitmentProfile?.additionalNotes,
+      ]
+        .filter(Boolean)
+        .join(' '),
+      1100
+    );
+    const participantCount = Array.isArray(solution?.participants)
+      ? solution.participants.length
+      : solution?.participants && typeof solution.participants === 'object'
+        ? Object.keys(solution.participants).length
+        : 0;
+    const documentCount = Array.isArray(solution?.documents)
+      ? solution.documents.length
+      : 0;
+    const evaluationCount = Array.isArray(solution?.evaluationDetails)
+      ? solution.evaluationDetails.length
+      : Number(solution?.numberofTimesEvaluated || 0) || 0;
+
+    const cacheKey = buildSolutionLaunchResourceCacheKey(
+      lane,
+      locationMode,
+      city,
+      region,
+      country
+    );
+    const cacheRef = admin
+      .firestore()
+      .doc(`solutions/${solutionId}/solution_launch_resources/${cacheKey}`);
+    const nowIso = new Date().toISOString();
+    const nowMs = Date.now();
+
+    const cacheSnap = await cacheRef.get();
+    let cache = cacheSnap.exists
+      ? (cacheSnap.data() as SolutionLaunchResourceCacheDocument)
+      : undefined;
+
+    if (forceRefresh && cacheSnap.exists) {
+      await cacheRef.delete().catch(() => null);
+      cache = undefined;
+    } else if (isSolutionLaunchResourceCacheExpired(cache, nowMs)) {
+      await cacheRef.delete().catch(() => null);
+      cache = undefined;
+    }
+
+    try {
+      let resources = normalizeCachedSolutionLaunchResources(
+        cache?.resources,
+        lane
+      );
+      let summary = normalizeReachText(cache?.summary, 320);
+      let lastSearchedAtIso = normalizeReachText(cache?.lastSearchedAtIso, 80);
+
+      if (!resources.length) {
+        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-2.5-flash',
+          generationConfig: {
+            temperature: 0.12,
+            maxOutputTokens: 6500,
+          },
+          tools: [{ google_search: {} }],
+        } as any);
+
+        const prompt = buildSolutionLaunchResourcePrompt({
+          lane,
+          solutionTitle,
+          solutionSummary,
+          focusArea,
+          category,
+          sdgs,
+          recruitmentProfile,
+          participantCount,
+          documentCount,
+          evaluationCount,
+          city,
+          region,
+          country,
+          locationMode,
+          pageSize,
+        });
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text() || '';
+        const parsed = parseSolutionLaunchResourcePayload(text);
+        const normalized = parsed.resources
+          .map((resource) =>
+            normalizeSolutionLaunchResourceCandidate(resource, lane)
+          )
+          .filter(
+            (resource): resource is SolutionLaunchResource => !!resource
+          )
+          .slice(0, pageSize * 2);
+
+        const validated = await Promise.all(
+          normalized.map(async (resource) => ({
+            resource,
+            valid: await isUrlUsableForReport(resource.url, 4500),
+          }))
+        );
+
+        resources = dedupeSolutionLaunchResources(
+          validated
+            .filter((entry) => entry.valid)
+            .map((entry) => entry.resource)
+        )
+          .sort((a, b) => b.fitScore - a.fitScore)
+          .slice(0, pageSize);
+
+        summary =
+          normalizeReachText(parsed.summary, 320) ||
+          (locationMode === 'global'
+            ? `These ${lane} results are ranked globally for fit, credibility, and actionability.`
+            : `These ${lane} results are weighted for ${[
+                city,
+                region,
+                country,
+              ]
+                .filter(Boolean)
+                .join(', ')} plus solution fit.`);
+        lastSearchedAtIso = new Date().toISOString();
+
+        const nextCache: SolutionLaunchResourceCacheDocument = {
+          solutionId,
+          lane,
+          cacheKey,
+          locationMode,
+          city: city || undefined,
+          region: region || undefined,
+          country: country || undefined,
+          summary,
+          resources,
+          createdAtIso: nowIso,
+          lastSearchedAtIso,
+          expiresAfterDays: 30,
+        };
+
+        await cacheRef.set(nextCache, { merge: false });
+        cache = nextCache;
+      }
+
+      return {
+        lane,
+        resources,
+        summary:
+          summary ||
+          (locationMode === 'global'
+            ? `These ${lane} results are ranked globally for fit, credibility, and actionability.`
+            : `These ${lane} results are weighted for local relevance and solution fit.`),
+        generatedAt:
+          normalizeReachText(cache?.lastSearchedAtIso, 80) ||
+          lastSearchedAtIso ||
+          nowIso,
+        locationMode,
+      };
+    } catch (error: any) {
+      console.error('findSolutionLaunchResources failed', error);
+      throw new functions.https.HttpsError(
+        'internal',
+        error?.message || 'Solution Launch resource lookup failed.'
       );
     }
   });

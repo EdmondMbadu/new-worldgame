@@ -41,9 +41,11 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   setupSectionOpen = false;
   briefSectionOpen = false;
   city = '';
+  region = '';
   country = '';
   locationError = '';
   savingLocation = false;
+  targetingModalOpen = false;
   loading = false;
   loadingMore = false;
   loadError = '';
@@ -112,21 +114,27 @@ export class SlpReachComponent implements OnInit, OnDestroy {
         map(([solutionId, location]) => ({
           solutionId: solutionId || undefined,
           city: location.city?.trim() || '',
+          region: location.region?.trim() || '',
           country: location.country?.trim() || '',
+          mode: location.mode || 'unset',
         })),
         distinctUntilChanged(
           (a, b) =>
             a.solutionId === b.solutionId &&
             a.city === b.city &&
+            a.region === b.region &&
+            a.mode === b.mode &&
             a.country === b.country
         )
       )
       .subscribe((context) => {
         this.solutionId = context.solutionId;
         this.city = context.city;
+        this.region = context.region;
         this.country = context.country;
         this.resetSearchState();
-        if (this.solutionId) {
+        this.targetingModalOpen = !this.hasTargetingChoice(this.slpLocation.snapshot);
+        if (this.solutionId && this.hasTargetingChoice(this.slpLocation.snapshot)) {
           const usedCached = this.loadCachedSearch();
           if (!usedCached) {
             void this.fetchPage(1, true);
@@ -159,7 +167,16 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     if (!this.city.trim() || !this.country.trim()) {
       return 'City and country not set yet';
     }
-    return `${this.city.trim()}, ${this.country.trim()}`;
+    return [this.city.trim(), this.region.trim(), this.country.trim()]
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  get currentTargetingLabel(): string {
+    if (this.slpLocation.snapshot.mode === 'global') {
+      return 'Global / anywhere';
+    }
+    return this.currentLocationLabel;
   }
 
   get locationStatusMessage(): string {
@@ -168,6 +185,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
 
   async applyLocation(): Promise<void> {
     const city = this.city.trim();
+    const region = this.region.trim();
     const country = this.country.trim();
 
     if (!city || !country) {
@@ -180,7 +198,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     this.savingLocation = true;
 
     try {
-      await this.slpLocation.applyLocation(city, country);
+      await this.slpLocation.applyLocation(city, country, region);
     } catch (error) {
       console.error('Failed to save Solution Launch reach location', error);
       this.locationError =
@@ -190,21 +208,57 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     }
   }
 
+  async applyTargetingLocation(value: {
+    city: string;
+    region: string;
+    country: string;
+  }): Promise<void> {
+    this.city = value.city;
+    this.region = value.region;
+    this.country = value.country;
+    await this.applyLocation();
+    if (!this.locationError) {
+      this.targetingModalOpen = false;
+    }
+  }
+
+  async applyGlobalTargeting(): Promise<void> {
+    this.locationError = '';
+    this.savingLocation = true;
+    try {
+      await this.slpLocation.applyGlobal();
+      this.targetingModalOpen = false;
+    } finally {
+      this.savingLocation = false;
+    }
+  }
+
   async loadMore(): Promise<void> {
-    if (this.loading || this.loadingMore || !this.solutionId) {
+    if (
+      this.loading ||
+      this.loadingMore ||
+      !this.solutionId ||
+      !this.hasTargetingChoice(this.slpLocation.snapshot)
+    ) {
       return;
     }
     await this.fetchPage(this.currentPage + 1, false);
   }
 
   async refreshResults(): Promise<void> {
-    if (!this.solutionId || this.loading || this.loadingMore) {
+    if (
+      !this.solutionId ||
+      this.loading ||
+      this.loadingMore ||
+      !this.hasTargetingChoice(this.slpLocation.snapshot)
+    ) {
       return;
     }
 
     this.slpReach.clearCachedSearch({
       solutionId: this.solutionId,
       city: this.city.trim(),
+      region: this.region.trim(),
       country: this.country.trim(),
     });
     this.usingStoredResults = false;
@@ -270,6 +324,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
         page,
         pageSize: 10,
         city: this.city.trim(),
+        region: this.region.trim(),
         country: this.country.trim(),
         excludedIds,
         forceRefresh,
@@ -287,8 +342,9 @@ export class SlpReachComponent implements OnInit, OnDestroy {
       ) {
         this.slpReach.clearCachedSearch({
           solutionId: this.solutionId,
-          city: this.city.trim(),
-          country: this.country.trim(),
+        city: this.city.trim(),
+        region: this.region.trim(),
+        country: this.country.trim(),
         });
         this.hasStoredResults = false;
         this.usingStoredResults = false;
@@ -309,6 +365,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
         {
           solutionId: this.solutionId,
           city: this.city.trim(),
+          region: this.region.trim(),
           country: this.country.trim(),
         },
         {
@@ -363,6 +420,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     await this.slpLocation.init();
     const { city, country } = this.slpLocation.snapshot as SlpLocationContext;
     this.city = city?.trim() || '';
+    this.region = this.slpLocation.snapshot.region?.trim() || '';
     this.country = country?.trim() || '';
   }
 
@@ -370,6 +428,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     const cached = this.slpReach.readCachedSearch({
       solutionId: this.solutionId,
       city: this.city.trim(),
+      region: this.region.trim(),
       country: this.country.trim(),
     });
     if (!cached) {
@@ -389,6 +448,13 @@ export class SlpReachComponent implements OnInit, OnDestroy {
       people: filteredPeople,
     });
     return true;
+  }
+
+  private hasTargetingChoice(location: SlpLocationContext): boolean {
+    return (
+      location.mode === 'global' ||
+      (!!location.city?.trim() && !!location.country?.trim())
+    );
   }
 
   private applyCachedSearch(cached: SlpReachCachedSearch): void {

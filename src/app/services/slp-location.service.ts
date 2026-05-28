@@ -18,7 +18,9 @@ export class SlpLocationService {
   private readonly storageKey = 'slp_publish_location';
   private initializingPromise?: Promise<void>;
   private readonly stateSubject = new BehaviorSubject<SlpLocationState>({
+    mode: 'unset',
     city: '',
+    region: '',
     country: '',
     source: 'none',
     currentUser: null,
@@ -49,6 +51,7 @@ export class SlpLocationService {
       if (profileLocation) {
         this.setState({
           ...profileLocation,
+          mode: 'location',
           source: 'profile',
           currentUser: user,
           statusMessage: 'Using the location already stored on your profile.',
@@ -64,8 +67,12 @@ export class SlpLocationService {
           source: user?.uid ? 'manual' : 'guest',
           currentUser: user,
           statusMessage: user?.uid
-            ? 'Using the last Solution Launch location you saved here.'
-            : 'Using the last location saved in this browser.',
+            ? storedLocation.mode === 'global'
+              ? 'Using the global Solution Launch targeting you chose here.'
+              : 'Using the last Solution Launch location you saved here.'
+            : storedLocation.mode === 'global'
+              ? 'Using the global targeting saved in this browser.'
+              : 'Using the last location saved in this browser.',
           initialized: true,
         });
         return;
@@ -73,12 +80,14 @@ export class SlpLocationService {
 
       this.setState({
         city: '',
+        region: '',
         country: '',
+        mode: 'unset',
         source: 'none',
         currentUser: user,
         statusMessage: user?.uid
-          ? 'We did not find a location on your profile. Add city and country here and we will save it back to your profile.'
-          : 'Add city and country to make these recommendations more precise.',
+          ? 'Choose local targeting or global targeting before we build Solution Launch recommendations.'
+          : 'Choose local targeting or global targeting before we build Solution Launch recommendations.',
         initialized: true,
       });
     })();
@@ -90,8 +99,21 @@ export class SlpLocationService {
     }
   }
 
-  async applyLocation(city: string, country: string): Promise<void> {
+  get hasTargetingChoice(): boolean {
+    const snapshot = this.snapshot;
+    return (
+      snapshot.mode === 'global' ||
+      (!!snapshot.city?.trim() && !!snapshot.country?.trim())
+    );
+  }
+
+  async applyLocation(
+    city: string,
+    country: string,
+    region: string = ''
+  ): Promise<void> {
     const normalizedCity = city.trim();
+    const normalizedRegion = region.trim();
     const normalizedCountry = country.trim();
     const currentUser = this.snapshot.currentUser;
     const source: SlpLocationContext['source'] = currentUser?.uid
@@ -99,7 +121,9 @@ export class SlpLocationService {
       : 'guest';
 
     this.setState({
+      mode: 'location',
       city: normalizedCity,
+      region: normalizedRegion,
       country: normalizedCountry,
       source,
       statusMessage: this.snapshot.statusMessage,
@@ -108,10 +132,14 @@ export class SlpLocationService {
     if (currentUser?.uid) {
       await this.data.updateLocation(
         currentUser.uid,
-        `${normalizedCity}, ${normalizedCountry}`
+        [normalizedCity, normalizedRegion, normalizedCountry]
+          .filter(Boolean)
+          .join(', ')
       );
       this.setState({
+        mode: 'location',
         city: normalizedCity,
+        region: normalizedRegion,
         country: normalizedCountry,
         source,
         statusMessage:
@@ -122,14 +150,43 @@ export class SlpLocationService {
 
     localStorage.setItem(
       this.storageKey,
-      JSON.stringify({ city: normalizedCity, country: normalizedCountry })
+      JSON.stringify({
+        mode: 'location',
+        city: normalizedCity,
+        region: normalizedRegion,
+        country: normalizedCountry,
+      })
     );
     this.setState({
+      mode: 'location',
       city: normalizedCity,
+      region: normalizedRegion,
       country: normalizedCountry,
       source,
       statusMessage:
         'Location saved in this browser and used to refresh Solution Launch recommendations.',
+    });
+  }
+
+  async applyGlobal(): Promise<void> {
+    const currentUser = this.snapshot.currentUser;
+    const source: SlpLocationContext['source'] = currentUser?.uid
+      ? 'manual'
+      : 'guest';
+
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify({ mode: 'global', city: '', region: '', country: '' })
+    );
+
+    this.setState({
+      mode: 'global',
+      city: '',
+      region: '',
+      country: '',
+      source,
+      statusMessage:
+        'Using global targeting. Results will be ranked by topic fit, credibility, and actionability rather than local proximity.',
     });
   }
 
@@ -153,7 +210,9 @@ export class SlpLocationService {
 
     if (parts.length >= 2) {
       return {
+        mode: 'location',
         city: parts[0],
+        region: parts.length > 2 ? parts.slice(1, -1).join(', ') : '',
         country: parts[parts.length - 1],
       };
     }
@@ -168,13 +227,28 @@ export class SlpLocationService {
         return null;
       }
 
-      const parsed = JSON.parse(raw) as { city?: string; country?: string };
+      const parsed = JSON.parse(raw) as {
+        mode?: 'location' | 'global' | 'unset';
+        city?: string;
+        region?: string;
+        country?: string;
+      };
+      if (parsed.mode === 'global') {
+        return {
+          mode: 'global',
+          city: '',
+          region: '',
+          country: '',
+        };
+      }
       if (!parsed.city || !parsed.country) {
         return null;
       }
 
       return {
+        mode: 'location',
         city: parsed.city,
+        region: parsed.region || '',
         country: parsed.country,
       };
     } catch {

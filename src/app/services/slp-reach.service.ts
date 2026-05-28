@@ -45,6 +45,7 @@ export class SlpReachService {
     page: number;
     pageSize?: number;
     city?: string;
+    region?: string;
     country?: string;
     excludedIds?: string[];
     forceRefresh?: boolean;
@@ -57,11 +58,13 @@ export class SlpReachService {
   readCachedSearch(params: {
     solutionId?: string;
     city?: string;
+    region?: string;
     country?: string;
   }): SlpReachCachedSearch | null {
     const cacheKey = this.getSearchCacheKey(
       params.solutionId,
       params.city,
+      params.region,
       params.country
     );
     if (!cacheKey) {
@@ -92,12 +95,18 @@ export class SlpReachService {
   }
 
   writeCachedSearch(
-    params: { solutionId?: string; city?: string; country?: string },
+    params: {
+      solutionId?: string;
+      city?: string;
+      region?: string;
+      country?: string;
+    },
     data: SlpReachLookupResponse
   ): void {
     const cacheKey = this.getSearchCacheKey(
       params.solutionId,
       params.city,
+      params.region,
       params.country
     );
     if (!cacheKey) {
@@ -120,11 +129,13 @@ export class SlpReachService {
   clearCachedSearch(params: {
     solutionId?: string;
     city?: string;
+    region?: string;
     country?: string;
   }): void {
     const cacheKey = this.getSearchCacheKey(
       params.solutionId,
       params.city,
+      params.region,
       params.country
     );
     if (!cacheKey) {
@@ -230,6 +241,7 @@ export class SlpReachService {
   private getSearchCacheKey(
     solutionId?: string,
     city?: string,
+    region?: string,
     country?: string
   ): string {
     const cleanSolutionId = String(solutionId || '').trim();
@@ -237,7 +249,7 @@ export class SlpReachService {
       return '';
     }
 
-    const locationKey = [city, country]
+    const locationKey = [city, region, country]
       .map((value) =>
         String(value || '')
           .trim()
