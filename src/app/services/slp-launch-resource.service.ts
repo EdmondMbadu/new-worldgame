@@ -28,6 +28,7 @@ export interface SlpLaunchResourceResponse {
   summary: string;
   generatedAt: string;
   locationMode: 'location' | 'global';
+  hasMore?: boolean;
 }
 
 @Injectable({
@@ -44,6 +45,8 @@ export class SlpLaunchResourceService {
     location: SlpLocationContext;
     pageSize?: number;
     forceRefresh?: boolean;
+    append?: boolean;
+    excludedIds?: string[];
   }): Promise<SlpLaunchResourceResponse> {
     const callable = this.fns.httpsCallable('findSolutionLaunchResources');
     const response = await firstValueFrom(
@@ -56,6 +59,8 @@ export class SlpLaunchResourceService {
         locationMode: params.location.mode === 'global' ? 'global' : 'location',
         pageSize: params.pageSize || 8,
         forceRefresh: params.forceRefresh === true,
+        append: params.append === true,
+        excludedIds: params.excludedIds || [],
       })
     );
     return this.normalizeResponse(response, params.lane);
@@ -141,6 +146,7 @@ export class SlpLaunchResourceService {
       summary: String(response?.summary || '').trim(),
       generatedAt: String(response?.generatedAt || '').trim(),
       locationMode: response?.locationMode === 'global' ? 'global' : 'location',
+      hasMore: response?.hasMore === true,
     };
   }
 

@@ -38,7 +38,10 @@ export class SlpFundComponent implements OnInit, OnDestroy {
   savingLocation = false;
   targetingModalOpen = false;
   researchLoading = false;
+  moreResearchLoading = false;
   researchError = '';
+  moreResearchMessage = '';
+  researchResources: SlpLaunchResource[] = [];
   researchCards: SlpActionCard[] = [];
   researchSummary = '';
   researchGeneratedAtLabel = '';
@@ -116,9 +119,12 @@ export class SlpFundComponent implements OnInit, OnDestroy {
         this.city = location.city?.trim() || '';
         this.region = location.region?.trim() || '';
         this.country = location.country?.trim() || '';
+        this.researchResources = [];
         this.researchCards = [];
         this.researchSummary = '';
         this.researchError = '';
+        this.moreResearchMessage = '';
+        this.moreResearchLoading = false;
         this.researchGeneratedAtLabel = '';
         this.usingStoredResearch = false;
         this.targetingModalOpen = !this.hasTargetingChoice(location);
@@ -238,6 +244,50 @@ export class SlpFundComponent implements OnInit, OnDestroy {
     await this.loadResearch(true);
   }
 
+  async loadMoreResearch(): Promise<void> {
+    if (
+      this.moreResearchLoading ||
+      this.researchLoading ||
+      !this.solutionId ||
+      !this.hasTargetingChoice(this.slpLocation.snapshot)
+    ) {
+      return;
+    }
+
+    this.moreResearchLoading = true;
+    this.moreResearchMessage = '';
+    try {
+      const existingIds = this.researchResources.map((resource) => resource.id);
+      const response = await this.slpResources.findResources({
+        solutionId: this.solutionId,
+        lane: 'fund',
+        location: this.slpLocation.snapshot,
+        pageSize: 5,
+        append: true,
+        excludedIds: existingIds,
+      });
+      this.appendResearch(response.resources, response.summary, response.generatedAt);
+      this.slpResources.writeCachedSearch(
+        {
+          solutionId: this.solutionId,
+          lane: 'fund',
+          location: this.slpLocation.snapshot,
+        },
+        {
+          ...response,
+          resources: this.researchResources,
+          summary: this.researchSummary,
+        }
+      );
+    } catch (error) {
+      console.error('More funding research failed', error);
+      this.moreResearchMessage =
+        'Could not load more funding sources right now. Try again in a moment.';
+    } finally {
+      this.moreResearchLoading = false;
+    }
+  }
+
   private async initializeLocation(solutionId?: string): Promise<void> {
     await this.slpLocation.init(solutionId);
     const { city, country } = this.slpLocation.snapshot as SlpLocationContext;
@@ -253,6 +303,7 @@ export class SlpFundComponent implements OnInit, OnDestroy {
 
     this.researchLoading = true;
     this.researchError = '';
+    this.moreResearchMessage = '';
     try {
       if (forceRefresh) {
         this.slpResources.clearCachedSearch({
@@ -299,10 +350,34 @@ export class SlpFundComponent implements OnInit, OnDestroy {
     generatedAt: string,
     fromCache: boolean
   ): void {
+    this.researchResources = resources;
     this.researchCards = resources.map((resource) => this.toResearchCard(resource));
     this.researchSummary = summary;
     this.researchGeneratedAtLabel = this.formatGeneratedAt(generatedAt);
     this.usingStoredResearch = fromCache;
+  }
+
+  private appendResearch(
+    resources: SlpLaunchResource[],
+    summary: string,
+    generatedAt: string
+  ): void {
+    const existingIds = new Set(this.researchResources.map((resource) => resource.id));
+    const incoming = resources.filter((resource) => !existingIds.has(resource.id));
+
+    if (!incoming.length) {
+      this.moreResearchMessage =
+        summary ||
+        'No additional high-quality funding sources were found for this target right now.';
+      return;
+    }
+
+    this.researchResources = [...this.researchResources, ...incoming];
+    this.researchCards = this.researchResources.map((resource) => this.toResearchCard(resource));
+    this.researchSummary = summary || this.researchSummary;
+    this.researchGeneratedAtLabel = this.formatGeneratedAt(generatedAt);
+    this.usingStoredResearch = false;
+    this.moreResearchMessage = `Added ${incoming.length} more funding source${incoming.length === 1 ? '' : 's'}.`;
   }
 
   private toResearchCard(resource: SlpLaunchResource): SlpActionCard {

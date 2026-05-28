@@ -266,6 +266,24 @@
             </div>
           </div>
         </article>
+        <div
+          *ngIf="vm.shell.hasSolution && researchCards.length && !researchLoading"
+          class="flex flex-col items-start gap-3 rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white/75 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p class="text-sm leading-6 text-[color:var(--slp-muted)]">
+            {{ moreResearchMessage || 'Need a wider list? Ask for five more partner sources for this same solution and target.' }}
+          </p>
+          <button
+            type="button"
+            (click)="loadMoreResearch()"
+            class="inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-[color:var(--slp-border)] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--slp-primary)] transition hover:bg-[color:var(--slp-panel-muted)] disabled:cursor-wait disabled:opacity-60"
+            [disabled]="moreResearchLoading"
+          >
+            <span *ngIf="moreResearchLoading" class="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--slp-border)] border-t-[color:var(--slp-primary)]"></span>
+            <span *ngIf="!moreResearchLoading" class="material-symbols-outlined text-base">add</span>
+            {{ moreResearchLoading ? 'Finding more' : 'Get 5 more' }}
+          </button>
+        </div>
       </div>
 
       <aside class="space-y-6">

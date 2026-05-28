@@ -1812,6 +1812,8 @@ type SolutionLaunchResourceRequest = {
   locationMode?: 'location' | 'global';
   pageSize?: number;
   forceRefresh?: boolean;
+  append?: boolean;
+  excludedIds?: string[];
 };
 
 type SolutionLaunchResource = {
@@ -2483,6 +2485,7 @@ const buildSolutionLaunchResourcePrompt = (params: {
   country: string;
   locationMode: 'location' | 'global';
   pageSize: number;
+  excludedIds: string[];
 }) => {
   const locationLabel =
     params.locationMode === 'global'
@@ -2498,6 +2501,9 @@ const buildSolutionLaunchResourcePrompt = (params: {
     params.locationMode === 'global'
       ? `The user explicitly chose global targeting. Rank by strongest thematic fit, credibility, current activity, and direct actionability. Do not pretend a result is local.`
       : `The user chose location targeting for ${locationLabel}. At least ${Math.max(4, Math.ceil(params.pageSize * 0.7))} results must be organizations, programs, publications, offices, or pages with real operations in ${params.city}, ${params.region || params.country}, or the directly surrounding region. Use global platforms only after exhausting strong local/regional matches, and label them as global rather than local.`;
+  const exclusionRule = params.excludedIds.length
+    ? `Already shown resource IDs: ${params.excludedIds.slice(0, 80).join(', ')}. Do not repeat the same organization, program, outlet, webpage, host/name pair, or near-duplicate route. If quality drops after excluding these, return fewer than ${params.pageSize} results rather than padding with generic sources.`
+    : '';
   const laneSpecificRules =
     params.lane === 'publish'
       ? [
@@ -2540,6 +2546,7 @@ ${locationRule}
 
 Strict quality rules:
 - Return ${params.pageSize} real, current, source-backed results.
+- If fewer than ${params.pageSize} meaningful results exist after the constraints, return only the meaningful results.
 - Every result must be specific to this solution topic, not just broad "innovation", "sustainability", or "community".
 - Prefer direct program, submission, staff, grants, newsroom, partnership, or initiative pages over generic homepages.
 - For local targeting, do not return a global/general platform when a relevant ${params.city || 'city'} or regional organization exists.
@@ -2549,6 +2556,7 @@ Strict quality rules:
 - For partner, include the likely partnership angle.
 - For publish, include the likely publication/access point.
 ${laneSpecificRules.map((rule) => `- ${rule}`).join('\n')}
+${exclusionRule ? `- ${exclusionRule}` : ''}
 
 Return JSON only in this exact shape:
 {
@@ -6738,6 +6746,8 @@ export const findSolutionLaunchResources = functions
         ? requestedLocationMode
         : 'global';
     const forceRefresh = data?.forceRefresh === true;
+    const append = data?.append === true;
+    const excludedIds = normalizeReachExcludedIds(data?.excludedIds);
 
     if (!solutionId) {
       throw new functions.https.HttpsError(
@@ -6843,12 +6853,32 @@ export const findSolutionLaunchResources = functions
       let summary = normalizeReachText(cache?.summary, 320);
       let lastSearchedAtIso = normalizeReachText(cache?.lastSearchedAtIso, 80);
 
-      if (!resources.length) {
+      const requestedExcludedIds = forceRefresh && !append ? [] : excludedIds;
+      let availableResources = resources.filter(
+        (resource) => !requestedExcludedIds.includes(resource.id)
+      );
+      const maxCacheResources = 80;
+      const fetchAttemptsLimit = 3;
+      let attempts = 0;
+
+      while (
+        availableResources.length < pageSize &&
+        resources.length < maxCacheResources &&
+        attempts < fetchAttemptsLimit
+      ) {
+        attempts += 1;
+
+        const searchExcludedIds = Array.from(
+          new Set([
+            ...requestedExcludedIds,
+            ...resources.map((resource) => resource.id),
+          ])
+        );
         const genAI = new GoogleGenerativeAI(GEMINI_KEY);
         const model = genAI.getGenerativeModel({
           model: 'gemini-2.5-flash',
           generationConfig: {
-            temperature: 0.12,
+            temperature: append ? 0.18 : 0.12,
             maxOutputTokens: 6500,
           },
           tools: [{ google_search: {} }],
@@ -6870,6 +6900,7 @@ export const findSolutionLaunchResources = functions
           country,
           locationMode,
           pageSize,
+          excludedIds: searchExcludedIds,
         });
 
         const result = await model.generateContent(prompt);
@@ -6883,6 +6914,7 @@ export const findSolutionLaunchResources = functions
           .filter(
             (resource): resource is SolutionLaunchResource => !!resource
           )
+          .filter((resource) => !searchExcludedIds.includes(resource.id))
           .slice(0, pageSize * 2);
 
         const validated = await Promise.all(
@@ -6892,7 +6924,7 @@ export const findSolutionLaunchResources = functions
           }))
         );
 
-        resources = rankSolutionLaunchResourcesForTarget(
+        const freshResources = rankSolutionLaunchResourcesForTarget(
           dedupeSolutionLaunchResources(
             validated
               .filter((entry) => entry.valid)
@@ -6904,10 +6936,30 @@ export const findSolutionLaunchResources = functions
             region,
             country,
           }
-        ).slice(0, pageSize);
+        )
+          .filter((resource) => !searchExcludedIds.includes(resource.id))
+          .slice(0, pageSize);
+
+        if (!freshResources.length) {
+          break;
+        }
+
+        resources = rankSolutionLaunchResourcesForTarget(
+          dedupeSolutionLaunchResources([...resources, ...freshResources]),
+          {
+            locationMode,
+            city,
+            region,
+            country,
+          }
+        ).slice(0, maxCacheResources);
+        availableResources = resources.filter(
+          (resource) => !requestedExcludedIds.includes(resource.id)
+        );
 
         summary =
           normalizeReachText(parsed.summary, 320) ||
+          summary ||
           (locationMode === 'global'
             ? `These ${lane} results are ranked globally for fit, credibility, and actionability.`
             : `These ${lane} results are weighted for ${[
@@ -6918,7 +6970,9 @@ export const findSolutionLaunchResources = functions
                 .filter(Boolean)
                 .join(', ')} plus solution fit.`);
         lastSearchedAtIso = new Date().toISOString();
+      }
 
+      if (!cache || attempts > 0 || forceRefresh) {
         const nextCache: SolutionLaunchResourceCacheDocument = {
           solutionId,
           lane,
@@ -6927,10 +6981,21 @@ export const findSolutionLaunchResources = functions
           ...(city ? { city } : {}),
           ...(region ? { region } : {}),
           ...(country ? { country } : {}),
-          summary,
+          summary:
+            summary ||
+            (locationMode === 'global'
+              ? `These ${lane} results are ranked globally for fit, credibility, and actionability.`
+              : `These ${lane} results are weighted for ${[
+                  city,
+                  region,
+                  country,
+                ]
+                  .filter(Boolean)
+                  .join(', ')} plus solution fit.`),
           resources,
-          createdAtIso: nowIso,
-          lastSearchedAtIso,
+          createdAtIso:
+            normalizeReachText(cache?.createdAtIso, 80) || nowIso,
+          lastSearchedAtIso: lastSearchedAtIso || nowIso,
           expiresAfterDays: 30,
         };
 
@@ -6938,10 +7003,22 @@ export const findSolutionLaunchResources = functions
         cache = nextCache;
       }
 
+      availableResources = resources.filter(
+        (resource) => !requestedExcludedIds.includes(resource.id)
+      );
+      const selectedResources = availableResources.slice(0, pageSize);
+      const locationLabel = locationMode === 'global'
+        ? 'global targeting'
+        : [city, region, country].filter(Boolean).join(', ');
+      const emptySummary = append
+        ? `No additional high-quality ${lane} sources were found for ${locationLabel} right now.`
+        : `No high-quality ${lane} sources were found for ${locationLabel} right now.`;
+
       return {
         lane,
-        resources,
+        resources: selectedResources,
         summary:
+          (!selectedResources.length ? emptySummary : '') ||
           summary ||
           (locationMode === 'global'
             ? `These ${lane} results are ranked globally for fit, credibility, and actionability.`
@@ -6950,6 +7027,7 @@ export const findSolutionLaunchResources = functions
           normalizeReachText(cache?.lastSearchedAtIso, 80) ||
           lastSearchedAtIso ||
           nowIso,
+        hasMore: availableResources.length > pageSize,
         locationMode,
       };
     } catch (error: any) {
