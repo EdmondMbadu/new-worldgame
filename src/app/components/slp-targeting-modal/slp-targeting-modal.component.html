@@ -28,57 +28,25 @@
     </div>
 
     <div class="mt-7 grid gap-4 lg:grid-cols-[1fr_0.72fr]">
-      <form
+      <div
         class="rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white p-5"
-        (ngSubmit)="submitLocation()"
       >
         <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
           Search from a place
         </p>
-        <div class="mt-4 grid gap-3 sm:grid-cols-3">
-          <label class="block">
-            <span class="slp-mono mb-2 block text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--slp-muted)]">
-              City
-            </span>
-            <input
-              [(ngModel)]="draftCity"
-              name="targetCity"
-              class="slp-input w-full px-4 py-3 text-sm"
-              placeholder="Philadelphia"
-            />
-          </label>
-          <label class="block">
-            <span class="slp-mono mb-2 block text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--slp-muted)]">
-              State / region
-            </span>
-            <input
-              [(ngModel)]="draftRegion"
-              name="targetRegion"
-              class="slp-input w-full px-4 py-3 text-sm"
-              placeholder="PA"
-            />
-          </label>
-          <label class="block">
-            <span class="slp-mono mb-2 block text-[0.66rem] uppercase tracking-[0.2em] text-[color:var(--slp-muted)]">
-              Country
-            </span>
-            <input
-              [(ngModel)]="draftCountry"
-              name="targetCountry"
-              class="slp-input w-full px-4 py-3 text-sm"
-              placeholder="United States"
-            />
-          </label>
-        </div>
-        <button
-          type="submit"
-          class="slp-button mt-5 w-full px-5 py-3 text-sm font-semibold"
-          [disabled]="saving"
-        >
-          <span class="material-symbols-outlined text-base">pin_drop</span>
-          {{ saving ? 'Saving...' : 'Use this location' }}
-        </button>
-      </form>
+        <app-slp-location-picker
+          class="mt-4 block"
+          [city]="city"
+          [region]="region"
+          [country]="country"
+          [saving]="saving"
+          [showGlobal]="false"
+          submitLabel="Use this location"
+          placeholder="Philadelphia, Lagos, London..."
+          helperText="Start typing a city, then choose a suggested place. The state/region and country are filled automatically."
+          (saveLocation)="submitLocation($event)"
+        ></app-slp-location-picker>
+      </div>
 
       <div class="rounded-[1.5rem] border border-[color:var(--slp-border)] bg-[color:var(--slp-panel-muted)] p-5">
         <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">

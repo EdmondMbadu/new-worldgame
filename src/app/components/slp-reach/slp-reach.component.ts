@@ -59,6 +59,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   usingStoredResults = false;
   private solutionId?: string;
   private contextSub?: Subscription;
+  private locationInitSub?: Subscription;
   private loadingStepIndex = 0;
   private loadingStepTimer?: ReturnType<typeof setInterval>;
 
@@ -108,6 +109,10 @@ export class SlpReachComponent implements OnInit, OnDestroy {
       shareReplay({ bufferSize: 1, refCount: true })
     );
 
+    this.locationInitSub = solutionId$.subscribe((solutionId) => {
+      void this.initializeLocation(solutionId);
+    });
+
     this.contextSub = combineLatest([solutionId$, this.slpLocation.state$])
       .pipe(
         filter(([, location]) => location.initialized),
@@ -141,16 +146,18 @@ export class SlpReachComponent implements OnInit, OnDestroy {
           }
         }
       });
-
-    void this.initializeLocation();
   }
 
   ngOnDestroy(): void {
     this.contextSub?.unsubscribe();
+    this.locationInitSub?.unsubscribe();
     this.stopLoadingMotion();
   }
 
   get locationSourceLabel(): string {
+    if (this.slpLocation.snapshot.source === 'solution') {
+      return 'From solution';
+    }
     if (this.slpLocation.snapshot.source === 'profile') {
       return 'From profile';
     }
@@ -416,8 +423,8 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     });
   }
 
-  private async initializeLocation(): Promise<void> {
-    await this.slpLocation.init();
+  private async initializeLocation(solutionId?: string): Promise<void> {
+    await this.slpLocation.init(solutionId);
     const { city, country } = this.slpLocation.snapshot as SlpLocationContext;
     this.city = city?.trim() || '';
     this.region = this.slpLocation.snapshot.region?.trim() || '';

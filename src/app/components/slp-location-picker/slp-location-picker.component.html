@@ -1,0 +1,71 @@
+<div class="slp-location-picker">
+  <label class="block min-w-0 flex-1">
+    <span class="slp-mono mb-1.5 block text-[0.62rem] uppercase tracking-[0.18em] text-[color:var(--slp-muted)]">
+      City or place
+    </span>
+    <div class="relative">
+      <span class="material-symbols-outlined pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-[color:var(--slp-muted)]">
+        search
+      </span>
+      <input
+        [ngModel]="query"
+        (ngModelChange)="onQueryChange($event)"
+        type="text"
+        class="slp-input h-10 w-full px-8 py-2 text-sm text-[color:var(--slp-ink)]"
+        [placeholder]="placeholder"
+        autocomplete="off"
+      />
+      <span
+        *ngIf="selectedPlace"
+        class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[color:var(--slp-primary)]"
+      >
+        <span class="material-symbols-outlined text-base">task_alt</span>
+      </span>
+      <div
+        *ngIf="suggestions.length && !selectedPlace"
+        class="slp-location-suggestions"
+      >
+        <button
+          *ngFor="let place of suggestions"
+          type="button"
+          (click)="choosePlace(place)"
+          class="flex w-full items-center gap-2 border-b border-[color:var(--slp-border)] px-3 py-2 text-left last:border-b-0 hover:bg-[color:var(--slp-panel-muted)]"
+        >
+          <span class="material-symbols-outlined text-sm text-[color:var(--slp-primary)]">
+            location_on
+          </span>
+          <span class="min-w-0">
+            <span class="block truncate text-xs font-semibold text-[color:var(--slp-ink)]">{{ place.city }}</span>
+            <span class="block truncate text-xs text-[color:var(--slp-muted)]">{{ place.label }}</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </label>
+
+  <p *ngIf="pickerError" class="mt-2 text-sm text-rose-600">
+    {{ pickerError }}
+  </p>
+
+  <div class="mt-2 flex min-w-0 flex-wrap items-center gap-2">
+    <button
+      type="button"
+      (click)="submit()"
+      class="slp-button h-10 min-w-0 px-3 text-xs font-semibold"
+      [disabled]="saving"
+    >
+      <span class="material-symbols-outlined text-sm">travel_explore</span>
+      {{ saving ? 'Saving...' : submitLabel }}
+    </button>
+    <button
+      *ngIf="showGlobal"
+      type="button"
+      (click)="useGlobal.emit()"
+      class="slp-button-secondary h-10 min-w-0 rounded-full px-3 text-xs font-semibold"
+      [disabled]="saving"
+    >
+      <span class="material-symbols-outlined text-sm">public</span>
+      Global
+    </button>
+  </div>
+</div>

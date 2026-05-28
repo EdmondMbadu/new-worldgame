@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+.slp-location-picker {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.slp-location-suggestions {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  z-index: 90;
+  max-height: 10rem;
+  overflow: auto;
+  border: 1px solid var(--slp-border);
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 18px 44px -24px rgba(15, 23, 42, 0.42);
+}
+
+@container (max-width: 24rem) {
+  .slp-location-picker :is(button) {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}

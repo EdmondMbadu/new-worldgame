@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { User } from '../models/user';
 import { AuthService } from './auth.service';
 import { DataService } from './data.service';
 import { SlpLocationContext } from './slp-context.service';
+import { SlpPlaceService } from './slp-place.service';
+import { SolutionService } from './solution.service';
 
 export interface SlpLocationState extends SlpLocationContext {
   currentUser: User | null;
@@ -16,59 +18,8 @@ export interface SlpLocationState extends SlpLocationContext {
 })
 export class SlpLocationService {
   private readonly storageKey = 'slp_publish_location';
-  private readonly usStateCodes = new Set([
-    'AL',
-    'AK',
-    'AZ',
-    'AR',
-    'CA',
-    'CO',
-    'CT',
-    'DE',
-    'FL',
-    'GA',
-    'HI',
-    'ID',
-    'IL',
-    'IN',
-    'IA',
-    'KS',
-    'KY',
-    'LA',
-    'ME',
-    'MD',
-    'MA',
-    'MI',
-    'MN',
-    'MS',
-    'MO',
-    'MT',
-    'NE',
-    'NV',
-    'NH',
-    'NJ',
-    'NM',
-    'NY',
-    'NC',
-    'ND',
-    'OH',
-    'OK',
-    'OR',
-    'PA',
-    'RI',
-    'SC',
-    'SD',
-    'TN',
-    'TX',
-    'UT',
-    'VT',
-    'VA',
-    'WA',
-    'WV',
-    'WI',
-    'WY',
-    'DC',
-  ]);
+  private activeSolutionId = '';
+  private initializedForSolutionId = '';
   private initializingPromise?: Promise<void>;
   private readonly stateSubject = new BehaviorSubject<SlpLocationState>({
     mode: 'unset',
@@ -83,14 +34,23 @@ export class SlpLocationService {
 
   readonly state$ = this.stateSubject.asObservable();
 
-  constructor(private auth: AuthService, private data: DataService) {}
+  constructor(
+    private auth: AuthService,
+    private data: DataService,
+    private places: SlpPlaceService,
+    private solutionService: SolutionService
+  ) {}
 
   get snapshot(): SlpLocationState {
     return this.stateSubject.value;
   }
 
-  async init(): Promise<void> {
-    if (this.snapshot.initialized) {
+  async init(solutionId?: string): Promise<void> {
+    const cleanSolutionId = String(solutionId || '').trim();
+    if (
+      this.snapshot.initialized &&
+      this.initializedForSolutionId === cleanSolutionId
+    ) {
       return;
     }
     if (this.initializingPromise) {
@@ -98,22 +58,9 @@ export class SlpLocationService {
     }
 
     this.initializingPromise = (async () => {
+      this.activeSolutionId = cleanSolutionId;
       const user = (await this.auth.getCurrentUserPromise()) as User | null;
-      const profileLocation = this.parseLocation(user?.location);
-
-      if (profileLocation) {
-        this.setState({
-          ...profileLocation,
-          mode: 'location',
-          source: 'profile',
-          currentUser: user,
-          statusMessage: 'Using the location already stored on your profile.',
-          initialized: true,
-        });
-        return;
-      }
-
-      const storedLocation = this.readStoredLocation();
+      const storedLocation = this.readStoredLocation(cleanSolutionId);
       if (storedLocation) {
         this.setState({
           ...storedLocation,
@@ -128,6 +75,36 @@ export class SlpLocationService {
               : 'Using the last location saved in this browser.',
           initialized: true,
         });
+        this.initializedForSolutionId = cleanSolutionId;
+        return;
+      }
+
+      const solutionLocation = await this.getSolutionLocation(cleanSolutionId);
+      if (solutionLocation) {
+        this.setState({
+          ...solutionLocation,
+          mode: 'location',
+          source: 'solution',
+          currentUser: user,
+          statusMessage: 'Using the location attached to this solution.',
+          initialized: true,
+        });
+        this.initializedForSolutionId = cleanSolutionId;
+        return;
+      }
+
+      const profileLocation = this.parseLocation(user?.location);
+
+      if (profileLocation) {
+        this.setState({
+          ...profileLocation,
+          mode: 'location',
+          source: 'profile',
+          currentUser: user,
+          statusMessage: 'Using the location already stored on your profile.',
+          initialized: true,
+        });
+        this.initializedForSolutionId = cleanSolutionId;
         return;
       }
 
@@ -143,6 +120,7 @@ export class SlpLocationService {
           : 'Choose local targeting or global targeting before we build Solution Launch recommendations.',
         initialized: true,
       });
+      this.initializedForSolutionId = cleanSolutionId;
     })();
 
     try {
@@ -169,7 +147,7 @@ export class SlpLocationService {
       city: normalizedCity,
       region: normalizedRegion,
       country: normalizedCountry,
-    } = this.normalizeLocationParts(city, region, country);
+    } = this.places.normalizeLocationParts(city, region, country);
     const currentUser = this.snapshot.currentUser;
     const source: SlpLocationContext['source'] = currentUser?.uid
       ? 'manual'
@@ -204,7 +182,7 @@ export class SlpLocationService {
     }
 
     localStorage.setItem(
-      this.storageKey,
+      this.getStorageKey(this.activeSolutionId),
       JSON.stringify({
         mode: 'location',
         city: normalizedCity,
@@ -230,7 +208,7 @@ export class SlpLocationService {
       : 'guest';
 
     localStorage.setItem(
-      this.storageKey,
+      this.getStorageKey(this.activeSolutionId),
       JSON.stringify({ mode: 'global', city: '', region: '', country: '' })
     );
 
@@ -264,7 +242,7 @@ export class SlpLocationService {
       .filter(Boolean);
 
     if (parts.length >= 2) {
-      const normalized = this.normalizeLocationParts(
+      const normalized = this.places.normalizeLocationParts(
         parts[0],
         parts.length > 2 ? parts.slice(1, -1).join(', ') : '',
         parts[parts.length - 1]
@@ -280,9 +258,11 @@ export class SlpLocationService {
     return null;
   }
 
-  private readStoredLocation(): SlpLocationContext | null {
+  private readStoredLocation(solutionId?: string): SlpLocationContext | null {
     try {
-      const raw = localStorage.getItem(this.storageKey);
+      const raw =
+        localStorage.getItem(this.getStorageKey(solutionId)) ||
+        localStorage.getItem(this.storageKey);
       if (!raw) {
         return null;
       }
@@ -304,7 +284,7 @@ export class SlpLocationService {
       if (!parsed.city || !parsed.country) {
         return null;
       }
-      const normalized = this.normalizeLocationParts(
+      const normalized = this.places.normalizeLocationParts(
         parsed.city,
         parsed.region || '',
         parsed.country
@@ -321,27 +301,67 @@ export class SlpLocationService {
     }
   }
 
-  private normalizeLocationParts(
-    city: string,
-    region: string,
-    country: string
-  ): { city: string; region: string; country: string } {
-    const normalizedCity = city.trim();
-    let normalizedRegion = region.trim();
-    let normalizedCountry = country.trim();
-    const countryUpper = normalizedCountry.toUpperCase();
-
-    if (!normalizedRegion && this.usStateCodes.has(countryUpper)) {
-      normalizedRegion = countryUpper;
-      normalizedCountry = 'United States';
-    } else if (['US', 'USA', 'U.S.', 'U.S.A.'].includes(countryUpper)) {
-      normalizedCountry = 'United States';
+  private async getSolutionLocation(
+    solutionId: string
+  ): Promise<SlpLocationContext | null> {
+    if (!solutionId) {
+      return null;
     }
 
-    return {
-      city: normalizedCity,
-      region: normalizedRegion,
-      country: normalizedCountry,
-    };
+    try {
+      const solutions = await firstValueFrom(
+        this.solutionService.getSolutionForNonAuthenticatedUser(solutionId)
+      );
+      const solution = Array.isArray(solutions) ? (solutions[0] as any) : null;
+      if (!solution) {
+        return null;
+      }
+
+      const parsedFromText = this.parseLocation(
+        solution.location ||
+          solution.targetLocation ||
+          solution.launchLocation ||
+          solution.place ||
+          solution.recruitmentProfile?.location
+      );
+      if (parsedFromText) {
+        return parsedFromText;
+      }
+
+      const rawCity = String(solution.city || solution.locationCity || '').trim();
+      const rawRegion = String(
+        solution.region ||
+          solution.state ||
+          solution.stateProvince ||
+          solution.locationRegion ||
+          ''
+      ).trim();
+      const rawCountry = String(solution.country || solution.locationCountry || '').trim();
+
+      if (rawCity && rawCountry) {
+        const normalized = this.places.normalizeLocationParts(
+          rawCity,
+          rawRegion,
+          rawCountry
+        );
+        return {
+          mode: 'location',
+          city: normalized.city,
+          region: normalized.region,
+          country: normalized.country,
+        };
+      }
+    } catch (error) {
+      console.warn('Could not read solution location for Solution Launch', error);
+    }
+
+    return null;
+  }
+
+  private getStorageKey(solutionId?: string): string {
+    const cleanSolutionId = String(solutionId || '').trim();
+    return cleanSolutionId
+      ? `${this.storageKey}:${cleanSolutionId}`
+      : this.storageKey;
   }
 }

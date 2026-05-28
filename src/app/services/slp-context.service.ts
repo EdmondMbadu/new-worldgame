@@ -10,7 +10,7 @@ export interface SlpLocationContext {
   city?: string;
   region?: string;
   country?: string;
-  source?: 'profile' | 'manual' | 'guest' | 'none';
+  source?: 'solution' | 'profile' | 'manual' | 'guest' | 'none';
 }
 
 export interface SlpLinkItem {
@@ -300,7 +300,7 @@ export class SlpContextService {
               label: 'Location target',
               value: hasLocation ? this.truncate(locationLabel, 18) : 'Pending',
               detail: hasLocation
-                ? `Source: ${location.source === 'profile' ? 'profile' : location.source === 'manual' ? 'saved here' : 'this browser'}`
+                ? `Source: ${location.source === 'solution' ? 'solution' : location.source === 'profile' ? 'profile' : location.source === 'manual' ? 'saved here' : 'this browser'}`
                 : isGlobal
                   ? 'Global / anywhere targeting selected.'
                 : 'No city/country set yet.',
