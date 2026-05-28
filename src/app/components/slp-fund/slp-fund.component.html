@@ -157,7 +157,10 @@
       </div>
       <div class="mb-5 flex flex-col gap-3 rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white/75 px-5 py-4 text-sm leading-6 text-[color:var(--slp-muted)] sm:flex-row sm:items-center sm:justify-between">
         <p>
-          <span *ngIf="researchLoading" class="font-semibold text-[color:var(--slp-primary)]">Researching funders and programs...</span>
+          <span *ngIf="researchLoading" class="inline-flex items-center gap-2 font-semibold text-[color:var(--slp-primary)]">
+            <span class="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--slp-border)] border-t-[color:var(--slp-primary)]"></span>
+            Researching funders and programs...
+          </span>
           <span *ngIf="!researchLoading && researchSummary">{{ researchSummary }}</span>
           <span *ngIf="!researchLoading && !researchSummary && !researchError">Use live research to replace generic funding prompts with direct, source-backed opportunities.</span>
           <span *ngIf="researchError" class="text-rose-700">{{ researchError }}</span>
@@ -180,7 +183,23 @@
       </div>
 
       <div class="grid gap-6 xl:grid-cols-2">
-        <article *ngFor="let resource of (researchCards.length ? researchCards : vm.resources)" class="slp-card overflow-hidden p-6 sm:p-7">
+        <article *ngFor="let item of [0, 1, 2, 3]" [hidden]="!researchLoading" class="slp-card overflow-hidden p-6 sm:p-7">
+          <div class="animate-pulse">
+            <div class="flex items-start justify-between gap-4">
+              <div class="h-14 w-14 rounded-2xl bg-[color:var(--slp-panel-muted)]"></div>
+              <div class="h-8 w-20 rounded-full bg-[color:var(--slp-highlight)]"></div>
+            </div>
+            <div class="mt-6 h-5 w-28 rounded-full bg-[color:var(--slp-panel-muted)]"></div>
+            <div class="mt-4 h-8 max-w-xs rounded bg-[color:var(--slp-panel-muted)]"></div>
+            <div class="mt-4 h-4 max-w-md rounded bg-[color:var(--slp-panel-muted)]"></div>
+            <div class="mt-3 h-4 max-w-sm rounded bg-[color:var(--slp-panel-muted)]"></div>
+            <div class="mt-6 flex flex-wrap gap-2">
+              <div class="h-7 w-28 rounded-full bg-[color:var(--slp-panel-muted)]"></div>
+              <div class="h-7 w-36 rounded-full bg-[color:var(--slp-panel-muted)]"></div>
+            </div>
+          </div>
+        </article>
+        <article *ngFor="let resource of (researchLoading ? [] : (researchCards.length ? researchCards : vm.resources))" class="slp-card overflow-hidden p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">
               <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--slp-panel-muted)] text-[color:var(--slp-primary)]">
                 <span class="material-symbols-outlined text-3xl">{{ resource.icon }}</span>
