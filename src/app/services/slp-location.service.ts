@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { User } from '../models/user';
 import { AuthService } from './auth.service';
-import { DataService } from './data.service';
 import { SlpLocationContext } from './slp-context.service';
 import { SlpPlaceService } from './slp-place.service';
 import { SolutionService } from './solution.service';
@@ -36,7 +35,6 @@ export class SlpLocationService {
 
   constructor(
     private auth: AuthService,
-    private data: DataService,
     private places: SlpPlaceService,
     private solutionService: SolutionService
   ) {}
@@ -112,12 +110,11 @@ export class SlpLocationService {
         city: '',
         region: '',
         country: '',
-        mode: 'unset',
+        mode: 'global',
         source: 'none',
         currentUser: user,
-        statusMessage: user?.uid
-          ? 'Choose local targeting or global targeting before we build Solution Launch recommendations.'
-          : 'Choose local targeting or global targeting before we build Solution Launch recommendations.',
+        statusMessage:
+          'Using global targeting until you choose a specific launch location.',
         initialized: true,
       });
       this.initializedForSolutionId = cleanSolutionId;
@@ -162,25 +159,6 @@ export class SlpLocationService {
       statusMessage: this.snapshot.statusMessage,
     });
 
-    if (currentUser?.uid) {
-      await this.data.updateLocation(
-        currentUser.uid,
-        [normalizedCity, normalizedRegion, normalizedCountry]
-          .filter(Boolean)
-          .join(', ')
-      );
-      this.setState({
-        mode: 'location',
-        city: normalizedCity,
-        region: normalizedRegion,
-        country: normalizedCountry,
-        source,
-        statusMessage:
-          'Location saved to your profile and used to refresh Solution Launch recommendations.',
-      });
-      return;
-    }
-
     localStorage.setItem(
       this.getStorageKey(this.activeSolutionId),
       JSON.stringify({
@@ -197,7 +175,7 @@ export class SlpLocationService {
       country: normalizedCountry,
       source,
       statusMessage:
-        'Location saved in this browser and used to refresh Solution Launch recommendations.',
+        'Location saved for this solution launch and used to refresh recommendations.',
     });
   }
 

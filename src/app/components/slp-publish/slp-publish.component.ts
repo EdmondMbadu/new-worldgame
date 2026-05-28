@@ -46,6 +46,7 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
   private solutionId?: string;
   private contextSub?: Subscription;
   private locationInitSub?: Subscription;
+  private forceNextResearch = false;
 
   constructor(
     private seoService: SeoService,
@@ -126,15 +127,19 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
         this.targetingModalOpen = !this.hasTargetingChoice(location);
 
         if (solutionId && this.hasTargetingChoice(location)) {
-          const cached = this.slpResources.readCachedSearch({
-            solutionId,
-            lane: 'publish',
-            location,
-          });
-          if (cached?.resources.length) {
+          const forceRefresh = this.forceNextResearch;
+          this.forceNextResearch = false;
+          const cached = forceRefresh
+            ? null
+            : this.slpResources.readCachedSearch({
+                solutionId,
+                lane: 'publish',
+                location,
+              });
+          if (!forceRefresh && cached?.resources.length) {
             this.applyResearch(cached.resources, cached.summary, cached.generatedAt, true);
           } else {
-            void this.loadResearch(false);
+            void this.loadResearch(forceRefresh);
           }
         }
       });
@@ -213,6 +218,7 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
     this.city = value.city;
     this.region = value.region;
     this.country = value.country;
+    this.forceNextResearch = true;
     await this.applyLocation();
     if (!this.locationError) {
       this.targetingModalOpen = false;
@@ -223,6 +229,7 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
     this.locationError = '';
     this.savingLocation = true;
     try {
+      this.forceNextResearch = true;
       await this.slpLocation.applyGlobal();
       this.targetingModalOpen = false;
     } finally {

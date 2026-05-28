@@ -60,6 +60,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
   private solutionId?: string;
   private contextSub?: Subscription;
   private locationInitSub?: Subscription;
+  private forceNextSearch = false;
   private loadingStepIndex = 0;
   private loadingStepTimer?: ReturnType<typeof setInterval>;
 
@@ -140,9 +141,11 @@ export class SlpReachComponent implements OnInit, OnDestroy {
         this.resetSearchState();
         this.targetingModalOpen = !this.hasTargetingChoice(this.slpLocation.snapshot);
         if (this.solutionId && this.hasTargetingChoice(this.slpLocation.snapshot)) {
-          const usedCached = this.loadCachedSearch();
+          const forceRefresh = this.forceNextSearch;
+          this.forceNextSearch = false;
+          const usedCached = forceRefresh ? false : this.loadCachedSearch();
           if (!usedCached) {
-            void this.fetchPage(1, true);
+            void this.fetchPage(1, true, forceRefresh);
           }
         }
       });
@@ -223,6 +226,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     this.city = value.city;
     this.region = value.region;
     this.country = value.country;
+    this.forceNextSearch = true;
     await this.applyLocation();
     if (!this.locationError) {
       this.targetingModalOpen = false;
@@ -233,6 +237,7 @@ export class SlpReachComponent implements OnInit, OnDestroy {
     this.locationError = '';
     this.savingLocation = true;
     try {
+      this.forceNextSearch = true;
       await this.slpLocation.applyGlobal();
       this.targetingModalOpen = false;
     } finally {
