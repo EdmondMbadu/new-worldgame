@@ -161,23 +161,25 @@
             <span class="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--slp-border)] border-t-[color:var(--slp-primary)]"></span>
             Researching funders and programs...
           </span>
-          <span *ngIf="!researchLoading && researchSummary">{{ researchSummary }}</span>
-          <span *ngIf="!researchLoading && !researchSummary && !researchError">Use live research to replace generic funding prompts with direct, source-backed opportunities.</span>
+          <span *ngIf="!researchLoading && researchSummary">
+            {{ usingStoredResearch ? 'Stored' : 'Fresh' }} funding results for {{ currentTargetingLabel }}.
+          </span>
+          <span *ngIf="!researchLoading && !researchSummary && !researchError">Run live search to refresh source-backed funding routes.</span>
           <span *ngIf="researchError" class="text-rose-700">{{ researchError }}</span>
         </p>
         <div class="flex flex-wrap items-center gap-2">
           <span *ngIf="researchGeneratedAtLabel" class="text-xs uppercase tracking-[0.18em]">
-            {{ usingStoredResearch ? 'Stored' : 'Fresh' }} · {{ researchGeneratedAtLabel }}
+            {{ researchGeneratedAtLabel }}
           </span>
           <button
             *ngIf="vm.shell.hasSolution"
             type="button"
             (click)="refreshResearch()"
-            class="inline-flex items-center gap-1 rounded-full border border-[color:var(--slp-border)] bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--slp-primary)]"
+            class="inline-flex items-center gap-2 rounded-full bg-[color:var(--slp-primary)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-sm transition hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
             [disabled]="researchLoading"
           >
             <span class="material-symbols-outlined text-base">refresh</span>
-            {{ researchLoading ? 'Researching' : researchCards.length ? 'Refresh' : 'Live search' }}
+            {{ researchLoading ? 'Searching' : researchCards.length ? 'Refresh results' : 'Live search' }}
           </button>
         </div>
       </div>
