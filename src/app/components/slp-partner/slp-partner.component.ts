@@ -50,6 +50,7 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
   private contextSub?: Subscription;
   private locationInitSub?: Subscription;
   private forceNextResearch = false;
+  private researchRequestToken = 0;
 
   constructor(
     private seoService: SeoService,
@@ -119,6 +120,7 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
         this.city = location.city?.trim() || '';
         this.region = location.region?.trim() || '';
         this.country = location.country?.trim() || '';
+        this.researchRequestToken += 1;
         this.researchResources = [];
         this.researchCards = [];
         this.researchSummary = '';
@@ -254,38 +256,13 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.moreResearchLoading = true;
-    this.moreResearchMessage = '';
-    try {
-      const existingIds = this.researchResources.map((resource) => resource.id);
-      const response = await this.slpResources.findResources({
-        solutionId: this.solutionId,
-        lane: 'partner',
-        location: this.slpLocation.snapshot,
-        pageSize: 5,
-        append: true,
-        excludedIds: existingIds,
-      });
-      this.appendResearch(response.resources, response.summary, response.generatedAt);
-      this.slpResources.writeCachedSearch(
-        {
-          solutionId: this.solutionId,
-          lane: 'partner',
-          location: this.slpLocation.snapshot,
-        },
-        {
-          ...response,
-          resources: this.researchResources,
-          summary: this.researchSummary,
-        }
-      );
-    } catch (error) {
-      console.error('More partner research failed', error);
-      this.moreResearchMessage =
-        'Could not load more partner sources right now. Try again in a moment.';
-    } finally {
-      this.moreResearchLoading = false;
-    }
+    await this.loadAdditionalResearch(5, {
+      emptyMessage:
+        'No additional high-quality partner sources were found for this target right now.',
+      failureMessage:
+        'Could not load more partner sources right now. Try again in a moment.',
+      successLabel: 'partner',
+    });
   }
 
   private async initializeLocation(solutionId?: string): Promise<void> {
@@ -301,6 +278,9 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const token = ++this.researchRequestToken;
+    const location = { ...this.slpLocation.snapshot };
+    let shouldFillRemaining = false;
     this.researchLoading = true;
     this.researchError = '';
     this.moreResearchMessage = '';
@@ -309,26 +289,33 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
         this.slpResources.clearCachedSearch({
           solutionId: this.solutionId,
           lane: 'partner',
-          location: this.slpLocation.snapshot,
+          location,
         });
       }
       const response = await this.slpResources.findResources({
         solutionId: this.solutionId,
         lane: 'partner',
-        location: this.slpLocation.snapshot,
-        pageSize: 8,
+        location,
+        pageSize: 2,
         forceRefresh,
       });
+      if (token !== this.researchRequestToken) {
+        return;
+      }
       this.applyResearch(response.resources, response.summary, response.generatedAt, false);
       this.slpResources.writeCachedSearch(
         {
           solutionId: this.solutionId,
           lane: 'partner',
-          location: this.slpLocation.snapshot,
+          location,
         },
         response
       );
+      shouldFillRemaining = response.resources.length > 0;
     } catch (error: any) {
+      if (token !== this.researchRequestToken) {
+        return;
+      }
       console.error('Partner research failed', error);
       const message = String(error?.message || '').trim();
       const technicalMessage =
@@ -340,7 +327,19 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
           ? message
           : 'Live partner research is unavailable. Showing the fallback partner list.';
     } finally {
-      this.researchLoading = false;
+      if (token === this.researchRequestToken) {
+        this.researchLoading = false;
+      }
+    }
+
+    if (shouldFillRemaining && token === this.researchRequestToken) {
+      await this.loadAdditionalResearch(3, {
+        token,
+        location,
+        silentEmpty: true,
+        pendingMessage: 'Adding three more verified partner sources...',
+        successLabel: 'partner',
+      });
     }
   }
 
@@ -378,6 +377,76 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
     this.researchGeneratedAtLabel = this.formatGeneratedAt(generatedAt);
     this.usingStoredResearch = false;
     this.moreResearchMessage = `Added ${incoming.length} more partner source${incoming.length === 1 ? '' : 's'}.`;
+  }
+
+  private async loadAdditionalResearch(
+    pageSize: number,
+    options: {
+      token?: number;
+      location?: SlpLocationContext;
+      pendingMessage?: string;
+      emptyMessage?: string;
+      failureMessage?: string;
+      successLabel: string;
+      silentEmpty?: boolean;
+    }
+  ): Promise<void> {
+    if (!this.solutionId) {
+      return;
+    }
+
+    const token = options.token ?? this.researchRequestToken;
+    const location = options.location ?? { ...this.slpLocation.snapshot };
+    this.moreResearchLoading = true;
+    this.moreResearchMessage = options.pendingMessage || '';
+    try {
+      const existingIds = this.researchResources.map((resource) => resource.id);
+      const response = await this.slpResources.findResources({
+        solutionId: this.solutionId,
+        lane: 'partner',
+        location,
+        pageSize,
+        append: true,
+        excludedIds: existingIds,
+      });
+      if (token !== this.researchRequestToken) {
+        return;
+      }
+      const beforeCount = this.researchResources.length;
+      this.appendResearch(response.resources, response.summary, response.generatedAt);
+      const addedCount = this.researchResources.length - beforeCount;
+      if (!addedCount && options.silentEmpty) {
+        this.moreResearchMessage = '';
+      } else if (!addedCount && options.emptyMessage) {
+        this.moreResearchMessage = options.emptyMessage;
+      } else if (addedCount && options.pendingMessage) {
+        this.moreResearchMessage = `Showing ${this.researchResources.length} verified ${options.successLabel} sources.`;
+      }
+      this.slpResources.writeCachedSearch(
+        {
+          solutionId: this.solutionId,
+          lane: 'partner',
+          location,
+        },
+        {
+          ...response,
+          resources: this.researchResources,
+          summary: this.researchSummary,
+        }
+      );
+    } catch (error) {
+      if (token !== this.researchRequestToken) {
+        return;
+      }
+      console.error('More partner research failed', error);
+      this.moreResearchMessage =
+        options.failureMessage ||
+        'Could not load more partner sources right now. Try again in a moment.';
+    } finally {
+      if (token === this.researchRequestToken) {
+        this.moreResearchLoading = false;
+      }
+    }
   }
 
   private toResearchCard(resource: SlpLaunchResource): SlpActionCard {

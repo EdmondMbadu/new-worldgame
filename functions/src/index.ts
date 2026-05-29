@@ -2401,12 +2401,12 @@ const getSolutionLaunchLocalSignalScore = (
   const countryValue = country.trim().toLowerCase();
   let score = 0;
 
-  if (cityValue && haystack.includes(cityValue)) score += 3;
-  if (regionValue && haystack.includes(regionValue)) score += 2;
+  if (cityValue && containsLaunchLocationTerm(haystack, cityValue)) score += 3;
+  if (regionValue && containsLaunchLocationTerm(haystack, regionValue)) score += 2;
   if (
     countryValue &&
     countryValue !== 'united states' &&
-    haystack.includes(countryValue)
+    containsLaunchLocationTerm(haystack, countryValue)
   ) {
     score += 1;
   }
@@ -2430,6 +2430,15 @@ const isGenericGlobalLaunchHost = (url: string): boolean => {
   } catch {
     return false;
   }
+};
+
+const containsLaunchLocationTerm = (haystack: string, term: string): boolean => {
+  const cleanTerm = term.trim().toLowerCase();
+  if (!cleanTerm) return false;
+  const escaped = cleanTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, 'i').test(
+    haystack
+  );
 };
 
 const rankSolutionLaunchResourcesForTarget = (
@@ -2500,7 +2509,7 @@ const buildSolutionLaunchResourcePrompt = (params: {
   const locationRule =
     params.locationMode === 'global'
       ? `The user explicitly chose global targeting. Rank by strongest thematic fit, credibility, current activity, and direct actionability. Do not pretend a result is local.`
-      : `The user chose location targeting for ${locationLabel}. At least ${Math.max(4, Math.ceil(params.pageSize * 0.7))} results must be organizations, programs, publications, offices, or pages with real operations in ${params.city}, ${params.region || params.country}, or the directly surrounding region. Use global platforms only after exhausting strong local/regional matches, and label them as global rather than local.`;
+      : `The user chose location targeting for ${locationLabel}. At least ${Math.max(1, Math.ceil(params.pageSize * 0.7))} result(s) must be organizations, programs, publications, offices, or pages with real operations in ${params.city}, ${params.region || params.country}, or the directly surrounding region. Use global platforms only after exhausting strong local/regional matches, and label them as global rather than local.`;
   const exclusionRule = params.excludedIds.length
     ? `Already shown resource IDs: ${params.excludedIds.slice(0, 80).join(', ')}. Do not repeat the same organization, program, outlet, webpage, host/name pair, or near-duplicate route. If quality drops after excluding these, return fewer than ${params.pageSize} results rather than padding with generic sources.`
     : '';
@@ -6735,7 +6744,7 @@ export const findSolutionLaunchResources = functions
   .https.onCall(async (data: SolutionLaunchResourceRequest) => {
     const solutionId = normalizeReachText(data?.solutionId, 120);
     const lane = normalizeReachText(data?.lane, 40) as SolutionLaunchResourceLane;
-    const pageSize = Math.min(Math.max(Number(data?.pageSize) || 8, 4), 10);
+    const pageSize = Math.min(Math.max(Number(data?.pageSize) || 5, 1), 10);
     const city = normalizeReachText(data?.city, 120);
     const region = normalizeReachText(data?.region, 120);
     const country = normalizeReachText(data?.country, 120);
@@ -6858,7 +6867,7 @@ export const findSolutionLaunchResources = functions
         (resource) => !requestedExcludedIds.includes(resource.id)
       );
       const maxCacheResources = 80;
-      const fetchAttemptsLimit = 3;
+      const fetchAttemptsLimit = 2;
       let attempts = 0;
 
       while (
@@ -6879,7 +6888,7 @@ export const findSolutionLaunchResources = functions
           model: 'gemini-2.5-flash',
           generationConfig: {
             temperature: append ? 0.18 : 0.12,
-            maxOutputTokens: 6500,
+            maxOutputTokens: pageSize <= 5 ? 4200 : 6500,
           },
           tools: [{ google_search: {} }],
         } as any);
@@ -7006,7 +7015,25 @@ export const findSolutionLaunchResources = functions
       availableResources = resources.filter(
         (resource) => !requestedExcludedIds.includes(resource.id)
       );
-      const selectedResources = availableResources.slice(0, pageSize);
+      const selectedResources = dedupeSolutionLaunchResources(
+        locationMode === 'global'
+          ? availableResources
+          : [
+              ...availableResources.filter(
+                (resource) =>
+                  getSolutionLaunchLocalSignalScore(
+                    resource,
+                    city,
+                    region,
+                    country
+                  ) > 0 && !isGenericGlobalLaunchHost(resource.url)
+              ),
+              ...availableResources.filter(
+                (resource) => !isGenericGlobalLaunchHost(resource.url)
+              ),
+              ...availableResources,
+            ]
+      ).slice(0, pageSize);
       const locationLabel = locationMode === 'global'
         ? 'global targeting'
         : [city, region, country].filter(Boolean).join(', ');
