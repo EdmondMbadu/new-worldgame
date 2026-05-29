@@ -134,7 +134,7 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
         this.usingStoredResearch = false;
         this.targetingModalOpen = !this.hasTargetingChoice(location);
 
-        if (solutionId && this.hasTargetingChoice(location)) {
+        if (solutionId && this.shouldAutoResearch(location)) {
           const forceRefresh = this.forceNextResearch;
           this.forceNextResearch = false;
           const cached = forceRefresh
@@ -490,6 +490,16 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
       location.mode === 'global' ||
       (!!location.city?.trim() && !!location.country?.trim())
     );
+  }
+
+  private shouldAutoResearch(location: SlpLocationContext): boolean {
+    if (!this.hasTargetingChoice(location)) {
+      return false;
+    }
+    if (location.mode === 'location') {
+      return true;
+    }
+    return location.source === 'manual' || location.source === 'guest';
   }
 
   private formatGeneratedAt(raw: string): string {
