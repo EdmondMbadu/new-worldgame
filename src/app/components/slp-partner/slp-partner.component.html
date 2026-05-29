@@ -192,7 +192,7 @@
             <div class="mt-3 h-4 max-w-xl rounded bg-[color:var(--slp-panel-muted)]"></div>
           </div>
         </article>
-        <article *ngFor="let card of (researchLoading ? [] : (researchCards.length ? researchCards : vm.collaborationCards))" class="slp-card overflow-hidden p-7 sm:p-8">
+        <article *ngFor="let card of (researchLoading ? [] : (researchCards.length ? researchCards : (liveResearchAttempted ? [] : vm.collaborationCards)))" class="slp-card overflow-hidden p-7 sm:p-8">
           <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
             <div class="flex gap-4">
               <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-[color:var(--slp-border)] bg-[color:var(--slp-panel-muted)]">
@@ -266,6 +266,12 @@
             </div>
           </div>
         </article>
+        <div
+          *ngIf="liveResearchAttempted && !researchLoading && !researchCards.length"
+          class="slp-card border border-amber-200 bg-amber-50/70 p-6 text-sm leading-7 text-amber-950"
+        >
+          No strong local partner sources came back for {{ currentTargetingLabel }}. Generic global partner paths are intentionally hidden after a local search attempt.
+        </div>
         <div
           *ngIf="vm.shell.hasSolution && researchCards.length && !researchLoading"
           class="flex flex-col items-start gap-3 rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white/75 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"

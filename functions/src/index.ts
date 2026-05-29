@@ -2396,13 +2396,17 @@ const getSolutionLaunchLocalSignalScore = (
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
-  const cityValue = city.trim().toLowerCase();
-  const regionValue = region.trim().toLowerCase();
+  const cityTerms = getSolutionLaunchLocationTerms(city);
+  const regionTerms = getSolutionLaunchLocationTerms(region);
   const countryValue = country.trim().toLowerCase();
   let score = 0;
 
-  if (cityValue && containsLaunchLocationTerm(haystack, cityValue)) score += 3;
-  if (regionValue && containsLaunchLocationTerm(haystack, regionValue)) score += 2;
+  if (cityTerms.some((term) => containsLaunchLocationTerm(haystack, term))) {
+    score += 3;
+  }
+  if (regionTerms.some((term) => containsLaunchLocationTerm(haystack, term))) {
+    score += 2;
+  }
   if (
     countryValue &&
     countryValue !== 'united states' &&
@@ -2412,6 +2416,34 @@ const getSolutionLaunchLocalSignalScore = (
   }
 
   return score;
+};
+
+const getSolutionLaunchLocationTerms = (value: string): string[] => {
+  const clean = value.trim().toLowerCase();
+  if (!clean) return [];
+  const terms = new Set<string>([clean]);
+
+  if (clean === 'philadelphia') {
+    terms.add('philly');
+    terms.add('phila');
+  }
+  if (clean === 'pa') {
+    terms.add('pennsylvania');
+  }
+  if (clean === 'dc') {
+    terms.add('district of columbia');
+    terms.add('washington dc');
+  }
+  if (clean === 'democratic republic of the congo') {
+    terms.add('drc');
+    terms.add('dr congo');
+    terms.add('congo kinshasa');
+  }
+  if (clean === 'kinshasa') {
+    terms.add('kin');
+  }
+
+  return Array.from(terms);
 };
 
 const isGenericGlobalLaunchHost = (url: string): boolean => {
@@ -2516,7 +2548,7 @@ const buildSolutionLaunchResourcePrompt = (params: {
   const laneSpecificRules =
     params.lane === 'publish'
       ? [
-          `For publish, prefer pages for local outlets, education desks, public-interest news, university newsrooms, civic newsletters, and submission/contact pages. A result like Medium, LinkedIn, Substack, Zenodo, ResearchGate, or The Conversation is acceptable only as a last-resort global channel.`,
+          `For publish, prefer pages for local outlets, education desks, public-interest news, university newsrooms, civic newsletters, and submission/contact pages. For local targeting, do not return Medium, LinkedIn, Substack, Zenodo, ResearchGate, The Conversation, or other global platforms.`,
           `For each result, "nextAction" must name the concrete pitch/submission/contact action and "contactHint" should name the relevant desk, form, or editor/contact route if visible.`,
         ]
       : params.lane === 'fund'
@@ -7018,21 +7050,15 @@ export const findSolutionLaunchResources = functions
       const selectedResources = dedupeSolutionLaunchResources(
         locationMode === 'global'
           ? availableResources
-          : [
-              ...availableResources.filter(
-                (resource) =>
-                  getSolutionLaunchLocalSignalScore(
-                    resource,
-                    city,
-                    region,
-                    country
-                  ) > 0 && !isGenericGlobalLaunchHost(resource.url)
-              ),
-              ...availableResources.filter(
-                (resource) => !isGenericGlobalLaunchHost(resource.url)
-              ),
-              ...availableResources,
-            ]
+          : availableResources.filter(
+              (resource) =>
+                getSolutionLaunchLocalSignalScore(
+                  resource,
+                  city,
+                  region,
+                  country
+                ) > 0 && !isGenericGlobalLaunchHost(resource.url)
+            )
       ).slice(0, pageSize);
       const locationLabel = locationMode === 'global'
         ? 'global targeting'

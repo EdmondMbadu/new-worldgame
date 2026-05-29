@@ -46,6 +46,7 @@ export class SlpFundComponent implements OnInit, OnDestroy {
   researchSummary = '';
   researchGeneratedAtLabel = '';
   usingStoredResearch = false;
+  liveResearchAttempted = false;
   private solutionId?: string;
   private contextSub?: Subscription;
   private locationInitSub?: Subscription;
@@ -129,6 +130,7 @@ export class SlpFundComponent implements OnInit, OnDestroy {
         this.moreResearchLoading = false;
         this.researchGeneratedAtLabel = '';
         this.usingStoredResearch = false;
+        this.liveResearchAttempted = false;
         this.targetingModalOpen = !this.hasTargetingChoice(location);
 
         if (solutionId && this.shouldAutoResearch(location)) {
@@ -282,6 +284,7 @@ export class SlpFundComponent implements OnInit, OnDestroy {
     const location = { ...this.slpLocation.snapshot };
     let shouldFillRemaining = false;
     this.researchLoading = true;
+    this.liveResearchAttempted = true;
     this.researchError = '';
     this.moreResearchMessage = '';
     try {
