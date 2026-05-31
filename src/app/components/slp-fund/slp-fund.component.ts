@@ -403,40 +403,52 @@ export class SlpFundComponent implements OnInit, OnDestroy {
     this.moreResearchLoading = true;
     this.moreResearchMessage = options.pendingMessage || '';
     try {
-      const existingIds = this.researchResources.map((resource) => resource.id);
-      const response = await this.slpResources.findResources({
-        solutionId: this.solutionId,
-        lane: 'fund',
-        location,
-        pageSize,
-        append: true,
-        excludedIds: existingIds,
-      });
-      if (token !== this.researchRequestToken) {
-        return;
-      }
-      const beforeCount = this.researchResources.length;
-      this.appendResearch(response.resources, response.summary, response.generatedAt);
-      const addedCount = this.researchResources.length - beforeCount;
-      if (!addedCount && options.silentEmpty) {
-        this.moreResearchMessage = '';
-      } else if (!addedCount && options.emptyMessage) {
-        this.moreResearchMessage = options.emptyMessage;
-      } else if (addedCount && options.pendingMessage) {
-        this.moreResearchMessage = `Showing ${this.researchResources.length} verified ${options.successLabel} sources.`;
-      }
-      this.slpResources.writeCachedSearch(
-        {
+      let addedTotal = 0;
+      for (let index = 0; index < pageSize; index += 1) {
+        const existingIds = this.researchResources.map((resource) => resource.id);
+        const response = await this.slpResources.findResources({
           solutionId: this.solutionId,
           lane: 'fund',
           location,
-        },
-        {
-          ...response,
-          resources: this.researchResources,
-          summary: this.researchSummary,
+          pageSize: 1,
+          append: true,
+          excludedIds: existingIds,
+        });
+        if (token !== this.researchRequestToken) {
+          return;
         }
-      );
+        const beforeCount = this.researchResources.length;
+        this.appendResearch(response.resources, response.summary, response.generatedAt);
+        const addedCount = this.researchResources.length - beforeCount;
+        if (!addedCount) {
+          if (!addedTotal && options.silentEmpty) {
+            this.moreResearchMessage = '';
+          } else if (!addedTotal && options.emptyMessage) {
+            this.moreResearchMessage = options.emptyMessage;
+          } else {
+            this.moreResearchMessage = `Added ${addedTotal} more ${options.successLabel} source${addedTotal === 1 ? '' : 's'}. No more strong matches found right now.`;
+          }
+          break;
+        }
+
+        addedTotal += addedCount;
+        this.moreResearchMessage =
+          addedTotal >= pageSize
+            ? `Added ${addedTotal} more ${options.successLabel} source${addedTotal === 1 ? '' : 's'}.`
+            : `Added ${addedTotal} of ${pageSize} ${options.successLabel} sources. Still searching...`;
+        this.slpResources.writeCachedSearch(
+          {
+            solutionId: this.solutionId,
+            lane: 'fund',
+            location,
+          },
+          {
+            ...response,
+            resources: this.researchResources,
+            summary: this.researchSummary,
+          }
+        );
+      }
     } catch (error) {
       if (token !== this.researchRequestToken) {
         return;

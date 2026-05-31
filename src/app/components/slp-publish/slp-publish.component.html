@@ -337,21 +337,21 @@
             No strong local publication targets came back for {{ currentTargetingLabel }}. Try “Get 5 more” or adjust the location; generic global platforms are intentionally hidden here.
           </div>
           <div
-            *ngIf="vm.shell.hasSolution && researchCards.length && !researchLoading"
-            class="flex flex-col items-start gap-3 rounded-[1.5rem] border border-[color:var(--slp-border)] bg-white/75 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+            *ngIf="vm.shell.hasSolution && !researchLoading && (researchCards.length || liveResearchAttempted)"
+            class="flex flex-col items-start gap-4 rounded-[1.5rem] border border-[color:var(--slp-primary)] bg-[color:var(--slp-highlight)] px-5 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between"
           >
-            <p class="text-sm leading-6 text-[color:var(--slp-muted)]">
-              {{ moreResearchMessage || 'Need a wider list? Ask for five more publication sources for this same solution and target.' }}
+            <p class="text-sm font-medium leading-6 text-[color:var(--slp-ink)]">
+              {{ moreResearchMessage || 'Find five additional publication sources for this same solution and location.' }}
             </p>
             <button
               type="button"
               (click)="loadMoreResearch()"
-              class="inline-flex flex-shrink-0 items-center gap-2 rounded-full border border-[color:var(--slp-border)] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--slp-primary)] transition hover:bg-[color:var(--slp-panel-muted)] disabled:cursor-wait disabled:opacity-60"
+              class="inline-flex flex-shrink-0 items-center gap-2 rounded-full bg-[color:var(--slp-primary)] px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-sm transition hover:opacity-90 disabled:cursor-wait disabled:opacity-60"
               [disabled]="moreResearchLoading"
             >
               <span *ngIf="moreResearchLoading" class="h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--slp-border)] border-t-[color:var(--slp-primary)]"></span>
               <span *ngIf="!moreResearchLoading" class="material-symbols-outlined text-base">add</span>
-              {{ moreResearchLoading ? 'Finding more' : 'Get 5 more' }}
+              {{ moreResearchLoading ? 'Finding sources' : 'Find 5 more sources' }}
             </button>
           </div>
         </div>
