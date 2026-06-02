@@ -3,6 +3,10 @@
     "language": {
       "english": "English",
       "french": "French"
+    },
+    "loading": {
+      "title": "Loading…",
+      "subtitle": "Taking you there"
     }
   },
   "navbar": {

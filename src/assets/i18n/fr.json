@@ -3,6 +3,10 @@
     "language": {
       "english": "Anglais",
       "french": "Français"
+    },
+    "loading": {
+      "title": "Chargement…",
+      "subtitle": "Redirection en cours"
     }
   },
   "navbar": {
