@@ -4408,10 +4408,9 @@ INTEGRITY RULES:
     container.style.left = '-9999px';
     container.style.top = '0';
     container.style.width = '816px';
-    container.style.background = '#ffffff';
+    container.style.background = '#f8fafc';
     container.style.padding = '0';
     container.style.boxSizing = 'border-box';
-    container.style.border = '1px solid #e5e7eb';
     container.querySelectorAll('img').forEach((img) => {
       img.setAttribute('crossorigin', 'anonymous');
       (img as HTMLImageElement).style.maxWidth = '100%';
@@ -4419,69 +4418,313 @@ INTEGRITY RULES:
       (img as HTMLImageElement).style.display = 'block';
       (img as HTMLImageElement).style.margin = '18px auto';
     });
-    container.querySelectorAll('p').forEach((p) => {
-      (p as HTMLElement).style.margin = (p as HTMLElement).style.margin || '0 0 13px';
-    });
 
     document.body.appendChild(container);
-    await this.waitForImages(container);
+    try {
+      await this.waitForImages(container);
+      const pageElements = this.paginateStyledDraftPrint(container);
+      await this.waitForImages(container);
 
-    const canvas = await html2canvas(container, {
-      backgroundColor: '#ffffff',
-      scale: 2,
-      useCORS: true,
-    });
+      const pdf = new jsPDF('p', 'mm', 'letter');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
-    document.body.removeChild(container);
+      for (let page = 0; page < pageElements.length; page += 1) {
+        const canvas = await html2canvas(pageElements[page], {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+          width: 816,
+          height: 1056,
+          windowWidth: 816,
+          windowHeight: 1056,
+          scrollX: 0,
+          scrollY: 0,
+        });
 
-    const pdf = new jsPDF('p', 'mm', 'letter');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 0;
-    const marginTop = 0;
-    const marginRight = 0;
-    const usableWidth = pageWidth - marginLeft - marginRight;
-    const usableHeight = pageHeight - marginTop * 2;
-    const scaleFactor = usableWidth / canvas.width;
-    const scaledCanvasHeight = canvas.height * scaleFactor;
-    const totalPages = Math.ceil(scaledCanvasHeight / usableHeight);
-
-    let yOffset = 0;
-    for (let page = 0; page < totalPages; page += 1) {
-      const pageCanvas = document.createElement('canvas');
-      pageCanvas.width = canvas.width;
-      const pageCanvasHeight = Math.min(
-        canvas.height - yOffset,
-        usableHeight / scaleFactor
-      );
-      pageCanvas.height = pageCanvasHeight;
-      const pageCtx = pageCanvas.getContext('2d');
-      if (!pageCtx) {
-        continue;
+        if (page > 0) {
+          pdf.addPage();
+        }
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageWidth, pageHeight);
       }
 
-      pageCtx.drawImage(
-        canvas,
-        0,
-        yOffset,
-        canvas.width,
-        pageCanvasHeight,
-        0,
-        0,
-        canvas.width,
-        pageCanvasHeight
-      );
+      pdf.save(this.buildDraftFileName('pdf'));
+    } finally {
+      document.body.removeChild(container);
+    }
+  }
 
-      const pageImgData = pageCanvas.toDataURL('image/png');
-      if (page > 0) {
-        pdf.addPage();
-      }
-      const chunkPdfHeight = pageCanvasHeight * scaleFactor;
-      pdf.addImage(pageImgData, 'PNG', marginLeft, marginTop, usableWidth, chunkPdfHeight);
-      yOffset += pageCanvasHeight;
+  private paginateStyledDraftPrint(container: HTMLElement): HTMLElement[] {
+    const pagesHost = container.querySelector('.draft-pages');
+    const source = container.querySelector('.draft-content-source');
+    if (!(pagesHost instanceof HTMLElement) || !(source instanceof HTMLElement)) {
+      return Array.from(container.querySelectorAll('.draft-page')) as HTMLElement[];
     }
 
-    pdf.save(this.buildDraftFileName('pdf'));
+    const state: { body: HTMLElement | null } = { body: null };
+    const sourceNodes = Array.from(source.children) as HTMLElement[];
+
+    const startPage = (): HTMLElement => {
+      const page = document.createElement('section');
+      page.className = 'draft-page draft-content-page';
+      page.innerHTML = `
+        <div class="draft-page-body draft-content"></div>
+        <footer class="draft-page-footer">
+          <span>NewWorld Game | newworld-game.org</span>
+          <span class="draft-page-number"></span>
+        </footer>
+      `;
+      pagesHost.appendChild(page);
+      state.body = page.querySelector('.draft-page-body') as HTMLElement;
+      return state.body;
+    };
+
+    const getBody = (): HTMLElement => state.body || startPage();
+
+    for (const node of sourceNodes) {
+      this.appendDraftPrintNode(node, getBody, startPage);
+    }
+
+    source.remove();
+    const pages = Array.from(container.querySelectorAll('.draft-page')) as HTMLElement[];
+    pages.forEach((page, index) => {
+      const pageNumber = page.querySelector('.draft-page-number');
+      if (pageNumber) {
+        pageNumber.textContent = `${index + 1} / ${pages.length}`;
+      }
+    });
+    return pages;
+  }
+
+  private appendDraftPrintNode(
+    node: HTMLElement,
+    getBody: () => HTMLElement,
+    startPage: () => HTMLElement
+  ): void {
+    let body = getBody();
+    const clone = node.cloneNode(true) as HTMLElement;
+    body.appendChild(clone);
+
+    if (!this.draftPrintBodyOverflows(body)) {
+      return;
+    }
+
+    clone.remove();
+    if (body.children.length > 0) {
+      body = startPage();
+      body.appendChild(node.cloneNode(true));
+      if (!this.draftPrintBodyOverflows(body)) {
+        return;
+      }
+      body.lastElementChild?.remove();
+    }
+
+    this.appendOversizedDraftPrintNode(node, getBody, startPage);
+  }
+
+  private appendOversizedDraftPrintNode(
+    node: HTMLElement,
+    getBody: () => HTMLElement,
+    startPage: () => HTMLElement
+  ): void {
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'ul' || tag === 'ol') {
+      this.appendPagedListNode(node as HTMLOListElement | HTMLUListElement, getBody, startPage);
+      return;
+    }
+
+    if (tag === 'table') {
+      this.appendPagedTableNode(node as HTMLTableElement, getBody, startPage);
+      return;
+    }
+
+    if (['p', 'blockquote', 'div', 'section'].includes(tag)) {
+      this.appendPagedTextBlock(node, getBody, startPage);
+      return;
+    }
+
+    const body = getBody();
+    body.appendChild(node.cloneNode(true));
+  }
+
+  private appendPagedTextBlock(
+    node: HTMLElement,
+    getBody: () => HTMLElement,
+    startPage: () => HTMLElement
+  ): void {
+    const text = this.normalizeWhitespace(node.textContent || '');
+    if (!text) {
+      return;
+    }
+
+    const words = text.split(/\s+/);
+    let remaining = words;
+
+    while (remaining.length) {
+      let body = getBody();
+      let low = 1;
+      let high = remaining.length;
+      let best = 0;
+
+      while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        const testNode = this.cloneDraftTextBlock(node, remaining.slice(0, mid).join(' '));
+        body.appendChild(testNode);
+        const fits = !this.draftPrintBodyOverflows(body);
+        testNode.remove();
+
+        if (fits) {
+          best = mid;
+          low = mid + 1;
+        } else {
+          high = mid - 1;
+        }
+      }
+
+      if (best === 0) {
+        body = startPage();
+        const testNode = this.cloneDraftTextBlock(node, remaining[0]);
+        body.appendChild(testNode);
+        remaining = remaining.slice(1);
+      } else {
+        body.appendChild(this.cloneDraftTextBlock(node, remaining.slice(0, best).join(' ')));
+        remaining = remaining.slice(best);
+      }
+
+      if (remaining.length) {
+        startPage();
+      }
+    }
+  }
+
+  private cloneDraftTextBlock(source: HTMLElement, text: string): HTMLElement {
+    const clone = source.cloneNode(false) as HTMLElement;
+    clone.textContent = text;
+    return clone;
+  }
+
+  private appendPagedListNode(
+    node: HTMLOListElement | HTMLUListElement,
+    getBody: () => HTMLElement,
+    startPage: () => HTMLElement
+  ): void {
+    const tag = node.tagName.toLowerCase();
+    let list = document.createElement(tag);
+
+    const ensureList = (): HTMLElement => {
+      let body = getBody();
+      if (!list.parentElement || list.parentElement !== body) {
+        list = document.createElement(tag);
+        body.appendChild(list);
+      }
+      return body;
+    };
+
+    Array.from(node.children).forEach((item) => {
+      let body = ensureList();
+      const clone = item.cloneNode(true) as HTMLElement;
+      list.appendChild(clone);
+
+      if (!this.draftPrintBodyOverflows(body)) {
+        return;
+      }
+
+      clone.remove();
+      if (list.children.length === 0) {
+        this.appendPagedTextBlock(item as HTMLElement, getBody, startPage);
+        list = document.createElement(tag);
+        return;
+      }
+
+      body = startPage();
+      list = document.createElement(tag);
+      body.appendChild(list);
+      list.appendChild(item.cloneNode(true));
+
+      if (this.draftPrintBodyOverflows(body)) {
+        list.lastElementChild?.remove();
+        this.appendPagedTextBlock(item as HTMLElement, getBody, startPage);
+        list = document.createElement(tag);
+      }
+    });
+  }
+
+  private appendPagedTableNode(
+    table: HTMLTableElement,
+    getBody: () => HTMLElement,
+    startPage: () => HTMLElement
+  ): void {
+    const headerRows = Array.from(table.querySelectorAll('thead tr'));
+    const bodyRows = Array.from(table.querySelectorAll('tbody tr'));
+    const directRows = Array.from(table.children).filter((child) => child.tagName.toLowerCase() === 'tr') as HTMLTableRowElement[];
+    const rows = bodyRows.length ? bodyRows : directRows.length ? directRows : Array.from(table.querySelectorAll('tr'));
+    const hasHeader = headerRows.length > 0;
+    let pageParts: { body: HTMLElement; tableBody: HTMLElement } | null = null;
+    const createdTables: Array<{ table: HTMLTableElement; tableBody: HTMLElement }> = [];
+
+    const createTableOnPage = (): { body: HTMLElement; tableBody: HTMLElement } => {
+      const body = getBody();
+      const currentTable = table.cloneNode(false) as HTMLTableElement;
+      if (hasHeader) {
+        const thead = document.createElement('thead');
+        headerRows.forEach((row) => thead.appendChild(row.cloneNode(true)));
+        currentTable.appendChild(thead);
+      }
+      const currentBodySection = document.createElement('tbody');
+      currentTable.appendChild(currentBodySection);
+      body.appendChild(currentTable);
+      createdTables.push({ table: currentTable, tableBody: currentBodySection });
+      return { body, tableBody: currentBodySection };
+    };
+
+    const ensureTableOnPage = (): { body: HTMLElement; tableBody: HTMLElement } => {
+      if (!pageParts) {
+        pageParts = createTableOnPage();
+      }
+      return pageParts;
+    };
+
+    rows.forEach((row, index) => {
+      pageParts = ensureTableOnPage();
+      const clonedRow = row.cloneNode(true) as HTMLTableRowElement;
+      pageParts.tableBody.appendChild(clonedRow);
+
+      if (!this.draftPrintBodyOverflows(pageParts.body)) {
+        return;
+      }
+
+      clonedRow.remove();
+      if (pageParts.tableBody.children.length === 0) {
+        // A single row is taller than the usable page body. Keep it intact rather than
+        // slicing text pixels; the row may overflow, but ordinary rows still paginate cleanly.
+        pageParts.tableBody.appendChild(row.cloneNode(true));
+        pageParts = null;
+        if (index < rows.length - 1) {
+          startPage();
+        }
+        return;
+      }
+
+      startPage();
+      pageParts = createTableOnPage();
+      pageParts.tableBody.appendChild(row.cloneNode(true));
+      if (this.draftPrintBodyOverflows(pageParts.body)) {
+        pageParts = null;
+        if (index < rows.length - 1) {
+          startPage();
+        }
+      }
+    });
+
+    createdTables.forEach((entry) => {
+      if (entry.tableBody.children.length === 0) {
+        entry.table.remove();
+      }
+    });
+  }
+
+  private draftPrintBodyOverflows(body: HTMLElement): boolean {
+    return body.scrollHeight > body.clientHeight + 1;
   }
 
   private buildStyledDraftPrintHtml(title: string): string {
@@ -4502,17 +4745,38 @@ INTEGRITY RULES:
 
     return `
       <style>
-        .draft-print {
+        .draft-pdf-document {
+          width: 816px;
+          background: #f8fafc;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+        .draft-page {
+          position: relative;
           box-sizing: border-box;
           width: 816px;
-          min-height: 1056px;
+          height: 1056px;
           padding: 72px;
           background: #ffffff;
           color: #444441;
           font-family: Arial, Helvetica, sans-serif;
           line-height: 1.55;
+          overflow: hidden;
         }
-        .draft-print * { box-sizing: border-box; }
+        .draft-page * { box-sizing: border-box; }
+        .draft-page-body {
+          height: 872px;
+          overflow: hidden;
+        }
+        .draft-content-source {
+          position: absolute;
+          left: -99999px;
+          top: 0;
+          width: 672px;
+          visibility: hidden;
+          pointer-events: none;
+          font-family: Arial, Helvetica, sans-serif;
+          line-height: 1.55;
+        }
         .draft-kicker {
           margin: 0 0 16px;
           text-align: center;
@@ -4663,33 +4927,52 @@ INTEGRITY RULES:
           font-style: italic;
           text-align: center;
         }
-        .draft-footer {
-          margin-top: 44px;
+        .draft-page-footer {
+          position: absolute;
+          left: 72px;
+          right: 72px;
+          bottom: 42px;
+          display: flex;
+          justify-content: space-between;
+          gap: 24px;
           padding-top: 12px;
           border-top: 1px solid #d8dee4;
           color: #6b7280;
           font-size: 11px;
         }
       </style>
-      <article class="draft-print">
-        <p class="draft-kicker">New World Game Draft</p>
-        <h1 class="draft-title">${this.escapeHtml(title)}</h1>
-        <div class="draft-rule"></div>
-        <section class="draft-meta">
-          <div><span>Author</span><strong>${author}</strong></div>
-          <div><span>Team</span><strong>${team}</strong></div>
-          <div><span>Generated</span><strong>${generated}</strong></div>
+      <article class="draft-pdf-document">
+        <section class="draft-page draft-cover-page">
+          <div class="draft-page-body">
+            <p class="draft-kicker">New World Game Draft</p>
+            <h1 class="draft-title">${this.escapeHtml(title)}</h1>
+            <div class="draft-rule"></div>
+            <section class="draft-meta">
+              <div><span>Author</span><strong>${author}</strong></div>
+              <div><span>Team</span><strong>${team}</strong></div>
+              <div><span>Generated</span><strong>${generated}</strong></div>
+            </section>
+            <section class="draft-callout">
+              <strong>Current Working Draft</strong>
+              <p>${description}</p>
+            </section>
+            <section class="draft-meta">
+              <div><span>Source</span><strong>Playground Steps</strong></div>
+              <div><span>Format</span><strong>DOCX primary, PDF mirror</strong></div>
+              <div><span>Status</span><strong>Current draft</strong></div>
+            </section>
+          </div>
+          <footer class="draft-page-footer">
+            <span>NewWorld Game | newworld-game.org</span>
+            <span class="draft-page-number"></span>
+          </footer>
         </section>
-        <section class="draft-callout">
-          <strong>Current Working Draft</strong>
-          <p>${description}</p>
-        </section>
-        <p class="draft-section-label">Step 5 Current Draft</p>
-        <section class="draft-content">
+        <div class="draft-pages"></div>
+        <section class="draft-content-source draft-content">
+          <p class="draft-section-label">Step 5 Current Draft</p>
           <h1>Current Draft</h1>
           ${bodyHtml}
         </section>
-        <footer class="draft-footer">NewWorld Game | newworld-game.org</footer>
       </article>
     `;
   }
