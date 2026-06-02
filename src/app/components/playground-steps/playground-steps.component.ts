@@ -25,6 +25,10 @@ import {
   Footer,
   HeadingLevel,
   ImageRun,
+  AlignmentType,
+  LevelFormat,
+  PageBreak,
+  PageNumber,
   Packer,
   Paragraph,
   Table,
@@ -34,6 +38,7 @@ import {
   WidthType,
   ShadingType,
   BorderStyle,
+  VerticalAlign,
 } from 'docx';
 
 type SupportedLanguage = 'en' | 'fr';
@@ -93,6 +98,8 @@ interface ImpactBmcTableData {
   revenueStreams: string;
   intendedImpact: string;
 }
+
+type DraftDocxBlock = Paragraph | Table;
 
 interface SavedAiFeedback {
   evaluatorName: string;
@@ -2188,25 +2195,413 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
     this.downloadingDraftDocx = true;
     try {
       const title = this.currentSolution?.title || 'Untitled Solution';
-      const paragraphs = await this.buildDocxParagraphsFromHtml(this.currentDraftHtml);
-
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: [
-              new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
-              ...paragraphs,
-            ],
-          },
-        ],
-      });
+      const contentBlocks = await this.buildDocxParagraphsFromHtml(this.currentDraftHtml);
+      const doc = this.buildBeautifulDraftDocument(title, contentBlocks);
 
       const blob = await Packer.toBlob(doc);
       this.triggerDownload(blob, this.buildDraftFileName('docx'));
     } finally {
       this.downloadingDraftDocx = false;
     }
+  }
+
+  private buildBeautifulDraftDocument(title: string, contentBlocks: DraftDocxBlock[]): Document {
+    const blocks = contentBlocks.length
+      ? contentBlocks
+      : [this.draftBodyParagraph('No draft content is available yet.', { italic: true, color: '6B7280' })];
+
+    return new Document({
+      numbering: {
+        config: [
+          {
+            reference: 'draft-bullets',
+            levels: [
+              {
+                level: 0,
+                format: LevelFormat.BULLET,
+                text: '\u2022',
+                alignment: AlignmentType.LEFT,
+                style: { paragraph: { indent: { left: 720, hanging: 360 } } },
+              },
+            ],
+          },
+          {
+            reference: 'draft-numbers',
+            levels: [
+              {
+                level: 0,
+                format: LevelFormat.DECIMAL,
+                text: '%1.',
+                alignment: AlignmentType.LEFT,
+                style: { paragraph: { indent: { left: 720, hanging: 360 } } },
+              },
+            ],
+          },
+        ],
+      },
+      styles: {
+        default: {
+          document: {
+            run: { font: 'Arial', size: 22, color: '444441' },
+            paragraph: { spacing: { after: 120, line: 300 } },
+          },
+        },
+        paragraphStyles: [
+          {
+            id: 'Heading1',
+            name: 'Heading 1',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 34, bold: true, font: 'Arial', color: '111827' },
+            paragraph: { spacing: { before: 360, after: 140 }, outlineLevel: 0 },
+          },
+          {
+            id: 'Heading2',
+            name: 'Heading 2',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 28, bold: true, font: 'Arial', color: '0F766E' },
+            paragraph: { spacing: { before: 300, after: 120 }, outlineLevel: 1 },
+          },
+          {
+            id: 'Heading3',
+            name: 'Heading 3',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 23, bold: true, font: 'Arial', color: '185FA5' },
+            paragraph: { spacing: { before: 220, after: 80 }, outlineLevel: 2 },
+          },
+        ],
+      },
+      sections: [
+        {
+          properties: {
+            page: {
+              size: { width: 12240, height: 15840 },
+              margin: { top: 1080, right: 1440, bottom: 1080, left: 1440 },
+            },
+          },
+          footers: { default: this.buildDraftFooter() },
+          children: [
+            ...this.buildDraftCoverBlocks(title),
+            new Paragraph({ children: [new PageBreak()] }),
+            this.draftSectionLabel('Step 5 Current Draft', '0F766E'),
+            this.draftHeading('Current Draft', 1),
+            ...blocks,
+          ],
+        },
+      ],
+    });
+  }
+
+  private buildDraftFooter(): Footer {
+    return new Footer({
+      children: [
+        new Paragraph({
+          border: {
+            top: { style: BorderStyle.SINGLE, size: 2, color: 'D8DEE4' },
+          },
+          spacing: { before: 120 },
+          children: [
+            new TextRun({ text: 'NewWorld Game  ', size: 16, color: '6B7280', font: 'Arial' }),
+            new TextRun({ text: '|  ', size: 16, color: 'CBD5E1', font: 'Arial' }),
+            new ExternalHyperlink({
+              link: 'https://newworld-game.org/',
+              children: [
+                new TextRun({
+                  text: 'newworld-game.org',
+                  size: 16,
+                  color: '0F766E',
+                  font: 'Arial',
+                }),
+              ],
+            }),
+            new TextRun({ text: '  |  Page ', size: 16, color: '6B7280', font: 'Arial' }),
+            new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '6B7280', font: 'Arial' }),
+          ],
+        }),
+      ],
+    });
+  }
+
+  private buildDraftCoverBlocks(title: string): DraftDocxBlock[] {
+    const author = this.getDraftAuthorName();
+    const team = this.getDraftTeamNames();
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const description = this.toPlainText(this.currentSolution?.description || '').slice(0, 520);
+
+    return [
+      this.draftSpacer(420),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 140 },
+        children: [
+          new TextRun({
+            text: 'NEW WORLD GAME DRAFT',
+            font: 'Arial',
+            size: 18,
+            bold: true,
+            color: '0F766E',
+            allCaps: true,
+            characterSpacing: 120,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 80, after: 80 },
+        children: [
+          new TextRun({
+            text: title,
+            font: 'Arial',
+            size: 48,
+            bold: true,
+            color: '111827',
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: '1D9E75' } },
+        spacing: { before: 80, after: 220 },
+        children: [new TextRun({ text: '', font: 'Arial', size: 4 })],
+      }),
+      this.draftMetadataTable([
+        { label: 'Author', value: author || 'Unknown' },
+        { label: 'Team', value: team || 'Individual draft' },
+        { label: 'Generated', value: dateStr },
+      ]),
+      this.draftSpacer(260),
+      this.draftCallout(
+        'Current Working Draft',
+        description ||
+          'This export packages the current Step 5 draft into a polished working document for review, sharing, and continued refinement.',
+        'E1F5EE',
+        '1D9E75',
+        '085041'
+      ),
+      this.draftSpacer(260),
+      this.draftMetadataTable([
+        { label: 'Source', value: 'Playground Steps' },
+        { label: 'Format', value: 'DOCX primary, PDF mirror' },
+        { label: 'Status', value: 'Current draft' },
+      ]),
+    ];
+  }
+
+  private draftMetadataTable(items: { label: string; value: string }[]): Table {
+    const widths = this.equalColumnWidths(9360, items.length);
+    return new Table({
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: widths,
+      rows: [
+        new TableRow({
+          children: items.map((item, index) =>
+            new TableCell({
+              width: { size: widths[index], type: WidthType.DXA },
+              borders: this.draftBorders('D8DEE4'),
+              shading: { fill: index === 1 ? 'E6F1FB' : 'F8FAFC', type: ShadingType.CLEAR },
+              verticalAlign: VerticalAlign.CENTER,
+              margins: { top: 140, bottom: 140, left: 160, right: 160 },
+              children: [
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { after: 40 },
+                  children: [
+                    new TextRun({
+                      text: item.label.toUpperCase(),
+                      font: 'Arial',
+                      size: 16,
+                      bold: true,
+                      color: index === 1 ? '185FA5' : '64748B',
+                      allCaps: true,
+                    }),
+                  ],
+                }),
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  children: [
+                    new TextRun({
+                      text: item.value,
+                      font: 'Arial',
+                      size: 20,
+                      color: index === 1 ? '0F3F71' : '111827',
+                      bold: true,
+                    }),
+                  ],
+                }),
+              ],
+            })
+          ),
+        }),
+      ],
+    });
+  }
+
+  private draftCallout(label: string, body: string, fillColor: string, borderColor: string, textColor: string): Table {
+    return new Table({
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: [180, 9180],
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 180, type: WidthType.DXA },
+              borders: { ...this.draftNoBorders(), left: { style: BorderStyle.SINGLE, size: 14, color: borderColor } },
+              shading: { fill: fillColor, type: ShadingType.CLEAR },
+              margins: { top: 100, bottom: 100, left: 80, right: 0 },
+              children: [new Paragraph({ children: [] })],
+            }),
+            new TableCell({
+              width: { size: 9180, type: WidthType.DXA },
+              borders: this.draftNoBorders(),
+              shading: { fill: fillColor, type: ShadingType.CLEAR },
+              margins: { top: 150, bottom: 150, left: 220, right: 240 },
+              children: [
+                new Paragraph({
+                  spacing: { after: 70 },
+                  children: [
+                    new TextRun({
+                      text: label.toUpperCase(),
+                      font: 'Arial',
+                      size: 17,
+                      bold: true,
+                      color: textColor,
+                      allCaps: true,
+                      characterSpacing: 60,
+                    }),
+                  ],
+                }),
+                new Paragraph({
+                  spacing: { line: 300 },
+                  children: [
+                    new TextRun({
+                      text: body,
+                      font: 'Arial',
+                      size: 21,
+                      color: textColor,
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
+    });
+  }
+
+  private draftSectionLabel(text: string, color: string): Paragraph {
+    return new Paragraph({
+      spacing: { before: 80, after: 90 },
+      children: [
+        new TextRun({
+          text: text.toUpperCase(),
+          font: 'Arial',
+          size: 17,
+          bold: true,
+          color,
+          allCaps: true,
+          characterSpacing: 100,
+        }),
+      ],
+    });
+  }
+
+  private draftHeading(text: string, level: 1 | 2 | 3): Paragraph {
+    return new Paragraph({
+      heading: level === 1 ? HeadingLevel.HEADING_1 : level === 2 ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
+      children: [
+        new TextRun({
+          text,
+          font: 'Arial',
+          size: level === 1 ? 34 : level === 2 ? 28 : 23,
+          bold: true,
+          color: level === 1 ? '111827' : level === 2 ? '0F766E' : '185FA5',
+        }),
+      ],
+    });
+  }
+
+  private draftBodyParagraph(
+    text: string,
+    opts: { bold?: boolean; italic?: boolean; color?: string; alignment?: (typeof AlignmentType)[keyof typeof AlignmentType] } = {}
+  ): Paragraph {
+    return new Paragraph({
+      alignment: opts.alignment,
+      spacing: { before: 40, after: 130, line: 300 },
+      children: [
+        new TextRun({
+          text,
+          font: 'Arial',
+          size: 22,
+          color: opts.color || '444441',
+          bold: !!opts.bold,
+          italics: !!opts.italic,
+        }),
+      ],
+    });
+  }
+
+  private draftListParagraph(text: string, ordered = false): Paragraph {
+    return new Paragraph({
+      numbering: { reference: ordered ? 'draft-numbers' : 'draft-bullets', level: 0 },
+      spacing: { before: 40, after: 90, line: 300 },
+      children: [new TextRun({ text, font: 'Arial', size: 21, color: '444441' })],
+    });
+  }
+
+  private draftCaption(text: string): Paragraph {
+    return new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 60, after: 140 },
+      children: [new TextRun({ text, font: 'Arial', size: 18, italics: true, color: '64748B' })],
+    });
+  }
+
+  private draftSpacer(before = 120): Paragraph {
+    return new Paragraph({ spacing: { before, after: 0 }, children: [new TextRun({ text: '' })] });
+  }
+
+  private draftBorders(color = 'E2E8F0') {
+    const border = { style: BorderStyle.SINGLE, size: 1, color };
+    return { top: border, bottom: border, left: border, right: border };
+  }
+
+  private draftNoBorders() {
+    const border = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    return { top: border, bottom: border, left: border, right: border };
+  }
+
+  private equalColumnWidths(totalWidth: number, count: number): number[] {
+    const safeCount = Math.max(1, count);
+    const base = Math.floor(totalWidth / safeCount);
+    const widths = new Array(safeCount).fill(base);
+    widths[widths.length - 1] += totalWidth - widths.reduce((sum, width) => sum + width, 0);
+    return widths;
+  }
+
+  private getDraftAuthorName(): string {
+    const profileName = this.normalizeWhitespace(
+      `${this.auth.currentUser?.firstName || ''} ${this.auth.currentUser?.lastName || ''}`
+    );
+    return this.normalizeWhitespace(
+      this.currentSolution?.authorName || profileName || this.auth.currentUser?.email || ''
+    );
+  }
+
+  private getDraftTeamNames(): string {
+    return this.teamMembers
+      .map((member) => this.normalizeWhitespace(`${member.firstName || ''} ${member.lastName || ''}`) || member.email || '')
+      .filter(Boolean)
+      .join(', ');
   }
 
   openReportModal() {
@@ -4008,18 +4403,13 @@ INTEGRITY RULES:
     const { default: html2canvas } = await import('html2canvas');
     const container = document.createElement('div');
     const title = this.currentSolution?.title || 'Untitled Solution';
-    container.innerHTML = `
-      <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.5;">
-        <h1 style="font-size: 22px; font-weight: 700; margin-bottom: 12px;">${this.escapeHtml(title)}</h1>
-        ${this.currentDraftHtml || this.textToHtml(this.currentDraftText)}
-      </div>
-    `;
+    container.innerHTML = this.buildStyledDraftPrintHtml(title);
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
-    container.style.width = '800px';
+    container.style.width = '816px';
     container.style.background = '#ffffff';
-    container.style.padding = '24px';
+    container.style.padding = '0';
     container.style.boxSizing = 'border-box';
     container.style.border = '1px solid #e5e7eb';
     container.querySelectorAll('img').forEach((img) => {
@@ -4027,10 +4417,10 @@ INTEGRITY RULES:
       (img as HTMLImageElement).style.maxWidth = '100%';
       (img as HTMLImageElement).style.height = 'auto';
       (img as HTMLImageElement).style.display = 'block';
-      (img as HTMLImageElement).style.margin = '12px 0';
+      (img as HTMLImageElement).style.margin = '18px auto';
     });
     container.querySelectorAll('p').forEach((p) => {
-      (p as HTMLElement).style.margin = '0 0 10px';
+      (p as HTMLElement).style.margin = (p as HTMLElement).style.margin || '0 0 13px';
     });
 
     document.body.appendChild(container);
@@ -4044,12 +4434,12 @@ INTEGRITY RULES:
 
     document.body.removeChild(container);
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdf = new jsPDF('p', 'mm', 'letter');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 14;
-    const marginTop = 14;
-    const marginRight = 14;
+    const marginLeft = 0;
+    const marginTop = 0;
+    const marginRight = 0;
     const usableWidth = pageWidth - marginLeft - marginRight;
     const usableHeight = pageHeight - marginTop * 2;
     const scaleFactor = usableWidth / canvas.width;
@@ -4094,6 +4484,216 @@ INTEGRITY RULES:
     pdf.save(this.buildDraftFileName('pdf'));
   }
 
+  private buildStyledDraftPrintHtml(title: string): string {
+    const author = this.escapeHtml(this.getDraftAuthorName() || 'Unknown');
+    const team = this.escapeHtml(this.getDraftTeamNames() || 'Individual draft');
+    const generated = this.escapeHtml(
+      new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    );
+    const description = this.escapeHtml(
+      this.toPlainText(this.currentSolution?.description || '').slice(0, 520) ||
+        'This export packages the current Step 5 draft into a polished working document for review, sharing, and continued refinement.'
+    );
+    const bodyHtml = this.currentDraftHtml || this.textToHtml(this.currentDraftText);
+
+    return `
+      <style>
+        .draft-print {
+          box-sizing: border-box;
+          width: 816px;
+          min-height: 1056px;
+          padding: 72px;
+          background: #ffffff;
+          color: #444441;
+          font-family: Arial, Helvetica, sans-serif;
+          line-height: 1.55;
+        }
+        .draft-print * { box-sizing: border-box; }
+        .draft-kicker {
+          margin: 0 0 16px;
+          text-align: center;
+          color: #0f766e;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+        .draft-title {
+          margin: 0 auto 18px;
+          max-width: 650px;
+          text-align: center;
+          color: #111827;
+          font-size: 34px;
+          line-height: 1.12;
+          font-weight: 800;
+        }
+        .draft-rule {
+          width: 150px;
+          height: 4px;
+          margin: 0 auto 30px;
+          background: #1d9e75;
+        }
+        .draft-meta {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0;
+          margin: 0 0 28px;
+          border: 1px solid #d8dee4;
+        }
+        .draft-meta div {
+          min-height: 86px;
+          padding: 14px 12px;
+          border-right: 1px solid #d8dee4;
+          background: #f8fafc;
+          text-align: center;
+        }
+        .draft-meta div:nth-child(2) { background: #e6f1fb; }
+        .draft-meta div:last-child { border-right: 0; }
+        .draft-meta span {
+          display: block;
+          margin-bottom: 7px;
+          color: #64748b;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .draft-meta strong {
+          display: block;
+          color: #111827;
+          font-size: 13px;
+          line-height: 1.35;
+        }
+        .draft-callout {
+          margin: 0 0 34px;
+          padding: 16px 20px;
+          border-left: 8px solid #1d9e75;
+          background: #e1f5ee;
+          color: #085041;
+        }
+        .draft-callout strong {
+          display: block;
+          margin-bottom: 7px;
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .draft-callout p {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.55;
+        }
+        .draft-section-label {
+          margin: 36px 0 8px;
+          color: #0f766e;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .draft-content h1 {
+          margin: 0 0 18px;
+          color: #111827;
+          font-size: 28px;
+          line-height: 1.18;
+        }
+        .draft-content h2 {
+          margin: 30px 0 12px;
+          color: #0f766e;
+          font-size: 21px;
+          line-height: 1.25;
+        }
+        .draft-content h3,
+        .draft-content h4,
+        .draft-content h5,
+        .draft-content h6 {
+          margin: 24px 0 10px;
+          color: #185fa5;
+          font-size: 16px;
+          line-height: 1.3;
+        }
+        .draft-content p,
+        .draft-content li {
+          color: #444441;
+          font-size: 14px;
+          line-height: 1.58;
+        }
+        .draft-content ul,
+        .draft-content ol {
+          margin: 8px 0 18px 22px;
+          padding: 0;
+        }
+        .draft-content li { margin: 0 0 7px; padding-left: 4px; }
+        .draft-content blockquote {
+          margin: 22px 0;
+          padding: 14px 18px;
+          border-left: 7px solid #185fa5;
+          background: #e6f1fb;
+          color: #0f3f71;
+        }
+        .draft-content table {
+          width: 100%;
+          margin: 22px 0;
+          border-collapse: collapse;
+          table-layout: fixed;
+          font-size: 12px;
+        }
+        .draft-content th {
+          padding: 11px 12px;
+          border: 1px solid #cbd5e1;
+          background: #0f766e;
+          color: #ffffff;
+          text-align: left;
+        }
+        .draft-content td {
+          padding: 11px 12px;
+          border: 1px solid #cbd5e1;
+          color: #334155;
+          vertical-align: middle;
+        }
+        .draft-content tr:nth-child(even) td { background: #f8fafc; }
+        .draft-content figcaption {
+          margin: -8px 0 18px;
+          color: #64748b;
+          font-size: 12px;
+          font-style: italic;
+          text-align: center;
+        }
+        .draft-footer {
+          margin-top: 44px;
+          padding-top: 12px;
+          border-top: 1px solid #d8dee4;
+          color: #6b7280;
+          font-size: 11px;
+        }
+      </style>
+      <article class="draft-print">
+        <p class="draft-kicker">New World Game Draft</p>
+        <h1 class="draft-title">${this.escapeHtml(title)}</h1>
+        <div class="draft-rule"></div>
+        <section class="draft-meta">
+          <div><span>Author</span><strong>${author}</strong></div>
+          <div><span>Team</span><strong>${team}</strong></div>
+          <div><span>Generated</span><strong>${generated}</strong></div>
+        </section>
+        <section class="draft-callout">
+          <strong>Current Working Draft</strong>
+          <p>${description}</p>
+        </section>
+        <p class="draft-section-label">Step 5 Current Draft</p>
+        <section class="draft-content">
+          <h1>Current Draft</h1>
+          ${bodyHtml}
+        </section>
+        <footer class="draft-footer">NewWorld Game | newworld-game.org</footer>
+      </article>
+    `;
+  }
+
   private downloadCurrentDraftPdfTextOnly(): void {
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -4125,18 +4725,18 @@ INTEGRITY RULES:
     pdf.save(this.buildDraftFileName('pdf'));
   }
 
-  private async buildDocxParagraphsFromHtml(html: string): Promise<Paragraph[]> {
+  private async buildDocxParagraphsFromHtml(html: string): Promise<DraftDocxBlock[]> {
     if (!html || typeof document === 'undefined') {
       return this.currentDraftText
         .split(/\n+/)
         .map((line) => line.trim())
         .filter(Boolean)
-        .map((line) => new Paragraph(line));
+        .map((line) => this.draftBodyParagraph(line));
     }
 
     const parser = new DOMParser();
     const parsed = parser.parseFromString(html, 'text/html');
-    const paragraphs: Paragraph[] = [];
+    const paragraphs: DraftDocxBlock[] = [];
     const bodyChildren = Array.from(parsed.body.children);
 
     for (const element of bodyChildren) {
@@ -4146,7 +4746,7 @@ INTEGRITY RULES:
     return paragraphs;
   }
 
-  private async appendDocxFromElement(element: HTMLElement, paragraphs: Paragraph[]): Promise<void> {
+  private async appendDocxFromElement(element: HTMLElement, paragraphs: DraftDocxBlock[]): Promise<void> {
     const tag = element.tagName.toLowerCase();
 
     if (tag === 'img') {
@@ -4167,7 +4767,7 @@ INTEGRITY RULES:
       }
       const caption = element.querySelector('figcaption')?.textContent?.trim();
       if (caption) {
-        paragraphs.push(new Paragraph(caption));
+        paragraphs.push(this.draftCaption(caption));
       }
       return;
     }
@@ -4175,7 +4775,25 @@ INTEGRITY RULES:
     if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
       const headingText = element.textContent?.trim();
       if (headingText) {
-        paragraphs.push(new Paragraph({ text: headingText, heading: HeadingLevel.HEADING_2 }));
+        const level = tag === 'h1' ? 1 : tag === 'h2' ? 2 : 3;
+        paragraphs.push(this.draftHeading(headingText, level));
+      }
+      return;
+    }
+
+    if (tag === 'blockquote') {
+      const quote = this.extractElementText(element);
+      if (quote) {
+        paragraphs.push(this.draftCallout('Key passage', quote, 'E6F1FB', '185FA5', '0F3F71'));
+      }
+      return;
+    }
+
+    if (tag === 'table') {
+      const table = this.buildDraftDocxTable(element as HTMLTableElement);
+      if (table) {
+        paragraphs.push(table);
+        paragraphs.push(this.draftSpacer(120));
       }
       return;
     }
@@ -4183,9 +4801,9 @@ INTEGRITY RULES:
     if (tag === 'ul' || tag === 'ol') {
       const items = Array.from(element.querySelectorAll('li'));
       for (const item of items) {
-        const itemText = item.textContent?.trim();
+        const itemText = this.extractElementText(item as HTMLElement);
         if (itemText) {
-          paragraphs.push(new Paragraph(`• ${itemText}`));
+          paragraphs.push(this.draftListParagraph(itemText, tag === 'ol'));
         }
         const img = item.querySelector('img');
         if (img) {
@@ -4201,9 +4819,9 @@ INTEGRITY RULES:
     let buffer = '';
     const childNodes = Array.from(element.childNodes);
     if (!childNodes.length) {
-      const textContent = element.textContent?.trim();
+      const textContent = this.extractElementText(element);
       if (textContent) {
-        paragraphs.push(new Paragraph(textContent));
+        paragraphs.push(this.draftBodyParagraph(textContent));
       }
       return;
     }
@@ -4226,7 +4844,7 @@ INTEGRITY RULES:
 
       if (childTag === 'br') {
         if (buffer) {
-          paragraphs.push(new Paragraph(buffer));
+          paragraphs.push(this.draftBodyParagraph(buffer));
           buffer = '';
         }
         continue;
@@ -4234,7 +4852,7 @@ INTEGRITY RULES:
 
       if (childTag === 'img') {
         if (buffer) {
-          paragraphs.push(new Paragraph(buffer));
+          paragraphs.push(this.draftBodyParagraph(buffer));
           buffer = '';
         }
         const imageParagraph = await this.buildImageParagraph(childElement as HTMLImageElement);
@@ -4244,15 +4862,69 @@ INTEGRITY RULES:
         continue;
       }
 
-      const childText = childElement.textContent?.trim();
+      const childText = this.extractElementText(childElement);
       if (childText) {
         buffer = buffer ? `${buffer} ${childText}` : childText;
       }
     }
 
     if (buffer) {
-      paragraphs.push(new Paragraph(buffer));
+      paragraphs.push(this.draftBodyParagraph(buffer));
     }
+  }
+
+  private extractElementText(element: HTMLElement): string {
+    return this.normalizeWhitespace(element.textContent || '');
+  }
+
+  private buildDraftDocxTable(tableElement: HTMLTableElement): Table | null {
+    const rowElements = Array.from(tableElement.querySelectorAll('tr'));
+    if (!rowElements.length) {
+      return null;
+    }
+
+    const rows = rowElements
+      .map((row) => Array.from(row.children).map((cell) => this.extractElementText(cell as HTMLElement)))
+      .filter((cells) => cells.some(Boolean));
+
+    const columnCount = Math.min(5, Math.max(...rows.map((row) => row.length), 1));
+    const widths = this.equalColumnWidths(9360, columnCount);
+
+    return new Table({
+      width: { size: 9360, type: WidthType.DXA },
+      columnWidths: widths,
+      rows: rows.map((cells, rowIndex) =>
+        new TableRow({
+          children: widths.map((width, cellIndex) => {
+            const value = cells[cellIndex] || '';
+            const isHeader =
+              rowIndex === 0 &&
+              Array.from(rowElements[0].children).some((cell) => cell.tagName.toLowerCase() === 'th');
+            return new TableCell({
+              width: { size: width, type: WidthType.DXA },
+              borders: this.draftBorders('CBD5E1'),
+              shading: { fill: isHeader ? '0F766E' : rowIndex % 2 === 0 ? 'F8FAFC' : 'FFFFFF', type: ShadingType.CLEAR },
+              verticalAlign: VerticalAlign.CENTER,
+              margins: { top: 120, bottom: 120, left: 140, right: 140 },
+              children: [
+                new Paragraph({
+                  spacing: { before: 0, after: 0, line: 260 },
+                  children: [
+                    new TextRun({
+                      text: value,
+                      font: 'Arial',
+                      size: isHeader ? 18 : 20,
+                      color: isHeader ? 'FFFFFF' : '334155',
+                      bold: isHeader,
+                    }),
+                  ],
+                }),
+              ],
+            });
+          }),
+        })
+      ),
+    });
   }
 
   private async buildImageParagraph(image: HTMLImageElement): Promise<Paragraph | null> {
@@ -4268,6 +4940,8 @@ INTEGRITY RULES:
       }
       const { data, width, height, type } = imageData;
       return new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 140, after: 140 },
         children: [
           new ImageRun({
             data,
