@@ -2604,6 +2604,164 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       .join(', ');
   }
 
+  private buildBeautifulReportDocument(title: string, contentBlocks: DraftDocxBlock[]): Document {
+    const blocks = contentBlocks.length
+      ? contentBlocks
+      : [this.draftBodyParagraph('No report content is available yet.', { italic: true, color: '6B7280' })];
+
+    return new Document({
+      numbering: {
+        config: [
+          {
+            reference: 'draft-bullets',
+            levels: [
+              {
+                level: 0,
+                format: LevelFormat.BULLET,
+                text: '\u2022',
+                alignment: AlignmentType.LEFT,
+                style: { paragraph: { indent: { left: 720, hanging: 360 } } },
+              },
+            ],
+          },
+          {
+            reference: 'draft-numbers',
+            levels: [
+              {
+                level: 0,
+                format: LevelFormat.DECIMAL,
+                text: '%1.',
+                alignment: AlignmentType.LEFT,
+                style: { paragraph: { indent: { left: 720, hanging: 360 } } },
+              },
+            ],
+          },
+        ],
+      },
+      styles: {
+        default: {
+          document: {
+            run: { font: 'Arial', size: 22, color: '444441' },
+            paragraph: { spacing: { after: 120, line: 300 } },
+          },
+        },
+        paragraphStyles: [
+          {
+            id: 'Heading1',
+            name: 'Heading 1',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 34, bold: true, font: 'Arial', color: '111827' },
+            paragraph: { spacing: { before: 360, after: 140 }, outlineLevel: 0 },
+          },
+          {
+            id: 'Heading2',
+            name: 'Heading 2',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 28, bold: true, font: 'Arial', color: '0F766E' },
+            paragraph: { spacing: { before: 300, after: 120 }, outlineLevel: 1 },
+          },
+          {
+            id: 'Heading3',
+            name: 'Heading 3',
+            basedOn: 'Normal',
+            next: 'Normal',
+            quickFormat: true,
+            run: { size: 23, bold: true, font: 'Arial', color: '185FA5' },
+            paragraph: { spacing: { before: 220, after: 80 }, outlineLevel: 2 },
+          },
+        ],
+      },
+      sections: [
+        {
+          properties: {
+            page: {
+              size: { width: 12240, height: 15840 },
+              margin: { top: 1080, right: 1440, bottom: 1080, left: 1440 },
+            },
+          },
+          footers: { default: this.buildDraftFooter() },
+          children: [
+            ...this.buildReportCoverBlocks(title),
+            new Paragraph({ children: [new PageBreak()] }),
+            this.draftSectionLabel('Generated Report', '0F766E'),
+            this.draftHeading(this.getSelectedReportType()?.title || 'Report', 1),
+            ...blocks,
+          ],
+        },
+      ],
+    });
+  }
+
+  private buildReportCoverBlocks(title: string): DraftDocxBlock[] {
+    const reportType = this.getSelectedReportType()?.title || 'Report';
+    const dateStr = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const context = this.clampText(
+      this.getSelectedReportType()?.summary ||
+        this.reportInstruction ||
+        'Generated from the current Step 5 draft and formatted for review, sharing, and follow-up action.',
+      520
+    );
+
+    return [
+      this.draftSpacer(420),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 140 },
+        children: [
+          new TextRun({
+            text: 'NEW WORLD GAME REPORT',
+            font: 'Arial',
+            size: 18,
+            bold: true,
+            color: '0F766E',
+            allCaps: true,
+            characterSpacing: 120,
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 80, after: 80 },
+        children: [
+          new TextRun({
+            text: title,
+            font: 'Arial',
+            size: 48,
+            bold: true,
+            color: '111827',
+          }),
+        ],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: '1D9E75' } },
+        spacing: { before: 80, after: 220 },
+        children: [new TextRun({ text: '', font: 'Arial', size: 4 })],
+      }),
+      this.draftMetadataTable([
+        { label: 'Report Type', value: reportType },
+        { label: 'Solution', value: this.currentSolution?.title || 'Untitled Solution' },
+        { label: 'Generated', value: dateStr },
+      ]),
+      this.draftSpacer(260),
+      this.draftCallout('Report Context', context, 'E6F1FB', '185FA5', '0F3F71'),
+      this.draftSpacer(260),
+      this.draftMetadataTable([
+        { label: 'Author', value: this.getDraftAuthorName() || 'Unknown' },
+        { label: 'Team', value: this.getDraftTeamNames() || 'Individual draft' },
+        { label: 'Source', value: 'Current draft' },
+      ]),
+    ];
+  }
+
   openReportModal() {
     this.showReportModal = true;
     const selected = this.getSelectedReportType();
@@ -2748,7 +2906,7 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       const cleaned = isImpactBmcReport
         ? this.reportText
         : this.normalizeReportText(this.reportText);
-      this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
+      await this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
     } finally {
       // Small delay to show loading state
       setTimeout(() => {
@@ -2770,81 +2928,12 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       if (isImpactBmcReport) {
         const parsed = this.parseImpactBmcReport(this.reportText);
         const children = this.buildImpactBmcDocxBlocks(parsed);
-        doc = new Document({
-          sections: [
-            {
-              properties: {},
-              footers: { default: this.buildReportFooter() },
-              children,
-            },
-          ],
-        });
+        doc = this.buildBeautifulReportDocument(this.buildReportTitle(), children);
       } else {
         const title = this.buildReportTitle();
         const cleaned = this.normalizeReportText(this.reportText);
         const paragraphs = this.buildReportDocxParagraphs(cleaned);
-        const reportTypeName = this.getSelectedReportType()?.title || 'Report';
-        const dateStr = new Date().toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-        doc = new Document({
-          sections: [
-            {
-              properties: {},
-              footers: { default: this.buildReportFooter() },
-              children: [
-                // Report type label
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: reportTypeName.toUpperCase(),
-                      size: 17,
-                      color: '787878',
-                      font: 'Calibri',
-                      characterSpacing: 80,
-                    }),
-                  ],
-                  spacing: { after: 80 },
-                }),
-                // Title
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: title,
-                      bold: true,
-                      size: 48,
-                      color: '1a1a1a',
-                      font: 'Georgia',
-                    }),
-                  ],
-                  spacing: { after: 100 },
-                }),
-                // Date
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: dateStr,
-                      size: 18,
-                      color: '787878',
-                      font: 'Calibri',
-                    }),
-                  ],
-                  spacing: { after: 140 },
-                }),
-                // Thin rule divider
-                new Paragraph({
-                  border: {
-                    bottom: { style: BorderStyle.SINGLE, size: 4, color: 'BEBEBE' },
-                  },
-                  spacing: { after: 360 },
-                }),
-                ...paragraphs,
-              ],
-            },
-          ],
-        });
+        doc = this.buildBeautifulReportDocument(title, paragraphs);
       }
 
       const blob = await Packer.toBlob(doc);
@@ -3563,118 +3652,326 @@ INTEGRITY RULES:
     pdf.save(filename);
   }
 
-  private downloadReportPdfStyled(text: string, title: string, filename: string): void {
-    if (this.selectedReportTypeId === 'business-model-canvas') {
-      this.downloadImpactBmcPdf(text, filename);
-      return;
-    }
+  private async downloadReportPdfStyled(text: string, title: string, filename: string): Promise<void> {
+    const html = this.selectedReportTypeId === 'business-model-canvas'
+      ? this.buildStyledImpactBmcReportPrintHtml(text, title)
+      : this.buildStyledReportPrintHtml(text, title);
+    await this.renderPaginatedHtmlToPdf(html, filename);
+  }
 
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const marginLeft = 25;
-    const marginRight = 25;
-    const contentWidth = pageWidth - marginLeft - marginRight;
-    const footerY = pageHeight - 18;
+  private buildStyledReportPrintHtml(text: string, title: string): string {
+    return this.buildReportPrintShell(title, this.buildReportBodyHtml(text));
+  }
 
-    const ink = { r: 26, g: 26, b: 26 };
-    const body = { r: 45, g: 45, b: 45 };
-    const meta = { r: 120, g: 120, b: 120 };
-    const rule = { r: 190, g: 190, b: 190 };
+  private buildStyledImpactBmcReportPrintHtml(text: string, title: string): string {
+    const parsed = this.parseImpactBmcReport(text);
+    const bodyHtml = `
+      <h2>Executive Overview</h2>
+      <p>${this.escapeHtml(parsed.executiveOverview || 'Not detailed in the current report.')}</p>
+      <section class="draft-callout">
+        <strong>Your Venture</strong>
+        <p>${this.escapeHtml(parsed.yourVenture || 'Not detailed in the current report.')}</p>
+      </section>
+      <h2>Impact Business Model Canvas</h2>
+      ${this.buildImpactBmcTableHtml(parsed.table)}
+    `;
+    return this.buildReportPrintShell(title, bodyHtml);
+  }
 
-    const setBody = () => {
-      pdf.setFont('times', 'normal');
-      pdf.setFontSize(11);
-      pdf.setTextColor(body.r, body.g, body.b);
-    };
-    const addPageIfNeeded = (needed: number) => {
-      if (yPos + needed > footerY - 4) {
-        pdf.addPage();
-        yPos = 28;
+  private buildReportPrintShell(title: string, bodyHtml: string): string {
+    const reportType = this.escapeHtml(this.getSelectedReportType()?.title || 'Report');
+    const solutionTitle = this.escapeHtml(this.currentSolution?.title || 'Untitled Solution');
+    const author = this.escapeHtml(this.getDraftAuthorName() || 'Unknown');
+    const team = this.escapeHtml(this.getDraftTeamNames() || 'Individual draft');
+    const generated = this.escapeHtml(
+      new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    );
+    const context = this.escapeHtml(
+      this.clampText(
+        this.getSelectedReportType()?.summary ||
+          this.reportInstruction ||
+          'Generated from the current Step 5 draft and formatted for review, sharing, and follow-up action.',
+        520
+      )
+    );
+
+    return `
+      <style>
+        .draft-pdf-document {
+          width: 816px;
+          background: #f8fafc;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+        .draft-page {
+          position: relative;
+          box-sizing: border-box;
+          width: 816px;
+          height: 1056px;
+          padding: 72px;
+          background: #ffffff;
+          color: #444441;
+          font-family: Arial, Helvetica, sans-serif;
+          line-height: 1.55;
+          overflow: hidden;
+        }
+        .draft-page * { box-sizing: border-box; }
+        .draft-page-body {
+          height: 872px;
+          overflow: hidden;
+        }
+        .draft-content-source {
+          position: absolute;
+          left: -99999px;
+          top: 0;
+          width: 672px;
+          visibility: hidden;
+          pointer-events: none;
+          font-family: Arial, Helvetica, sans-serif;
+          line-height: 1.55;
+        }
+        .draft-kicker {
+          margin: 0 0 16px;
+          text-align: center;
+          color: #0f766e;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+        }
+        .draft-title {
+          margin: 0 auto 18px;
+          max-width: 650px;
+          text-align: center;
+          color: #111827;
+          font-size: 34px;
+          line-height: 1.12;
+          font-weight: 800;
+        }
+        .draft-rule {
+          width: 150px;
+          height: 4px;
+          margin: 0 auto 30px;
+          background: #1d9e75;
+        }
+        .draft-meta {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0;
+          margin: 0 0 28px;
+          border: 1px solid #d8dee4;
+        }
+        .draft-meta div {
+          min-height: 86px;
+          padding: 14px 12px;
+          border-right: 1px solid #d8dee4;
+          background: #f8fafc;
+          text-align: center;
+        }
+        .draft-meta div:nth-child(2) { background: #e6f1fb; }
+        .draft-meta div:last-child { border-right: 0; }
+        .draft-meta span {
+          display: block;
+          margin-bottom: 7px;
+          color: #64748b;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .draft-meta strong {
+          display: block;
+          color: #111827;
+          font-size: 13px;
+          line-height: 1.35;
+        }
+        .draft-callout {
+          margin: 0 0 24px;
+          padding: 16px 20px;
+          border-left: 8px solid #1d9e75;
+          background: #e1f5ee;
+          color: #085041;
+        }
+        .draft-callout strong {
+          display: block;
+          margin-bottom: 7px;
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .draft-callout p {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.55;
+        }
+        .draft-section-label {
+          margin: 0 0 8px;
+          color: #0f766e;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+        .draft-content h1 {
+          margin: 0 0 18px;
+          color: #111827;
+          font-size: 28px;
+          line-height: 1.18;
+        }
+        .draft-content h2 {
+          margin: 30px 0 12px;
+          color: #0f766e;
+          font-size: 21px;
+          line-height: 1.25;
+        }
+        .draft-content h3,
+        .draft-content h4,
+        .draft-content h5,
+        .draft-content h6 {
+          margin: 24px 0 10px;
+          color: #185fa5;
+          font-size: 16px;
+          line-height: 1.3;
+        }
+        .draft-content p,
+        .draft-content li {
+          color: #444441;
+          font-size: 14px;
+          line-height: 1.58;
+        }
+        .draft-content p { margin: 0 0 13px; }
+        .draft-content ul,
+        .draft-content ol {
+          margin: 8px 0 18px 22px;
+          padding: 0;
+        }
+        .draft-content li { margin: 0 0 7px; padding-left: 4px; }
+        .report-indexed {
+          padding-left: 24px;
+          text-indent: -24px;
+        }
+        .report-indexed strong {
+          color: #0f766e;
+        }
+        .draft-content table {
+          width: 100%;
+          margin: 22px 0;
+          border-collapse: collapse;
+          table-layout: fixed;
+          font-size: 12px;
+        }
+        .draft-content th {
+          padding: 11px 12px;
+          border: 1px solid #cbd5e1;
+          background: #0f766e;
+          color: #ffffff;
+          text-align: left;
+        }
+        .draft-content td {
+          padding: 11px 12px;
+          border: 1px solid #cbd5e1;
+          color: #334155;
+          vertical-align: top;
+        }
+        .draft-content tr:nth-child(even) td { background: #f8fafc; }
+        .report-bmc-table td strong {
+          display: block;
+          margin-bottom: 6px;
+          color: #0f766e;
+          font-size: 10px;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+        .report-bmc-table td p {
+          margin: 0;
+          font-size: 11px;
+          line-height: 1.45;
+        }
+        .draft-page-footer {
+          position: absolute;
+          left: 72px;
+          right: 72px;
+          bottom: 42px;
+          display: flex;
+          justify-content: space-between;
+          gap: 24px;
+          padding-top: 12px;
+          border-top: 1px solid #d8dee4;
+          color: #6b7280;
+          font-size: 11px;
+        }
+      </style>
+      <article class="draft-pdf-document">
+        <section class="draft-page draft-cover-page">
+          <div class="draft-page-body">
+            <p class="draft-kicker">New World Game Report</p>
+            <h1 class="draft-title">${this.escapeHtml(title)}</h1>
+            <div class="draft-rule"></div>
+            <section class="draft-meta">
+              <div><span>Report Type</span><strong>${reportType}</strong></div>
+              <div><span>Solution</span><strong>${solutionTitle}</strong></div>
+              <div><span>Generated</span><strong>${generated}</strong></div>
+            </section>
+            <section class="draft-callout">
+              <strong>Report Context</strong>
+              <p>${context}</p>
+            </section>
+            <section class="draft-meta">
+              <div><span>Author</span><strong>${author}</strong></div>
+              <div><span>Team</span><strong>${team}</strong></div>
+              <div><span>Source</span><strong>Current draft</strong></div>
+            </section>
+          </div>
+          <footer class="draft-page-footer">
+            <span>NewWorld Game | newworld-game.org</span>
+            <span class="draft-page-number"></span>
+          </footer>
+        </section>
+        <div class="draft-pages"></div>
+        <section class="draft-content-source draft-content">
+          <p class="draft-section-label">Generated Report</p>
+          <h1>${reportType}</h1>
+          ${bodyHtml}
+        </section>
+      </article>
+    `;
+  }
+
+  private buildReportBodyHtml(text: string): string {
+    const lines = text.split(/\r?\n/).map((line) => line.trim());
+    let html = '';
+    let listMode: 'ul' | 'ol' | null = null;
+
+    const closeList = () => {
+      if (listMode) {
+        html += `</${listMode}>`;
+        listMode = null;
       }
     };
 
-    let yPos = 32;
-
-    // Top rule — thin, black, full width
-    pdf.setDrawColor(ink.r, ink.g, ink.b);
-    pdf.setLineWidth(0.5);
-    pdf.line(marginLeft, yPos - 6, marginLeft + contentWidth, yPos - 6);
-
-    // Report type label — understated small caps
-    const reportType = this.getSelectedReportType();
-    if (reportType) {
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(8.5);
-      pdf.setTextColor(meta.r, meta.g, meta.b);
-      pdf.text(reportType.title.toUpperCase(), marginLeft, yPos);
-      yPos += 10;
-    }
-
-    // Title — large, bold serif
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(24);
-    pdf.setTextColor(ink.r, ink.g, ink.b);
-    const titleWrapped = pdf.splitTextToSize(title, contentWidth);
-    pdf.text(titleWrapped, marginLeft, yPos);
-    yPos += titleWrapped.length * 10 + 4;
-
-    // Date line
-    const dateStr = new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-    pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    pdf.setTextColor(meta.r, meta.g, meta.b);
-    pdf.text(dateStr, marginLeft, yPos);
-    yPos += 8;
-
-    // Divider — light hairline, full width
-    pdf.setDrawColor(rule.r, rule.g, rule.b);
-    pdf.setLineWidth(0.3);
-    pdf.line(marginLeft, yPos, marginLeft + contentWidth, yPos);
-    yPos += 12;
-
-    setBody();
-    const lines = text.split(/\r?\n/).map((line) => line.trim());
-
     for (const line of lines) {
       if (!line) {
-        yPos += 3.5;
+        closeList();
         continue;
       }
 
       if (this.isReportHeading(line)) {
-        yPos += 6;
-        addPageIfNeeded(14);
-        pdf.setFont('times', 'bold');
-        pdf.setFontSize(13.5);
-        pdf.setTextColor(ink.r, ink.g, ink.b);
-        const headingText = line.replace(/:\s*$/, '');
-        pdf.text(headingText, marginLeft, yPos);
-        yPos += 8;
-        setBody();
+        closeList();
+        html += `<h2>${this.escapeHtml(line.replace(/:\s*$/, ''))}</h2>`;
         continue;
       }
 
       if (line.startsWith('•') || line.startsWith('  •')) {
         const bulletText = line.replace(/^\s*•\s*/, '');
-        const wrapped = pdf.splitTextToSize(bulletText, contentWidth - 10);
-        for (let i = 0; i < wrapped.length; i++) {
-          addPageIfNeeded(6.5);
-          if (i === 0) {
-            pdf.setFont('times', 'normal');
-            pdf.setFontSize(7);
-            pdf.setTextColor(meta.r, meta.g, meta.b);
-            pdf.text('\u2022', marginLeft + 3, yPos - 0.2);
-          }
-          setBody();
-          pdf.text(wrapped[i], marginLeft + 10, yPos);
-          yPos += 6.5;
+        if (listMode !== 'ul') {
+          closeList();
+          html += '<ul>';
+          listMode = 'ul';
         }
-        yPos += 1;
+        html += `<li>${this.escapeHtml(bulletText)}</li>`;
         continue;
       }
 
@@ -3682,38 +3979,65 @@ INTEGRITY RULES:
       if (numberedMatch) {
         const label = numberedMatch[1];
         const rest = numberedMatch[2];
-        const wrapped = pdf.splitTextToSize(rest, contentWidth - 14);
-        for (let i = 0; i < wrapped.length; i++) {
-          addPageIfNeeded(6.5);
-          if (i === 0) {
-            pdf.setFont('times', 'bold');
-            pdf.setTextColor(body.r, body.g, body.b);
-            pdf.text(label, marginLeft + 2, yPos);
+        if (/^\d+\.$/.test(label)) {
+          if (listMode !== 'ol') {
+            closeList();
+            html += '<ol>';
+            listMode = 'ol';
           }
-          setBody();
-          pdf.text(wrapped[i], marginLeft + 14, yPos);
-          yPos += 6.5;
+          html += `<li>${this.escapeHtml(rest)}</li>`;
+        } else {
+          closeList();
+          html += `<p class="report-indexed"><strong>${this.escapeHtml(label)}</strong> ${this.escapeHtml(rest)}</p>`;
         }
-        yPos += 1;
         continue;
       }
 
-      const wrapped = pdf.splitTextToSize(line, contentWidth);
-      for (const segment of wrapped) {
-        addPageIfNeeded(6.5);
-        pdf.text(segment, marginLeft, yPos);
-        yPos += 6.5;
-      }
-      yPos += 2;
+      closeList();
+      html += `<p>${this.escapeHtml(line)}</p>`;
     }
 
-    this.addPdfFooter(pdf);
-    pdf.save(filename);
+    closeList();
+    return html || '<p>No report content is available yet.</p>';
+  }
+
+  private buildImpactBmcTableHtml(data: ImpactBmcTableData): string {
+    const cell = (label: string, value: string, attrs = '') => `
+      <td ${attrs}>
+        <strong>${this.escapeHtml(label)}</strong>
+        <p>${this.escapeHtml(value || 'Not detailed in the current report.')}</p>
+      </td>
+    `;
+
+    return `
+      <table class="report-bmc-table">
+        <tbody>
+          <tr>${cell('Problem Statement', data.problemStatement, 'colspan="5"')}</tr>
+          <tr>${cell('Mission Statement', data.missionStatement, 'colspan="5"')}</tr>
+          <tr>
+            ${cell('Key Partners', data.keyPartners)}
+            ${cell('Key Activities', data.keyActivities)}
+            ${cell('Value Proposition', data.valueProposition)}
+            ${cell('Stakeholder Relationships', data.stakeholderRelationships)}
+            ${cell('Stakeholder Segments', data.stakeholderSegments)}
+          </tr>
+          <tr>
+            ${cell('Key Resources', data.keyResources, 'colspan="2"')}
+            ${cell('Channels', data.channels, 'colspan="3"')}
+          </tr>
+          <tr>
+            ${cell('Cost Structure', data.costStructure, 'colspan="3"')}
+            ${cell('Revenue Streams', data.revenueStreams, 'colspan="2"')}
+          </tr>
+          <tr>${cell('Intended Impact', data.intendedImpact, 'colspan="5"')}</tr>
+        </tbody>
+      </table>
+    `;
   }
 
   private buildReportDocxParagraphs(text: string): Array<Paragraph | Table> {
     const lines = text.split(/\r?\n/).map((line) => line.trim());
-    const blocks: Array<Paragraph | Table> = [];
+    const blocks: DraftDocxBlock[] = [];
     const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
     let bmcTableInserted = false;
     let skipBmcBody = false;
@@ -3726,20 +4050,7 @@ INTEGRITY RULES:
       if (this.isReportHeading(line)) {
         const headingText = line.replace(/:\s*$/, '');
 
-        blocks.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: headingText,
-                bold: true,
-                size: 27,
-                color: '1a1a1a',
-                font: 'Georgia',
-              }),
-            ],
-            spacing: { before: 320, after: 140 },
-          })
-        );
+        blocks.push(this.draftHeading(headingText, 2));
 
         if (isImpactBmcReport && /business model canvas/i.test(headingText)) {
           blocks.push(this.buildImpactBmcTable());
@@ -3758,46 +4069,45 @@ INTEGRITY RULES:
 
       if (line.startsWith('•') || line.startsWith('  •')) {
         const bulletText = line.replace(/^\s*•\s*/, '');
-        blocks.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: '\u2022  ', color: '999999', size: 20 }),
-              new TextRun({ text: bulletText, size: 22, color: '2d2d2d', font: 'Calibri' }),
-            ],
-            indent: { left: 360 },
-            spacing: { after: 80 },
-          })
-        );
+        blocks.push(this.draftListParagraph(bulletText));
         continue;
       }
 
       const numberedMatch = line.match(/^(\d+\.|[A-H]\.)\s+(.+)/);
       if (numberedMatch) {
-        blocks.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: `${numberedMatch[1]}  `, bold: true, color: '4b4b4b', size: 22, font: 'Calibri' }),
-              new TextRun({ text: numberedMatch[2], size: 22, color: '2d2d2d', font: 'Calibri' }),
-            ],
-            indent: { left: 360 },
-            spacing: { after: 80 },
-          })
-        );
+        if (/^\d+\.$/.test(numberedMatch[1])) {
+          blocks.push(this.draftListParagraph(numberedMatch[2], true));
+        } else {
+          blocks.push(
+            new Paragraph({
+              spacing: { before: 40, after: 90, line: 300 },
+              indent: { left: 360 },
+              children: [
+                new TextRun({
+                  text: `${numberedMatch[1]}  `,
+                  font: 'Arial',
+                  size: 21,
+                  bold: true,
+                  color: '0F766E',
+                }),
+                new TextRun({
+                  text: numberedMatch[2],
+                  font: 'Arial',
+                  size: 21,
+                  color: '444441',
+                }),
+              ],
+            })
+          );
+        }
         continue;
       }
 
-      blocks.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: line, size: 22, color: '2d2d2d', font: 'Calibri' }),
-          ],
-          spacing: { after: 140 },
-        })
-      );
+      blocks.push(this.draftBodyParagraph(line));
     }
 
     if (isImpactBmcReport && !bmcTableInserted) {
-      blocks.push(new Paragraph({ text: 'Impact Business Model Canvas' }));
+      blocks.push(this.draftHeading('Impact Business Model Canvas', 2));
       blocks.push(this.buildImpactBmcTable());
     }
 
@@ -3920,31 +4230,24 @@ INTEGRITY RULES:
   }): Array<Paragraph | Table> {
     const blocks: Array<Paragraph | Table> = [];
 
+    blocks.push(this.draftHeading('Executive Overview', 2));
     blocks.push(
-      new Paragraph({
-        text: this.buildReportTitle(),
-        heading: HeadingLevel.HEADING_1,
-        spacing: { after: 220 },
-      })
+      parsed.executiveOverview
+        ? this.draftBodyParagraph(parsed.executiveOverview)
+        : this.draftBodyParagraph('Not detailed in the current report.', { italic: true, color: '6B7280' })
     );
 
     blocks.push(
-      new Paragraph({
-        text: 'Executive Overview',
-        heading: HeadingLevel.HEADING_2,
-      })
-    );
-    blocks.push(new Paragraph({ text: parsed.executiveOverview || '', spacing: { after: 160 } }));
-
-    const ventureLine = parsed.yourVenture
-      ? new TextRun({ text: ` ${parsed.yourVenture}` })
-      : new TextRun(' ________________________________________________');
-    blocks.push(
-      new Paragraph({
-        children: [new TextRun({ text: 'Your Venture:', bold: true }), ventureLine],
-      })
+      this.draftCallout(
+        'Your Venture',
+        parsed.yourVenture || 'Not detailed in the current report.',
+        'E1F5EE',
+        '1D9E75',
+        '085041'
+      )
     );
 
+    blocks.push(this.draftHeading('Impact Business Model Canvas', 2));
     blocks.push(this.buildImpactBmcTable(parsed.table));
     return blocks;
   }
@@ -4218,37 +4521,62 @@ INTEGRITY RULES:
   }
 
   private buildImpactBmcTable(data?: ImpactBmcTableData): Table {
-    const shaded = 'D9D9D9';
+    const totalWidth = 9360;
+    const columnWidths = this.equalColumnWidths(totalWidth, 5);
     const border = {
       style: BorderStyle.SINGLE,
-      size: 6,
-      color: '000000',
+      size: 1,
+      color: 'CBD5E1',
     };
 
     const makeCell = (
       label: string,
       content?: string,
       options?: { shaded?: boolean; columnSpan?: number; rowSpan?: number; lines?: number }
-    ) =>
-      new TableCell({
+    ) => {
+      const columnSpan = options?.columnSpan || 1;
+      return new TableCell({
         columnSpan: options?.columnSpan,
         rowSpan: options?.rowSpan,
-        shading: options?.shaded
-          ? { type: ShadingType.CLEAR, fill: shaded }
-          : undefined,
+        width: { size: columnWidths.slice(0, columnSpan).reduce((sum, width) => sum + width, 0), type: WidthType.DXA },
+        shading: { type: ShadingType.CLEAR, fill: options?.shaded ? 'E1F5EE' : 'FFFFFF' },
         borders: { top: border, bottom: border, left: border, right: border },
+        verticalAlign: VerticalAlign.TOP,
+        margins: { top: 130, bottom: 130, left: 140, right: 140 },
         children: [
-          new Paragraph({ children: [new TextRun({ text: label, bold: true })] }),
+          new Paragraph({
+            spacing: { after: 70 },
+            children: [
+              new TextRun({
+                text: label.toUpperCase(),
+                bold: true,
+                font: 'Arial',
+                size: 16,
+                color: options?.shaded ? '085041' : '0F766E',
+                allCaps: true,
+              }),
+            ],
+          }),
           ...(content
             ? content
                 .split(/\r?\n/)
-                .map((line) => new Paragraph(line))
-            : Array.from({ length: options?.lines ?? 2 }).map(() => new Paragraph(''))),
+                .filter((line) => line.trim())
+                .map((line) =>
+                  new Paragraph({
+                    spacing: { after: 60, line: 250 },
+                    children: [new TextRun({ text: line.trim(), font: 'Arial', size: 18, color: '334155' })],
+                  })
+                )
+            : Array.from({ length: options?.lines ?? 2 }).map(
+                () => new Paragraph({ children: [new TextRun({ text: '', font: 'Arial', size: 18 })] })
+              )),
         ],
       });
+    };
 
     return new Table({
-      width: { size: 100, type: WidthType.PERCENTAGE },
+      width: { size: totalWidth, type: WidthType.DXA },
+      columnWidths,
       rows: [
         new TableRow({
           children: [
@@ -4400,10 +4728,20 @@ INTEGRITY RULES:
       return;
     }
 
-    const { default: html2canvas } = await import('html2canvas');
-    const container = document.createElement('div');
     const title = this.currentSolution?.title || 'Untitled Solution';
-    container.innerHTML = this.buildStyledDraftPrintHtml(title);
+    await this.renderPaginatedHtmlToPdf(
+      this.buildStyledDraftPrintHtml(title),
+      this.buildDraftFileName('pdf')
+    );
+  }
+
+  private async renderPaginatedHtmlToPdf(html: string, filename: string): Promise<void> {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const container = document.createElement('div');
+    container.innerHTML = html;
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
@@ -4421,6 +4759,7 @@ INTEGRITY RULES:
 
     document.body.appendChild(container);
     try {
+      const { default: html2canvas } = await import('html2canvas');
       await this.waitForImages(container);
       const pageElements = this.paginateStyledDraftPrint(container);
       await this.waitForImages(container);
@@ -4448,7 +4787,7 @@ INTEGRITY RULES:
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageWidth, pageHeight);
       }
 
-      pdf.save(this.buildDraftFileName('pdf'));
+      pdf.save(filename);
     } finally {
       document.body.removeChild(container);
     }
