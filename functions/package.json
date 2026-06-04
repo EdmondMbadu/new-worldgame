@@ -28,6 +28,7 @@
     "mammoth": "^1.11.0",
     "mime-types": "^3.0.1",
     "pdf-parse": "^1.1.1",
+    "pptxgenjs": "^4.0.1",
     "stripe": "^17.7.0",
     "twilio": "^5.4.0"
   },

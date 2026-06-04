@@ -60,6 +60,50 @@
             Add Presentation
           </p>
         </div>
+
+        <!-- Generate AI Presentation -->
+        <button
+          type="button"
+          (click)="generateAiPresentation()"
+          [disabled]="generatingAiPresentation"
+          class="w-40 h-48 flex flex-col items-center justify-center
+                border border-teal-200 dark:border-teal-700 rounded-md cursor-pointer
+                hover:shadow-md bg-teal-50 text-teal-700 transition
+                disabled:cursor-wait disabled:opacity-70
+                dark:bg-slate-800 dark:text-teal-200">
+          <svg
+            *ngIf="!generatingAiPresentation"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-14 w-14"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5.5A2.5 2.5 0 016.5 3h11A2.5 2.5 0 0120 5.5v13A2.5 2.5 0 0117.5 21h-11A2.5 2.5 0 014 18.5v-13z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 8h8M8 12h4m-4 4h6M17 9.5l.55 1.1 1.2.18-.87.85.2 1.2L17 12.25l-1.08.57.2-1.2-.87-.85 1.2-.18L17 9.5z" />
+          </svg>
+          <svg
+            *ngIf="generatingAiPresentation"
+            class="h-10 w-10 animate-spin"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <p class="mt-4 px-3 text-center text-sm font-semibold">
+            Generate Presentation using AI
+          </p>
+        </button>
+      </div>
+
+      <div
+        *ngIf="aiPresentationStatus || aiPresentationError"
+        class="mb-6 rounded-md border px-4 py-3 text-sm"
+        [ngClass]="aiPresentationError
+          ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300'
+          : 'border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-800 dark:bg-teal-950/30 dark:text-teal-300'">
+        {{ aiPresentationError || aiPresentationStatus }}
       </div>
 
   

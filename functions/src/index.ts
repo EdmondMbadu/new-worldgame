@@ -41,6 +41,7 @@ const GEMINI_KEY = functions.config()['gemini'].key;
 
 const { Storage } = require('@google-cloud/storage');
 const Busboy = require('busboy');
+const PptxGenJS = require('pptxgenjs');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
@@ -6533,6 +6534,975 @@ export const onReportRequest = functions
           technicalError: errorMsg,
         },
         response: userFriendlyError,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+  });
+
+type PresentationDocInput = {
+  name?: string;
+  originalFilename?: string;
+  description?: string;
+  downloadURL?: string;
+  type?: string;
+};
+
+type GeneratedDeckSlide = {
+  title?: string;
+  kicker?: string;
+  layout?: 'signal' | 'image' | 'split' | 'quote' | 'steps' | 'closing';
+  bullets?: string[];
+  notes?: string;
+  visualCue?: string;
+};
+
+type GeneratedDeckPlan = {
+  title?: string;
+  subtitle?: string;
+  audience?: string;
+  narrative?: string;
+  slides?: GeneratedDeckSlide[];
+};
+
+const PRESENTATION_PPTX_MIME =
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+const PRESENTATION_FALLBACK_IMAGE =
+  'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fgeneric-image.jpg?alt=media&token=c4e8d393-50e6-4080-bfcd-923848db7007';
+
+function cleanPresentationText(value: unknown, max = 6000): string {
+  const text = String(value || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.slice(0, max);
+}
+
+function slugPresentationFileName(value: string): string {
+  const slug = cleanPresentationText(value, 80)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || 'ai-presentation';
+}
+
+function uniquePresentationStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  return values.filter((value) => {
+    const normalized = value.trim();
+    if (!normalized || seen.has(normalized)) return false;
+    seen.add(normalized);
+    return true;
+  });
+}
+
+function extractDeckPlanJson(value: string, fallbackTitle: string): GeneratedDeckPlan {
+  const cleaned = value
+    .replace(/^```(?:json)?/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  const candidates = [
+    cleaned,
+    cleaned.slice(cleaned.indexOf('{'), cleaned.lastIndexOf('}') + 1),
+  ].filter((candidate) => candidate.trim().startsWith('{'));
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate) as GeneratedDeckPlan;
+      if (Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+        return parsed;
+      }
+    } catch (error) {
+      console.warn('Failed to parse deck JSON candidate:', (error as Error).message);
+    }
+  }
+
+  return {
+    title: fallbackTitle,
+    subtitle: 'AI-generated presentation draft',
+    narrative: 'A concise presentation built from the available solution content.',
+    slides: [
+      {
+        title: 'The opportunity',
+        layout: 'signal',
+        bullets: ['Clarify the core problem', 'Show why the timing matters', 'Frame the solution path'],
+      },
+      {
+        title: 'The solution',
+        layout: 'split',
+        bullets: ['Summarize the proposed approach', 'Identify the people served', 'Highlight the expected impact'],
+      },
+      {
+        title: 'Next steps',
+        layout: 'closing',
+        bullets: ['Validate with stakeholders', 'Prioritize near-term actions', 'Define success measures'],
+      },
+    ],
+  };
+}
+
+async function collectPresentationSourceText(solution: any): Promise<{
+  sourceText: string;
+  imageUrls: string[];
+}> {
+  const sections: string[] = [];
+  const imageUrls: string[] = [];
+
+  sections.push(`Title: ${cleanPresentationText(solution?.title, 300)}`);
+  sections.push(`Description: ${cleanPresentationText(solution?.description, 2000)}`);
+  sections.push(`Strategy Review: ${cleanPresentationText(solution?.strategyReview, 5000)}`);
+  sections.push(`Solution Content: ${cleanPresentationText(solution?.content, 4000)}`);
+
+  if (solution?.status && typeof solution.status === 'object') {
+    const statusLines = Object.entries(solution.status)
+      .slice(0, 20)
+      .map(([key, value]) => `${key}: ${cleanPresentationText(value, 700)}`)
+      .join('\n');
+    sections.push(`Status Notes:\n${statusLines}`);
+  }
+
+  const solutionImage = String(solution?.image || '').trim();
+  if (/^https?:\/\//i.test(solutionImage)) {
+    imageUrls.push(solutionImage);
+  }
+
+  const documents = Array.isArray(solution?.documents)
+    ? (solution.documents as PresentationDocInput[])
+    : [];
+
+  const extractableDocs = documents
+    .filter((doc) => {
+      const mime = String(doc?.type || '').toLowerCase();
+      return (
+        mime === 'application/pdf' ||
+        mime === 'application/msword' ||
+        mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        mime === 'text/plain' ||
+        mime === 'text/csv'
+      );
+    })
+    .slice(0, 4);
+
+  for (const doc of documents) {
+    const url = String(doc?.downloadURL || '').trim();
+    const mime = String(doc?.type || '').toLowerCase();
+    if (url && mime.startsWith('image/')) {
+      imageUrls.push(url);
+    }
+  }
+
+  for (const doc of extractableDocs) {
+    const url = String(doc?.downloadURL || '').trim();
+    const mime = String(doc?.type || '').trim();
+    if (!url || !mime) continue;
+    try {
+      const extracted = await fetchAndExtract(url, mime);
+      sections.push(
+        `Document: ${cleanPresentationText(doc.name || doc.originalFilename, 180)}\n${cleanPresentationText(
+          extracted,
+          6000
+        )}`
+      );
+    } catch (error) {
+      console.warn(
+        'Could not extract presentation source document:',
+        doc.name || doc.originalFilename,
+        (error as Error).message
+      );
+    }
+  }
+
+  return {
+    sourceText: sections.filter(Boolean).join('\n\n').slice(0, 28000),
+    imageUrls: uniquePresentationStrings(imageUrls).slice(0, 6),
+  };
+}
+
+function buildDeckPlanPrompt(sourceText: string, title: string): string {
+  return `You are an expert presentation strategist and PowerPoint story designer.
+
+Create a concise, investor-quality presentation plan from the source material.
+
+Cost and production constraints:
+- Do not request generated images.
+- Use existing visuals if available.
+- Prefer clear synthesis over exhaustive detail.
+
+Return ONLY valid JSON. No markdown fences. No commentary.
+
+JSON shape:
+{
+  "title": "short deck title",
+  "subtitle": "one-line promise or context",
+  "audience": "primary audience",
+  "narrative": "one sentence through-line",
+  "slides": [
+    {
+      "title": "slide title under 9 words",
+      "kicker": "short label, optional",
+      "layout": "signal|image|split|quote|steps|closing",
+      "bullets": ["3 to 5 tight bullets, each under 13 words"],
+      "notes": "speaker notes in 1-3 sentences",
+      "visualCue": "short visual direction, no text inside image"
+    }
+  ]
+}
+
+Rules:
+- Create 7 to 10 slides.
+- Make the deck beautiful but practical: title, agenda, evidence, solution, model, impact, roadmap, ask.
+- Use concrete content from the source.
+- Avoid hype, vague slogans, and long paragraphs.
+- Do not include citations unless the source material explicitly contains them.
+
+Deck title fallback: ${title}
+
+SOURCE MATERIAL:
+${sourceText}`;
+}
+
+async function generatePresentationDeckPlan(
+  sourceText: string,
+  fallbackTitle: string
+): Promise<GeneratedDeckPlan> {
+  const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    generationConfig: {
+      temperature: 0.25,
+      maxOutputTokens: 4500,
+      responseMimeType: 'application/json',
+    },
+  } as any);
+
+  const result = await model.generateContent(buildDeckPlanPrompt(sourceText, fallbackTitle));
+  const text = result.response.text();
+  const plan = extractDeckPlanJson(text, fallbackTitle);
+  plan.title = cleanPresentationText(plan.title || fallbackTitle, 90);
+  plan.subtitle = cleanPresentationText(plan.subtitle || 'Presentation draft', 160);
+  plan.narrative = cleanPresentationText(plan.narrative || '', 240);
+  plan.slides = (plan.slides || [])
+    .slice(0, 10)
+    .map((slide) => ({
+      title: cleanPresentationText(slide.title || 'Key point', 90),
+      kicker: cleanPresentationText(slide.kicker || '', 40),
+      layout: slide.layout || 'signal',
+      bullets: Array.isArray(slide.bullets)
+        ? slide.bullets.map((bullet) => cleanPresentationText(bullet, 120)).filter(Boolean).slice(0, 5)
+        : [],
+      notes: cleanPresentationText(slide.notes || '', 500),
+      visualCue: cleanPresentationText(slide.visualCue || '', 140),
+    }))
+    .filter((slide) => slide.title || slide.bullets.length);
+
+  if (!plan.slides.length) {
+    return extractDeckPlanJson('', fallbackTitle);
+  }
+  return plan;
+}
+
+async function fetchPresentationImageData(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const contentType = response.headers.get('content-type') || 'image/png';
+    if (!contentType.toLowerCase().startsWith('image/')) return null;
+    const arrayBuffer = await response.arrayBuffer();
+    if (arrayBuffer.byteLength > 6 * 1024 * 1024) return null;
+    return `data:${contentType};base64,${Buffer.from(arrayBuffer).toString('base64')}`;
+  } catch (error) {
+    console.warn('Could not fetch presentation image:', (error as Error).message);
+    return null;
+  }
+}
+
+async function buildPresentationImagePool(imageUrls: string[]): Promise<string[]> {
+  const dataUris: string[] = [];
+  for (const url of imageUrls.slice(0, 4)) {
+    const dataUri = await fetchPresentationImageData(url);
+    if (dataUri) {
+      dataUris.push(dataUri);
+    }
+  }
+  return dataUris;
+}
+
+function addDeckFooter(slide: any, slideNumber: number, totalSlides: number): void {
+  slide.addShape(slide.ShapeType?.rect || 'rect', {
+    x: 0,
+    y: 7.18,
+    w: 13.33,
+    h: 0.04,
+    fill: { color: 'D7DEE8' },
+    line: { color: 'D7DEE8' },
+  });
+  slide.addText('NewWorld Game', {
+    x: 0.45,
+    y: 7.26,
+    w: 3,
+    h: 0.16,
+    fontFace: 'Aptos',
+    fontSize: 6.8,
+    bold: true,
+    color: '64748B',
+    margin: 0,
+  });
+  slide.addText(`${slideNumber}/${totalSlides}`, {
+    x: 12.18,
+    y: 7.26,
+    w: 0.7,
+    h: 0.16,
+    fontFace: 'Aptos',
+    fontSize: 6.8,
+    color: '64748B',
+    align: 'right',
+    margin: 0,
+  });
+}
+
+function addAccentGeometry(slide: any, pptx: any, variant: number): void {
+  const colors = ['0F766E', '2563EB', 'F59E0B', '7C3AED'];
+  slide.addShape(pptx.ShapeType.arc, {
+    x: 10.35,
+    y: -0.42,
+    w: 3.55,
+    h: 3.55,
+    line: { color: colors[variant % colors.length], transparency: 18, pt: 5 },
+    adjustPoint: 0.2,
+    rotate: 35,
+  });
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 0,
+    y: 0,
+    w: 0.13,
+    h: 7.5,
+    fill: { color: colors[(variant + 1) % colors.length] },
+    line: { color: colors[(variant + 1) % colors.length] },
+  });
+}
+
+function addBulletList(slide: any, bullets: string[], x: number, y: number, w: number): void {
+  bullets.slice(0, 5).forEach((bullet, index) => {
+    const top = y + index * 0.53;
+    slide.addShape(slide.ShapeType?.ellipse || 'ellipse', {
+      x,
+      y: top + 0.09,
+      w: 0.13,
+      h: 0.13,
+      fill: { color: index % 2 === 0 ? '0F766E' : '2563EB' },
+      line: { color: index % 2 === 0 ? '0F766E' : '2563EB' },
+    });
+    slide.addText(bullet, {
+      x: x + 0.28,
+      y: top,
+      w,
+      h: 0.42,
+      fontFace: 'Aptos',
+      fontSize: 16,
+      breakLine: false,
+      fit: 'shrink',
+      color: '1E293B',
+      margin: 0,
+    });
+  });
+}
+
+function addImagePanel(slide: any, imageData: string | undefined, x: number, y: number, w: number, h: number): void {
+  slide.addShape(slide.ShapeType?.roundRect || 'roundRect', {
+    x,
+    y,
+    w,
+    h,
+    rectRadius: 0.08,
+    fill: { color: 'E0F2FE' },
+    line: { color: 'C7D2FE', transparency: 25 },
+  });
+
+  if (imageData) {
+    slide.addImage({ data: imageData, x: x + 0.08, y: y + 0.08, w: w - 0.16, h: h - 0.16 });
+    return;
+  }
+
+  slide.addShape(slide.ShapeType?.arc || 'arc', {
+    x: x + w - 1.75,
+    y: y + 0.3,
+    w: 1.55,
+    h: 1.55,
+    line: { color: '0F766E', transparency: 10, pt: 3 },
+    rotate: 20,
+  });
+  slide.addShape(slide.ShapeType?.chevron || 'chevron', {
+    x: x + 0.65,
+    y: y + h - 1.45,
+    w: 1.3,
+    h: 0.8,
+    fill: { color: 'F59E0B', transparency: 5 },
+    line: { color: 'F59E0B' },
+    rotate: -12,
+  });
+}
+
+function addSlideTitle(slide: any, deckSlide: GeneratedDeckSlide, y = 0.52): void {
+  if (deckSlide.kicker) {
+    slide.addText(deckSlide.kicker.toUpperCase(), {
+      x: 0.62,
+      y,
+      w: 4.4,
+      h: 0.2,
+      fontFace: 'Aptos',
+      fontSize: 8,
+      bold: true,
+      color: '0F766E',
+      charSpace: 1.2,
+      margin: 0,
+    });
+  }
+  slide.addText(deckSlide.title || 'Key point', {
+    x: 0.62,
+    y: y + (deckSlide.kicker ? 0.26 : 0),
+    w: 7.6,
+    h: 0.72,
+    fontFace: 'Aptos Display',
+    fontSize: 28,
+    bold: true,
+    fit: 'shrink',
+    color: '0F172A',
+    margin: 0,
+    breakLine: false,
+  });
+}
+
+function buildPresentationPptx(
+  plan: GeneratedDeckPlan,
+  imageDataUris: string[],
+  sourceTitle: string
+): Promise<Buffer> {
+  const pptx = new PptxGenJS();
+  pptx.layout = 'LAYOUT_WIDE';
+  pptx.author = 'NewWorld Game AI';
+  pptx.company = 'NewWorld Game';
+  pptx.subject = 'AI-generated solution presentation';
+  pptx.title = plan.title || sourceTitle;
+  pptx.theme = {
+    headFontFace: 'Aptos Display',
+    bodyFontFace: 'Aptos',
+    lang: 'en-US',
+  };
+
+  const slides = (plan.slides || []).slice(0, 10);
+  const totalSlides = slides.length + 3;
+  let slideNumber = 1;
+
+  const cover = pptx.addSlide();
+  cover.background = { color: 'F8FAFC' };
+  addAccentGeometry(cover, pptx, 0);
+  addImagePanel(cover, imageDataUris[0], 8.2, 0.62, 4.55, 5.55);
+  cover.addText('AI-GENERATED PRESENTATION', {
+    x: 0.72,
+    y: 0.92,
+    w: 4.4,
+    h: 0.2,
+    fontFace: 'Aptos',
+    fontSize: 8,
+    bold: true,
+    color: '0F766E',
+    charSpace: 1.1,
+    margin: 0,
+  });
+  cover.addText(plan.title || sourceTitle, {
+    x: 0.72,
+    y: 1.34,
+    w: 6.9,
+    h: 1.3,
+    fontFace: 'Aptos Display',
+    fontSize: 38,
+    bold: true,
+    color: '0F172A',
+    fit: 'shrink',
+    margin: 0,
+  });
+  cover.addText(plan.subtitle || 'Presentation draft', {
+    x: 0.76,
+    y: 2.88,
+    w: 6.1,
+    h: 0.64,
+    fontFace: 'Aptos',
+    fontSize: 16,
+    color: '475569',
+    fit: 'shrink',
+    margin: 0,
+  });
+  if (plan.narrative) {
+    cover.addShape(pptx.ShapeType.roundRect, {
+      x: 0.72,
+      y: 4.05,
+      w: 6.1,
+      h: 1,
+      fill: { color: 'FFFFFF' },
+      line: { color: 'CBD5E1', transparency: 20 },
+    });
+    cover.addText(plan.narrative, {
+      x: 1.02,
+      y: 4.28,
+      w: 5.5,
+      h: 0.48,
+      fontFace: 'Aptos',
+      fontSize: 13,
+      italic: true,
+      color: '334155',
+      fit: 'shrink',
+      margin: 0,
+    });
+  }
+  addDeckFooter(cover, slideNumber, totalSlides);
+  cover.addNotes(`Opening slide. Audience: ${plan.audience || 'general stakeholders'}.`);
+  slideNumber += 1;
+
+  const agenda = pptx.addSlide();
+  agenda.background = { color: 'FFFFFF' };
+  addAccentGeometry(agenda, pptx, 1);
+  agenda.addText('Discussion Flow', {
+    x: 0.62,
+    y: 0.66,
+    w: 5.6,
+    h: 0.56,
+    fontFace: 'Aptos Display',
+    fontSize: 30,
+    bold: true,
+    color: '0F172A',
+    margin: 0,
+  });
+  slides.slice(0, 6).forEach((item, index) => {
+    const row = Math.floor(index / 2);
+    const col = index % 2;
+    const x = 0.8 + col * 6.1;
+    const y = 1.65 + row * 1.42;
+    agenda.addShape(pptx.ShapeType.roundRect, {
+      x,
+      y,
+      w: 5.35,
+      h: 1.02,
+      fill: { color: index % 2 === 0 ? 'F0FDFA' : 'EFF6FF' },
+      line: { color: index % 2 === 0 ? '99F6E4' : 'BFDBFE' },
+    });
+    agenda.addText(`0${index + 1}`, {
+      x: x + 0.22,
+      y: y + 0.2,
+      w: 0.55,
+      h: 0.28,
+      fontFace: 'Aptos Display',
+      fontSize: 13,
+      bold: true,
+      color: index % 2 === 0 ? '0F766E' : '2563EB',
+      margin: 0,
+    });
+    agenda.addText(item.title || 'Topic', {
+      x: x + 0.9,
+      y: y + 0.2,
+      w: 4.05,
+      h: 0.34,
+      fontFace: 'Aptos',
+      fontSize: 13.5,
+      bold: true,
+      color: '0F172A',
+      fit: 'shrink',
+      margin: 0,
+    });
+    agenda.addText((item.bullets || [])[0] || item.visualCue || '', {
+      x: x + 0.9,
+      y: y + 0.56,
+      w: 4.08,
+      h: 0.22,
+      fontFace: 'Aptos',
+      fontSize: 8.8,
+      color: '64748B',
+      fit: 'shrink',
+      margin: 0,
+    });
+  });
+  addDeckFooter(agenda, slideNumber, totalSlides);
+  agenda.addNotes('Use this slide to orient the room before moving into the core story.');
+  slideNumber += 1;
+
+  slides.forEach((deckSlide, index) => {
+    const slide = pptx.addSlide();
+    slide.background = { color: index % 2 === 0 ? 'FFFFFF' : 'F8FAFC' };
+    addAccentGeometry(slide, pptx, index + 2);
+    addSlideTitle(slide, deckSlide);
+
+    const image = imageDataUris.length ? imageDataUris[index % imageDataUris.length] : undefined;
+    const layout = deckSlide.layout || 'signal';
+
+    if (layout === 'image' || layout === 'split') {
+      addBulletList(slide, deckSlide.bullets || [], 0.86, 2.0, 5.5);
+      addImagePanel(slide, image, 7.55, 1.32, 4.85, 4.95);
+    } else if (layout === 'steps') {
+      (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
+        const x = 0.78 + bulletIndex * 3.02;
+        slide.addShape(pptx.ShapeType.roundRect, {
+          x,
+          y: 2.0,
+          w: 2.55,
+          h: 2.55,
+          fill: { color: bulletIndex % 2 === 0 ? 'F0FDFA' : 'EFF6FF' },
+          line: { color: bulletIndex % 2 === 0 ? '99F6E4' : 'BFDBFE' },
+        });
+        slide.addText(String(bulletIndex + 1).padStart(2, '0'), {
+          x: x + 0.22,
+          y: 2.22,
+          w: 0.62,
+          h: 0.32,
+          fontFace: 'Aptos Display',
+          fontSize: 15,
+          bold: true,
+          color: bulletIndex % 2 === 0 ? '0F766E' : '2563EB',
+          margin: 0,
+        });
+        slide.addText(bullet, {
+          x: x + 0.26,
+          y: 2.95,
+          w: 2.02,
+          h: 0.88,
+          fontFace: 'Aptos',
+          fontSize: 13,
+          bold: true,
+          fit: 'shrink',
+          color: '1E293B',
+          margin: 0,
+        });
+      });
+    } else if (layout === 'quote') {
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: 1.05,
+        y: 2.05,
+        w: 10.75,
+        h: 2.85,
+        fill: { color: '0F172A' },
+        line: { color: '0F172A' },
+      });
+      slide.addText((deckSlide.bullets || [deckSlide.visualCue || ''])[0] || '', {
+        x: 1.62,
+        y: 2.65,
+        w: 9.55,
+        h: 1.26,
+        fontFace: 'Aptos Display',
+        fontSize: 25,
+        bold: true,
+        color: 'FFFFFF',
+        fit: 'shrink',
+        margin: 0,
+      });
+    } else {
+      const first = (deckSlide.bullets || [])[0] || deckSlide.visualCue || 'Key signal';
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: 0.82,
+        y: 1.72,
+        w: 4.1,
+        h: 2.35,
+        fill: { color: '0F766E' },
+        line: { color: '0F766E' },
+      });
+      slide.addText(first, {
+        x: 1.16,
+        y: 2.15,
+        w: 3.4,
+        h: 1.08,
+        fontFace: 'Aptos Display',
+        fontSize: 24,
+        bold: true,
+        color: 'FFFFFF',
+        fit: 'shrink',
+        margin: 0,
+      });
+      addBulletList(slide, (deckSlide.bullets || []).slice(1), 6.0, 1.88, 5.55);
+    }
+
+    if (deckSlide.visualCue && layout !== 'quote') {
+      slide.addText(deckSlide.visualCue, {
+        x: 0.72,
+        y: 6.45,
+        w: 10.8,
+        h: 0.25,
+        fontFace: 'Aptos',
+        fontSize: 8,
+        color: '64748B',
+        italic: true,
+        fit: 'shrink',
+        margin: 0,
+      });
+    }
+
+    addDeckFooter(slide, slideNumber, totalSlides);
+    if (deckSlide.notes) {
+      slide.addNotes(deckSlide.notes);
+    }
+    slideNumber += 1;
+  });
+
+  const close = pptx.addSlide();
+  close.background = { color: '0F172A' };
+  close.addShape(pptx.ShapeType.rect, {
+    x: 0,
+    y: 0,
+    w: 13.33,
+    h: 7.5,
+    fill: { color: '0F172A' },
+    line: { color: '0F172A' },
+  });
+  close.addShape(pptx.ShapeType.arc, {
+    x: 9.5,
+    y: -0.3,
+    w: 3.4,
+    h: 3.4,
+    line: { color: '14B8A6', transparency: 10, pt: 5 },
+    rotate: 30,
+  });
+  close.addText('Next move', {
+    x: 0.86,
+    y: 1.08,
+    w: 4.6,
+    h: 0.5,
+    fontFace: 'Aptos Display',
+    fontSize: 28,
+    bold: true,
+    color: 'FFFFFF',
+    margin: 0,
+  });
+  close.addText('Turn the presentation into decisions, commitments, and measurable work.', {
+    x: 0.9,
+    y: 1.86,
+    w: 6.6,
+    h: 0.56,
+    fontFace: 'Aptos',
+    fontSize: 15,
+    color: 'CBD5E1',
+    fit: 'shrink',
+    margin: 0,
+  });
+  ['Choose the first validation audience', 'Confirm the smallest credible pilot', 'Assign owners and timing'].forEach(
+    (item, index) => {
+      close.addShape(pptx.ShapeType.roundRect, {
+        x: 0.92,
+        y: 3.0 + index * 0.75,
+        w: 6.2,
+        h: 0.5,
+        fill: { color: index % 2 === 0 ? '134E4A' : '1E3A8A' },
+        line: { color: index % 2 === 0 ? '134E4A' : '1E3A8A' },
+      });
+      close.addText(item, {
+        x: 1.18,
+        y: 3.13 + index * 0.75,
+        w: 5.5,
+        h: 0.18,
+        fontFace: 'Aptos',
+        fontSize: 10.5,
+        bold: true,
+        color: 'FFFFFF',
+        margin: 0,
+      });
+    }
+  );
+  close.addText('newworld-game.org', {
+    x: 10.5,
+    y: 6.84,
+    w: 2.0,
+    h: 0.22,
+    fontFace: 'Aptos',
+    fontSize: 9,
+    color: '94A3B8',
+    align: 'right',
+    margin: 0,
+  });
+  close.addNotes('Close by asking for a specific commitment or next conversation.');
+
+  return pptx
+    .write({ outputType: 'nodebuffer', compression: true } as any)
+    .then((output: any) => (Buffer.isBuffer(output) ? output : Buffer.from(output)));
+}
+
+async function savePresentationPptx(
+  uid: string,
+  solutionId: string,
+  requestId: string,
+  title: string,
+  buffer: Buffer
+): Promise<{ downloadUrl: string; storagePath: string; fileName: string }> {
+  const fileName = `${slugPresentationFileName(title)}-ai-presentation.pptx`;
+  const storagePath = `ai-presentations/${uid}/${solutionId}/${requestId}.pptx`;
+  const file = bucket.file(storagePath);
+  const downloadToken = randomUUID();
+
+  await file.save(buffer, {
+    metadata: {
+      contentType: PRESENTATION_PPTX_MIME,
+      contentDisposition: `attachment; filename="${fileName}"`,
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+        solutionId,
+        createdBy: uid,
+      },
+    },
+  });
+
+  return {
+    fileName,
+    storagePath,
+    downloadUrl: `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(
+      storagePath
+    )}?alt=media&token=${downloadToken}`,
+  };
+}
+
+export const onPresentationRequest = functions
+  .region('us-central1')
+  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .firestore.document('users/{uid}/presentation-requests/{docId}')
+  .onCreate(async (snap, context) => {
+    const uid = String(context.params.uid || '');
+    const requestId = String(context.params.docId || snap.id);
+    const data = snap.data() || {};
+    const solutionId = cleanPresentationText(data?.solutionId, 120);
+
+    if (!solutionId) {
+      await snap.ref.update({
+        status: { state: 'ERRORED', message: 'No solutionId provided.' },
+      });
+      return;
+    }
+
+    try {
+      await snap.ref.update({
+        status: { state: 'PROCESSING', message: 'Reading solution content...' },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const solutionRef = admin.firestore().doc(`solutions/${solutionId}`);
+      const solutionSnap = await solutionRef.get();
+      if (!solutionSnap.exists) {
+        await snap.ref.update({
+          status: { state: 'ERRORED', message: 'Solution not found.' },
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+
+      const solution = solutionSnap.data() || {};
+      const title = cleanPresentationText(solution?.title || 'Solution Presentation', 90);
+      const { sourceText, imageUrls } = await collectPresentationSourceText(solution);
+
+      if (!sourceText || sourceText.length < 80) {
+        await snap.ref.update({
+          status: {
+            state: 'ERRORED',
+            message: 'There is not enough solution content to generate a presentation.',
+          },
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+
+      await snap.ref.update({
+        status: { state: 'PROCESSING', message: 'Designing slide narrative...' },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const plan = await generatePresentationDeckPlan(sourceText, title);
+      const imagePool = await buildPresentationImagePool(imageUrls);
+
+      await snap.ref.update({
+        status: { state: 'PROCESSING', message: 'Building PowerPoint file...' },
+        planPreview: {
+          title: plan.title,
+          subtitle: plan.subtitle,
+          slideCount: plan.slides?.length || 0,
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const pptxBuffer = await buildPresentationPptx(plan, imagePool, title);
+      const saved = await savePresentationPptx(
+        uid,
+        solutionId,
+        requestId,
+        plan.title || title,
+        pptxBuffer
+      );
+      const now = Date.now();
+      const formattedDateCreated = new Date(now).toLocaleString('en-US', {
+        year: '2-digit',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+      const thumbnail = imageUrls[0] || PRESENTATION_FALLBACK_IMAGE;
+
+      const documentEntry = {
+        downloadURL: saved.downloadUrl,
+        name: plan.title || title,
+        originalFilename: saved.fileName,
+        description: plan.subtitle || 'AI-generated PowerPoint presentation',
+        type: PRESENTATION_PPTX_MIME,
+        dateSorted: now,
+        dateCreated: formattedDateCreated,
+        formattedDateCreated,
+      };
+
+      await solutionRef.set(
+        {
+          documents: admin.firestore.FieldValue.arrayUnion(documentEntry),
+        },
+        { merge: true }
+      );
+
+      await solutionRef.collection('presentations').doc(requestId).set(
+        {
+          id: requestId,
+          solutionId,
+          name: plan.title || title,
+          description: plan.subtitle || 'AI-generated presentation',
+          dateCreated: now,
+          thumbnail,
+          generatedByAi: true,
+          pptxDownloadURL: saved.downloadUrl,
+          slides: (plan.slides || []).map((slide, index) => ({
+            ...(imageUrls.length ? { imageUrl: imageUrls[index % imageUrls.length] } : {}),
+            bullets: [slide.title || 'Slide', ...(slide.bullets || [])].slice(0, 6),
+          })),
+        },
+        { merge: true }
+      );
+
+      await snap.ref.update({
+        status: { state: 'COMPLETED', message: 'Presentation generated.' },
+        response: {
+          ...saved,
+          title: plan.title || title,
+          subtitle: plan.subtitle || '',
+          slideCount: (plan.slides || []).length + 3,
+          document: documentEntry,
+          presentationId: requestId,
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (error: any) {
+      console.error('onPresentationRequest error:', error?.message || error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      await snap.ref.update({
+        status: {
+          state: 'ERRORED',
+          message: errorMsg.includes('quota') || errorMsg.includes('429')
+            ? 'The AI service is temporarily busy. Please try again shortly.'
+            : 'Could not generate the presentation. Please try again.',
+          technicalError: errorMsg,
+        },
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }

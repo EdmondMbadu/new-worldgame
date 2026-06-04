@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,13 +10,14 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-document-files',
   templateUrl: './document-files.component.html',
   styleUrl: './document-files.component.css',
 })
-export class DocumentFilesComponent implements OnInit {
+export class DocumentFilesComponent implements OnInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
@@ -35,20 +36,31 @@ export class DocumentFilesComponent implements OnInit {
   documents: Avatar[] = [];
   presentations: any[] = [];
   originalFilename = '';
+  generatingAiPresentation = false;
+  aiPresentationStatus = '';
+  aiPresentationError = '';
+  private aiPresentationRequestSub?: Subscription;
+  private solutionSub?: Subscription;
+  private presentationsSub?: Subscription;
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.solution.getSolution(this.id).subscribe((data: any) => {
+    this.solutionSub = this.solution.getSolution(this.id).subscribe((data: any) => {
       this.currentSolution = data;
       if (this.currentSolution.documents) {
         this.documents = this.currentSolution.documents;
         console.log('Documents:', this.documents);
       }
-      /* ② NEW – live list of presentations */
-      this.data.getPresentations(this.id).subscribe((p) => {
-        this.presentations = p;
-      });
     });
+    this.presentationsSub = this.data.getPresentations(this.id).subscribe((p) => {
+      this.presentations = p;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.aiPresentationRequestSub?.unsubscribe();
+    this.solutionSub?.unsubscribe();
+    this.presentationsSub?.unsubscribe();
   }
   documentType: string = '';
   documentFileTypes = [
@@ -281,6 +293,74 @@ export class DocumentFilesComponent implements OnInit {
           .getPresentations(this.id)
           .subscribe((p) => (this.presentations = p));
       });
+  }
+
+  async generateAiPresentation() {
+    const uid = this.auth.currentUser?.uid;
+    const solutionId = this.currentSolution?.solutionId || this.id;
+    if (!uid) {
+      this.aiPresentationError = 'Please sign in to generate a presentation.';
+      return;
+    }
+    if (!solutionId) {
+      this.aiPresentationError = 'No solution was found for this page.';
+      return;
+    }
+
+    this.generatingAiPresentation = true;
+    this.aiPresentationError = '';
+    this.aiPresentationStatus = 'Preparing presentation request...';
+
+    const docId = this.afs.createId();
+    const docRef = this.afs.doc<any>(
+      `users/${uid}/presentation-requests/${docId}`
+    );
+
+    this.aiPresentationRequestSub?.unsubscribe();
+    this.aiPresentationRequestSub = docRef.valueChanges().subscribe((snap) => {
+      if (!snap) {
+        return;
+      }
+      const state = snap.status?.state;
+      if (state === 'PROCESSING') {
+        this.aiPresentationStatus =
+          snap.status?.message || 'Generating presentation...';
+        return;
+      }
+      if (state === 'COMPLETED') {
+        this.generatingAiPresentation = false;
+        this.aiPresentationStatus =
+          'Presentation ready. The PPTX was added to Documents.';
+        this.aiPresentationRequestSub?.unsubscribe();
+        return;
+      }
+      if (state === 'ERRORED') {
+        this.generatingAiPresentation = false;
+        this.aiPresentationError =
+          snap.status?.message ||
+          snap.status?.error ||
+          'Could not generate the presentation.';
+        this.aiPresentationStatus = '';
+        this.aiPresentationRequestSub?.unsubscribe();
+      }
+    });
+
+    try {
+      await docRef.set({
+        solutionId,
+        status: { state: 'QUEUED', message: 'Queued for generation.' },
+        requestedAt: Date.now(),
+        mode: 'cheap-first-pass',
+      });
+      this.aiPresentationStatus = 'Reading solution and documents...';
+    } catch (err) {
+      console.error('Unable to start AI presentation generation', err);
+      this.generatingAiPresentation = false;
+      this.aiPresentationStatus = '';
+      this.aiPresentationError =
+        'Unable to start presentation generation. Please try again.';
+      this.aiPresentationRequestSub?.unsubscribe();
+    }
   }
 
   openViewer(pid: string) {

@@ -65,6 +65,12 @@ type BulkRecipient = {
   source?: string;
 };
 
+type UnsubscribedRow = {
+  email: string;
+  reason?: string;
+  updatedAt: Date;
+};
+
 type PendingRecipientImport = {
   source?: string;
   label?: string;
@@ -79,17 +85,24 @@ type PendingRecipientImport = {
 export class BulkEmailsComponent implements OnDestroy {
   private readonly recipientImportKey = 'bulkEmail.recipientImport.v1';
   // ===== Unsubscribed state =====
-  allUnsubscribedRows: Array<{
-    email: string;
-    reason?: string;
-    updatedAt: Date;
-  }> = [];
+  allUnsubscribedRows: UnsubscribedRow[] = [];
   unsubscribedEmails: string[] = [];
-  unsubscribedRows: Array<{ email: string; reason?: string; updatedAt: Date }> =
-    [];
+  unsubscribedRows: UnsubscribedRow[] = [];
+  unsubscribedMonthRows: UnsubscribedRow[] = [];
+  unsubscribedDayRows: UnsubscribedRow[] = [];
+  todayUnsubRows: UnsubscribedRow[] = [];
+  unsubscribedViewMode: 'month' | 'day' = 'month';
   public unsubSet: Set<string> = new Set();
   autoExcludeUnsubs = true; // toggle in UI
   selectedUnsubMonth = this.toMonthInputValue(new Date());
+  selectedUnsubDate = this.toDateInputValue(new Date());
+  unsubDayCounts: Array<{
+    date: string;
+    day: number;
+    count: number;
+    isSelected: boolean;
+    isToday: boolean;
+  }> = [];
   // Inner-collapsible toggles (default: open CSV, collapsed Unsubs—tweak as you like)
   showCsvLists = true;
   showUnsubs = false;
@@ -1798,10 +1811,7 @@ export class BulkEmailsComponent implements OnDestroy {
         });
 
         // normalize + dedupe by email (keep most recent)
-        const latestByEmail = new Map<
-          string,
-          { email: string; reason?: string; updatedAt: Date }
-        >();
+        const latestByEmail = new Map<string, UnsubscribedRow>();
         for (const row of list) {
           const prev = latestByEmail.get(row.email);
           if (!prev || prev.updatedAt < row.updatedAt)
@@ -1832,11 +1842,42 @@ export class BulkEmailsComponent implements OnDestroy {
     }).format(new Date(year, month - 1, 1));
   }
 
+  get selectedUnsubDateLabel(): string {
+    const [year, month, day] = this.selectedUnsubDate
+      .split('-')
+      .map((value) => parseInt(value, 10));
+    if (!year || !month || !day) return 'Selected day';
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(year, month - 1, day));
+  }
+
+  get selectedUnsubPeriodLabel(): string {
+    return this.unsubscribedViewMode === 'day'
+      ? this.selectedUnsubDateLabel
+      : this.selectedUnsubMonthLabel;
+  }
+
+  get selectedUnsubDayCount(): number {
+    return this.unsubscribedDayRows.length;
+  }
+
+  get todayUnsubCount(): number {
+    return this.todayUnsubRows.length;
+  }
+
+  get unsubscribedViewCount(): number {
+    return this.unsubscribedRows.length;
+  }
+
   onUnsubMonthChange(evt: Event): void {
     const el = evt.target as HTMLInputElement;
     const value = (el.value || '').trim();
     if (!value) return;
     this.selectedUnsubMonth = value;
+    this.ensureSelectedUnsubDateInMonth();
     this.applyUnsubscribeMonthFilter();
   }
 
@@ -1847,24 +1888,125 @@ export class BulkEmailsComponent implements OnDestroy {
     const dt = new Date(y, m - 1, 1);
     dt.setMonth(dt.getMonth() + deltaMonths);
     this.selectedUnsubMonth = this.toMonthInputValue(dt);
+    this.ensureSelectedUnsubDateInMonth();
     this.applyUnsubscribeMonthFilter();
   }
 
   resetUnsubsToThisMonth(): void {
     this.selectedUnsubMonth = this.toMonthInputValue(new Date());
+    this.selectedUnsubDate = this.toDateInputValue(new Date());
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  onUnsubDateChange(evt: Event): void {
+    const el = evt.target as HTMLInputElement;
+    const value = (el.value || '').trim();
+    if (!value) return;
+    this.selectedUnsubDate = value;
+    this.selectedUnsubMonth = value.slice(0, 7);
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  shiftUnsubDay(deltaDays: number): void {
+    const [y, m, d] = this.selectedUnsubDate
+      .split('-')
+      .map((n) => parseInt(n, 10));
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() + deltaDays);
+    this.selectedUnsubDate = this.toDateInputValue(dt);
+    this.selectedUnsubMonth = this.selectedUnsubDate.slice(0, 7);
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  resetUnsubsToToday(): void {
+    const today = new Date();
+    this.selectedUnsubDate = this.toDateInputValue(today);
+    this.selectedUnsubMonth = this.toMonthInputValue(today);
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  showUnsubMonthView(): void {
+    this.unsubscribedViewMode = 'month';
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  showUnsubDayView(): void {
+    this.unsubscribedViewMode = 'day';
+    this.ensureSelectedUnsubDateInMonth();
+    this.applyUnsubscribeMonthFilter();
+  }
+
+  selectUnsubDay(date: string): void {
+    if (!date) return;
+    this.selectedUnsubDate = date;
+    this.selectedUnsubMonth = date.slice(0, 7);
+    this.unsubscribedViewMode = 'day';
     this.applyUnsubscribeMonthFilter();
   }
 
   private applyUnsubscribeMonthFilter(): void {
-    const { start, end } = this.getMonthBoundsLocalFromYYYYMM(
+    const { start, end, daysInMonth } = this.getMonthBoundsLocalFromYYYYMM(
       this.selectedUnsubMonth
     );
 
-    this.unsubscribedRows = this.allUnsubscribedRows.filter((row) => {
+    this.unsubscribedMonthRows = this.allUnsubscribedRows.filter((row) => {
       const updatedAt = row.updatedAt;
       return updatedAt >= start && updatedAt < end;
     });
+
+    this.unsubDayCounts = Array.from({ length: daysInMonth }, (_, index) => {
+      const day = index + 1;
+      const date = `${this.selectedUnsubMonth}-${String(day).padStart(
+        2,
+        '0'
+      )}`;
+      return {
+        date,
+        day,
+        count: 0,
+        isSelected: date === this.selectedUnsubDate,
+        isToday: date === this.toDateInputValue(new Date()),
+      };
+    });
+
+    for (const row of this.unsubscribedMonthRows) {
+      const dayIndex = row.updatedAt.getDate() - 1;
+      if (this.unsubDayCounts[dayIndex]) {
+        this.unsubDayCounts[dayIndex].count += 1;
+      }
+    }
+
+    const { start: dayStart, end: dayEnd } = this.getDayBoundsLocal(
+      this.selectedUnsubDate
+    );
+    this.unsubscribedDayRows = this.allUnsubscribedRows.filter((row) => {
+      const updatedAt = row.updatedAt;
+      return updatedAt >= dayStart && updatedAt < dayEnd;
+    });
+
+    const { start: todayStart, end: todayEnd } = this.getDayBoundsLocal(
+      this.toDateInputValue(new Date())
+    );
+    this.todayUnsubRows = this.allUnsubscribedRows.filter((row) => {
+      const updatedAt = row.updatedAt;
+      return updatedAt >= todayStart && updatedAt < todayEnd;
+    });
+
+    this.unsubscribedRows =
+      this.unsubscribedViewMode === 'day'
+        ? this.unsubscribedDayRows
+        : this.unsubscribedMonthRows;
     this.unsubscribedEmails = this.unsubscribedRows.map((row) => row.email);
+  }
+
+  private ensureSelectedUnsubDateInMonth(): void {
+    if (this.selectedUnsubDate.slice(0, 7) === this.selectedUnsubMonth) return;
+
+    const currentMonth = this.toMonthInputValue(new Date());
+    this.selectedUnsubDate =
+      this.selectedUnsubMonth === currentMonth
+        ? this.toDateInputValue(new Date())
+        : `${this.selectedUnsubMonth}-01`;
   }
 
   private applyUnsubFilter() {
