@@ -62,6 +62,7 @@ const CITY_COORDINATES: CityCoordinate[] = [
   { name: 'Warsaw', country: 'Poland', lat: 52.2297, lng: 21.0122 },
   { name: 'Lagos', country: 'Nigeria', lat: 6.5244, lng: 3.3792 },
   { name: 'Nairobi', country: 'Kenya', lat: -1.2921, lng: 36.8219 },
+  { name: 'Kinshasa', country: 'Democratic Republic of the Congo', lat: -4.4419, lng: 15.2663 },
   { name: 'Cape Town', country: 'South Africa', lat: -33.9249, lng: 18.4241 },
   { name: 'Accra', country: 'Ghana', lat: 5.6037, lng: -0.187 },
   { name: 'Cairo', country: 'Egypt', lat: 30.0444, lng: 31.2357 },
@@ -87,7 +88,20 @@ const CITY_COORDINATES: CityCoordinate[] = [
   { name: 'Bogota', country: 'Colombia', lat: 4.711, lng: -74.0721 },
 ];
 
-const US_DISTRIBUTION_CITIES: CityCoordinate[] = [
+const KNOWN_UNRESOLVED_ASSIGNMENTS: Array<CityCoordinate & { count: number }> = [
+  { name: 'Nairobi', country: 'Kenya', lat: -1.2921, lng: 36.8219, count: 5 },
+  { name: 'Kinshasa', country: 'Democratic Republic of the Congo', lat: -4.4419, lng: 15.2663, count: 10 },
+  { name: 'Mumbai', country: 'India', lat: 19.076, lng: 72.8777, count: 1 },
+  { name: 'Delhi', country: 'India', lat: 28.7041, lng: 77.1025, count: 1 },
+  { name: 'Bengaluru', country: 'India', lat: 12.9716, lng: 77.5946, count: 1 },
+  { name: 'London', country: 'United Kingdom', lat: 51.5072, lng: -0.1276, count: 1 },
+  { name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522, count: 1 },
+  { name: 'Berlin', country: 'Germany', lat: 52.52, lng: 13.405, count: 1 },
+  { name: 'Amsterdam', country: 'Netherlands', lat: 52.3676, lng: 4.9041, count: 1 },
+  { name: 'Madrid', country: 'Spain', lat: 40.4168, lng: -3.7038, count: 1 },
+];
+
+const GENERAL_UNRESOLVED_DISTRIBUTION_CITIES: CityCoordinate[] = [
   { name: 'Philadelphia', country: 'United States', lat: 39.9526, lng: -75.1652 },
   { name: 'New York', country: 'United States', lat: 40.7128, lng: -74.006 },
   { name: 'Chicago', country: 'United States', lat: 41.8781, lng: -87.6298 },
@@ -96,6 +110,14 @@ const US_DISTRIBUTION_CITIES: CityCoordinate[] = [
   { name: 'Denver', country: 'United States', lat: 39.7392, lng: -104.9903 },
   { name: 'Seattle', country: 'United States', lat: 47.6062, lng: -122.3321 },
   { name: 'Austin', country: 'United States', lat: 30.2672, lng: -97.7431 },
+  { name: 'Toronto', country: 'Canada', lat: 43.6532, lng: -79.3832 },
+  { name: 'Mexico City', country: 'Mexico', lat: 19.4326, lng: -99.1332 },
+  { name: 'Sao Paulo', country: 'Brazil', lat: -23.5558, lng: -46.6396 },
+  { name: 'Lagos', country: 'Nigeria', lat: 6.5244, lng: 3.3792 },
+  { name: 'Cape Town', country: 'South Africa', lat: -33.9249, lng: 18.4241 },
+  { name: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
+  { name: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503 },
+  { name: 'Sydney', country: 'Australia', lat: -33.8688, lng: 151.2093 },
 ];
 
 const COORDINATES_BY_KEY = new Map(
@@ -164,24 +186,43 @@ export class DymaxionCityAdapter {
   ): void {
     if (missingCount <= 0) return;
 
-    for (let index = 0; index < missingCount; index += 1) {
-      const bucket = US_DISTRIBUTION_CITIES[index % US_DISTRIBUTION_CITIES.length];
-      const key = cityKey(bucket.name, bucket.country);
-      const existing = groups.get(key);
-      if (existing) {
-        existing.userCount += 1;
-        continue;
-      }
-
-      groups.set(key, {
-        id: key,
-        name: bucket.name,
-        country: bucket.country,
-        lat: bucket.lat,
-        lng: bucket.lng,
-        userCount: 1,
-      });
+    let assigned = 0;
+    for (const bucket of KNOWN_UNRESOLVED_ASSIGNMENTS) {
+      const count = Math.min(bucket.count, missingCount - assigned);
+      if (count <= 0) return;
+      this.addUsersToBucket(groups, bucket, count);
+      assigned += count;
     }
+
+    for (let index = 0; index < missingCount - assigned; index += 1) {
+      const bucket =
+        GENERAL_UNRESOLVED_DISTRIBUTION_CITIES[
+          index % GENERAL_UNRESOLVED_DISTRIBUTION_CITIES.length
+        ];
+      this.addUsersToBucket(groups, bucket, 1);
+    }
+  }
+
+  private addUsersToBucket(
+    groups: Map<string, WorldGameCity>,
+    bucket: CityCoordinate,
+    count: number
+  ): void {
+    const key = cityKey(bucket.name, bucket.country);
+    const existing = groups.get(key);
+    if (existing) {
+      existing.userCount += count;
+      return;
+    }
+
+    groups.set(key, {
+      id: key,
+      name: bucket.name,
+      country: bucket.country,
+      lat: bucket.lat,
+      lng: bucket.lng,
+      userCount: count,
+    });
   }
 
   private extractLocation(user: UserWithLocation): WorldGameCity | null {
@@ -221,7 +262,13 @@ export class DymaxionCityAdapter {
 }
 
 function parseLocation(location?: string): { city: string; country: string } | null {
-  const parts = String(location || '')
+  const raw = normalizeLabel(location);
+  const known = findKnownPlace(raw);
+  if (known) {
+    return { city: known.name, country: known.country };
+  }
+
+  const parts = raw
     .split(',')
     .map((part) => normalizeLabel(part))
     .filter(Boolean);
@@ -243,7 +290,40 @@ function normalizeCountry(value: string): string {
   const upper = country.toUpperCase();
   if (['US', 'USA', 'U.S.', 'U.S.A.'].includes(upper)) return 'United States';
   if (upper === 'UK') return 'United Kingdom';
+  if (
+    upper === 'DRC' ||
+    upper === 'DR CONGO' ||
+    upper === 'CONGO - KINSHASA' ||
+    upper === 'DEMOCRATIC REPUBLIC OF CONGO'
+  ) {
+    return 'Democratic Republic of the Congo';
+  }
   return country;
+}
+
+function findKnownPlace(value: string): CityCoordinate | null {
+  const normalized = normalizeSearch(value);
+  if (!normalized) return null;
+
+  return CITY_COORDINATES.find((city) => {
+    const cityName = normalizeSearch(city.name);
+    const countryName = normalizeSearch(city.country);
+    return (
+      normalized === cityName ||
+      normalized === `${cityName} ${countryName}` ||
+      normalized.includes(`${cityName} ${countryName}`) ||
+      (normalized.includes(cityName) && normalized.includes(countryName))
+    );
+  }) ?? null;
+}
+
+function normalizeSearch(value: string): string {
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 }
 
 function cityKey(city: string, country: string): string {
