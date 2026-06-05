@@ -66,6 +66,7 @@ import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.compo
 import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
 import { SlpTargetingModalComponent } from '../components/slp-targeting-modal/slp-targeting-modal.component';
 import { SlpLocationPickerComponent } from '../components/slp-location-picker/slp-location-picker.component';
+import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
 
 @NgModule({
   declarations: [
@@ -130,6 +131,7 @@ import { SlpLocationPickerComponent } from '../components/slp-location-picker/sl
     SlpReachComponent,
     SlpTargetingModalComponent,
     SlpLocationPickerComponent,
+    DymaxionComponent,
   ],
   imports: [
     CommonModule,

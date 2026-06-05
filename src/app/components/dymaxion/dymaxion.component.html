@@ -1,0 +1,111 @@
+<main class="dym-page">
+  <header class="dym-toolbar">
+    <div>
+      <p class="dym-eyebrow">Fuller projection</p>
+      <h1>Dymaxion World Game Map</h1>
+    </div>
+
+    <div class="dym-toolbar__controls">
+      <label class="dym-search">
+        <span aria-hidden="true">Search</span>
+        <input
+          type="text"
+          placeholder="City or country"
+          autocomplete="off"
+          [ngModel]="searchValue()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </label>
+      <div class="dym-counts" aria-live="polite">
+        <strong>{{ shownPlayerCount() | number }}</strong>
+        <span>players</span>
+        <em>{{ shownCityCount() }} / {{ cityCount() }} cities</em>
+      </div>
+    </div>
+  </header>
+
+  <div class="dym-chips" aria-label="Map focus">
+    <button
+      *ngFor="let f of foci()"
+      type="button"
+      class="dym-chip"
+      [class.active]="activeFocus() === f.id"
+      [class.sub]="!!f.box"
+      (click)="setFocus(f)"
+    >
+      {{ f.label }}
+    </button>
+  </div>
+
+  <section class="dym-mapstage" aria-label="Dymaxion map with city player counts">
+    <div
+      class="dym-map-frame"
+      #frame
+      (wheel)="onMapWheel($event)"
+      (pointerdown)="onMapPointerDown($event)"
+    >
+      <span class="dym-tick tl"></span>
+      <span class="dym-tick tr"></span>
+      <span class="dym-tick bl"></span>
+      <span class="dym-tick br"></span>
+
+      <div class="dym-zoom-controls" aria-label="Map zoom controls">
+        <button class="dym-zoomctl" type="button" (click)="zoomBy(1.45)" aria-label="Zoom in">+</button>
+        <button class="dym-zoomctl" type="button" (click)="zoomBy(1 / 1.45)" aria-label="Zoom out">-</button>
+      </div>
+
+      <button
+        class="dym-zoomout"
+        type="button"
+        #zoomout
+        (click)="resetToWorld()"
+        aria-label="Zoom back out to the whole world"
+      >
+        World
+      </button>
+
+      <div class="dym-map-canvas" #canvas>
+        <img
+          src="/assets/img/dymaxion/dymaxion-map.png"
+          alt="Dymaxion Fuller projection world map"
+          draggable="false"
+        />
+        <svg
+          class="dym-country-layer"
+          #countryLayer
+          viewBox="0 0 1000 475"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label="Projected country boundaries"
+        ></svg>
+        <div #clusterLayer></div>
+      </div>
+
+      <article
+        *ngIf="selected() as c"
+        class="dym-selected-card"
+        aria-live="polite"
+      >
+        <button type="button" class="dym-selected-close" (click)="clearSelected()" aria-label="Close city detail">×</button>
+        <p>{{ c.country }}</p>
+        <h2>{{ c.name }}</h2>
+        <strong>{{ formatPlayers(c.userCount) }}</strong>
+        <span>{{ fmtLat(c.lat) }}, {{ fmtLng(c.lng) }}</span>
+      </article>
+
+      <div *ngIf="cityDataLoading()" class="dym-map-loading" aria-live="polite" aria-label="Loading city and user data">
+        <span class="dym-loading-spinner" aria-hidden="true"></span>
+        <span>Loading city players...</span>
+      </div>
+
+      <div *ngIf="isMapLoading(); else readyHint" class="dym-hint">Loading the world...</div>
+      <ng-template #readyHint>
+        <div class="dym-hint" #hint>Scroll to zoom · drag to pan · hover cities</div>
+      </ng-template>
+    </div>
+
+    <div class="dym-picker" #picker role="dialog" aria-label="Cities at this location"></div>
+  </section>
+</main>
+
+<app-footer></app-footer>
