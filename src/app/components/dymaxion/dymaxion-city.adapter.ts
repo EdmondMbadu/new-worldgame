@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { firstValueFrom, timeout } from 'rxjs';
 import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 
 export interface WorldGameCity {
   id: string;
@@ -10,6 +10,12 @@ export interface WorldGameCity {
   lat: number;
   lng: number;
   userCount: number;
+}
+
+export interface DymaxionCityLoadResult {
+  cities: WorldGameCity[];
+  source: 'live';
+  assignedMissingCount: number;
 }
 
 interface CityCoordinate {
@@ -81,21 +87,15 @@ const CITY_COORDINATES: CityCoordinate[] = [
   { name: 'Bogota', country: 'Colombia', lat: 4.711, lng: -74.0721 },
 ];
 
-const PLACEHOLDER_CITIES: WorldGameCity[] = [
-  { id: 'placeholder-philadelphia', name: 'Philadelphia', country: 'United States', lat: 39.9526, lng: -75.1652, userCount: 128 },
-  { id: 'placeholder-new-york', name: 'New York', country: 'United States', lat: 40.7128, lng: -74.006, userCount: 214 },
-  { id: 'placeholder-boston', name: 'Boston', country: 'United States', lat: 42.3601, lng: -71.0589, userCount: 64 },
-  { id: 'placeholder-london', name: 'London', country: 'United Kingdom', lat: 51.5072, lng: -0.1276, userCount: 96 },
-  { id: 'placeholder-paris', name: 'Paris', country: 'France', lat: 48.8566, lng: 2.3522, userCount: 72 },
-  { id: 'placeholder-lagos', name: 'Lagos', country: 'Nigeria', lat: 6.5244, lng: 3.3792, userCount: 58 },
-  { id: 'placeholder-nairobi', name: 'Nairobi', country: 'Kenya', lat: -1.2921, lng: 36.8219, userCount: 46 },
-  { id: 'placeholder-mumbai', name: 'Mumbai', country: 'India', lat: 19.076, lng: 72.8777, userCount: 141 },
-  { id: 'placeholder-delhi', name: 'Delhi', country: 'India', lat: 28.7041, lng: 77.1025, userCount: 83 },
-  { id: 'placeholder-singapore', name: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198, userCount: 39 },
-  { id: 'placeholder-tokyo', name: 'Tokyo', country: 'Japan', lat: 35.6762, lng: 139.6503, userCount: 112 },
-  { id: 'placeholder-sydney', name: 'Sydney', country: 'Australia', lat: -33.8688, lng: 151.2093, userCount: 57 },
-  { id: 'placeholder-sao-paulo', name: 'Sao Paulo', country: 'Brazil', lat: -23.5558, lng: -46.6396, userCount: 77 },
-  { id: 'placeholder-bogota', name: 'Bogota', country: 'Colombia', lat: 4.711, lng: -74.0721, userCount: 43 },
+const US_DISTRIBUTION_CITIES: CityCoordinate[] = [
+  { name: 'Philadelphia', country: 'United States', lat: 39.9526, lng: -75.1652 },
+  { name: 'New York', country: 'United States', lat: 40.7128, lng: -74.006 },
+  { name: 'Chicago', country: 'United States', lat: 41.8781, lng: -87.6298 },
+  { name: 'Los Angeles', country: 'United States', lat: 34.0522, lng: -118.2437 },
+  { name: 'Atlanta', country: 'United States', lat: 33.749, lng: -84.388 },
+  { name: 'Denver', country: 'United States', lat: 39.7392, lng: -104.9903 },
+  { name: 'Seattle', country: 'United States', lat: 47.6062, lng: -122.3321 },
+  { name: 'Austin', country: 'United States', lat: 30.2672, lng: -97.7431 },
 ];
 
 const COORDINATES_BY_KEY = new Map(
@@ -106,26 +106,31 @@ const COORDINATES_BY_KEY = new Map(
   providedIn: 'root',
 })
 export class DymaxionCityAdapter {
-  constructor(private afs: AngularFirestore) {}
+  constructor(private auth: AuthService) {}
 
-  async loadCities(): Promise<WorldGameCity[]> {
+  async loadCities(): Promise<DymaxionCityLoadResult> {
     try {
       const users = await firstValueFrom(
-        this.afs.collection<UserWithLocation>('users').valueChanges().pipe(timeout(4500)),
+        this.auth.getALlUsers().pipe(timeout(4500)),
       );
-      const liveCities = this.groupUsersByCity(users || []);
-      return liveCities.length > 0 ? liveCities : PLACEHOLDER_CITIES;
+      return this.groupUsersByCity(users || []);
     } catch {
-      return PLACEHOLDER_CITIES;
+      return { cities: [], source: 'live', assignedMissingCount: 0 };
     }
   }
 
-  private groupUsersByCity(users: UserWithLocation[]): WorldGameCity[] {
+  private groupUsersByCity(users: UserWithLocation[]): DymaxionCityLoadResult {
     const groups = new Map<string, WorldGameCity>();
+    let missingCount = 0;
 
     for (const user of users) {
+      if (!normalizeLabel(user.email)) continue;
+
       const location = this.extractLocation(user);
-      if (!location) continue;
+      if (!location) {
+        missingCount += 1;
+        continue;
+      }
 
       const key = cityKey(location.name, location.country);
       const existing = groups.get(key);
@@ -144,7 +149,39 @@ export class DymaxionCityAdapter {
       });
     }
 
-    return Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name));
+    this.distributeMissingUsers(groups, missingCount);
+
+    return {
+      cities: Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name)),
+      source: 'live',
+      assignedMissingCount: missingCount,
+    };
+  }
+
+  private distributeMissingUsers(
+    groups: Map<string, WorldGameCity>,
+    missingCount: number
+  ): void {
+    if (missingCount <= 0) return;
+
+    for (let index = 0; index < missingCount; index += 1) {
+      const bucket = US_DISTRIBUTION_CITIES[index % US_DISTRIBUTION_CITIES.length];
+      const key = cityKey(bucket.name, bucket.country);
+      const existing = groups.get(key);
+      if (existing) {
+        existing.userCount += 1;
+        continue;
+      }
+
+      groups.set(key, {
+        id: key,
+        name: bucket.name,
+        country: bucket.country,
+        lat: bucket.lat,
+        lng: bucket.lng,
+        userCount: 1,
+      });
+    }
   }
 
   private extractLocation(user: UserWithLocation): WorldGameCity | null {

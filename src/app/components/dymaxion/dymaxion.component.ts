@@ -130,6 +130,7 @@ export class DymaxionComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly playerCount = signal(0);
   readonly shownCityCount = signal(0);
   readonly shownPlayerCount = signal(0);
+  readonly assignedMissingCount = signal(0);
   readonly foci = signal<Focus[]>([{ id: 'all', label: 'World' }]);
   readonly activeFocus = signal('all');
   readonly searchValue = signal('');
@@ -243,8 +244,9 @@ export class DymaxionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async loadCities(): Promise<void> {
     this.cityDataLoading.set(true);
-    const rawCities = await this.cityAdapter.loadCities();
-    this.cities = this.projectCities(rawCities);
+    const result = await this.cityAdapter.loadCities();
+    this.assignedMissingCount.set(result.assignedMissingCount);
+    this.cities = this.projectCities(result.cities);
     this.cityCount.set(this.cities.length);
     this.playerCount.set(this.totalUsers(this.cities));
     this.refreshFoci();
@@ -920,6 +922,10 @@ export class DymaxionComponent implements OnInit, AfterViewInit, OnDestroy {
 
   formatPlayers(value: number): string {
     return formatPlayers(value);
+  }
+
+  playerCountLabel(): string {
+    return 'players';
   }
 
   fmtLat(value: number): string {
