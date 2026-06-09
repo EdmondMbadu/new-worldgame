@@ -63,6 +63,7 @@ type BulkRecipient = {
   fields: Record<string, string>;
   rowNumber?: number;
   source?: string;
+  importIndex?: number;
 };
 
 type UnsubscribedRow = {
@@ -231,6 +232,7 @@ export class BulkEmailsComponent implements OnDestroy {
   csvDupes = 0;
   csvFieldKeys: string[] = [];
   importedAudienceLabel = '';
+  manuallyRemovedRecipients: BulkRecipient[] = [];
 
   sendingBulk = false;
   bulkProgressText = '';
@@ -851,6 +853,7 @@ export class BulkEmailsComponent implements OnDestroy {
     this.csvDupes = 0;
     this.csvFieldKeys = [];
     this.importedAudienceLabel = '';
+    this.manuallyRemovedRecipients = [];
     this.bulkResult = '';
     this.bulkProgressText = '';
     if (this.csvInput?.nativeElement) this.csvInput.nativeElement.value = '';
@@ -931,6 +934,7 @@ export class BulkEmailsComponent implements OnDestroy {
               fields: recipientFields,
               rowNumber: i + 1,
               source: 'csv',
+              importIndex: recipients.length,
             });
           }
         } else {
@@ -944,6 +948,7 @@ export class BulkEmailsComponent implements OnDestroy {
     this.csvInvalid = invalid;
     this.csvFieldKeys = Array.from(fieldKeys);
     this.importedAudienceLabel = '';
+    this.manuallyRemovedRecipients = [];
     // crude duplicate estimate: invalid for bad format; dupes are total unique vs total raw tokens
     const totalTokens = rows
       .slice(1)
@@ -1041,6 +1046,97 @@ export class BulkEmailsComponent implements OnDestroy {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
+  }
+
+  removeRecipient(email: string): void {
+    if (this.sendingBulk) return;
+    const normalized = (email || '').trim().toLowerCase();
+    if (!normalized) return;
+
+    const recipient = this.csvRecipients.find(
+      (item) => item.email === normalized
+    );
+    if (!recipient) return;
+
+    this.csvRecipients = this.csvRecipients.filter(
+      (item) => item.email !== normalized
+    );
+    this.syncCsvValidFromRecipients();
+
+    if (
+      !this.manuallyRemovedRecipients.some((item) => item.email === normalized)
+    ) {
+      this.manuallyRemovedRecipients = [
+        ...this.manuallyRemovedRecipients,
+        recipient,
+      ];
+    }
+
+    this.bulkResult = `${normalized} removed from this send.`;
+    this.recompute();
+  }
+
+  restoreRecipient(email: string): void {
+    if (this.sendingBulk) return;
+    const normalized = (email || '').trim().toLowerCase();
+    if (!normalized) return;
+
+    const recipient = this.manuallyRemovedRecipients.find(
+      (item) => item.email === normalized
+    );
+    if (!recipient) return;
+
+    this.manuallyRemovedRecipients = this.manuallyRemovedRecipients.filter(
+      (item) => item.email !== normalized
+    );
+
+    if (!this.csvRecipients.some((item) => item.email === normalized)) {
+      this.csvRecipients = [...this.csvRecipients, recipient].sort(
+        this.compareRecipientOrder
+      );
+      this.syncCsvValidFromRecipients();
+    }
+
+    this.bulkResult = `${normalized} restored to this send.`;
+    this.recompute();
+  }
+
+  restoreAllRemovedRecipients(): void {
+    if (this.sendingBulk || !this.manuallyRemovedRecipients.length) return;
+
+    const activeEmails = new Set(this.csvRecipients.map((item) => item.email));
+    const restored = this.manuallyRemovedRecipients.filter(
+      (item) => !activeEmails.has(item.email)
+    );
+
+    this.csvRecipients = [...this.csvRecipients, ...restored].sort(
+      this.compareRecipientOrder
+    );
+    const restoredCount = this.manuallyRemovedRecipients.length;
+    this.manuallyRemovedRecipients = [];
+    this.syncCsvValidFromRecipients();
+    this.bulkResult = `${restoredCount} removed recipient(s) restored.`;
+    this.recompute();
+  }
+
+  private syncCsvValidFromRecipients(): void {
+    this.csvValid = this.csvRecipients.map((recipient) => recipient.email);
+  }
+
+  private compareRecipientOrder(a: BulkRecipient, b: BulkRecipient): number {
+    const aIndex =
+      typeof a.importIndex === 'number' ? a.importIndex : Number.MAX_SAFE_INTEGER;
+    const bIndex =
+      typeof b.importIndex === 'number' ? b.importIndex : Number.MAX_SAFE_INTEGER;
+    if (aIndex !== bIndex) return aIndex - bIndex;
+
+    const aRow =
+      typeof a.rowNumber === 'number' ? a.rowNumber : Number.MAX_SAFE_INTEGER;
+    const bRow =
+      typeof b.rowNumber === 'number' ? b.rowNumber : Number.MAX_SAFE_INTEGER;
+    if (aRow !== bRow) return aRow - bRow;
+
+    return a.email.localeCompare(b.email);
   }
 
   // --- Bulk send ---
@@ -2223,6 +2319,7 @@ export class BulkEmailsComponent implements OnDestroy {
           fields: recipientFields,
           rowNumber: index + 1,
           source: label,
+          importIndex: recipients.length,
         });
       }
     });
@@ -2233,6 +2330,7 @@ export class BulkEmailsComponent implements OnDestroy {
     this.csvDupes = Math.max(0, rawCount - recipients.length - invalid.length);
     this.csvFieldKeys = Array.from(fieldKeys);
     this.importedAudienceLabel = label;
+    this.manuallyRemovedRecipients = [];
 
     if (this.autoExcludeUnsubs) this.applyUnsubFilter();
     this.recompute();
