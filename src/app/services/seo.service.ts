@@ -242,6 +242,12 @@ export class SeoService {
         keywords: 'privacy policy, data protection, NewWorld Game privacy, user data',
         url: `${baseUrl}/privacy`
       },
+      '/intellectual-property': {
+        title: 'Intellectual Property & Honor Code - NewWorld Game',
+        description: 'Learn how NewWorld Game handles participant ownership, attribution, protected work, commercialization, and embargo options.',
+        keywords: 'NewWorld Game intellectual property, honor code, student IP, solution ownership, attribution',
+        url: `${baseUrl}/intellectual-property`
+      },
       '/overview': {
         title: 'About NewWorld Game | Buckminster Fuller Inspired Learning Platform',
         description: 'Learn what NewWorld Game is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',

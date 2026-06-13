@@ -1,0 +1,51 @@
+.intellectual-property-page {
+  font-family: 'Inter', 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.intellectual-property-page h1,
+.intellectual-property-page h2,
+.intellectual-property-page h3,
+.intellectual-property-page p,
+.intellectual-property-page a,
+.intellectual-property-page li,
+.intellectual-property-page summary {
+  letter-spacing: 0;
+}
+
+.ip-hero {
+  background:
+    linear-gradient(135deg, #07111f 0%, #0f172a 46%, #082f35 100%);
+}
+
+.ip-globe::before,
+.ip-globe::after {
+  content: '';
+  position: absolute;
+  inset: 17%;
+  border: 1px solid rgba(94, 234, 212, 0.2);
+  border-radius: 9999px;
+  transform: rotate(58deg);
+}
+
+.ip-globe::after {
+  transform: rotate(-58deg);
+}
+
+.ip-node {
+  position: absolute;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 9999px;
+  background: #fcd34d;
+  box-shadow: 0 0 0 0.45rem rgba(252, 211, 77, 0.16);
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .intellectual-property-page details p {
+    padding-left: 0;
+  }
+}

@@ -55,6 +55,7 @@ import { TournamentInstructionsComponent } from '../blogs/tournament-instruction
 import { ChesterReportComponent } from '../blogs/chester-report/chester-report.component';
 import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
+import { IntellectualPropertyComponent } from '../blogs/intellectual-property/intellectual-property.component';
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
@@ -69,6 +70,7 @@ const routes: Routes = [
   { path: 'landing-community', component: LandingCommunityComponent },
   { path: 'careers', component: CareersComponent },
   { path: 'privacy', component: PrivacyComponent },
+  { path: 'intellectual-property', component: IntellectualPropertyComponent },
   { path: 'blogs/features', component: FeaturesComponent },
   { path: 'blogs/nwg-steps', component: NwgStepsComponent },
   { path: 'blogs/tournament', component: TournamentComponent },
