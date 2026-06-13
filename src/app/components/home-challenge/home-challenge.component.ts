@@ -181,6 +181,10 @@ export class HomeChallengeComponent implements OnDestroy {
   allUsers: any[] = [];  // Cached users for instant client-side filtering
   showUserSuggestions = false;
   private userSearchTimeout: any;  // For debouncing server-side search
+  bulkParticipantsText = '';
+  bulkParticipantsFileName = '';
+  bulkParticipantEmails: string[] = [];
+  bulkDuplicateEmails: string[] = [];
 
   // Remove participant search
   removeParticipantSearchQuery = '';
@@ -1109,6 +1113,7 @@ export class HomeChallengeComponent implements OnDestroy {
     // Reset search when opening add participant modal (users already loaded on init)
     if (property === 'showAddTeamMember' && this.showAddTeamMember) {
       this.clearSelectedUser();
+      this.clearBulkParticipants();
     }
     
     // Reset remove participant search when opening modal
@@ -1256,6 +1261,67 @@ export class HomeChallengeComponent implements OnDestroy {
     this.newParticipant = '';
     this.userSearchResults = [];
     this.showUserSuggestions = false;
+  }
+
+  onBulkParticipantsTextChange(): void {
+    this.refreshBulkParticipantPreview();
+  }
+
+  onBulkParticipantsFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.bulkParticipantsFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.bulkParticipantsText = String(reader.result || '');
+      this.refreshBulkParticipantPreview();
+      input.value = '';
+    };
+    reader.onerror = () => {
+      this.toast.error('Could not read that CSV file.');
+      input.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  clearBulkParticipants(): void {
+    this.bulkParticipantsText = '';
+    this.bulkParticipantsFileName = '';
+    this.bulkParticipantEmails = [];
+    this.bulkDuplicateEmails = [];
+  }
+
+  private refreshBulkParticipantPreview(): void {
+    const extractedEmails = this.extractEmailsFromText(this.bulkParticipantsText);
+    const existingEmails = new Set(
+      (this.participants || []).map((email) => this.normalizeEmail(email))
+    );
+
+    this.bulkDuplicateEmails = extractedEmails.filter((email) =>
+      existingEmails.has(email)
+    );
+    this.bulkParticipantEmails = extractedEmails.filter(
+      (email) => !existingEmails.has(email)
+    );
+  }
+
+  private extractEmailsFromText(text: string): string[] {
+    const matches =
+      text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+    const uniqueEmails = new Set<string>();
+
+    matches.forEach((email) => {
+      const normalizedEmail = this.normalizeEmail(email);
+      if (normalizedEmail && this.data.isValidEmail(normalizedEmail)) {
+        uniqueEmails.add(normalizedEmail);
+      }
+    });
+
+    return Array.from(uniqueEmails);
   }
 
   // Filter participants for remove modal
@@ -1436,6 +1502,64 @@ export class HomeChallengeComponent implements OnDestroy {
     this.selectedUserToAdd = null;
     this.userSearchQuery = '';
     this.userSearchResults = [];
+  }
+
+  async addBulkParticipants(): Promise<void> {
+    this.refreshBulkParticipantPreview();
+
+    if (!this.bulkParticipantEmails.length) {
+      this.toast.warning('Paste or upload a list with at least one new valid email.');
+      return;
+    }
+
+    const nextParticipants = [
+      ...(this.participants || []),
+      ...this.bulkParticipantEmails,
+    ];
+
+    this.isLoading = true;
+    try {
+      await this.challenge.addParticipantToChallengePage(
+        this.challengePageId,
+        nextParticipants
+      );
+
+      this.participants = nextParticipants;
+      await this.loadParticipantProfiles();
+
+      const inviteResults = await Promise.allSettled(
+        this.bulkParticipantEmails.map((email) =>
+          this.sendEmailToParticipant(email)
+        )
+      );
+      const failedInvites = inviteResults.filter(
+        (result) => result.status === 'rejected'
+      ).length;
+
+      const addedCount = this.bulkParticipantEmails.length;
+      const skippedCount = this.bulkDuplicateEmails.length;
+      this.clearBulkParticipants();
+      this.toggle('showAddTeamMember');
+
+      if (failedInvites) {
+        this.toast.warning(
+          `${addedCount} participant${addedCount === 1 ? '' : 's'} added. ${failedInvites} invite email${failedInvites === 1 ? '' : 's'} could not be sent.`
+        );
+      } else if (skippedCount) {
+        this.toast.success(
+          `${addedCount} participant${addedCount === 1 ? '' : 's'} added. ${skippedCount} duplicate${skippedCount === 1 ? '' : 's'} skipped.`
+        );
+      } else {
+        this.toast.success(
+          `${addedCount} participant${addedCount === 1 ? '' : 's'} added.`
+        );
+      }
+    } catch (error) {
+      console.error('Error adding bulk participants:', error);
+      this.toast.error('Could not add participants. Please try again.');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   removeParticipant(email: string) {
