@@ -3,8 +3,8 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { firstValueFrom } from 'rxjs';
-import { Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { ChallengeJoinRequest, ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -109,6 +109,7 @@ export class HomeChallengeComponent implements OnDestroy {
   showEditHandouts = false;
 
   // Existing challenges picker (global challenges)
+  pageChallengeCards: any[] = [];
   existingChallenges: any[] = [];
   filteredExistingChallenges: any[] = [];
   existingCategories: string[] = [];
@@ -132,6 +133,7 @@ export class HomeChallengeComponent implements OnDestroy {
   editIndex = -1;
   editTitle = '';
   editDescription = '';
+  editImage = '';
   editCategory = '';
   editCategoryCustom = '';
 
@@ -189,6 +191,8 @@ export class HomeChallengeComponent implements OnDestroy {
   // Remove admin search
   removeAdminSearchQuery = '';
   private languageSub?: Subscription;
+  private pageChallengesSub?: Subscription;
+  private challengeHydrationSub?: Subscription;
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -259,6 +263,8 @@ export class HomeChallengeComponent implements OnDestroy {
     this.languageSub?.unsubscribe();
     this.participantPresenceSub?.unsubscribe();
     this.challengeJoinRequestsSub?.unsubscribe();
+    this.pageChallengesSub?.unsubscribe();
+    this.challengeHydrationSub?.unsubscribe();
   }
   private resetPageState(): void {
     // everything that can legitimately be “missing” on a page
@@ -278,6 +284,9 @@ export class HomeChallengeComponent implements OnDestroy {
   loadChallengePage(idOrSlug: string): void {
     // Reset challenge-related data before fetching new ones
     this.resetPageState();
+    this.pageChallengesSub?.unsubscribe();
+    this.challengeHydrationSub?.unsubscribe();
+    this.pageChallengeCards = [];
     this.categories = [];
     this.challenges = {};
     this.activeCategory = '';
@@ -387,20 +396,28 @@ export class HomeChallengeComponent implements OnDestroy {
         this.checkAccess();
         this.maybePromptJoin();
 
-        this.challenge
-          .getThisUserChallenges(
+        this.pageChallengesSub?.unsubscribe();
+        this.pageChallengesSub = this.challenge
+          .getUserChallengesForPage(
             this.challengePage.authorId!,
             this.challengePageId
           )
           .subscribe((challenges: any[]) => {
-            // Extract unique categories from new challenges
+            const pageChallenges = challenges || [];
+            this.pageChallengeCards = pageChallenges;
             const uniqueCategories = Array.from(
-              new Set(challenges.map((challenge) => challenge.category))
+              new Set(
+                pageChallenges
+                  .map((challenge) => challenge.category)
+                  .filter(Boolean)
+              )
             );
 
             this.categories = uniqueCategories;
-            this.activeCategory = this.categories[0] || ''; // Set to first category if available
-            this.fetchChallenges(this.activeCategory);
+            if (!this.categories.includes(this.activeCategory)) {
+              this.activeCategory = this.categories[0] || '';
+            }
+            this.fetchChallenges(this.activeCategory, pageChallenges);
           });
   }
   private checkAccess(): void {
@@ -545,15 +562,48 @@ export class HomeChallengeComponent implements OnDestroy {
   /** whether the detailed list is visible */
   showParticipantsList = false;
 
-  fetchChallenges(category: string) {
+  fetchChallenges(
+    category: string,
+    pageChallenges: any[] = this.pageChallengeCards
+  ) {
+    this.challengeHydrationSub?.unsubscribe();
+
     // only fetch challenges if the category is present and not an empty string
     if (!category) {
       console.warn('No category provided to fetch challenges.');
+      this.titles = [];
+      this.descriptions = [];
+      this.challengeImages = [];
+      this.ids = [];
       return;
     }
-    this.challenge
-      .getUserChallengesByCategory(category)
-      .subscribe((data: any[]) => {
+
+    const matchingChallenges = (pageChallenges || []).filter(
+      (challenge) => challenge.category === category
+    );
+
+    if (!matchingChallenges.length) {
+      this.challenges[category] = {
+        ids: [],
+        titles: [],
+        frenchTitles: [],
+        descriptions: [],
+        frenchDescriptions: [],
+        images: [],
+      };
+      this.updateChallenges();
+      return;
+    }
+
+    this.challengeHydrationSub = combineLatest(
+      matchingChallenges.map((challenge) =>
+        this.solution.getSolution(challenge.id || challenge.docId).pipe(
+          map((solution: any) =>
+            this.mergeChallengeCardWithSolution(challenge, solution)
+          )
+        )
+      )
+    ).subscribe((data: any[]) => {
         // Transform the array into the expected format
         const transformedData = {
           ids: data.map((challenge) => challenge.id),
@@ -570,12 +620,25 @@ export class HomeChallengeComponent implements OnDestroy {
           ),
         };
         this.challenges[category] = transformedData; // Assign to the challenges object
-        // console.log(
-        //   `Challenges for category ${category}:`,
-        //   this.challenges[category]
-        // );
         this.updateChallenges(); // Update the active challenge display
       });
+  }
+
+  private mergeChallengeCardWithSolution(challenge: any, solution: any): any {
+    if (!solution) {
+      return {
+        ...challenge,
+        id: challenge.id || challenge.docId,
+      };
+    }
+
+    return {
+      ...challenge,
+      id: challenge.id || challenge.docId,
+      title: solution.title || challenge.title,
+      description: solution.description || challenge.description,
+      image: solution.image || challenge.image,
+    };
   }
 
   updateChallenges(): void {
@@ -1972,9 +2035,28 @@ export class HomeChallengeComponent implements OnDestroy {
     this.editIndex = index;
     this.editTitle = this.titles[index];
     this.editDescription = this.descriptions[index];
+    this.editImage = this.challengeImages[index] || '';
     this.editCategory = this.activeCategory;
     this.editCategoryCustom = '';
     this.showEditChallenge = true;
+  }
+
+  async startEditChallengeImageUpload(event: FileList) {
+    if (!this.editChallengeId) {
+      return;
+    }
+
+    try {
+      const url = await this.data.startUpload(
+        event,
+        `challenges/${this.editChallengeId}`,
+        'false'
+      );
+      this.editImage = url || this.editImage;
+    } catch (error) {
+      console.error('Error uploading challenge image:', error);
+      this.toast.error('Error occurred while uploading file. Please try again.');
+    }
   }
 
   async saveEditChallenge() {
@@ -1991,16 +2073,46 @@ export class HomeChallengeComponent implements OnDestroy {
 
     try {
       this.isLoading = true;
+      const title = this.editTitle.trim();
+      const description = this.editDescription.trim();
+      const image =
+        this.editImage && this.editImage !== 'No image available'
+          ? this.editImage
+          : '';
 
-      await this.afs.doc(`user-challenges/${this.editChallengeId}`).update({
-        title: this.editTitle.trim(),
-        description: this.editDescription.trim(),
-        category: newCat,
-      });
+      const batch = this.afs.firestore.batch();
+      const challengeRef = this.afs.doc(
+        `user-challenges/${this.editChallengeId}`
+      ).ref;
+      const solutionRef = this.afs.doc(`solutions/${this.editChallengeId}`).ref;
+
+      batch.set(
+        challengeRef,
+        {
+          title,
+          description,
+          image,
+          titleLower: title.toLowerCase(),
+          category: newCat,
+        },
+        { merge: true }
+      );
+      batch.set(
+        solutionRef,
+        {
+          title,
+          description,
+          image,
+        },
+        { merge: true }
+      );
+
+      await batch.commit();
 
       /* — update local arrays for instant UI feedback — */
-      this.titles[this.editIndex] = this.editTitle.trim();
-      this.descriptions[this.editIndex] = this.editDescription.trim();
+      this.titles[this.editIndex] = title;
+      this.descriptions[this.editIndex] = description;
+      this.challengeImages[this.editIndex] = image || 'No image available';
 
       /* if the category changed */
       if (newCat !== this.activeCategory) {

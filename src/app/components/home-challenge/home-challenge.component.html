@@ -2285,6 +2285,27 @@
       >
       </textarea>
 
+      <!-- Cover Image -->
+      <label
+        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+      >
+        Cover Image
+      </label>
+      <div class="mb-6 rounded border border-gray-300 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700">
+        <img
+          *ngIf="editImage && editImage !== 'No image available'"
+          [src]="editImage"
+          alt="Challenge cover preview"
+          class="mb-3 h-32 w-full rounded object-cover"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          (change)="startEditChallengeImageUpload($any($event.target).files)"
+          class="block w-full text-sm text-gray-700 file:mr-4 file:rounded file:border-0 file:bg-teal-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-800 dark:text-gray-200"
+        />
+      </div>
+
       <!-- Buttons -->
       <div class="flex justify-end space-x-3">
         <button
