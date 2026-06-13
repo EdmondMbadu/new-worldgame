@@ -33,6 +33,7 @@ export class ChallengeComponent implements OnInit {
   alreadyParticipant = false;
   isLoadingParticipantStatus = false;
   showPrivateSolutionModal = false;
+  memberCount = 0;
   challengeText = 'Join Solution';
   constructor(
     private time: TimeService,
@@ -110,12 +111,7 @@ export class ChallengeComponent implements OnInit {
       }
 
       /* ---------- 2) Join if the user is not a participant ---------- */
-      const raw = solution.participants ?? [];
-      const participants: { name: string }[] = Array.isArray(raw)
-        ? [...raw]
-        : Object.values(raw as Record<string, string>).map((e) => ({
-            name: e,
-          }));
+      const participants = this.normalizeParticipants(solution.participants);
       const isParticipant = participants.some(
         (p) => p.name.trim().toLowerCase() === email
       );
@@ -129,7 +125,11 @@ export class ChallengeComponent implements OnInit {
 
       /* --- 2. add user if missing --- */
       if (!isParticipant) {
-        await this.solutionService.joinSolution(solution, email);
+        const updatedParticipants = await this.solutionService.joinSolution(
+          solution,
+          email
+        );
+        this.memberCount = updatedParticipants.length;
       }
 
       /* ---------- 3) Navigate to the workspace ---------- */
@@ -142,10 +142,9 @@ export class ChallengeComponent implements OnInit {
 
   isParticipant() {
     const email = this.auth.currentUser.email?.trim().toLowerCase();
-    const raw = this.currentSolution.participants ?? [];
-    const participants: { name: string }[] = Array.isArray(raw)
-      ? [...raw]
-      : Object.values(raw as Record<string, string>).map((e) => ({ name: e }));
+    const participants = this.normalizeParticipants(
+      this.currentSolution.participants
+    );
 
     /* --- 2. add user if missing --- */
     return !participants.some((p) => p.name.trim().toLowerCase() === email);
@@ -182,12 +181,8 @@ export class ChallengeComponent implements OnInit {
 
       this.currentSolution = solution;
       this.isPrivateSolution = !!solution.isPrivate;
-      const raw = solution.participants ?? [];
-      const participants: { name: string }[] = Array.isArray(raw)
-        ? [...raw]
-        : Object.values(raw as Record<string, string>).map((e) => ({
-            name: e,
-          }));
+      const participants = this.normalizeParticipants(solution.participants);
+      this.memberCount = participants.length;
 
       this.alreadyParticipant = participants.some(
         (p) => p.name.trim().toLowerCase() === email
@@ -234,5 +229,45 @@ export class ChallengeComponent implements OnInit {
     this.router.navigate(['/dashboard', this.id], {
       queryParams: { challengePageId: this.challengePageId }
     });
+  }
+
+  get memberCountLabel(): string {
+    if (this.isLoadingParticipantStatus) {
+      return 'Loading members';
+    }
+
+    if (this.memberCount === 1) {
+      return '1 member';
+    }
+
+    return `${this.memberCount} members`;
+  }
+
+  private normalizeParticipants(raw: any): { name: string }[] {
+    if (!raw) {
+      return [];
+    }
+
+    if (Array.isArray(raw)) {
+      return raw
+        .map((participant) => {
+          if (typeof participant === 'string') {
+            return { name: participant };
+          }
+
+          return { name: participant?.name || '' };
+        })
+        .filter((participant) => participant.name);
+    }
+
+    return Object.values(raw as Record<string, any>)
+      .map((participant: any) => {
+        if (typeof participant === 'string') {
+          return { name: participant };
+        }
+
+        return { name: participant?.name || Object.values(participant || {})[0] || '' };
+      })
+      .filter((participant) => participant.name);
   }
 }

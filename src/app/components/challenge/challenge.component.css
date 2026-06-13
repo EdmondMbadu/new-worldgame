@@ -1,0 +1,14 @@
+.challenge-card-title,
+.challenge-card-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.challenge-card-title {
+  -webkit-line-clamp: 2;
+}
+
+.challenge-card-description {
+  -webkit-line-clamp: 3;
+}
