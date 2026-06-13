@@ -46,6 +46,7 @@ export class Solution {
   activeScreenSharer?: string;
   meetLink?: string;
   image?: string;
+  isPrivate?: boolean;
   category?: string;
   impact?: number;
   supporters?: number;

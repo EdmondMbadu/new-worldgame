@@ -49,6 +49,7 @@ export class HomeChallengeComponent implements OnDestroy {
       descriptions: string[];
       frenchDescriptions?: string[];
       images: string[];
+      privateFlags?: boolean[];
     };
   } = {};
   challengeId: string = '';
@@ -56,6 +57,7 @@ export class HomeChallengeComponent implements OnDestroy {
   titles: string[] = [];
   descriptions: string[] = [];
   challengeImages: string[] = [];
+  solutionPrivateFlags: boolean[] = [];
   ids: string[] = [];
   participants: string[] = [];
   participantProfiles: {
@@ -134,6 +136,7 @@ export class HomeChallengeComponent implements OnDestroy {
   editTitle = '';
   editDescription = '';
   editImage = '';
+  editSolutionPrivate = false;
   editCategory = '';
   editCategoryCustom = '';
 
@@ -293,6 +296,7 @@ export class HomeChallengeComponent implements OnDestroy {
     this.titles = [];
     this.descriptions = [];
     this.challengeImages = [];
+    this.solutionPrivateFlags = [];
     this.ids = [];
 
     // Try to load by custom URL first, then fall back to ID
@@ -590,6 +594,7 @@ export class HomeChallengeComponent implements OnDestroy {
         descriptions: [],
         frenchDescriptions: [],
         images: [],
+        privateFlags: [],
       };
       this.updateChallenges();
       return;
@@ -618,6 +623,7 @@ export class HomeChallengeComponent implements OnDestroy {
           images: data.map(
             (challenge) => challenge.image || 'No image available'
           ),
+          privateFlags: data.map((challenge) => !!challenge.isPrivate),
         };
         this.challenges[category] = transformedData; // Assign to the challenges object
         this.updateChallenges(); // Update the active challenge display
@@ -629,6 +635,7 @@ export class HomeChallengeComponent implements OnDestroy {
       return {
         ...challenge,
         id: challenge.id || challenge.docId,
+        isPrivate: !!challenge.isPrivate,
       };
     }
 
@@ -638,6 +645,7 @@ export class HomeChallengeComponent implements OnDestroy {
       title: solution.title || challenge.title,
       description: solution.description || challenge.description,
       image: solution.image || challenge.image,
+      isPrivate: !!(solution.isPrivate ?? challenge.isPrivate),
     };
   }
 
@@ -652,6 +660,7 @@ export class HomeChallengeComponent implements OnDestroy {
       this.titles = [];
       this.descriptions = [];
       this.challengeImages = [];
+      this.solutionPrivateFlags = [];
       this.ids = [];
       return;
     }
@@ -663,6 +672,7 @@ export class HomeChallengeComponent implements OnDestroy {
       ? categoryData.frenchDescriptions ?? categoryData.descriptions
       : categoryData.descriptions;
     this.challengeImages = categoryData.images;
+    this.solutionPrivateFlags = categoryData.privateFlags ?? [];
     this.ids = categoryData.ids!;
   }
 
@@ -1802,6 +1812,7 @@ export class HomeChallengeComponent implements OnDestroy {
       this.titles.splice(index, 1);
       this.descriptions.splice(index, 1);
       this.challengeImages.splice(index, 1);
+      this.solutionPrivateFlags.splice(index, 1);
 
       // If you also track counts per category, update them here.
 
@@ -1840,6 +1851,7 @@ export class HomeChallengeComponent implements OnDestroy {
       this.titles.splice(localIndex, 1);
       this.descriptions.splice(localIndex, 1);
       this.challengeImages.splice(localIndex, 1);
+      this.solutionPrivateFlags.splice(localIndex, 1);
 
       // 3b if new category is brand-new, add it to the filter pills
       if (!this.categories.includes(newCat)) {
@@ -2036,6 +2048,7 @@ export class HomeChallengeComponent implements OnDestroy {
     this.editTitle = this.titles[index];
     this.editDescription = this.descriptions[index];
     this.editImage = this.challengeImages[index] || '';
+    this.editSolutionPrivate = !!this.solutionPrivateFlags[index];
     this.editCategory = this.activeCategory;
     this.editCategoryCustom = '';
     this.showEditChallenge = true;
@@ -2092,6 +2105,7 @@ export class HomeChallengeComponent implements OnDestroy {
           title,
           description,
           image,
+          isPrivate: this.editSolutionPrivate,
           titleLower: title.toLowerCase(),
           category: newCat,
         },
@@ -2103,6 +2117,7 @@ export class HomeChallengeComponent implements OnDestroy {
           title,
           description,
           image,
+          isPrivate: this.editSolutionPrivate,
         },
         { merge: true }
       );
@@ -2113,6 +2128,7 @@ export class HomeChallengeComponent implements OnDestroy {
       this.titles[this.editIndex] = title;
       this.descriptions[this.editIndex] = description;
       this.challengeImages[this.editIndex] = image || 'No image available';
+      this.solutionPrivateFlags[this.editIndex] = this.editSolutionPrivate;
 
       /* if the category changed */
       if (newCat !== this.activeCategory) {
@@ -2121,6 +2137,7 @@ export class HomeChallengeComponent implements OnDestroy {
         this.titles.splice(this.editIndex, 1);
         this.descriptions.splice(this.editIndex, 1);
         this.challengeImages.splice(this.editIndex, 1);
+        this.solutionPrivateFlags.splice(this.editIndex, 1);
 
         // 2. add category pill if brand-new
         if (!this.categories.includes(newCat)) {

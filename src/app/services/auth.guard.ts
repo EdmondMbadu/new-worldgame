@@ -258,6 +258,7 @@ export class AuthGuard {
 
             // If solution has a challengePageId, check if user is a workspace participant
             const workspaceId = solution?.challengePageId || challengePageId;
+            const isPrivateSolution = !!solution?.isPrivate;
             if (workspaceId) {
               return this.afs
                 .doc(`challengePages/${workspaceId}`)
@@ -275,6 +276,9 @@ export class AuthGuard {
                     }
                     if (Array.isArray(page.adminUids) && page.adminUids.includes(user.uid)) {
                       return true;
+                    }
+                    if (isPrivateSolution) {
+                      return false;
                     }
                     // Check if user is workspace participant
                     if (Array.isArray(page.participants)) {

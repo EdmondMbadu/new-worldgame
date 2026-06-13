@@ -16,6 +16,15 @@
       loading="lazy"
      
     />
+    <div
+      *ngIf="fromChallengeSpace && isPrivateSolution"
+      class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-slate-950/80 px-3 py-1 text-xs font-semibold text-white shadow-lg backdrop-blur"
+    >
+      <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4"></path>
+      </svg>
+      Private
+    </div>
   </div>
 </a>
 
@@ -97,3 +106,58 @@
       </div>
     </div>
   </div>
+
+<div
+  *ngIf="showPrivateSolutionModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 px-4 backdrop-blur-sm"
+>
+  <div
+    class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+  >
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-900 px-6 py-5 text-white">
+      <div class="flex items-start gap-4">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/25">
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] text-teal-100">
+            Private solution
+          </p>
+          <h3 class="mt-1 text-xl font-bold leading-tight">
+            Access is restricted
+          </h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-6">
+      <p class="text-base font-semibold text-slate-900 dark:text-white">
+        {{ title || 'This solution' }} is private.
+      </p>
+      <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+        Reach out to a workspace admin to be added before opening this solution.
+        Once an admin grants access, this card will take you to the same
+        solution workspace.
+      </p>
+
+      <div
+        class="mt-5 rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-900 dark:border-teal-800/60 dark:bg-teal-950/30 dark:text-teal-100"
+      >
+        Ask an admin from this challenge space to invite you or add your email
+        to the solution team.
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button
+          type="button"
+          (click)="closePrivateSolutionModal()"
+          class="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

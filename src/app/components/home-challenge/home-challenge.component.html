@@ -1082,6 +1082,8 @@
               [title]="t"
               [originalTitle]="getOriginalChallengeTitle(i)"
               [challengePageId]="challengePageId"
+              [isPrivateSolution]="solutionPrivateFlags[i]"
+              [canManage]="isAuthorPage"
             ></app-challenge>
           </div>
         </div>
@@ -2305,6 +2307,24 @@
           class="block w-full text-sm text-gray-700 file:mr-4 file:rounded file:border-0 file:bg-teal-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-teal-800 dark:text-gray-200"
         />
       </div>
+
+      <!-- Privacy -->
+      <label
+        class="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-100"
+      >
+        <input
+          type="checkbox"
+          [(ngModel)]="editSolutionPrivate"
+          class="mt-1 h-4 w-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+        />
+        <span>
+          <span class="block text-sm font-semibold">Make solution private</span>
+          <span class="mt-1 block text-sm text-amber-800 dark:text-amber-200">
+            People who are not already on the solution team will see a private
+            access message and must contact an admin.
+          </span>
+        </span>
+      </label>
 
       <!-- Buttons -->
       <div class="flex justify-end space-x-3">

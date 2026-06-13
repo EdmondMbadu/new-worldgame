@@ -25,11 +25,14 @@ export class ChallengeComponent implements OnInit {
   @Input() fromChallengeSpace: boolean = false;
   @Input() fit: 'cover' | 'contain' = 'cover';
   @Input() challengePageId: string = ''; // The workspace/challenge page ID
+  @Input() isPrivateSolution: boolean = false;
+  @Input() canManage: boolean = false;
 
   currentSolution: Solution = {};
   user?: User = {};
   alreadyParticipant = false;
   isLoadingParticipantStatus = false;
+  showPrivateSolutionModal = false;
   challengeText = 'Join Solution';
   constructor(
     private time: TimeService,
@@ -42,11 +45,32 @@ export class ChallengeComponent implements OnInit {
 
   openChallengeImage() {
     if (this.fromChallengeSpace) {
+      if (this.shouldBlockPrivateAccess()) {
+        this.openPrivateSolutionModal();
+        return;
+      }
       this.viewSolution();
       return;
     }
 
     this.selectChallenge();
+  }
+
+  closePrivateSolutionModal() {
+    this.showPrivateSolutionModal = false;
+  }
+
+  private shouldBlockPrivateAccess(): boolean {
+    return (
+      this.fromChallengeSpace &&
+      this.isPrivateSolution &&
+      !this.alreadyParticipant &&
+      !this.canManage
+    );
+  }
+
+  private openPrivateSolutionModal(): void {
+    this.showPrivateSolutionModal = true;
   }
 
   selectChallenge() {
@@ -92,9 +116,19 @@ export class ChallengeComponent implements OnInit {
         : Object.values(raw as Record<string, string>).map((e) => ({
             name: e,
           }));
+      const isParticipant = participants.some(
+        (p) => p.name.trim().toLowerCase() === email
+      );
+
+      if (solution.isPrivate && !isParticipant && !this.canManage) {
+        this.isPrivateSolution = true;
+        this.alreadyParticipant = false;
+        this.openPrivateSolutionModal();
+        return;
+      }
 
       /* --- 2. add user if missing --- */
-      if (!participants.some((p) => p.name.trim().toLowerCase() === email)) {
+      if (!isParticipant) {
         await this.solutionService.joinSolution(solution, email);
       }
 
@@ -147,6 +181,7 @@ export class ChallengeComponent implements OnInit {
       }
 
       this.currentSolution = solution;
+      this.isPrivateSolution = !!solution.isPrivate;
       const raw = solution.participants ?? [];
       const participants: { name: string }[] = Array.isArray(raw)
         ? [...raw]
@@ -174,6 +209,10 @@ export class ChallengeComponent implements OnInit {
       console.error('No solution ID available');
       return;
     }
+    if (this.shouldBlockPrivateAccess()) {
+      this.openPrivateSolutionModal();
+      return;
+    }
     // Navigate to dashboard - user is already a participant
     this.router.navigate(['/dashboard', this.id]);
   }
@@ -185,6 +224,10 @@ export class ChallengeComponent implements OnInit {
   async previewSolution(): Promise<void> {
     if (!this.id) {
       console.error('No solution ID available');
+      return;
+    }
+    if (this.shouldBlockPrivateAccess()) {
+      this.openPrivateSolutionModal();
       return;
     }
     // Navigate to dashboard with challengePageId so auth guard allows workspace participants
