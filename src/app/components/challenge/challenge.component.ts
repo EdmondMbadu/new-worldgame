@@ -39,6 +39,16 @@ export class ChallengeComponent implements OnInit {
     private router: Router,
     private challenge: ChallengesService
   ) {}
+
+  openChallengeImage() {
+    if (this.fromChallengeSpace) {
+      this.viewSolution();
+      return;
+    }
+
+    this.selectChallenge();
+  }
+
   selectChallenge() {
     const selectedChallengeItem = {
       id: this.id,
