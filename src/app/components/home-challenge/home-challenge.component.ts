@@ -1902,6 +1902,7 @@ export class HomeChallengeComponent implements OnDestroy {
         title: this.challengePage.name || 'Challenge Workspace',
         description: this.challengePage.description || '',
         image: this.challengePage.imageChallenge || '',
+        logoImage: this.challengePage.logoImage || '',
         path: `https://newworld-game.org/home-challenge/${this.challengePageId}`,
         type: 'challenge',
         recipientName: isRegisteredUser ? `${users[0].firstName || ''} ${users[0].lastName || ''}`.trim() : '',

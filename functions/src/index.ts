@@ -8473,6 +8473,7 @@ export const sendParticipantInvite = functions.https.onCall(
     const projectTitle = (data?.title || 'a project').toString().trim();
     const projectDescription = (data?.description || '').toString().trim();
     const projectImage = (data?.image || '').toString().trim();
+    const workspaceLogo = (data?.logoImage || '').toString().trim();
     const inviteUrl = (data?.path || data?.url || '').toString().trim();
     const inviteType = (data?.type || 'solution').toString().trim(); // 'solution', 'challenge', 'workspace'
     const recipientName = (data?.recipientName || '').toString().trim();
@@ -8499,6 +8500,10 @@ export const sendParticipantInvite = functions.https.onCall(
       ? escapeHtml(projectDescription).slice(0, 200) + (projectDescription.length > 200 ? '...' : '')
       : '';
     const safeRecipientName = recipientName ? escapeHtml(recipientName) : '';
+    const safeInviteUrl = escapeHtml(inviteUrl);
+    const safeProjectImage = projectImage ? escapeHtml(projectImage) : '';
+    const safeWorkspaceLogo = workspaceLogo ? escapeHtml(workspaceLogo) : '';
+    const brandLogoUrl = `${APP_BASE_URL.replace(/\/$/, '')}/assets/img/earth-triangle-test.png`;
     
     // Determine the invite type label
     const typeLabels: Record<string, string> = {
@@ -8527,37 +8532,56 @@ export const sendParticipantInvite = functions.https.onCall(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 640px) {
+      .outer-pad { padding: 18px 12px !important; }
+      .content-pad { padding: 26px 20px 24px !important; }
+      .mobile-full { width: 100% !important; }
+      .mobile-button { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; }
+      .mobile-title { font-size: 22px !important; line-height: 1.25 !important; }
+      .project-image { max-height: 170px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0; padding:0; background-color:#f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f8fafc;">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
+      <td class="outer-pad" align="center" style="padding: 32px 20px;">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width:600px; width:100%;">
           
           <!-- Logo Header -->
           <tr>
-            <td align="center" style="padding-bottom: 32px;">
-              <img src="https://firebasestorage.googleapis.com/v0/b/buckminister-backup.appspot.com/o/nwg-logo-green.png?alt=media" alt="NewWorld Game" width="180" style="display:block; max-width:180px; height:auto;" />
+            <td align="center" style="padding: 0 8px 20px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td style="vertical-align:middle;padding-right:10px;">
+                    <img src="${brandLogoUrl}" alt="NewWorld Game" width="42" style="display:block;width:42px;max-width:42px;height:auto;border:0;">
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="font-size:21px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">NewWorld Game</span>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           
           <!-- Main Card -->
           <tr>
             <td>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff; border-radius:16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); overflow:hidden;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff; border:1px solid #dbe3ef; border-radius:16px; box-shadow: 0 4px 14px rgba(15,23,42,0.08); overflow:hidden;">
                 
                 <!-- Project Image (if provided) -->
                 ${projectImage ? `
                 <tr>
                   <td>
-                    <img src="${escapeHtml(projectImage)}" alt="${safeTitle}" width="600" style="display:block; width:100%; max-height:200px; object-fit:cover;" />
+                    <img class="project-image" src="${safeProjectImage}" alt="${safeTitle}" width="600" style="display:block; width:100%; max-height:210px; object-fit:cover; border:0;" />
                   </td>
                 </tr>
                 ` : ''}
                 
                 <!-- Content -->
                 <tr>
-                  <td style="padding: 40px 40px 32px;">
+                  <td class="content-pad" style="padding: 36px 38px 32px;">
                     
                     <!-- Invite Badge -->
                     <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
@@ -8577,6 +8601,16 @@ export const sendParticipantInvite = functions.https.onCall(
                     <p style="margin:0 0 24px; font-size:16px; color:#334155; line-height:1.6;">
                       <strong style="color:#0f172a;">${safeInviter}</strong> has invited you to collaborate on a ${typeLabel} on NewWorld Game.
                     </p>
+
+                    ${safeWorkspaceLogo ? `
+                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 22px;">
+                      <tr>
+                        <td style="padding:10px;border:1px solid #dbe3ef;border-radius:14px;background:#ffffff;">
+                          <img src="${safeWorkspaceLogo}" alt="${safeTitle} logo" width="72" style="display:block;width:72px;max-width:72px;height:auto;border-radius:12px;border:0;">
+                        </td>
+                      </tr>
+                    </table>
+                    ` : ''}
                     
                     <!-- Project Info Box -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f1f5f9; border-radius:12px; margin-bottom:28px;">
@@ -8585,7 +8619,7 @@ export const sendParticipantInvite = functions.https.onCall(
                           <p style="margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:0.1em; color:#64748b; font-weight:600;">
                             ${typeLabel.toUpperCase()}
                           </p>
-                          <h2 style="margin:0 0 12px; font-size:20px; color:#0f172a; font-weight:700; line-height:1.3;">
+                          <h2 class="mobile-title" style="margin:0 0 12px; font-size:22px; color:#0f172a; font-weight:800; line-height:1.25;">
                             ${safeTitle}
                           </h2>
                           ${safeDescription ? `
@@ -8598,10 +8632,10 @@ export const sendParticipantInvite = functions.https.onCall(
                     </table>
                     
                     <!-- CTA Button -->
-                    <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:28px;">
+                    <table role="presentation" class="mobile-full" cellspacing="0" cellpadding="0" style="margin-bottom:28px;">
                       <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius:9999px;">
-                          <a href="${inviteUrl}" target="_blank" style="display:inline-block; padding:16px 32px; font-size:16px; font-weight:600; color:#ffffff; text-decoration:none;">
+                        <td align="center" style="background:#047857; border-radius:12px;">
+                          <a class="mobile-button" href="${safeInviteUrl}" target="_blank" style="display:inline-block; padding:16px 30px; font-size:16px; font-weight:700; color:#ffffff; text-decoration:none; border-radius:12px;">
                             ${ctaText} →
                           </a>
                         </td>
