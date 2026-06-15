@@ -1281,7 +1281,12 @@
     "documents": {
       "openPdf": "Ouvrir le PDF",
       "handouts": "Documents",
-      "download": "Telecharger"
+      "download": "Telecharger",
+      "downloadableFiles": "Fichiers telechargeables",
+      "downloadableFilesSubtitle": "Les documents du programme et les fichiers a distribuer sont disponibles ci-dessous.",
+      "programDocument": "Document du programme",
+      "readyToDownload": "Pret a telecharger",
+      "file": "Fichier"
     },
     "participants": {
       "title": "Participants ({{count}})",

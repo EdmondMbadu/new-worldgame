@@ -1532,7 +1532,12 @@
     "documents": {
       "openPdf": "Open PDF",
       "handouts": "Handouts",
-      "download": "Download"
+      "download": "Download",
+      "downloadableFiles": "Downloadable files",
+      "downloadableFilesSubtitle": "Program documents and handouts are available below.",
+      "programDocument": "Program document",
+      "readyToDownload": "Ready to download",
+      "file": "File"
     },
     "participants": {
       "title": "Participants ({{count}})",
