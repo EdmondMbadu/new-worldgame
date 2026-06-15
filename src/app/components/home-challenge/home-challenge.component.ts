@@ -50,6 +50,7 @@ export class HomeChallengeComponent implements OnDestroy {
       frenchDescriptions?: string[];
       images: string[];
       privateFlags?: boolean[];
+      participantCounts?: number[];
     };
   } = {};
   challengeId: string = '';
@@ -58,6 +59,7 @@ export class HomeChallengeComponent implements OnDestroy {
   descriptions: string[] = [];
   challengeImages: string[] = [];
   solutionPrivateFlags: boolean[] = [];
+  solutionParticipantCounts: number[] = [];
   ids: string[] = [];
   participants: string[] = [];
   participantProfiles: {
@@ -301,6 +303,7 @@ export class HomeChallengeComponent implements OnDestroy {
     this.descriptions = [];
     this.challengeImages = [];
     this.solutionPrivateFlags = [];
+    this.solutionParticipantCounts = [];
     this.ids = [];
 
     // Try to load by custom URL first, then fall back to ID
@@ -599,6 +602,7 @@ export class HomeChallengeComponent implements OnDestroy {
         frenchDescriptions: [],
         images: [],
         privateFlags: [],
+        participantCounts: [],
       };
       this.updateChallenges();
       return;
@@ -628,6 +632,9 @@ export class HomeChallengeComponent implements OnDestroy {
             (challenge) => challenge.image || 'No image available'
           ),
           privateFlags: data.map((challenge) => !!challenge.isPrivate),
+          participantCounts: data.map(
+            (challenge) => challenge.participantCount || 0
+          ),
         };
         this.challenges[category] = transformedData; // Assign to the challenges object
         this.updateChallenges(); // Update the active challenge display
@@ -650,7 +657,57 @@ export class HomeChallengeComponent implements OnDestroy {
       description: solution.description || challenge.description,
       image: solution.image || challenge.image,
       isPrivate: !!(solution.isPrivate ?? challenge.isPrivate),
+      participantCount: this.countSolutionParticipants(solution.participants),
     };
+  }
+
+  private countSolutionParticipants(participants: any): number {
+    return this.normalizeSolutionParticipants(participants).length;
+  }
+
+  private normalizeSolutionParticipants(participants: any): { name: string }[] {
+    if (!participants) {
+      return [];
+    }
+
+    const normalizeValue = (value: any): { name: string } | null => {
+      if (!value) {
+        return null;
+      }
+
+      if (typeof value === 'string') {
+        const name = value.trim();
+        return name ? { name } : null;
+      }
+
+      if (typeof value === 'object') {
+        const fallback = value.name || value.email || Object.values(value)[0];
+        if (typeof fallback === 'string' && fallback.trim()) {
+          return { name: fallback.trim() };
+        }
+      }
+
+      return null;
+    };
+
+    const values = Array.isArray(participants)
+      ? participants
+      : typeof participants === 'object'
+        ? Object.values(participants)
+        : [];
+
+    const uniqueEmails = new Set<string>();
+    return values
+      .map(normalizeValue)
+      .filter((participant): participant is { name: string } => !!participant)
+      .filter((participant) => {
+        const key = this.normalizeEmail(participant.name);
+        if (!key || uniqueEmails.has(key)) {
+          return false;
+        }
+        uniqueEmails.add(key);
+        return true;
+      });
   }
 
   updateChallenges(): void {
@@ -677,6 +734,7 @@ export class HomeChallengeComponent implements OnDestroy {
       : categoryData.descriptions;
     this.challengeImages = categoryData.images;
     this.solutionPrivateFlags = categoryData.privateFlags ?? [];
+    this.solutionParticipantCounts = categoryData.participantCounts ?? [];
     this.ids = categoryData.ids!;
   }
 

@@ -27,6 +27,7 @@ export class ChallengeComponent implements OnInit {
   @Input() challengePageId: string = ''; // The workspace/challenge page ID
   @Input() isPrivateSolution: boolean = false;
   @Input() canManage: boolean = false;
+  @Input() memberCountOverride: number | null | undefined = null;
 
   currentSolution: Solution = {};
   user?: User = {};
@@ -182,7 +183,7 @@ export class ChallengeComponent implements OnInit {
       this.currentSolution = solution;
       this.isPrivateSolution = !!solution.isPrivate;
       const participants = this.normalizeParticipants(solution.participants);
-      this.memberCount = participants.length;
+      this.memberCount = this.memberCountOverride ?? participants.length;
 
       this.alreadyParticipant = participants.some(
         (p) => p.name.trim().toLowerCase() === email
@@ -212,6 +213,15 @@ export class ChallengeComponent implements OnInit {
     this.router.navigate(['/dashboard', this.id]);
   }
 
+  viewSolutionDetails(): void {
+    if (!this.id) {
+      console.error('No solution ID available');
+      return;
+    }
+
+    this.router.navigate(['/solution-details', this.id]);
+  }
+
   /**
    * Preview the solution without joining
    * This allows workspace members to view the dashboard without becoming participants
@@ -232,15 +242,17 @@ export class ChallengeComponent implements OnInit {
   }
 
   get memberCountLabel(): string {
-    if (this.isLoadingParticipantStatus) {
+    if (this.isLoadingParticipantStatus && this.memberCountOverride == null) {
       return 'Loading members';
     }
 
-    if (this.memberCount === 1) {
+    const count = this.memberCountOverride ?? this.memberCount;
+
+    if (count === 1) {
       return '1 member';
     }
 
-    return `${this.memberCount} members`;
+    return `${count} members`;
   }
 
   private normalizeParticipants(raw: any): { name: string }[] {

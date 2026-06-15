@@ -237,10 +237,11 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   }
   getMembers() {
     this.teamMembers = [];
-    console.log('all participants', this.currentSolution.participants);
-    for (const key in this.currentSolution.participants) {
-      let participant = this.currentSolution.participants[key];
-      let email = Object.values(participant)[0];
+    const participants = this.getParticipantsArray();
+    console.log('all participants', participants);
+
+    participants.forEach((participant) => {
+      const email = participant.name;
       this.auth.getUserFromEmail(email).subscribe((data) => {
         // Check if the email of the incoming data is already in the teamMembers
         if (
@@ -251,7 +252,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
           this.teamMembers.push(data[0]);
         }
       });
-    }
+    });
   }
   getEvaluators() {
     this.evaluators = [];
@@ -670,25 +671,35 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   private getParticipantsArray(): Array<{ name: string }> {
     const participants = this.currentSolution.participants;
     if (!participants) return [];
-    if (Array.isArray(participants)) {
-      return participants as Array<{ name: string }>;
-    }
 
-    if (typeof participants === 'object') {
-      return Object.values(participants)
-        .map((value) => {
-          if (!value) return null;
-          if (typeof value === 'string') return { name: value };
-          if (typeof value === 'object') {
-            const fallback = (value as any).name ?? Object.values(value)[0];
-            if (typeof fallback === 'string') return { name: fallback };
-          }
-          return null;
-        })
-        .filter((value): value is { name: string } => !!value);
-    }
+    const values = Array.isArray(participants)
+      ? participants
+      : typeof participants === 'object'
+        ? Object.values(participants)
+        : [];
 
-    return [];
+    const seenEmails = new Set<string>();
+
+    return values
+      .map((value) => {
+        if (!value) return null;
+        if (typeof value === 'string') return { name: value.trim() };
+        if (typeof value === 'object') {
+          const fallback =
+            (value as any).name ?? (value as any).email ?? Object.values(value)[0];
+          if (typeof fallback === 'string') return { name: fallback.trim() };
+        }
+        return null;
+      })
+      .filter((value): value is { name: string } => !!value?.name)
+      .filter((value) => {
+        const key = this.normalizeEmail(value.name);
+        if (!key || seenEmails.has(key)) {
+          return false;
+        }
+        seenEmails.add(key);
+        return true;
+      });
   }
 
   private async refreshPresence(): Promise<void> {
