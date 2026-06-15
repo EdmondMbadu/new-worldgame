@@ -10,11 +10,27 @@ import { ChallengeJoinRequest, ChallengePage } from '../models/user';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import { SolutionService } from './solution.service';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+
+export interface FeaturedChallengeSpaceConfig {
+  featuredSpaceId: string;
+  featuredSpaceTitle?: string;
+  updatedAt?: any;
+  updatedBy?: {
+    uid?: string;
+    email?: string;
+    name?: string;
+  };
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChallengesService {
+  private readonly challengeSpacesSettingsDocPath =
+    'admin_settings/challenge_spaces';
+
   constructor(
     private afs: AngularFirestore,
     private fns: AngularFireFunctions,
@@ -322,6 +338,50 @@ export class ChallengesService {
           }))
         )
       );
+  }
+
+  getFeaturedChallengeSpaceConfig(): Observable<FeaturedChallengeSpaceConfig | null> {
+    return this.afs
+      .doc<FeaturedChallengeSpaceConfig>(this.challengeSpacesSettingsDocPath)
+      .valueChanges()
+      .pipe(
+        map((config) =>
+          config?.featuredSpaceId
+            ? {
+                ...config,
+                featuredSpaceId: config.featuredSpaceId,
+              }
+            : null
+        )
+      );
+  }
+
+  setFeaturedChallengeSpace(space: ChallengePage | null): Promise<void> {
+    const user = this.auth.currentUser || {};
+    const authorName = [user.firstName, user.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
+    const spaceTitle = space
+      ? space.name || space.heading || 'Untitled challenge space'
+      : '';
+
+    const data: FeaturedChallengeSpaceConfig = {
+      featuredSpaceId: space
+        ? space.challengePageId || space.customUrl || spaceTitle
+        : '',
+      featuredSpaceTitle: spaceTitle,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: {
+        uid: user.uid || '',
+        email: user.email || '',
+        name: authorName || user.email || '',
+      },
+    };
+
+    return this.afs
+      .doc(this.challengeSpacesSettingsDocPath)
+      .set(data, { merge: true });
   }
 
   // Get all challengePages where this user is participant

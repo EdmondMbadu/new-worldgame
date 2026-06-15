@@ -21,6 +21,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   challengeSpaces: ChallengePage[] = [];
   joinRequests: ChallengeJoinRequest[] = [];
   myJoinRequests: ChallengeJoinRequest[] = [];
+  featuredSpaceId = '';
   selectedRequestSpace: ChallengePage | null = null;
   requestMessage = '';
   requestError = '';
@@ -31,6 +32,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   private memberUidsBySpace = new Map<string, string[]>();
   private memberLastActiveByUid = new Map<string, string | undefined>();
   private challengeSpacesSub?: Subscription;
+  private featuredSpaceSub?: Subscription;
   private joinRequestsSub?: Subscription;
   private myJoinRequestsSub?: Subscription;
   private presenceSub?: Subscription;
@@ -59,6 +61,17 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
       },
     });
 
+    this.featuredSpaceSub = this.challenges
+      .getFeaturedChallengeSpaceConfig()
+      .subscribe({
+        next: (config) => {
+          this.featuredSpaceId = config?.featuredSpaceId || '';
+        },
+        error: (error) => {
+          console.error('Unable to load featured challenge space', error);
+        },
+      });
+
     this.joinRequestsSub = this.challenges.getChallengeJoinRequests().subscribe({
       next: (requests) => {
         this.joinRequests = requests || [];
@@ -82,19 +95,36 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.challengeSpacesSub?.unsubscribe();
+    this.featuredSpaceSub?.unsubscribe();
     this.joinRequestsSub?.unsubscribe();
     this.myJoinRequestsSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
   }
 
   get joinedSpaces(): ChallengePage[] {
-    return this.filteredSpaces.filter((space) => this.isCurrentUserInSpace(space));
+    return this.filteredSpacesWithoutFeatured.filter((space) =>
+      this.isCurrentUserInSpace(space)
+    );
   }
 
   get availableSpaces(): ChallengePage[] {
-    return this.filteredSpaces.filter(
+    return this.filteredSpacesWithoutFeatured.filter(
       (space) => !this.isCurrentUserInSpace(space) && !space.isPrivate
     );
+  }
+
+  get featuredSpace(): ChallengePage | null {
+    if (!this.featuredSpaceId) {
+      return null;
+    }
+
+    return (
+      this.filteredSpaces.find((space) => this.isFeaturedSpace(space)) || null
+    );
+  }
+
+  get filteredSpacesWithoutFeatured(): ChallengePage[] {
+    return this.filteredSpaces.filter((space) => !this.isFeaturedSpace(space));
   }
 
   get filteredSpaces(): ChallengePage[] {
@@ -122,6 +152,14 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   displaySubtitle(space: ChallengePage): string {
     return String(space.subHeading || space.description || '').trim();
+  }
+
+  featuredActionLabel(space: ChallengePage): string {
+    if (this.isCurrentUserInSpace(space)) {
+      return 'Open featured space';
+    }
+
+    return this.requestButtonLabel(space);
   }
 
   routeTarget(space: ChallengePage): string[] {
@@ -442,6 +480,10 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   private spaceKey(space: ChallengePage): string {
     return space.challengePageId || space.customUrl || this.displayTitle(space);
+  }
+
+  isFeaturedSpace(space: ChallengePage): boolean {
+    return !!this.featuredSpaceId && this.spaceKey(space) === this.featuredSpaceId;
   }
 
   private myRequestStatus(

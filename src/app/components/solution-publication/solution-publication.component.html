@@ -15,6 +15,108 @@
       Solution Publication Manager ({{filteredSolutions.length}})
     </h2>
 
+    <section
+      class="mb-8 rounded-lg border border-teal-200 bg-white p-5 shadow-sm dark:border-teal-900/70 dark:bg-gray-800"
+    >
+      <div class="flex flex-col gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300">
+            Challenge Spaces
+          </p>
+          <h3 class="mt-1 text-lg font-semibold text-gray-950 dark:text-white">
+            Highlight a challenge space
+          </h3>
+          <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-300">
+            The selected space is pinned to the top of the Challenge Spaces page. Choosing a different space replaces the current one.
+          </p>
+        </div>
+
+        <div class="rounded-lg bg-teal-50 px-4 py-3 text-sm text-teal-900 dark:bg-teal-950/40 dark:text-teal-100">
+          Current featured space:
+          <span class="font-semibold">{{ currentFeaturedSpaceTitle }}</span>
+        </div>
+
+        <div class="relative">
+          <label class="block">
+          <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            Space to feature
+          </span>
+          <input
+            type="search"
+            [(ngModel)]="featuredSpaceSearch"
+            (ngModelChange)="onFeaturedSpaceSearchInput()"
+            (focus)="showFeaturedSpaceResults = true"
+            class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
+            placeholder="Search by space name, description, or URL"
+            autocomplete="off"
+          />
+          </label>
+
+          <div
+            *ngIf="showFeaturedSpaceResults"
+            class="absolute z-20 mt-2 max-h-80 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-900"
+          >
+            <button
+              *ngFor="let space of filteredFeaturedChallengeSpaces"
+              type="button"
+              (mousedown)="selectFeaturedChallengeSpace(space)"
+              class="block w-full border-b border-gray-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-teal-50 dark:border-gray-800 dark:hover:bg-teal-950/40"
+            >
+              <span class="block text-sm font-semibold text-gray-950 dark:text-white">
+                {{ challengeSpaceTitle(space) }}
+              </span>
+              <span
+                *ngIf="space.subHeading || space.description || space.customUrl"
+                class="mt-1 line-clamp-2 block text-xs leading-5 text-gray-500 dark:text-gray-400"
+              >
+                {{ space.subHeading || space.description || space.customUrl }}
+              </span>
+            </button>
+
+            <div
+              *ngIf="filteredFeaturedChallengeSpaces.length === 0"
+              class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+            >
+              No matching challenge spaces.
+            </div>
+          </div>
+
+          <p
+            *ngIf="selectedFeaturedSpaceId"
+            class="mt-2 text-xs font-medium text-teal-700 dark:text-teal-300"
+          >
+            Selected: {{ selectedFeaturedSpace?.name || selectedFeaturedSpace?.heading || featuredSpaceSearch }}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            (click)="saveFeaturedChallengeSpace()"
+            [disabled]="featuredSpaceSaving || !selectedFeaturedSpaceId"
+            class="rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 dark:bg-teal-600 dark:hover:bg-teal-500 dark:disabled:bg-gray-700 dark:disabled:text-gray-300"
+          >
+            {{ featuredSpaceSaving ? 'Saving...' : 'Feature space' }}
+          </button>
+          <button
+            type="button"
+            (click)="clearFeaturedChallengeSpace()"
+            [disabled]="featuredSpaceSaving || !featuredSpaceConfig?.featuredSpaceId"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+          >
+            Clear featured
+          </button>
+        </div>
+
+        <p *ngIf="featuredSpaceMessage" class="text-sm font-medium text-green-700 dark:text-green-300">
+          {{ featuredSpaceMessage }}
+        </p>
+        <p *ngIf="featuredSpaceError" class="text-sm font-medium text-red-600 dark:text-red-300">
+          {{ featuredSpaceError }}
+        </p>
+      </div>
+    </section>
+
     <!-- filter bar -->
     <div class="flex justify-center flex-wrap gap-2 mb-6">
       <button
