@@ -6550,10 +6550,21 @@ type PresentationDocInput = {
 type GeneratedDeckSlide = {
   title?: string;
   kicker?: string;
-  layout?: 'signal' | 'image' | 'split' | 'quote' | 'steps' | 'closing';
+  layout?:
+    | 'hero'
+    | 'signal'
+    | 'dashboard'
+    | 'comparison'
+    | 'roadmap'
+    | 'image'
+    | 'split'
+    | 'quote'
+    | 'steps'
+    | 'closing';
   bullets?: string[];
   notes?: string;
   visualCue?: string;
+  imagePrompt?: string;
 };
 
 type GeneratedDeckPlan = {
@@ -6574,9 +6585,16 @@ const PRESENTATION_TEXT_MODELS = [
   'gemini-3-flash-preview',
   'gemini-2.5-flash',
 ];
+const PRESENTATION_IMAGE_MODELS = [
+  'gemini-3.1-flash-image',
+  'gemini-3-pro-image',
+  'gemini-2.5-flash-image',
+];
 const PRESENTATION_DRIVE_FOLDER_ID = '1Rib4RlYsv-PsL1QOhlAoht-fw0tUHLEy';
 const PRESENTATION_SERVICE_ACCOUNT_EMAIL =
   'new-worldgame@appspot.gserviceaccount.com';
+const PRESENTATION_VISUAL_STYLE =
+  'premium boardroom presentation visual, cinematic but realistic, clean composition, generous negative space for editable slide text, navy and teal accents, modern public-impact aesthetic, no words, no logos, no watermark';
 
 function cleanPresentationText(value: unknown, max = 6000): string {
   const text = String(value || '')
@@ -6608,6 +6626,49 @@ function uniquePresentationStrings(values: string[]): string[] {
     seen.add(normalized);
     return true;
   });
+}
+
+function getInlineImageBase64(response: any): string {
+  const candidates = response?.candidates || response?.response?.candidates || [];
+  for (const candidate of candidates) {
+    for (const part of candidate?.content?.parts || []) {
+      const data = part?.inlineData?.data || part?.inline_data?.data;
+      if (data) return String(data);
+    }
+  }
+  for (const part of response?.parts || response?.response?.parts || []) {
+    const data = part?.inlineData?.data || part?.inline_data?.data;
+    if (data) return String(data);
+  }
+  return '';
+}
+
+async function uploadPresentationGeneratedImage(
+  uid: string,
+  solutionId: string,
+  requestId: string,
+  index: number,
+  imageBase64: string
+): Promise<string> {
+  const storagePath = `ai-presentations/${uid}/${solutionId}/${requestId}/generated-${index}.png`;
+  const file = bucket.file(storagePath);
+  const downloadToken = randomUUID();
+
+  await file.save(Buffer.from(imageBase64, 'base64'), {
+    metadata: {
+      contentType: 'image/png',
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+        solutionId,
+        createdBy: uid,
+        generatedFor: 'presentation',
+      },
+    },
+  });
+
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(
+    storagePath
+  )}?alt=media&token=${downloadToken}`;
 }
 
 function extractDeckPlanJson(value: string, fallbackTitle: string): GeneratedDeckPlan {
@@ -6736,20 +6797,21 @@ async function collectPresentationSourceText(solution: any): Promise<{
 function buildDeckPlanPrompt(sourceText: string, title: string): string {
   return `You are a world-class presentation strategist, McKinsey-quality narrative architect, and elite Google Slides art director.
 
-Create a boardroom-ready, visually powerful presentation plan from the source material. The output will be rendered into Google Slides, so every slide must be specific, structured, and visually directed.
+Create a boardroom-ready, visually powerful presentation plan from the source material. The output will be rendered into Google Slides and PowerPoint, so every slide must be specific, structured, visual, and presentation-native.
 
 Design direction:
 - Think like a premium operating dashboard: crisp hierarchy, confident navy text, quiet gray structure, disciplined white space, and selective green/yellow/red status signals.
 - Turn metrics into scorecards, rankings, progress bars, milestone ladders, and decision tables whenever the source supports it.
 - Preserve the user's language and locale from the source material; do not translate names, labels, currencies, or dates unless the source asks for it.
 - Make visuals legible first, beautiful second: every slide should be easy to scan in five seconds.
+- Use premium presentation craft: strong cover, editorial section rhythm, cinematic image moments, precise KPI cards, clean diagrams, and a closing ask.
+- Avoid primitive bullet slides. Every slide must have a visual job: orient, prove, compare, prioritize, sequence, quantify, de-risk, or ask.
 
-Cost and production constraints:
-- Do not request generated images.
-- Use existing visuals if available.
-- Use visualCue to direct layouts, metaphors, diagrams, maps, timelines, impact scorecards, or image usage.
-- Prefer sharp synthesis over exhaustive detail.
-- Make every slide feel like a designed decision-support artifact, not a document pasted into slides.
+Visual generation:
+- You may specify generated images where they would improve comprehension or emotional weight.
+- imagePrompt must describe a clean 16:9 visual with no embedded text, no logos, no UI screenshots, no watermarks, and no real people's faces unless explicitly in the source.
+- Prefer visuals that can sit behind or beside editable slide text: editorial photographs, optimistic realistic scenes, abstract system maps, civic/operational environments, product-neutral conceptual images, or cinematic illustrations.
+- Use existing visuals only when the source clearly provides them; otherwise create imagePrompt directions where useful.
 
 Return ONLY valid JSON. No markdown fences. No commentary.
 
@@ -6763,21 +6825,24 @@ JSON shape:
     {
       "title": "slide title under 9 words",
       "kicker": "short label, optional",
-      "layout": "signal|image|split|quote|steps|closing",
+      "layout": "hero|signal|dashboard|comparison|roadmap|image|split|quote|steps|closing",
       "bullets": ["3 to 5 tight bullets, each under 13 words"],
       "notes": "speaker notes in 1-3 sentences",
-      "visualCue": "short visual direction, no text inside image"
+      "visualCue": "short visual direction for shapes, diagrams, scorecards, charts, or image use",
+      "imagePrompt": "optional 16:9 generated image prompt, no text in image"
     }
   ]
 }
 
 Rules:
-- Create 7 to 10 slides.
+- Create 9 to 12 slides.
+- Use these layout values where appropriate: hero, signal, dashboard, comparison, roadmap, image, split, quote, steps, closing.
 - Make the deck beautiful but practical: cinematic title, agenda, evidence, solution, operating model, implementation path, measurable impact, risks, and ask.
 - Use concrete content from the source.
 - Avoid hype, vague slogans, generic sustainability language, and long paragraphs.
 - Every bullet must be crisp, concrete, and decision-oriented.
 - Speaker notes should tell the presenter what to emphasize, not repeat bullets.
+- Include imagePrompt on 3 to 5 slides where generated visuals would help; leave imagePrompt empty on dense KPI/table slides.
 - Do not include citations unless the source material explicitly contains them.
 
 Deck title fallback: ${title}
@@ -6828,7 +6893,7 @@ async function generatePresentationDeckPlan(
   plan.subtitle = cleanPresentationText(plan.subtitle || 'Presentation draft', 160);
   plan.narrative = cleanPresentationText(plan.narrative || '', 240);
   plan.slides = (plan.slides || [])
-    .slice(0, 10)
+    .slice(0, 12)
     .map((slide) => ({
       title: cleanPresentationText(slide.title || 'Key point', 90),
       kicker: cleanPresentationText(slide.kicker || '', 40),
@@ -6838,6 +6903,7 @@ async function generatePresentationDeckPlan(
         : [],
       notes: cleanPresentationText(slide.notes || '', 500),
       visualCue: cleanPresentationText(slide.visualCue || '', 140),
+      imagePrompt: cleanPresentationText(slide.imagePrompt || '', 500),
     }))
     .filter((slide) => slide.title || slide.bullets.length);
 
@@ -6878,6 +6944,95 @@ async function savePresentationPptx(
       storagePath
     )}?alt=media&token=${downloadToken}`,
   };
+}
+
+async function generatePresentationVisuals(
+  plan: GeneratedDeckPlan,
+  uid: string,
+  solutionId: string,
+  requestId: string
+): Promise<string[]> {
+  const prompts = uniquePresentationStrings(
+    (plan.slides || [])
+      .map((slide) => cleanPresentationText(slide.imagePrompt, 520))
+      .filter(Boolean)
+  ).slice(0, 4);
+
+  if (!prompts.length) return [];
+
+  const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+  const generatedUrls: string[] = [];
+
+  for (const [index, prompt] of prompts.entries()) {
+    const fullPrompt = `${prompt}. ${PRESENTATION_VISUAL_STYLE}.`;
+    let imageBase64 = '';
+
+    for (const modelName of PRESENTATION_IMAGE_MODELS) {
+      try {
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: fullPrompt,
+          config: {
+            responseModalities: ['Image'],
+            responseFormat: {
+              image: {
+                aspectRatio: '16:9',
+                imageSize: modelName.includes('3-pro') ? '2K' : '1K',
+              },
+            },
+          },
+        } as any);
+
+        imageBase64 = getInlineImageBase64(response);
+        if (imageBase64) {
+          console.log(`Presentation image generated with ${modelName}`);
+          break;
+        }
+      } catch (error: any) {
+        console.warn(
+          `Presentation image model ${modelName} failed:`,
+          String(error?.message || error).slice(0, 180)
+        );
+      }
+    }
+
+    if (!imageBase64) {
+      try {
+        const imageResult = await ai.models.generateImages({
+          model: 'imagen-4.0-generate-001',
+          prompt: fullPrompt,
+          config: {
+            numberOfImages: 1,
+            aspectRatio: '16:9',
+          },
+        } as any);
+        imageBase64 = imageResult.generatedImages?.[0]?.image?.imageBytes || '';
+        if (imageBase64) {
+          console.log('Presentation image generated with Imagen fallback');
+        }
+      } catch (error: any) {
+        console.warn('Presentation Imagen fallback failed:', String(error?.message || error).slice(0, 180));
+      }
+    }
+
+    if (!imageBase64) continue;
+
+    try {
+      generatedUrls.push(
+        await uploadPresentationGeneratedImage(
+          uid,
+          solutionId,
+          requestId,
+          index,
+          imageBase64
+        )
+      );
+    } catch (error: any) {
+      console.warn('Could not upload generated presentation image:', error?.message || error);
+    }
+  }
+
+  return generatedUrls;
 }
 
 type GoogleSlidesOutput = {
@@ -7166,6 +7321,29 @@ function pptxText(value: unknown, max = 500): string {
   return cleanPresentationText(value, max).replace(/[^\S\r\n]+/g, ' ');
 }
 
+function pptxShadow(color = '0F766E', opacity = 0.18): any {
+  return {
+    type: 'outer',
+    color,
+    opacity,
+    blur: 2,
+    angle: 45,
+    distance: 1,
+  };
+}
+
+function addPptxGlow(slide: any, x: number, y: number, w: number, h: number, color = '14B8A6'): void {
+  slide.addShape('roundRect', {
+    x,
+    y,
+    w,
+    h,
+    rectRadius: 0.12,
+    fill: { color, transparency: 78 },
+    line: { color, transparency: 100 },
+  });
+}
+
 function addPptxFooter(slide: any, slideNumber: number, totalSlides: number): void {
   slide.addShape('line', {
     x: 0.62,
@@ -7214,6 +7392,7 @@ function addPptxImageOrPanel(
     rectRadius: 0.08,
     fill: { color: 'E0F2FE' },
     line: { color: 'BFDBFE', width: 1 },
+    shadow: pptxShadow('2563EB', 0.16),
   });
   if (imageData) {
     slide.addImage({ data: imageData, x: x + 0.08, y: y + 0.08, w: w - 0.16, h: h - 0.16 });
@@ -7293,7 +7472,7 @@ async function createPowerPointDeck(
     lang: 'en-US',
   };
 
-  const slides = (plan.slides || []).slice(0, 10);
+  const slides = (plan.slides || []).slice(0, 12);
   const totalSlides = slides.length + 3;
   const images = await buildPowerPointImagePool(imageUrls);
   let slideNumber = 1;
@@ -7301,6 +7480,7 @@ async function createPowerPointDeck(
   const cover = pptx.addSlide();
   cover.background = { color: 'F8FAFC' };
   cover.addShape('rect', { x: 0, y: 0, w: 0.16, h: 7.5, fill: { color: '0F766E' }, line: { color: '0F766E' } });
+  addPptxGlow(cover, 7.75, 0.52, 4.7, 5.5, '22D3EE');
   addPptxImageOrPanel(cover, images[0], 8.0, 0.78, 4.22, 5.0);
   cover.addText('AI-GENERATED PRESENTATION', {
     x: 0.78,
@@ -7345,6 +7525,7 @@ async function createPowerPointDeck(
       rectRadius: 0.08,
       fill: { color: 'FFFFFF' },
       line: { color: 'CBD5E1', width: 1 },
+      shadow: pptxShadow('0F172A', 0.12),
     });
     cover.addText(pptxText(plan.narrative, 240), {
       x: 1.04,
@@ -7389,6 +7570,7 @@ async function createPowerPointDeck(
       rectRadius: 0.08,
       fill: { color: isTeal ? 'F0FDFA' : 'EFF6FF' },
       line: { color: isTeal ? '99F6E4' : 'BFDBFE', width: 1 },
+      shadow: pptxShadow(isTeal ? '0F766E' : '2563EB', 0.1),
     });
     agenda.addText(String(index + 1).padStart(2, '0'), {
       x: x + 0.22,
@@ -7459,8 +7641,155 @@ async function createPowerPointDeck(
       margin: 0,
     });
 
-    if (layout === 'image' || layout === 'split') {
+    if (layout === 'hero') {
+      addPptxGlow(slide, 0.72, 1.62, 11.45, 4.65, index % 2 === 0 ? '99F6E4' : '93C5FD');
+      addPptxImageOrPanel(slide, images.length ? images[index % images.length] : undefined, 0.95, 1.82, 11.0, 4.18);
+      slide.addShape('roundRect', {
+        x: 1.28,
+        y: 4.72,
+        w: 6.4,
+        h: 0.95,
+        rectRadius: 0.08,
+        fill: { color: '0F172A', transparency: 8 },
+        line: { color: '0F172A', transparency: 100 },
+      });
+      slide.addText(pptxText((deckSlide.bullets || [])[0] || deckSlide.visualCue || 'Core idea', 150), {
+        x: 1.6,
+        y: 5.0,
+        w: 5.78,
+        h: 0.34,
+        fontFace: 'Aptos Display',
+        fontSize: 18,
+        color: 'FFFFFF',
+        bold: true,
+        fit: 'shrink',
+        margin: 0,
+      });
+    } else if (layout === 'dashboard') {
+      const colors = ['0F766E', '2563EB', 'F59E0B', 'EF4444'];
+      (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
+        const col = bulletIndex % 2;
+        const row = Math.floor(bulletIndex / 2);
+        const x = 0.95 + col * 5.75;
+        const y = 1.9 + row * 1.75;
+        const color = colors[bulletIndex % colors.length];
+        slide.addShape('roundRect', {
+          x,
+          y,
+          w: 5.15,
+          h: 1.28,
+          rectRadius: 0.08,
+          fill: { color: 'FFFFFF' },
+          line: { color: 'E2E8F0', width: 1 },
+          shadow: pptxShadow(color, 0.11),
+        });
+        slide.addShape('rect', { x, y, w: 0.1, h: 1.28, fill: { color }, line: { color } });
+        slide.addText(String(bulletIndex + 1).padStart(2, '0'), {
+          x: x + 0.28,
+          y: y + 0.2,
+          w: 0.58,
+          h: 0.24,
+          fontFace: 'Aptos',
+          fontSize: 10,
+          color,
+          bold: true,
+          margin: 0,
+        });
+        slide.addText(pptxText(bullet, 150), {
+          x: x + 0.92,
+          y: y + 0.22,
+          w: 3.82,
+          h: 0.52,
+          fontFace: 'Aptos Display',
+          fontSize: 15,
+          color: '0F172A',
+          bold: true,
+          fit: 'shrink',
+          margin: 0,
+        });
+        slide.addShape('line', {
+          x: x + 0.92,
+          y: y + 0.92,
+          w: 3.7,
+          h: 0,
+          line: { color, width: 4, transparency: 18 },
+        });
+      });
+    } else if (layout === 'comparison') {
+      const leftBullets = (deckSlide.bullets || []).filter((_, i) => i % 2 === 0).slice(0, 3);
+      const rightBullets = (deckSlide.bullets || []).filter((_, i) => i % 2 === 1).slice(0, 3);
+      [
+        { label: 'Current reality', x: 0.95, color: '475569', bullets: leftBullets },
+        { label: 'Better path', x: 6.55, color: '0F766E', bullets: rightBullets.length ? rightBullets : leftBullets },
+      ].forEach((panel) => {
+        slide.addShape('roundRect', {
+          x: panel.x,
+          y: 1.9,
+          w: 5.05,
+          h: 3.75,
+          rectRadius: 0.08,
+          fill: { color: 'FFFFFF' },
+          line: { color: panel.color, transparency: 35, width: 1.2 },
+          shadow: pptxShadow(panel.color, 0.12),
+        });
+        slide.addText(panel.label, {
+          x: panel.x + 0.35,
+          y: 2.22,
+          w: 3.8,
+          h: 0.3,
+          fontFace: 'Aptos',
+          fontSize: 10,
+          color: panel.color,
+          bold: true,
+          margin: 0,
+        });
+        addPptxBullets(slide, panel.bullets, panel.x + 0.35, 2.85, 4.3, 2.1);
+      });
+    } else if (layout === 'roadmap') {
+      (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
+        const x = 0.95 + bulletIndex * 2.9;
+        const color = bulletIndex % 2 === 0 ? '0F766E' : '2563EB';
+        slide.addShape('line', {
+          x: bulletIndex === 0 ? x + 0.85 : x - 1.05,
+          y: 3.05,
+          w: bulletIndex === 0 ? 0 : 2.15,
+          h: 0,
+          line: { color: 'CBD5E1', width: 2 },
+        });
+        slide.addShape('ellipse', {
+          x: x + 0.72,
+          y: 2.82,
+          w: 0.48,
+          h: 0.48,
+          fill: { color },
+          line: { color },
+          shadow: pptxShadow(color, 0.2),
+        });
+        slide.addShape('roundRect', {
+          x,
+          y: 3.55,
+          w: 2.25,
+          h: 1.18,
+          rectRadius: 0.08,
+          fill: { color: bulletIndex % 2 === 0 ? 'F0FDFA' : 'EFF6FF' },
+          line: { color: bulletIndex % 2 === 0 ? '99F6E4' : 'BFDBFE', width: 1 },
+        });
+        slide.addText(pptxText(bullet, 110), {
+          x: x + 0.22,
+          y: 3.88,
+          w: 1.78,
+          h: 0.45,
+          fontFace: 'Aptos',
+          fontSize: 10.5,
+          color: '0F172A',
+          bold: true,
+          fit: 'shrink',
+          margin: 0,
+        });
+      });
+    } else if (layout === 'image' || layout === 'split') {
       addPptxBullets(slide, deckSlide.bullets || [], 0.95, 2.25, 5.4, 2.7);
+      addPptxGlow(slide, 7.28, 1.48, 4.7, 4.7, '93C5FD');
       addPptxImageOrPanel(slide, images.length ? images[index % images.length] : undefined, 7.5, 1.68, 4.26, 4.26);
     } else if (layout === 'steps') {
       (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
@@ -7474,6 +7803,7 @@ async function createPowerPointDeck(
           rectRadius: 0.08,
           fill: { color: isTeal ? 'F0FDFA' : 'EFF6FF' },
           line: { color: isTeal ? '99F6E4' : 'BFDBFE', width: 1 },
+          shadow: pptxShadow(isTeal ? '0F766E' : '2563EB', 0.1),
         });
         slide.addText(String(bulletIndex + 1).padStart(2, '0'), {
           x: x + 0.25,
@@ -7508,6 +7838,7 @@ async function createPowerPointDeck(
         rectRadius: 0.08,
         fill: { color: '0F172A' },
         line: { color: '0F172A' },
+        shadow: pptxShadow('0F172A', 0.2),
       });
       slide.addText(pptxText((deckSlide.bullets || [deckSlide.visualCue || ''])[0] || '', 220), {
         x: 1.6,
@@ -7532,6 +7863,7 @@ async function createPowerPointDeck(
         rectRadius: 0.08,
         fill: { color: '0F766E' },
         line: { color: '0F766E' },
+        shadow: pptxShadow('0F766E', 0.16),
       });
       slide.addText(pptxText(first, 140), {
         x: 1.32,
@@ -7626,7 +7958,7 @@ function buildGoogleSlidesRequests(
   requestId: string,
   defaultSlideId?: string
 ): SlidesBatchRequest[] {
-  const slides = (plan.slides || []).slice(0, 10);
+  const slides = (plan.slides || []).slice(0, 12);
   const totalSlides = slides.length + 3;
   const safePrefix = `nwg_${requestId.replace(/[^A-Za-z0-9_]/g, '_').slice(0, 28)}`;
   const requests: SlidesBatchRequest[] = [];
@@ -7718,7 +8050,70 @@ function buildGoogleSlidesRequests(
       bold: true,
     }));
 
-    if (layout === 'image' || layout === 'split') {
+    if (layout === 'hero') {
+      requests.push(...addImageIfAvailable(slideId, `${slidePrefix}_hero_image`, imageUrl, 52, 112, 590, 205));
+      requests.push(...createRect(slideId, `${slidePrefix}_hero_caption_box`, 78, 260, 350, 48, '0F172A', '0F172A', 'ROUND_RECTANGLE'));
+      requests.push(...createTextBox(slideId, `${slidePrefix}_hero_caption`, (deckSlide.bullets || [])[0] || deckSlide.visualCue || 'Core idea', 96, 275, 312, 18, {
+        color: 'FFFFFF',
+        fontSize: 14,
+        bold: true,
+      }));
+    } else if (layout === 'dashboard') {
+      const colors = ['0F766E', '2563EB', 'F59E0B', 'EF4444'];
+      (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
+        const col = bulletIndex % 2;
+        const row = Math.floor(bulletIndex / 2);
+        const x = 52 + col * 302;
+        const y = 118 + row * 88;
+        const color = colors[bulletIndex % colors.length];
+        const cardId = `${slidePrefix}_dash_${bulletIndex}`;
+        requests.push(...createRect(slideId, cardId, x, y, 260, 64, 'FFFFFF', 'E2E8F0', 'ROUND_RECTANGLE'));
+        requests.push(...createRect(slideId, `${cardId}_bar`, x, y, 6, 64, color, color));
+        requests.push(...createTextBox(slideId, `${cardId}_num`, String(bulletIndex + 1).padStart(2, '0'), x + 18, y + 14, 34, 18, {
+          color,
+          fontSize: 10,
+          bold: true,
+        }));
+        requests.push(...createTextBox(slideId, `${cardId}_text`, bullet, x + 58, y + 13, 176, 28, {
+          color: '0F172A',
+          fontSize: 12,
+          bold: true,
+        }));
+        requests.push(...createRect(slideId, `${cardId}_progress`, x + 58, y + 48, 150, 4, color, color, 'ROUND_RECTANGLE'));
+      });
+    } else if (layout === 'comparison') {
+      const leftBullets = (deckSlide.bullets || []).filter((_, i) => i % 2 === 0).slice(0, 3);
+      const rightBullets = (deckSlide.bullets || []).filter((_, i) => i % 2 === 1).slice(0, 3);
+      [
+        { label: 'Current reality', x: 58, color: '475569', bullets: leftBullets },
+        { label: 'Better path', x: 370, color: '0F766E', bullets: rightBullets.length ? rightBullets : leftBullets },
+      ].forEach((panel, panelIndex) => {
+        const panelId = `${slidePrefix}_compare_${panelIndex}`;
+        requests.push(...createRect(slideId, panelId, panel.x, 122, 270, 165, 'FFFFFF', panel.color, 'ROUND_RECTANGLE'));
+        requests.push(...createTextBox(slideId, `${panelId}_label`, panel.label, panel.x + 18, 142, 160, 16, {
+          color: panel.color,
+          fontSize: 10,
+          bold: true,
+        }));
+        requests.push(...createBulletTextBox(slideId, `${panelId}_bullets`, panel.bullets, panel.x + 18, 178, 220, 78));
+      });
+    } else if (layout === 'roadmap') {
+      (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
+        const x = 58 + bulletIndex * 152;
+        const color = bulletIndex % 2 === 0 ? '0F766E' : '2563EB';
+        const stepId = `${slidePrefix}_road_${bulletIndex}`;
+        requests.push(...createRect(slideId, `${stepId}_dot`, x + 45, 150, 26, 26, color, color, 'ELLIPSE'));
+        if (bulletIndex > 0) {
+          requests.push(...createRect(slideId, `${stepId}_line`, x - 86, 162, 130, 2, 'CBD5E1', 'CBD5E1'));
+        }
+        requests.push(...createRect(slideId, stepId, x, 212, 116, 70, bulletIndex % 2 === 0 ? 'F0FDFA' : 'EFF6FF', bulletIndex % 2 === 0 ? '99F6E4' : 'BFDBFE', 'ROUND_RECTANGLE'));
+        requests.push(...createTextBox(slideId, `${stepId}_text`, bullet, x + 12, 235, 90, 24, {
+          color: '0F172A',
+          fontSize: 10,
+          bold: true,
+        }));
+      });
+    } else if (layout === 'image' || layout === 'split') {
       requests.push(...createBulletTextBox(slideId, `${slidePrefix}_bullets`, deckSlide.bullets || [], 52, 125, 292, 180));
       requests.push(...addImageIfAvailable(slideId, `${slidePrefix}_image`, imageUrl, 405, 92, 230, 230));
     } else if (layout === 'steps') {
@@ -7943,11 +8338,34 @@ export const onPresentationRequest = functions
       const plan = await generatePresentationDeckPlan(sourceText, title);
 
       await snap.ref.update({
+        status: { state: 'PROCESSING', message: 'Creating presentation visuals...' },
+        planPreview: {
+          title: plan.title,
+          subtitle: plan.subtitle,
+          slideCount: plan.slides?.length || 0,
+          generatedImagePrompts: (plan.slides || []).filter((slide) => slide.imagePrompt).length,
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const generatedImageUrls = await generatePresentationVisuals(
+        plan,
+        uid,
+        solutionId,
+        requestId
+      );
+      const presentationImageUrls = uniquePresentationStrings([
+        ...generatedImageUrls,
+        ...imageUrls,
+      ]).slice(0, 8);
+
+      await snap.ref.update({
         status: { state: 'PROCESSING', message: 'Building Google Slides deck...' },
         planPreview: {
           title: plan.title,
           subtitle: plan.subtitle,
           slideCount: plan.slides?.length || 0,
+          generatedImageCount: generatedImageUrls.length,
         },
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
@@ -7959,7 +8377,7 @@ export const onPresentationRequest = functions
       try {
         slidesDeck = await createGoogleSlidesDeck(
           plan,
-          imageUrls,
+          presentationImageUrls,
           title,
           requestId
         );
@@ -7985,7 +8403,7 @@ export const onPresentationRequest = functions
           googleSlidesError,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
-        pptxBuffer = await createPowerPointDeck(plan, imageUrls, title);
+        pptxBuffer = await createPowerPointDeck(plan, presentationImageUrls, title);
       }
 
       await snap.ref.update({
@@ -8018,7 +8436,7 @@ export const onPresentationRequest = functions
         minute: '2-digit',
         hour12: true,
       });
-      const thumbnail = imageUrls[0] || PRESENTATION_FALLBACK_IMAGE;
+      const thumbnail = presentationImageUrls[0] || PRESENTATION_FALLBACK_IMAGE;
 
       const documentEntry = {
         downloadURL: saved.downloadUrl,
@@ -8061,7 +8479,9 @@ export const onPresentationRequest = functions
           pptxFileName: saved.fileName,
           primaryFormat: slidesDeck ? GOOGLE_SLIDES_MIME : PRESENTATION_PPTX_MIME,
           slides: (plan.slides || []).map((slide, index) => ({
-            ...(imageUrls.length ? { imageUrl: imageUrls[index % imageUrls.length] } : {}),
+            ...(presentationImageUrls.length
+              ? { imageUrl: presentationImageUrls[index % presentationImageUrls.length] }
+              : {}),
             bullets: [slide.title || 'Slide', ...(slide.bullets || [])].slice(0, 6),
           })),
         },
