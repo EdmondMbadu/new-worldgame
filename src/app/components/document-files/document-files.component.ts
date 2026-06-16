@@ -330,8 +330,9 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       }
       if (state === 'COMPLETED') {
         this.generatingAiPresentation = false;
-        this.aiPresentationStatus =
-          'Google Slides presentation ready. PowerPoint download was added to Documents.';
+        this.aiPresentationStatus = snap.response?.googleSlidesUrl
+          ? 'Google Slides presentation ready. PowerPoint download was added to Documents.'
+          : snap.status?.message || 'PowerPoint presentation ready.';
         this.aiPresentationRequestSub?.unsubscribe();
         return;
       }
