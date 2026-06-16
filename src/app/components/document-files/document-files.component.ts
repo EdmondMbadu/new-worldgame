@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
+import firebase from 'firebase/compat/app';
 import { Solution } from 'src/app/models/solution';
 import { Presentation } from 'src/app/models/presentation';
 import { Avatar } from 'src/app/models/user';
@@ -27,6 +29,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     private time: TimeService,
     private router: Router,
     private fns: AngularFireFunctions,
+    private fireauth: AngularFireAuth,
     private afs: AngularFirestore,
     private dialog: MatDialog
   ) {}
@@ -310,6 +313,21 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
     this.generatingAiPresentation = true;
     this.aiPresentationError = '';
+    this.aiPresentationStatus = 'Connecting Google Slides...';
+
+    let googleAccessToken = '';
+    try {
+      googleAccessToken = await this.requestGoogleSlidesAccessToken(uid);
+    } catch (err: any) {
+      console.error('Unable to connect Google Slides', err);
+      this.generatingAiPresentation = false;
+      this.aiPresentationStatus = '';
+      this.aiPresentationError =
+        err?.message ||
+        'Google Slides permission is required to generate the presentation.';
+      return;
+    }
+
     this.aiPresentationStatus = 'Preparing presentation request...';
 
     const docId = this.afs.createId();
@@ -349,9 +367,10 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     try {
       await docRef.set({
         solutionId,
+        googleAccessToken,
         status: { state: 'QUEUED', message: 'Queued for generation.' },
         requestedAt: Date.now(),
-        mode: 'cheap-first-pass',
+        mode: 'google-slides-primary',
       });
       this.aiPresentationStatus = 'Reading solution and documents...';
     } catch (err) {
@@ -362,6 +381,36 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
         'Unable to start presentation generation. Please try again.';
       this.aiPresentationRequestSub?.unsubscribe();
     }
+  }
+
+  private async requestGoogleSlidesAccessToken(uid: string): Promise<string> {
+    const user = await this.fireauth.currentUser;
+    if (!user || user.uid !== uid) {
+      throw new Error('Please sign in again before generating a presentation.');
+    }
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/presentations');
+    provider.addScope('https://www.googleapis.com/auth/drive.file');
+    provider.setCustomParameters({ prompt: 'consent select_account' });
+
+    const hasGoogleProvider = user.providerData.some(
+      (providerData) => providerData?.providerId === 'google.com'
+    );
+    const result = hasGoogleProvider
+      ? await user.reauthenticateWithPopup(provider)
+      : await user.linkWithPopup(provider);
+
+    if (result.user?.uid !== uid) {
+      throw new Error('Google account connection did not match the signed-in user.');
+    }
+
+    const credential = result.credential as firebase.auth.OAuthCredential | null;
+    const token = credential?.accessToken;
+    if (!token) {
+      throw new Error('Google did not return Slides permission. Please try again.');
+    }
+    return token;
   }
 
   openViewer(pid: string) {

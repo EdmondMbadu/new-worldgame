@@ -7307,15 +7307,23 @@ async function createGoogleSlidesDeck(
   plan: GeneratedDeckPlan,
   imageUrls: string[],
   sourceTitle: string,
-  requestId: string
+  requestId: string,
+  googleAccessToken = ''
 ): Promise<GoogleSlidesOutput> {
-  const auth = new google.auth.GoogleAuth({
-    scopes: [
-      'https://www.googleapis.com/auth/presentations',
-      'https://www.googleapis.com/auth/drive',
-    ],
-  });
-  const authClient = await auth.getClient();
+  let authClient: any;
+  if (googleAccessToken) {
+    const oauthClient = new google.auth.OAuth2();
+    oauthClient.setCredentials({ access_token: googleAccessToken });
+    authClient = oauthClient;
+  } else {
+    const auth = new google.auth.GoogleAuth({
+      scopes: [
+        'https://www.googleapis.com/auth/presentations',
+        'https://www.googleapis.com/auth/drive.file',
+      ],
+    });
+    authClient = await auth.getClient();
+  }
   const slidesService = google.slides({ version: 'v1', auth: authClient as any });
   const driveService = google.drive({ version: 'v3', auth: authClient as any });
   const title = cleanPresentationText(plan.title || sourceTitle || 'AI Presentation', 120);
@@ -7378,10 +7386,15 @@ export const onPresentationRequest = functions
     const requestId = String(context.params.docId || snap.id);
     const data = snap.data() || {};
     const solutionId = cleanPresentationText(data?.solutionId, 120);
+    const googleAccessToken = cleanPresentationText(data?.googleAccessToken, 5000);
+    const clearGoogleAccessToken = googleAccessToken
+      ? { googleAccessToken: admin.firestore.FieldValue.delete() }
+      : {};
 
     if (!solutionId) {
       await snap.ref.update({
         status: { state: 'ERRORED', message: 'No solutionId provided.' },
+        ...clearGoogleAccessToken,
       });
       return;
     }
@@ -7397,6 +7410,7 @@ export const onPresentationRequest = functions
       if (!solutionSnap.exists) {
         await snap.ref.update({
           status: { state: 'ERRORED', message: 'Solution not found.' },
+          ...clearGoogleAccessToken,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         return;
@@ -7412,6 +7426,7 @@ export const onPresentationRequest = functions
             state: 'ERRORED',
             message: 'There is not enough solution content to generate a presentation.',
           },
+          ...clearGoogleAccessToken,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         return;
@@ -7434,7 +7449,13 @@ export const onPresentationRequest = functions
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      const slidesDeck = await createGoogleSlidesDeck(plan, imageUrls, title, requestId);
+      const slidesDeck = await createGoogleSlidesDeck(
+        plan,
+        imageUrls,
+        title,
+        requestId,
+        googleAccessToken
+      );
 
       await snap.ref.update({
         status: { state: 'PROCESSING', message: 'Preparing PowerPoint download...' },
@@ -7520,19 +7541,27 @@ export const onPresentationRequest = functions
           document: documentEntry,
           presentationId: requestId,
         },
+        ...clearGoogleAccessToken,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     } catch (error: any) {
       console.error('onPresentationRequest error:', error?.message || error);
       const errorMsg = error instanceof Error ? error.message : String(error);
+      const isPermissionError =
+        errorMsg.toLowerCase().includes('permission') ||
+        errorMsg.toLowerCase().includes('insufficient authentication') ||
+        errorMsg.toLowerCase().includes('insufficient permission');
       await snap.ref.update({
         status: {
           state: 'ERRORED',
-          message: errorMsg.includes('quota') || errorMsg.includes('429')
-            ? 'The AI service is temporarily busy. Please try again shortly.'
-            : 'Could not generate the presentation. Please try again.',
+          message: isPermissionError
+            ? 'Google Slides permission was not granted. Please try again and allow Google Slides/Drive access.'
+            : errorMsg.includes('quota') || errorMsg.includes('429')
+              ? 'The AI service is temporarily busy. Please try again shortly.'
+              : 'Could not generate the presentation. Please try again.',
           technicalError: errorMsg,
         },
+        ...clearGoogleAccessToken,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }
