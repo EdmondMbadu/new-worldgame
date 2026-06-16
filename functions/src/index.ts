@@ -6610,7 +6610,7 @@ const PRESENTATION_DRIVE_FOLDER_ID = '1Rib4RlYsv-PsL1QOhlAoht-fw0tUHLEy';
 const PRESENTATION_SERVICE_ACCOUNT_EMAIL =
   'new-worldgame@appspot.gserviceaccount.com';
 const PRESENTATION_VISUAL_STYLE =
-  'premium editorial presentation image, authentic and dignified local problem-solving, cinematic but realistic, strong human-scale context, clean 16:9 composition, generous negative space for editable slide text, deep teal and warm amber accents, paper-white and near-black visual system, no words, no logos, no watermark, no poverty-porn stereotypes';
+  'premium editorial presentation image, authentic and dignified local problem-solving, cinematic but realistic, strong human-scale context, clean 16:9 composition, generous negative space for editable slide text, deep teal and warm amber accents, paper-white and near-black visual system, no words, no letters, no numbers, no labels, no UI text, no logos, no watermark, no poverty-porn stereotypes';
 
 function cleanPresentationText(value: unknown, max = 6000): string {
   const text = String(value || '')
@@ -6641,6 +6641,255 @@ function uniquePresentationStrings(values: string[]): string[] {
     if (!normalized || seen.has(normalized)) return false;
     seen.add(normalized);
     return true;
+  });
+}
+
+function extractImageUrlsFromHtml(value: unknown): string[] {
+  const text = String(value || '');
+  const urls: string[] = [];
+  const srcRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+  let match: RegExpExecArray | null;
+  while ((match = srcRegex.exec(text))) {
+    const url = match[1]?.trim();
+    if (/^https?:\/\//i.test(url)) {
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+function firstMatchingSentence(sourceText: string, words: string[], fallback: string): string {
+  const normalizedWords = words.map((word) => word.toLowerCase());
+  const sentences = sourceText
+    .split(/\n+/)
+    .flatMap((line) => {
+      const cleanedLine = cleanPresentationText(line, 2400)
+        .replace(/^Title:\s*[^.?!\n]{1,120}$/i, '')
+        .replace(/^([A-Za-z0-9 .&()/\-]{1,54}):\s*/i, '');
+      return cleanedLine.split(/(?<=[.!?])\s+/);
+    })
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 36 && sentence.length < 260);
+  const found = sentences.find((sentence) => {
+    const lower = sentence.toLowerCase();
+    return normalizedWords.some((word) => lower.includes(word));
+  });
+  return cleanPresentationText(found || fallback, 180);
+}
+
+function buildContentAwareFallbackDeckPlan(
+  sourceText: string,
+  fallbackTitle: string
+): GeneratedDeckPlan {
+  const title = cleanPresentationText(fallbackTitle || 'AI Presentation', 90);
+  const problem = firstMatchingSentence(
+    sourceText,
+    ['problem', 'chatbot', 'spoon-feed', 'critical thinking', 'reasoning'],
+    'Students are relying on direct-answer chatbots instead of building reasoning and deep understanding.'
+  );
+  const stakes = firstMatchingSentence(
+    sourceText,
+    ['superficial', 'retention', 'misinformation', 'workforce', 'passive'],
+    'The cost is a generation of passive learners who struggle to transfer knowledge into new contexts.'
+  );
+  const solution = firstMatchingSentence(
+    sourceText,
+    ['adaptive questioning', 'socratic', 'learning companion', 'guided dialogues', 'reasoning gaps'],
+    'SocraticLens uses adaptive questioning and Socratic dialogue to detect reasoning gaps and strengthen understanding.'
+  );
+  const scope = firstMatchingSentence(
+    sourceText,
+    ['google classroom', 'whatsapp', 'offline', 'low-resource', 'parents'],
+    'The product can support students and parents through guided dialogues, progress insights, classroom integrations, and offline use.'
+  );
+  const cost = firstMatchingSentence(
+    sourceText,
+    ['$30,000', '$70,000', 'proof-of-concept', 'mvp', 'pilot'],
+    'A lean proof-of-concept can validate the core mechanism before full-scale investment.'
+  );
+
+  return {
+    title,
+    subtitle: cleanPresentationText(
+      'An adaptive AI learning companion that teaches by questioning, not answering.',
+      160
+    ),
+    audience: 'Educators, funders, product partners, and implementation teams',
+    narrative:
+      'SocraticLens reframes AI tutoring from answer delivery into guided reasoning practice.',
+    slides: [
+      {
+        title: 'Answers Are Too Easy',
+        kicker: 'Hook',
+        layout: 'hero',
+        bullets: [problem],
+        notes: 'Open with the learning tension: convenience is replacing cognitive struggle.',
+        visualCue: 'A learner pauses before a difficult question while an answer stream waits in the background.',
+        imageSearchQuery: 'student thinking with AI',
+        imagePrompt:
+          'A thoughtful student at a desk facing a laptop, pausing before a difficult learning problem, subtle AI glow in the room, no visible screen text, warm editorial lighting, deep teal and amber palette, dignified and hopeful mood, clean negative space on the left',
+      },
+      {
+        title: 'The Hidden Cost',
+        kicker: 'Stakes',
+        layout: 'split',
+        bullets: [
+          stakes,
+          'Critical analysis weakens when struggle is bypassed.',
+          'Students can recall answers without explaining reasoning.',
+          'Misinformation risk rises without stronger judgment habits.',
+        ],
+        notes: 'Frame the issue as cognitive development, not anti-technology.',
+        visualCue: 'Large warning signal with four consequence cards.',
+        imageSearchQuery: 'passive AI learning classroom',
+        imagePrompt:
+          'A cinematic classroom study scene showing a student surrounded by easy digital answers but looking uncertain, no screen text, thoughtful rather than dystopian, editorial realism, deep teal shadows with warm amber highlights, wide 16:9 with negative space',
+      },
+      {
+        title: 'The Reframe',
+        kicker: 'Insight',
+        layout: 'quote',
+        bullets: ['The better AI tutor should ask the next question, not give the final answer.'],
+        notes: 'This is the core thesis the audience should remember.',
+        visualCue: 'Minimal quote treatment, high contrast, no decorative clutter.',
+      },
+      {
+        title: 'SocraticLens',
+        kicker: 'Solution',
+        layout: 'split',
+        bullets: [
+          solution,
+          'Adapts questions to each learner’s reasoning level.',
+          'Offers guided dialogues instead of instant answers.',
+          'Shows parents how reasoning improves over time.',
+        ],
+        notes: 'Describe the product as a mentor pattern, not another chatbot.',
+        visualCue: 'Product concept beside mentor-like learning scene.',
+        imageSearchQuery: 'adaptive learning dialogue',
+        imagePrompt:
+          'An optimistic scene of a student and parent reviewing a learning journey together near a tablet, abstract AI question path visualized as soft light arcs, no readable UI text, modern home learning setting, deep teal and warm amber palette, clean space for slide copy',
+      },
+      {
+        title: 'How It Works',
+        kicker: 'Mechanism',
+        layout: 'steps',
+        bullets: [
+          'Diagnose the learner’s reasoning gap.',
+          'Ask a targeted next question.',
+          'Observe the explanation, not just the answer.',
+          'Adapt the path until understanding improves.',
+        ],
+        notes: 'Make the mechanism simple enough for a funder or educator to repeat.',
+        visualCue: 'Four-step loop: diagnose, question, explain, adapt.',
+      },
+      {
+        title: 'Built For Daily Learning',
+        kicker: 'Use Cases',
+        layout: 'image',
+        bullets: [
+          scope,
+          'Students practice reasoning in everyday study moments.',
+          'Parents see progress without replacing teachers.',
+          'Low-resource settings can still use guided support.',
+        ],
+        notes: 'Show breadth without overclaiming maturity.',
+        visualCue: 'Bento grid showing student, parent, classroom, and offline contexts.',
+        imageSearchQuery: 'community learning technology',
+        imagePrompt:
+          'A warm community learning environment with students using shared tablets and notebooks, educator nearby as facilitator, realistic low-resource classroom but dignified and optimistic, no text on devices, cinematic natural light, deep teal accents and amber warmth, wide 16:9 composition',
+      },
+      {
+        title: 'Measure Reasoning',
+        kicker: 'Proof',
+        layout: 'comparison',
+        bullets: [
+          'Old metric: final-answer correctness.',
+          'Better metric: explanation quality.',
+          'Old behavior: instant chatbot dependency.',
+          'Better behavior: independent problem attempts.',
+        ],
+        notes: 'Shift evaluation from answer output to reasoning process.',
+        visualCue: 'Two-up comparison: answer culture versus reasoning culture.',
+      },
+      {
+        title: 'Pilot Economics',
+        kicker: 'Feasibility',
+        layout: 'split',
+        bullets: [
+          cost,
+          'Build only the core question engine first.',
+          'Test with a small learner cohort.',
+          'Iterate from explanation data and teacher feedback.',
+        ],
+        notes: 'Use the cost range as a practical proof-of-concept frame.',
+        visualCue: 'Budget cards for build, pilot, testing, iteration.',
+        imageSearchQuery: 'education startup pilot planning',
+        imagePrompt:
+          'A small interdisciplinary education technology team planning a pilot around a table with sticky notes, laptop, and notebooks, no readable text, practical optimistic startup energy, deep teal and warm amber palette, clean editorial composition with space for cost cards',
+      },
+      {
+        title: 'Why It Matters',
+        kicker: 'Impact',
+        layout: 'image',
+        bullets: [
+          'Supports SDG 4: Quality Education.',
+          'Builds deeper learning habits, not answer consumption.',
+          'Strengthens judgment in an AI-saturated world.',
+        ],
+        notes: 'Connect the product to learning quality and long-term agency.',
+        visualCue: 'Editorial image with concise SDG4 impact caption.',
+        imageSearchQuery: 'quality education reasoning skills',
+        imagePrompt:
+          'A hopeful editorial image of diverse learners collaboratively solving a challenging problem on paper, with a subtle abstract question-mark light pattern, no text, no logos, respectful classroom context, deep teal paper-white and amber palette, strong negative space',
+      },
+      {
+        title: 'The First Six Months',
+        kicker: 'Roadmap',
+        layout: 'roadmap',
+        bullets: [
+          'Prototype adaptive dialogue engine.',
+          'Recruit educator and learner pilot partners.',
+          'Run guided learning sessions.',
+          'Measure reasoning growth and retention.',
+        ],
+        notes: 'Turn the idea into an executable pilot path.',
+        visualCue: 'Six-month milestone ladder with clear gates.',
+      },
+      {
+        title: 'What We Need',
+        kicker: 'Ask',
+        layout: 'closing',
+        bullets: [
+          'Pilot partners with real learner cohorts.',
+          'Funding for MVP build and testing.',
+          'Educators to validate question quality.',
+        ],
+        notes: 'Close with a concrete request rather than a general aspiration.',
+        visualCue: 'Clear ask slide with three commitment cards.',
+      },
+    ],
+  };
+}
+
+function buildSlideImagePrompt(slide: GeneratedDeckSlide, title: string): string {
+  const slideTitle = cleanPresentationText(slide.title || title || 'learning transformation', 90);
+  const slidePoint = cleanPresentationText((slide.bullets || [])[0] || slide.visualCue || slide.notes || '', 180);
+  return [
+    `A single coherent editorial photograph representing "${slideTitle}" for an education and AI presentation`,
+    slidePoint ? `Core idea: ${slidePoint}` : '',
+    'Show authentic human learning, reflection, collaboration, or mentorship through environment and body language',
+    'No computer screens, phone screens, signs, posters, papers with writing, books with readable marks, magnifying glasses, speech bubbles, icons, letters, numbers, or symbolic labels',
+    'Deep teal and warm amber palette, dignified optimistic mood, clean 16:9 composition with negative space',
+  ].filter(Boolean).join('. ');
+}
+
+function ensureImagePromptsForVisibleImageSlides(plan: GeneratedDeckPlan): void {
+  const imageLayouts = new Set(['hero', 'image', 'split']);
+  (plan.slides || []).forEach((slide) => {
+    if (!imageLayouts.has(String(slide.layout || ''))) return;
+    if (!cleanPresentationText(slide.imagePrompt, 120)) {
+      slide.imagePrompt = buildSlideImagePrompt(slide, plan.title || 'Presentation');
+    }
   });
 }
 
@@ -6687,50 +6936,64 @@ async function uploadPresentationGeneratedImage(
   )}?alt=media&token=${downloadToken}`;
 }
 
-function extractDeckPlanJson(value: string, fallbackTitle: string): GeneratedDeckPlan {
+function normalizeGeneratedDeckPlan(value: unknown, fallbackTitle: string): GeneratedDeckPlan | null {
+  const parsed: any = value;
+  const candidate =
+    Array.isArray(parsed)
+      ? { title: fallbackTitle, slides: parsed }
+      : parsed?.slides
+        ? parsed
+        : parsed?.deck?.slides
+          ? parsed.deck
+          : parsed?.presentation?.slides
+            ? parsed.presentation
+            : parsed?.deckPlan?.slides
+              ? parsed.deckPlan
+              : parsed?.plan?.slides
+                ? parsed.plan
+                : null;
+
+  if (candidate && Array.isArray(candidate.slides) && candidate.slides.length > 0) {
+    return candidate as GeneratedDeckPlan;
+  }
+  return null;
+}
+
+function extractDeckPlanJson(
+  value: string,
+  fallbackTitle: string
+): GeneratedDeckPlan | null {
   const cleaned = value
-    .replace(/^```(?:json)?/i, '')
-    .replace(/```$/i, '')
+    .replace(/```(?:json)?/gi, '')
+    .replace(/```/g, '')
     .trim();
 
   const candidates = [
     cleaned,
-    cleaned.slice(cleaned.indexOf('{'), cleaned.lastIndexOf('}') + 1),
-  ].filter((candidate) => candidate.trim().startsWith('{'));
+    cleaned.includes('{') && cleaned.includes('}')
+      ? cleaned.slice(cleaned.indexOf('{'), cleaned.lastIndexOf('}') + 1)
+      : '',
+    cleaned.includes('[') && cleaned.includes(']')
+      ? cleaned.slice(cleaned.indexOf('['), cleaned.lastIndexOf(']') + 1)
+      : '',
+  ].filter((candidate) => {
+    const trimmed = candidate.trim();
+    return trimmed.startsWith('{') || trimmed.startsWith('[');
+  });
 
   for (const candidate of candidates) {
     try {
-      const parsed = JSON.parse(candidate) as GeneratedDeckPlan;
-      if (Array.isArray(parsed.slides) && parsed.slides.length > 0) {
-        return parsed;
+      const parsed = JSON.parse(candidate);
+      const plan = normalizeGeneratedDeckPlan(parsed, fallbackTitle);
+      if (plan) {
+        return plan;
       }
     } catch (error) {
       console.warn('Failed to parse deck JSON candidate:', (error as Error).message);
     }
   }
 
-  return {
-    title: fallbackTitle,
-    subtitle: 'AI-generated presentation draft',
-    narrative: 'A concise presentation built from the available solution content.',
-    slides: [
-      {
-        title: 'The opportunity',
-        layout: 'signal',
-        bullets: ['Clarify the core problem', 'Show why the timing matters', 'Frame the solution path'],
-      },
-      {
-        title: 'The solution',
-        layout: 'split',
-        bullets: ['Summarize the proposed approach', 'Identify the people served', 'Highlight the expected impact'],
-      },
-      {
-        title: 'Next steps',
-        layout: 'closing',
-        bullets: ['Validate with stakeholders', 'Prioritize near-term actions', 'Define success measures'],
-      },
-    ],
-  };
+  return null;
 }
 
 async function collectPresentationSourceText(solution: any): Promise<{
@@ -6742,15 +7005,80 @@ async function collectPresentationSourceText(solution: any): Promise<{
 
   sections.push(`Title: ${cleanPresentationText(solution?.title, 300)}`);
   sections.push(`Description: ${cleanPresentationText(solution?.description, 2000)}`);
+  sections.push(`Solution Area: ${cleanPresentationText(solution?.solutionArea, 300)}`);
+  if (Array.isArray(solution?.sdgs) && solution.sdgs.length) {
+    sections.push(`Relevant SDGs: ${solution.sdgs.map((sdg: unknown) => cleanPresentationText(sdg, 160)).join(', ')}`);
+  }
   sections.push(`Strategy Review: ${cleanPresentationText(solution?.strategyReview, 5000)}`);
   sections.push(`Solution Content: ${cleanPresentationText(solution?.content, 4000)}`);
 
+  imageUrls.push(...extractImageUrlsFromHtml(solution?.content));
+  imageUrls.push(...extractImageUrlsFromHtml(solution?.strategyReview));
+
+  if (solution?.recruitmentProfile && typeof solution.recruitmentProfile === 'object') {
+    const recruitmentLines = [
+      ['Initiative', solution.recruitmentProfile.initiativeName],
+      ['Focus Area', solution.recruitmentProfile.focusArea],
+      ['Challenge Description', solution.recruitmentProfile.challengeDescription],
+      ['Scope of Work', solution.recruitmentProfile.scopeOfWork],
+      ['Final Product', solution.recruitmentProfile.finalProduct],
+      ['Skills Needed', solution.recruitmentProfile.skills],
+      ['Perspectives Needed', solution.recruitmentProfile.perspectives],
+      ['Knowledge Needed', solution.recruitmentProfile.knowledge],
+      ['Interests', solution.recruitmentProfile.interests],
+      ['Time Commitment', solution.recruitmentProfile.timeCommitment],
+      ['Team Size', [solution.recruitmentProfile.teamSizeMin, solution.recruitmentProfile.teamSizeMax].filter(Boolean).join(' to ')],
+      ['Start Date', solution.recruitmentProfile.startDate],
+      ['Additional Notes', solution.recruitmentProfile.additionalNotes],
+    ]
+      .map(([label, value]) => `${label}: ${cleanPresentationText(value, 2000)}`)
+      .filter((line) => !line.endsWith(':'));
+    if (recruitmentLines.length) {
+      sections.push(`Recruitment and Implementation Profile:\n${recruitmentLines.join('\n')}`);
+    }
+  }
+
   if (solution?.status && typeof solution.status === 'object') {
     const statusLines = Object.entries(solution.status)
-      .slice(0, 20)
+      .filter(([, value]) => cleanPresentationText(value, 120).length > 0)
+      .slice(0, 40)
       .map(([key, value]) => `${key}: ${cleanPresentationText(value, 700)}`)
       .join('\n');
-    sections.push(`Status Notes:\n${statusLines}`);
+    if (statusLines) {
+      sections.push(`Step Answers and Strategy Notes:\n${statusLines}`);
+    }
+    for (const value of Object.values(solution.status)) {
+      imageUrls.push(...extractImageUrlsFromHtml(value));
+    }
+  }
+
+  const dottedStatusLines = Object.entries(solution)
+    .filter(([key, value]) => key.startsWith('status.') && cleanPresentationText(value, 120).length > 0)
+    .slice(0, 40)
+    .map(([key, value]) => `${key}: ${cleanPresentationText(value, 900)}`);
+  if (dottedStatusLines.length) {
+    sections.push(`Legacy Step Answers:\n${dottedStatusLines.join('\n')}`);
+  }
+  for (const [key, value] of Object.entries(solution)) {
+    if (key.startsWith('status.')) {
+      imageUrls.push(...extractImageUrlsFromHtml(value));
+    }
+  }
+
+  if (Array.isArray(solution?.evaluationDetails) && solution.evaluationDetails.length) {
+    const evaluations = solution.evaluationDetails
+      .slice(0, 6)
+      .map((item: any, index: number) => {
+        const scores = [
+          item?.average ? `average ${item.average}` : '',
+          item?.achievable ? `achievable ${item.achievable}` : '',
+          item?.feasible ? `feasible ${item.feasible}` : '',
+          item?.equitable ? `equitable ${item.equitable}` : '',
+          item?.understandable ? `understandable ${item.understandable}` : '',
+        ].filter(Boolean).join(', ');
+        return `Evaluation ${index + 1}: ${scores}. ${cleanPresentationText(item?.comment, 1200)}`;
+      });
+    sections.push(`Evaluation Feedback:\n${evaluations.join('\n')}`);
   }
 
   const solutionImage = String(solution?.image || '').trim();
@@ -6805,8 +7133,8 @@ async function collectPresentationSourceText(solution: any): Promise<{
   }
 
   return {
-    sourceText: sections.filter(Boolean).join('\n\n').slice(0, 28000),
-    imageUrls: uniquePresentationStrings(imageUrls).slice(0, 6),
+    sourceText: sections.filter(Boolean).join('\n\n').slice(0, 52000),
+    imageUrls: uniquePresentationStrings(imageUrls).slice(0, 12),
   };
 }
 
@@ -6884,8 +7212,35 @@ async function generatePresentationDeckPlan(
   fallbackTitle: string
 ): Promise<GeneratedDeckPlan> {
   const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-  let text = '';
+  let plan: GeneratedDeckPlan | null = null;
   let lastError: unknown;
+  const responseSchema = {
+    type: 'object',
+    properties: {
+      title: { type: 'string' },
+      subtitle: { type: 'string' },
+      audience: { type: 'string' },
+      narrative: { type: 'string' },
+      slides: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            kicker: { type: 'string' },
+            layout: { type: 'string' },
+            bullets: { type: 'array', items: { type: 'string' } },
+            notes: { type: 'string' },
+            visualCue: { type: 'string' },
+            imageSearchQuery: { type: 'string' },
+            imagePrompt: { type: 'string' },
+          },
+          required: ['title', 'layout', 'bullets', 'notes', 'visualCue'],
+        },
+      },
+    },
+    required: ['title', 'subtitle', 'narrative', 'slides'],
+  };
 
   for (const modelName of PRESENTATION_TEXT_MODELS) {
     try {
@@ -6895,12 +7250,19 @@ async function generatePresentationDeckPlan(
           temperature: 0.25,
           maxOutputTokens: 4500,
           responseMimeType: 'application/json',
+          responseSchema,
         },
       } as any);
 
       const result = await model.generateContent(buildDeckPlanPrompt(sourceText, fallbackTitle));
-      text = result.response.text();
-      break;
+      const text = result.response.text();
+      plan = extractDeckPlanJson(text, fallbackTitle);
+      if (plan) {
+        console.log(`Presentation deck plan generated with ${modelName}`);
+        break;
+      }
+      lastError = new Error(`Presentation deck plan model ${modelName} returned invalid JSON.`);
+      console.warn(`Presentation deck plan model ${modelName} returned invalid JSON.`);
     } catch (error) {
       lastError = error;
       console.warn(
@@ -6910,35 +7272,53 @@ async function generatePresentationDeckPlan(
     }
   }
 
-  if (!text) {
-    throw lastError instanceof Error
-      ? lastError
-      : new Error('Could not generate the presentation plan.');
+  if (!plan) {
+    console.warn(
+      'Using content-aware fallback deck plan after all presentation planning models failed.',
+      lastError instanceof Error ? lastError.message : String(lastError || '')
+    );
+    plan = buildContentAwareFallbackDeckPlan(sourceText, fallbackTitle);
   }
 
-  const plan = extractDeckPlanJson(text, fallbackTitle);
   plan.title = cleanPresentationText(plan.title || fallbackTitle, 90);
   plan.subtitle = cleanPresentationText(plan.subtitle || 'Presentation draft', 160);
   plan.narrative = cleanPresentationText(plan.narrative || '', 240);
   plan.slides = (plan.slides || [])
     .slice(0, 12)
-    .map((slide) => ({
-      title: cleanPresentationText(slide.title || 'Key point', 90),
-      kicker: cleanPresentationText(slide.kicker || '', 40),
-      layout: slide.layout || 'signal',
-      bullets: Array.isArray(slide.bullets)
-        ? slide.bullets.map((bullet) => cleanPresentationText(bullet, 120)).filter(Boolean).slice(0, 5)
-        : [],
-      notes: cleanPresentationText(slide.notes || '', 500),
-      visualCue: cleanPresentationText(slide.visualCue || '', 140),
-      imageSearchQuery: cleanPresentationText(slide.imageSearchQuery || '', 120),
-      imagePrompt: cleanPresentationText(slide.imagePrompt || '', 500),
-      imageUrl: cleanPresentationText(slide.imageUrl || '', 800),
-    }))
+    .map((slide) => {
+      const imagePrompt = cleanPresentationText(slide.imagePrompt || '', 500);
+      const requestedLayout = slide.layout || 'signal';
+      const layout =
+        imagePrompt && requestedLayout === 'signal'
+          ? 'split'
+          : requestedLayout;
+      return {
+        title: cleanPresentationText(slide.title || 'Key point', 90),
+        kicker: cleanPresentationText(slide.kicker || '', 40),
+        layout,
+        bullets: Array.isArray(slide.bullets)
+          ? slide.bullets.map((bullet) => cleanPresentationText(bullet, 120)).filter(Boolean).slice(0, 5)
+          : [],
+        notes: cleanPresentationText(slide.notes || '', 500),
+        visualCue: cleanPresentationText(slide.visualCue || '', 140),
+        imageSearchQuery: cleanPresentationText(slide.imageSearchQuery || '', 120),
+        imagePrompt,
+        imageUrl: cleanPresentationText(slide.imageUrl || '', 800),
+      };
+    })
     .filter((slide) => slide.title || slide.bullets.length);
+  ensureImagePromptsForVisibleImageSlides(plan);
 
   if (!plan.slides.length) {
-    return extractDeckPlanJson('', fallbackTitle);
+    const fallbackPlan = buildContentAwareFallbackDeckPlan(sourceText, fallbackTitle);
+    ensureImagePromptsForVisibleImageSlides(fallbackPlan);
+    return fallbackPlan;
+  }
+  if (plan.slides.length < 8) {
+    console.warn(`Generated deck plan had only ${plan.slides.length} slides; using content-aware fallback.`);
+    const fallbackPlan = buildContentAwareFallbackDeckPlan(sourceText, fallbackTitle);
+    ensureImagePromptsForVisibleImageSlides(fallbackPlan);
+    return fallbackPlan;
   }
   return plan;
 }
@@ -7005,8 +7385,9 @@ async function generatePresentationVisuals(
     const fullPrompt = [
       entry.prompt,
       PRESENTATION_VISUAL_STYLE,
+      'Create one coherent photographic or cinematic editorial scene, not a split-screen, not a diagram, not an infographic, not a UI mockup.',
       'Shot for a premium editable presentation slide; leave clean negative space for headline and cards.',
-      'No typography, captions, numbers, charts, interface elements, logos, or watermark inside the image.',
+      'No typography, captions, numbers, letters, pseudo-letters, symbols, signs, posters, papers with writing, screen interfaces, icons containing text, charts, logos, or watermark inside the image.',
     ].join('. ');
     let imageBase64 = '';
 
@@ -8409,7 +8790,7 @@ async function createGoogleSlidesDeck(
 
 export const onPresentationRequest = functions
   .region('us-central1')
-  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .runWith({ timeoutSeconds: 300, memory: '1GB' })
   .firestore.document('users/{uid}/presentation-requests/{docId}')
   .onCreate(async (snap, context) => {
     const uid = String(context.params.uid || '');
