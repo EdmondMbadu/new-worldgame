@@ -6568,7 +6568,12 @@ const PRESENTATION_PPTX_MIME =
 const GOOGLE_SLIDES_MIME = 'application/vnd.google-apps.presentation';
 const PRESENTATION_FALLBACK_IMAGE =
   'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fgeneric-image.jpg?alt=media&token=c4e8d393-50e6-4080-bfcd-923848db7007';
-const PRESENTATION_TEXT_MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+const PRESENTATION_TEXT_MODELS = [
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash',
+];
+const PRESENTATION_DRIVE_FOLDER_ID = '1Rib4RlYsv-PsL1QOhlAoht-fw0tUHLEy';
 
 function cleanPresentationText(value: unknown, max = 6000): string {
   const text = String(value || '')
@@ -6726,14 +6731,16 @@ async function collectPresentationSourceText(solution: any): Promise<{
 }
 
 function buildDeckPlanPrompt(sourceText: string, title: string): string {
-  return `You are an expert presentation strategist and PowerPoint story designer.
+  return `You are a world-class presentation strategist, McKinsey-quality narrative architect, and elite Google Slides art director.
 
-Create a concise, investor-quality presentation plan from the source material.
+Create a boardroom-ready, visually powerful presentation plan from the source material. The output will be rendered into Google Slides, so every slide must be specific, structured, and visually directed.
 
 Cost and production constraints:
 - Do not request generated images.
 - Use existing visuals if available.
-- Prefer clear synthesis over exhaustive detail.
+- Use visualCue to direct layouts, metaphors, diagrams, maps, timelines, impact scorecards, or image usage.
+- Prefer sharp synthesis over exhaustive detail.
+- Make every slide feel like a designed decision-support artifact, not a document pasted into slides.
 
 Return ONLY valid JSON. No markdown fences. No commentary.
 
@@ -6757,9 +6764,11 @@ JSON shape:
 
 Rules:
 - Create 7 to 10 slides.
-- Make the deck beautiful but practical: title, agenda, evidence, solution, model, impact, roadmap, ask.
+- Make the deck beautiful but practical: cinematic title, agenda, evidence, solution, operating model, implementation path, measurable impact, risks, and ask.
 - Use concrete content from the source.
-- Avoid hype, vague slogans, and long paragraphs.
+- Avoid hype, vague slogans, generic sustainability language, and long paragraphs.
+- Every bullet must be crisp, concrete, and decision-oriented.
+- Speaker notes should tell the presenter what to emphasize, not repeat bullets.
 - Do not include citations unless the source material explicitly contains them.
 
 Deck title fallback: ${title}
@@ -7104,7 +7113,11 @@ function addImageIfAvailable(
 
 async function buildPresentationImageUrlPool(imageUrls: string[]): Promise<string[]> {
   const validUrls: string[] = [];
-  for (const url of imageUrls.slice(0, 6)) {
+  const candidateUrls = uniquePresentationStrings([
+    ...imageUrls,
+    PRESENTATION_FALLBACK_IMAGE,
+  ]).slice(0, 8);
+  for (const url of candidateUrls) {
     try {
       const response = await fetch(url);
       if (!response.ok) continue;
@@ -7307,31 +7320,28 @@ async function createGoogleSlidesDeck(
   plan: GeneratedDeckPlan,
   imageUrls: string[],
   sourceTitle: string,
-  requestId: string,
-  googleAccessToken = ''
+  requestId: string
 ): Promise<GoogleSlidesOutput> {
-  let authClient: any;
-  if (googleAccessToken) {
-    const oauthClient = new google.auth.OAuth2();
-    oauthClient.setCredentials({ access_token: googleAccessToken });
-    authClient = oauthClient;
-  } else {
-    const auth = new google.auth.GoogleAuth({
-      scopes: [
-        'https://www.googleapis.com/auth/presentations',
-        'https://www.googleapis.com/auth/drive.file',
-      ],
-    });
-    authClient = await auth.getClient();
-  }
+  const auth = new google.auth.GoogleAuth({
+    scopes: [
+      'https://www.googleapis.com/auth/presentations',
+      'https://www.googleapis.com/auth/drive',
+    ],
+  });
+  const authClient = await auth.getClient();
   const slidesService = google.slides({ version: 'v1', auth: authClient as any });
   const driveService = google.drive({ version: 'v3', auth: authClient as any });
   const title = cleanPresentationText(plan.title || sourceTitle || 'AI Presentation', 120);
 
-  const created = await slidesService.presentations.create({
-    requestBody: { title },
+  const created = await driveService.files.create({
+    requestBody: {
+      name: title,
+      mimeType: GOOGLE_SLIDES_MIME,
+      parents: [PRESENTATION_DRIVE_FOLDER_ID],
+    },
+    fields: 'id',
   } as any);
-  const presentationId = created.data.presentationId;
+  const presentationId = created.data.id;
   if (!presentationId) {
     throw new Error('Google Slides did not return a presentation ID.');
   }
@@ -7386,15 +7396,10 @@ export const onPresentationRequest = functions
     const requestId = String(context.params.docId || snap.id);
     const data = snap.data() || {};
     const solutionId = cleanPresentationText(data?.solutionId, 120);
-    const googleAccessToken = cleanPresentationText(data?.googleAccessToken, 5000);
-    const clearGoogleAccessToken = googleAccessToken
-      ? { googleAccessToken: admin.firestore.FieldValue.delete() }
-      : {};
 
     if (!solutionId) {
       await snap.ref.update({
         status: { state: 'ERRORED', message: 'No solutionId provided.' },
-        ...clearGoogleAccessToken,
       });
       return;
     }
@@ -7410,7 +7415,6 @@ export const onPresentationRequest = functions
       if (!solutionSnap.exists) {
         await snap.ref.update({
           status: { state: 'ERRORED', message: 'Solution not found.' },
-          ...clearGoogleAccessToken,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         return;
@@ -7426,7 +7430,6 @@ export const onPresentationRequest = functions
             state: 'ERRORED',
             message: 'There is not enough solution content to generate a presentation.',
           },
-          ...clearGoogleAccessToken,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
         return;
@@ -7453,8 +7456,7 @@ export const onPresentationRequest = functions
         plan,
         imageUrls,
         title,
-        requestId,
-        googleAccessToken
+        requestId
       );
 
       await snap.ref.update({
@@ -7541,7 +7543,6 @@ export const onPresentationRequest = functions
           document: documentEntry,
           presentationId: requestId,
         },
-        ...clearGoogleAccessToken,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     } catch (error: any) {
@@ -7555,13 +7556,12 @@ export const onPresentationRequest = functions
         status: {
           state: 'ERRORED',
           message: isPermissionError
-            ? 'Google Slides permission was not granted. Please try again and allow Google Slides/Drive access.'
+            ? 'The presentation folder is not shared correctly with the app service account.'
             : errorMsg.includes('quota') || errorMsg.includes('429')
               ? 'The AI service is temporarily busy. Please try again shortly.'
               : 'Could not generate the presentation. Please try again.',
           technicalError: errorMsg,
         },
-        ...clearGoogleAccessToken,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }
