@@ -1133,16 +1133,25 @@
                         <div *ngIf="csvValid.length || csvInvalid.length || manuallyRemovedRecipients.length" class="max-h-56 overflow-auto pr-1">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
-                                <div class="text-[11px] font-medium mb-1">Valid Emails</div>
+                                <div class="text-[11px] font-medium mb-1">Valid Recipients</div>
                                 <ul class="text-[11px] space-y-1">
-                                <li *ngFor="let e of csvValid; let i = index"
+                                <li *ngFor="let recipient of csvRecipients; let i = index"
                                     class="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1 dark:border-slate-700">
-                                    <span class="min-w-0 flex-1 truncate">
-                                    <span class="tabular-nums">{{ i + 1 }}.</span> {{ e }}
-                                    <span *ngIf="unsubSet.has(e)" class="ml-1 px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">unsub</span>
+                                    <span class="min-w-0 flex-1">
+                                    <span class="flex min-w-0 items-center gap-1.5">
+                                        <span class="shrink-0 tabular-nums">{{ i + 1 }}.</span>
+                                        <span *ngIf="displayRecipientName(recipient) as recipientName"
+                                              class="min-w-0 truncate font-medium text-slate-900 dark:text-slate-100">
+                                        {{ recipientName }}
+                                        </span>
+                                    </span>
+                                    <span class="block truncate font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                                        {{ recipient.email }}
+                                        <span *ngIf="unsubSet.has(recipient.email)" class="ml-1 px-1.5 py-0.5 rounded bg-rose-100 text-rose-700">unsub</span>
+                                    </span>
                                     </span>
                                     <button type="button"
-                                            (click)="removeRecipient(e)"
+                                            (click)="removeRecipient(recipient.email)"
                                             [disabled]="sendingBulk"
                                             title="Remove from this send"
                                             class="shrink-0 rounded-md px-2 py-0.5 text-[10px] ring-1 ring-slate-300 hover:bg-slate-100 disabled:opacity-50 dark:ring-slate-600 dark:hover:bg-slate-800">
@@ -1174,8 +1183,17 @@
                                 <ul class="text-[11px] space-y-1">
                                 <li *ngFor="let recipient of manuallyRemovedRecipients; let i = index"
                                     class="flex items-center gap-2">
-                                    <span class="min-w-0 flex-1 truncate">
-                                    <span class="tabular-nums">{{ i + 1 }}.</span> {{ recipient.email }}
+                                    <span class="min-w-0 flex-1">
+                                    <span class="flex min-w-0 items-center gap-1.5">
+                                        <span class="shrink-0 tabular-nums">{{ i + 1 }}.</span>
+                                        <span *ngIf="displayRecipientName(recipient) as recipientName"
+                                              class="min-w-0 truncate font-medium">
+                                        {{ recipientName }}
+                                        </span>
+                                    </span>
+                                    <span class="block truncate font-mono text-[10px] opacity-80">
+                                        {{ recipient.email }}
+                                    </span>
                                     </span>
                                     <button type="button"
                                             (click)="restoreRecipient(recipient.email)"

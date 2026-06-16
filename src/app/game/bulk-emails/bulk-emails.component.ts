@@ -1048,6 +1048,62 @@ export class BulkEmailsComponent implements OnDestroy {
     setTimeout(() => URL.revokeObjectURL(a.href), 30_000);
   }
 
+  displayRecipientName(recipient: BulkRecipient | null | undefined): string {
+    if (!recipient) return '';
+    const fields = recipient.fields || {};
+    const directName = this.cleanRecipientName(
+      this.firstRecipientField(fields, [
+        'name',
+        'fullName',
+        'displayName',
+        'contactName',
+        'recipientName',
+        'customerName',
+        'studentName',
+        'personName',
+      ]),
+      recipient.email
+    );
+    if (directName) return directName;
+
+    const firstName = this.firstRecipientField(fields, [
+      'firstName',
+      'first',
+      'givenName',
+      'forename',
+    ]);
+    const lastName = this.firstRecipientField(fields, [
+      'lastName',
+      'last',
+      'familyName',
+      'surname',
+    ]);
+
+    return this.cleanRecipientName(
+      [firstName, lastName].filter(Boolean).join(' '),
+      recipient.email
+    );
+  }
+
+  private firstRecipientField(
+    fields: Record<string, string>,
+    candidateKeys: string[]
+  ): string {
+    for (const key of candidateKeys) {
+      const value = (fields[key] || '').trim();
+      if (value) return value;
+    }
+    return '';
+  }
+
+  private cleanRecipientName(name: string, email: string): string {
+    const cleaned = (name || '').replace(/\s+/g, ' ').trim();
+    if (!cleaned) return '';
+    return cleaned.toLowerCase() === (email || '').trim().toLowerCase()
+      ? ''
+      : cleaned;
+  }
+
   removeRecipient(email: string): void {
     if (this.sendingBulk) return;
     const normalized = (email || '').trim().toLowerCase();
