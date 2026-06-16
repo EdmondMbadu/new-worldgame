@@ -4,6 +4,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
+import { Presentation } from 'src/app/models/presentation';
 import { Avatar } from 'src/app/models/user';
 import { PresentationFormComponent } from 'src/app/presentations/presentation-form/presentation-form.component';
 import { AuthService } from 'src/app/services/auth.service';
@@ -34,7 +35,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   showAddDocument: boolean = false;
   isHovering: boolean = false;
   documents: Avatar[] = [];
-  presentations: any[] = [];
+  presentations: Presentation[] = [];
   originalFilename = '';
   generatingAiPresentation = false;
   aiPresentationStatus = '';
@@ -330,7 +331,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       if (state === 'COMPLETED') {
         this.generatingAiPresentation = false;
         this.aiPresentationStatus =
-          'Presentation ready. The PPTX was added to Documents.';
+          'Google Slides presentation ready. PowerPoint download was added to Documents.';
         this.aiPresentationRequestSub?.unsubscribe();
         return;
       }
@@ -368,6 +369,49 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       ['/document-files', this.id, 'presentation', pid] // absolute path
     );
   }
+
+  openPresentation(p: Presentation) {
+    if (p.googleSlidesPresentUrl || p.googleSlidesUrl) {
+      window.open(p.googleSlidesPresentUrl || p.googleSlidesUrl, '_blank');
+      return;
+    }
+    if (p.id) {
+      this.openViewer(p.id);
+    }
+  }
+
+  presentGoogleSlides(p: Presentation, e: Event) {
+    e.stopPropagation();
+    const url = p.googleSlidesPresentUrl || p.googleSlidesUrl;
+    if (!url) {
+      return;
+    }
+    window.open(url, '_blank');
+  }
+
+  openGoogleSlides(p: Presentation, e: Event) {
+    e.stopPropagation();
+    const url = p.googleSlidesEditUrl || p.googleSlidesUrl;
+    if (!url) {
+      return;
+    }
+    window.open(url, '_blank');
+  }
+
+  downloadPresentationPptx(p: Presentation, e: Event) {
+    e.stopPropagation();
+    if (!p.pptxDownloadURL) {
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = p.pptxDownloadURL;
+    link.download = p.pptxFileName || `${this.stripExt(p.name || 'presentation')}.pptx`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   deletePresentation(pid: string, e: Event) {
     e.stopPropagation(); // ⬅ stop card click
     if (!confirm('Delete this presentation?')) {

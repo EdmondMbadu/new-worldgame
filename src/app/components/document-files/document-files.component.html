@@ -152,12 +152,13 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
     <div
       *ngFor="let p of presentations"
-      (click)="openViewer(p.id)"
+      (click)="openPresentation(p)"
       class="relative cursor-pointer border border-gray-200 dark:border-slate-700
              rounded-lg p-4 bg-white dark:bg-slate-800 hover:shadow-md transition">
 
       <!-- delete btn -->
       <button
+        *ngIf="p.id"
         (click)="deletePresentation(p.id, $event)"
         aria-label="Delete"
         class="absolute top-2 right-2 text-red-500 hover:text-red-700
@@ -169,13 +170,45 @@
         </svg>
       </button>
 
-      <img [src]="p.thumbnail"
+      <span
+        *ngIf="p.googleSlidesUrl"
+        class="mb-3 inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200">
+        Google Slides
+      </span>
+
+      <img [src]="p.thumbnail || '../../../assets/img/world-game-presentation.jpeg'"
            class="h-32 w-full object-cover rounded mb-3" />
 
       <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ p.name }}</h3>
       <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
         {{ p.description }}
       </p>
+
+      <div
+        *ngIf="p.googleSlidesUrl || p.pptxDownloadURL"
+        class="mt-4 grid grid-cols-3 gap-2">
+        <button
+          *ngIf="p.googleSlidesPresentUrl || p.googleSlidesUrl"
+          type="button"
+          (click)="presentGoogleSlides(p, $event)"
+          class="rounded-md bg-emerald-600 px-2 py-2 text-xs font-semibold text-white hover:bg-emerald-700">
+          Present
+        </button>
+        <button
+          *ngIf="p.googleSlidesUrl"
+          type="button"
+          (click)="openGoogleSlides(p, $event)"
+          class="rounded-md border border-emerald-200 bg-white px-2 py-2 text-xs font-semibold text-emerald-700 hover:border-emerald-300 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">
+          Open
+        </button>
+        <button
+          *ngIf="p.pptxDownloadURL"
+          type="button"
+          (click)="downloadPresentationPptx(p, $event)"
+          class="rounded-md border border-blue-200 bg-white px-2 py-2 text-xs font-semibold text-blue-700 hover:border-blue-300 dark:border-blue-800 dark:bg-slate-900 dark:text-blue-200">
+          PPTX
+        </button>
+      </div>
     </div>
   </div>
 </section>
