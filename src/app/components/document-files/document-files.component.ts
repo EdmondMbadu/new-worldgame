@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { MatDialog } from '@angular/material/dialog';
@@ -40,6 +40,8 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   generatingAiPresentation = false;
   aiPresentationStatus = '';
   aiPresentationError = '';
+  activePresentation: Presentation | null = null;
+  activeSlideIndex = 0;
   private aiPresentationRequestSub?: Subscription;
   private solutionSub?: Subscription;
   private presentationsSub?: Subscription;
@@ -62,6 +64,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     this.aiPresentationRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     this.presentationsSub?.unsubscribe();
+    this.setPresentationBodyLock(false);
   }
   documentType: string = '';
   documentFileTypes = [
@@ -372,12 +375,89 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   }
 
   openPresentation(p: Presentation) {
-    if (p.googleSlidesPresentUrl || p.googleSlidesUrl) {
-      window.open(p.googleSlidesPresentUrl || p.googleSlidesUrl, '_blank');
+    this.activePresentation = p;
+    this.activeSlideIndex = 0;
+    this.setPresentationBodyLock(true);
+  }
+
+  closePresentation() {
+    this.activePresentation = null;
+    this.activeSlideIndex = 0;
+    this.setPresentationBodyLock(false);
+  }
+
+  nextPresentationSlide() {
+    if (!this.activePresentation) {
       return;
     }
-    if (p.id) {
-      this.openViewer(p.id);
+    this.activeSlideIndex = Math.min(
+      this.activeSlideIndex + 1,
+      this.presentationSlideCount(this.activePresentation) - 1
+    );
+  }
+
+  previousPresentationSlide() {
+    this.activeSlideIndex = Math.max(this.activeSlideIndex - 1, 0);
+  }
+
+  presentationSlideCount(p: Presentation | null = this.activePresentation): number {
+    return Math.max(p?.slides?.length || 0, 1);
+  }
+
+  currentPresentationSlide() {
+    const slides = this.activePresentation?.slides || [];
+    return slides[this.activeSlideIndex] || {
+      imageUrl: this.activePresentation?.thumbnail,
+      bullets: [
+        this.activePresentation?.name || 'Presentation',
+        this.activePresentation?.description || '',
+      ].filter(Boolean),
+    };
+  }
+
+  currentSlideTitle(): string {
+    const firstBullet = this.currentPresentationSlide()?.bullets?.[0];
+    return firstBullet || this.activePresentation?.name || 'Presentation';
+  }
+
+  currentSlideBullets(): string[] {
+    const bullets = this.currentPresentationSlide()?.bullets || [];
+    return bullets.slice(1).filter(Boolean);
+  }
+
+  currentSlideImage(): string {
+    return (
+      this.currentPresentationSlide()?.imageUrl ||
+      this.activePresentation?.thumbnail ||
+      '../../../assets/img/world-game-presentation.jpeg'
+    );
+  }
+
+  private setPresentationBodyLock(locked: boolean) {
+    document.body.style.overflow = locked ? 'hidden' : '';
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handlePresentationKeydown(event: KeyboardEvent) {
+    if (!this.activePresentation) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closePresentation();
+    } else if (['ArrowRight', 'PageDown', ' '].includes(event.key)) {
+      event.preventDefault();
+      this.nextPresentationSlide();
+    } else if (['ArrowLeft', 'PageUp'].includes(event.key)) {
+      event.preventDefault();
+      this.previousPresentationSlide();
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      this.activeSlideIndex = 0;
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      this.activeSlideIndex = this.presentationSlideCount() - 1;
     }
   }
 
