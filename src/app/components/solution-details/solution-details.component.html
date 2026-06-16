@@ -408,6 +408,60 @@
           </p>
         </div>
       </div>
+
+      <section
+        *ngIf="isAdminOfSolution || canLeaveSolution"
+        class="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+      >
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Workspace access
+            </p>
+            <h2 class="mt-1 text-base font-semibold text-gray-900 dark:text-white">
+              {{ isAdminOfSolution ? "Manage this solution" : "Leave this solution" }}
+            </h2>
+            <p class="mt-1 max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-300">
+              {{
+                isAdminOfSolution
+                  ? "Admins can permanently delete this solution workspace when it is no longer needed."
+                  : "Remove yourself from this solution if you no longer want it in your workspace."
+              }}
+            </p>
+          </div>
+
+          <button
+            *ngIf="isAdminOfSolution"
+            type="button"
+            (click)="openDeleteSolutionConfirm()"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/60"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12m-9 0V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7h12z" />
+            </svg>
+            <span>Delete solution</span>
+          </button>
+
+          <button
+            *ngIf="canLeaveSolution"
+            type="button"
+            (click)="openLeaveSolutionConfirm()"
+            class="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition hover:border-red-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500/50 dark:border-red-900/70 dark:bg-slate-900 dark:text-red-300 dark:hover:bg-red-950/40"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17l5-5m0 0l-5-5m5 5H9m4 7H6a2 2 0 01-2-2V7a2 2 0 012-2h7" />
+            </svg>
+            <span>Leave solution</span>
+          </button>
+        </div>
+
+        <p
+          *ngIf="workspaceAccessError"
+          class="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300"
+        >
+          {{ workspaceAccessError }}
+        </p>
+      </section>
     </div>
   </main>
 </div>
@@ -421,6 +475,118 @@
 <ng-template #modalBackdrop>
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 </ng-template>
+
+<div *ngIf="showDeleteSolutionConfirm" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+  <div
+    class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+    (click)="closeDeleteSolutionConfirm()"
+  ></div>
+  <div
+    class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+  >
+    <div class="flex items-start gap-4">
+      <div class="rounded-xl bg-red-100 p-3 text-red-600 dark:bg-red-950 dark:text-red-300">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 7h12m-9 0V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7h12z" />
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+          Delete solution?
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+          This will permanently delete
+          <span class="font-semibold text-gray-900 dark:text-white">{{ currentSolution.title || "this solution" }}</span>
+          and remove the workspace for every team member.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        (click)="closeDeleteSolutionConfirm()"
+        [disabled]="isDeletingSolution"
+        class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="submitDeleteSolution()"
+        [disabled]="isDeletingSolution"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <svg
+          *ngIf="isDeletingSolution"
+          class="h-4 w-4 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+        </svg>
+        <span>{{ isDeletingSolution ? "Deleting..." : "Delete solution" }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showLeaveSolutionConfirm" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+  <div
+    class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+    (click)="closeLeaveSolutionConfirm()"
+  ></div>
+  <div
+    class="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+  >
+    <div class="flex items-start gap-4">
+      <div class="rounded-xl bg-red-100 p-3 text-red-600 dark:bg-red-950 dark:text-red-300">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 17l5-5m0 0l-5-5m5 5H9m4 7H6a2 2 0 01-2-2V7a2 2 0 012-2h7" />
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+          Leave solution?
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+          This removes your access to
+          <span class="font-semibold text-gray-900 dark:text-white">{{ currentSolution.title || "this solution" }}</span>
+          and sends you back to your solutions list.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        (click)="closeLeaveSolutionConfirm()"
+        [disabled]="isLeavingSolution"
+        class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="submitLeaveSolution()"
+        [disabled]="isLeavingSolution"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <svg
+          *ngIf="isLeavingSolution"
+          class="h-4 w-4 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+        </svg>
+        <span>{{ isLeavingSolution ? "Leaving..." : "Leave solution" }}</span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Invite People Modal -->
 <div *ngIf="showInviteModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">

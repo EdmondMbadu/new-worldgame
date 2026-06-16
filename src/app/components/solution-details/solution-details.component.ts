@@ -56,6 +56,11 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   ) {}
 
   copied = false;
+  showDeleteSolutionConfirm = false;
+  showLeaveSolutionConfirm = false;
+  isDeletingSolution = false;
+  isLeavingSolution = false;
+  workspaceAccessError = '';
 
   async copySolutionId(id?: string) {
     if (!id) return;
@@ -785,6 +790,37 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       .filter((value) => value.length > 0);
   }
 
+  private isCurrentUserParticipant(): boolean {
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email);
+    if (!currentEmail) return false;
+    return this.solutionMemberEmails().includes(currentEmail);
+  }
+
+  private normalizeParticipantEntries(value: any): Array<{ name: string }> {
+    if (!value) return [];
+
+    const values = Array.isArray(value)
+      ? value
+      : typeof value === 'object'
+        ? Object.values(value)
+        : [value];
+    const seenEmails = new Set<string>();
+
+    return values
+      .map((entry) => {
+        const email = this.normalizeEmail(
+          (entry as any)?.name || (entry as any)?.email || entry
+        );
+        return email ? { name: email } : null;
+      })
+      .filter((entry): entry is { name: string } => !!entry)
+      .filter((entry) => {
+        if (seenEmails.has(entry.name)) return false;
+        seenEmails.add(entry.name);
+        return true;
+      });
+  }
+
   private async addParticipantEmail(email: string): Promise<boolean> {
     if (!this.data.isValidEmail(email) || this.participantExists(email)) {
       return false;
@@ -970,12 +1006,96 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   get isAdminOfSolution(): boolean {
     if (!this.currentSolution || !this.auth.currentUser) return false;
     const uid = this.auth.currentUser.uid;
+    const email = this.normalizeEmail(this.auth.currentUser.email);
     return (
-      this.currentSolution.authorAccountId === uid ||
+      (!!uid && this.currentSolution.authorAccountId === uid) ||
+      (!!email &&
+        this.normalizeEmail(this.currentSolution.authorEmail) === email) ||
       (this.currentSolution.chosenAdmins ?? []).some(
-        (a) => a.authorAccountId === uid
+        (a) =>
+          (!!uid && a.authorAccountId === uid) ||
+          (!!email && this.normalizeEmail(a.authorEmail) === email)
       )
     );
+  }
+
+  get canLeaveSolution(): boolean {
+    return !this.isAdminOfSolution && this.isCurrentUserParticipant();
+  }
+
+  openDeleteSolutionConfirm() {
+    this.workspaceAccessError = '';
+    this.showDeleteSolutionConfirm = true;
+  }
+
+  closeDeleteSolutionConfirm() {
+    if (this.isDeletingSolution) return;
+    this.showDeleteSolutionConfirm = false;
+  }
+
+  openLeaveSolutionConfirm() {
+    this.workspaceAccessError = '';
+    this.showLeaveSolutionConfirm = true;
+  }
+
+  closeLeaveSolutionConfirm() {
+    if (this.isLeavingSolution) return;
+    this.showLeaveSolutionConfirm = false;
+  }
+
+  async submitDeleteSolution() {
+    const solutionId = this.currentSolution.solutionId || this.id;
+    if (!solutionId || !this.isAdminOfSolution || this.isDeletingSolution) {
+      return;
+    }
+
+    this.isDeletingSolution = true;
+    this.workspaceAccessError = '';
+
+    try {
+      await this.solution.deleteSolution(solutionId);
+      this.showDeleteSolutionConfirm = false;
+      await this.router.navigate(['/problem-list-view']);
+    } catch (error) {
+      console.error('Error deleting solution:', error);
+      this.workspaceAccessError = 'Could not delete this solution. Please try again.';
+    } finally {
+      this.isDeletingSolution = false;
+    }
+  }
+
+  async submitLeaveSolution() {
+    const solutionId = this.currentSolution.solutionId || this.id;
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email);
+    if (!solutionId || !currentEmail || this.isLeavingSolution) {
+      return;
+    }
+
+    this.isLeavingSolution = true;
+    this.workspaceAccessError = '';
+
+    const participants = this.getParticipantsArray().filter(
+      (participant) => this.normalizeEmail(participant.name) !== currentEmail
+    );
+    const participantsHolder = this.normalizeParticipantEntries(
+      this.currentSolution.participantsHolder
+    ).filter((participant) => this.normalizeEmail(participant.name) !== currentEmail);
+
+    try {
+      await this.solution.updateSolutionFields(solutionId, {
+        participants: participants as any,
+        participantsHolder: participantsHolder as any,
+      });
+      this.currentSolution.participants = participants as any;
+      this.currentSolution.participantsHolder = participantsHolder as any;
+      this.showLeaveSolutionConfirm = false;
+      await this.router.navigate(['/problem-list-view']);
+    } catch (error) {
+      console.error('Error leaving solution:', error);
+      this.workspaceAccessError = 'Could not leave this solution. Please try again.';
+    } finally {
+      this.isLeavingSolution = false;
+    }
   }
 
   removeEvaluatorFromSolution(email: string) {
