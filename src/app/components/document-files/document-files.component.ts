@@ -2,6 +2,7 @@ import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { MatDialog } from '@angular/material/dialog';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { Presentation } from 'src/app/models/presentation';
@@ -28,7 +29,8 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     private router: Router,
     private fns: AngularFireFunctions,
     private afs: AngularFirestore,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private sanitizer: DomSanitizer
   ) {}
   currentSolution: Solution = {};
   id: any;
@@ -41,6 +43,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   aiPresentationStatus = '';
   aiPresentationError = '';
   activePresentation: Presentation | null = null;
+  activePresentationEmbedUrl: SafeResourceUrl | null = null;
   activeSlideIndex = 0;
   private aiPresentationRequestSub?: Subscription;
   private solutionSub?: Subscription;
@@ -376,12 +379,14 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
   openPresentation(p: Presentation) {
     this.activePresentation = p;
+    this.activePresentationEmbedUrl = this.buildPresentationEmbedUrl(p);
     this.activeSlideIndex = 0;
     this.setPresentationBodyLock(true);
   }
 
   closePresentation() {
     this.activePresentation = null;
+    this.activePresentationEmbedUrl = null;
     this.activeSlideIndex = 0;
     this.setPresentationBodyLock(false);
   }
@@ -407,22 +412,35 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   currentPresentationSlide() {
     const slides = this.activePresentation?.slides || [];
     return slides[this.activeSlideIndex] || {
+      title: this.activePresentation?.name || 'Presentation',
+      subtitle: this.activePresentation?.description || '',
       imageUrl: this.activePresentation?.thumbnail,
-      bullets: [
-        this.activePresentation?.name || 'Presentation',
-        this.activePresentation?.description || '',
-      ].filter(Boolean),
+      bullets: [],
     };
   }
 
   currentSlideTitle(): string {
-    const firstBullet = this.currentPresentationSlide()?.bullets?.[0];
-    return firstBullet || this.activePresentation?.name || 'Presentation';
+    const slide = this.currentPresentationSlide();
+    return slide.title || slide.bullets?.[0] || this.activePresentation?.name || 'Presentation';
+  }
+
+  currentSlideSubtitle(): string {
+    const slide = this.currentPresentationSlide();
+    return slide.subtitle || slide.visualCue || '';
+  }
+
+  currentSlideKicker(): string {
+    return this.currentPresentationSlide()?.kicker || 'Presentation';
+  }
+
+  currentSlideLayout(): string {
+    return this.currentPresentationSlide()?.layout || 'split';
   }
 
   currentSlideBullets(): string[] {
-    const bullets = this.currentPresentationSlide()?.bullets || [];
-    return bullets.slice(1).filter(Boolean);
+    const slide = this.currentPresentationSlide();
+    const bullets = slide?.bullets || [];
+    return slide.title ? bullets.filter(Boolean) : bullets.slice(1).filter(Boolean);
   }
 
   currentSlideImage(): string {
@@ -431,6 +449,29 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       this.activePresentation?.thumbnail ||
       '../../../assets/img/world-game-presentation.jpeg'
     );
+  }
+
+  presentationEmbedUrl(): SafeResourceUrl | null {
+    return this.activePresentationEmbedUrl;
+  }
+
+  private buildPresentationEmbedUrl(p: Presentation): SafeResourceUrl | null {
+    if (!p) {
+      return null;
+    }
+
+    const googleSlidesId =
+      p.googleSlidesId ||
+      p.googleSlidesUrl?.match(/\/presentation\/d\/([^/]+)/)?.[1] ||
+      p.googleSlidesPresentUrl?.match(/\/presentation\/d\/([^/]+)/)?.[1];
+
+    if (googleSlidesId) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://docs.google.com/presentation/d/${googleSlidesId}/embed?start=false&loop=false&delayms=3000`
+      );
+    }
+
+    return null;
   }
 
   private setPresentationBodyLock(locked: boolean) {
@@ -446,6 +487,8 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     if (event.key === 'Escape') {
       event.preventDefault();
       this.closePresentation();
+    } else if (this.presentationEmbedUrl()) {
+      return;
     } else if (['ArrowRight', 'PageDown', ' '].includes(event.key)) {
       event.preventDefault();
       this.nextPresentationSlide();

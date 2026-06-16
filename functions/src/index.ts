@@ -6575,6 +6575,16 @@ type GeneratedDeckPlan = {
   slides?: GeneratedDeckSlide[];
 };
 
+type PresentationViewerSlide = {
+  title: string;
+  subtitle?: string;
+  kicker?: string;
+  layout?: string;
+  imageUrl?: string;
+  bullets: string[];
+  visualCue?: string;
+};
+
 const PRESENTATION_PPTX_MIME =
   'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 const GOOGLE_SLIDES_MIME = 'application/vnd.google-apps.presentation';
@@ -7033,6 +7043,69 @@ async function generatePresentationVisuals(
   }
 
   return generatedUrls;
+}
+
+function buildPresentationViewerSlides(
+  plan: GeneratedDeckPlan,
+  imageUrls: string[],
+  sourceTitle: string
+): PresentationViewerSlide[] {
+  const plannedSlides = (plan.slides || []).slice(0, 12);
+  const imageFor = (index: number): string | undefined =>
+    imageUrls.length ? imageUrls[index % imageUrls.length] : undefined;
+
+  const slides: PresentationViewerSlide[] = [
+    {
+      title: cleanPresentationText(plan.title || sourceTitle || 'Presentation', 120),
+      subtitle: cleanPresentationText(plan.subtitle || 'Presentation draft', 180),
+      kicker: 'AI-GENERATED PRESENTATION',
+      layout: 'cover',
+      imageUrl: imageFor(0),
+      bullets: [
+        cleanPresentationText(plan.narrative || plan.subtitle || 'A focused presentation built from the solution content.', 220),
+      ].filter(Boolean),
+    },
+    {
+      title: 'Discussion Flow',
+      subtitle: cleanPresentationText(plan.narrative || '', 180),
+      kicker: 'Agenda',
+      layout: 'agenda',
+      imageUrl: imageFor(1),
+      bullets: plannedSlides.slice(0, 6).map((slide, index) =>
+        `${String(index + 1).padStart(2, '0')} ${cleanPresentationText(slide.title || 'Topic', 90)}`
+      ),
+    },
+  ];
+
+  plannedSlides.forEach((slide, index) => {
+    slides.push({
+      title: cleanPresentationText(slide.title || 'Key point', 100),
+      subtitle: cleanPresentationText(slide.notes || slide.visualCue || '', 220),
+      kicker: cleanPresentationText(slide.kicker || '', 44),
+      layout: slide.layout || 'signal',
+      imageUrl: imageFor(index + 2),
+      bullets: (slide.bullets || [])
+        .map((bullet) => cleanPresentationText(bullet, 140))
+        .filter(Boolean)
+        .slice(0, 5),
+      visualCue: cleanPresentationText(slide.visualCue || '', 180),
+    });
+  });
+
+  slides.push({
+    title: 'Next move',
+    subtitle: 'Turn the presentation into decisions, commitments, and measurable work.',
+    kicker: 'Close',
+    layout: 'closing',
+    imageUrl: imageFor(plannedSlides.length + 2),
+    bullets: [
+      'Choose the first validation audience',
+      'Confirm the smallest credible pilot',
+      'Assign owners and timing',
+    ],
+  });
+
+  return slides;
 }
 
 type GoogleSlidesOutput = {
@@ -8437,6 +8510,11 @@ export const onPresentationRequest = functions
         hour12: true,
       });
       const thumbnail = presentationImageUrls[0] || PRESENTATION_FALLBACK_IMAGE;
+      const viewerSlides = buildPresentationViewerSlides(
+        plan,
+        presentationImageUrls,
+        title
+      );
 
       const documentEntry = {
         downloadURL: saved.downloadUrl,
@@ -8478,12 +8556,7 @@ export const onPresentationRequest = functions
           pptxDownloadURL: saved.downloadUrl,
           pptxFileName: saved.fileName,
           primaryFormat: slidesDeck ? GOOGLE_SLIDES_MIME : PRESENTATION_PPTX_MIME,
-          slides: (plan.slides || []).map((slide, index) => ({
-            ...(presentationImageUrls.length
-              ? { imageUrl: presentationImageUrls[index % presentationImageUrls.length] }
-              : {}),
-            bullets: [slide.title || 'Slide', ...(slide.bullets || [])].slice(0, 6),
-          })),
+          slides: viewerSlides,
         },
         { merge: true }
       );
@@ -8510,7 +8583,7 @@ export const onPresentationRequest = functions
                 googleSlidesError,
               }),
           primaryFormat: slidesDeck ? GOOGLE_SLIDES_MIME : PRESENTATION_PPTX_MIME,
-          slideCount: (plan.slides || []).length + 3,
+          slideCount: viewerSlides.length,
           document: documentEntry,
           presentationId: requestId,
         },

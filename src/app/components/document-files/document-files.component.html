@@ -268,6 +268,7 @@
 
     <main class="flex min-h-0 flex-1 items-center justify-center px-4 py-4 sm:px-8 sm:py-6">
       <button
+        *ngIf="!presentationEmbedUrl()"
         type="button"
         (click)="previousPresentationSlide()"
         [disabled]="activeSlideIndex === 0"
@@ -280,39 +281,157 @@
 
       <section class="relative w-full max-w-6xl">
         <div class="aspect-video overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-2xl shadow-black/50">
-          <div class="grid h-full grid-cols-1 md:grid-cols-[1.15fr_0.85fr]">
-            <div class="relative min-h-0 bg-slate-800">
-              <img
-                [src]="currentSlideImage()"
-                alt=""
-                class="h-full w-full object-cover" />
-              <div class="absolute inset-0 bg-gradient-to-r from-slate-950/30 via-transparent to-transparent"></div>
+          <iframe
+            *ngIf="presentationEmbedUrl() as embedUrl; else reconstructedSlideView"
+            [src]="embedUrl"
+            title="Presentation"
+            class="h-full w-full border-0 bg-white"
+            allowfullscreen>
+          </iframe>
+
+          <ng-template #reconstructedSlideView>
+          <div class="h-full bg-white text-slate-950" [ngSwitch]="currentSlideLayout()">
+            <div *ngSwitchCase="'cover'" class="relative h-full overflow-hidden">
+              <img [src]="currentSlideImage()" alt="" class="absolute inset-0 h-full w-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-slate-950/10"></div>
+              <div class="relative flex h-full max-w-[62%] flex-col justify-center p-10 text-white">
+                <p class="mb-5 text-xs font-bold uppercase tracking-[0.22em] text-teal-200">{{ currentSlideKicker() }}</p>
+                <h2 class="text-5xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+                <p *ngIf="currentSlideSubtitle()" class="mt-5 text-lg font-medium leading-relaxed text-slate-200">{{ currentSlideSubtitle() }}</p>
+                <div class="mt-8 h-1.5 w-36 rounded-full bg-teal-400"></div>
+              </div>
             </div>
 
-            <div class="flex min-h-0 flex-col justify-center bg-white p-6 text-slate-950 sm:p-10">
-              <p class="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">
-                {{ activePresentation.generatedByAi ? 'AI Presentation' : 'Presentation' }}
-              </p>
-              <h2 class="text-2xl font-bold leading-tight text-slate-950 sm:text-4xl">
-                {{ currentSlideTitle() }}
-              </h2>
-              <div class="mt-7 space-y-4">
-                <div
-                  *ngFor="let bullet of currentSlideBullets(); let i = index"
-                  class="flex gap-3 rounded-md border border-slate-200 bg-slate-50 p-3">
-                  <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-600 text-xs font-bold text-white">
-                    {{ i + 1 }}
-                  </span>
-                  <p class="text-sm font-medium leading-relaxed text-slate-700 sm:text-base">
-                    {{ bullet }}
-                  </p>
+            <div *ngSwitchCase="'hero'" class="relative h-full overflow-hidden">
+              <img [src]="currentSlideImage()" alt="" class="absolute inset-0 h-full w-full object-cover" />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+              <div class="relative flex h-full flex-col justify-end p-10 text-white">
+                <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-teal-200">{{ currentSlideKicker() }}</p>
+                <h2 class="max-w-4xl text-4xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+                <p *ngIf="currentSlideSubtitle()" class="mt-4 max-w-3xl text-base font-medium text-slate-200">{{ currentSlideSubtitle() }}</p>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'agenda'" class="flex h-full flex-col justify-center bg-slate-50 p-10">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-blue-700">{{ currentSlideKicker() }}</p>
+              <h2 class="text-4xl font-bold text-slate-950">{{ currentSlideTitle() }}</h2>
+              <div class="mt-8 grid grid-cols-2 gap-4">
+                <div *ngFor="let bullet of currentSlideBullets(); let i = index"
+                     class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                  <p class="text-xs font-bold text-teal-700">{{ (i + 1) | number:'2.0' }}</p>
+                  <p class="mt-2 text-lg font-bold leading-tight text-slate-900">{{ bullet }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'dashboard'" class="flex h-full flex-col justify-center bg-slate-50 p-10">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-teal-700">{{ currentSlideKicker() }}</p>
+              <h2 class="max-w-4xl text-4xl font-bold leading-tight text-slate-950">{{ currentSlideTitle() }}</h2>
+              <p *ngIf="currentSlideSubtitle()" class="mt-3 max-w-3xl text-sm font-medium text-slate-500">{{ currentSlideSubtitle() }}</p>
+              <div class="mt-8 grid grid-cols-2 gap-5">
+                <div *ngFor="let bullet of currentSlideBullets(); let i = index"
+                     class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
+                  <div class="h-2" [ngClass]="i % 4 === 0 ? 'bg-teal-600' : i % 4 === 1 ? 'bg-blue-600' : i % 4 === 2 ? 'bg-amber-500' : 'bg-red-500'"></div>
+                  <div class="p-5">
+                    <p class="text-xs font-bold text-slate-400">SIGNAL {{ i + 1 }}</p>
+                    <p class="mt-2 text-xl font-bold leading-tight text-slate-950">{{ bullet }}</p>
+                    <div class="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div class="h-full w-3/4 rounded-full" [ngClass]="i % 4 === 0 ? 'bg-teal-600' : i % 4 === 1 ? 'bg-blue-600' : i % 4 === 2 ? 'bg-amber-500' : 'bg-red-500'"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'comparison'" class="flex h-full flex-col justify-center bg-white p-10">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-teal-700">{{ currentSlideKicker() }}</p>
+              <h2 class="max-w-4xl text-4xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+              <div class="mt-8 grid grid-cols-2 gap-6">
+                <div class="rounded-lg border border-slate-300 bg-slate-50 p-6">
+                  <p class="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Current reality</p>
+                  <div class="mt-5 space-y-3">
+                    <p *ngFor="let bullet of currentSlideBullets(); let i = index" [hidden]="i % 2 === 1" class="text-lg font-semibold leading-snug text-slate-800">{{ bullet }}</p>
+                  </div>
+                </div>
+                <div class="rounded-lg border border-teal-200 bg-teal-50 p-6 shadow-lg shadow-teal-100">
+                  <p class="text-xs font-bold uppercase tracking-[0.14em] text-teal-700">Better path</p>
+                  <div class="mt-5 space-y-3">
+                    <p *ngFor="let bullet of currentSlideBullets(); let i = index" [hidden]="i % 2 === 0" class="text-lg font-semibold leading-snug text-slate-900">{{ bullet }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'roadmap'" class="flex h-full flex-col justify-center bg-slate-50 p-10">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-blue-700">{{ currentSlideKicker() }}</p>
+              <h2 class="max-w-4xl text-4xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+              <div class="relative mt-14 grid grid-cols-4 gap-5">
+                <div class="absolute left-[8%] right-[8%] top-6 h-0.5 bg-slate-300"></div>
+                <div *ngFor="let bullet of currentSlideBullets(); let i = index" class="relative">
+                  <div class="mx-auto grid h-12 w-12 place-items-center rounded-full text-sm font-bold text-white shadow-lg" [ngClass]="i % 2 === 0 ? 'bg-teal-600 shadow-teal-200' : 'bg-blue-600 shadow-blue-200'">{{ i + 1 }}</div>
+                  <div class="mt-6 rounded-lg border border-slate-200 bg-white p-4 text-center shadow-sm">
+                    <p class="text-base font-bold leading-tight text-slate-900">{{ bullet }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'quote'" class="flex h-full items-center justify-center bg-slate-950 p-12 text-white">
+              <div class="max-w-5xl text-center">
+                <p class="mb-6 text-xs font-bold uppercase tracking-[0.22em] text-teal-300">{{ currentSlideKicker() }}</p>
+                <h2 class="text-5xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+                <p *ngIf="currentSlideBullets()[0]" class="mt-8 text-2xl font-semibold leading-relaxed text-slate-200">“{{ currentSlideBullets()[0] }}”</p>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'steps'" class="flex h-full flex-col justify-center bg-white p-10">
+              <p class="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-teal-700">{{ currentSlideKicker() }}</p>
+              <h2 class="max-w-4xl text-4xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+              <div class="mt-9 grid grid-cols-4 gap-5">
+                <div *ngFor="let bullet of currentSlideBullets(); let i = index"
+                     class="rounded-lg border border-slate-200 bg-slate-50 p-5 shadow-sm">
+                  <p class="text-sm font-bold text-teal-700">{{ (i + 1) | number:'2.0' }}</p>
+                  <p class="mt-8 text-lg font-bold leading-tight text-slate-900">{{ bullet }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'closing'" class="flex h-full items-center bg-slate-950 p-12 text-white">
+              <div class="max-w-4xl">
+                <p class="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-teal-300">{{ currentSlideKicker() }}</p>
+                <h2 class="text-5xl font-bold leading-tight">{{ currentSlideTitle() }}</h2>
+                <p *ngIf="currentSlideSubtitle()" class="mt-5 text-lg text-slate-300">{{ currentSlideSubtitle() }}</p>
+                <div class="mt-10 space-y-4">
+                  <div *ngFor="let bullet of currentSlideBullets(); let i = index" class="rounded-lg bg-white/10 px-5 py-4 text-lg font-semibold">{{ bullet }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngSwitchDefault class="grid h-full grid-cols-1 md:grid-cols-[1.15fr_0.85fr]">
+              <div class="relative min-h-0 bg-slate-800">
+                <img [src]="currentSlideImage()" alt="" class="h-full w-full object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-950/30 via-transparent to-transparent"></div>
+              </div>
+
+              <div class="flex min-h-0 flex-col justify-center bg-white p-6 text-slate-950 sm:p-10">
+                <p class="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-teal-700">{{ currentSlideKicker() }}</p>
+                <h2 class="text-2xl font-bold leading-tight text-slate-950 sm:text-4xl">{{ currentSlideTitle() }}</h2>
+                <p *ngIf="currentSlideSubtitle()" class="mt-4 text-sm font-medium leading-relaxed text-slate-500 sm:text-base">{{ currentSlideSubtitle() }}</p>
+                <div class="mt-7 space-y-4">
+                  <div *ngFor="let bullet of currentSlideBullets(); let i = index" class="flex gap-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                    <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-600 text-xs font-bold text-white">{{ i + 1 }}</span>
+                    <p class="text-sm font-medium leading-relaxed text-slate-700 sm:text-base">{{ bullet }}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          </ng-template>
         </div>
 
-        <div class="mt-4 flex items-center justify-between gap-3">
+        <div
+          *ngIf="!presentationEmbedUrl()"
+          class="mt-4 flex items-center justify-between gap-3">
           <button
             type="button"
             (click)="previousPresentationSlide()"
@@ -339,6 +458,7 @@
       </section>
 
       <button
+        *ngIf="!presentationEmbedUrl()"
         type="button"
         (click)="nextPresentationSlide()"
         [disabled]="activeSlideIndex >= presentationSlideCount() - 1"

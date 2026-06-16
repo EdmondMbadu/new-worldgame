@@ -1,6 +1,11 @@
 export interface Slide {
+  title?: string;
+  subtitle?: string;
+  kicker?: string;
+  layout?: string;
   imageUrl?: string;
   bullets?: string[];
+  visualCue?: string;
 }
 export interface Presentation {
   id?: string;
