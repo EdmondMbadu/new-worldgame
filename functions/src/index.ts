@@ -6564,7 +6564,9 @@ type GeneratedDeckSlide = {
   bullets?: string[];
   notes?: string;
   visualCue?: string;
+  imageSearchQuery?: string;
   imagePrompt?: string;
+  imageUrl?: string;
 };
 
 type GeneratedDeckPlan = {
@@ -6596,15 +6598,19 @@ const PRESENTATION_TEXT_MODELS = [
   'gemini-2.5-flash',
 ];
 const PRESENTATION_IMAGE_MODELS = [
-  'gemini-3.1-flash-image',
-  'gemini-3-pro-image',
-  'gemini-2.5-flash-image',
+  'gemini-2.5-flash-image-preview',
+  'gemini-2.0-flash-preview-image-generation',
 ];
+const PRESENTATION_IMAGEN_MODELS = [
+  'imagen-3.0-generate-002',
+  'imagen-4.0-generate-001',
+];
+const PRESENTATION_MAX_GENERATED_IMAGES = 8;
 const PRESENTATION_DRIVE_FOLDER_ID = '1Rib4RlYsv-PsL1QOhlAoht-fw0tUHLEy';
 const PRESENTATION_SERVICE_ACCOUNT_EMAIL =
   'new-worldgame@appspot.gserviceaccount.com';
 const PRESENTATION_VISUAL_STYLE =
-  'premium boardroom presentation visual, cinematic but realistic, clean composition, generous negative space for editable slide text, navy and teal accents, modern public-impact aesthetic, no words, no logos, no watermark';
+  'premium editorial presentation image, authentic and dignified local problem-solving, cinematic but realistic, strong human-scale context, clean 16:9 composition, generous negative space for editable slide text, deep teal and warm amber accents, paper-white and near-black visual system, no words, no logos, no watermark, no poverty-porn stereotypes';
 
 function cleanPresentationText(value: unknown, max = 6000): string {
   const text = String(value || '')
@@ -6805,23 +6811,32 @@ async function collectPresentationSourceText(solution: any): Promise<{
 }
 
 function buildDeckPlanPrompt(sourceText: string, title: string): string {
-  return `You are a world-class presentation strategist, McKinsey-quality narrative architect, and elite Google Slides art director.
+  return `You are a senior presentation designer, narrative strategist, and elite Google Slides / PowerPoint art director. Produce investor- and conference-grade decks: editorial, image-forward, visually disciplined, and stronger than default AI slide templates.
 
-Create a boardroom-ready, visually powerful presentation plan from the source material. The output will be rendered into Google Slides and PowerPoint, so every slide must be specific, structured, visual, and presentation-native.
+Create a presentation plan from the source material. The plan will be rendered into editable Google Slides and an exported PowerPoint, so every slide must have a precise visual job, tight copy, and concrete image direction.
 
-Design direction:
-- Think like a premium operating dashboard: crisp hierarchy, confident navy text, quiet gray structure, disciplined white space, and selective green/yellow/red status signals.
-- Turn metrics into scorecards, rankings, progress bars, milestone ladders, and decision tables whenever the source supports it.
-- Preserve the user's language and locale from the source material; do not translate names, labels, currencies, or dates unless the source asks for it.
-- Make visuals legible first, beautiful second: every slide should be easy to scan in five seconds.
-- Use premium presentation craft: strong cover, editorial section rhythm, cinematic image moments, precise KPI cards, clean diagrams, and a closing ask.
-- Avoid primitive bullet slides. Every slide must have a visual job: orient, prove, compare, prioritize, sequence, quantify, de-risk, or ask.
+Core philosophy:
+- One idea per slide. If a slide has two ideas, split it.
+- The audience should understand the headline in 3 seconds and the slide in 10 seconds.
+- Show, do not list. Replace bullet walls with a stat hero, comparison, diagram, flow, bento grid, or one strong image with a caption.
+- Every deck must follow a story arc: Tension -> Insight -> Solution -> Proof -> Ask.
+- White space is a feature.
 
-Visual generation:
-- You may specify generated images where they would improve comprehension or emotional weight.
-- imagePrompt must describe a clean 16:9 visual with no embedded text, no logos, no UI screenshots, no watermarks, and no real people's faces unless explicitly in the source.
-- Prefer visuals that can sit behind or beside editable slide text: editorial photographs, optimistic realistic scenes, abstract system maps, civic/operational environments, product-neutral conceptual images, or cinematic illustrations.
-- Use existing visuals only when the source clearly provides them; otherwise create imagePrompt directions where useful.
+Design system:
+- Use a consistent premium system across the deck: deep teal primary, warm amber accent used sparingly, near-black ink, paper-white background, restrained slate structure.
+- Use confident headline hierarchy, short body copy, and generous margins.
+- Preserve the user's language, locale, names, dates, and currencies from the source. Do not translate unless the source asks for it.
+- Turn metrics into scorecards, progress bars, rankings, milestone ladders, and decision tables whenever the source supports it.
+- Avoid primitive bullet slides. Every slide must orient, prove, compare, prioritize, sequence, quantify, de-risk, or ask.
+
+Image direction:
+- This deck must generate new images where useful. Existing source images are allowed, but do not rely on them as the only visuals.
+- Include imagePrompt on 7 to 9 slides in a 10-12 slide deck, especially cover/hook, stakes, local context, solution, how-it-works, proof, impact, and close.
+- Leave imagePrompt empty only on dense KPI, table, or pure diagram slides where generated photography would distract.
+- For every imagePrompt, describe a clean 16:9 image with subject, local setting, lighting, mood, composition, and palette.
+- Images must be purposeful, not decorative. Prefer authentic, dignified, human-scale local problem-solving over generic business stock.
+- Never include embedded text, logos, UI screenshots, watermarks, identifiable real people's faces, stereotypes, or poverty-porn imagery.
+- Generated visuals should have negative space for editable slide text and a consistent treatment across the deck.
 
 Return ONLY valid JSON. No markdown fences. No commentary.
 
@@ -6839,21 +6854,24 @@ JSON shape:
       "bullets": ["3 to 5 tight bullets, each under 13 words"],
       "notes": "speaker notes in 1-3 sentences",
       "visualCue": "short visual direction for shapes, diagrams, scorecards, charts, or image use",
-      "imagePrompt": "optional 16:9 generated image prompt, no text in image"
+      "imageSearchQuery": "optional 4-7 word search phrase for a stock/reference image",
+      "imagePrompt": "16:9 generated image prompt where useful, no text in image"
     }
   ]
 }
 
 Rules:
-- Create 9 to 12 slides.
+- Create 10 to 12 slides.
 - Use these layout values where appropriate: hero, signal, dashboard, comparison, roadmap, image, split, quote, steps, closing.
+- Use this arc unless the source clearly demands another: hook, stakes, insight, solution, how it works, operating model, proof, impact, feasibility / measurement, risks, ask, close.
 - Make the deck beautiful but practical: cinematic title, agenda, evidence, solution, operating model, implementation path, measurable impact, risks, and ask.
 - Use concrete content from the source.
 - Avoid hype, vague slogans, generic sustainability language, and long paragraphs.
 - Every bullet must be crisp, concrete, and decision-oriented.
 - Speaker notes should tell the presenter what to emphasize, not repeat bullets.
-- Include imagePrompt on 3 to 5 slides where generated visuals would help; leave imagePrompt empty on dense KPI/table slides.
+- Include imagePrompt on most narrative slides. A deck with zero generated image prompts is invalid.
 - Do not include citations unless the source material explicitly contains them.
+- If the topic is SDG or local-problem oriented, name relevant SDG goals or sub-targets only when supported by the source. Do not slap on SDGs generically.
 
 Deck title fallback: ${title}
 
@@ -6913,7 +6931,9 @@ async function generatePresentationDeckPlan(
         : [],
       notes: cleanPresentationText(slide.notes || '', 500),
       visualCue: cleanPresentationText(slide.visualCue || '', 140),
+      imageSearchQuery: cleanPresentationText(slide.imageSearchQuery || '', 120),
       imagePrompt: cleanPresentationText(slide.imagePrompt || '', 500),
+      imageUrl: cleanPresentationText(slide.imageUrl || '', 800),
     }))
     .filter((slide) => slide.title || slide.bullets.length);
 
@@ -6962,22 +6982,60 @@ async function generatePresentationVisuals(
   solutionId: string,
   requestId: string
 ): Promise<string[]> {
-  const prompts = uniquePresentationStrings(
-    (plan.slides || [])
-      .map((slide) => cleanPresentationText(slide.imagePrompt, 520))
-      .filter(Boolean)
-  ).slice(0, 4);
+  const promptEntries = (plan.slides || [])
+    .map((slide, slideIndex) => ({
+      slide,
+      slideIndex,
+      prompt: cleanPresentationText(slide.imagePrompt, 620),
+    }))
+    .filter((entry) => entry.prompt)
+    .slice(0, PRESENTATION_MAX_GENERATED_IMAGES);
 
-  if (!prompts.length) return [];
+  if (!promptEntries.length) return [];
 
   const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
   const generatedUrls: string[] = [];
+  const usedPrompts = new Set<string>();
 
-  for (const [index, prompt] of prompts.entries()) {
-    const fullPrompt = `${prompt}. ${PRESENTATION_VISUAL_STYLE}.`;
+  for (const [imageIndex, entry] of promptEntries.entries()) {
+    const normalizedPrompt = entry.prompt.toLowerCase();
+    if (usedPrompts.has(normalizedPrompt)) continue;
+    usedPrompts.add(normalizedPrompt);
+
+    const fullPrompt = [
+      entry.prompt,
+      PRESENTATION_VISUAL_STYLE,
+      'Shot for a premium editable presentation slide; leave clean negative space for headline and cards.',
+      'No typography, captions, numbers, charts, interface elements, logos, or watermark inside the image.',
+    ].join('. ');
     let imageBase64 = '';
 
+    for (const modelName of PRESENTATION_IMAGEN_MODELS) {
+      try {
+        const imageResult = await ai.models.generateImages({
+          model: modelName,
+          prompt: fullPrompt,
+          config: {
+            numberOfImages: 1,
+            aspectRatio: '16:9',
+            includeRaiReason: true,
+          },
+        } as any);
+        imageBase64 = imageResult.generatedImages?.[0]?.image?.imageBytes || '';
+        if (imageBase64) {
+          console.log(`Presentation image generated with ${modelName}`);
+          break;
+        }
+      } catch (error: any) {
+        console.warn(
+          `Presentation Imagen model ${modelName} failed:`,
+          String(error?.message || error).slice(0, 180)
+        );
+      }
+    }
+
     for (const modelName of PRESENTATION_IMAGE_MODELS) {
+      if (imageBase64) break;
       try {
         const response = await ai.models.generateContent({
           model: modelName,
@@ -7006,37 +7064,18 @@ async function generatePresentationVisuals(
       }
     }
 
-    if (!imageBase64) {
-      try {
-        const imageResult = await ai.models.generateImages({
-          model: 'imagen-4.0-generate-001',
-          prompt: fullPrompt,
-          config: {
-            numberOfImages: 1,
-            aspectRatio: '16:9',
-          },
-        } as any);
-        imageBase64 = imageResult.generatedImages?.[0]?.image?.imageBytes || '';
-        if (imageBase64) {
-          console.log('Presentation image generated with Imagen fallback');
-        }
-      } catch (error: any) {
-        console.warn('Presentation Imagen fallback failed:', String(error?.message || error).slice(0, 180));
-      }
-    }
-
     if (!imageBase64) continue;
 
     try {
-      generatedUrls.push(
-        await uploadPresentationGeneratedImage(
-          uid,
-          solutionId,
-          requestId,
-          index,
-          imageBase64
-        )
+      const url = await uploadPresentationGeneratedImage(
+        uid,
+        solutionId,
+        requestId,
+        imageIndex,
+        imageBase64
       );
+      entry.slide.imageUrl = url;
+      generatedUrls.push(url);
     } catch (error: any) {
       console.warn('Could not upload generated presentation image:', error?.message || error);
     }
@@ -7083,7 +7122,7 @@ function buildPresentationViewerSlides(
       subtitle: cleanPresentationText(slide.notes || slide.visualCue || '', 220),
       kicker: cleanPresentationText(slide.kicker || '', 44),
       layout: slide.layout || 'signal',
-      imageUrl: imageFor(index + 2),
+      imageUrl: slide.imageUrl || imageFor(index + 2),
       bullets: (slide.bullets || [])
         .map((bullet) => cleanPresentationText(bullet, 140))
         .filter(Boolean)
@@ -7353,7 +7392,7 @@ async function buildPresentationImageUrlPool(imageUrls: string[]): Promise<strin
   const candidateUrls = uniquePresentationStrings([
     ...imageUrls,
     PRESENTATION_FALLBACK_IMAGE,
-  ]).slice(0, 8);
+  ]).slice(0, PRESENTATION_MAX_GENERATED_IMAGES + 4);
   for (const url of candidateUrls) {
     try {
       const response = await fetch(url);
@@ -7367,11 +7406,15 @@ async function buildPresentationImageUrlPool(imageUrls: string[]): Promise<strin
       console.warn('Could not validate presentation image URL:', (error as Error).message);
     }
   }
-  return uniquePresentationStrings(validUrls).slice(0, 4);
+  return uniquePresentationStrings(validUrls).slice(0, PRESENTATION_MAX_GENERATED_IMAGES + 2);
 }
 
-async function buildPowerPointImagePool(imageUrls: string[]): Promise<string[]> {
+async function buildPowerPointImageAssets(imageUrls: string[]): Promise<{
+  dataByUrl: Map<string, string>;
+  dataUris: string[];
+}> {
   const validUrls = await buildPresentationImageUrlPool(imageUrls);
+  const dataByUrl = new Map<string, string>();
   const dataUris: string[] = [];
 
   for (const url of validUrls) {
@@ -7381,13 +7424,18 @@ async function buildPowerPointImagePool(imageUrls: string[]): Promise<string[]> 
       const contentType = (response.headers.get('content-type') || '').toLowerCase();
       if (!['image/png', 'image/jpeg', 'image/jpg'].includes(contentType)) continue;
       const buffer = Buffer.from(await response.arrayBuffer());
-      dataUris.push(`data:${contentType};base64,${buffer.toString('base64')}`);
+      const dataUri = `data:${contentType};base64,${buffer.toString('base64')}`;
+      dataByUrl.set(url, dataUri);
+      dataUris.push(dataUri);
     } catch (error) {
       console.warn('Could not prepare presentation image for PPTX:', (error as Error).message);
     }
   }
 
-  return dataUris.slice(0, 4);
+  return {
+    dataByUrl,
+    dataUris: dataUris.slice(0, PRESENTATION_MAX_GENERATED_IMAGES + 2),
+  };
 }
 
 function pptxText(value: unknown, max = 500): string {
@@ -7547,7 +7595,11 @@ async function createPowerPointDeck(
 
   const slides = (plan.slides || []).slice(0, 12);
   const totalSlides = slides.length + 3;
-  const images = await buildPowerPointImagePool(imageUrls);
+  const imageAssets = await buildPowerPointImageAssets(imageUrls);
+  const images = imageAssets.dataUris;
+  const imageForDeckSlide = (deckSlide: GeneratedDeckSlide, index: number): string | undefined =>
+    (deckSlide.imageUrl ? imageAssets.dataByUrl.get(deckSlide.imageUrl) : undefined) ||
+    (images.length ? images[index % images.length] : undefined);
   let slideNumber = 1;
 
   const cover = pptx.addSlide();
@@ -7716,7 +7768,7 @@ async function createPowerPointDeck(
 
     if (layout === 'hero') {
       addPptxGlow(slide, 0.72, 1.62, 11.45, 4.65, index % 2 === 0 ? '99F6E4' : '93C5FD');
-      addPptxImageOrPanel(slide, images.length ? images[index % images.length] : undefined, 0.95, 1.82, 11.0, 4.18);
+      addPptxImageOrPanel(slide, imageForDeckSlide(deckSlide, index), 0.95, 1.82, 11.0, 4.18);
       slide.addShape('roundRect', {
         x: 1.28,
         y: 4.72,
@@ -7863,7 +7915,7 @@ async function createPowerPointDeck(
     } else if (layout === 'image' || layout === 'split') {
       addPptxBullets(slide, deckSlide.bullets || [], 0.95, 2.25, 5.4, 2.7);
       addPptxGlow(slide, 7.28, 1.48, 4.7, 4.7, '93C5FD');
-      addPptxImageOrPanel(slide, images.length ? images[index % images.length] : undefined, 7.5, 1.68, 4.26, 4.26);
+      addPptxImageOrPanel(slide, imageForDeckSlide(deckSlide, index), 7.5, 1.68, 4.26, 4.26);
     } else if (layout === 'steps') {
       (deckSlide.bullets || []).slice(0, 4).forEach((bullet, bulletIndex) => {
         const x = 0.9 + bulletIndex * 2.9;
@@ -8105,7 +8157,7 @@ function buildGoogleSlidesRequests(
   slides.forEach((deckSlide, index) => {
     const slideId = `${safePrefix}_slide_${index}`;
     const slidePrefix = `${safePrefix}_s${index}`;
-    const imageUrl = imageUrls.length ? imageUrls[index % imageUrls.length] : undefined;
+    const imageUrl = deckSlide.imageUrl || (imageUrls.length ? imageUrls[index % imageUrls.length] : undefined);
     const layout = deckSlide.layout || 'signal';
     requests.push({ createSlide: { objectId: slideId, slideLayoutReference: { predefinedLayout: 'BLANK' } } });
     requests.push(setPageBackground(slideId, index % 2 === 0 ? 'FFFFFF' : 'F8FAFC'));
