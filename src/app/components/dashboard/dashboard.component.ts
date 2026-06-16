@@ -56,6 +56,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   savingProfile = false;
   profileSaved = false;
   profileMessage = '';
+  showDeleteSolutionConfirm = false;
+  showLeaveSolutionConfirm = false;
+  isDeletingSolution = false;
+  isLeavingSolution = false;
+  workspaceAccessMessage = '';
+  workspaceAccessError = '';
 
   // Invite team member modal (hybrid: client-side + server fallback)
   showInviteTeamMemberModal = false;
@@ -339,9 +345,108 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return this.isLive;
   }
 
+  get isAdminOfSolution(): boolean {
+    if (!this.currentSolution || !this.auth.currentUser) return false;
+
+    const uid = this.auth.currentUser.uid;
+    const email = this.normalizeEmail(this.auth.currentUser.email);
+
+    return (
+      (!!uid && this.currentSolution.authorAccountId === uid) ||
+      (!!email &&
+        this.normalizeEmail(this.currentSolution.authorEmail) === email) ||
+      (this.currentSolution.chosenAdmins ?? []).some(
+        (admin) =>
+          (!!uid && admin.authorAccountId === uid) ||
+          (!!email && this.normalizeEmail(admin.authorEmail) === email)
+      )
+    );
+  }
+
+  get canLeaveSolution(): boolean {
+    return !this.isAdminOfSolution && this.isCurrentUserParticipant();
+  }
+
   get broadcastStatus(): 'active' | 'paused' | 'stopped' | 'pending' {
     const status = (this.currentSolution as any)?.broadcastStatus as any;
     return status ?? 'stopped';
+  }
+
+  openDeleteSolutionConfirm() {
+    this.workspaceAccessMessage = '';
+    this.workspaceAccessError = '';
+    this.showDeleteSolutionConfirm = true;
+  }
+
+  closeDeleteSolutionConfirm() {
+    if (this.isDeletingSolution) return;
+    this.showDeleteSolutionConfirm = false;
+  }
+
+  openLeaveSolutionConfirm() {
+    this.workspaceAccessMessage = '';
+    this.workspaceAccessError = '';
+    this.showLeaveSolutionConfirm = true;
+  }
+
+  closeLeaveSolutionConfirm() {
+    if (this.isLeavingSolution) return;
+    this.showLeaveSolutionConfirm = false;
+  }
+
+  async submitDeleteSolution() {
+    const solutionId = this.currentSolution?.solutionId || this.id;
+    if (!solutionId || !this.isAdminOfSolution || this.isDeletingSolution) {
+      return;
+    }
+
+    this.isDeletingSolution = true;
+    this.workspaceAccessMessage = '';
+    this.workspaceAccessError = '';
+
+    try {
+      await this.solution.deleteSolution(solutionId);
+      this.showDeleteSolutionConfirm = false;
+      await this.router.navigate(['/problem-list-view']);
+    } catch (error) {
+      console.error('Error deleting solution:', error);
+      this.workspaceAccessError = 'Could not delete this solution. Please try again.';
+    } finally {
+      this.isDeletingSolution = false;
+    }
+  }
+
+  async submitLeaveSolution() {
+    const solutionId = this.currentSolution?.solutionId || this.id;
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email);
+    if (!solutionId || !currentEmail || this.isLeavingSolution) {
+      return;
+    }
+
+    this.isLeavingSolution = true;
+    this.workspaceAccessMessage = '';
+    this.workspaceAccessError = '';
+
+    const participants = this.normalizeParticipantEntries(
+      (this.currentSolution as any).participants
+    ).filter((participant) => this.normalizeEmail(participant.name) !== currentEmail);
+    const participantsHolder = this.normalizeParticipantEntries(
+      this.currentSolution.participantsHolder
+    ).filter((participant) => this.normalizeEmail(participant.name) !== currentEmail);
+
+    try {
+      await this.solution.updateSolutionFields(solutionId, {
+        participants: participants as any,
+        participantsHolder: participantsHolder as any,
+      });
+      this.showLeaveSolutionConfirm = false;
+      await this.router.navigate(['/problem-list-view']);
+    } catch (error) {
+      console.error('Error leaving solution:', error);
+      this.workspaceAccessError = 'Could not leave this solution. Please try again.';
+    } finally {
+      this.isLeavingSolution = false;
+    }
   }
 
   async cancelReview() {
@@ -797,6 +902,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
     addEmail(solution.authorEmail);
 
     return Array.from(emails);
+  }
+
+  private isCurrentUserParticipant(): boolean {
+    const currentEmail = this.normalizeEmail(this.auth.currentUser?.email);
+    if (!currentEmail) return false;
+    return this.solutionMemberEmails(this.currentSolution).includes(currentEmail);
+  }
+
+  private normalizeParticipantEntries(value: any): Array<{ name: string }> {
+    const participants = new Map<string, { name: string }>();
+    const addParticipant = (entry: any) => {
+      const email = this.normalizeEmail(entry?.name || entry?.email || entry);
+      if (email) {
+        participants.set(email, { name: email });
+      }
+    };
+
+    if (Array.isArray(value)) {
+      value.forEach(addParticipant);
+    } else if (value && typeof value === 'object') {
+      Object.values(value).forEach(addParticipant);
+    }
+
+    return Array.from(participants.values());
   }
 
   private async resolveTeamMemberByEmail(

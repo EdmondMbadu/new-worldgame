@@ -273,6 +273,170 @@
         </svg>
       </div>
     </div>
+
+    <section
+      *ngIf="isAdminOfSolution || canLeaveSolution"
+      class="mt-6 w-full max-w-4xl rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/70"
+    >
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Workspace access
+          </p>
+          <h3 class="mt-1 text-base font-semibold text-slate-900 dark:text-white">
+            {{ isAdminOfSolution ? "Manage this solution" : "Leave this solution" }}
+          </h3>
+          <p class="mt-1 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+            {{
+              isAdminOfSolution
+                ? "Admins can permanently delete this solution workspace when it is no longer needed."
+                : "Remove yourself from this solution if you no longer want it in your workspace."
+            }}
+          </p>
+        </div>
+
+        <button
+          *ngIf="isAdminOfSolution"
+          type="button"
+          (click)="openDeleteSolutionConfirm()"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/60"
+        >
+          <span class="material-symbols-outlined text-[1.05rem]">delete</span>
+          <span>Delete solution</span>
+        </button>
+
+        <button
+          *ngIf="canLeaveSolution"
+          type="button"
+          (click)="openLeaveSolutionConfirm()"
+          class="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:border-rose-300 hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500/50 dark:border-rose-900/70 dark:bg-slate-950 dark:text-rose-300 dark:hover:bg-rose-950/40"
+        >
+          <span class="material-symbols-outlined text-[1.05rem]">logout</span>
+          <span>Leave solution</span>
+        </button>
+      </div>
+
+      <p
+        *ngIf="workspaceAccessError"
+        class="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 dark:bg-rose-950/40 dark:text-rose-300"
+      >
+        {{ workspaceAccessError }}
+      </p>
+      <p
+        *ngIf="workspaceAccessMessage"
+        class="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+      >
+        {{ workspaceAccessMessage }}
+      </p>
+    </section>
+  </div>
+</div>
+
+<div *ngIf="showDeleteSolutionConfirm" class="fixed inset-0 z-[10000]">
+  <div
+    class="absolute inset-0 bg-black/55 backdrop-blur-sm"
+    (click)="closeDeleteSolutionConfirm()"
+  ></div>
+  <div
+    class="relative mx-auto mt-28 w-[calc(100%-2rem)] max-w-lg rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+  >
+    <div class="flex items-start gap-4">
+      <div class="rounded-xl bg-rose-100 p-3 text-rose-600 dark:bg-rose-950 dark:text-rose-300">
+        <span class="material-symbols-outlined">delete</span>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
+          Delete solution?
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          This will permanently delete
+          <span class="font-semibold text-slate-900 dark:text-white">{{ currentSolution.title || "this solution" }}</span>
+          and remove the workspace for every team member.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        (click)="closeDeleteSolutionConfirm()"
+        [disabled]="isDeletingSolution"
+        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="submitDeleteSolution()"
+        [disabled]="isDeletingSolution"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <svg
+          *ngIf="isDeletingSolution"
+          class="h-4 w-4 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+        </svg>
+        <span>{{ isDeletingSolution ? "Deleting..." : "Delete solution" }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showLeaveSolutionConfirm" class="fixed inset-0 z-[10000]">
+  <div
+    class="absolute inset-0 bg-black/55 backdrop-blur-sm"
+    (click)="closeLeaveSolutionConfirm()"
+  ></div>
+  <div
+    class="relative mx-auto mt-28 w-[calc(100%-2rem)] max-w-lg rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+  >
+    <div class="flex items-start gap-4">
+      <div class="rounded-xl bg-rose-100 p-3 text-rose-600 dark:bg-rose-950 dark:text-rose-300">
+        <span class="material-symbols-outlined">logout</span>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-white">
+          Leave solution?
+        </h2>
+        <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          This removes your access to
+          <span class="font-semibold text-slate-900 dark:text-white">{{ currentSolution.title || "this solution" }}</span>
+          and sends you back to your solutions list.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <button
+        type="button"
+        (click)="closeLeaveSolutionConfirm()"
+        [disabled]="isLeavingSolution"
+        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="submitLeaveSolution()"
+        [disabled]="isLeavingSolution"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        <svg
+          *ngIf="isLeavingSolution"
+          class="h-4 w-4 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+        </svg>
+        <span>{{ isLeavingSolution ? "Leaving..." : "Leave solution" }}</span>
+      </button>
+    </div>
   </div>
 </div>
 
