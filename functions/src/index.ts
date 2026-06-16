@@ -6568,6 +6568,7 @@ const PRESENTATION_PPTX_MIME =
 const GOOGLE_SLIDES_MIME = 'application/vnd.google-apps.presentation';
 const PRESENTATION_FALLBACK_IMAGE =
   'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/blogs%2Fgeneric-image.jpg?alt=media&token=c4e8d393-50e6-4080-bfcd-923848db7007';
+const PRESENTATION_TEXT_MODELS = ['gemini-2.5-flash', 'gemini-1.5-flash'];
 
 function cleanPresentationText(value: unknown, max = 6000): string {
   const text = String(value || '')
@@ -6772,17 +6773,38 @@ async function generatePresentationDeckPlan(
   fallbackTitle: string
 ): Promise<GeneratedDeckPlan> {
   const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
-    generationConfig: {
-      temperature: 0.25,
-      maxOutputTokens: 4500,
-      responseMimeType: 'application/json',
-    },
-  } as any);
+  let text = '';
+  let lastError: unknown;
 
-  const result = await model.generateContent(buildDeckPlanPrompt(sourceText, fallbackTitle));
-  const text = result.response.text();
+  for (const modelName of PRESENTATION_TEXT_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        generationConfig: {
+          temperature: 0.25,
+          maxOutputTokens: 4500,
+          responseMimeType: 'application/json',
+        },
+      } as any);
+
+      const result = await model.generateContent(buildDeckPlanPrompt(sourceText, fallbackTitle));
+      text = result.response.text();
+      break;
+    } catch (error) {
+      lastError = error;
+      console.warn(
+        `Presentation deck plan model ${modelName} failed:`,
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }
+
+  if (!text) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('Could not generate the presentation plan.');
+  }
+
   const plan = extractDeckPlanJson(text, fallbackTitle);
   plan.title = cleanPresentationText(plan.title || fallbackTitle, 90);
   plan.subtitle = cleanPresentationText(plan.subtitle || 'Presentation draft', 160);
