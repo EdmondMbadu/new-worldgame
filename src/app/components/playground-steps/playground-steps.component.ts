@@ -364,8 +364,17 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   ];
   selectedAiEvaluator: AiEvaluatorOption = this.aiEvaluatorOptions[0];
   showAiEvaluatorDropdown = false;
-  studioActivePanel: 'export' | 'feedback' | 'report' | 'infographic' | null = null;
+  studioActivePanel: 'export' | 'feedback' | 'report' | 'presentation' | 'infographic' | null = null;
   showFeedbackResults = false;
+
+  // Presentation generation state
+  presentationLoading = false;
+  presentationStatus = '';
+  presentationError = '';
+  presentationGoogleSlidesUrl = '';
+  presentationPptxUrl = '';
+  presentationReady = false;
+  private presentationRequestSub?: Subscription;
 
   // Infographic generation state
   infographicLoading = false;
@@ -1813,6 +1822,87 @@ STYLE REQUIREMENTS:
     }
   }
 
+  async generateAiPresentation() {
+    const uid = this.auth.currentUser?.uid;
+    const solutionId = this.currentSolution?.solutionId || this.id;
+
+    if (!uid) {
+      this.presentationError = 'Please sign in to generate a presentation.';
+      return;
+    }
+
+    if (!solutionId) {
+      this.presentationError = 'No solution was found for this page.';
+      return;
+    }
+
+    this.presentationLoading = true;
+    this.presentationError = '';
+    this.presentationStatus = 'Preparing presentation request...';
+    this.presentationGoogleSlidesUrl = '';
+    this.presentationPptxUrl = '';
+    this.presentationReady = false;
+
+    const docId = this.afs.createId();
+    const docRef: AngularFirestoreDocument<any> = this.afs.doc(
+      `users/${uid}/presentation-requests/${docId}`
+    );
+
+    this.presentationRequestSub?.unsubscribe();
+    this.presentationRequestSub = docRef.valueChanges().subscribe((snap) => {
+      if (!snap) {
+        return;
+      }
+
+      const state = snap.status?.state;
+      if (state === 'PROCESSING') {
+        this.presentationStatus =
+          snap.status?.message || 'Generating presentation...';
+        return;
+      }
+
+      if (state === 'COMPLETED') {
+        this.presentationLoading = false;
+        this.presentationStatus =
+          'Presentation ready. It was also added to Documents.';
+        this.presentationReady = true;
+        this.presentationGoogleSlidesUrl =
+          snap.response?.googleSlidesEditUrl || snap.response?.googleSlidesUrl || '';
+        this.presentationPptxUrl =
+          snap.response?.downloadUrl || snap.response?.pptxDownloadURL || '';
+        this.presentationRequestSub?.unsubscribe();
+        return;
+      }
+
+      if (state === 'ERRORED') {
+        this.presentationLoading = false;
+        this.presentationStatus = '';
+        this.presentationError =
+          snap.status?.message ||
+          snap.status?.error ||
+          'Could not generate the presentation. Please try again.';
+        this.presentationRequestSub?.unsubscribe();
+      }
+    });
+
+    try {
+      await docRef.set({
+        solutionId,
+        status: { state: 'QUEUED', message: 'Queued for generation.' },
+        requestedAt: Date.now(),
+        mode: 'google-slides-primary',
+      });
+      this.presentationStatus = 'Reading solution and documents...';
+    } catch (error) {
+      console.error('Presentation generation request failed', error);
+      this.presentationLoading = false;
+      this.presentationStatus = '';
+      this.presentationError =
+        'Unable to start presentation generation. Please retry.';
+      this.presentationRequestSub?.unsubscribe();
+    }
+  }
+
   private buildInfographicPrompt(): string {
     const title = this.currentSolution.title || 'Strategy';
     const description = this.currentSolution.description || '';
@@ -2952,6 +3042,7 @@ Make it visually appealing with bright colors, friendly icons, and a clear flow 
       this.reportTimeoutHandle = undefined;
     }
     this.infographicDocSub?.unsubscribe();
+    this.presentationRequestSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     // Clear chat context when leaving the playground
