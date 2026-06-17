@@ -520,11 +520,15 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
   openGoogleSlides(p: Presentation, e: Event) {
     e.stopPropagation();
-    const url = p.googleSlidesEditUrl || p.googleSlidesUrl;
+    const url = this.presentationSourceUrl(p);
     if (!url) {
       return;
     }
     window.open(url, '_blank');
+  }
+
+  presentationSourceUrl(p: Presentation): string {
+    return p.googleSlidesEditUrl || p.googleSlidesUrl || p.googleSlidesPresentUrl || '';
   }
 
   downloadPresentationPptx(p: Presentation, e: Event) {
