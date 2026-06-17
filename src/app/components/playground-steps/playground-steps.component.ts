@@ -1925,6 +1925,8 @@ Infographic requirements:
 - Choose the best structure: timeline, flow, comparison, hierarchy, cycle, map, anatomy, ranking, isotype, or big-number.
 - Translate any numbers into human-scale comparisons. If numbers are missing, mark them [VERIFY] instead of inventing facts.
 - Keep the design cohesive: one palette, one icon style, one clear reading path.
+- Do not put text, letters, numbers, headings, labels, captions, signs, or pseudo-text inside the generated image.
+- Communicate with icons, arrows, scale, layout, color, and visual metaphor. Text can be handled outside the image.
 - Make it beautiful, concise, credible, and legible at thumbnail size.
 - Use teal/emerald with one warm accent, but avoid clutter and decorative chartjunk.`;
   }

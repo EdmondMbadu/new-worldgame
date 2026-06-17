@@ -6605,6 +6605,14 @@ const PRESENTATION_IMAGEN_MODELS = [
   'imagen-3.0-generate-002',
   'imagen-4.0-generate-001',
 ];
+const INFOGRAPHIC_IMAGE_MODELS = [
+  'gemini-2.5-flash-image-preview',
+  'gemini-2.0-flash-preview-image-generation',
+];
+const INFOGRAPHIC_IMAGEN_MODELS = [
+  'imagen-4.0-generate-001',
+  'imagen-3.0-generate-002',
+];
 const PRESENTATION_MAX_GENERATED_IMAGES = 8;
 const PRESENTATION_DRIVE_FOLDER_ID = '1Rib4RlYsv-PsL1QOhlAoht-fw0tUHLEy';
 const PRESENTATION_SERVICE_ACCOUNT_EMAIL =
@@ -11327,6 +11335,7 @@ Rules:
 - Choose ONE structure: timeline, flow, comparison, hierarchy, cycle, map, anatomy, ranking, isotype, or big-number.
 - Include a hero visual concept, 3 supporting sections, and one human-scale comparison.
 - Use only facts present in the source. If a number is missing, say [VERIFY] rather than inventing it.
+- This will become a text-free image. Describe visual metaphors, icons, arrows, shapes, and spatial layout instead of labels.
 - Keep it concrete, visual, and concise.
 - Return plain text only. No markdown.
 
@@ -11352,24 +11361,24 @@ HUMAN-SCALE COMPARISON: Use [VERIFY] placeholder comparison only if the source i
 SOURCE NOTE: Current solution draft.`;
       }
 
-      // Step 2: Create a real infographic prompt. Keep text minimal because image
-      // models can distort typography, but preserve infographic structure.
-      const infographicPrompt = `Create a magnificent editorial infographic poster based on this brief:
+      // Step 2: Create a real infographic prompt. Keep the raster text-free because
+      // image models often distort typography; app-rendered text can be added later.
+      const infographicPrompt = `Create a magnificent text-free editorial infographic-style visual based on this brief:
 
 ${infographicBrief}
 
 Design direction:
-- One clear takeaway drives the whole composition.
+- Visually express one clear takeaway without writing it as text.
 - One dominant custom hero visual, not generic clip art.
-- Clear reading path with 3 supporting visual sections.
-- Include a human-scale comparison as imagery, not dense copy.
+- Clear reading path with 3 supporting visual sections, using arrows, icons, scale, position, and color.
+- Include a human-scale comparison as imagery only.
 - Cohesive information design inspired by Nicholas Felton, David McCandless, and The Pudding.
 - Premium civic/editorial style, crisp grid, generous whitespace, strong hierarchy.
 - Palette: paper white, near-black, slate, teal, emerald, one warm amber accent.
 - Consistent icon style; flat/vector editorial shapes mixed with polished depth.
 - Honest proportions; no 3D charts, no decorative chartjunk.
-- Text-safe image generation: avoid paragraphs and tiny labels. If text appears, keep it to a few large, clean words only.
-- No logos, no watermarks, no fake UI, no illegible pseudo-text blocks.
+- ABSOLUTELY NO TEXT: no words, letters, numbers, captions, headings, labels, signs, interface text, pseudo-text, scribbles, charts with axis text, or tiny glyph marks.
+- No logos, no watermarks, no fake UI.
 - High quality, polished, inspiring, immediately understandable at thumbnail size.`;
 
       console.log('Generating visual infographic:', {
@@ -11379,9 +11388,37 @@ Design direction:
 
       let imgB64 = '';
 
-      // Step 3: Try the same image-generation stack used by presentations.
+      // Step 3: Try Gemini image generation first for infographic composition,
+      // then fall back to Imagen.
       const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-      for (const modelName of PRESENTATION_IMAGEN_MODELS) {
+      for (const modelName of INFOGRAPHIC_IMAGE_MODELS) {
+        if (imgB64) break;
+        try {
+          console.log(`Trying infographic Gemini image model: ${modelName}`);
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: infographicPrompt,
+            config: {
+              responseModalities: ['Image'],
+              responseFormat: {
+                image: {
+                  aspectRatio: '16:9',
+                  imageSize: '1K',
+                },
+              },
+            },
+          } as any);
+
+          imgB64 = getInlineImageBase64(response);
+          if (imgB64) {
+            console.log(`Infographic generated with ${modelName}`);
+          }
+        } catch (modelError: any) {
+          console.log(`${modelName} failed:`, modelError?.message?.slice(0, 150));
+        }
+      }
+
+      for (const modelName of INFOGRAPHIC_IMAGEN_MODELS) {
         if (imgB64) break;
         try {
           console.log(`Trying infographic Imagen model: ${modelName}`);
@@ -11397,33 +11434,6 @@ Design direction:
 
           if (imageResult.generatedImages?.[0]?.image?.imageBytes) {
             imgB64 = imageResult.generatedImages[0].image.imageBytes;
-            console.log(`Infographic generated with ${modelName}`);
-          }
-        } catch (modelError: any) {
-          console.log(`${modelName} failed:`, modelError?.message?.slice(0, 150));
-        }
-      }
-
-      for (const modelName of PRESENTATION_IMAGE_MODELS) {
-        if (imgB64) break;
-        try {
-          console.log(`Trying infographic Gemini image model: ${modelName}`);
-          const response = await ai.models.generateContent({
-            model: modelName,
-            contents: infographicPrompt,
-            config: {
-              responseModalities: ['Image'],
-              responseFormat: {
-                image: {
-                  aspectRatio: '16:9',
-                  imageSize: modelName.includes('3-pro') ? '2K' : '1K',
-                },
-              },
-            },
-          } as any);
-
-          imgB64 = getInlineImageBase64(response);
-          if (imgB64) {
             console.log(`Infographic generated with ${modelName}`);
           }
         } catch (modelError: any) {
