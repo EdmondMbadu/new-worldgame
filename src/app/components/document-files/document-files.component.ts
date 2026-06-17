@@ -511,7 +511,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
   presentGoogleSlides(p: Presentation, e: Event) {
     e.stopPropagation();
-    const url = p.googleSlidesPresentUrl || p.googleSlidesUrl;
+    const url = this.googleSlidesOpenUrl(p);
     if (!url) {
       return;
     }
@@ -520,15 +520,24 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
   openGoogleSlides(p: Presentation, e: Event) {
     e.stopPropagation();
-    const url = this.presentationSourceUrl(p);
+    const url = this.googleSlidesOpenUrl(p);
     if (!url) {
       return;
     }
     window.open(url, '_blank');
   }
 
-  presentationSourceUrl(p: Presentation): string {
-    return p.googleSlidesEditUrl || p.googleSlidesUrl || p.googleSlidesPresentUrl || '';
+  googleSlidesOpenUrl(p: Presentation): string {
+    const nativeSlidesUrl = p.googleSlidesEditUrl || p.googleSlidesUrl || p.googleSlidesPresentUrl;
+    if (nativeSlidesUrl) {
+      return nativeSlidesUrl;
+    }
+
+    if (p.pptxDownloadURL) {
+      return `https://docs.google.com/viewer?url=${encodeURIComponent(p.pptxDownloadURL)}`;
+    }
+
+    return '';
   }
 
   downloadPresentationPptx(p: Presentation, e: Event) {
