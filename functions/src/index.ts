@@ -11312,103 +11312,122 @@ export const onInfographicRequest = functions
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      // Step 1: Use text model to extract and clean key concepts
+      // Step 1: Use a text model to turn the strategy into an infographic brief.
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-      const strategyText = prompt.slice(0, 2000);
+      const strategyText = prompt.slice(0, 4500);
 
-      let cleanedConcepts = '';
+      let infographicBrief = '';
       try {
-        const textModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        const textModel = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
         const cleanupResult = await textModel.generateContent(
-          `Extract the main concept from this text and describe it in 2-3 simple, clear English sentences. Fix any spelling errors and summarize the core idea. Do not include any special characters or formatting:
+          `You are an award-winning information designer. Turn this solution into a concise infographic design brief.
+
+Rules:
+- Choose ONE big takeaway sentence.
+- Choose ONE structure: timeline, flow, comparison, hierarchy, cycle, map, anatomy, ranking, isotype, or big-number.
+- Include a hero visual concept, 3 supporting sections, and one human-scale comparison.
+- Use only facts present in the source. If a number is missing, say [VERIFY] rather than inventing it.
+- Keep it concrete, visual, and concise.
+- Return plain text only. No markdown.
 
 ${strategyText}
 
-Respond with ONLY the clean summary, nothing else.`
+Respond in this shape:
+TAKEAWAY: ...
+STRUCTURE: ...
+HERO VISUAL: ...
+SUPPORTING SECTIONS: ...
+HUMAN-SCALE COMPARISON: ...
+SOURCE NOTE: Current solution draft.`
         );
-        cleanedConcepts = cleanupResult.response.text().trim();
-        console.log('Cleaned concepts:', cleanedConcepts);
+        infographicBrief = cleanupResult.response.text().trim();
+        console.log('Infographic brief:', infographicBrief);
       } catch (cleanupError: any) {
         console.log('Text cleanup failed, using simplified fallback:', cleanupError?.message?.slice(0, 100));
-        // Fallback: just use the title
-        cleanedConcepts = `A solution about: ${solutionTitle}`;
+        infographicBrief = `TAKEAWAY: ${solutionTitle} creates a clearer path from problem to action.
+STRUCTURE: Flow.
+HERO VISUAL: A central pathway from community problem to measurable impact.
+SUPPORTING SECTIONS: problem, solution, action steps, outcomes.
+HUMAN-SCALE COMPARISON: Use [VERIFY] placeholder comparison only if the source includes numbers.
+SOURCE NOTE: Current solution draft.`;
       }
 
-      // Step 2: Create image prompt with cleaned concepts - NO TEXT in image
-      const infographicPrompt = `Create a beautiful, professional illustration for this concept:
+      // Step 2: Create a real infographic prompt. Keep text minimal because image
+      // models can distort typography, but preserve infographic structure.
+      const infographicPrompt = `Create a magnificent editorial infographic poster based on this brief:
 
-${cleanedConcepts}
+${infographicBrief}
 
-CRITICAL REQUIREMENTS:
-- DO NOT include ANY text, words, letters, or numbers in the image
-- Pure visual storytelling using illustrations, icons, and imagery only
-- Beautiful conceptual scene with people, nature, technology, or abstract shapes
-- Professional magazine-quality artistic composition
-- Warm, hopeful color palette with teal and emerald green accents
-- High quality, detailed, inspiring visual that captures the essence
-- The image must be completely text-free`;
+Design direction:
+- One clear takeaway drives the whole composition.
+- One dominant custom hero visual, not generic clip art.
+- Clear reading path with 3 supporting visual sections.
+- Include a human-scale comparison as imagery, not dense copy.
+- Cohesive information design inspired by Nicholas Felton, David McCandless, and The Pudding.
+- Premium civic/editorial style, crisp grid, generous whitespace, strong hierarchy.
+- Palette: paper white, near-black, slate, teal, emerald, one warm amber accent.
+- Consistent icon style; flat/vector editorial shapes mixed with polished depth.
+- Honest proportions; no 3D charts, no decorative chartjunk.
+- Text-safe image generation: avoid paragraphs and tiny labels. If text appears, keep it to a few large, clean words only.
+- No logos, no watermarks, no fake UI, no illegible pseudo-text blocks.
+- High quality, polished, inspiring, immediately understandable at thumbnail size.`;
 
       console.log('Generating visual infographic:', {
         title: solutionTitle,
-        cleanedConcepts: cleanedConcepts.slice(0, 200),
+        brief: infographicBrief.slice(0, 300),
       });
 
       let imgB64 = '';
 
-      // Step 3: Try image generation models
-      const imageGenModels = [
-        'gemini-2.0-flash-exp',                        // Latest experimental
-        'gemini-2.0-flash-preview-image-generation',   // Preview with image gen
-        'gemini-2.0-flash-exp-image-generation',       // Experimental image gen
-        'gemini-2.0-flash-thinking-exp-01-21',         // Thinking model (may have better text)
-      ];
-
-      for (const modelName of imageGenModels) {
+      // Step 3: Try the same image-generation stack used by presentations.
+      const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+      for (const modelName of PRESENTATION_IMAGEN_MODELS) {
         if (imgB64) break;
         try {
-          console.log(`Trying image generation model: ${modelName}`);
-          const modelConfig: Record<string, unknown> = {
+          console.log(`Trying infographic Imagen model: ${modelName}`);
+          const imageResult = await ai.models.generateImages({
             model: modelName,
-            generationConfig: {
-              responseModalities: ['IMAGE'],
+            prompt: infographicPrompt,
+            config: {
+              numberOfImages: 1,
+              aspectRatio: '16:9',
+              includeRaiReason: true,
             },
-          };
-          const model = genAI.getGenerativeModel(modelConfig as any);
-          const result = await model.generateContent(infographicPrompt);
-          const response = await result.response;
+          } as any);
 
-          for (const part of response.candidates?.[0]?.content?.parts || []) {
-            if (part.inlineData?.data) {
-              imgB64 = part.inlineData.data;
-              console.log(`Image generated with ${modelName}`);
-              break;
-            }
+          if (imageResult.generatedImages?.[0]?.image?.imageBytes) {
+            imgB64 = imageResult.generatedImages[0].image.imageBytes;
+            console.log(`Infographic generated with ${modelName}`);
           }
         } catch (modelError: any) {
           console.log(`${modelName} failed:`, modelError?.message?.slice(0, 150));
         }
       }
 
-      // Fallback to Imagen 4
-      if (!imgB64) {
+      for (const modelName of PRESENTATION_IMAGE_MODELS) {
+        if (imgB64) break;
         try {
-          console.log('Trying Imagen 4 as fallback');
-          const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-          const imageResult = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
-            prompt: infographicPrompt,
+          console.log(`Trying infographic Gemini image model: ${modelName}`);
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: infographicPrompt,
             config: {
-              numberOfImages: 1,
-              aspectRatio: '16:9',
+              responseModalities: ['Image'],
+              responseFormat: {
+                image: {
+                  aspectRatio: '16:9',
+                  imageSize: modelName.includes('3-pro') ? '2K' : '1K',
+                },
+              },
             },
-          });
+          } as any);
 
-          if (imageResult.generatedImages?.[0]?.image?.imageBytes) {
-            imgB64 = imageResult.generatedImages[0].image.imageBytes;
-            console.log('Image generated with Imagen 4');
+          imgB64 = getInlineImageBase64(response);
+          if (imgB64) {
+            console.log(`Infographic generated with ${modelName}`);
           }
-        } catch (imagenError: any) {
-          console.log('Imagen 4 failed:', imagenError?.message?.slice(0, 150));
+        } catch (modelError: any) {
+          console.log(`${modelName} failed:`, modelError?.message?.slice(0, 150));
         }
       }
 
@@ -11437,6 +11456,7 @@ CRITICAL REQUIREMENTS:
         await snap.ref.update({
           status: { state: 'COMPLETED' },
           imageUrl,
+          brief: infographicBrief,
           completedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 

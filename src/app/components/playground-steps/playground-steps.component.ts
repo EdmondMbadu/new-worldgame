@@ -1910,7 +1910,7 @@ STYLE REQUIREMENTS:
     // Use the currentDraftText which contains the full solution content
     const strategyContent = this.currentDraftText.substring(0, 4000);
 
-    return `Create a beautiful, friendly infographic summarizing this strategy:
+    return `Create a magnificent, information-rich infographic for this strategy.
 
 TITLE: ${title}
 
@@ -1919,7 +1919,14 @@ OVERVIEW: ${description}
 STRATEGY CONTENT:
 ${strategyContent}
 
-Make it visually appealing with bright colors, friendly icons, and a clear flow from problem to solution. Use teal and emerald as accent colors.`;
+Infographic requirements:
+- Decide one big takeaway and make the whole design serve it.
+- Use one strong hero visual, not a generic chart.
+- Choose the best structure: timeline, flow, comparison, hierarchy, cycle, map, anatomy, ranking, isotype, or big-number.
+- Translate any numbers into human-scale comparisons. If numbers are missing, mark them [VERIFY] instead of inventing facts.
+- Keep the design cohesive: one palette, one icon style, one clear reading path.
+- Make it beautiful, concise, credible, and legible at thumbnail size.
+- Use teal/emerald with one warm accent, but avoid clutter and decorative chartjunk.`;
   }
 
   async downloadInfographic() {
