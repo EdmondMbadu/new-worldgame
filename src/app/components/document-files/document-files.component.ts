@@ -92,6 +92,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   documentDescription: string = '';
   // Track which doc is “open” for the 3-dot menu.
   openDocIndex: number | null = null;
+  openPresentationMenuId: string | null = null;
 
   toggle(property: 'showAddDocument') {
     this[property] = !this[property];
@@ -194,6 +195,11 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   toggleDocMenu(index: number) {
     // If this doc’s menu is already open, close it; otherwise open it
     this.openDocIndex = this.openDocIndex === index ? null : index;
+  }
+
+  togglePresentationMenu(id: string, e: Event) {
+    e.stopPropagation();
+    this.openPresentationMenuId = this.openPresentationMenuId === id ? null : id;
   }
 
   // Copy the document’s URL to the clipboard
@@ -560,6 +566,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.openPresentationMenuId = null;
     this.data
       .deletePresentationById(this.id, pid)
       .then(() => console.log('Presentation deleted'))
