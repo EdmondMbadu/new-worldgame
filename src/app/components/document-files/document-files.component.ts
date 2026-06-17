@@ -389,19 +389,6 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     this.openPresentation(p);
   }
 
-  presentationFormatLabel(p: Presentation): string {
-    if (p.googleSlidesUrl && p.pptxDownloadURL) {
-      return 'Google Slides and PowerPoint';
-    }
-    if (p.googleSlidesUrl) {
-      return 'Google Slides';
-    }
-    if (p.pptxDownloadURL) {
-      return 'PowerPoint';
-    }
-    return 'Presentation';
-  }
-
   closePresentation() {
     this.activePresentation = null;
     this.activePresentationEmbedUrl = null;

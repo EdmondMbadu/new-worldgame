@@ -177,11 +177,6 @@
       <div class="mt-4 flex items-start justify-between gap-4">
         <div class="min-w-0">
           <h3 class="truncate text-base font-semibold text-gray-900 dark:text-white">{{ p.name }}</h3>
-          <p
-            *ngIf="p.googleSlidesUrl || p.pptxDownloadURL"
-            class="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-            {{ presentationFormatLabel(p) }}
-          </p>
         </div>
         <span
           *ngIf="p.generatedByAi"
@@ -194,26 +189,54 @@
         {{ p.description }}
       </p>
 
-      <div class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div class="mt-5 flex items-center gap-2">
         <button
           type="button"
           (click)="openPresentationFromButton(p, $event)"
-          class="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-          Open
+          aria-label="Open presentation"
+          title="Open"
+          class="grid h-10 w-10 place-items-center rounded-md bg-blue-600 text-white hover:bg-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12z" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 15.25a3.25 3.25 0 100-6.5 3.25 3.25 0 000 6.5z" />
+          </svg>
         </button>
         <button
           *ngIf="p.googleSlidesUrl"
           type="button"
           (click)="openGoogleSlides(p, $event)"
-          class="rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold leading-tight text-emerald-700 hover:border-emerald-300 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">
-          Open Google Slides
+          aria-label="Open source deck"
+          title="Open source deck"
+          class="grid h-10 w-10 place-items-center rounded-md border border-emerald-200 bg-white text-emerald-700 hover:border-emerald-300 dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M14 3h7v7" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M10 14L21 3" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6" />
+          </svg>
         </button>
         <button
           *ngIf="p.pptxDownloadURL"
           type="button"
           (click)="downloadPresentationPptx(p, $event)"
-          class="rounded-md border border-purple-200 bg-white px-3 py-2 text-sm font-semibold text-purple-700 hover:border-purple-300 dark:border-purple-800 dark:bg-slate-900 dark:text-purple-200">
-          Download PowerPoint
+          aria-label="Download PowerPoint"
+          title="Download PowerPoint"
+          class="grid h-10 w-10 place-items-center rounded-md border border-purple-200 bg-white text-purple-700 hover:border-purple-300 dark:border-purple-800 dark:bg-slate-900 dark:text-purple-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 3v12" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M7 10l5 5 5-5" />
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5 21h14" />
+          </svg>
         </button>
       </div>
     </div>
