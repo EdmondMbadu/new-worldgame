@@ -384,6 +384,24 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     this.setPresentationBodyLock(true);
   }
 
+  openPresentationFromButton(p: Presentation, e: Event) {
+    e.stopPropagation();
+    this.openPresentation(p);
+  }
+
+  presentationFormatLabel(p: Presentation): string {
+    if (p.googleSlidesUrl && p.pptxDownloadURL) {
+      return 'Google Slides and PowerPoint';
+    }
+    if (p.googleSlidesUrl) {
+      return 'Google Slides';
+    }
+    if (p.pptxDownloadURL) {
+      return 'PowerPoint';
+    }
+    return 'Presentation';
+  }
+
   closePresentation() {
     this.activePresentation = null;
     this.activePresentationEmbedUrl = null;
@@ -546,6 +564,41 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       .deletePresentationById(this.id, pid)
       .then(() => console.log('Presentation deleted'))
       .catch((err) => console.error(err));
+  }
+
+  get visibleDocuments(): Avatar[] {
+    return this.documents.filter((doc) => !this.isPresentationExportDocument(doc));
+  }
+
+  deleteDocumentByRef(doc: Avatar) {
+    const index = this.documents.indexOf(doc);
+    if (index < 0) {
+      return;
+    }
+
+    this.deleteDocument(index);
+  }
+
+  private isPresentationExportDocument(doc: Avatar): boolean {
+    if (!doc || !this.isPowerPoint(doc.type || '')) {
+      return false;
+    }
+
+    return this.presentations.some((presentation) => {
+      const sameDownload =
+        !!doc.downloadURL &&
+        !!presentation.pptxDownloadURL &&
+        doc.downloadURL === presentation.pptxDownloadURL;
+      const sameFileName =
+        !!doc.originalFilename &&
+        !!presentation.pptxFileName &&
+        doc.originalFilename === presentation.pptxFileName;
+      const generatedExport =
+        (doc.description || '').toLowerCase().includes('powerpoint export') &&
+        this.stripExt(doc.name || '') === this.stripExt(presentation.name || '');
+
+      return sameDownload || sameFileName || generatedExport;
+    });
   }
   /* NEW ──────────────────────────────────────────────── */
   /** Detect Word documents */
