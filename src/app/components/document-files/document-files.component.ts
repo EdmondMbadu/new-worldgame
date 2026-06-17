@@ -116,11 +116,10 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       return alert('Video files are not allowed.');
     }
 
-    this.documentType = file.type;
+    this.documentType = file.type || 'application/octet-stream';
     this.originalFilename = file.name;
-    if (!this.documentName.trim()) {
-      this.documentName = this.stripExt(file.name);
-    }
+    this.documentName = this.stripExt(file.name);
+    this.documentDescription = '';
     this.documentId ||= this.afs.createId();
 
     try {
@@ -148,8 +147,8 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
        Save document metadata
   ───────────────────────────────── */
   addDocument() {
-    if (!this.documentName || !this.documentDownloadUrl) {
-      return alert('Name & file are required.');
+    if (!this.documentDownloadUrl) {
+      return alert('Choose a file first.');
     }
     if (!this.currentSolution.solutionId) {
       return;
@@ -158,9 +157,9 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     const now = new Date();
     const newDoc: Avatar = {
       downloadURL: this.documentDownloadUrl,
-      name: this.documentName,
-      originalFilename: this.originalFilename || this.documentName,
-      description: this.documentDescription,
+      name: this.documentName || this.stripExt(this.originalFilename || 'File'),
+      originalFilename: this.originalFilename || this.documentName || 'File',
+      description: this.documentDescription || '',
       type: this.documentType, // full MIME
       dateSorted: now.getTime(),
       dateCreated: this.time.todaysDate(),
