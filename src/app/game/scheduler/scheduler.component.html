@@ -137,7 +137,25 @@
                         [class.border-blue-500]="time.label === selectedTime"
                         [class.hover:border-blue-500]="time.label !== selectedTime"
                         class="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg text-center transition-colors">
-                        {{ time.label }}
+                        <span class="block font-semibold">{{ time.label }}</span>
+                        <span
+                          *ngIf="getBookedTeamSummary(time)"
+                          class="mt-1 block text-xs"
+                          [class.text-blue-100]="time.label === selectedTime"
+                          [class.text-slate-500]="time.label !== selectedTime"
+                          [class.dark:text-slate-400]="time.label !== selectedTime"
+                        >
+                          Scheduled: {{ getBookedTeamSummary(time) }}
+                        </span>
+                        <span
+                          *ngIf="!getBookedTeamSummary(time) && config.bookingType === 'gsl2026Prep'"
+                          class="mt-1 block text-xs"
+                          [class.text-blue-100]="time.label === selectedTime"
+                          [class.text-slate-400]="time.label !== selectedTime"
+                          [class.dark:text-slate-500]="time.label !== selectedTime"
+                        >
+                          Open
+                        </span>
                 </button>
 
                   

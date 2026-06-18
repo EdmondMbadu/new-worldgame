@@ -562,11 +562,33 @@ export class AuthService {
     });
   }
 
+  updateDemoBooking(
+    id: string,
+    booking: Partial<DemoBooking>
+  ): Promise<void> {
+    return this.afs.doc<DemoBooking>(`demoBookings/${id}`).update({
+      ...booking,
+      updatedAt: serverTimestamp() as any,
+    } as any);
+  }
+
+  deleteDemoBooking(id: string): Promise<void> {
+    return this.afs.doc<DemoBooking>(`demoBookings/${id}`).delete();
+  }
+
   /** Live list for the admin component, ordered by slot */
   listAll() {
     return this.afs
       .collection<DemoBooking>('demoBookings', (ref) =>
         ref.orderBy('demoDateTime', 'asc')
+      )
+      .valueChanges({ idField: 'id' });
+  }
+
+  listGsl2026PrepBookings() {
+    return this.afs
+      .collection<DemoBooking>('demoBookings', (ref) =>
+        ref.where('bookingType', '==', 'gsl2026Prep')
       )
       .valueChanges({ idField: 'id' });
   }

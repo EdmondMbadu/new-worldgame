@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { DemoBooking } from 'src/app/models/tournament';
 import { AuthService } from 'src/app/services/auth.service';
 
 // Define a type for the day object used in the calendar
@@ -43,7 +45,7 @@ interface SchedulerConfig {
   templateUrl: './scheduler.component.html',
   styleUrl: './scheduler.component.css',
 })
-export class SchedulerComponent implements OnInit {
+export class SchedulerComponent implements OnInit, OnDestroy {
   // --- State Management ---
   public step = 1; // Controls which step of the scheduler is visible: 1: Time, 2: Details, 3: Confirm
 
@@ -63,7 +65,9 @@ export class SchedulerComponent implements OnInit {
   public userEmail = '';
   public teamName = '';
   public notes = '';
+  public gslPrepBookings: DemoBooking[] = [];
   isLoggedIn: boolean = false;
+  private gslPrepBookingsSub?: Subscription;
 
   private readonly defaultConfig: SchedulerConfig = {
     bookingType: 'demo',
@@ -141,8 +145,25 @@ export class SchedulerComponent implements OnInit {
     if (this.config.initialMonth) {
       this.currentMonthDate = new Date(this.config.initialMonth);
     }
+    if (this.config.bookingType === 'gsl2026Prep') {
+      this.gslPrepBookingsSub = this.auth.listGsl2026PrepBookings().subscribe({
+        next: (bookings) => {
+          this.gslPrepBookings = [...bookings].sort(
+            (a, b) => a.demoDateTime - b.demoDateTime
+          );
+        },
+        error: (error) => {
+          console.error('Could not load scheduled GSL prep teams', error);
+          this.gslPrepBookings = [];
+        },
+      });
+    }
     // Initialize the calendar with the current month and year
     this.generateCalendar();
+  }
+
+  ngOnDestroy(): void {
+    this.gslPrepBookingsSub?.unsubscribe();
   }
 
   // --- Calendar Logic ---
@@ -274,6 +295,25 @@ export class SchedulerComponent implements OnInit {
   selectTime(slot: TimeSlot): void {
     this.selectedTime = slot.label;
     this.selectedStartTime = slot.startsAt;
+  }
+
+  getBookingsForSlot(slot: TimeSlot): DemoBooking[] {
+    if (!this.selectedDate) return [];
+    const selectedDateKey = this.toDateKey(this.selectedDate);
+    return this.gslPrepBookings.filter(
+      (booking) =>
+        booking.demoDate === selectedDateKey &&
+        booking.demoTime === slot.label
+    );
+  }
+
+  getBookedTeamSummary(slot: TimeSlot): string {
+    const teams = this.getBookingsForSlot(slot)
+      .map((booking) => booking.teamName?.trim())
+      .filter((teamName): teamName is string => !!teamName);
+
+    if (!teams.length) return '';
+    return teams.join(', ');
   }
 
   // --- Step Navigation ---

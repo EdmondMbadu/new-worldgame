@@ -2,6 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { DemoBooking } from 'src/app/models/tournament';
 import { AuthService } from 'src/app/services/auth.service';
 
+interface BookingEditDraft {
+  id: string;
+  name: string;
+  email: string;
+  teamName: string;
+  demoDate: string;
+  demoTime: string;
+  demoStartTime: string;
+  notes: string;
+}
+
 @Component({
   selector: 'app-management-demo',
   templateUrl: './management-demo.component.html',
@@ -14,6 +25,10 @@ export class ManagementDemoComponent implements OnInit {
   isLoggedIn = false;
   expandedNotes: Set<string> = new Set();
   bookingView: 'all' | 'demo' | 'gsl2026Prep' = 'all';
+  editingId: string | null = null;
+  editDraft: BookingEditDraft | null = null;
+  savingId: string | null = null;
+  deletingId: string | null = null;
 
   constructor(public auth: AuthService) {}
 
@@ -104,6 +119,96 @@ export class ManagementDemoComponent implements OnInit {
     // Always show expand button for any non-empty notes since CSS truncation 
     // can happen based on width, not just character count
     return !!notes && notes.trim().length > 0;
+  }
+
+  startEdit(booking: DemoBooking): void {
+    if (!booking.id) return;
+    this.editingId = booking.id;
+    this.editDraft = {
+      id: booking.id,
+      name: booking.name || '',
+      email: booking.email || '',
+      teamName: booking.teamName || '',
+      demoDate: booking.demoDate || '',
+      demoTime: booking.demoTime || '',
+      demoStartTime:
+        booking.demoStartTime || this.getStartTimeFromDemoTime(booking.demoTime),
+      notes: booking.notes || '',
+    };
+  }
+
+  cancelEdit(): void {
+    this.editingId = null;
+    this.editDraft = null;
+  }
+
+  async saveEdit(): Promise<void> {
+    if (!this.editDraft) return;
+    const draft = this.editDraft;
+    if (!draft.name.trim() || !draft.email.trim() || !draft.demoDate || !draft.demoTime.trim()) {
+      alert('Name, email, date, and slot are required.');
+      return;
+    }
+
+    this.savingId = draft.id;
+    const demoStartTime = this.getStartTimeFromDemoTime(draft.demoTime);
+    try {
+      await this.auth.updateDemoBooking(draft.id, {
+        name: draft.name.trim(),
+        email: draft.email.trim(),
+        teamName: draft.teamName.trim(),
+        demoDate: draft.demoDate,
+        demoTime: draft.demoTime.trim(),
+        demoStartTime,
+        demoDateTime: this.buildDemoDateTime(
+          draft.demoDate,
+          demoStartTime || draft.demoTime
+        ),
+        notes: draft.notes.trim(),
+      });
+      this.cancelEdit();
+    } catch (error) {
+      console.error('Could not update booking', error);
+      alert('Could not update this booking. Please try again.');
+    } finally {
+      this.savingId = null;
+    }
+  }
+
+  async deleteBooking(booking: DemoBooking): Promise<void> {
+    if (!booking.id) return;
+    const label = booking.teamName || booking.name || booking.email;
+    const confirmed = window.confirm(`Delete this booking for ${label}?`);
+    if (!confirmed) return;
+
+    this.deletingId = booking.id;
+    try {
+      await this.auth.deleteDemoBooking(booking.id);
+      if (this.editingId === booking.id) {
+        this.cancelEdit();
+      }
+    } catch (error) {
+      console.error('Could not delete booking', error);
+      alert('Could not delete this booking. Please try again.');
+    } finally {
+      this.deletingId = null;
+    }
+  }
+
+  private getStartTimeFromDemoTime(demoTime = ''): string {
+    return demoTime.split('-')[0].trim();
+  }
+
+  private buildDemoDateTime(dateValue: string, timeValue: string): number {
+    const startTime = this.getStartTimeFromDemoTime(timeValue);
+    const [time, meridian] = startTime.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (meridian === 'PM' && hours < 12) hours += 12;
+    if (meridian === 'AM' && hours === 12) hours = 0;
+
+    const date = new Date(`${dateValue}T00:00:00`);
+    date.setHours(hours || 0, minutes || 0, 0, 0);
+    return date.getTime();
   }
 
   /** Download visible rows to CSV */
