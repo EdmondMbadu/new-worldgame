@@ -836,7 +836,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       );
       this.currentSolution.participants = participants as any;
       this.getMembers();
-      await this.sendEmailToParticipant(email);
+      await this.sendEmailToParticipant(email, 'designer');
       return true;
     } catch (error) {
       console.error('Error adding participant:', error);
@@ -859,7 +859,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       );
       this.currentSolution.evaluators = evaluators;
       this.getEvaluators();
-      await this.sendEmailToParticipant(email);
+      await this.sendEmailToParticipant(email, 'evaluator');
       return true;
     } catch (error) {
       console.error('Error adding evaluator:', error);
@@ -907,7 +907,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       );
       this.currentSolution.chosenAdmins = updated;
       this.admins = updated;
-      await this.sendEmailToParticipant(adminUser.email);
+      await this.sendEmailToParticipant(adminUser.email, 'admin');
       return true;
     } catch (error) {
       console.error('Error adding admin:', error);
@@ -966,7 +966,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
         .catch((error) => {
           alert('Error occured while adding a team member. Try Again!');
         });
-      await this.sendEmailToParticipant(this.newTeamMember);
+      await this.sendEmailToParticipant(this.newTeamMember, 'designer');
       this.newTeamMember = '';
     } else {
       alert('Enter a valid email!');
@@ -976,15 +976,17 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   addEvaluatorToSolution() {
     let evaluators: any = [];
     if (this.data.isValidEmail(this.newEvaluator)) {
+      const evaluatorEmail = this.newEvaluator;
       evaluators = this.currentSolution.evaluators;
-      evaluators.push({ name: this.newEvaluator });
+      evaluators.push({ name: evaluatorEmail });
 
       this.solution
         .addEvaluatorsToSolution(evaluators, this.currentSolution.solutionId!)
         .then(() => {
-          alert(`Successfully added ${this.newEvaluator} as an evaluator.`);
+          alert(`Successfully added ${evaluatorEmail} as an evaluator.`);
           this.getEvaluators();
           this.toggle('showAddEvaluator');
+          void this.sendEmailToParticipant(evaluatorEmail, 'evaluator');
         })
         .catch((error) => {
           alert('Error occured while adding an evaluator. Try Again!');
@@ -1130,7 +1132,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  async sendEmailToParticipant(email: string) {
+  async sendEmailToParticipant(email: string, role: InviteRole = 'designer') {
     const sendParticipantInvite = this.fns.httpsCallable('sendParticipantInvite');
 
     try {
@@ -1140,6 +1142,13 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       );
       const isRegisteredUser = users && users.length > 0;
       const inviterName = `${this.auth.currentUser.firstName || ''} ${this.auth.currentUser.lastName || ''}`.trim() || 'A team member';
+      const solutionRouteId = this.currentSolution.solutionId || this.id;
+      const rolePath =
+        role === 'evaluator'
+          ? `https://newworld-game.org/problem-feedback/${solutionRouteId}`
+          : role === 'designer'
+            ? `https://newworld-game.org/dashboard/${solutionRouteId}`
+            : `https://newworld-game.org/solution-details/${solutionRouteId}`;
 
       const emailData = {
         email,
@@ -1147,8 +1156,9 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
         title: this.currentSolution.title || 'Solution Lab',
         description: this.currentSolution.description || '',
         image: this.currentSolution.image || '',
-        path: `https://newworld-game.org/playground-steps/${this.currentSolution.solutionId}`,
+        path: rolePath,
         type: 'solution',
+        inviteRole: role,
         recipientName: isRegisteredUser ? `${users[0].firstName || ''} ${users[0].lastName || ''}`.trim() : '',
         isNewUser: !isRegisteredUser,
       };

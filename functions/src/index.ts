@@ -10246,6 +10246,13 @@ export const sendParticipantInvite = functions.https.onCall(
     const inviteType = (data?.type || 'solution').toString().trim(); // 'solution', 'challenge', 'workspace'
     const recipientName = (data?.recipientName || '').toString().trim();
     const isNewUser = data?.isNewUser === true;
+    const inviteRole = (data?.inviteRole || data?.role || '')
+      .toString()
+      .trim()
+      .toLowerCase();
+    const isRoleAssignment =
+      inviteType === 'solution' &&
+      (inviteRole === 'designer' || inviteRole === 'evaluator');
 
     if (!recipientEmail || !emailRegex.test(recipientEmail)) {
       throw new functions.https.HttpsError(
@@ -10272,6 +10279,11 @@ export const sendParticipantInvite = functions.https.onCall(
     const safeProjectImage = projectImage ? escapeHtml(projectImage) : '';
     const safeWorkspaceLogo = workspaceLogo ? escapeHtml(workspaceLogo) : '';
     const brandLogoUrl = `${APP_BASE_URL.replace(/\/$/, '')}/assets/img/earth-triangle-test.png`;
+    const roleLabel = inviteRole === 'evaluator' ? 'evaluator' : 'designer';
+    const roleArticle = inviteRole === 'evaluator' ? 'an' : 'a';
+    const roleBadge = inviteRole === 'evaluator' ? 'Evaluator Added' : 'Designer Added';
+    const roleCtaText =
+      inviteRole === 'evaluator' ? 'Open Evaluation' : 'Open Team Dashboard';
     
     // Determine the invite type label
     const typeLabels: Record<string, string> = {
@@ -10289,10 +10301,16 @@ export const sendParticipantInvite = functions.https.onCall(
 
     // CTA button text based on user status
     const ctaText = isNewUser 
-      ? 'Create Account & Join' 
-      : 'View Invitation';
+      ? isRoleAssignment
+        ? 'Create Account & Open'
+        : 'Create Account & Join'
+      : isRoleAssignment
+        ? roleCtaText
+        : 'View Invitation';
 
-    const subject = `${inviterName} invited you to join "${projectTitle}" on NewWorld Game`;
+    const subject = isRoleAssignment
+      ? `${inviterName} added you as ${roleArticle} ${roleLabel} for "${projectTitle}" on NewWorld Game`
+      : `${inviterName} invited you to join "${projectTitle}" on NewWorld Game`;
 
     const html = `
 <!DOCTYPE html>
@@ -10355,7 +10373,7 @@ export const sendParticipantInvite = functions.https.onCall(
                     <table role="presentation" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
                       <tr>
                         <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 8px 16px; border-radius: 9999px;">
-                          <span style="color:#ffffff; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">You're Invited</span>
+                          <span style="color:#ffffff; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">${isRoleAssignment ? roleBadge : "You're Invited"}</span>
                         </td>
                       </tr>
                     </table>
@@ -10367,7 +10385,9 @@ export const sendParticipantInvite = functions.https.onCall(
                     
                     <!-- Main Message -->
                     <p style="margin:0 0 24px; font-size:16px; color:#334155; line-height:1.6;">
-                      <strong style="color:#0f172a;">${safeInviter}</strong> has invited you to collaborate on a ${typeLabel} on NewWorld Game.
+                      ${isRoleAssignment
+                        ? `You have been added as ${roleArticle} <strong style="color:#0f172a;">${roleLabel}</strong> for this solution on NewWorld Game.`
+                        : `<strong style="color:#0f172a;">${safeInviter}</strong> has invited you to collaborate on a ${typeLabel} on NewWorld Game.`}
                     </p>
 
                     ${safeWorkspaceLogo ? `
@@ -10434,7 +10454,9 @@ export const sendParticipantInvite = functions.https.onCall(
           <tr>
             <td style="padding: 32px 20px; text-align:center;">
               <p style="margin:0 0 8px; font-size:13px; color:#94a3b8;">
-                This invitation was sent by ${safeInviter} via NewWorld Game.
+                ${isRoleAssignment
+                  ? `This ${roleLabel} notification was sent by ${safeInviter} via NewWorld Game.`
+                  : `This invitation was sent by ${safeInviter} via NewWorld Game.`}
               </p>
               <p style="margin:0; font-size:12px; color:#94a3b8;">
                 © ${new Date().getFullYear()} NewWorld Game · <a href="https://newworld-game.org" style="color:#64748b; text-decoration:underline;">newworld-game.org</a>
@@ -10450,7 +10472,20 @@ export const sendParticipantInvite = functions.https.onCall(
 </html>
     `.trim();
 
-    const text = `${greeting}
+    const text = isRoleAssignment
+      ? `${greeting}
+
+You have been added as ${roleArticle} ${roleLabel} for "${projectTitle}" on NewWorld Game.
+
+${safeDescription ? `About this solution: ${projectDescription}\n\n` : ''}Open your ${roleLabel === 'evaluator' ? 'evaluation page' : 'team dashboard'}: ${inviteUrl}
+
+---
+What is NewWorld Game?
+NewWorld Game is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
+
+This ${roleLabel} notification was sent by ${inviterName} via NewWorld Game.
+`
+      : `${greeting}
 
 ${inviterName} has invited you to collaborate on "${projectTitle}" on NewWorld Game.
 
