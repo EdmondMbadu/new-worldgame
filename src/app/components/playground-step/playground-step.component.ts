@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  ViewChild,
 } from '@angular/core';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
@@ -25,6 +26,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { ActivityService } from 'src/app/services/activity.service';
 import { DataService } from 'src/app/services/data.service';
 import { LanguageService } from 'src/app/services/language.service';
+import { ChatbotComponent } from '../chatbot/chatbot.component';
 
 type StepSupportedLanguage = 'en' | 'fr';
 
@@ -104,6 +106,7 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
   @Input() questionsTitles: string[] = [];
   @Input() stepNumber: number = 0;
   @Output() buttonInfoEvent = new EventEmitter<number>();
+  @ViewChild('buckyChat') buckyChat?: ChatbotComponent;
   contentsArray: string[] = [];
   public isUpdatingContent = false;
   public editorInstance: any;
@@ -1067,6 +1070,14 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   }
   openPopups(index: number) {
     this.clickedDisplayPopups[index] = true;
+  }
+
+  openAskBucky(index?: number) {
+    if (typeof index === 'number') {
+      this.clickedDisplayPopups[index] = false;
+      this.displayPopups[index] = false;
+    }
+    this.buckyChat?.openBot();
   }
 
   onHoverChangeTitle() {

@@ -629,6 +629,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     }
   }
 
+  openBot() {
+    if (!this.showBot) {
+      this.showBot = true;
+    }
+    this.showAiSelector = false;
+  }
+
   toggleInsertMenu(index: number): void {
     if (this.showInsertMenu === index) {
       this.showInsertMenu = null;
