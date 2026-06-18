@@ -23,6 +23,7 @@ interface SchedulerConfig {
   meetingTitle: string;
   meetingDescription: string;
   durationText: string;
+  availabilityText?: string;
   introText: string;
   scheduledLabel: string;
   detailsTitle: string;
@@ -93,6 +94,7 @@ export class SchedulerComponent implements OnInit {
     meetingDescription:
       'Team prep meeting for Global Solutions Lab 2026 solution presentations.',
     durationText: '30 min',
+    availabilityText: 'Available Saturday, June 20 and Sunday, June 21, 2026.',
     introText:
       'Schedule your team prep meeting with Medard Gabel for Global Solutions Lab 2026. Bring your team name and the main points you want to review before presentations.',
     scheduledLabel: 'Your Team Meeting',
