@@ -51,11 +51,17 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   isAdmin = false;
   showUnmute = false;
   showAddVideoModal = false;
+  showEditVideoModal = false;
   isSavingVideo = false;
+  isUpdatingVideo = false;
+  isDeletingVideo = false;
   addVideoError = '';
+  editVideoError = '';
   sortBy: VideoSort = 'latest';
   selectedVideoFile: File | null = null;
+  selectedReplacementVideoFile: File | null = null;
   uploadProgress: number | null = null;
+  replaceUploadProgress: number | null = null;
 
   mainVideo!: Video;
   previousVideos: Video[] = [];
@@ -64,8 +70,15 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   videoForm = {
     title: '',
+    speaker: '',
     tagline: '',
   };
+  editVideoForm = {
+    title: '',
+    speaker: '',
+    tagline: '',
+  };
+  editingVideo: Video | null = null;
 
   private readonly newsCollection = 'nwgNewsVideos';
   private readonly curatedVideos: Video[] = [
@@ -227,6 +240,28 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     document.body.style.overflow = '';
   }
 
+  openEditVideoModal(video: Video) {
+    if (!this.canManageVideo(video)) return;
+    this.editingVideo = video;
+    this.editVideoError = '';
+    this.selectedReplacementVideoFile = null;
+    this.replaceUploadProgress = null;
+    this.editVideoForm = {
+      title: video.title || '',
+      speaker: video.speaker || '',
+      tagline: video.tagline || '',
+    };
+    this.showEditVideoModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeEditVideoModal() {
+    if (this.isUpdatingVideo) return;
+    this.showEditVideoModal = false;
+    this.resetEditVideoForm();
+    document.body.style.overflow = '';
+  }
+
   async addVideo() {
     if (!this.isAdmin || this.isSavingVideo) return;
     this.addVideoError = '';
@@ -270,7 +305,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
       await docRef.set({
         title,
         url,
-        speaker: '',
+        speaker: this.videoForm.speaker.trim(),
         thumbUrl: '',
         tagline: this.videoForm.tagline.trim(),
         source: 'admin',
@@ -296,6 +331,117 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  async updateVideo() {
+    if (!this.isAdmin || this.isUpdatingVideo || !this.editingVideo?.id) return;
+    if (!this.canManageVideo(this.editingVideo)) return;
+    this.editVideoError = '';
+
+    const title = this.editVideoForm.title.trim();
+    if (!title) {
+      this.editVideoError = 'Add a title for this video.';
+      return;
+    }
+
+    const replacement = this.selectedReplacementVideoFile;
+    if (replacement && !replacement.type.startsWith('video/')) {
+      this.editVideoError = 'Choose a valid replacement video file.';
+      return;
+    }
+
+    this.isUpdatingVideo = true;
+    const docRef = this.afs.collection<Video>(this.newsCollection).doc(this.editingVideo.id);
+    const updates: Partial<Video> & { updatedAt?: any; updatedBy?: string } = {
+      title,
+      speaker: this.editVideoForm.speaker.trim(),
+      tagline: this.editVideoForm.tagline.trim(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: this.auth.currentUser?.uid || '',
+    };
+
+    let oldStoragePathToDelete = '';
+    let progressSub: Subscription | undefined;
+
+    try {
+      if (replacement) {
+        const now = Date.now();
+        const safeName = this.safeFileName(replacement.name);
+        const year = new Date(now).getFullYear();
+        const storagePath = `${this.newsCollection}/videos/${year}/${this.editingVideo.id}-${safeName}`;
+        const storageRef = this.storage.ref(storagePath);
+        const task = this.storage.upload(storagePath, replacement, {
+          contentType: replacement.type,
+          customMetadata: {
+            uploadedBy: this.auth.currentUser?.uid || '',
+            originalName: replacement.name,
+            replacedVideoId: this.editingVideo.id,
+          },
+        });
+        progressSub = task.percentageChanges().subscribe((progress) => {
+          this.replaceUploadProgress = Math.round(progress || 0);
+        });
+
+        await lastValueFrom(task.snapshotChanges());
+        const url = await lastValueFrom(storageRef.getDownloadURL());
+        oldStoragePathToDelete = this.editingVideo.storagePath || '';
+        updates.url = url;
+        updates.youtubeId = null;
+        updates.storagePath = storagePath;
+        updates.fileName = replacement.name;
+        updates.contentType = replacement.type;
+        updates.size = replacement.size;
+      }
+
+      await docRef.update(updates as any);
+
+      if (oldStoragePathToDelete && oldStoragePathToDelete !== updates.storagePath) {
+        await this.deleteStorageFile(oldStoragePathToDelete);
+      }
+
+      this.showEditVideoModal = false;
+      this.resetEditVideoForm();
+      document.body.style.overflow = '';
+    } catch (error) {
+      console.error('Could not update NWG news video', error);
+      this.editVideoError = 'Could not update this video. Please try again.';
+    } finally {
+      progressSub?.unsubscribe();
+      this.isUpdatingVideo = false;
+      this.replaceUploadProgress = null;
+    }
+  }
+
+  async deleteVideo(video: Video) {
+    if (!this.canManageVideo(video) || !video.id || this.isDeletingVideo) return;
+    const confirmed = window.confirm(`Delete "${video.title}" from NWG News?`);
+    if (!confirmed) return;
+
+    this.isDeletingVideo = true;
+    try {
+      await this.afs.collection(this.newsCollection).doc(video.id).delete();
+      if (video.storagePath) {
+        await this.deleteStorageFile(video.storagePath);
+      }
+      if (this.mainVideo?.id === video.id) {
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { v: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      }
+      if (this.editingVideo?.id === video.id) {
+        this.showEditVideoModal = false;
+        this.resetEditVideoForm();
+        document.body.style.overflow = '';
+      }
+    } catch (error) {
+      console.error('Could not delete NWG news video', error);
+      alert('Could not delete this video. Please try again.');
+    } finally {
+      this.isDeletingVideo = false;
+    }
+  }
+
   onVideoFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
@@ -304,6 +450,17 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uploadProgress = null;
     if (file && !this.videoForm.title.trim()) {
       this.videoForm.title = this.titleFromFileName(file.name);
+    }
+  }
+
+  onReplacementVideoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    this.selectedReplacementVideoFile = file;
+    this.editVideoError = '';
+    this.replaceUploadProgress = null;
+    if (file && !this.editVideoForm.title.trim()) {
+      this.editVideoForm.title = this.titleFromFileName(file.name);
     }
   }
 
@@ -339,6 +496,10 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getDisplayDate(video: Video): number | null {
     return video.createdAtMs || null;
+  }
+
+  canManageVideo(video: Video | null | undefined): boolean {
+    return !!this.isAdmin && !!video?.id && video.source === 'admin';
   }
 
   private refreshVideosFromSources() {
@@ -433,11 +594,24 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private resetVideoForm() {
     this.videoForm = {
       title: '',
+      speaker: '',
       tagline: '',
     };
     this.selectedVideoFile = null;
     this.uploadProgress = null;
     this.addVideoError = '';
+  }
+
+  private resetEditVideoForm() {
+    this.editVideoForm = {
+      title: '',
+      speaker: '',
+      tagline: '',
+    };
+    this.editingVideo = null;
+    this.selectedReplacementVideoFile = null;
+    this.replaceUploadProgress = null;
+    this.editVideoError = '';
   }
 
   private titleFromFileName(fileName: string): string {
@@ -455,6 +629,14 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
       .replace(/-+/g, '-')
       .replace(/^-+|-+$/g, '');
     return cleaned || `video-${Date.now()}.mp4`;
+  }
+
+  private async deleteStorageFile(storagePath: string) {
+    try {
+      await lastValueFrom(this.storage.ref(storagePath).delete());
+    } catch (error) {
+      console.warn('Could not delete stored NWG news video file', error);
+    }
   }
 
   private async autoPlayWithAudio() {
