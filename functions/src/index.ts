@@ -4953,6 +4953,151 @@ function ensureAuthed(context: functions.https.CallableContext) {
   }
 }
 
+const TEXT_IMPORT_ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'text/markdown',
+  'text/csv',
+]);
+
+const TEXT_IMPORT_ALLOWED_EXTENSIONS = new Set([
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.txt',
+  '.md',
+  '.csv',
+]);
+
+const TEXT_IMPORT_MAX_BYTES = 8 * 1024 * 1024;
+const TEXT_IMPORT_MAX_CHARS = 120000;
+
+function normalizeTextImportMime(mimeType: unknown, fileName: unknown): string {
+  const rawMime = String(mimeType || '').toLowerCase().split(';')[0].trim();
+  const lowerName = String(fileName || '').toLowerCase();
+  if (rawMime) return rawMime;
+  if (lowerName.endsWith('.pdf')) return 'application/pdf';
+  if (lowerName.endsWith('.docx')) {
+    return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+  }
+  if (lowerName.endsWith('.doc')) return 'application/msword';
+  if (lowerName.endsWith('.txt')) return 'text/plain';
+  if (lowerName.endsWith('.md')) return 'text/markdown';
+  if (lowerName.endsWith('.csv')) return 'text/csv';
+  return 'application/octet-stream';
+}
+
+function hasAllowedTextImportExtension(fileName: unknown): boolean {
+  const lowerName = String(fileName || '').toLowerCase();
+  return Array.from(TEXT_IMPORT_ALLOWED_EXTENSIONS).some((extension) =>
+    lowerName.endsWith(extension)
+  );
+}
+
+function cleanExtractedDocumentText(value: unknown): string {
+  return String(value || '')
+    .replace(/\u0000/g, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, TEXT_IMPORT_MAX_CHARS);
+}
+
+export const extractDocumentText = functions
+  .runWith({ timeoutSeconds: 60, memory: '512MB' })
+  .https.onCall(async (data: any, context: functions.https.CallableContext) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Sign in to extract document text.'
+      );
+    }
+
+    const fileName = String(data?.fileName || 'document').slice(0, 240);
+    const mime = normalizeTextImportMime(data?.mimeType, fileName);
+
+    if (
+      !TEXT_IMPORT_ALLOWED_MIME_TYPES.has(mime) &&
+      !hasAllowedTextImportExtension(fileName)
+    ) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Upload a PDF, DOCX, DOC, TXT, Markdown, or CSV file.'
+      );
+    }
+
+    const rawBase64 = String(data?.fileBase64 || '').replace(
+      /^data:[^;]+;base64,/,
+      ''
+    );
+    if (!rawBase64) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'No document content was provided.'
+      );
+    }
+
+    const buffer = Buffer.from(rawBase64, 'base64');
+    if (!buffer.length) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'The selected document is empty.'
+      );
+    }
+    if (buffer.length > TEXT_IMPORT_MAX_BYTES) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Choose a file smaller than 8 MB.'
+      );
+    }
+
+    try {
+      if (mime === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore - no types published for pdf-parse
+        const pdfMod: any = await import('pdf-parse');
+        const parsePdf = pdfMod.default || pdfMod;
+        const { text } = await parsePdf(buffer);
+        return { text: cleanExtractedDocumentText(text) };
+      }
+
+      if (
+        mime ===
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        fileName.toLowerCase().endsWith('.docx')
+      ) {
+        const { value } = await mammoth.extractRawText({ buffer });
+        return { text: cleanExtractedDocumentText(value) };
+      }
+
+      if (mime === 'application/msword' || fileName.toLowerCase().endsWith('.doc')) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          'Legacy .doc files cannot always be read here. Save the document as .docx and upload it again.'
+        );
+      }
+
+      return { text: cleanExtractedDocumentText(buffer.toString('utf8')) };
+    } catch (error: any) {
+      if (error instanceof functions.https.HttpsError) {
+        throw error;
+      }
+      console.error('extractDocumentText failed:', {
+        fileName,
+        mime,
+        message: error?.message || error,
+      });
+      throw new functions.https.HttpsError(
+        'internal',
+        'Could not extract text from this document.'
+      );
+    }
+  });
+
 type BulkEmailAttachmentInput = {
   name?: string;
   filename?: string;

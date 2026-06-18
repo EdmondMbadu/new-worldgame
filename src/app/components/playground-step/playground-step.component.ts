@@ -21,7 +21,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { TimeService } from 'src/app/services/time.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { environment } from 'environments/environments';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { ActivityService } from 'src/app/services/activity.service';
 import { DataService } from 'src/app/services/data.service';
 import { LanguageService } from 'src/app/services/language.service';
@@ -114,6 +114,13 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
   updateTitleBox: boolean = false;
   isEditingTitle = false;
   isSavingTitle = false;
+  showTextImportModal = false;
+  textImportTargetIndex: number | null = null;
+  textImportFile: File | null = null;
+  textImportPaste = '';
+  textImportMode: 'append' | 'replace' = 'append';
+  isExtractingText = false;
+  textImportError = '';
 
   isLoading: boolean = false;
 
@@ -470,6 +477,200 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.showVideoModal = false;
     this.currentVideo = ''; // ② stop the stream
     document.body.style.overflow = '';
+  }
+
+  openTextImportModal(index: number) {
+    this.textImportTargetIndex = index;
+    this.textImportFile = null;
+    this.textImportPaste = '';
+    this.textImportMode = 'append';
+    this.textImportError = '';
+    this.showTextImportModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeTextImportModal() {
+    if (this.isExtractingText) return;
+    this.resetTextImportModal();
+  }
+
+  onTextImportFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    this.textImportFile = file;
+    this.textImportError = '';
+  }
+
+  async applyTextImport() {
+    if (this.textImportTargetIndex === null) return;
+
+    this.textImportError = '';
+    const pastedText = this.textImportPaste.trim();
+
+    if (!this.textImportFile && !pastedText) {
+      this.textImportError = 'Paste text or choose a PDF, DOCX, DOC, or TXT file.';
+      return;
+    }
+
+    this.isExtractingText = true;
+    try {
+      let extractedText = pastedText;
+      if (this.textImportFile) {
+        extractedText = await this.extractTextFromFile(this.textImportFile);
+      }
+
+      const normalizedText = this.normalizeExtractedText(extractedText);
+      if (!normalizedText) {
+        this.textImportError = 'No readable text was found in that document.';
+        return;
+      }
+
+      await this.insertExtractedText(
+        this.textImportTargetIndex,
+        normalizedText,
+        this.textImportMode
+      );
+      this.resetTextImportModal();
+      this.saveSuccess = true;
+    } catch (error: any) {
+      console.error('Document text import failed', error);
+      this.textImportError =
+        error?.message ||
+        'Could not extract text from this file. Try a PDF, DOCX, DOC, or TXT file.';
+    } finally {
+      this.isExtractingText = false;
+    }
+  }
+
+  private async extractTextFromFile(file: File): Promise<string> {
+    const maxFileBytes = 8 * 1024 * 1024;
+    if (file.size > maxFileBytes) {
+      throw new Error('Choose a file smaller than 8 MB.');
+    }
+
+    if (file.type.startsWith('text/') || /\.txt$/i.test(file.name)) {
+      return await file.text();
+    }
+
+    const base64 = await this.readFileAsBase64(file);
+    const extractDocumentText = this.fns.httpsCallable('extractDocumentText');
+    const result: any = await firstValueFrom(
+      extractDocumentText({
+        fileBase64: base64,
+        mimeType: file.type || this.guessMimeType(file.name),
+        fileName: file.name,
+      })
+    );
+    return result?.text || '';
+  }
+
+  private resetTextImportModal() {
+    this.showTextImportModal = false;
+    this.textImportTargetIndex = null;
+    this.textImportFile = null;
+    this.textImportPaste = '';
+    this.textImportError = '';
+    document.body.style.overflow = '';
+  }
+
+  private readFileAsBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const value = String(reader.result || '');
+        resolve(value.includes(',') ? value.split(',').pop() || '' : value);
+      };
+      reader.onerror = () => reject(new Error('Could not read this file.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  private guessMimeType(fileName: string): string {
+    const lowerName = fileName.toLowerCase();
+    if (lowerName.endsWith('.pdf')) return 'application/pdf';
+    if (lowerName.endsWith('.docx')) {
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    }
+    if (lowerName.endsWith('.doc')) return 'application/msword';
+    if (lowerName.endsWith('.txt')) return 'text/plain';
+    return 'application/octet-stream';
+  }
+
+  private normalizeExtractedText(text: string): string {
+    return String(text || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  private async insertExtractedText(
+    index: number,
+    text: string,
+    mode: 'append' | 'replace'
+  ): Promise<void> {
+    const importedHtml = this.plainTextToEditorHtml(text);
+    const isStrategyTarget = this.isStrategyReviewStep && this.strategyReviewSelected;
+
+    if (isStrategyTarget) {
+      const current = this.strategyReview || '';
+      this.strategyReview =
+        mode === 'append' && current
+          ? `${current}<p>&nbsp;</p>${importedHtml}`
+          : importedHtml;
+      this.lastLocalEditTime = Date.now();
+      this.cdRef.detectChanges();
+      await this.solution.saveSolutionStrategyReview(
+        this.solutionId,
+        this.strategyReview
+      );
+      this.lastSavedStrategyReview = this.strategyReview || '';
+      return;
+    }
+
+    const current = this.contentsArray[index] || '';
+    const nextContent =
+      mode === 'append' && current
+        ? `${current}<p>&nbsp;</p>${importedHtml}`
+        : importedHtml;
+    const nextContentsArray = [...this.contentsArray];
+    nextContentsArray[index] = nextContent;
+    this.contentsArray = nextContentsArray;
+    this.lastLocalEditTime = Date.now();
+    this.cdRef.detectChanges();
+
+    if (this.questionsTitles[index]) {
+      this.questionsAndAnswersTracker![this.questionsTitles[index]] = nextContent;
+      await this.solution.saveSolutionStatus(
+        this.solutionId,
+        this.questionsAndAnswersTracker
+      );
+      const nextStaticArray = [...this.staticContentArray];
+      nextStaticArray[index] = nextContent;
+      this.staticContentArray = nextStaticArray;
+      if (this.currentSolution.status) {
+        this.currentSolution.status[this.questionsTitles[index]] = nextContent;
+      }
+    }
+  }
+
+  private plainTextToEditorHtml(text: string): string {
+    return text
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+      .map((paragraph) => `<p>${this.escapeHtml(paragraph).replace(/\n/g, '<br>')}</p>`)
+      .join('');
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
   updatePlayground(current: number) {
     // only save data if both are different.
