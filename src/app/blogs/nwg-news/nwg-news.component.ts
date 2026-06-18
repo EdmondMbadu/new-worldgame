@@ -9,9 +9,10 @@ import {
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
-import { Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
 
 interface Video {
@@ -26,6 +27,10 @@ interface Video {
   createdAt?: any;
   createdBy?: string;
   youtubeId?: string | null;
+  storagePath?: string;
+  fileName?: string;
+  contentType?: string;
+  size?: number;
 }
 
 type VideoSort = 'latest' | 'oldest' | 'title';
@@ -49,6 +54,8 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   isSavingVideo = false;
   addVideoError = '';
   sortBy: VideoSort = 'latest';
+  selectedVideoFile: File | null = null;
+  uploadProgress: number | null = null;
 
   mainVideo!: Video;
   previousVideos: Video[] = [];
@@ -57,9 +64,6 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   videoForm = {
     title: '',
-    url: '',
-    speaker: '',
-    thumbUrl: '',
     tagline: '',
   };
 
@@ -157,6 +161,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     public auth: AuthService,
     private afs: AngularFirestore,
+    private storage: AngularFireStorage,
     private route: ActivatedRoute,
     private router: Router,
     private sanitizer: DomSanitizer
@@ -226,34 +231,54 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.isAdmin || this.isSavingVideo) return;
     this.addVideoError = '';
 
-    const title = this.videoForm.title.trim();
-    const url = this.videoForm.url.trim();
-    if (!title || !url) {
-      this.addVideoError = 'Add a title and video URL.';
+    const file = this.selectedVideoFile;
+    const title = (this.videoForm.title.trim() || this.titleFromFileName(file?.name || '')).trim();
+    if (!file) {
+      this.addVideoError = 'Choose a video file to upload.';
       return;
     }
-    if (!/^https?:\/\//i.test(url)) {
-      this.addVideoError = 'Use a full https:// video URL.';
+    if (!file.type.startsWith('video/')) {
+      this.addVideoError = 'Choose a valid video file.';
+      return;
+    }
+    if (!title) {
+      this.addVideoError = 'Add a title for this video.';
       return;
     }
 
     this.isSavingVideo = true;
     const docRef = this.afs.collection(this.newsCollection).doc();
     const now = Date.now();
-    const youtubeId = this.extractYouTubeId(url);
-    const thumbUrl =
-      this.videoForm.thumbUrl.trim() ||
-      (youtubeId ? this.youtubeThumbUrl(youtubeId) : '');
+    const safeName = this.safeFileName(file.name);
+    const year = new Date(now).getFullYear();
+    const storagePath = `${this.newsCollection}/videos/${year}/${docRef.ref.id}-${safeName}`;
+    const storageRef = this.storage.ref(storagePath);
+    const task = this.storage.upload(storagePath, file, {
+      contentType: file.type,
+      customMetadata: {
+        uploadedBy: this.auth.currentUser?.uid || '',
+        originalName: file.name,
+      },
+    });
+    const progressSub = task.percentageChanges().subscribe((progress) => {
+      this.uploadProgress = Math.round(progress || 0);
+    });
 
     try {
+      await lastValueFrom(task.snapshotChanges());
+      const url = await lastValueFrom(storageRef.getDownloadURL());
       await docRef.set({
         title,
         url,
-        speaker: this.videoForm.speaker.trim(),
-        thumbUrl,
+        speaker: '',
+        thumbUrl: '',
         tagline: this.videoForm.tagline.trim(),
         source: 'admin',
-        youtubeId,
+        youtubeId: null,
+        storagePath,
+        fileName: file.name,
+        contentType: file.type,
+        size: file.size,
         createdAtMs: now,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         createdBy: this.auth.currentUser?.uid || '',
@@ -265,7 +290,20 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
       console.error('Could not add NWG news video', error);
       this.addVideoError = 'Could not add this video. Please try again.';
     } finally {
+      progressSub.unsubscribe();
       this.isSavingVideo = false;
+      this.uploadProgress = null;
+    }
+  }
+
+  onVideoFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    this.selectedVideoFile = file;
+    this.addVideoError = '';
+    this.uploadProgress = null;
+    if (file && !this.videoForm.title.trim()) {
+      this.videoForm.title = this.titleFromFileName(file.name);
     }
   }
 
@@ -397,12 +435,28 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private resetVideoForm() {
     this.videoForm = {
       title: '',
-      url: '',
-      speaker: '',
-      thumbUrl: '',
       tagline: '',
     };
+    this.selectedVideoFile = null;
+    this.uploadProgress = null;
     this.addVideoError = '';
+  }
+
+  private titleFromFileName(fileName: string): string {
+    return fileName
+      .replace(/\.[^.]+$/, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private safeFileName(fileName: string): string {
+    const cleaned = fileName
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return cleaned || `video-${Date.now()}.mp4`;
   }
 
   private async autoPlayWithAudio() {
