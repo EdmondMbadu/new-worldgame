@@ -350,10 +350,8 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.allVideos.length) return;
 
     const requestedId = this.route.snapshot.queryParamMap.get('v');
-    const currentId = this.mainVideo?.id;
     const candidate =
       this.allVideos.find((v) => v.id === requestedId) ||
-      this.allVideos.find((v) => v.id === currentId) ||
       this.allVideos[0];
 
     this.setMainVideo(candidate, false);
