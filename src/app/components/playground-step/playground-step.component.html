@@ -279,7 +279,45 @@
         (See "Ask Bucky: Additional Prompts".)
       </a>
     </span>
-                    <button (click)="openPopups(i)" (mouseenter)="onHoverPopup(i)" (mouseleave)="onLeavePopup(i)" type="button"><svg class="w-5 h-5 ms-2  text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg><span class="sr-only">Show information</span></button>
+                    <span class="relative inline-flex align-middle" (mouseenter)="onHoverPopup(i)" (mouseleave)="onLeavePopup(i)">
+                      <button
+                        (click)="openPopups(i)"
+                        type="button"
+                        class="group relative align-middle"
+                        aria-label="Show useful resources">
+                        <svg class="w-5 h-5 ms-2 text-gray-400 transition group-hover:text-sky-600 group-focus-visible:text-sky-600 dark:group-hover:text-sky-300 dark:group-focus-visible:text-sky-300" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9.1 9a3 3 0 115.2 2.04c-.82.48-1.3 1.02-1.3 1.96" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 17h.01" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="sr-only">Show useful resources</span>
+                      </button>
+                      <span
+                        *ngIf="displayPopups[i] || clickedDisplayPopups[i]"
+                        role="tooltip"
+                        class="absolute left-1/2 top-full z-30 mt-2 w-72 -translate-x-1/2 rounded-xl border border-slate-200 bg-white p-3 text-left text-sm text-slate-600 opacity-100 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:ring-white/10">
+                        <button
+                          type="button"
+                          class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white"
+                          (click)="closePopups(i)"
+                          aria-label="Close useful resources">
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                          </svg>
+                        </button>
+                        <span class="block pr-7 font-semibold text-slate-900 dark:text-white">
+                          Helpful starting points
+                        </span>
+                        <span class="mt-2 block text-xs leading-5 text-slate-500 dark:text-slate-400">
+                          Ask Bucky for a quick draft, or use trusted SDG data sources.
+                        </span>
+                        <span class="mt-3 flex flex-col gap-2">
+                          <a href="https://unstats.un.org/UNSDWebsite/undatacommons/sdgs?mc_cid=c5616bfc7b&mc_eid=a10d6deccb" target="_blank" class="font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">UN Data Commons</a>
+                          <a href="https://datatopics.worldbank.org/sdgatlas/?lang=en" target="_blank" class="font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Atlas of SDGs</a>
+                          <a href="https://ourworldindata.org/sdgs" target="_blank" class="font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">SDG Tracker</a>
+                        </span>
+                      </span>
+                    </span>
                     <button
                       (click)="openTextImportModal(i)"
                       type="button"
@@ -294,41 +332,6 @@
                       </span>
                       <span class="sr-only">Import text from a document</span>
                     </button></h2>
-                
-                    
-                <div *ngIf="displayPopups[i] || clickedDisplayPopups[i]" role="tooltip" class="absolute z-10 -mt-[4rem] ml-[40rem]   inline-block    text-sm mb-2 text-gray-500  bg-white border border-gray-200 rounded-lg shadow-sm  w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" (click)="closePopups(i)">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                        </svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                    <div class="p-3 space-y-2">
-                        <h3 class="font-semibold text-gray-900 dark:text-white">Click on <span class="text-blue-500"> Ask Bucky</span>  to help answer questions quickly or go to</h3>
-                    
-                        <a href="https://unstats.un.org/UNSDWebsite/undatacommons/sdgs?mc_cid=c5616bfc7b&mc_eid=a10d6deccb" target="_blank" class="flex items-center font-medium text-blue-600 dark:text-blue-500 dark:hover:text-blue-600 hover:text-blue-700 hover:underline"> UN Data Commons <svg class="w-2 h-2 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-
-                        </svg></a> <h3 class="font-semibold text-gray-900 dark:text-white"> and/or</h3> 
-                    
-                        <a href="https://datatopics.worldbank.org/sdgatlas/?lang=en" target="_blank" class="flex items-center font-medium text-blue-600 dark:text-blue-500 dark:hover:text-blue-600 hover:text-blue-700 hover:underline">Atlas of SDGs <svg class="w-2 h-2 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-
-                        </svg></a> <h3 class="font-semibold text-gray-900 dark:text-white"> and/or</h3> 
-
-                    
-                        <a href="https://ourworldindata.org/sdgs" target="_blank" class="flex items-center font-medium text-blue-600 dark:text-blue-500 dark:hover:text-blue-600 hover:text-blue-700 hover:underline">SDG Tracker <svg class="w-2 h-2 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-            
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-
-                        </svg></a>
-                <h3 class="font-semibold text-gray-900 dark:text-white">For more detailed info </h3>
-                    
-                    </div>
-                    <div data-popper-arrow></div>
-                </div>
                 
             </header>
             <div class="md:max-w-full  sm:mx-auto  " id="box-{{i}}">
