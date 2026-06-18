@@ -5811,14 +5811,75 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
   };
 });
 
+function parseClockTime(time: string): { hours: number; minutes: number } {
+  const normalized = String(time || '').trim().split('-')[0].trim();
+  const match = normalized.match(/^(\d{1,2}):(\d{2})\s*([AP]M)$/i);
+  if (!match) {
+    return { hours: 9, minutes: 0 };
+  }
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const meridian = match[3].toUpperCase();
+  if (meridian === 'PM' && hours < 12) hours += 12;
+  if (meridian === 'AM' && hours === 12) hours = 0;
+
+  return { hours, minutes };
+}
+
+function getTimeZoneOffsetMinutes(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    timeZoneName: 'shortOffset',
+  }).formatToParts(date);
+  const zoneName = parts.find((part) => part.type === 'timeZoneName')?.value;
+  const match = zoneName?.match(/^GMT([+-])(\d{1,2})(?::(\d{2}))?$/);
+  if (!match) {
+    return -300;
+  }
+
+  const sign = match[1] === '+' ? 1 : -1;
+  const hours = Number(match[2]);
+  const minutes = Number(match[3] || 0);
+  return sign * (hours * 60 + minutes);
+}
+
+function buildUtcDateFromBooking(
+  dateValue: string,
+  timeValue: string,
+  timeZone = 'America/New_York'
+): Date {
+  const [year, month, day] = String(dateValue).split('-').map(Number);
+  const { hours, minutes } = parseClockTime(timeValue);
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+  const offsetMinutes = getTimeZoneOffsetMinutes(utcGuess, timeZone);
+  return new Date(utcGuess.getTime() - offsetMinutes * 60_000);
+}
+
 export const sendDemoInvite = functions.firestore
   .document('demoBookings/{demoId}')
   .onCreate(async (snap) => {
     const data = snap.data(); // bracket notation everywhere
 
     /* 1 ║ Build start / end time */
-    const startEST = new Date(`${data['demoDate']} ${data['demoTime']} EST`);
-    const startUTC = new Date(startEST.getTime() + 5 * 60 * 60 * 1000);
+    const meetingLink = 'https://meet.google.com/pea-twnz-uwn';
+    const isGslPrep = data['bookingType'] === 'gsl2026Prep';
+    const meetingTitle =
+      data['meetingTitle'] ||
+      (isGslPrep
+        ? 'Team meeting with Medard Gabel for Global Solutions Lab 2026 prep'
+        : 'NewWorld Game Workshop');
+    const meetingDescription =
+      data['meetingDescription'] ||
+      (isGslPrep
+        ? 'Team prep meeting for Global Solutions Lab 2026 solution presentations.'
+        : 'Live NewWorld Game workshop with the NewWorld team.');
+    const timeZone = data['bookingTimeZone'] || 'America/New_York';
+    const startUTC = buildUtcDateFromBooking(
+      data['demoDate'],
+      data['demoStartTime'] || data['demoTime'],
+      timeZone
+    );
     functions.logger.info('SG key starts with', API_KEY.slice(0, 10));
 
     /* 2 ║ Build .ics attachment */
@@ -5826,7 +5887,9 @@ export const sendDemoInvite = functions.firestore
       startUTC,
       data['name'],
       data['email'],
-      'https://meet.google.com/pea-twnz-uwn'
+      meetingLink,
+      meetingTitle,
+      meetingDescription
     );
 
     const attachment = {
@@ -5837,8 +5900,14 @@ export const sendDemoInvite = functions.firestore
     };
 
     /* 3 ║ Message subjects */
-    const userSubject = `✅ NewWorld Game Workshop – ${data['demoDate']} ${data['demoTime']} EST`;
-    const opsSubject = `📆 Demo booked – ${data['name']} – ${data['demoDate']} ${data['demoTime']} EST`;
+    const userSubject = isGslPrep
+      ? `✅ GSL 2026 prep meeting - ${data['demoDate']} ${data['demoTime']} ET`
+      : `✅ NewWorld Game Workshop – ${data['demoDate']} ${data['demoTime']} EST`;
+    const opsSubject = isGslPrep
+      ? `📆 GSL team meeting booked - ${data['teamName'] || 'Team'} - ${
+          data['demoDate']
+        } ${data['demoTime']} ET`
+      : `📆 Demo booked – ${data['name']} – ${data['demoDate']} ${data['demoTime']} EST`;
 
     /* 4 ║ Build messages */
     const userMsg = {
@@ -5851,7 +5920,7 @@ export const sendDemoInvite = functions.firestore
         firstName: data['name'].split(' ')[0] ?? '',
         date: data['demoDate'],
         time: data['demoTime'],
-        meetingLink: 'https://meet.google.com/pea-twnz-uwn',
+        meetingLink,
       },
       attachments: [attachment],
     };
@@ -5860,7 +5929,13 @@ export const sendDemoInvite = functions.firestore
       to: 'newworld@newworld-game.org',
       from: 'newworld@newworld-game.org',
       subject: opsSubject,
-      text: `${data['name']} booked ${data['demoDate']} at ${data['demoTime']} EST\nNotes: ${data['notes']}`,
+      text: isGslPrep
+        ? `${data['name']} booked a GSL 2026 prep team meeting with Medard Gabel.\nTeam: ${
+            data['teamName'] || 'Not provided'
+          }\nSlot: ${data['demoDate']} ${data['demoTime']} ET\nEmail: ${
+            data['email']
+          }\nNotes: ${data['notes'] || ''}`
+        : `${data['name']} booked ${data['demoDate']} at ${data['demoTime']} EST\nNotes: ${data['notes']}`,
       attachments: [attachment],
     };
 

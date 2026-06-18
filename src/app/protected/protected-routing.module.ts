@@ -182,6 +182,11 @@ const routes: Routes = [
   },
   { path: 'scheduler', component: SchedulerComponent },
   {
+    path: 'gsl2026-prep',
+    component: SchedulerComponent,
+    data: { scheduleType: 'gsl2026Prep' },
+  },
+  {
     path: 'document-files/:solutionId/presentation/:presentationId',
     component: PresentationViewerComponent,
     canActivate: [AuthGuard],

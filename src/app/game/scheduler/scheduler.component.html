@@ -37,25 +37,25 @@
 
         <!-- Left Column: Static Information & Summary -->
         <div class="p-8 border-r border-slate-200 dark:border-slate-700">
-          <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">NewWorld Game Workshop</h1>
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">{{ config.eventTitle }}</h1>
           <div class="flex items-center text-slate-500 dark:text-slate-400 mb-6">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>30 min</span>
+            <span>{{ config.durationText }}</span>
           </div>
           
           <!-- General Info -->
           <div *ngIf="step < 3">
          <p class="text-slate-600 dark:text-slate-300">
-            Join a Live NewWorld Game Workshop with our team to experience the NewWorld Game firsthand. This is not just a demo — you’ll actively take part in the thinking process behind the game, exploring how it helps individuals and teams organize knowledge, tackle real-world challenges, and co-create meaningful solutions. Together, we’ll walk through the platform’s unique tools and philosophy—rooted in Buckminster Fuller’s vision of systems thinking and planetary stewardship.
+            {{ config.introText }}
         </p>
 
           </div>
 
           <!-- Show selected time on Step 2 and 3 -->
           <div *ngIf="step > 1" class="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
-              <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Your Scheduled Demo</h2>
+              <h2 class="text-lg font-semibold text-slate-900 dark:text-white">{{ config.scheduledLabel }}</h2>
               <div class="flex items-center text-blue-600 dark:text-blue-400 mt-4">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                   <span>{{ selectedDate | date:'fullDate' }}</span>
@@ -69,6 +69,7 @@
           <!-- Confirmation Details on Step 3 -->
           <div *ngIf="step === 3" class="mt-4">
             <p class="text-slate-600 dark:text-slate-300">A calendar invitation has been sent to <strong class="text-slate-800 dark:text-slate-100">{{ userEmail }}</strong>.</p>
+            <p *ngIf="teamName" class="text-slate-600 dark:text-slate-300 mt-2">Team: <strong class="text-slate-800 dark:text-slate-100">{{ teamName }}</strong></p>
           </div>
 
         </div>
@@ -123,14 +124,14 @@
                 <div class="flex flex-col space-y-2 max-h-60 overflow-y-auto pr-2">
                   <button *ngFor="let time of availableTimes" 
                         (click)="selectTime(time)"
-                        [class.bg-blue-600]="time === selectedTime"
-                        [class.text-white]="time === selectedTime"
-                        [class.text-slate-700]="time !== selectedTime"
-                        [class.dark:text-slate-200]="time !== selectedTime"
-                        [class.border-blue-500]="time === selectedTime"
-                        [class.hover:border-blue-500]="time !== selectedTime"
+                        [class.bg-blue-600]="time.label === selectedTime"
+                        [class.text-white]="time.label === selectedTime"
+                        [class.text-slate-700]="time.label !== selectedTime"
+                        [class.dark:text-slate-200]="time.label !== selectedTime"
+                        [class.border-blue-500]="time.label === selectedTime"
+                        [class.hover:border-blue-500]="time.label !== selectedTime"
                         class="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg text-center transition-colors">
-                        {{ time }}
+                        {{ time.label }}
                 </button>
 
                   
@@ -148,7 +149,7 @@
 
           <!-- STEP 2: User Details -->
           <div *ngIf="step === 2">
-            <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Enter Your Details</h2>
+            <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">{{ config.detailsTitle }}</h2>
             <form>
               <div class="mb-4">
                 <label for="name" class="block text-slate-600 dark:text-slate-300 mb-2">Name</label>
@@ -158,8 +159,12 @@
                 <label for="email" class="block text-slate-600 dark:text-slate-300 mb-2">Email</label>
                 <input type="email" id="email" [(ngModel)]="userEmail" name="email" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               </div>
+              <div *ngIf="config.requireTeamName" class="mb-4">
+                <label for="teamName" class="block text-slate-600 dark:text-slate-300 mb-2">Team Name</label>
+                <input type="text" id="teamName" [(ngModel)]="teamName" name="teamName" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              </div>
               <div class="mb-6">
-                <label for="notes" class="block text-slate-600 dark:text-slate-300 mb-2">What questions do you have about NewWorld Game? </label>
+                <label for="notes" class="block text-slate-600 dark:text-slate-300 mb-2">{{ config.notesLabel }}</label>
                 <textarea id="notes" [(ngModel)]="notes" name="notes" rows="4" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
               </div>
               <div class="flex justify-between items-center">
@@ -167,11 +172,11 @@
                   Back
                 </button>
                 <button type="button" (click)="submitDemo()" 
-                        [disabled]="!userName || !userEmail"
-                        [class.opacity-50]="!userName || !userEmail"
-                        [class.cursor-not-allowed]="!userName || !userEmail"
+                        [disabled]="!userName || !userEmail || (config.requireTeamName && !teamName)"
+                        [class.opacity-50]="!userName || !userEmail || (config.requireTeamName && !teamName)"
+                        [class.cursor-not-allowed]="!userName || !userEmail || (config.requireTeamName && !teamName)"
                         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-                  Schedule Demo
+                  {{ config.submitLabel }}
                 </button>
               </div>
             </form>
@@ -182,8 +187,8 @@
             <div class="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
             </div>
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Demo Scheduled!</h2>
-            <p class="text-slate-600 dark:text-slate-300 mt-2">Thank you, {{ userName }}. Your demo is confirmed.</p>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ config.confirmationTitle }}</h2>
+            <p class="text-slate-600 dark:text-slate-300 mt-2">Thank you, {{ userName }}. {{ config.confirmationText }}</p>
           </div>
 
           <!-- STEP 4 : Final Thank-You -->
@@ -223,5 +228,4 @@
     </div>
   </div>
 </div>
-
 

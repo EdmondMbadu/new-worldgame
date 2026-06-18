@@ -45,10 +45,18 @@ export interface DemoBooking {
   id?: string; // populated automatically when reading
   demoDate: string; // ISO date portion – e.g. “2025-07-22”
   demoTime: string; // “02:30 PM”
+  demoStartTime?: string; // start time used for calendar invites when demoTime is a range
   demoDateTime: number; // milliseconds since epoch, for easy sorting
   name: string;
   email: string;
+  teamName?: string;
   notes?: string;
+  bookingType?: 'demo' | 'gsl2026Prep';
+  eventSlug?: string;
+  eventTitle?: string;
+  meetingTitle?: string;
+  meetingDescription?: string;
+  bookingTimeZone?: string;
   createdAt: number; // server timestamp
   uid?: string; // if the user was logged-in
 }

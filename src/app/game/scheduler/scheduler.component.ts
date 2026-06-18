@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 
 // Define a type for the day object used in the calendar
@@ -8,6 +9,32 @@ interface CalendarDay {
   isCurrentMonth: boolean;
   isPast: boolean;
   isValidBookingDay: boolean;
+}
+
+interface TimeSlot {
+  label: string;
+  startsAt: string;
+}
+
+interface SchedulerConfig {
+  bookingType: 'demo' | 'gsl2026Prep';
+  eventSlug?: string;
+  eventTitle: string;
+  meetingTitle: string;
+  meetingDescription: string;
+  durationText: string;
+  introText: string;
+  scheduledLabel: string;
+  detailsTitle: string;
+  notesLabel: string;
+  submitLabel: string;
+  confirmationTitle: string;
+  confirmationText: string;
+  requireNotes: boolean;
+  requireTeamName: boolean;
+  fixedSlots?: Record<string, TimeSlot[]>;
+  initialMonth?: Date;
+  bookingTimeZone: string;
 }
 
 @Component({
@@ -22,7 +49,8 @@ export class SchedulerComponent implements OnInit {
   // --- Date & Time Selection (Step 1) ---
   public selectedDate: Date | null = null;
   public selectedTime: string | null = null;
-  public availableTimes: string[] = [];
+  public selectedStartTime: string | null = null;
+  public availableTimes: TimeSlot[] = [];
 
   // --- Calendar Properties ---
   public currentMonthDate: Date = new Date();
@@ -32,15 +60,85 @@ export class SchedulerComponent implements OnInit {
   // --- User Details (Step 2) ---
   public userName = '';
   public userEmail = '';
+  public teamName = '';
   public notes = '';
   isLoggedIn: boolean = false;
-  constructor(public auth: AuthService) {
+
+  private readonly defaultConfig: SchedulerConfig = {
+    bookingType: 'demo',
+    eventTitle: 'NewWorld Game Workshop',
+    meetingTitle: 'NewWorld Game Workshop',
+    meetingDescription:
+      'Live NewWorld Game workshop with the NewWorld team.',
+    durationText: '30 min',
+    introText:
+      'Join a live NewWorld Game workshop with our team. We will walk through the platform, the thinking process behind the game, and how teams can use it to organize knowledge and design practical solutions.',
+    scheduledLabel: 'Your Scheduled Demo',
+    detailsTitle: 'Enter Your Details',
+    notesLabel: 'What questions do you have about NewWorld Game?',
+    submitLabel: 'Schedule Demo',
+    confirmationTitle: 'Demo Scheduled!',
+    confirmationText: 'Your demo is confirmed.',
+    requireNotes: true,
+    requireTeamName: false,
+    bookingTimeZone: 'America/New_York',
+  };
+
+  private readonly gslPrepConfig: SchedulerConfig = {
+    bookingType: 'gsl2026Prep',
+    eventSlug: 'gsl2026-prep',
+    eventTitle: 'Global Solutions Lab 2026 Prep',
+    meetingTitle:
+      'Team meeting with Medard Gabel for Global Solutions Lab 2026 prep',
+    meetingDescription:
+      'Team prep meeting for Global Solutions Lab 2026 solution presentations.',
+    durationText: '30 min',
+    introText:
+      'Schedule your team prep meeting with Medard Gabel for Global Solutions Lab 2026. Bring your team name and the main points you want to review before presentations.',
+    scheduledLabel: 'Your Team Meeting',
+    detailsTitle: 'Team Meeting Details',
+    notesLabel: 'Anything Medard should know before the meeting? (optional)',
+    submitLabel: 'Schedule Team Meeting',
+    confirmationTitle: 'Team Meeting Scheduled!',
+    confirmationText: 'Your Global Solutions Lab 2026 prep meeting is confirmed.',
+    requireNotes: false,
+    requireTeamName: true,
+    bookingTimeZone: 'America/New_York',
+    initialMonth: new Date(2026, 5, 1),
+    fixedSlots: {
+      '2026-06-20': [
+        { label: '12:00 PM - 12:30 PM', startsAt: '12:00 PM' },
+        { label: '12:30 PM - 1:00 PM', startsAt: '12:30 PM' },
+        { label: '1:00 PM - 1:30 PM', startsAt: '1:00 PM' },
+        { label: '1:30 PM - 2:00 PM', startsAt: '1:30 PM' },
+        { label: '4:00 PM - 4:30 PM', startsAt: '4:00 PM' },
+      ],
+      '2026-06-21': [
+        { label: '11:00 AM - 11:30 AM', startsAt: '11:00 AM' },
+        { label: '11:30 AM - 12:00 PM', startsAt: '11:30 AM' },
+        { label: '12:00 PM - 12:30 PM', startsAt: '12:00 PM' },
+        { label: '12:30 PM - 1:00 PM', startsAt: '12:30 PM' },
+        { label: '1:00 PM - 1:30 PM', startsAt: '1:00 PM' },
+      ],
+    },
+  };
+
+  public config: SchedulerConfig = this.defaultConfig;
+
+  constructor(public auth: AuthService, private route: ActivatedRoute) {
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
     });
   }
 
   ngOnInit(): void {
+    this.config =
+      this.route.snapshot.data['scheduleType'] === 'gsl2026Prep'
+        ? this.gslPrepConfig
+        : this.defaultConfig;
+    if (this.config.initialMonth) {
+      this.currentMonthDate = new Date(this.config.initialMonth);
+    }
     // Initialize the calendar with the current month and year
     this.generateCalendar();
   }
@@ -84,13 +182,17 @@ export class SchedulerComponent implements OnInit {
     for (let i = 1; i <= totalDaysInMonth; i++) {
       const date = new Date(year, month, i);
       const dayOfWeek = date.getDay(); // 5 = Friday, 6 = Saturday
+      const dateKey = this.toDateKey(date);
+      const hasFixedSlots = !!this.config.fixedSlots?.[dateKey]?.length;
 
       this.monthDays.push({
         day: i,
         date: date,
         isCurrentMonth: true,
         isPast: date < today,
-        isValidBookingDay: dayOfWeek === 5 || dayOfWeek === 6,
+        isValidBookingDay: this.config.fixedSlots
+          ? hasFixedSlots
+          : dayOfWeek === 5 || dayOfWeek === 6,
       });
     }
 
@@ -121,6 +223,7 @@ export class SchedulerComponent implements OnInit {
     this.generateCalendar();
     this.selectedDate = null; // Reset selection when changing month
     this.selectedTime = null;
+    this.selectedStartTime = null;
   }
 
   // --- Selection Logic ---
@@ -132,6 +235,12 @@ export class SchedulerComponent implements OnInit {
   selectDate(date: Date): void {
     this.selectedDate = date;
     this.selectedTime = null; // Reset time when a new date is selected
+    this.selectedStartTime = null;
+    const fixedSlots = this.config.fixedSlots?.[this.toDateKey(date)];
+    if (fixedSlots) {
+      this.availableTimes = fixedSlots;
+      return;
+    }
     // In a real app, you would fetch available times for the selected date from a backend.
     // Here, we generate dummy times for demonstration.
     this.availableTimes = [
@@ -139,11 +248,11 @@ export class SchedulerComponent implements OnInit {
       // '09:30 AM',
       // '10:00 AM',
       // '10:30 AM',
-      '02:00 PM',
-      '02:30 PM',
-      '03:00 PM',
-      '03:30 PM',
-      '04:00 PM',
+      { label: '02:00 PM', startsAt: '02:00 PM' },
+      { label: '02:30 PM', startsAt: '02:30 PM' },
+      { label: '03:00 PM', startsAt: '03:00 PM' },
+      { label: '03:30 PM', startsAt: '03:30 PM' },
+      { label: '04:00 PM', startsAt: '04:00 PM' },
     ];
   }
 
@@ -160,8 +269,9 @@ export class SchedulerComponent implements OnInit {
    * Handles the click event on a time slot.
    * @param time The selected time string (e.g., "09:00 AM").
    */
-  selectTime(time: string): void {
-    this.selectedTime = time;
+  selectTime(slot: TimeSlot): void {
+    this.selectedTime = slot.label;
+    this.selectedStartTime = slot.startsAt;
   }
 
   // --- Step Navigation ---
@@ -195,14 +305,16 @@ export class SchedulerComponent implements OnInit {
       !this.userEmail ||
       !this.selectedDate ||
       !this.selectedTime ||
-      !this.notes
+      !this.selectedStartTime ||
+      (this.config.requireTeamName && !this.teamName.trim()) ||
+      (this.config.requireNotes && !this.notes.trim())
     ) {
       alert('Please fill out all fields.');
       return;
     }
 
     // Combine date + time into a single UTC millisecond value for sorting
-    const [time, meridian] = this.selectedTime.split(' ');
+    const [time, meridian] = this.selectedStartTime.split(' ');
     let [hours, minutes] = time.split(':').map(Number);
     if (meridian === 'PM' && hours < 12) hours += 12;
     if (meridian === 'AM' && hours === 12) hours = 0;
@@ -211,17 +323,32 @@ export class SchedulerComponent implements OnInit {
     fullDateTime.setHours(hours, minutes, 0, 0);
 
     await this.auth.addDemoScheduled({
-      demoDate: this.selectedDate.toISOString().substring(0, 10),
+      demoDate: this.toDateKey(this.selectedDate),
       demoTime: this.selectedTime,
+      demoStartTime: this.selectedStartTime,
       demoDateTime: fullDateTime.getTime(),
       name: this.userName,
       email: this.userEmail,
+      teamName: this.teamName.trim(),
       notes: this.notes || '',
+      bookingType: this.config.bookingType,
+      eventSlug: this.config.eventSlug,
+      eventTitle: this.config.eventTitle,
+      meetingTitle: this.config.meetingTitle,
+      meetingDescription: this.config.meetingDescription,
+      bookingTimeZone: this.config.bookingTimeZone,
       uid: this.auth.currentUser?.uid || null,
       createdAt: Date.now(), // will be overwritten by serverTimestamp()
     });
 
     this.step = 3; // Confirmation view
     // setTimeout(() => (this.step = 4), 1600); // 1.6-second pop to step 4
+  }
+
+  private toDateKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

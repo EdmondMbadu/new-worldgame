@@ -10,7 +10,9 @@ export function buildICS(
   startUTC: Date, // workshop start, already in UTC
   name: string,
   email: string,
-  meetingLink: string
+  meetingLink: string,
+  summary = 'NewWorld Game Workshop',
+  description = 'Live hands-on workshop with the NewWorld team'
 ) {
   const endUTC = new Date(startUTC.getTime() + 30 * 60_000);
   const uid = randomUUID();
@@ -26,8 +28,8 @@ UID:${uid}
 DTSTAMP:${toICS(new Date())}
 DTSTART:${toICS(startUTC)}
 DTEND:${toICS(endUTC)}
-SUMMARY:NewWorld Game Workshop
-DESCRIPTION:Live hands-on workshop with the NewWorld team – ${meetingLink}
+SUMMARY:${summary}
+DESCRIPTION:${description} - ${meetingLink}
 LOCATION:${meetingLink}
 ORGANIZER;CN=NewWorld Team:MAILTO:newworld@newworld-game.org
 ATTENDEE;CN=${name};RSVP=TRUE:MAILTO:${email}

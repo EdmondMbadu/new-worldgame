@@ -13,6 +13,7 @@ export class ManagementDemoComponent implements OnInit {
   search = '';
   isLoggedIn = false;
   expandedNotes: Set<string> = new Set();
+  bookingView: 'all' | 'demo' | 'gsl2026Prep' = 'all';
 
   constructor(public auth: AuthService) {}
 
@@ -56,13 +57,29 @@ export class ManagementDemoComponent implements OnInit {
 
   applyFilter(): void {
     const q = this.search.toLowerCase().trim();
-    this.filtered = this.bookings.filter(
-      (b) =>
+    this.filtered = this.bookings.filter((b) => {
+      const bookingType = b.bookingType || 'demo';
+      const matchesView =
+        this.bookingView === 'all' || bookingType === this.bookingView;
+      const matchesSearch =
         b.name.toLowerCase().includes(q) ||
         b.email.toLowerCase().includes(q) ||
+        (b.teamName || '').toLowerCase().includes(q) ||
+        (b.eventTitle || '').toLowerCase().includes(q) ||
         b.demoDate.includes(q) ||
-        b.demoTime.toLowerCase().includes(q)
-    );
+        b.demoTime.toLowerCase().includes(q);
+
+      return matchesView && matchesSearch;
+    });
+  }
+
+  setBookingView(view: 'all' | 'demo' | 'gsl2026Prep'): void {
+    this.bookingView = view;
+    this.applyFilter();
+  }
+
+  getBookingTypeLabel(booking: DemoBooking): string {
+    return booking.bookingType === 'gsl2026Prep' ? 'GSL Team Meeting' : 'Demo';
   }
 
   getBookingKey(booking: DemoBooking): string {
@@ -95,12 +112,17 @@ export class ManagementDemoComponent implements OnInit {
       [
         `${i + 1}. ${b.name}`,
         b.email,
+        this.getBookingTypeLabel(b),
+        b.teamName || '',
         `${b.demoDate} ${b.demoTime}`,
         `"${b.notes?.replace(/"/g, '""') || ''}"`,
         new Date(b.createdAt).toLocaleString(), // <-- Add this line
       ].join(',')
     );
-    const csv = ['Name,Email,Slot,Notes,Scheduled At', ...rows].join('\r\n');
+    const csv = [
+      'Name,Email,Type,Team,Slot,Notes,Scheduled At',
+      ...rows,
+    ].join('\r\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
