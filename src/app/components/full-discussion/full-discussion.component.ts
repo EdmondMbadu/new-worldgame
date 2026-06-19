@@ -487,7 +487,31 @@ Please choose a file under 5 MB.`);
   }
 
   getParticipantAvatar(participant?: ParticipantInfo | null): string {
-    return participant?.avatarPath || '';
+    const profile = this.getParticipantProfile(participant);
+    return this.getUserAvatarUrl(profile) || participant?.avatarPath || '';
+  }
+
+  getParticipantProfile(participant?: ParticipantInfo | null): User | null {
+    const uid = String(participant?.uid || '').trim();
+    if (!uid || participant?.isAI || uid.startsWith('ai-')) return null;
+    return this.commentAuthorProfiles[uid] || null;
+  }
+
+  getParticipantRoute(participant?: ParticipantInfo | null): string[] | null {
+    const uid = String(participant?.uid || '').trim();
+    if (!uid || participant?.isAI || uid.startsWith('ai-')) return null;
+
+    if (this.auth.currentUser?.uid && uid === this.auth.currentUser.uid) {
+      return ['/profile'];
+    }
+
+    return ['/user-profile', uid];
+  }
+
+  getParticipantDisplayName(participant?: ParticipantInfo | null): string {
+    const profile = this.getParticipantProfile(participant);
+    const fullName = `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim();
+    return fullName || profile?.email || participant?.displayName || 'NewWorld Game member';
   }
 
   async sendOnEnter(event: Event): Promise<void> {
@@ -692,6 +716,10 @@ Please choose a file under 5 MB.`);
         const currentEmail = (this.auth.currentUser?.email || '').trim().toLowerCase();
         const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
         if (normalizedEmail === currentEmail && currentUid) {
+          this.commentAuthorProfiles = {
+            ...this.commentAuthorProfiles,
+            [currentUid]: this.auth.currentUser,
+          };
           participants.push({
             email: normalizedEmail,
             displayName:
@@ -712,6 +740,12 @@ Please choose a file under 5 MB.`);
           
           if (userQuery && userQuery.length > 0) {
             const user: any = userQuery[0];
+            if (user.uid) {
+              this.commentAuthorProfiles = {
+                ...this.commentAuthorProfiles,
+                [user.uid]: { ...user, uid: user.uid },
+              };
+            }
             participants.push({
               email: normalizedEmail,
               displayName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || normalizedEmail,
