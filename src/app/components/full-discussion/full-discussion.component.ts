@@ -116,6 +116,7 @@ export class FullDiscussionComponent
   private participantPresenceSub?: Subscription;
   private lastReadMarkerKey = '';
   highlightedMessageId = '';
+  commentAuthorProfiles: Record<string, User | null | undefined> = {};
 
   constructor(
     private afs: AngularFirestore,
@@ -166,6 +167,7 @@ export class FullDiscussionComponent
           }
           this.markCurrentDiscussionRead();
           this.scrollToRouteMessage();
+          this.hydrateCommentAuthorProfiles();
           const qp = this.activatedRoute.snapshot.queryParamMap;
           const qpTitle = qp.get('title');
           if (qpTitle) this.currentSolution.title = qpTitle;
@@ -204,6 +206,7 @@ export class FullDiscussionComponent
       });
       this.markCurrentDiscussionRead();
       this.scrollToRouteMessage();
+      this.hydrateCommentAuthorProfiles();
 
       // Once data is loaded, scroll to bottom
       if (!this.hasRouteMessageId()) {
@@ -327,6 +330,7 @@ Please choose a file under 5 MB.`);
       // helper visible immediately in the UI
       displayTime: this.time.formatDateStringComment(nowIso),
     };
+    this.cacheCurrentUserProfile();
     if (this.pendingFiles.length) {
       msg.attachments = [];
       for (const file of this.pendingFiles) {
@@ -419,6 +423,118 @@ Please choose a file under 5 MB.`);
   }
   getInitial(name: string = ''): string {
     return (name.trim()[0] || '?').toUpperCase();
+  }
+
+  getCommentAuthorProfile(comment?: Comment | null): User | null {
+    const uid = this.getHumanAuthorId(comment);
+    return uid ? this.commentAuthorProfiles[uid] || null : null;
+  }
+
+  getCommentAuthorRoute(comment?: Comment | null): string[] | null {
+    const uid = this.getHumanAuthorId(comment);
+    if (!uid) return null;
+
+    if (this.auth.currentUser?.uid && uid === this.auth.currentUser.uid) {
+      return ['/profile'];
+    }
+
+    return ['/user-profile', uid];
+  }
+
+  getCommentAuthorDisplayName(comment?: Comment | null): string {
+    const author = this.getCommentAuthorProfile(comment);
+    const fullName = `${author?.firstName || ''} ${author?.lastName || ''}`.trim();
+
+    return (
+      fullName ||
+      author?.email ||
+      comment?.authorName ||
+      'NewWorld Game member'
+    );
+  }
+
+  getCommentAuthorInitials(comment?: Comment | null): string {
+    const name = this.getCommentAuthorDisplayName(comment);
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+
+    if (parts.length === 1 && parts[0].length >= 2) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+
+    return 'NW';
+  }
+
+  getCommentAuthorAvatar(comment?: Comment | null): string {
+    const author = this.getCommentAuthorProfile(comment);
+    return (
+      author?.profilePicture?.downloadURL ||
+      author?.profilePicPath ||
+      comment?.profilePic ||
+      ''
+    );
+  }
+
+  getUserCount(
+    user: User | null | undefined,
+    countKey: 'followers' | 'following',
+    arrayKey: 'followersArray' | 'followingArray'
+  ): string | number {
+    return user?.[countKey] || user?.[arrayKey]?.length || 0;
+  }
+
+  private getHumanAuthorId(comment?: Comment | null): string {
+    const uid = String(comment?.authorId || '').trim();
+    if (!uid || comment?.isAI || uid.startsWith('ai-')) return '';
+    return uid;
+  }
+
+  private cacheCurrentUserProfile(): void {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    this.commentAuthorProfiles = {
+      ...this.commentAuthorProfiles,
+      [uid]: this.auth.currentUser,
+    };
+  }
+
+  private async hydrateCommentAuthorProfiles(): Promise<void> {
+    const uids = Array.from(
+      new Set(
+        (this.comments || [])
+          .map((comment) => this.getHumanAuthorId(comment))
+          .filter(Boolean)
+      )
+    ).filter((uid) => !(uid in this.commentAuthorProfiles));
+
+    if (!uids.length) return;
+
+    const loadedProfiles = await Promise.all(
+      uids.map(async (uid) => {
+        if (this.auth.currentUser?.uid === uid) {
+          return [uid, this.auth.currentUser as User] as const;
+        }
+
+        try {
+          const profile = await firstValueFrom(this.auth.getAUser(uid));
+          return [uid, profile ? { ...profile, uid: profile.uid || uid } : null] as const;
+        } catch (error) {
+          console.error('Unable to load discussion comment author', error);
+          return [uid, null] as const;
+        }
+      })
+    );
+
+    this.commentAuthorProfiles = loadedProfiles.reduce(
+      (profiles, [uid, profile]) => ({
+        ...profiles,
+        [uid]: profile,
+      }),
+      { ...this.commentAuthorProfiles }
+    );
   }
 
   /** --- Methods --- */

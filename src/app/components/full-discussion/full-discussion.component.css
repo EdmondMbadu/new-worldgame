@@ -1,0 +1,20 @@
+.comment-author-trigger .comment-author-preview {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.comment-author-trigger:hover .comment-author-preview,
+.comment-author-trigger:focus-within .comment-author-preview {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.comment-author-preview__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}

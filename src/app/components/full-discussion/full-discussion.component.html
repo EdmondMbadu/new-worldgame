@@ -122,20 +122,54 @@
             [class.dark:bg-emerald-950]="highlightedMessageId && highlightedMessageId === comment.messageId"
           >
             <!-- Avatar with AI badge if applicable -->
-            <div class="relative flex-shrink-0">
-              <ng-container *ngIf="comment.profilePic; else letterAvatar">
-                <img [src]="comment.profilePic"
-                    alt="{{ comment.authorName }}"
-                    class="w-10 h-10 rounded-full object-cover" />
-              </ng-container>
+            <div
+              class="relative flex-shrink-0"
+              [class.comment-author-trigger]="getCommentAuthorRoute(comment)"
+            >
+              <a
+                *ngIf="getCommentAuthorRoute(comment) as authorRoute; else staticAvatar"
+                [routerLink]="authorRoute"
+                class="group/avatar block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-800"
+                [attr.aria-label]="'View profile for ' + getCommentAuthorDisplayName(comment)"
+              >
+                <ng-container *ngIf="getCommentAuthorAvatar(comment); else linkedLetterAvatar">
+                  <img
+                    [src]="getCommentAuthorAvatar(comment)"
+                    alt="{{ getCommentAuthorDisplayName(comment) }}"
+                    class="w-10 h-10 rounded-full object-cover transition group-hover/avatar:ring-2 group-hover/avatar:ring-emerald-400"
+                  />
+                </ng-container>
 
-              <ng-template #letterAvatar>
-                <div class="w-10 h-10 rounded-full bg-indigo-500
-                    flex items-center justify-center
-                    text-white font-semibold select-none">
-                  {{ getInitial(comment.authorName) }}
-                </div>
+                <ng-template #linkedLetterAvatar>
+                  <div class="w-10 h-10 rounded-full bg-indigo-500
+                      flex items-center justify-center
+                      text-white font-semibold select-none transition group-hover/avatar:ring-2 group-hover/avatar:ring-emerald-400">
+                    {{ getCommentAuthorInitials(comment) }}
+                  </div>
+                </ng-template>
+              </a>
+
+              <ng-template #staticAvatar>
+                <ng-container *ngIf="comment.profilePic; else letterAvatar">
+                  <img [src]="comment.profilePic"
+                      alt="{{ comment.authorName }}"
+                      class="w-10 h-10 rounded-full object-cover" />
+                </ng-container>
+
+                <ng-template #letterAvatar>
+                  <div class="w-10 h-10 rounded-full bg-indigo-500
+                      flex items-center justify-center
+                      text-white font-semibold select-none">
+                    {{ getInitial(comment.authorName) }}
+                  </div>
+                </ng-template>
               </ng-template>
+
+              <ng-container
+                *ngIf="getCommentAuthorRoute(comment)"
+                [ngTemplateOutlet]="authorPreview"
+                [ngTemplateOutletContext]="{ $implicit: comment }"
+              ></ng-container>
 
               <!-- AI Badge overlay on avatar -->
               <span *ngIf="comment.isAI"
@@ -185,9 +219,27 @@
                   </div>
 
               <div class="flex items-center space-x-2 text-sm flex-wrap">
-                <span class="font-semibold dark:text-gray-100 text-slate-800">
-                  {{ comment.authorName }}
+                <span
+                  *ngIf="getCommentAuthorRoute(comment) as authorRoute; else staticAuthorName"
+                  class="relative inline-flex comment-author-trigger"
+                >
+                  <a
+                    [routerLink]="authorRoute"
+                    class="font-semibold text-slate-800 transition hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-gray-100 dark:hover:text-emerald-300 dark:focus-visible:ring-offset-slate-800"
+                    [attr.aria-label]="'View profile for ' + getCommentAuthorDisplayName(comment)"
+                  >
+                    {{ getCommentAuthorDisplayName(comment) }}
+                  </a>
+                  <ng-container
+                    [ngTemplateOutlet]="authorPreview"
+                    [ngTemplateOutletContext]="{ $implicit: comment }"
+                  ></ng-container>
                 </span>
+                <ng-template #staticAuthorName>
+                  <span class="font-semibold dark:text-gray-100 text-slate-800">
+                    {{ comment.authorName }}
+                  </span>
+                </ng-template>
                 <!-- AI Assistant label next to name -->
                 <span *ngIf="comment.isAI"
                       class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium
@@ -479,4 +531,112 @@
       </div>
     </div>
   </div>
+
+<ng-template #authorPreview let-comment>
+  <span
+    class="comment-author-preview absolute left-0 top-full z-50 mt-2 w-[min(20rem,calc(100vw-3rem))] rounded-xl border border-slate-200 bg-white p-4 text-left text-sm shadow-xl shadow-slate-900/10 ring-1 ring-black/5 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40"
+  >
+    <ng-container *ngIf="getCommentAuthorProfile(comment) as author; else authorPreviewFallback">
+      <span class="flex items-center gap-3">
+        <span
+          class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-base font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        >
+          <img
+            *ngIf="getCommentAuthorAvatar(comment); else authorPreviewInitials"
+            [src]="getCommentAuthorAvatar(comment)"
+            [alt]="getCommentAuthorDisplayName(comment)"
+            class="h-full w-full object-cover"
+          />
+          <ng-template #authorPreviewInitials>
+            {{ getCommentAuthorInitials(comment) }}
+          </ng-template>
+        </span>
+        <span class="min-w-0">
+          <span class="block truncate text-base font-bold text-slate-950 dark:text-white">
+            {{ getCommentAuthorDisplayName(comment) }}
+          </span>
+          <span class="block truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+            {{ author.email }}
+          </span>
+        </span>
+      </span>
+
+      <span class="block pt-3">
+        <span
+          *ngIf="author.profileCredential"
+          class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200"
+        >
+          {{ author.profileCredential }}
+        </span>
+        <span
+          *ngIf="author.profileDescription"
+          class="comment-author-preview__description mb-3 block text-sm leading-5 text-slate-600 dark:text-slate-300"
+        >
+          {{ author.profileDescription }}
+        </span>
+        <span class="mb-3 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <span
+            *ngIf="author.location"
+            class="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800"
+          >
+            {{ author.location }}
+          </span>
+          <span
+            *ngIf="author.employement"
+            class="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800"
+          >
+            {{ author.employement }}
+          </span>
+        </span>
+        <span class="flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+          <span class="font-semibold text-slate-900 dark:text-white">
+            {{ getUserCount(author, 'followers', 'followersArray') }}
+            <span class="font-medium text-slate-500 dark:text-slate-400">followers</span>
+          </span>
+          <span class="font-semibold text-slate-900 dark:text-white">
+            {{ getUserCount(author, 'following', 'followingArray') }}
+            <span class="font-medium text-slate-500 dark:text-slate-400">following</span>
+          </span>
+          <a
+            *ngIf="getCommentAuthorRoute(comment) as authorRoute"
+            [routerLink]="authorRoute"
+            class="font-semibold text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200"
+          >
+            View profile
+          </a>
+        </span>
+      </span>
+    </ng-container>
+
+    <ng-template #authorPreviewFallback>
+      <span class="flex items-center gap-3">
+        <span
+          class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-base font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+        >
+          <img
+            *ngIf="getCommentAuthorAvatar(comment); else fallbackInitials"
+            [src]="getCommentAuthorAvatar(comment)"
+            [alt]="getCommentAuthorDisplayName(comment)"
+            class="h-full w-full object-cover"
+          />
+          <ng-template #fallbackInitials>
+            {{ getCommentAuthorInitials(comment) }}
+          </ng-template>
+        </span>
+        <span class="min-w-0">
+          <span class="block truncate text-base font-bold text-slate-950 dark:text-white">
+            {{ getCommentAuthorDisplayName(comment) }}
+          </span>
+          <span class="block text-xs font-medium text-slate-500 dark:text-slate-400">
+            Loading profile...
+          </span>
+        </span>
+      </span>
+    </ng-template>
+
+    <span
+      class="absolute -top-2 left-5 h-4 w-4 rotate-45 border-l border-t border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+    ></span>
+  </span>
+</ng-template>
   
