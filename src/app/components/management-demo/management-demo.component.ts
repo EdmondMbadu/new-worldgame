@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { DemoBooking } from 'src/app/models/tournament';
+import {
+  DemoBooking,
+  GslPrepEmailTemplate,
+} from 'src/app/models/tournament';
 import { AuthService } from 'src/app/services/auth.service';
 
 interface BookingEditDraft {
@@ -19,6 +22,25 @@ interface BookingEditDraft {
   styleUrl: './management-demo.component.css',
 })
 export class ManagementDemoComponent implements OnInit {
+  readonly defaultGslPrepEmailTemplate: GslPrepEmailTemplate = {
+    subject:
+      'Global Solutions Lab 2026 final presentation prep - {{date}} {{time}} ET',
+    eyebrow: 'Global Solutions Lab 2026',
+    headline: 'Final Presentation Prep Meeting',
+    subhead:
+      'A focused team meeting with Medard Gabel before the final presentations on Wednesday, June 24, 2026.',
+    intro:
+      'Your team prep meeting with Medard Gabel is confirmed. This session is for sharpening your Global Solutions Lab 2026 final presentation and clarifying the points your team wants to review before Wednesday.',
+    discussionHeading: 'Please come ready to discuss:',
+    discussionItems: [
+      "Your team's main solution and final presentation story.",
+      'The strongest points to make on Wednesday, June 24.',
+      "One or two questions where Medard's feedback would help most.",
+    ],
+    ctaLabel: 'Join the Google Meet',
+    signoff: 'Thank you,\nMedard Gabel and the NewWorld Team',
+  };
+
   bookings: DemoBooking[] = [];
   filtered: DemoBooking[] = [];
   search = '';
@@ -29,6 +51,14 @@ export class ManagementDemoComponent implements OnInit {
   editDraft: BookingEditDraft | null = null;
   savingId: string | null = null;
   deletingId: string | null = null;
+  templateDraft: GslPrepEmailTemplate = {
+    ...this.defaultGslPrepEmailTemplate,
+    discussionItems: [...this.defaultGslPrepEmailTemplate.discussionItems],
+  };
+  templateDiscussionItemsText =
+    this.defaultGslPrepEmailTemplate.discussionItems.join('\n');
+  templateSaving = false;
+  templateStatus = '';
 
   constructor(public auth: AuthService) {}
 
@@ -45,6 +75,10 @@ export class ManagementDemoComponent implements OnInit {
       }));
       this.sortBookings();
       this.applyFilter();
+    });
+
+    this.auth.getGslPrepEmailTemplate().subscribe((template) => {
+      this.setTemplateDraft(template || this.defaultGslPrepEmailTemplate);
     });
   }
 
@@ -91,6 +125,71 @@ export class ManagementDemoComponent implements OnInit {
   setBookingView(view: 'all' | 'demo' | 'gsl2026Prep'): void {
     this.bookingView = view;
     this.applyFilter();
+  }
+
+  resetTemplateToDefault(): void {
+    const confirmed = window.confirm(
+      'Reset the team meeting email template to the default Medard/GSL copy? Save after resetting to make it active.'
+    );
+    if (!confirmed) return;
+    this.setTemplateDraft(this.defaultGslPrepEmailTemplate);
+    this.templateStatus = 'Default template loaded. Click Save Template to use it.';
+  }
+
+  async saveTemplate(): Promise<void> {
+    const template = this.normalizedTemplateDraft();
+    if (
+      !template.subject ||
+      !template.headline ||
+      !template.intro ||
+      template.discussionItems.length === 0
+    ) {
+      alert('Subject, headline, intro, and at least one discussion item are required.');
+      return;
+    }
+
+    this.templateSaving = true;
+    this.templateStatus = '';
+    try {
+      await this.auth.saveGslPrepEmailTemplate(template);
+      this.templateStatus = 'Template saved. New team meeting signups will use it.';
+    } catch (error) {
+      console.error('Could not save GSL prep email template', error);
+      alert('Could not save the template. Please try again.');
+    } finally {
+      this.templateSaving = false;
+    }
+  }
+
+  private setTemplateDraft(template: GslPrepEmailTemplate): void {
+    const discussionItems =
+      Array.isArray(template.discussionItems) && template.discussionItems.length
+        ? template.discussionItems
+        : this.defaultGslPrepEmailTemplate.discussionItems;
+    this.templateDraft = {
+      ...this.defaultGslPrepEmailTemplate,
+      ...template,
+      discussionItems: [...discussionItems],
+    };
+    this.templateDiscussionItemsText = this.templateDraft.discussionItems.join('\n');
+  }
+
+  private normalizedTemplateDraft(): GslPrepEmailTemplate {
+    return {
+      ...this.templateDraft,
+      subject: this.templateDraft.subject.trim(),
+      eyebrow: this.templateDraft.eyebrow.trim(),
+      headline: this.templateDraft.headline.trim(),
+      subhead: this.templateDraft.subhead.trim(),
+      intro: this.templateDraft.intro.trim(),
+      discussionHeading: this.templateDraft.discussionHeading.trim(),
+      discussionItems: this.templateDiscussionItemsText
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean),
+      ctaLabel: this.templateDraft.ctaLabel.trim(),
+      signoff: this.templateDraft.signoff.trim(),
+    };
   }
 
   getBookingTypeLabel(booking: DemoBooking): string {

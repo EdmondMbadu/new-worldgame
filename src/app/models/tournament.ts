@@ -60,3 +60,17 @@ export interface DemoBooking {
   createdAt: number; // server timestamp
   uid?: string; // if the user was logged-in
 }
+
+export interface GslPrepEmailTemplate {
+  subject: string;
+  eyebrow: string;
+  headline: string;
+  subhead: string;
+  intro: string;
+  discussionHeading: string;
+  discussionItems: string[];
+  ctaLabel: string;
+  signoff: string;
+  updatedAt?: any;
+  updatedBy?: string;
+}

@@ -18,7 +18,7 @@ import {
 } from 'rxjs';
 import { NewUser, PlanKey, PRICE_BOOK, School, User } from '../models/user';
 import { TimeService } from './time.service';
-import { DemoBooking } from '../models/tournament';
+import { DemoBooking, GslPrepEmailTemplate } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import { PresenceService } from './presence.service';
@@ -51,6 +51,8 @@ export class AuthService {
   private lastActiveWriteAtMs = 0;
   private activityTrackingBound = false;
   private readonly minLastActiveWriteIntervalMs = 5 * 60 * 1000;
+  private readonly gslPrepEmailTemplateDoc =
+    'admin_settings/gsl2026_prep_email_template';
 
   constructor(
     private fireauth: AngularFireAuth,
@@ -591,6 +593,23 @@ export class AuthService {
         ref.where('bookingType', '==', 'gsl2026Prep')
       )
       .valueChanges({ idField: 'id' });
+  }
+
+  getGslPrepEmailTemplate() {
+    return this.afs
+      .doc<GslPrepEmailTemplate>(this.gslPrepEmailTemplateDoc)
+      .valueChanges();
+  }
+
+  saveGslPrepEmailTemplate(template: GslPrepEmailTemplate): Promise<void> {
+    return this.afs.doc<GslPrepEmailTemplate>(this.gslPrepEmailTemplateDoc).set(
+      {
+        ...template,
+        updatedAt: serverTimestamp() as any,
+        updatedBy: this.currentUser?.email || '',
+      },
+      { merge: true }
+    );
   }
 
   addNewUserSchoolAdmin(

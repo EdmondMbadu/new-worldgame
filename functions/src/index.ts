@@ -5856,26 +5856,150 @@ function buildUtcDateFromBooking(
   return new Date(utcGuess.getTime() - offsetMinutes * 60_000);
 }
 
-function buildGslPrepConfirmationEmail(data: any, meetingLink: string) {
+type GslPrepEmailTemplate = {
+  subject: string;
+  eyebrow: string;
+  headline: string;
+  subhead: string;
+  intro: string;
+  discussionHeading: string;
+  discussionItems: string[];
+  ctaLabel: string;
+  signoff: string;
+};
+
+const DEFAULT_GSL_PREP_EMAIL_TEMPLATE: GslPrepEmailTemplate = {
+  subject:
+    'Global Solutions Lab 2026 final presentation prep - {{date}} {{time}} ET',
+  eyebrow: 'Global Solutions Lab 2026',
+  headline: 'Final Presentation Prep Meeting',
+  subhead:
+    'A focused team meeting with Medard Gabel before the final presentations on Wednesday, June 24, 2026.',
+  intro:
+    'Your team prep meeting with Medard Gabel is confirmed. This session is for sharpening your Global Solutions Lab 2026 final presentation and clarifying the points your team wants to review before Wednesday.',
+  discussionHeading: 'Please come ready to discuss:',
+  discussionItems: [
+    "Your team's main solution and final presentation story.",
+    'The strongest points to make on Wednesday, June 24.',
+    "One or two questions where Medard's feedback would help most.",
+  ],
+  ctaLabel: 'Join the Google Meet',
+  signoff: 'Thank you,\nMedard Gabel and the NewWorld Team',
+};
+
+function normalizeGslPrepEmailTemplate(raw?: any): GslPrepEmailTemplate {
+  const fallback = DEFAULT_GSL_PREP_EMAIL_TEMPLATE;
+  const discussionItems =
+    Array.isArray(raw?.discussionItems) && raw.discussionItems.length
+      ? raw.discussionItems
+          .map((item: unknown) => String(item || '').trim())
+          .filter(Boolean)
+      : fallback.discussionItems;
+
+  return {
+    subject: String(raw?.subject || fallback.subject).trim(),
+    eyebrow: String(raw?.eyebrow || fallback.eyebrow).trim(),
+    headline: String(raw?.headline || fallback.headline).trim(),
+    subhead: String(raw?.subhead || fallback.subhead).trim(),
+    intro: String(raw?.intro || fallback.intro).trim(),
+    discussionHeading: String(
+      raw?.discussionHeading || fallback.discussionHeading
+    ).trim(),
+    discussionItems,
+    ctaLabel: String(raw?.ctaLabel || fallback.ctaLabel).trim(),
+    signoff: String(raw?.signoff || fallback.signoff).trim(),
+  };
+}
+
+async function loadGslPrepEmailTemplate(): Promise<GslPrepEmailTemplate> {
+  try {
+    const snap = await admin
+      .firestore()
+      .doc('admin_settings/gsl2026_prep_email_template')
+      .get();
+    return normalizeGslPrepEmailTemplate(snap.exists ? snap.data() : undefined);
+  } catch (error) {
+    functions.logger.error('Could not load GSL prep email template', error);
+    return DEFAULT_GSL_PREP_EMAIL_TEMPLATE;
+  }
+}
+
+function gslPrepTemplateTokens(data: any, meetingLink: string) {
   const fullName = String(data['name'] || '').trim();
   const firstName = fullName.split(/\s+/)[0] || 'there';
   const teamName = String(data['teamName'] || '').trim() || 'your team';
   const date = String(data['demoDate'] || '').trim();
   const time = String(data['demoTime'] || '').trim();
   const notes = String(data['notes'] || '').trim();
-  const safeFirstName = escapeEmailHtml(firstName);
-  const safeTeamName = escapeEmailHtml(teamName);
-  const safeDate = escapeEmailHtml(date);
-  const safeTime = escapeEmailHtml(time);
-  const safeMeetingLink = escapeEmailHtml(meetingLink);
-  const safeNotes = escapeEmailHtml(notes);
 
-  const notesHtml = notes
+  return {
+    firstName,
+    teamName,
+    date,
+    time,
+    meetingLink,
+    notes,
+  };
+}
+
+function applyGslPrepTemplateTokens(
+  value: string,
+  tokens: ReturnType<typeof gslPrepTemplateTokens>
+): string {
+  return String(value || '')
+    .replace(/{{\s*firstName\s*}}/g, tokens.firstName)
+    .replace(/{{\s*teamName\s*}}/g, tokens.teamName)
+    .replace(/{{\s*date\s*}}/g, tokens.date)
+    .replace(/{{\s*time\s*}}/g, tokens.time)
+    .replace(/{{\s*meetingLink\s*}}/g, tokens.meetingLink)
+    .replace(/{{\s*notes\s*}}/g, tokens.notes);
+}
+
+function escapeRenderedTemplate(
+  value: string,
+  tokens: ReturnType<typeof gslPrepTemplateTokens>
+): string {
+  return escapeEmailHtml(applyGslPrepTemplateTokens(value, tokens));
+}
+
+function buildGslPrepConfirmationEmail(
+  data: any,
+  meetingLink: string,
+  template: GslPrepEmailTemplate
+) {
+  const tokens = gslPrepTemplateTokens(data, meetingLink);
+  const renderedDiscussionItems = template.discussionItems.map((item) =>
+    applyGslPrepTemplateTokens(item, tokens)
+  );
+  const safeFirstName = escapeEmailHtml(tokens.firstName);
+  const safeTeamName = escapeEmailHtml(tokens.teamName);
+  const safeDate = escapeEmailHtml(tokens.date);
+  const safeTime = escapeEmailHtml(tokens.time);
+  const safeMeetingLink = escapeEmailHtml(tokens.meetingLink);
+  const safeNotes = escapeEmailHtml(tokens.notes);
+  const safeEyebrow = escapeRenderedTemplate(template.eyebrow, tokens);
+  const safeHeadline = escapeRenderedTemplate(template.headline, tokens);
+  const safeSubhead = escapeRenderedTemplate(template.subhead, tokens);
+  const safeIntro = escapeRenderedTemplate(template.intro, tokens);
+  const safeDiscussionHeading = escapeRenderedTemplate(
+    template.discussionHeading,
+    tokens
+  );
+  const safeCtaLabel = escapeRenderedTemplate(template.ctaLabel, tokens);
+  const signoffHtml = escapeRenderedTemplate(template.signoff, tokens).replace(
+    /\n/g,
+    '<br>'
+  );
+
+  const notesHtml = tokens.notes
     ? `<tr>
         <td style="padding:10px 0;color:#51606f;font-size:14px;line-height:1.6;">Notes</td>
         <td style="padding:10px 0;color:#122033;font-size:14px;line-height:1.6;text-align:right;">${safeNotes}</td>
       </tr>`
     : '';
+  const discussionItemsHtml = renderedDiscussionItems
+    .map((item) => `<li>${escapeEmailHtml(item)}</li>`)
+    .join('');
 
   const html = `
 <!doctype html>
@@ -5887,15 +6011,15 @@ function buildGslPrepConfirmationEmail(data: any, meetingLink: string) {
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border:1px solid #dfe5ee;border-radius:12px;overflow:hidden;">
             <tr>
               <td style="background:#10233f;padding:28px 32px;color:#ffffff;">
-                <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#b8d7ff;">Global Solutions Lab 2026</div>
-                <h1 style="margin:10px 0 0;font-size:26px;line-height:1.2;font-weight:700;">Final Presentation Prep Meeting</h1>
-                <p style="margin:12px 0 0;color:#dbe7f6;font-size:15px;line-height:1.6;">A focused team meeting with Medard Gabel before the final presentations on Wednesday, June 24, 2026.</p>
+                <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#b8d7ff;">${safeEyebrow}</div>
+                <h1 style="margin:10px 0 0;font-size:26px;line-height:1.2;font-weight:700;">${safeHeadline}</h1>
+                <p style="margin:12px 0 0;color:#dbe7f6;font-size:15px;line-height:1.6;">${safeSubhead}</p>
               </td>
             </tr>
             <tr>
               <td style="padding:30px 32px;">
                 <p style="margin:0 0 18px;font-size:16px;line-height:1.6;">Hi ${safeFirstName},</p>
-                <p style="margin:0 0 22px;font-size:16px;line-height:1.6;">Your team prep meeting with Medard Gabel is confirmed. This session is for sharpening your Global Solutions Lab 2026 final presentation and clarifying the points your team wants to review before Wednesday.</p>
+                <p style="margin:0 0 22px;font-size:16px;line-height:1.6;">${safeIntro}</p>
 
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e4e9f1;border-bottom:1px solid #e4e9f1;margin:0 0 24px;">
                   <tr>
@@ -5913,23 +6037,21 @@ function buildGslPrepConfirmationEmail(data: any, meetingLink: string) {
                   ${notesHtml}
                 </table>
 
-                <p style="margin:0 0 14px;font-size:15px;line-height:1.6;font-weight:700;">Please come ready to discuss:</p>
+                <p style="margin:0 0 14px;font-size:15px;line-height:1.6;font-weight:700;">${safeDiscussionHeading}</p>
                 <ul style="margin:0 0 24px 20px;padding:0;color:#26364a;font-size:15px;line-height:1.7;">
-                  <li>Your team&apos;s main solution and final presentation story.</li>
-                  <li>The strongest points to make on Wednesday, June 24.</li>
-                  <li>One or two questions where Medard&apos;s feedback would help most.</li>
+                  ${discussionItemsHtml}
                 </ul>
 
                 <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
                   <tr>
                     <td style="background:#2563eb;border-radius:8px;">
-                      <a href="${safeMeetingLink}" style="display:inline-block;padding:12px 18px;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;">Join the Google Meet</a>
+                      <a href="${safeMeetingLink}" style="display:inline-block;padding:12px 18px;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;">${safeCtaLabel}</a>
                     </td>
                   </tr>
                 </table>
 
                 <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#51606f;">Meeting link: <a href="${safeMeetingLink}" style="color:#2563eb;">${safeMeetingLink}</a></p>
-                <p style="margin:22px 0 0;font-size:15px;line-height:1.6;">Thank you,<br>Medard Gabel and the NewWorld Team</p>
+                <p style="margin:22px 0 0;font-size:15px;line-height:1.6;">${signoffHtml}</p>
               </td>
             </tr>
           </table>
@@ -5940,24 +6062,20 @@ function buildGslPrepConfirmationEmail(data: any, meetingLink: string) {
 </html>`.trim();
 
   const text = [
-    `Hi ${firstName},`,
+    `Hi ${tokens.firstName},`,
     '',
-    'Your team prep meeting with Medard Gabel is confirmed.',
-    'This session is for sharpening your Global Solutions Lab 2026 final presentation before Wednesday, June 24, 2026.',
+    applyGslPrepTemplateTokens(template.intro, tokens),
     '',
-    `Team: ${teamName}`,
-    `Date: ${date}`,
-    `Time: ${time} ET`,
+    `Team: ${tokens.teamName}`,
+    `Date: ${tokens.date}`,
+    `Time: ${tokens.time} ET`,
     `Meeting link: ${meetingLink}`,
-    notes ? `Notes: ${notes}` : null,
+    tokens.notes ? `Notes: ${tokens.notes}` : null,
     '',
-    'Please come ready to discuss:',
-    '- Your team\'s main solution and final presentation story.',
-    '- The strongest points to make on Wednesday, June 24.',
-    '- One or two questions where Medard\'s feedback would help most.',
+    applyGslPrepTemplateTokens(template.discussionHeading, tokens),
+    ...renderedDiscussionItems.map((item) => `- ${item}`),
     '',
-    'Thank you,',
-    'Medard Gabel and the NewWorld Team',
+    applyGslPrepTemplateTokens(template.signoff, tokens),
   ]
     .filter((line) => line !== null)
     .join('\n');
@@ -6007,10 +6125,17 @@ export const sendDemoInvite = functions.firestore
       type: 'text/calendar', // ← no “; method=…”
       disposition: 'attachment',
     };
+    const gslPrepTemplate = isGslPrep ? await loadGslPrepEmailTemplate() : null;
+    const gslPrepTokens = isGslPrep
+      ? gslPrepTemplateTokens(data, meetingLink)
+      : null;
 
     /* 3 ║ Message subjects */
     const userSubject = isGslPrep
-      ? `Global Solutions Lab 2026 final presentation prep - ${data['demoDate']} ${data['demoTime']} ET`
+      ? applyGslPrepTemplateTokens(
+          gslPrepTemplate?.subject || DEFAULT_GSL_PREP_EMAIL_TEMPLATE.subject,
+          gslPrepTokens || gslPrepTemplateTokens(data, meetingLink)
+        )
       : `✅ NewWorld Game Workshop – ${data['demoDate']} ${data['demoTime']} EST`;
     const opsSubject = isGslPrep
       ? `📆 GSL team meeting booked - ${data['teamName'] || 'Team'} - ${
@@ -6020,7 +6145,11 @@ export const sendDemoInvite = functions.firestore
 
     /* 4 ║ Build messages */
     const gslPrepEmail = isGslPrep
-      ? buildGslPrepConfirmationEmail(data, meetingLink)
+      ? buildGslPrepConfirmationEmail(
+          data,
+          meetingLink,
+          gslPrepTemplate || DEFAULT_GSL_PREP_EMAIL_TEMPLATE
+        )
       : null;
     const userMsg = isGslPrep
       ? {
