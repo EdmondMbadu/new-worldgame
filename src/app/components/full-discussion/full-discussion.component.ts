@@ -85,6 +85,7 @@ export class FullDiscussionComponent
   @ViewChild('notifyAudio', { static: true })
   notifyAudio!: ElementRef<HTMLAudioElement>;
   @ViewChild('bottomAnchor') bottomAnchor!: ElementRef<HTMLDivElement>;
+  @ViewChild('chatScroller') chatScroller!: ElementRef<HTMLDivElement>;
 
   editingId: string | null = null; // holds ISO date (acts as unique id)
   editingContent = '';
@@ -114,6 +115,8 @@ export class FullDiscussionComponent
 
   private hasScrolled = false;
   private participantPresenceSub?: Subscription;
+  private participantSourceKey = '';
+  private participantPresenceUidKey = '';
   private lastReadMarkerKey = '';
   highlightedMessageId = '';
   commentAuthorProfiles: Record<string, User | null | undefined> = {};
@@ -151,6 +154,8 @@ export class FullDiscussionComponent
         .doc(this.docPath)
         .valueChanges()
         .subscribe((doc: any) => {
+          const shouldPinToBottom =
+            !this.hasRouteMessageId() && this.isNearBottom();
           this.comments = (doc?.discussion || []).map((c: any) =>
             !c.date || isNaN(Date.parse(c.date as string))
               ? { ...c, date: undefined }
@@ -162,7 +167,7 @@ export class FullDiscussionComponent
             this.lastMsgIso = latest.date;
           }
           this.firstSnapshot = false;
-          if (!this.hasRouteMessageId()) {
+          if (shouldPinToBottom) {
             this.scrollToBottom();
           }
           this.markCurrentDiscussionRead();
@@ -180,9 +185,7 @@ export class FullDiscussionComponent
           }
 
           // Load participants for @mention functionality
-          this.loadParticipants(doc?.participants || []).then(() => {
-            this.buildParticipantsFromComments();
-          });
+          this.refreshParticipants(doc?.participants || []);
         });
       return; // skip the old "solution-id via route" code
     }
@@ -195,6 +198,8 @@ export class FullDiscussionComponent
     }
 
     this.solution.getSolution(this.id).subscribe((data: any) => {
+      const shouldPinToBottom =
+        !this.hasRouteMessageId() && this.isNearBottom();
       this.currentSolution = data;
       this.comments = (data?.discussion || []).map((c: any) => {
         // if the original field is garbage we drop it
@@ -209,12 +214,11 @@ export class FullDiscussionComponent
       this.hydrateCommentAuthorProfiles();
 
       // Once data is loaded, scroll to bottom
-      if (!this.hasRouteMessageId()) {
+      if (shouldPinToBottom) {
         this.ngZone.runOutsideAngular(() => {
           setTimeout(() => this.scrollToBottom(), 0);
         });
       }
-      this.hasScrolled = false;
 
       // Load participants for @mention from solution participants
       const participantEmails: string[] = [];
@@ -226,9 +230,7 @@ export class FullDiscussionComponent
           participantEmails.push(...Object.values(data.participants).filter(Boolean) as string[]);
         }
       }
-      this.loadParticipants(participantEmails).then(() => {
-        this.buildParticipantsFromComments();
-      });
+      this.refreshParticipants(participantEmails);
     });
   }
 
@@ -289,6 +291,12 @@ export class FullDiscussionComponent
     requestAnimationFrame(() => {
       this.bottomAnchor?.nativeElement.scrollIntoView({ behavior: 'auto' });
     });
+  }
+
+  private isNearBottom(thresholdPx = 160): boolean {
+    const el = this.chatScroller?.nativeElement;
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= thresholdPx;
   }
 
   onFileSelected(evt: Event) {
@@ -423,6 +431,25 @@ Please choose a file under 5 MB.`);
   }
   getInitial(name: string = ''): string {
     return (name.trim()[0] || '?').toUpperCase();
+  }
+
+  trackByComment(index: number, comment: Comment): string {
+    return (
+      comment.messageId ||
+      `${comment.authorId || comment.authorName || 'comment'}-${comment.date || index}`
+    );
+  }
+
+  trackByParticipant(_index: number, participant: ParticipantInfo): string {
+    return participant.uid || participant.email || participant.displayName;
+  }
+
+  trackByPreview(_index: number, preview: PendingPreview): string {
+    return `${preview.file.name}-${preview.file.size}-${preview.file.lastModified}`;
+  }
+
+  trackByAttachment(_index: number, attachment: Attachment): string {
+    return attachment.url || attachment.name;
   }
 
   getCommentAuthorProfile(comment?: Comment | null): User | null {
@@ -701,6 +728,41 @@ Please choose a file under 5 MB.`);
 
   // ============ @Mention functionality ============
 
+  private refreshParticipants(participantsInput: unknown): void {
+    const participantEmails = this.normalizeParticipantEmails(participantsInput);
+    const nextKey = participantEmails.join('|');
+
+    if (nextKey === this.participantSourceKey) {
+      this.buildParticipantsFromComments();
+      return;
+    }
+
+    this.participantSourceKey = nextKey;
+    this.loadParticipants(participantEmails).then(() => {
+      this.buildParticipantsFromComments();
+    });
+  }
+
+  private normalizeParticipantEmails(participantsInput: unknown): string[] {
+    const rawParticipants = Array.isArray(participantsInput)
+      ? participantsInput
+      : participantsInput && typeof participantsInput === 'object'
+      ? Object.values(participantsInput as Record<string, unknown>)
+      : [];
+
+    return Array.from(
+      new Set(
+        rawParticipants
+          .map((participant: any) =>
+            String(participant?.email || participant?.name || participant || '')
+              .trim()
+              .toLowerCase()
+          )
+          .filter(Boolean)
+      )
+    ).sort();
+  }
+
   /** Load participant emails and fetch their display names */
   private async loadParticipants(participantEmails: string[]) {
     const participants: ParticipantInfo[] = [];
@@ -798,9 +860,17 @@ Please choose a file under 5 MB.`);
     if (!this.comments?.length) return;
 
     const seenIds = new Set(this.participants.map(p => p.uid || p.email));
+    let addedParticipant = false;
     
     for (const comment of this.comments) {
-      if (!comment.authorId || seenIds.has(comment.authorId)) continue;
+      if (
+        !comment.authorId ||
+        comment.isAI ||
+        comment.authorId.startsWith('ai-') ||
+        seenIds.has(comment.authorId)
+      ) {
+        continue;
+      }
       seenIds.add(comment.authorId);
 
       // Add participant from comment author
@@ -811,8 +881,11 @@ Please choose a file under 5 MB.`);
         isOnline: false,
         avatarPath: comment.profilePic || '',
       });
+      addedParticipant = true;
     }
-    this.subscribeToParticipantPresence();
+    if (addedParticipant) {
+      this.subscribeToParticipantPresence();
+    }
   }
 
   private subscribeToParticipantPresence(): void {
@@ -825,9 +898,11 @@ Please choose a file under 5 MB.`);
         return uid;
       })
       .filter(Boolean);
+    const uidKey = uids.sort().join('|');
+    if (uidKey === this.participantPresenceUidKey) return;
+    this.participantPresenceUidKey = uidKey;
 
     this.participantPresenceSub?.unsubscribe();
-    this.onlineParticipants = [];
     this.participantPresenceSub = this.presence
       .watchOnlineUids$(uids, fallbackLastActiveByUid)
       .subscribe((onlineUids) => {

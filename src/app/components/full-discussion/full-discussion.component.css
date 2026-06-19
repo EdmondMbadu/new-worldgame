@@ -1,3 +1,29 @@
+.discussion-shell {
+  color-scheme: light dark;
+}
+
+.discussion-panel {
+  border: 1px solid rgb(226 232 240);
+}
+
+.discussion-messages {
+  overflow-anchor: auto;
+  scrollbar-gutter: stable;
+}
+
+.discussion-message {
+  contain: layout;
+  transition: background-color 120ms ease;
+}
+
+.discussion-message:hover {
+  background: rgb(248 250 252);
+}
+
+.message-body {
+  line-height: 1.55;
+}
+
 .comment-author-trigger .comment-author-preview {
   opacity: 0;
   pointer-events: none;
@@ -17,4 +43,22 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .discussion-panel {
+    border-color: rgb(30 41 59);
+  }
+
+  .discussion-message:hover {
+    background: rgb(15 23 42);
+  }
+}
+
+:host-context(.dark) .discussion-panel {
+  border-color: rgb(30 41 59);
+}
+
+:host-context(.dark) .discussion-message:hover {
+  background: rgb(15 23 42);
 }

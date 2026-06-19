@@ -1,4 +1,4 @@
-<div class="dark:bg-slate-900 bg-white min-h-screen flex flex-col">
+<div class="discussion-shell dark:bg-slate-950 bg-slate-100 min-h-screen flex flex-col">
 
   <!-- put this right after the opening <div class="dark:bg-slate-900 …"> -->
 <audio #notifyAudio src="../../../assets/sounds/live-chat.mp3" preload="auto"></audio>
@@ -21,17 +21,17 @@
       - “dark:text-white text-slate-800” for text color. 
     -->
     <div
-      class=" flex flex-col mx-auto md:rounded-lg shadow-lg overflow-hidden 
-             dark:bg-slate-800 bg-white 
+      class="discussion-panel flex flex-col mx-auto md:rounded-lg shadow-lg overflow-hidden 
+             dark:bg-slate-900 bg-white 
              dark:text-white text-slate-800 
              mt-20 w-full max-w-5xl h-[calc(100vh-5rem)] min-h-0"
     >
       <!-- Top bar / header -->
-      <div class="flex shrink-0 items-center justify-between px-4 py-2
-                  dark:bg-slate-700 bg-slate-200">
+      <div class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3
+                  dark:border-slate-800 dark:bg-slate-900 bg-white">
         <!-- Left side: channel name -->
         <div class="flex items-center space-x-2">
-          <span class="font-semibold text-base">
+          <span class="font-semibold text-base text-slate-900 dark:text-white">
             #team-discussion - {{ currentSolution.title }}
           </span>
         </div>
@@ -55,7 +55,7 @@
         </ng-template>
           <button
             (click)="endChat()"
-            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm text-white"
+            class="border border-slate-300 bg-white px-4 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
           >
             Close
           </button>
@@ -63,8 +63,8 @@
       </div>
   
       <!-- Optional pinned/intro area -->
-      <div class="shrink-0 px-4 py-2 text-sm
-                  dark:bg-slate-800 bg-white
+      <div class="shrink-0 border-b border-slate-200 px-4 py-2 text-sm
+                  dark:border-slate-800 dark:bg-slate-900 bg-white
                   dark:text-gray-300 text-gray-600"
       >
         {{ introMessage }}
@@ -79,18 +79,18 @@
 
       <!-- Mention Rules Banner -->
       <div class="mx-4 my-2 shrink-0 p-3 rounded-lg
-                  dark:bg-indigo-900/40 bg-indigo-50
-                  border dark:border-indigo-700 border-indigo-200">
+                  dark:bg-slate-800 bg-slate-50
+                  border dark:border-slate-700 border-slate-200">
         <div class="flex items-start space-x-2">
-          <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <div class="text-sm dark:text-indigo-200 text-indigo-800">
+          <div class="text-sm dark:text-slate-200 text-slate-700">
             <p class="font-semibold mb-1">Mention Tips:</p>
-            <ul class="list-disc list-inside space-y-0.5 text-xs dark:text-indigo-300 text-indigo-700">
-              <li>Type <span class="font-mono bg-indigo-100 dark:bg-indigo-800 px-1 rounded">&#64;everyone</span> to notify all participants in this discussion</li>
-              <li>Type <span class="font-mono bg-indigo-100 dark:bg-indigo-800 px-1 rounded">&#64;</span> followed by a name to mention a specific person — they'll receive an email notification</li>
-              <li>Type <span class="font-mono bg-indigo-100 dark:bg-indigo-800 px-1 rounded">&#64;</span> followed by an AI name (e.g., Einstein, Zara) to get AI assistance in the conversation</li>
+            <ul class="list-disc list-inside space-y-0.5 text-xs dark:text-slate-300 text-slate-600">
+              <li>Type <span class="font-mono bg-slate-200 dark:bg-slate-700 px-1 rounded">&#64;everyone</span> to notify all participants in this discussion</li>
+              <li>Type <span class="font-mono bg-slate-200 dark:bg-slate-700 px-1 rounded">&#64;</span> followed by a name to mention a specific person — they'll receive an email notification</li>
+              <li>Type <span class="font-mono bg-slate-200 dark:bg-slate-700 px-1 rounded">&#64;</span> followed by an AI name (e.g., Einstein, Zara) to get AI assistance in the conversation</li>
             </ul>
           </div>
         </div>
@@ -100,9 +100,10 @@
       <!-- Main chat area. Use flex-1 to occupy remaining space. -->
       <div
         id="chatboxDiscussion"
-        class="min-h-0 flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        #chatScroller
+        class="discussion-messages min-h-0 flex-1 overflow-y-auto px-4 py-4 space-y-2"
       >
-        <ng-container *ngFor="let comment of comments; let i=index">
+        <ng-container *ngFor="let comment of comments; let i=index; trackBy: trackByComment">
 
           <!-- Day divider -->
         <div *ngIf="shouldShowDateDivider(i)" class="flex items-center my-6">
@@ -115,7 +116,7 @@
         </div>
           <div
             [attr.id]="comment.messageId ? 'message-' + comment.messageId : null"
-            class="flex items-start space-x-3 group rounded-xl transition"
+            class="discussion-message flex items-start space-x-3 group rounded-xl px-2 py-1.5"
             [class.ring-2]="highlightedMessageId && highlightedMessageId === comment.messageId"
             [class.ring-emerald-400]="highlightedMessageId && highlightedMessageId === comment.messageId"
             [class.bg-emerald-50]="highlightedMessageId && highlightedMessageId === comment.messageId"
@@ -181,11 +182,11 @@
             </div>
   
             <!-- Message content -->
-            <div class="relative">
+            <div class="relative min-w-0 flex-1">
               <!-- Action icons – visible to the author only -->
                   <div
                     *ngIf="comment.authorId === auth.currentUser.uid"
-                    class="absolute -right-7 top-0 flex space-x-1 opacity-0 group-hover:opacity-100 transition"
+                    class="absolute right-0 top-0 flex space-x-1 opacity-0 group-hover:opacity-100 transition"
                   >
             <!-- Edit -->
                 <button
@@ -270,7 +271,7 @@
                 </div>
                 <!-- Normal content -->
                 <p *ngIf="!comment.isLoading"
-                  class="mt-1 rounded-md px-3 py-2 break-words dark:text-gray-100 text-slate-800"
+                  class="message-body mt-1 rounded-md px-3 py-2 break-words dark:text-gray-100 text-slate-800"
                   [innerHTML]="highlightMentions(comment.content!)"
                 ></p>
               </ng-container>
@@ -288,7 +289,7 @@
               </ng-template>
             <!-- attachments -->
 <div *ngIf="comment.attachments?.length" class="mt-2 space-y-2">
-  <ng-container *ngFor="let att of comment.attachments">
+  <ng-container *ngFor="let att of comment.attachments; trackBy: trackByAttachment">
     <!-- images -->
     <img *ngIf="att.type === 'image'"
          [src]="att.url"
@@ -315,7 +316,7 @@
          <div #bottomAnchor></div>
       </div>
 
-      <aside class="hidden h-full w-72 shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50 lg:block">
+      <aside class="hidden h-full w-72 shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 lg:block">
         <div class="mb-4 flex items-center justify-between gap-3">
           <div>
             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
@@ -330,8 +331,8 @@
 
         <ul *ngIf="onlineParticipants.length; else noOnlineParticipants" class="space-y-2">
           <li
-            *ngFor="let participant of onlineParticipants"
-            class="relative rounded-lg bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
+            *ngFor="let participant of onlineParticipants; trackBy: trackByParticipant"
+            class="relative rounded-lg bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
           >
             <div
               *ngIf="getParticipantRoute(participant) as participantRoute; else staticOnlineParticipant"
@@ -433,7 +434,7 @@
        (change)="onFileSelected($event)" />
        <!-- live previews -->
 <div *ngIf="previews.length" class="flex flex-wrap gap-2">
-  <ng-container *ngFor="let p of previews; let i = index">
+  <ng-container *ngFor="let p of previews; let i = index; trackBy: trackByPreview">
     <!-- image thumb -->
     <div *ngIf="p.type==='image'" class="relative">
       <img [src]="p.url" class="h-16 w-16 object-cover rounded border" />
@@ -467,10 +468,10 @@
             id="user-input"
             placeholder="Message #team-discussion — use @ to mention"
             class="w-full resize-none 
-                   dark:bg-slate-700 bg-slate-100
+                   dark:bg-slate-900 bg-slate-100
                    dark:text-gray-200 text-slate-800
                    text-sm rounded-md px-3 py-2 outline-none
-                   focus:ring-2 focus:ring-[#5865F2]"
+                   focus:ring-2 focus:ring-emerald-500"
           ></textarea>
 
           <!-- Mention dropdown -->
@@ -508,7 +509,7 @@
 
             <!-- Individual participants -->
             <button
-              *ngFor="let p of filteredParticipants"
+              *ngFor="let p of filteredParticipants; trackBy: trackByParticipant"
               (click)="selectMention(p)"
               class="w-full px-3 py-2 text-left text-sm
                      hover:bg-blue-50 dark:hover:bg-blue-900/30
@@ -531,7 +532,7 @@
                 AI Team Members
               </div>
               <button
-                *ngFor="let ai of filteredAIAvatars"
+                *ngFor="let ai of filteredAIAvatars; trackBy: trackByParticipant"
                 (click)="selectMention(ai)"
                 class="w-full px-3 py-2 text-left text-sm
                        hover:bg-blue-50 dark:hover:bg-blue-900/30
