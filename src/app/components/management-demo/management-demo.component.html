@@ -134,12 +134,22 @@
             <div class="flex shrink-0 gap-2">
               <button
                 type="button"
+                (click)="toggleTemplateEditor()"
+                class="rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+                [attr.aria-expanded]="templateEditorExpanded"
+              >
+                {{ templateEditorExpanded ? 'Hide Template' : 'Edit Template' }}
+              </button>
+              <button
+                *ngIf="templateEditorExpanded"
+                type="button"
                 (click)="resetTemplateToDefault()"
                 class="rounded border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
               >
                 Reset Default
               </button>
               <button
+                *ngIf="templateEditorExpanded"
                 type="button"
                 (click)="saveTemplate()"
                 [disabled]="templateSaving"
@@ -151,13 +161,13 @@
           </div>
 
           <div
-            *ngIf="templateStatus"
+            *ngIf="templateStatus && templateEditorExpanded"
             class="mb-4 rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100"
           >
             {{ templateStatus }}
           </div>
 
-          <div class="grid gap-4 lg:grid-cols-2">
+          <div *ngIf="templateEditorExpanded" class="grid gap-4 lg:grid-cols-2">
             <label class="block">
               <span class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Subject

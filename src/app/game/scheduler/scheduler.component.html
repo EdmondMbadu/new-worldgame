@@ -132,20 +132,27 @@
                         (click)="selectTime(time)"
                         [class.bg-blue-600]="time.label === selectedTime"
                         [class.text-white]="time.label === selectedTime"
-                        [class.text-slate-700]="time.label !== selectedTime"
-                        [class.dark:text-slate-200]="time.label !== selectedTime"
+                        [class.text-slate-700]="time.label !== selectedTime && !isSlotBooked(time)"
+                        [class.dark:text-slate-200]="time.label !== selectedTime && !isSlotBooked(time)"
+                        [class.text-slate-400]="isSlotBooked(time)"
+                        [class.dark:text-slate-500]="isSlotBooked(time)"
                         [class.border-blue-500]="time.label === selectedTime"
-                        [class.hover:border-blue-500]="time.label !== selectedTime"
+                        [class.border-red-300]="isSlotBooked(time)"
+                        [class.dark:border-red-800]="isSlotBooked(time)"
+                        [class.bg-red-50]="isSlotBooked(time)"
+                        [class.dark:bg-red-950]="isSlotBooked(time)"
+                        [class.hover:border-blue-500]="time.label !== selectedTime && !isSlotBooked(time)"
+                        [class.cursor-not-allowed]="isSlotBooked(time)"
                         class="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg text-center transition-colors">
                         <span class="block font-semibold">{{ time.label }}</span>
                         <span
                           *ngIf="getBookedTeamSummary(time)"
                           class="mt-1 block text-xs"
                           [class.text-blue-100]="time.label === selectedTime"
-                          [class.text-slate-500]="time.label !== selectedTime"
-                          [class.dark:text-slate-400]="time.label !== selectedTime"
+                          [class.text-red-700]="time.label !== selectedTime"
+                          [class.dark:text-red-300]="time.label !== selectedTime"
                         >
-                          Scheduled: {{ getBookedTeamSummary(time) }}
+                          Taken: {{ getBookedTeamSummary(time) }}
                         </span>
                         <span
                           *ngIf="!getBookedTeamSummary(time) && config.bookingType === 'gsl2026Prep'"
@@ -248,6 +255,32 @@
 
 
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="bookedSlotModalMessage"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="booked-slot-title"
+  >
+    <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-800">
+      <h2 id="booked-slot-title" class="text-xl font-bold text-slate-900 dark:text-white">
+        Time Already Taken
+      </h2>
+      <p class="mt-3 text-slate-600 dark:text-slate-300">
+        {{ bookedSlotModalMessage }}
+      </p>
+      <div class="mt-6 flex justify-end">
+        <button
+          type="button"
+          (click)="closeBookedSlotModal()"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
+        >
+          Choose Another Time
+        </button>
       </div>
     </div>
   </div>

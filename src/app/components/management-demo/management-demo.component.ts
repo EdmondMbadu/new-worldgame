@@ -59,6 +59,7 @@ export class ManagementDemoComponent implements OnInit {
     this.defaultGslPrepEmailTemplate.discussionItems.join('\n');
   templateSaving = false;
   templateStatus = '';
+  templateEditorExpanded = false;
 
   constructor(public auth: AuthService) {}
 
@@ -125,6 +126,10 @@ export class ManagementDemoComponent implements OnInit {
   setBookingView(view: 'all' | 'demo' | 'gsl2026Prep'): void {
     this.bookingView = view;
     this.applyFilter();
+  }
+
+  toggleTemplateEditor(): void {
+    this.templateEditorExpanded = !this.templateEditorExpanded;
   }
 
   resetTemplateToDefault(): void {

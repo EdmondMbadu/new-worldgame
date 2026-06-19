@@ -66,6 +66,7 @@ export class SchedulerComponent implements OnInit, OnDestroy {
   public teamName = '';
   public notes = '';
   public gslPrepBookings: DemoBooking[] = [];
+  public bookedSlotModalMessage = '';
   isLoggedIn: boolean = false;
   private gslPrepBookingsSub?: Subscription;
 
@@ -151,6 +152,15 @@ export class SchedulerComponent implements OnInit, OnDestroy {
           this.gslPrepBookings = [...bookings].sort(
             (a, b) => a.demoDateTime - b.demoDateTime
           );
+          if (this.selectedDate && this.selectedTime) {
+            const selectedSlot = this.availableTimes.find(
+              (slot) => slot.label === this.selectedTime
+            );
+            if (selectedSlot && this.isSlotBooked(selectedSlot)) {
+              this.selectedTime = null;
+              this.selectedStartTime = null;
+            }
+          }
         },
         error: (error) => {
           console.error('Could not load scheduled GSL prep teams', error);
@@ -293,8 +303,20 @@ export class SchedulerComponent implements OnInit, OnDestroy {
    * @param time The selected time string (e.g., "09:00 AM").
    */
   selectTime(slot: TimeSlot): void {
+    if (this.isSlotBooked(slot)) {
+      const teamSummary = this.getBookedTeamSummary(slot);
+      this.bookedSlotModalMessage = teamSummary
+        ? `This time is already taken by ${teamSummary}. Please choose another slot.`
+        : 'This time is already taken. Please choose another slot.';
+      return;
+    }
+
     this.selectedTime = slot.label;
     this.selectedStartTime = slot.startsAt;
+  }
+
+  closeBookedSlotModal(): void {
+    this.bookedSlotModalMessage = '';
   }
 
   getBookingsForSlot(slot: TimeSlot): DemoBooking[] {
@@ -316,6 +338,13 @@ export class SchedulerComponent implements OnInit, OnDestroy {
     return teams.join(', ');
   }
 
+  isSlotBooked(slot: TimeSlot): boolean {
+    return (
+      this.config.bookingType === 'gsl2026Prep' &&
+      this.getBookingsForSlot(slot).length > 0
+    );
+  }
+
   // --- Step Navigation ---
 
   /**
@@ -323,6 +352,13 @@ export class SchedulerComponent implements OnInit, OnDestroy {
    */
   nextStep(): void {
     if (this.step === 1 && this.selectedTime) {
+      const selectedSlot = this.availableTimes.find(
+        (slot) => slot.label === this.selectedTime
+      );
+      if (selectedSlot && this.isSlotBooked(selectedSlot)) {
+        this.selectTime(selectedSlot);
+        return;
+      }
       this.step = 2;
     }
   }
@@ -352,6 +388,15 @@ export class SchedulerComponent implements OnInit, OnDestroy {
       (this.config.requireNotes && !this.notes.trim())
     ) {
       alert('Please fill out all fields.');
+      return;
+    }
+
+    const selectedSlot = this.availableTimes.find(
+      (slot) => slot.label === this.selectedTime
+    );
+    if (selectedSlot && this.isSlotBooked(selectedSlot)) {
+      this.selectTime(selectedSlot);
+      this.step = 1;
       return;
     }
 
