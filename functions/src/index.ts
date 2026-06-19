@@ -5136,8 +5136,8 @@ const BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS = new Set([
   '.png',
   '.mp4',
 ]);
-const BULK_EMAIL_ATTACHMENT_MAX_BYTES = 10_000_000;
-const BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES = 20_000_000;
+const BULK_EMAIL_ATTACHMENT_MAX_BYTES = 50_000_000;
+const BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES = 50_000_000;
 const BULK_EMAIL_ATTACHMENT_MAX_COUNT = 10;
 const BULK_EMAIL_ATTACHMENT_STORAGE_PREFIX = 'bulk-mails/';
 
@@ -5254,7 +5254,9 @@ async function prepareBulkEmailAttachments(
     if (metadataSize > BULK_EMAIL_ATTACHMENT_MAX_BYTES) {
       throw new functions.https.HttpsError(
         'invalid-argument',
-        `${filename} exceeds the 10 MB attachment limit.`
+        `${filename} exceeds the ${Math.round(
+          BULK_EMAIL_ATTACHMENT_MAX_BYTES / (1024 * 1024)
+        )} MB attachment limit.`
       );
     }
 

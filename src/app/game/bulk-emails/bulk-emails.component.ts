@@ -216,8 +216,8 @@ export class BulkEmailsComponent implements OnDestroy {
 
   readonly attachmentAccept =
     '.pdf,.doc,.docx,.jpg,.jpeg,.png,.mp4,image/jpeg,image/png,video/mp4,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-  readonly maxAttachmentBytes = 10_000_000;
-  readonly maxAttachmentTotalBytes = 20_000_000;
+  readonly maxAttachmentBytes = 50_000_000;
+  readonly maxAttachmentTotalBytes = 50_000_000;
   readonly maxAttachmentCount = 10;
   emailAttachments: BulkEmailAttachment[] = [];
   attachmentUploading = false;
@@ -535,7 +535,9 @@ export class BulkEmailsComponent implements OnDestroy {
     }
 
     if (file.size > this.maxAttachmentBytes) {
-      return `${file.name}: attachments must be 10 MB or smaller.`;
+      return `${file.name}: attachments must be ${this.formatBytes(
+        this.maxAttachmentBytes
+      )} or smaller.`;
     }
 
     if (currentTotalBytes + file.size > this.maxAttachmentTotalBytes) {
