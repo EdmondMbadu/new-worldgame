@@ -215,7 +215,7 @@ export class BulkEmailsComponent implements OnDestroy {
   sendResult = '';
 
   readonly attachmentAccept =
-    '.pdf,.doc,.docx,.jpg,.jpeg,.png,image/jpeg,image/png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    '.pdf,.doc,.docx,.jpg,.jpeg,.png,.mp4,image/jpeg,image/png,video/mp4,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   readonly maxAttachmentBytes = 10_000_000;
   readonly maxAttachmentTotalBytes = 20_000_000;
   readonly maxAttachmentCount = 10;
@@ -527,7 +527,7 @@ export class BulkEmailsComponent implements OnDestroy {
     }
 
     if (!this.isAllowedAttachmentFile(file)) {
-      return `${file.name}: only PDF, DOC, DOCX, JPG, JPEG, and PNG files are allowed.`;
+      return `${file.name}: only PDF, DOC, DOCX, JPG, JPEG, PNG, and MP4 files are allowed.`;
     }
 
     if (file.size <= 0) {
@@ -558,8 +558,9 @@ export class BulkEmailsComponent implements OnDestroy {
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'image/jpeg',
         'image/png',
+        'video/mp4',
       ].includes(type) ||
-      ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'].includes(extension)
+      ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.mp4'].includes(extension)
     );
   }
 
@@ -611,6 +612,8 @@ export class BulkEmailsComponent implements OnDestroy {
         return 'image/jpeg';
       case '.png':
         return 'image/png';
+      case '.mp4':
+        return 'video/mp4';
       default:
         return 'application/octet-stream';
     }

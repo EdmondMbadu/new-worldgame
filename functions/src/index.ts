@@ -5125,6 +5125,7 @@ const BULK_EMAIL_ATTACHMENT_ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'image/jpeg',
   'image/png',
+  'video/mp4',
 ]);
 const BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS = new Set([
   '.pdf',
@@ -5133,6 +5134,7 @@ const BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS = new Set([
   '.jpg',
   '.jpeg',
   '.png',
+  '.mp4',
 ]);
 const BULK_EMAIL_ATTACHMENT_MAX_BYTES = 10_000_000;
 const BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES = 20_000_000;
@@ -5157,6 +5159,8 @@ function getBulkAttachmentContentType(filename: string): string {
       return 'image/jpeg';
     case '.png':
       return 'image/png';
+    case '.mp4':
+      return 'video/mp4';
     default:
       return 'application/octet-stream';
   }
