@@ -580,12 +580,8 @@ export class BulkEmailsComponent implements OnDestroy {
       contentType: file.type || this.inferAttachmentContentType(file.name),
     };
 
-    const downloadUrl = await this.data.startUpload(
-      file,
-      storagePath,
-      'false',
-      metadata
-    );
+    const uploadTask = await this.storage.upload(storagePath, file, metadata);
+    const downloadUrl = await uploadTask.ref.getDownloadURL();
 
     if (!downloadUrl) {
       throw new Error('No download URL returned for attachment upload.');
