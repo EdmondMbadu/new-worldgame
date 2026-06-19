@@ -5856,6 +5856,115 @@ function buildUtcDateFromBooking(
   return new Date(utcGuess.getTime() - offsetMinutes * 60_000);
 }
 
+function buildGslPrepConfirmationEmail(data: any, meetingLink: string) {
+  const fullName = String(data['name'] || '').trim();
+  const firstName = fullName.split(/\s+/)[0] || 'there';
+  const teamName = String(data['teamName'] || '').trim() || 'your team';
+  const date = String(data['demoDate'] || '').trim();
+  const time = String(data['demoTime'] || '').trim();
+  const notes = String(data['notes'] || '').trim();
+  const safeFirstName = escapeEmailHtml(firstName);
+  const safeTeamName = escapeEmailHtml(teamName);
+  const safeDate = escapeEmailHtml(date);
+  const safeTime = escapeEmailHtml(time);
+  const safeMeetingLink = escapeEmailHtml(meetingLink);
+  const safeNotes = escapeEmailHtml(notes);
+
+  const notesHtml = notes
+    ? `<tr>
+        <td style="padding:10px 0;color:#51606f;font-size:14px;line-height:1.6;">Notes</td>
+        <td style="padding:10px 0;color:#122033;font-size:14px;line-height:1.6;text-align:right;">${safeNotes}</td>
+      </tr>`
+    : '';
+
+  const html = `
+<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f5f7fb;font-family:Arial,Helvetica,sans-serif;color:#122033;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7fb;padding:28px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border:1px solid #dfe5ee;border-radius:12px;overflow:hidden;">
+            <tr>
+              <td style="background:#10233f;padding:28px 32px;color:#ffffff;">
+                <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#b8d7ff;">Global Solutions Lab 2026</div>
+                <h1 style="margin:10px 0 0;font-size:26px;line-height:1.2;font-weight:700;">Final Presentation Prep Meeting</h1>
+                <p style="margin:12px 0 0;color:#dbe7f6;font-size:15px;line-height:1.6;">A focused team meeting with Medard Gabel before the final presentations on Wednesday, June 24, 2026.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px 32px;">
+                <p style="margin:0 0 18px;font-size:16px;line-height:1.6;">Hi ${safeFirstName},</p>
+                <p style="margin:0 0 22px;font-size:16px;line-height:1.6;">Your team prep meeting with Medard Gabel is confirmed. This session is for sharpening your Global Solutions Lab 2026 final presentation and clarifying the points your team wants to review before Wednesday.</p>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e4e9f1;border-bottom:1px solid #e4e9f1;margin:0 0 24px;">
+                  <tr>
+                    <td style="padding:10px 0;color:#51606f;font-size:14px;line-height:1.6;">Team</td>
+                    <td style="padding:10px 0;color:#122033;font-size:14px;line-height:1.6;text-align:right;font-weight:700;">${safeTeamName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:10px 0;color:#51606f;font-size:14px;line-height:1.6;">Date</td>
+                    <td style="padding:10px 0;color:#122033;font-size:14px;line-height:1.6;text-align:right;">${safeDate}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:10px 0;color:#51606f;font-size:14px;line-height:1.6;">Time</td>
+                    <td style="padding:10px 0;color:#122033;font-size:14px;line-height:1.6;text-align:right;">${safeTime} ET</td>
+                  </tr>
+                  ${notesHtml}
+                </table>
+
+                <p style="margin:0 0 14px;font-size:15px;line-height:1.6;font-weight:700;">Please come ready to discuss:</p>
+                <ul style="margin:0 0 24px 20px;padding:0;color:#26364a;font-size:15px;line-height:1.7;">
+                  <li>Your team&apos;s main solution and final presentation story.</li>
+                  <li>The strongest points to make on Wednesday, June 24.</li>
+                  <li>One or two questions where Medard&apos;s feedback would help most.</li>
+                </ul>
+
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 24px;">
+                  <tr>
+                    <td style="background:#2563eb;border-radius:8px;">
+                      <a href="${safeMeetingLink}" style="display:inline-block;padding:12px 18px;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;">Join the Google Meet</a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#51606f;">Meeting link: <a href="${safeMeetingLink}" style="color:#2563eb;">${safeMeetingLink}</a></p>
+                <p style="margin:22px 0 0;font-size:15px;line-height:1.6;">Thank you,<br>Medard Gabel and the NewWorld Team</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`.trim();
+
+  const text = [
+    `Hi ${firstName},`,
+    '',
+    'Your team prep meeting with Medard Gabel is confirmed.',
+    'This session is for sharpening your Global Solutions Lab 2026 final presentation before Wednesday, June 24, 2026.',
+    '',
+    `Team: ${teamName}`,
+    `Date: ${date}`,
+    `Time: ${time} ET`,
+    `Meeting link: ${meetingLink}`,
+    notes ? `Notes: ${notes}` : null,
+    '',
+    'Please come ready to discuss:',
+    '- Your team\'s main solution and final presentation story.',
+    '- The strongest points to make on Wednesday, June 24.',
+    '- One or two questions where Medard\'s feedback would help most.',
+    '',
+    'Thank you,',
+    'Medard Gabel and the NewWorld Team',
+  ]
+    .filter((line) => line !== null)
+    .join('\n');
+
+  return { html, text };
+}
+
 export const sendDemoInvite = functions.firestore
   .document('demoBookings/{demoId}')
   .onCreate(async (snap) => {
@@ -5872,7 +5981,7 @@ export const sendDemoInvite = functions.firestore
     const meetingDescription =
       data['meetingDescription'] ||
       (isGslPrep
-        ? 'Team prep meeting for Global Solutions Lab 2026 solution presentations.'
+        ? 'Final presentation prep meeting for Global Solutions Lab 2026 teams. Final presentations are Wednesday, June 24, 2026.'
         : 'Live NewWorld Game workshop with the NewWorld team.');
     const timeZone = data['bookingTimeZone'] || 'America/New_York';
     const startUTC = buildUtcDateFromBooking(
@@ -5901,7 +6010,7 @@ export const sendDemoInvite = functions.firestore
 
     /* 3 ║ Message subjects */
     const userSubject = isGslPrep
-      ? `✅ GSL 2026 prep meeting - ${data['demoDate']} ${data['demoTime']} ET`
+      ? `Global Solutions Lab 2026 final presentation prep - ${data['demoDate']} ${data['demoTime']} ET`
       : `✅ NewWorld Game Workshop – ${data['demoDate']} ${data['demoTime']} EST`;
     const opsSubject = isGslPrep
       ? `📆 GSL team meeting booked - ${data['teamName'] || 'Team'} - ${
@@ -5910,20 +6019,32 @@ export const sendDemoInvite = functions.firestore
       : `📆 Demo booked – ${data['name']} – ${data['demoDate']} ${data['demoTime']} EST`;
 
     /* 4 ║ Build messages */
-    const userMsg = {
-      to: data['email'],
-      from: 'newworld@newworld-game.org', // verified sender
-      subject: userSubject,
-      templateId: TEMPLATE_DEMO,
-      dynamicTemplateData: {
-        subject: userSubject, // <- NEW line
-        firstName: data['name'].split(' ')[0] ?? '',
-        date: data['demoDate'],
-        time: data['demoTime'],
-        meetingLink,
-      },
-      attachments: [attachment],
-    };
+    const gslPrepEmail = isGslPrep
+      ? buildGslPrepConfirmationEmail(data, meetingLink)
+      : null;
+    const userMsg = isGslPrep
+      ? {
+          to: data['email'],
+          from: 'newworld@newworld-game.org', // verified sender
+          subject: userSubject,
+          html: gslPrepEmail?.html || '',
+          text: gslPrepEmail?.text || '',
+          attachments: [attachment],
+        }
+      : {
+          to: data['email'],
+          from: 'newworld@newworld-game.org', // verified sender
+          subject: userSubject,
+          templateId: TEMPLATE_DEMO,
+          dynamicTemplateData: {
+            subject: userSubject, // <- NEW line
+            firstName: data['name'].split(' ')[0] ?? '',
+            date: data['demoDate'],
+            time: data['demoTime'],
+            meetingLink,
+          },
+          attachments: [attachment],
+        };
 
     const opsMsg = {
       to: 'newworld@newworld-game.org',
