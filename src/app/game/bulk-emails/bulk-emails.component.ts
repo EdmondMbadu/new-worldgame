@@ -819,6 +819,7 @@ export class BulkEmailsComponent implements OnDestroy {
         attachments: this.emailAttachments.map((file) => ({
           name: file.name,
           storagePath: file.storagePath,
+          downloadUrl: file.downloadUrl,
           contentType: file.contentType,
           size: file.size,
         })),
@@ -1240,6 +1241,7 @@ export class BulkEmailsComponent implements OnDestroy {
         attachments: this.emailAttachments.map((file) => ({
           name: file.name,
           storagePath: file.storagePath,
+          downloadUrl: file.downloadUrl,
           contentType: file.contentType,
           size: file.size,
         })),

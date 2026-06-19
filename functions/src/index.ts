@@ -5102,6 +5102,7 @@ type BulkEmailAttachmentInput = {
   name?: string;
   filename?: string;
   storagePath?: string;
+  downloadUrl?: string;
   contentType?: string;
   size?: number;
 };
@@ -5109,9 +5110,11 @@ type BulkEmailAttachmentInput = {
 type PreparedBulkEmailAttachment = {
   filename: string;
   storagePath: string;
+  downloadUrl?: string;
   contentType: string;
   size: number;
-  sendGrid: {
+  linkOnly?: boolean;
+  sendGrid?: {
     content: string;
     filename: string;
     type: string;
@@ -5138,6 +5141,7 @@ const BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS = new Set([
 ]);
 const BULK_EMAIL_ATTACHMENT_MAX_BYTES = 50_000_000;
 const BULK_EMAIL_ATTACHMENT_MAX_TOTAL_BYTES = 50_000_000;
+const BULK_EMAIL_INLINE_ATTACHMENT_MAX_BYTES = 18_000_000;
 const BULK_EMAIL_ATTACHMENT_MAX_COUNT = 10;
 const BULK_EMAIL_ATTACHMENT_STORAGE_PREFIX = 'bulk-mails/';
 
@@ -5176,6 +5180,94 @@ function isAllowedBulkAttachment(
     BULK_EMAIL_ATTACHMENT_ALLOWED_MIME_TYPES.has(normalizedType) ||
     BULK_EMAIL_ATTACHMENT_ALLOWED_EXTENSIONS.has(extension)
   );
+}
+
+function sanitizeBulkAttachmentUrl(value: unknown): string {
+  const url = String(value || '').trim();
+  if (!url) return '';
+
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' ? parsed.toString() : '';
+  } catch {
+    return '';
+  }
+}
+
+function getFirebaseStorageDownloadUrl(
+  bucketName: string,
+  storagePath: string,
+  metadata: any
+): string {
+  const tokenValue = metadata?.metadata?.firebaseStorageDownloadTokens || '';
+  const token = String(tokenValue).split(',')[0]?.trim();
+  if (!token) return '';
+
+  return `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(
+    bucketName
+  )}/o/${encodeURIComponent(storagePath)}?alt=media&token=${encodeURIComponent(
+    token
+  )}`;
+}
+
+function formatBulkAttachmentBytes(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return '';
+  const megabytes = bytes / (1024 * 1024);
+  if (megabytes >= 1) return `${megabytes.toFixed(megabytes >= 10 ? 0 : 1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+function buildBulkAttachmentLinkBlock(
+  attachments: PreparedBulkEmailAttachment[]
+): string {
+  const linkedAttachments = attachments.filter(
+    (file) => file.linkOnly && file.downloadUrl
+  );
+  if (!linkedAttachments.length) return '';
+
+  const listItems = linkedAttachments
+    .map((file) => {
+      const sizeLabel = formatBulkAttachmentBytes(file.size);
+      const detail = sizeLabel ? ` (${escapeHtml(sizeLabel)})` : '';
+      return `<li style="margin:0 0 8px;padding:0;"><a href="${escapeHtml(
+        file.downloadUrl
+      )}" style="color:#0f766e;text-decoration:underline;font-weight:700;">${escapeHtml(
+        file.filename
+      )}</a>${detail}</li>`;
+    })
+    .join('');
+
+  return `
+    <div style="margin:24px 0 0;padding:16px;border:1px solid #d1d5db;border-radius:10px;background:#f9fafb;color:#111827;font-family:Arial,sans-serif;">
+      <p style="margin:0 0 10px;font-size:14px;line-height:1.5;font-weight:700;">Large attachment download</p>
+      <p style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#4b5563;">Large files are provided as secure download links so the email can be delivered reliably.</p>
+      <ul style="margin:0;padding:0 0 0 18px;font-size:14px;line-height:1.5;">${listItems}</ul>
+    </div>`;
+}
+
+function appendBulkAttachmentLinks(
+  html: string,
+  attachments: PreparedBulkEmailAttachment[]
+): string {
+  const linkBlock = buildBulkAttachmentLinkBlock(attachments);
+  if (!linkBlock) return html;
+
+  return /<\/body>/i.test(html)
+    ? html.replace(/<\/body>/i, `${linkBlock}</body>`)
+    : `${html}${linkBlock}`;
+}
+
+function getSendGridBulkAttachments(
+  attachments: PreparedBulkEmailAttachment[]
+): Array<NonNullable<PreparedBulkEmailAttachment['sendGrid']>> {
+  return attachments
+    .map((file) => file.sendGrid)
+    .filter(
+      (
+        file
+      ): file is NonNullable<PreparedBulkEmailAttachment['sendGrid']> =>
+        !!file
+    );
 }
 
 async function prepareBulkEmailAttachments(
@@ -5270,6 +5362,29 @@ async function prepareBulkEmailAttachments(
       );
     }
 
+    const downloadUrl =
+      sanitizeBulkAttachmentUrl(item?.downloadUrl) ||
+      getFirebaseStorageDownloadUrl(bucket.name, storagePath, metadata);
+
+    if (metadataSize > BULK_EMAIL_INLINE_ATTACHMENT_MAX_BYTES) {
+      if (!downloadUrl) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          `${filename} is too large to embed directly and does not have a download URL. Please upload it again.`
+        );
+      }
+
+      prepared.push({
+        filename,
+        storagePath,
+        downloadUrl,
+        contentType,
+        size: metadataSize,
+        linkOnly: true,
+      });
+      continue;
+    }
+
     const [buffer] = await file.download();
     if (!buffer.length || buffer.length > BULK_EMAIL_ATTACHMENT_MAX_BYTES) {
       throw new functions.https.HttpsError(
@@ -5281,6 +5396,7 @@ async function prepareBulkEmailAttachments(
     prepared.push({
       filename,
       storagePath,
+      downloadUrl,
       contentType,
       size: buffer.length,
       sendGrid: {
@@ -5314,8 +5430,9 @@ function htmlToPlainText(html: string): string {
  * Callable to send a single test email with raw HTML
  * data: { to: string, subject: string, html: string, preheader?: string, from?: string }
  */
-export const sendBulkTestEmail = functions.https.onCall(
-  async (data, context) => {
+export const sendBulkTestEmail = functions
+  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .https.onCall(async (data, context) => {
     ensureAuthed(context);
 
     const to = (data?.to || '').trim();
@@ -5344,9 +5461,11 @@ export const sendBulkTestEmail = functions.https.onCall(
     }
 
     const attachments = await prepareBulkEmailAttachments(data?.attachments);
+    const sendGridAttachments = getSendGridBulkAttachments(attachments);
 
     // Preheader injection (kept invisible in most clients)
     html = injectHiddenPreheader(html, preheader);
+    html = appendBulkAttachmentLinks(html, attachments);
 
     const msg: sgMail.MailDataRequired = {
       to,
@@ -5360,7 +5479,7 @@ export const sendBulkTestEmail = functions.https.onCall(
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-tester'],
-      attachments: attachments.map((file) => file.sendGrid),
+      attachments: sendGridAttachments,
       // Optional: sandbox mode toggle if you want a dry-run
       // mailSettings: { sandboxMode: { enable: true } },
     };
@@ -5383,8 +5502,7 @@ export const sendBulkTestEmail = functions.https.onCall(
         'Failed to send test email.'
       );
     }
-  }
-);
+  });
 
 // functions/src/index.ts
 
@@ -5511,7 +5629,9 @@ export const sendBulkTestEmail = functions.https.onCall(
 //   };
 // });
 
-export const sendBulkHtml = functions.https.onCall(async (data, context) => {
+export const sendBulkHtml = functions
+  .runWith({ timeoutSeconds: 300, memory: '1GB' })
+  .https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       'unauthenticated',
@@ -5544,6 +5664,7 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
     );
 
   const attachments = await prepareBulkEmailAttachments(data?.attachments);
+  const sendGridAttachments = getSendGridBulkAttachments(attachments);
 
   // Normalize + validate
   const normalizeMergeFieldKey = (raw: string): string => {
@@ -5695,6 +5816,7 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
 
   // Preheader injection + text fallback
   html = injectHiddenPreheader(html, preheader);
+  html = appendBulkAttachmentLinks(html, attachments);
   const text = htmlToPlainText(html);
 
   // Create a run doc
@@ -5720,8 +5842,10 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       attachments: attachments.map((file) => ({
         filename: file.filename,
         storagePath: file.storagePath,
+        downloadUrl: file.downloadUrl || '',
         contentType: file.contentType,
         size: file.size,
+        linkOnly: !!file.linkOnly,
       })),
       status: 'running',
       batches: [],
@@ -5750,7 +5874,7 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-html'],
-      attachments: attachments.map((file) => file.sendGrid),
+      attachments: sendGridAttachments,
       substitutionWrappers: ['{{', '}}'] as [string, string],
       personalizations: batch.map((recipient) => ({
         to: [{ email: recipient.email }],
@@ -5815,7 +5939,7 @@ export const sendBulkHtml = functions.https.onCall(async (data, context) => {
       batches: results.length,
     },
   };
-});
+  });
 
 function parseClockTime(time: string): { hours: number; minutes: number } {
   const normalized = String(time || '').trim().split('-')[0].trim();
