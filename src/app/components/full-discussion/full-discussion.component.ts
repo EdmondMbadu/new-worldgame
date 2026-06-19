@@ -486,10 +486,27 @@ Please choose a file under 5 MB.`);
     return user?.[countKey] || user?.[arrayKey]?.length || 0;
   }
 
+  getParticipantAvatar(participant?: ParticipantInfo | null): string {
+    return participant?.avatarPath || '';
+  }
+
+  async sendOnEnter(event: Event): Promise<void> {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.shiftKey || keyboardEvent.isComposing) return;
+
+    keyboardEvent.preventDefault();
+    this.closeMentionDropdown();
+    await this.addToDiscussion();
+  }
+
   private getHumanAuthorId(comment?: Comment | null): string {
     const uid = String(comment?.authorId || '').trim();
     if (!uid || comment?.isAI || uid.startsWith('ai-')) return '';
     return uid;
+  }
+
+  private getUserAvatarUrl(user?: User | null): string {
+    return user?.profilePicture?.downloadURL || user?.profilePicPath || '';
   }
 
   private cacheCurrentUserProfile(): void {
@@ -685,6 +702,7 @@ Please choose a file under 5 MB.`);
             uid: currentUid,
             lastActiveAt: new Date().toISOString(),
             isOnline: true,
+            avatarPath: this.getUserAvatarUrl(this.auth.currentUser),
           });
           continue;
         }
@@ -700,6 +718,7 @@ Please choose a file under 5 MB.`);
               uid: user.uid,
               lastActiveAt: user.lastActiveAt,
               isOnline: false,
+              avatarPath: this.getUserAvatarUrl(user),
             });
           } else {
             participants.push({
@@ -756,6 +775,7 @@ Please choose a file under 5 MB.`);
         displayName: comment.authorName || 'Unknown',
         uid: comment.authorId,
         isOnline: false,
+        avatarPath: comment.profilePic || '',
       });
     }
     this.subscribeToParticipantPresence();

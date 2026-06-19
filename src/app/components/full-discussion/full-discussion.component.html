@@ -334,9 +334,17 @@
             class="flex items-center gap-3 rounded-lg bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700"
           >
             <div class="relative">
+              <img
+                *ngIf="getParticipantAvatar(participant); else participantInitial"
+                [src]="getParticipantAvatar(participant)"
+                [alt]="participant.displayName"
+                class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
+              />
+              <ng-template #participantInitial>
               <div class="grid h-9 w-9 place-content-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
                 {{ getInitial(participant.displayName) }}
               </div>
+              </ng-template>
               <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"></span>
             </div>
             <div class="min-w-0">
@@ -412,6 +420,7 @@
           <textarea
             [(ngModel)]="prompt"
             (input)="onPromptInput($event)"
+            (keydown.enter)="sendOnEnter($event)"
             (keydown.escape)="closeMentionDropdown()"
             id="user-input"
             placeholder="Message #team-discussion — use @ to mention"
