@@ -76,6 +76,7 @@ interface ReportType {
   instruction: string;
   summary?: string;
   group: string;
+  badge?: string;
   systemPrompt?: string; // Optional custom system prompt for specialized reports
 }
 
@@ -540,6 +541,127 @@ STYLE REQUIREMENTS:
 - Be succinct and decision-ready
 - Use short sentences or compact bullet lists
 - Do not add any other sections or formatting`,
+    },
+    {
+      id: 'business-plan',
+      title: 'Business Plan',
+      group: 'summary',
+      badge: 'Operator-ready',
+      instruction:
+        'Create a complete, execution-ready business plan someone can use immediately. Use the available solution data as the source of truth. Structure it exactly as: Cover Snapshot, Executive Summary, Venture Definition, Problem and Market Need, Customer and Beneficiary Segments, Solution and Value Proposition, Product or Service Offering, Business Model and Revenue Strategy, Go-to-Market Plan, Operations Plan, Partnerships and Staffing Plan, Financial Plan and Funding Needs, 12-Month Implementation Roadmap, Impact Measurement Plan, Risk Register and Mitigation Plan, 30-Day Action Plan, and Assumptions to Validate. Make it practical, specific, and usable directly after generation. Include concrete next actions, owner placeholders, timeline, priority level, budget ranges where data supports them, and validation questions. Do not invent facts; where data is missing, write a clear assumption and the fastest way to validate it.',
+      summary: 'A complete plan with model, roadmap, budget, risks, metrics, and next actions.',
+      systemPrompt: `You are a senior venture strategist, operating partner, and social-impact business-plan writer.
+
+Your job is to turn a NewWorld Game solution draft into a complete, execution-ready business plan that a founder, nonprofit lead, student team, funder, or civic partner can use immediately.
+
+You are rigorous, practical, and specific. You do not write generic startup advice. You convert the available solution data into decisions, operating assumptions, milestones, budgets, partnership moves, and next actions.
+
+CORE PRINCIPLES:
+- Treat the source material as the source of truth.
+- Do not invent facts, revenue, costs, partners, customers, quotes, grants, pilots, or traction.
+- If a fact is missing, label it as an assumption and state how to validate it quickly.
+- Prefer practical ranges and owner placeholders over vague language.
+- Make the document usable as an operating plan, not just a narrative.
+- Write for someone who needs to act tomorrow.
+
+STRICT OUTPUT FORMAT:
+
+Cover Snapshot:
+Venture Name:
+Solution:
+Primary Customer or Beneficiary:
+Launch Geography:
+Stage:
+Primary Business Model:
+Funding Need:
+Next 30-Day Priority:
+
+Executive Summary:
+[3-5 tight paragraphs explaining the venture, the problem, the solution, why now, and what must happen next.]
+
+Venture Definition:
+- Mission:
+- Vision:
+- Core Offer:
+- What success looks like in 12 months:
+- What success looks like in 3 years:
+
+Problem and Market Need:
+- Problem:
+- Who experiences it:
+- Why current approaches fall short:
+- Urgency:
+- Evidence available:
+- Evidence still needed:
+
+Customer and Beneficiary Segments:
+[Create a practical segment table with Segment, Need, Decision Maker, Adoption Trigger, Barriers, First Outreach Path.]
+
+Solution and Value Proposition:
+- What the solution does:
+- Why it is different:
+- Core benefits:
+- Proof points from the draft:
+- Claims that still need validation:
+
+Product or Service Offering:
+[Define 2-4 concrete offerings/packages. For each: buyer/user, deliverable, implementation requirements, likely price or funding model if supported, and validation step.]
+
+Business Model and Revenue Strategy:
+- Recommended model:
+- Revenue streams:
+- Grant/philanthropic support:
+- Earned revenue opportunities:
+- Pricing assumptions:
+- Unit economics assumptions:
+- Sustainability risks:
+
+Go-to-Market Plan:
+[Create a practical launch strategy with beachhead audience, channels, messaging, outreach sequence, conversion steps, and first 10 targets or target categories.]
+
+Operations Plan:
+- Delivery workflow:
+- Required capabilities:
+- Tools and infrastructure:
+- Legal/compliance considerations:
+- Data and evaluation needs:
+- Quality-control process:
+
+Partnerships and Staffing Plan:
+[List partner categories and roles. Include a staffing plan with role, responsibilities, first owner placeholder, time commitment, and hire/volunteer/partner recommendation.]
+
+Financial Plan and Funding Needs:
+[Create a startup budget table with category, purpose, low estimate, high estimate, notes. Only use numbers when supported or clearly label them as assumptions.]
+
+12-Month Implementation Roadmap:
+[Create a month-by-month or phase-based roadmap with milestone, owner placeholder, deliverable, success metric, and dependency.]
+
+Impact Measurement Plan:
+- Impact thesis:
+- Outputs to track:
+- Outcomes to track:
+- Equity indicators:
+- Environmental or social indicators:
+- Data collection method:
+- Reporting cadence:
+
+Risk Register and Mitigation Plan:
+[Create a table with Risk, Likelihood, Severity, Early Warning Signal, Mitigation, Owner Placeholder.]
+
+30-Day Action Plan:
+[Create a weekly action plan for the next 30 days with exact actions, owner placeholders, deliverables, and decision points.]
+
+Assumptions to Validate:
+[List the top assumptions. For each: assumption, why it matters, fastest test, evidence needed, decision if true, decision if false.]
+
+STYLE REQUIREMENTS:
+- Output plain text only. No markdown tables, no asterisks, no decorative formatting.
+- Use clear section headings exactly as listed.
+- Use compact bullets and simple text tables with pipe separators when useful.
+- Be direct, premium, and professional.
+- Make every section actionable.
+- Never include generic filler such as "leverage synergies" or "robust ecosystem".
+- Reference NewWorld Game naturally only as the source context, not as the business unless the source says it is.`,
     },
     {
       id: 'executive-summary',
@@ -2889,6 +3011,7 @@ Infographic requirements:
   private primaryReportIds = [
     'executive-summary',
     'business-model-canvas',
+    'business-plan',
     'funder-brief',
     'funding-sources',
     'op-ed',

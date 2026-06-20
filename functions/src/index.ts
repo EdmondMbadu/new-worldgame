@@ -7062,6 +7062,7 @@ export const onReportRequest = functions
     const data = snap.data() || {};
     const prompt: string = (data?.prompt || '').trim();
     const isFundingReport = /Report Type:\s*Funding Sources List/i.test(prompt);
+    const isBusinessPlanReport = /Report Type:\s*Business Plan/i.test(prompt);
 
     if (!prompt) {
       await snap.ref.update({
@@ -7080,8 +7081,12 @@ export const onReportRequest = functions
       const modelConfig: Record<string, unknown> = {
         model: isFundingReport ? 'gemini-2.0-flash' : 'gemini-2.5-flash',
         generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: isFundingReport ? 3500 : 5000,
+          temperature: isBusinessPlanReport ? 0.18 : 0.2,
+          maxOutputTokens: isFundingReport
+            ? 3500
+            : isBusinessPlanReport
+              ? 9000
+              : 5000,
         },
       };
       modelConfig['tools'] = [{ google_search: {} }];
@@ -7153,7 +7158,10 @@ export const onReportRequest = functions
         }
       }
       sources.sort((a, b) => b.priority - a.priority);
-      const sourceCandidates = sources.slice(0, isFundingReport ? 25 : 10);
+      const sourceCandidates = sources.slice(
+        0,
+        isFundingReport ? 25 : isBusinessPlanReport ? 15 : 10
+      );
       const validatedSourceResults = await Promise.all(
         sourceCandidates.map(async (s) => ({
           source: s,
@@ -7162,7 +7170,7 @@ export const onReportRequest = functions
       );
       const cleanSources = validatedSourceResults
         .filter((r) => r.valid)
-        .slice(0, isFundingReport ? 15 : 10)
+        .slice(0, isFundingReport ? 15 : isBusinessPlanReport ? 12 : 10)
         .map(({ source }) => ({ title: source.title, url: source.url }));
 
       let finalText = text || '';
