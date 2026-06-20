@@ -732,7 +732,7 @@
                         <button
                           type="button"
                           (click)="downloadReportPdf()"
-                          [disabled]="downloadingReportPdf"
+                          [disabled]="downloadingReportPdf || downloadingReportDocx"
                           class="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
                           <ng-container *ngIf="!downloadingReportPdf; else reportPdfLoading">
                             <svg class="h-3.5 w-3.5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
@@ -745,12 +745,13 @@
                               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
+                            PDF
                           </ng-template>
                         </button>
                         <button
                           type="button"
                           (click)="downloadReportDocx()"
-                          [disabled]="downloadingReportDocx"
+                          [disabled]="downloadingReportPdf || downloadingReportDocx"
                           class="flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 py-2.5 text-xs font-medium text-white transition hover:bg-slate-800 disabled:opacity-50 dark:bg-slate-700 dark:hover:bg-slate-600">
                           <ng-container *ngIf="!downloadingReportDocx; else reportDocxLoading">
                             <svg class="h-3.5 w-3.5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
@@ -763,9 +764,15 @@
                               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
+                            Word
                           </ng-template>
                         </button>
                       </div>
+                      <p
+                        *ngIf="reportDownloadStatus"
+                        class="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-[11px] font-medium text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
+                        {{ reportDownloadStatus }}
+                      </p>
                     </div>
                   </div>
 

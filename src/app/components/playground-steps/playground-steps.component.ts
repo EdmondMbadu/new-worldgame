@@ -337,6 +337,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   downloadingReportPdf = false;
   downloadingReportDocx = false;
   downloadingFeedbackPdf = false;
+  reportDownloadStatus = '';
   reportGroupState: Record<string, boolean> = {
     funder: true,
     summary: false,
@@ -2474,8 +2475,12 @@ Infographic requirements:
             basedOn: 'Normal',
             next: 'Normal',
             quickFormat: true,
-            run: { size: 34, bold: true, font: 'Arial', color: '111827' },
-            paragraph: { spacing: { before: 360, after: 140 }, outlineLevel: 0 },
+            run: { size: 32, bold: true, font: 'Arial', color: '1F6B4C' },
+            paragraph: {
+              spacing: { before: 360, after: 140 },
+              outlineLevel: 0,
+              border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CFE0D8', space: 4 } },
+            },
           },
           {
             id: 'Heading2',
@@ -2743,9 +2748,9 @@ Infographic requirements:
         new TextRun({
           text,
           font: 'Arial',
-          size: level === 1 ? 34 : level === 2 ? 28 : 23,
+          size: level === 1 ? 32 : level === 2 ? 28 : 23,
           bold: true,
-          color: level === 1 ? '111827' : level === 2 ? '0F766E' : '185FA5',
+          color: level === 1 ? '1F6B4C' : level === 2 ? '0F766E' : '185FA5',
         }),
       ],
     });
@@ -2951,52 +2956,60 @@ Infographic requirements:
     );
 
     return [
-      this.draftSpacer(420),
+      this.draftSpacer(980),
       new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 140 },
+        spacing: { after: 80 },
         children: [
           new TextRun({
             text: 'NEW WORLD GAME REPORT',
             font: 'Arial',
-            size: 18,
+            size: 20,
             bold: true,
-            color: '0F766E',
+            color: '1F6B4C',
             allCaps: true,
             characterSpacing: 120,
           }),
         ],
       }),
       new Paragraph({
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 80, after: 80 },
+        spacing: { before: 40, after: 80 },
         children: [
           new TextRun({
             text: title,
             font: 'Arial',
-            size: 48,
+            size: 58,
             bold: true,
-            color: '111827',
+            color: '1F6B4C',
           }),
         ],
       }),
       new Paragraph({
-        alignment: AlignmentType.CENTER,
-        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: '1D9E75' } },
-        spacing: { before: 80, after: 220 },
+        spacing: { after: 180 },
+        children: [
+          new TextRun({
+            text: reportType,
+            font: 'Arial',
+            size: 28,
+            color: '163D2E',
+          }),
+        ],
+      }),
+      new Paragraph({
+        border: { bottom: { style: BorderStyle.SINGLE, size: 14, color: '1F6B4C', space: 6 } },
+        spacing: { after: 240 },
         children: [new TextRun({ text: '', font: 'Arial', size: 4 })],
       }),
       this.draftMetadataTable([
-        { label: 'Report Type', value: reportType },
         { label: 'Solution', value: this.currentSolution?.title || 'Untitled Solution' },
         { label: 'Generated', value: dateStr },
-      ]),
-      this.draftSpacer(260),
-      this.draftCallout('Report Context', context, 'E6F1FB', '185FA5', '0F3F71'),
-      this.draftSpacer(260),
-      this.draftMetadataTable([
         peopleMeta,
+      ]),
+      this.draftSpacer(300),
+      this.draftCallout('Report Context', context, 'E6F1FB', '185FA5', '0F3F71'),
+      this.draftSpacer(300),
+      this.draftMetadataTable([
         { label: 'Source', value: 'Current draft' },
+        { label: 'Format', value: 'PDF and Word export' },
       ]),
     ];
   }
@@ -3140,17 +3153,26 @@ Infographic requirements:
       return;
     }
     this.downloadingReportPdf = true;
+    this.reportDownloadStatus = 'Preparing PDF export...';
+    let success = false;
     try {
+      await this.waitForUiPaint();
       const title = this.buildReportTitle();
       const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
       const cleaned = isImpactBmcReport
         ? this.reportText
         : this.normalizeReportText(this.reportText);
       await this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
+      success = true;
+      this.reportDownloadStatus = 'PDF download ready.';
+    } catch (error) {
+      console.error('Report PDF export failed', error);
+      this.reportDownloadStatus = 'PDF export failed. Please try again.';
+      this.reportError = 'Could not prepare the PDF. Please try again.';
     } finally {
-      // Small delay to show loading state
       setTimeout(() => {
         this.downloadingReportPdf = false;
+        this.reportDownloadStatus = success ? '' : this.reportDownloadStatus;
       }, 500);
     }
   }
@@ -3161,26 +3183,62 @@ Infographic requirements:
     }
 
     this.downloadingReportDocx = true;
+    this.reportDownloadStatus = 'Preparing Word export...';
+    let success = false;
     try {
+      await this.waitForUiPaint();
       const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
       let doc: Document;
 
       if (isImpactBmcReport) {
+        this.reportDownloadStatus = 'Formatting Business Model Canvas...';
+        await this.waitForUiPaint();
         const parsed = this.parseImpactBmcReport(this.reportText);
         const children = this.buildImpactBmcDocxBlocks(parsed);
         doc = this.buildBeautifulReportDocument(this.buildReportTitle(), children);
       } else {
+        this.reportDownloadStatus = 'Formatting report document...';
+        await this.waitForUiPaint();
         const title = this.buildReportTitle();
         const cleaned = this.normalizeReportText(this.reportText);
         const paragraphs = this.buildReportDocxParagraphs(cleaned);
         doc = this.buildBeautifulReportDocument(title, paragraphs);
       }
 
+      this.reportDownloadStatus = 'Packaging Word file...';
+      await this.waitForUiPaint();
       const blob = await Packer.toBlob(doc);
       this.triggerDownload(blob, this.buildReportFileName('docx'));
+      success = true;
+      this.reportDownloadStatus = 'Word download ready.';
+    } catch (error) {
+      console.error('Report Word export failed', error);
+      this.reportDownloadStatus = 'Word export failed. Please try again.';
+      this.reportError = 'Could not prepare the Word document. Please try again.';
     } finally {
-      this.downloadingReportDocx = false;
+      setTimeout(() => {
+        this.downloadingReportDocx = false;
+        this.reportDownloadStatus = success ? '' : this.reportDownloadStatus;
+      }, 500);
     }
+  }
+
+  private async waitForUiPaint(): Promise<void> {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      const raf = window.requestAnimationFrame || ((cb: FrameRequestCallback) => window.setTimeout(cb, 16));
+      raf(() => raf(() => resolve()));
+    });
+  }
+
+  private async yieldToBrowser(): Promise<void> {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
   }
 
   ngOnDestroy(): void {
@@ -3253,6 +3311,7 @@ Infographic requirements:
     this.reportError = '';
     this.reportText = '';
     this.reportFormatted = '';
+    this.reportDownloadStatus = '';
   }
 
   private parseAiFeedback(raw: string): AiFeedbackDisplay {
@@ -3965,6 +4024,9 @@ INTEGRITY RULES:
           height: 872px;
           overflow: hidden;
         }
+        .draft-cover-page .draft-page-body {
+          padding-top: 68px;
+        }
         .draft-content-source {
           position: absolute;
           left: -99999px;
@@ -3977,27 +4039,33 @@ INTEGRITY RULES:
         }
         .draft-kicker {
           margin: 0 0 16px;
-          text-align: center;
-          color: #0f766e;
+          text-align: left;
+          color: #1f6b4c;
           font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.14em;
           text-transform: uppercase;
         }
         .draft-title {
-          margin: 0 auto 18px;
-          max-width: 650px;
-          text-align: center;
-          color: #111827;
-          font-size: 34px;
+          margin: 0 0 12px;
+          max-width: 670px;
+          text-align: left;
+          color: #1f6b4c;
+          font-size: 40px;
           line-height: 1.12;
           font-weight: 800;
         }
+        .draft-subtitle {
+          margin: 0 0 26px;
+          color: #163d2e;
+          font-size: 18px;
+          line-height: 1.3;
+        }
         .draft-rule {
-          width: 150px;
-          height: 4px;
-          margin: 0 auto 30px;
-          background: #1d9e75;
+          width: 100%;
+          height: 7px;
+          margin: 0 0 32px;
+          background: #1f6b4c;
         }
         .draft-meta {
           display: grid;
@@ -4005,6 +4073,9 @@ INTEGRITY RULES:
           gap: 0;
           margin: 0 0 28px;
           border: 1px solid #d8dee4;
+        }
+        .draft-meta-two {
+          grid-template-columns: repeat(2, 1fr);
         }
         .draft-meta div {
           min-height: 86px;
@@ -4065,7 +4136,9 @@ INTEGRITY RULES:
         }
         .draft-content h2 {
           margin: 30px 0 12px;
-          color: #0f766e;
+          padding-bottom: 7px;
+          border-bottom: 2px solid #cfe0d8;
+          color: #1f6b4c;
           font-size: 21px;
           line-height: 1.25;
         }
@@ -4151,19 +4224,20 @@ INTEGRITY RULES:
           <div class="draft-page-body">
             <p class="draft-kicker">New World Game Report</p>
             <h1 class="draft-title">${this.escapeHtml(title)}</h1>
+            <p class="draft-subtitle">${reportType}</p>
             <div class="draft-rule"></div>
             <section class="draft-meta">
-              <div><span>Report Type</span><strong>${reportType}</strong></div>
               <div><span>Solution</span><strong>${solutionTitle}</strong></div>
               <div><span>Generated</span><strong>${generated}</strong></div>
+              <div><span>${peopleLabel}</span><strong>${peopleValue}</strong></div>
             </section>
             <section class="draft-callout">
               <strong>Report Context</strong>
               <p>${context}</p>
             </section>
-            <section class="draft-meta">
-              <div><span>${peopleLabel}</span><strong>${peopleValue}</strong></div>
+            <section class="draft-meta draft-meta-two">
               <div><span>Source</span><strong>Current draft</strong></div>
+              <div><span>Format</span><strong>PDF and Word export</strong></div>
             </section>
           </div>
           <footer class="draft-page-footer">
@@ -5001,6 +5075,10 @@ INTEGRITY RULES:
     document.body.appendChild(container);
     try {
       const { default: html2canvas } = await import('html2canvas');
+      if (this.downloadingReportPdf) {
+        this.reportDownloadStatus = 'Preparing report pages...';
+        await this.waitForUiPaint();
+      }
       await this.waitForImages(container);
       const pageElements = this.paginateStyledDraftPrint(container);
       await this.waitForImages(container);
@@ -5010,6 +5088,10 @@ INTEGRITY RULES:
       const pageHeight = pdf.internal.pageSize.getHeight();
 
       for (let page = 0; page < pageElements.length; page += 1) {
+        if (this.downloadingReportPdf) {
+          this.reportDownloadStatus = `Rendering PDF page ${page + 1} of ${pageElements.length}...`;
+          await this.waitForUiPaint();
+        }
         const canvas = await html2canvas(pageElements[page], {
           backgroundColor: '#ffffff',
           scale: 2,
@@ -5026,8 +5108,13 @@ INTEGRITY RULES:
           pdf.addPage();
         }
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageWidth, pageHeight);
+        await this.yieldToBrowser();
       }
 
+      if (this.downloadingReportPdf) {
+        this.reportDownloadStatus = 'Finalizing PDF download...';
+        await this.waitForUiPaint();
+      }
       pdf.save(filename);
     } finally {
       document.body.removeChild(container);
