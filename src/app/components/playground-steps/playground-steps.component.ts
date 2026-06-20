@@ -2825,6 +2825,24 @@ Infographic requirements:
       .join(', ');
   }
 
+  private getReportPeopleMetadata(): { label: 'Author' | 'Team'; value: string } {
+    const names = [
+      this.getDraftAuthorName(),
+      ...this.getDraftTeamNames()
+        .split(',')
+        .map((name) => this.normalizeWhitespace(name)),
+    ].filter(Boolean);
+    const uniqueNames = Array.from(
+      new Map(names.map((name) => [name.toLowerCase(), name])).values()
+    );
+
+    if (uniqueNames.length <= 1) {
+      return { label: 'Author', value: uniqueNames[0] || 'Unknown' };
+    }
+
+    return { label: 'Team', value: uniqueNames.join(', ') };
+  }
+
   private buildBeautifulReportDocument(title: string, contentBlocks: DraftDocxBlock[]): Document {
     const blocks = contentBlocks.length
       ? contentBlocks
@@ -2919,6 +2937,7 @@ Infographic requirements:
 
   private buildReportCoverBlocks(title: string): DraftDocxBlock[] {
     const reportType = this.getSelectedReportType()?.title || 'Report';
+    const peopleMeta = this.getReportPeopleMetadata();
     const dateStr = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -2976,8 +2995,7 @@ Infographic requirements:
       this.draftCallout('Report Context', context, 'E6F1FB', '185FA5', '0F3F71'),
       this.draftSpacer(260),
       this.draftMetadataTable([
-        { label: 'Author', value: this.getDraftAuthorName() || 'Unknown' },
-        { label: 'Team', value: this.getDraftTeamNames() || 'Individual draft' },
+        peopleMeta,
         { label: 'Source', value: 'Current draft' },
       ]),
     ];
@@ -3904,8 +3922,9 @@ INTEGRITY RULES:
   private buildReportPrintShell(title: string, bodyHtml: string): string {
     const reportType = this.escapeHtml(this.getSelectedReportType()?.title || 'Report');
     const solutionTitle = this.escapeHtml(this.currentSolution?.title || 'Untitled Solution');
-    const author = this.escapeHtml(this.getDraftAuthorName() || 'Unknown');
-    const team = this.escapeHtml(this.getDraftTeamNames() || 'Individual draft');
+    const peopleMeta = this.getReportPeopleMetadata();
+    const peopleLabel = this.escapeHtml(peopleMeta.label);
+    const peopleValue = this.escapeHtml(peopleMeta.value);
     const generated = this.escapeHtml(
       new Date().toLocaleDateString('en-US', {
         year: 'numeric',
@@ -4143,8 +4162,7 @@ INTEGRITY RULES:
               <p>${context}</p>
             </section>
             <section class="draft-meta">
-              <div><span>Author</span><strong>${author}</strong></div>
-              <div><span>Team</span><strong>${team}</strong></div>
+              <div><span>${peopleLabel}</span><strong>${peopleValue}</strong></div>
               <div><span>Source</span><strong>Current draft</strong></div>
             </section>
           </div>
