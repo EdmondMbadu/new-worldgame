@@ -35,7 +35,7 @@ export interface SlpLaunchResourceResponse {
   providedIn: 'root',
 })
 export class SlpLaunchResourceService {
-  private readonly cacheStoragePrefix = 'slp_launch_resources_cache';
+  private readonly cacheStoragePrefix = 'slp_launch_resources_cache_v2';
 
   constructor(private readonly fns: AngularFireFunctions) {}
 
@@ -57,7 +57,7 @@ export class SlpLaunchResourceService {
         region: params.location.region || '',
         country: params.location.country || '',
         locationMode: params.location.mode === 'global' ? 'global' : 'location',
-        pageSize: params.pageSize || 8,
+        pageSize: params.pageSize || 10,
         forceRefresh: params.forceRefresh === true,
         append: params.append === true,
         excludedIds: params.excludedIds || [],

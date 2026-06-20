@@ -2133,14 +2133,20 @@ ${contextLines}
 
 This is batch ${params.page}. If this is not the first batch, deliberately find different people and different organizations than earlier batches.
 
-People can include:
-- subject-matter experts
-- nonprofit or NGO leaders
-- program officers and foundation staff
-- university center directors or researchers
-- ecosystem builders
-- government or policy leaders
-- startup or implementation leaders
+Retrieval plan:
+- Infer 4 to 8 precise search themes from the solution summary, focus area, category, SDGs, and affected populations.
+- Search across these outreach lanes before deciding the final list:
+1. local subject-matter expert or practitioner
+2. nonprofit or NGO program leader
+3. foundation program officer or grantmaking staff member
+4. university center director, faculty member, researcher, or evaluator
+5. civic agency, school-system, policy, or government leader
+6. coalition, intermediary, ecosystem builder, or association staff member
+7. implementation, startup, or service delivery leader
+8. journalist, editor, newsletter owner, communications lead, or public program host
+- Use a geographic ladder: exact city -> city nicknames/abbreviations -> metro/nearby counties -> state/region -> national people with explicit thematic fit.
+- Do not stop after finding the first few easy contacts. Build a diverse candidate pool, remove duplicates, then return the strongest ${params.pageSize}.
+- Avoid returning more than two people from the same organization unless each has a clearly different role and outreach reason.
 
 Strict rules:
 - Relevance must be specific to the solution topic, not just broad innovation or sustainability.
@@ -2151,6 +2157,7 @@ Strict rules:
 - Do not use social media or organization homepages unless they are clearly the best authoritative source about that person.
 - Avoid duplicate organizations unless the people are materially different and both are strong fits.
 - Only include people you can stand behind as solid matches for this exact solution.
+- Prioritize current official pages, staff directories, faculty profiles, grantmaker staff pages, program pages, and authored/contact pages with visible emails.
 
 Return JSON only in this exact shape:
 {
@@ -2511,6 +2518,92 @@ const rankSolutionLaunchResourcesForTarget = (
     }));
 };
 
+const selectSolutionLaunchResourcesForTarget = (
+  resources: SolutionLaunchResource[],
+  params: {
+    locationMode: 'location' | 'global';
+    city: string;
+    region: string;
+    country: string;
+    pageSize: number;
+  }
+): SolutionLaunchResource[] => {
+  const ranked = dedupeSolutionLaunchResources(resources);
+  if (params.locationMode === 'global') {
+    return ranked.slice(0, params.pageSize);
+  }
+
+  const nonGeneric = ranked.filter(
+    (resource) => !isGenericGlobalLaunchHost(resource.url)
+  );
+  const localMatches = nonGeneric.filter(
+    (resource) =>
+      getSolutionLaunchLocalSignalScore(
+        resource,
+        params.city,
+        params.region,
+        params.country
+      ) > 0
+  );
+  const widerMatches = nonGeneric.filter(
+    (resource) =>
+      getSolutionLaunchLocalSignalScore(
+        resource,
+        params.city,
+        params.region,
+        params.country
+      ) === 0
+  );
+
+  return dedupeSolutionLaunchResources([
+    ...localMatches,
+    ...widerMatches,
+  ]).slice(0, params.pageSize);
+};
+
+const SOLUTION_LAUNCH_RETRIEVAL_LANES: Record<
+  SolutionLaunchResourceLane,
+  string[]
+> = {
+  publish: [
+    'local civic outlet or neighborhood publication',
+    'regional public-interest, education, environment, or solutions journalism outlet',
+    'city or university newsroom, magazine, or communications channel',
+    'professional/practitioner trade publication tied to the solution domain',
+    'peer-reviewed, applied research, or policy publication venue',
+    'planning, civic innovation, or government publication channel',
+    'sector-specific newsletter, association bulletin, or implementation blog',
+    'podcast, public program, award, showcase, or demo-day visibility route',
+  ],
+  fund: [
+    'local private foundation or family foundation',
+    'community foundation, donor-advised initiative, or place-based fund',
+    'city, county, or state agency grant program',
+    'federal agency, national public grant, or matching program',
+    'national private foundation with this exact theme',
+    'corporate social impact, CSR, or employee giving program',
+    'CDFI, impact capital, fiscal sponsor, or nonprofit incubator route',
+    'prize, challenge, accelerator, fellowship, or innovation competition',
+  ],
+  partner: [
+    'mission-twin nonprofit or direct service organization',
+    'land, asset, school, civic, or regulator-adjacent implementation holder',
+    'grassroots, equity, coalition, or community power organization',
+    'academic center, applied research lab, evaluator, or university partner',
+    'intermediary, network, association, or backbone organization',
+    'operator, implementer, vendor-neutral service provider, or program shop',
+    'advocacy, policy, data, tooling, or field-building organization',
+    'faith, civic, neighborhood, peer-city, or local institution route',
+  ],
+};
+
+const buildSolutionLaunchRetrievalLaneText = (
+  lane: SolutionLaunchResourceLane
+): string =>
+  SOLUTION_LAUNCH_RETRIEVAL_LANES[lane]
+    .map((entry, index) => `${index + 1}. ${entry}`)
+    .join('\n');
+
 const buildSolutionLaunchResourcePrompt = (params: {
   lane: SolutionLaunchResourceLane;
   solutionTitle: string;
@@ -2542,14 +2635,15 @@ const buildSolutionLaunchResourcePrompt = (params: {
   const locationRule =
     params.locationMode === 'global'
       ? `The user explicitly chose global targeting. Rank by strongest thematic fit, credibility, current activity, and direct actionability. Do not pretend a result is local.`
-      : `The user chose location targeting for ${locationLabel}. At least ${Math.max(1, Math.ceil(params.pageSize * 0.7))} result(s) must be organizations, programs, publications, offices, or pages with real operations in ${params.city}, ${params.region || params.country}, or the directly surrounding region. Use global platforms only after exhausting strong local/regional matches, and label them as global rather than local.`;
+      : `The user chose location targeting for ${locationLabel}. Search ${params.city}, common nicknames/abbreviations for the city, ${params.region || params.country}, nearby counties/metro area, then statewide/regional, then national programs that explicitly serve this theme. Prefer local/regional results, but fill the full list with high-quality statewide or national matches when local-only results are fewer than ${params.pageSize}. Label wider results honestly as regional, national, or global rather than pretending they are local.`;
   const exclusionRule = params.excludedIds.length
     ? `Already shown resource IDs: ${params.excludedIds.slice(0, 80).join(', ')}. Do not repeat the same organization, program, outlet, webpage, host/name pair, or near-duplicate route. If quality drops after excluding these, return fewer than ${params.pageSize} results rather than padding with generic sources.`
     : '';
+  const retrievalLanes = buildSolutionLaunchRetrievalLaneText(params.lane);
   const laneSpecificRules =
     params.lane === 'publish'
       ? [
-          `For publish, prefer pages for local outlets, education desks, public-interest news, university newsrooms, civic newsletters, and submission/contact pages. For local targeting, do not return Medium, LinkedIn, Substack, Zenodo, ResearchGate, The Conversation, or other global platforms.`,
+          `For publish, include a mix of earned media, formal submission venues, applied/practitioner publications, local civic outlets, and showcase routes when they fit. For local targeting, do not return Medium, LinkedIn, Substack, Zenodo, ResearchGate, The Conversation, or other global platforms.`,
           `For each result, "nextAction" must name the concrete pitch/submission/contact action and "contactHint" should name the relevant desk, form, or editor/contact route if visible.`,
         ]
       : params.lane === 'fund'
@@ -2586,17 +2680,27 @@ ${contextLines}
 Targeting rule:
 ${locationRule}
 
+Retrieval plan:
+- First infer 4 to 8 search themes from the solution summary, focus area, category, SDGs, and implementation profile. Include synonyms, affected populations, policy terms, and program terms.
+- Search across this ${params.lane} lane matrix before deciding the final list:
+${retrievalLanes}
+- Use a geographic ladder: exact city -> city nicknames/abbreviations -> metro/nearby counties -> state/region -> national programs with explicit thematic fit.
+- Do not stop after finding the first 1 or 2 easy results. Build a candidate pool across multiple lanes, remove duplicates, then return the strongest diverse ${params.pageSize}.
+- Prefer at least 5 distinct host domains when ${params.pageSize} is 8 or more.
+
 Strict quality rules:
 - Return ${params.pageSize} real, current, source-backed results.
 - If fewer than ${params.pageSize} meaningful results exist after the constraints, return only the meaningful results.
 - Every result must be specific to this solution topic, not just broad "innovation", "sustainability", or "community".
 - Prefer direct program, submission, staff, grants, newsroom, partnership, or initiative pages over generic homepages.
 - For local targeting, do not return a global/general platform when a relevant ${params.city || 'city'} or regional organization exists.
-- Do not return Google, search result pages, social media feeds, URL shorteners, or directory pages unless the directory is the authoritative program page.
+- Do not return Google, search result pages, social media feeds, URL shorteners, RocketReach, ZoomInfo, Crunchbase, generic business directories, or broad listing pages unless the listing page is the authoritative program page.
 - Include only results you can stand behind as meaningful next steps for this exact solution.
 - For funding, include eligibility or deadline when visible. If not visible, say "Check current cycle".
 - For partner, include the likely partnership angle.
 - For publish, include the likely publication/access point.
+- Use "type" to identify the lane category, for example "Local civic outlet", "Community foundation", "Academic implementation partner", or "State grant program".
+- Score fit by topical match, geographic usefulness, authority, recency/current activity, and direct actionability.
 ${laneSpecificRules.map((rule) => `- ${rule}`).join('\n')}
 ${exclusionRule ? `- ${exclusionRule}` : ''}
 
@@ -9732,8 +9836,8 @@ export const findSolutionReachPeople = functions
       const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: {
-          temperature: 0.15,
-          maxOutputTokens: 5000,
+          temperature: 0.2,
+          maxOutputTokens: 7000,
         },
         tools: [{ google_search: {} }],
       } as any);
@@ -10037,8 +10141,8 @@ export const findSolutionLaunchResources = functions
         const model = genAI.getGenerativeModel({
           model: 'gemini-2.5-flash',
           generationConfig: {
-            temperature: append ? 0.18 : 0.12,
-            maxOutputTokens: pageSize <= 5 ? 4200 : 6500,
+            temperature: append ? 0.22 : 0.18,
+            maxOutputTokens: pageSize <= 5 ? 5200 : 9000,
           },
           tools: [{ google_search: {} }],
         } as any);
@@ -10165,19 +10269,16 @@ export const findSolutionLaunchResources = functions
       availableResources = resources.filter(
         (resource) => !requestedExcludedIds.includes(resource.id)
       );
-      const selectedResources = dedupeSolutionLaunchResources(
-        locationMode === 'global'
-          ? availableResources
-          : availableResources.filter(
-              (resource) =>
-                getSolutionLaunchLocalSignalScore(
-                  resource,
-                  city,
-                  region,
-                  country
-                ) > 0 && !isGenericGlobalLaunchHost(resource.url)
-            )
-      ).slice(0, pageSize);
+      const selectedResources = selectSolutionLaunchResourcesForTarget(
+        availableResources,
+        {
+          locationMode,
+          city,
+          region,
+          country,
+          pageSize,
+        }
+      );
       const locationLabel = locationMode === 'global'
         ? 'global targeting'
         : [city, region, country].filter(Boolean).join(', ');

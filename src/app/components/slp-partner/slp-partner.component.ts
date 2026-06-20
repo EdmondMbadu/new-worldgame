@@ -282,7 +282,6 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
 
     const token = ++this.researchRequestToken;
     const location = { ...this.slpLocation.snapshot };
-    let shouldFillRemaining = false;
     this.researchLoading = true;
     this.liveResearchAttempted = true;
     this.researchError = '';
@@ -299,7 +298,7 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
         solutionId: this.solutionId,
         lane: 'partner',
         location,
-        pageSize: 2,
+        pageSize: 10,
         forceRefresh,
       });
       if (token !== this.researchRequestToken) {
@@ -314,7 +313,6 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
         },
         response
       );
-      shouldFillRemaining = response.resources.length > 0;
     } catch (error: any) {
       if (token !== this.researchRequestToken) {
         return;
@@ -333,16 +331,6 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
       if (token === this.researchRequestToken) {
         this.researchLoading = false;
       }
-    }
-
-    if (shouldFillRemaining && token === this.researchRequestToken) {
-      await this.loadAdditionalResearch(3, {
-        token,
-        location,
-        silentEmpty: true,
-        pendingMessage: 'Adding three more verified partner sources...',
-        successLabel: 'partner',
-      });
     }
   }
 
@@ -403,52 +391,41 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
     this.moreResearchLoading = true;
     this.moreResearchMessage = options.pendingMessage || '';
     try {
-      let addedTotal = 0;
-      for (let index = 0; index < pageSize; index += 1) {
-        const existingIds = this.researchResources.map((resource) => resource.id);
-        const response = await this.slpResources.findResources({
+      const existingIds = this.researchResources.map((resource) => resource.id);
+      const response = await this.slpResources.findResources({
+        solutionId: this.solutionId,
+        lane: 'partner',
+        location,
+        pageSize,
+        append: true,
+        excludedIds: existingIds,
+      });
+      if (token !== this.researchRequestToken) {
+        return;
+      }
+      const beforeCount = this.researchResources.length;
+      this.appendResearch(response.resources, response.summary, response.generatedAt);
+      const addedTotal = this.researchResources.length - beforeCount;
+      if (!addedTotal) {
+        this.moreResearchMessage = options.silentEmpty
+          ? ''
+          : options.emptyMessage ||
+            'No additional high-quality partner sources were found for this target right now.';
+      } else {
+        this.moreResearchMessage = `Added ${addedTotal} more ${options.successLabel} source${addedTotal === 1 ? '' : 's'}.`;
+      }
+      this.slpResources.writeCachedSearch(
+        {
           solutionId: this.solutionId,
           lane: 'partner',
           location,
-          pageSize: 1,
-          append: true,
-          excludedIds: existingIds,
-        });
-        if (token !== this.researchRequestToken) {
-          return;
+        },
+        {
+          ...response,
+          resources: this.researchResources,
+          summary: this.researchSummary,
         }
-        const beforeCount = this.researchResources.length;
-        this.appendResearch(response.resources, response.summary, response.generatedAt);
-        const addedCount = this.researchResources.length - beforeCount;
-        if (!addedCount) {
-          if (!addedTotal && options.silentEmpty) {
-            this.moreResearchMessage = '';
-          } else if (!addedTotal && options.emptyMessage) {
-            this.moreResearchMessage = options.emptyMessage;
-          } else {
-            this.moreResearchMessage = `Added ${addedTotal} more ${options.successLabel} source${addedTotal === 1 ? '' : 's'}. No more strong matches found right now.`;
-          }
-          break;
-        }
-
-        addedTotal += addedCount;
-        this.moreResearchMessage =
-          addedTotal >= pageSize
-            ? `Added ${addedTotal} more ${options.successLabel} source${addedTotal === 1 ? '' : 's'}.`
-            : `Added ${addedTotal} of ${pageSize} ${options.successLabel} sources. Still searching...`;
-        this.slpResources.writeCachedSearch(
-          {
-            solutionId: this.solutionId,
-            lane: 'partner',
-            location,
-          },
-          {
-            ...response,
-            resources: this.researchResources,
-            summary: this.researchSummary,
-          }
-        );
-      }
+      );
     } catch (error) {
       if (token !== this.researchRequestToken) {
         return;
