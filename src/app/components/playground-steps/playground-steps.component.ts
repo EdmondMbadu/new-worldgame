@@ -2824,28 +2824,27 @@ Infographic requirements:
   }
 
   private getDraftTeamNames(): string {
+    return this.getDraftTeamNameList().join(', ');
+  }
+
+  private getDraftTeamNameList(): string[] {
     return this.teamMembers
       .map((member) => this.normalizeWhitespace(`${member.firstName || ''} ${member.lastName || ''}`) || member.email || '')
       .filter(Boolean)
-      .join(', ');
+      .filter((name, index, names) =>
+        names.findIndex((candidate) => candidate.toLowerCase() === name.toLowerCase()) === index
+      );
   }
 
   private getReportPeopleMetadata(): { label: 'Author' | 'Team'; value: string } {
-    const names = [
-      this.getDraftAuthorName(),
-      ...this.getDraftTeamNames()
-        .split(',')
-        .map((name) => this.normalizeWhitespace(name)),
-    ].filter(Boolean);
-    const uniqueNames = Array.from(
-      new Map(names.map((name) => [name.toLowerCase(), name])).values()
-    );
+    const teamNames = this.getDraftTeamNameList();
+    const names = teamNames.length ? teamNames : [this.getDraftAuthorName()].filter(Boolean);
 
-    if (uniqueNames.length <= 1) {
-      return { label: 'Author', value: uniqueNames[0] || 'Unknown' };
+    if (names.length <= 1) {
+      return { label: 'Author', value: names[0] || 'Unknown' };
     }
 
-    return { label: 'Team', value: uniqueNames.join(', ') };
+    return { label: 'Team', value: names.join(', ') };
   }
 
   private buildBeautifulReportDocument(title: string, contentBlocks: DraftDocxBlock[]): Document {
