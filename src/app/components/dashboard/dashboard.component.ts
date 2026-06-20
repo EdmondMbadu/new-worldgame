@@ -2,7 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { Solution, SolutionRecruitmentProfile } from 'src/app/models/solution';
+import {
+  Evaluation,
+  EvaluationHistoryEntry,
+  Solution,
+  SolutionRecruitmentProfile,
+} from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
@@ -14,6 +19,16 @@ interface OnlineTeamMember {
   displayName: string;
   uid: string;
   lastActiveAt?: string;
+}
+
+interface EvaluationRoundView {
+  label: string;
+  badge: string;
+  dateLabel: string;
+  count: number;
+  summary: Evaluation;
+  details: Evaluation[];
+  archived: boolean;
 }
 
 @Component({
@@ -152,6 +167,127 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get teamMemberLabel(): string {
     return `${this.teamMemberCount} member${this.teamMemberCount === 1 ? '' : 's'}`;
+  }
+
+  get evaluationRounds(): EvaluationRoundView[] {
+    const rounds: EvaluationRoundView[] = [];
+    const currentDetails = this.currentEvaluationDetails;
+
+    if (currentDetails.length > 0) {
+      rounds.push({
+        label: 'Current evaluation round',
+        badge: 'Current',
+        dateLabel: this.currentSolution.submissionDate || 'Latest submission',
+        count: currentDetails.length,
+        summary: this.currentSolution.evaluationSummary || {},
+        details: currentDetails,
+        archived: false,
+      });
+    }
+
+    const history = this.currentSolution.evaluationHistory || [];
+    const archivedRounds = history
+      .slice()
+      .sort((a, b) => (b.archivedAtMs || 0) - (a.archivedAtMs || 0))
+      .map((entry, index) => this.toEvaluationRound(entry, history.length - index));
+
+    return [...rounds, ...archivedRounds];
+  }
+
+  get totalEvaluationCount(): number {
+    return this.evaluationRounds.reduce((total, round) => total + round.count, 0);
+  }
+
+  get evaluationTileMeta(): string {
+    const roundCount = this.evaluationRounds.length;
+    const evaluationCount = this.totalEvaluationCount;
+
+    if (evaluationCount === 0) {
+      return 'No evaluations yet';
+    }
+
+    return `${evaluationCount} evaluation${
+      evaluationCount === 1 ? '' : 's'
+    } across ${roundCount} round${roundCount === 1 ? '' : 's'}`;
+  }
+
+  get currentEvaluationDetails(): Evaluation[] {
+    return Array.isArray(this.currentSolution.evaluationDetails)
+      ? this.currentSolution.evaluationDetails
+      : [];
+  }
+
+  scrollToEvaluationHistory() {
+    document
+      .getElementById('evaluation-history')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  getRoundAverage(round: EvaluationRoundView): string {
+    return this.formatScore(round.summary?.average);
+  }
+
+  getEvaluationDisplayName(evaluation: Evaluation, index: number): string {
+    if (evaluation.evaluatorName) return evaluation.evaluatorName;
+    if (evaluation.evaluatorEmail) return evaluation.evaluatorEmail;
+    if (evaluation.evaluator?.email) {
+      const fullName = `${evaluation.evaluator.firstName ?? ''} ${
+        evaluation.evaluator.lastName ?? ''
+      }`.trim();
+      return fullName || evaluation.evaluator.email;
+    }
+    return `Evaluator ${index + 1}`;
+  }
+
+  getScorePercent(value?: string): number {
+    const score = Number.parseFloat(value || '0');
+    if (Number.isNaN(score)) return 0;
+    return Math.max(0, Math.min(100, score * 10));
+  }
+
+  getScoreColor(value?: string): string {
+    const percent = this.getScorePercent(value);
+    if (percent >= 91) return 'bg-emerald-500';
+    if (percent >= 81) return 'bg-lime-500';
+    if (percent >= 71) return 'bg-amber-400';
+    if (percent >= 61) return 'bg-orange-500';
+    return 'bg-rose-500';
+  }
+
+  formatScore(value?: string): string {
+    const score = Number.parseFloat(value || '0');
+    return Number.isNaN(score) ? '0.0' : score.toFixed(1);
+  }
+
+  private toEvaluationRound(
+    entry: EvaluationHistoryEntry,
+    roundNumber: number
+  ): EvaluationRoundView {
+    const details = Array.isArray(entry.evaluationDetails)
+      ? entry.evaluationDetails
+      : [];
+
+    return {
+      label: `Past evaluation round ${roundNumber}`,
+      badge: 'Archived',
+      dateLabel:
+        entry.submissionDate ||
+        entry.archivedAtLabel ||
+        this.formatDate(entry.archivedAtMs),
+      count: Number(entry.numberofTimesEvaluated || details.length || 0),
+      summary: entry.evaluationSummary || {},
+      details,
+      archived: true,
+    };
+  }
+
+  private formatDate(value?: number): string {
+    if (!value) return 'Archived evaluation';
+    return new Date(value).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   }
 
   get allBroadcasts(): string {

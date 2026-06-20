@@ -176,7 +176,7 @@
     <!-- ========== WORKSPACE TOOLS ========== -->
     <div class="w-full max-w-4xl mb-8">
       <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4 px-1">Workspace Tools</h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <!-- Video Meeting -->
         <div
           [routerLink]="['/meeting', currentSolution.solutionId || id]"
@@ -250,8 +250,169 @@
           </div>
           <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ "dashboard.tiles.whiteboard.title" | translate }}</span>
         </div>
+
+        <!-- Evaluations -->
+        <button
+          type="button"
+          (click)="scrollToEvaluationHistory()"
+          class="group cursor-pointer rounded-xl bg-slate-100 dark:bg-slate-800 p-4 hover:bg-slate-200 dark:hover:bg-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
+        >
+          <div class="rounded-lg p-2.5 bg-amber-100 dark:bg-amber-900/30 mb-2 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-amber-500 dark:text-amber-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M9 6h6m-8.25 14.25h10.5A2.25 2.25 0 0 0 19.5 18V5.25A2.25 2.25 0 0 0 17.25 3H6.75A2.25 2.25 0 0 0 4.5 5.25V18a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Evaluations</span>
+          <span class="mt-2 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+            {{ totalEvaluationCount }}
+          </span>
+        </button>
       </div>
     </div>
+
+    <!-- ========== EVALUATION HISTORY ========== -->
+    <section
+      id="evaluation-history"
+      class="w-full max-w-4xl mb-8 scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+    >
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Workspace Tools
+          </p>
+          <h2 class="mt-1 text-xl font-bold text-slate-900 dark:text-white">
+            Evaluations
+          </h2>
+          <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">
+            Current and past evaluations stay here even after the solution is revised for a new submission.
+          </p>
+        </div>
+        <span class="inline-flex w-fit items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200">
+          {{ evaluationTileMeta }}
+        </span>
+      </div>
+
+      <div
+        *ngIf="evaluationRounds.length === 0"
+        class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+      >
+        No evaluations have been submitted for this solution yet.
+      </div>
+
+      <div *ngIf="evaluationRounds.length > 0" class="mt-5 space-y-4">
+        <article
+          *ngFor="let round of evaluationRounds"
+          class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
+        >
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+                  {{ round.label }}
+                </h3>
+                <span
+                  class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                  [ngClass]="
+                    round.archived
+                      ? 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200'
+                  "
+                >
+                  {{ round.badge }}
+                </span>
+              </div>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {{ round.dateLabel }} · {{ round.count }} evaluator{{ round.count === 1 ? "" : "s" }}
+              </p>
+            </div>
+            <div class="rounded-xl bg-white px-4 py-2 text-right shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Average
+              </p>
+              <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                {{ getRoundAverage(round) }}<span class="text-sm font-semibold text-slate-500">/10</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Achievable</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ formatScore(round.summary.achievable) }}</span>
+              </div>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-2 rounded-full" [ngClass]="getScoreColor(round.summary.achievable)" [style.width.%]="getScorePercent(round.summary.achievable)"></div>
+              </div>
+            </div>
+            <div class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Feasible</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ formatScore(round.summary.feasible) }}</span>
+              </div>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-2 rounded-full" [ngClass]="getScoreColor(round.summary.feasible)" [style.width.%]="getScorePercent(round.summary.feasible)"></div>
+              </div>
+            </div>
+            <div class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Economical</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ formatScore(round.summary.economical) }}</span>
+              </div>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-2 rounded-full" [ngClass]="getScoreColor(round.summary.economical)" [style.width.%]="getScorePercent(round.summary.economical)"></div>
+              </div>
+            </div>
+            <div class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Ecological</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ formatScore(round.summary.ecological) }}</span>
+              </div>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-2 rounded-full" [ngClass]="getScoreColor(round.summary.ecological)" [style.width.%]="getScorePercent(round.summary.ecological)"></div>
+              </div>
+            </div>
+            <div class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Equitable</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ formatScore(round.summary.equitable) }}</span>
+              </div>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-2 rounded-full" [ngClass]="getScoreColor(round.summary.equitable)" [style.width.%]="getScorePercent(round.summary.equitable)"></div>
+              </div>
+            </div>
+            <div class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-600 dark:text-slate-300">Understandable</span>
+                <span class="font-bold text-slate-800 dark:text-slate-100">{{ formatScore(round.summary.understandable) }}</span>
+              </div>
+              <div class="mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800">
+                <div class="h-2 rounded-full" [ngClass]="getScoreColor(round.summary.understandable)" [style.width.%]="getScorePercent(round.summary.understandable)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="round.details.length > 0" class="mt-4 space-y-3">
+            <div
+              *ngFor="let evaluation of round.details; let i = index"
+              class="rounded-lg bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                  {{ getEvaluationDisplayName(evaluation, i) }}
+                </p>
+                <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  {{ formatScore(evaluation.average) }}/10
+                </span>
+              </div>
+              <p *ngIf="evaluation.comment" class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {{ evaluation.comment }}
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
 
     <!-- ========== PUBLISH INVITE BANNER (Last Item) ========== -->
     <div

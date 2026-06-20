@@ -29,6 +29,7 @@ export class Solution {
   sdgs?: string[];
   evaluationSummary?: Evaluation = {};
   evaluationDetails?: Evaluation[];
+  evaluationHistory?: EvaluationHistoryEntry[];
   endDate?: string;
   endDateFormatted?: string;
   finished?: string;
@@ -110,6 +111,15 @@ export class Evaluation {
   understandable?: string;
   comment?: string;
   evaluator?: User;
+}
+
+export interface EvaluationHistoryEntry {
+  archivedAtMs: number;
+  archivedAtLabel?: string;
+  submissionDate?: string;
+  numberofTimesEvaluated?: string;
+  evaluationSummary?: Evaluation;
+  evaluationDetails?: Evaluation[];
 }
 
 export class Evaluator {

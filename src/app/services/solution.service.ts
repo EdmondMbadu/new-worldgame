@@ -6,6 +6,7 @@ import {
 import {
   Broadcast,
   Evaluation,
+  EvaluationHistoryEntry,
   JoinRequest,
   Roles,
   Solution,
@@ -720,12 +721,14 @@ export class SolutionService {
     solutionId: string,
     currentSolution: Solution
   ) {
+    const evaluationHistory = this.buildEvaluationHistory(currentSolution);
     const data = this.withSolutionUpdatedAt({
       finished: 'false',
       edited: 'true',
       submissionDate: '',
       evaluationDetails: [],
       evaluationSummary: {},
+      evaluationHistory,
       evaluators: currentSolution.evaluators,
       numberofTimesEvaluated: '',
     });
@@ -734,6 +737,32 @@ export class SolutionService {
     );
 
     return solutionRef.set(data, { merge: true });
+  }
+
+  private buildEvaluationHistory(solution: Solution): EvaluationHistoryEntry[] {
+    const existingHistory = Array.isArray(solution.evaluationHistory)
+      ? solution.evaluationHistory
+      : [];
+    const evaluationDetails = Array.isArray(solution.evaluationDetails)
+      ? solution.evaluationDetails
+      : [];
+
+    if (evaluationDetails.length === 0) {
+      return existingHistory;
+    }
+
+    return [
+      ...existingHistory,
+      {
+        archivedAtMs: Date.now(),
+        archivedAtLabel: this.time.todaysDate(),
+        submissionDate: solution.submissionDate,
+        numberofTimesEvaluated:
+          solution.numberofTimesEvaluated || evaluationDetails.length.toString(),
+        evaluationSummary: solution.evaluationSummary || {},
+        evaluationDetails,
+      },
+    ];
   }
   submitSolutionForPublication(solutionId: string, currentSolution: Solution) {
     const data = this.withSolutionUpdatedAt({
