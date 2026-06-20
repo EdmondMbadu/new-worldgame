@@ -1,11 +1,23 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Evaluation, Solution } from 'src/app/models/solution';
+import {
+  Evaluation,
+  EvaluationHistoryEntry,
+  Solution,
+} from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+
+interface EvaluationArchiveRound {
+  label: string;
+  dateLabel: string;
+  count: number;
+  summary: Evaluation;
+  details: Evaluation[];
+}
 
 @Component({
   selector: 'app-evaluation-summary',
@@ -65,8 +77,14 @@ export class EvaluationSummaryComponent {
   }
 
   mapping() {
-    console.log(' are there evaluators', this.evaluators);
-    this.currentSolution!.evaluationDetails!.sort((a: any, b: any) => {
+    this.colors = [];
+    this.evaluations = [];
+
+    if (!this.currentSolution?.evaluationDetails?.length) {
+      return;
+    }
+
+    this.currentSolution.evaluationDetails.sort((a: any, b: any) => {
       if (a.evaluatorId < b.evaluatorId) {
         return -1;
       }
@@ -75,13 +93,81 @@ export class EvaluationSummaryComponent {
       }
       return 0;
     });
-    if (this.currentSolution.evaluationDetails!) {
-      for (let a of this.currentSolution.evaluationDetails!) {
-        console.log('here  ai m ', a.evaluator);
-        this.colors.push(this.data.mapEvaluationToColors(a));
-        this.evaluations.push(this.data.mapEvaluationToNumeric(a));
-      }
+    for (let a of this.currentSolution.evaluationDetails) {
+      this.colors.push(this.data.mapEvaluationToColors(a));
+      this.evaluations.push(this.data.mapEvaluationToNumeric(a));
     }
+  }
+
+  get totalEvaluationCount(): number {
+    const currentCount = Array.isArray(this.currentSolution.evaluationDetails)
+      ? this.currentSolution.evaluationDetails.length
+      : 0;
+    const archivedCount = this.pastEvaluationRounds.reduce(
+      (total, round) => total + round.count,
+      0
+    );
+
+    return currentCount + archivedCount;
+  }
+
+  get pastEvaluationRounds(): EvaluationArchiveRound[] {
+    const history = Array.isArray(this.currentSolution.evaluationHistory)
+      ? this.currentSolution.evaluationHistory
+      : [];
+
+    return history
+      .slice()
+      .sort((a, b) => (b.archivedAtMs || 0) - (a.archivedAtMs || 0))
+      .map((entry, index) => this.toArchiveRound(entry, history.length - index));
+  }
+
+  get hasPastEvaluations(): boolean {
+    return this.pastEvaluationRounds.length > 0;
+  }
+
+  private toArchiveRound(
+    entry: EvaluationHistoryEntry,
+    roundNumber: number
+  ): EvaluationArchiveRound {
+    const details = Array.isArray(entry.evaluationDetails)
+      ? entry.evaluationDetails
+      : [];
+
+    return {
+      label: `Past evaluation round ${roundNumber}`,
+      dateLabel:
+        entry.submissionDate ||
+        entry.archivedAtLabel ||
+        this.formatArchiveDate(entry.archivedAtMs),
+      count: Number(entry.numberofTimesEvaluated || details.length || 0),
+      summary: entry.evaluationSummary || {},
+      details,
+    };
+  }
+
+  formatArchiveDate(value?: number): string {
+    if (!value) return 'Archived evaluation';
+    return new Date(value).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
+
+  getScorePercent(value?: string): number {
+    const score = Number.parseFloat(value || '0');
+    if (Number.isNaN(score)) return 0;
+    return Math.max(0, Math.min(100, score * 10));
+  }
+
+  getScoreColor(value?: string): string {
+    const percent = this.getScorePercent(value);
+    if (percent >= 91) return 'bg-green-500';
+    if (percent >= 81) return 'bg-yellow-300';
+    if (percent >= 71) return 'bg-amber-400';
+    if (percent >= 61) return 'bg-orange-500';
+    return 'bg-red-700';
   }
 
   getEvaluators() {
