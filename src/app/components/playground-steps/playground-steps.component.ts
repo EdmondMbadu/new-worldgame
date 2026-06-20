@@ -2570,7 +2570,7 @@ Infographic requirements:
         spacing: { after: 140 },
         children: [
           new TextRun({
-            text: 'NEW WORLD GAME DRAFT',
+            text: 'NEWWORLD GAME DRAFT',
             font: 'Arial',
             size: 18,
             bold: true,
@@ -2960,7 +2960,7 @@ Infographic requirements:
         spacing: { after: 80 },
         children: [
           new TextRun({
-            text: 'NEW WORLD GAME REPORT',
+            text: 'NEWWORLD GAME REPORT',
             font: 'Arial',
             size: 20,
             bold: true,
@@ -4221,7 +4221,7 @@ INTEGRITY RULES:
       <article class="draft-pdf-document">
         <section class="draft-page draft-cover-page">
           <div class="draft-page-body">
-            <p class="draft-kicker">New World Game Report</p>
+            <p class="draft-kicker">NEWWORLD GAME REPORT</p>
             <h1 class="draft-title">${this.escapeHtml(title)}</h1>
             <p class="draft-subtitle">${reportType}</p>
             <div class="draft-rule"></div>
@@ -5610,7 +5610,7 @@ INTEGRITY RULES:
       <article class="draft-pdf-document">
         <section class="draft-page draft-cover-page">
           <div class="draft-page-body">
-            <p class="draft-kicker">New World Game Draft</p>
+            <p class="draft-kicker">NEWWORLD GAME DRAFT</p>
             <h1 class="draft-title">${this.escapeHtml(title)}</h1>
             <div class="draft-rule"></div>
             <section class="draft-meta">
