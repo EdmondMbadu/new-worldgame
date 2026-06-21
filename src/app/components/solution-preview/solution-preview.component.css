@@ -324,15 +324,27 @@
 :host-context(.dark) .nwg-comment { border-color: #374151; }
 
 .nwg-comment-box {
-  border: 1px solid var(--nwg-rule);
+  border: 1.5px solid #cfcabf;
   border-radius: 1rem;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  background: #fbfaf7;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.nwg-comment-box:hover {
+  border-color: #b7b1a4;
 }
 .nwg-comment-box:focus-within {
-  border-color: rgba(17, 122, 96, 0.4);
-  box-shadow: 0 0 0 4px rgba(17, 122, 96, 0.08);
+  border-color: var(--nwg-primary);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(17, 122, 96, 0.12);
 }
-:host-context(.dark) .nwg-comment-box { border-color: #374151; }
+:host-context(.dark) .nwg-comment-box {
+  border-color: #4b5563;
+  background: #1f2937;
+}
+:host-context(.dark) .nwg-comment-box:focus-within {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.15);
+}
 
 /* ---------- existing copy-flash animation (kept) ---------- */
 .flash-animation {
@@ -341,4 +353,23 @@
 @keyframes flash {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* ---------- clickable comment-author popover ---------- */
+.comment-author-popover {
+  transform-origin: bottom left;
+}
+
+.comment-author-popover__description {
+  display: -webkit-box;
+  max-height: 3.75rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (max-width: 640px) {
+  .comment-author-popover {
+    left: -0.75rem;
+  }
 }
