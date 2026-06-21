@@ -162,6 +162,10 @@ export class SolutionPreviewComponent implements OnInit {
     return ['/user-profile', user.uid];
   }
 
+  getTeamMemberRoute(user?: User | null): string[] | null {
+    return this.getCommentAuthorRoute(user);
+  }
+
   getUserCount(
     user: User | null | undefined,
     countKey: 'followers' | 'following',

@@ -46,59 +46,27 @@
                 </div> -->
         <address class="flex items-center mb-6 not-italic">
           <div
-            class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white overflow-x-auto"
+            class="flex items-center gap-2 mr-3 text-sm text-gray-900 dark:text-white"
           >
             <div
-              class="flex flex-row -space-x-3 flex-shrink-0 cursor-pointer"
+              class="group relative flex-shrink-0"
               *ngFor="let user of teamMembers; let i = index"
             >
-              <!-- <span *ngIf="user.status==='online'" class="absolute w-4 h-4 bg-green-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
-              <!-- <span *ngIf="user.status==='offline'" class="absolute w-4 h-4 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full"></span>  -->
-              <div *ngIf="user.profilePicture?.downloadURL !== undefined">
+              <a
+                [routerLink]="getTeamMemberRoute(user)"
+                class="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+                [class.pointer-events-none]="!user.uid"
+                [attr.aria-label]="'View profile for ' + getCommentAuthorName(user)"
+              >
                 <img
-                  *ngIf="
-                    auth.currentUser !== null &&
-                    user.uid === auth.currentUser.uid
-                  "
-                  (mouseenter)="onHoverImageTeam(i)"
-                  (mouseleave)="onLeaveTeam(i)"
-                  class="w-11 h-11 border-2 dark:border-gray-700 border-white rounded-full"
+                  *ngIf="user.profilePicture?.downloadURL !== undefined"
+                  class="w-11 h-11 border-2 dark:border-gray-700 border-white rounded-full object-cover transition group-hover:ring-2 group-hover:ring-emerald-400"
                   [src]="user.profilePicture?.downloadURL"
-                  routerLink="/profile"
                   alt=""
                 />
-                <img
-                  *ngIf="
-                    auth.currentUser !== null &&
-                    user.uid !== auth.currentUser.uid
-                  "
-                  (mouseenter)="onHoverImageTeam(i)"
-                  (mouseleave)="onLeaveTeam(i)"
-                  class="w-11 h-11 dark:border-gray-700 border-2 border-white rounded-full"
-                  [src]="user.profilePicture?.downloadURL"
-                  routerLink="/user-profile/{{ user.uid }}"
-                  alt=""
-                />
-                <img
-                  *ngIf="auth.currentUser === null"
-                  (mouseenter)="onHoverImageTeam(i)"
-                  (mouseleave)="onLeaveTeam(i)"
-                  class="w-11 h-11 dark:border-gray-700 border-2 border-white rounded-full"
-                  [src]="user.profilePicture?.downloadURL"
-                  routerLink="/user-profile/{{ user.uid }}"
-                  alt=""
-                />
-              </div>
-              <div *ngIf="user.profilePicture?.downloadURL === undefined">
                 <div
-                  *ngIf="
-                    auth.currentUser !== null &&
-                    user.uid === auth.currentUser.uid
-                  "
-                  (mouseenter)="onHoverImageTeam(i)"
-                  (mouseleave)="onLeaveTeam(i)"
-                  routerLink="/profile"
-                  class="w-11 h-11 flex items-center justify-center rounded-full text-white text-lg font-semibold border-2 border-white dark:border-gray-700"
+                  *ngIf="user.profilePicture?.downloadURL === undefined"
+                  class="w-11 h-11 flex items-center justify-center rounded-full text-white text-lg font-semibold border-2 border-white dark:border-gray-700 transition group-hover:ring-2 group-hover:ring-emerald-400"
                   [ngStyle]="{
                     'background-color': getAvatarColor(user.uid!)
                   }"
@@ -108,116 +76,83 @@
                       (user.lastName || "").charAt(0) | uppercase
                   }}
                 </div>
+              </a>
 
-                <div
-                  *ngIf="
-                    auth.currentUser !== null &&
-                    user.uid !== auth.currentUser.uid
-                  "
-                  (mouseenter)="onHoverImageTeam(i)"
-                  (mouseleave)="onLeaveTeam(i)"
-                  [routerLink]="['/user-profile', user.uid]"
-                  class="w-11 h-11 flex items-center justify-center rounded-full text-white text-lg font-semibold border-2 border-white dark:border-gray-700"
-                  [ngStyle]="{
-                    'background-color': getAvatarColor(user.uid!)
-                  }"
-                >
-                  {{
-                    (user.firstName || "").charAt(0) +
-                      (user.lastName || "").charAt(0) | uppercase
-                  }}
-                </div>
-
-                <div
-                  *ngIf="auth.currentUser === null"
-                  (mouseenter)="onHoverImageTeam(i)"
-                  (mouseleave)="onLeaveTeam(i)"
-                  [routerLink]="['/user-profile', user.uid]"
-                  class="w-11 h-11 flex items-center justify-center rounded-full text-white text-lg font-semibold border-2 border-white dark:border-gray-700"
-                  [ngStyle]="{
-                    'background-color': getAvatarColor(user.uid!)
-                  }"
-                >
-                  {{
-                    (user.firstName || "").charAt(0) +
-                      (user.lastName || "").charAt(0) | uppercase
-                  }}
-                </div>
-              </div>
-
-              <div>
-                <div *ngIf="showPopUpTeam[i]">
-                  <div
-                    class="shadow-lg border-2 border-gray-200 dark:border-gray-700 absolute z-10 -mt-[5rem] bg-white dark:bg-slate-800 rounded-lg p-4"
+              <div
+                class="comment-author-popover pointer-events-none absolute bottom-full left-0 z-50 mb-3 w-[min(20rem,calc(100vw-3rem))] translate-y-1 rounded-xl border border-slate-200 bg-white p-4 text-left opacity-0 shadow-xl shadow-slate-900/10 ring-1 ring-black/5 transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/40"
+              >
+                <div class="flex items-center gap-3">
+                  <span
+                    class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-base font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    [ngStyle]="
+                      user.profilePicture?.downloadURL
+                        ? {}
+                        : { 'background-color': getAvatarColor(user.uid!), color: '#fff' }
+                    "
                   >
-                    <div class="flex items-center justify-between mb-2">
-                      <a>
-                        <img
-                          *ngIf="user.profilePicture?.downloadURL !== undefined"
-                          class="w-10 h-10 rounded-full"
-                          [src]="user.profilePicture?.downloadURL"
-                          alt=""
-                        />
-                        <div
-                          *ngIf="user.profilePicture?.downloadURL === undefined"
-                          class="w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700 mx-auto"
-                        >
-                          <svg
-                            class="w-12 h-12 text-gray-400 -left-1"
-                            fill="currentColor"
-                            viewBox="0 0 24 20"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                              clip-rule="evenodd"
-                            ></path>
-                          </svg>
-                        </div>
-                      </a>
-                      <div>
-                        <button
-                          type="button"
-                          class="text-white bg-teal-700 hover:bg-teal-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5"
-                        >
-                          Follow
-                        </button>
-                      </div>
-                    </div>
-                    <p
-                      class="text-base font-semibold leading-none text-gray-800 dark:text-gray-200"
-                    >
-                      <a>{{ user.firstName }} {{ user.lastName }}</a>
-                    </p>
-                    <p class="mb-3 text-sm font-normal dark:text-gray-200">
-                      <a class="hover:underline">{{ user.email }}</a>
-                    </p>
-                    <p class="mb-4 text-sm text-gray-800 dark:text-gray-200">
-                      {{ user.profileCredential }}
-                    </p>
-                    <ul class="flex text-sm">
-                      <li class="mr-2">
-                        <a class="hover:underline">
-                          <span
-                            class="font-semibold text-gray-800 dark:text-gray-200"
-                            >{{ user.following }}
-                          </span>
-                          <span>Following</span>
-                        </a>
-                      </li>
-                      <li>
-                        <a class="hover:underline">
-                          <span
-                            class="font-semibold text-gray-900 dark:text-gray-200"
-                            >{{ user.followers }}
-                          </span>
-                          <span>Followers</span>
-                        </a>
-                      </li>
-                    </ul>
+                    <img
+                      *ngIf="user.profilePicture?.downloadURL as teamPic; else teamPopoverInitials"
+                      [src]="teamPic"
+                      [alt]="getCommentAuthorName(user)"
+                      class="h-full w-full object-cover"
+                    />
+                    <ng-template #teamPopoverInitials>
+                      {{ getCommentAuthorInitials(user) }}
+                    </ng-template>
+                  </span>
+                  <div class="min-w-0">
+                    <span class="block truncate text-base font-bold text-slate-950 dark:text-white">
+                      {{ getCommentAuthorName(user) }}
+                    </span>
+                    <span class="block truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+                      {{ user.email }}
+                    </span>
                   </div>
                 </div>
+                <div class="pt-3">
+                  <p
+                    *ngIf="user.profileCredential"
+                    class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    {{ user.profileCredential }}
+                  </p>
+                  <p
+                    *ngIf="user.profileDescription"
+                    class="comment-author-popover__description mb-3 text-sm leading-5 text-slate-600 dark:text-slate-300"
+                  >
+                    {{ user.profileDescription }}
+                  </p>
+                  <div class="mb-3 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <span
+                      *ngIf="user.location"
+                      class="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800"
+                    >
+                      {{ user.location }}
+                    </span>
+                    <span
+                      *ngIf="user.employement"
+                      class="rounded-full bg-slate-100 px-2.5 py-1 dark:bg-slate-800"
+                    >
+                      {{ user.employement }}
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
+                    <span class="font-semibold text-slate-900 dark:text-white">
+                      {{ getUserCount(user, 'followers', 'followersArray') }}
+                      <span class="font-medium text-slate-500 dark:text-slate-400">followers</span>
+                    </span>
+                    <span class="font-semibold text-slate-900 dark:text-white">
+                      {{ getUserCount(user, 'following', 'followingArray') }}
+                      <span class="font-medium text-slate-500 dark:text-slate-400">following</span>
+                    </span>
+                    <span class="font-semibold text-emerald-700 dark:text-emerald-300">
+                      View profile
+                    </span>
+                  </div>
+                </div>
+                <span
+                  class="absolute -bottom-2 left-7 h-4 w-4 rotate-45 border-b border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                ></span>
               </div>
             </div>
             <p class="ml-5 text-sm font-medium text-gray-500 dark:text-gray-400">
