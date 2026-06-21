@@ -147,11 +147,16 @@ export class Comment {
   content?: string;
   likes?: string;
   dislikes?: string;
+  reactions?: CommentReactions;
   profilePic?: string;
   attachments?: Attachment[]; // NEW
   linkPreview?: LinkPreview;
   isAI?: boolean; // For AI-generated messages
   isLoading?: boolean; // For AI typing indicator
+}
+
+export interface CommentReactions {
+  [emoji: string]: string[];
 }
 
 export class Roles {

@@ -309,6 +309,48 @@
   </ng-container>
 </div>
 
+              <div *ngIf="!comment.isLoading" class="mt-2 flex flex-wrap items-center gap-1.5">
+                <button
+                  *ngFor="let reaction of getReactionEntries(comment); trackBy: trackByReactionEntry"
+                  type="button"
+                  (click)="toggleReaction(comment, reaction.emoji)"
+                  class="reaction-chip"
+                  [class.reaction-chip--active]="reaction.reacted"
+                  [attr.aria-label]="reaction.label + ': ' + reaction.count + ' reaction' + (reaction.count === 1 ? '' : 's')"
+                  [title]="reaction.label"
+                >
+                  <span aria-hidden="true">{{ reaction.emoji }}</span>
+                  <span>{{ reaction.count }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  (click)="toggleReactionPicker(comment)"
+                  class="reaction-add-button"
+                  aria-label="Add emoji reaction"
+                  title="Add reaction"
+                >
+                  <span aria-hidden="true">+</span>
+                  <span aria-hidden="true">😊</span>
+                </button>
+              </div>
+
+              <div
+                *ngIf="activeReactionPickerKey === getCommentKey(comment)"
+                class="reaction-picker mt-2 flex flex-wrap items-center gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+              >
+                <button
+                  *ngFor="let option of reactionOptions; trackBy: trackByReactionOption"
+                  type="button"
+                  (click)="selectReaction(comment, option)"
+                  class="reaction-picker-button"
+                  [class.reaction-picker-button--active]="hasUserReacted(comment, option.emoji)"
+                  [attr.aria-label]="option.label"
+                  [title]="option.label"
+                >
+                  {{ option.emoji }}
+                </button>
+              </div>
 
             </div>
           </div>

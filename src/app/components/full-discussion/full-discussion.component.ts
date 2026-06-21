@@ -66,6 +66,29 @@ interface PendingPreview {
   type: 'image' | 'other';
 }
 
+interface ReactionOption {
+  emoji: string;
+  label: string;
+}
+
+interface ReactionEntry extends ReactionOption {
+  count: number;
+  reacted: boolean;
+}
+
+const MAIN_REACTION_OPTIONS: ReactionOption[] = [
+  { emoji: '👍', label: 'Like' },
+  { emoji: '❤️', label: 'Love' },
+  { emoji: '😂', label: 'Funny' },
+  { emoji: '🎉', label: 'Excitement' },
+  { emoji: '😮', label: 'Surprised' },
+  { emoji: '😢', label: 'Sad' },
+  { emoji: '🙌', label: 'Celebrate' },
+  { emoji: '👀', label: 'Watching' },
+  { emoji: '💡', label: 'Great idea' },
+  { emoji: '🚀', label: 'Launch it' },
+];
+
 @Component({
   selector: 'app-full-discussion',
   templateUrl: './full-discussion.component.html',
@@ -120,6 +143,8 @@ export class FullDiscussionComponent
   private lastReadMarkerKey = '';
   highlightedMessageId = '';
   commentAuthorProfiles: Record<string, User | null | undefined> = {};
+  readonly reactionOptions = MAIN_REACTION_OPTIONS;
+  activeReactionPickerKey = '';
 
   constructor(
     private afs: AngularFirestore,
@@ -157,9 +182,7 @@ export class FullDiscussionComponent
           const shouldPinToBottom =
             !this.hasRouteMessageId() && this.isNearBottom();
           this.comments = (doc?.discussion || []).map((c: any) =>
-            !c.date || isNaN(Date.parse(c.date as string))
-              ? { ...c, date: undefined }
-              : c
+            this.normalizeComment(c)
           );
           const latest = this.comments.at(-1);
           if (latest?.date && latest.date !== this.lastMsgIso) {
@@ -201,14 +224,9 @@ export class FullDiscussionComponent
       const shouldPinToBottom =
         !this.hasRouteMessageId() && this.isNearBottom();
       this.currentSolution = data;
-      this.comments = (data?.discussion || []).map((c: any) => {
-        // if the original field is garbage we drop it
-        if (!c.date || isNaN(Date.parse(c.date as string))) {
-          return { ...c, date: undefined }; // renders nothing
-        }
-        // keep the ISO string so the pipe works
-        return c;
-      });
+      this.comments = (data?.discussion || []).map((c: any) =>
+        this.normalizeComment(c)
+      );
       this.markCurrentDiscussionRead();
       this.scrollToRouteMessage();
       this.hydrateCommentAuthorProfiles();
@@ -391,7 +409,7 @@ Please choose a file under 5 MB.`);
       setTimeout(() => this.scrollToBottom(), 0);
     });
 
-    const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
+    const toSave = this.serializeDiscussionForSave(this.comments);
     // play ping before adding message
     this.playPing();
     const path =
@@ -450,6 +468,128 @@ Please choose a file under 5 MB.`);
 
   trackByAttachment(_index: number, attachment: Attachment): string {
     return attachment.url || attachment.name;
+  }
+
+  trackByReactionOption(_index: number, option: ReactionOption): string {
+    return option.emoji;
+  }
+
+  trackByReactionEntry(_index: number, reaction: ReactionEntry): string {
+    return reaction.emoji;
+  }
+
+  getCommentKey(comment: Comment): string {
+    return (
+      comment.messageId ||
+      `${comment.authorId || comment.authorName || 'comment'}-${comment.date || ''}-${comment.content || ''}`
+    );
+  }
+
+  getReactionEntries(comment?: Comment | null): ReactionEntry[] {
+    const reactions = this.normalizeReactions(comment?.reactions);
+    const mainOrder = this.reactionOptions.map((option) => option.emoji);
+    const optionByEmoji = new Map(
+      this.reactionOptions.map((option) => [option.emoji, option])
+    );
+    const uid = this.auth.currentUser?.uid || '';
+
+    return Object.entries(reactions)
+      .filter(([, userIds]) => userIds.length > 0)
+      .sort(([emojiA], [emojiB]) => {
+        const aIndex = mainOrder.indexOf(emojiA);
+        const bIndex = mainOrder.indexOf(emojiB);
+        if (aIndex === -1 && bIndex === -1) return emojiA.localeCompare(emojiB);
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      })
+      .map(([emoji, userIds]) => ({
+        ...(optionByEmoji.get(emoji) || { emoji, label: 'Reaction' }),
+        count: userIds.length,
+        reacted: !!uid && userIds.includes(uid),
+      }));
+  }
+
+  hasUserReacted(comment: Comment, emoji: string): boolean {
+    const uid = this.auth.currentUser?.uid || '';
+    return !!uid && (comment.reactions?.[emoji] || []).includes(uid);
+  }
+
+  toggleReactionPicker(comment: Comment): void {
+    const key = this.getCommentKey(comment);
+    this.activeReactionPickerKey =
+      this.activeReactionPickerKey === key ? '' : key;
+  }
+
+  async selectReaction(comment: Comment, option: ReactionOption): Promise<void> {
+    this.activeReactionPickerKey = '';
+    await this.toggleReaction(comment, option.emoji);
+  }
+
+  async toggleReaction(comment: Comment, emoji: string): Promise<void> {
+    const uid = this.auth.currentUser?.uid || '';
+    if (!uid || !emoji) return;
+
+    try {
+      const updatedComment = await this.afs.firestore.runTransaction(
+        async (transaction) => {
+          const ref = this.afs.doc(this.getDiscussionDocPath()).ref;
+          const snap = await transaction.get(ref);
+          const data: any = snap.exists ? snap.data() : {};
+          const discussion = Array.isArray(data?.discussion)
+            ? data.discussion
+            : [];
+          const targetIndex = this.findMatchingCommentIndex(
+            discussion,
+            comment
+          );
+
+          if (targetIndex === -1) {
+            throw new Error('Unable to find discussion message for reaction.');
+          }
+
+          const updatedDiscussion = discussion.map((rawComment: any, index: number) => {
+            if (index !== targetIndex) return rawComment;
+
+            const normalized = this.normalizeComment(rawComment);
+            const reactions = this.normalizeReactions(normalized.reactions);
+            const currentUsers = reactions[emoji] || [];
+            reactions[emoji] = currentUsers.includes(uid)
+              ? currentUsers.filter((reactorUid) => reactorUid !== uid)
+              : [...currentUsers, uid];
+
+            if (!reactions[emoji].length) {
+              delete reactions[emoji];
+            }
+
+            return this.serializeCommentForSave({
+              ...normalized,
+              reactions,
+            });
+          });
+
+          transaction.set(
+            this.afs.doc(this.getDiscussionDocPath()).ref,
+            { discussion: updatedDiscussion },
+            { merge: true }
+          );
+
+          return this.normalizeComment(updatedDiscussion[targetIndex]);
+        }
+      );
+
+      const localIndex = this.findMatchingCommentIndex(this.comments, comment);
+      if (localIndex !== -1) {
+        this.comments[localIndex] = {
+          ...this.comments[localIndex],
+          reactions: updatedComment.reactions || {},
+        };
+        this.comments = [...this.comments];
+      }
+    } catch (error) {
+      console.error('Unable to update reaction', error);
+      alert('Unable to update that reaction right now. Please try again.');
+    }
   }
 
   getCommentAuthorProfile(comment?: Comment | null): User | null {
@@ -634,7 +774,7 @@ Please choose a file under 5 MB.`);
 
   /** --- helper: update Firestore once --- */
   private async syncDiscussion() {
-    const toSave = this.comments.map(({ displayTime, ...raw }) => raw);
+    const toSave = this.serializeDiscussionForSave(this.comments);
     const path =
       this.docPath || `solutions/${this.currentSolution!.solutionId}`;
     await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
@@ -655,6 +795,91 @@ Please choose a file under 5 MB.`);
     return contextType === 'challenge'
       ? `/challenge-discussion/${this.id}`
       : `/full-discussion/${this.currentSolution!.solutionId || this.id}`;
+  }
+
+  private normalizeComment(comment: any): Comment {
+    const normalized: Comment = {
+      ...(comment || {}),
+      reactions: this.normalizeReactions(comment?.reactions),
+    };
+
+    if (!normalized.date || isNaN(Date.parse(normalized.date as string))) {
+      normalized.date = undefined;
+    }
+
+    return normalized;
+  }
+
+  private normalizeReactions(
+    reactions: unknown
+  ): Record<string, string[]> {
+    if (!reactions || typeof reactions !== 'object') return {};
+
+    return Object.entries(reactions as Record<string, unknown>).reduce(
+      (normalized, [emoji, userIds]) => {
+        if (!emoji || !Array.isArray(userIds)) return normalized;
+
+        const cleanUserIds = Array.from(
+          new Set(
+            userIds
+              .map((userId) => String(userId || '').trim())
+              .filter(Boolean)
+          )
+        );
+
+        if (cleanUserIds.length) {
+          normalized[emoji] = cleanUserIds;
+        }
+
+        return normalized;
+      },
+      {} as Record<string, string[]>
+    );
+  }
+
+  private serializeDiscussionForSave(comments: Comment[]): Comment[] {
+    return comments.map((comment) => this.serializeCommentForSave(comment));
+  }
+
+  private serializeCommentForSave(comment: Comment): Comment {
+    const { displayTime, ...raw } = comment;
+    const reactions = this.normalizeReactions(raw.reactions);
+
+    if (Object.keys(reactions).length) {
+      return { ...raw, reactions };
+    }
+
+    const { reactions: _emptyReactions, ...withoutReactions } = raw;
+    return withoutReactions;
+  }
+
+  private findMatchingCommentIndex(
+    comments: any[],
+    target: Comment
+  ): number {
+    if (!Array.isArray(comments) || !target) return -1;
+
+    if (target.messageId) {
+      const byMessageId = comments.findIndex(
+        (comment) => comment?.messageId === target.messageId
+      );
+      if (byMessageId !== -1) return byMessageId;
+    }
+
+    if (target.date) {
+      const byDateAndAuthor = comments.findIndex(
+        (comment) =>
+          comment?.date === target.date &&
+          (!target.authorId || comment?.authorId === target.authorId)
+      );
+      if (byDateAndAuthor !== -1) return byDateAndAuthor;
+    }
+
+    return comments.findIndex(
+      (comment) =>
+        comment?.content === target.content &&
+        comment?.authorName === target.authorName
+    );
   }
 
   private markCurrentDiscussionRead(): void {

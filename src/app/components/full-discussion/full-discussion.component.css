@@ -45,6 +45,67 @@
   overflow: hidden;
 }
 
+.reaction-chip,
+.reaction-add-button,
+.reaction-picker-button {
+  align-items: center;
+  border: 1px solid rgb(203 213 225);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.8125rem;
+  gap: 0.25rem;
+  justify-content: center;
+  line-height: 1;
+  min-height: 1.75rem;
+  transition: background-color 120ms ease, border-color 120ms ease,
+    color 120ms ease;
+}
+
+.reaction-chip {
+  background: rgb(248 250 252);
+  color: rgb(51 65 85);
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+}
+
+.reaction-chip:hover,
+.reaction-chip--active {
+  background: rgb(236 253 245);
+  border-color: rgb(16 185 129);
+  color: rgb(4 120 87);
+}
+
+.reaction-add-button {
+  background: transparent;
+  color: rgb(100 116 139);
+  min-width: 2.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.reaction-add-button:hover {
+  background: rgb(241 245 249);
+  border-color: rgb(148 163 184);
+  color: rgb(15 23 42);
+}
+
+.reaction-picker {
+  max-width: min(24rem, 100%);
+}
+
+.reaction-picker-button {
+  background: transparent;
+  border-color: transparent;
+  font-size: 1.125rem;
+  min-width: 2rem;
+  padding: 0.35rem;
+}
+
+.reaction-picker-button:hover,
+.reaction-picker-button--active {
+  background: rgb(236 253 245);
+  border-color: rgb(16 185 129);
+}
+
 @media (prefers-color-scheme: dark) {
   .discussion-panel {
     border-color: rgb(30 41 59);
@@ -52,6 +113,36 @@
 
   .discussion-message:hover {
     background: rgb(15 23 42);
+  }
+
+  .reaction-chip {
+    background: rgb(30 41 59);
+    border-color: rgb(51 65 85);
+    color: rgb(226 232 240);
+  }
+
+  .reaction-chip:hover,
+  .reaction-chip--active {
+    background: rgba(6, 78, 59, 0.55);
+    border-color: rgb(52 211 153);
+    color: rgb(167 243 208);
+  }
+
+  .reaction-add-button {
+    border-color: rgb(51 65 85);
+    color: rgb(203 213 225);
+  }
+
+  .reaction-add-button:hover {
+    background: rgb(30 41 59);
+    border-color: rgb(100 116 139);
+    color: rgb(248 250 252);
+  }
+
+  .reaction-picker-button:hover,
+  .reaction-picker-button--active {
+    background: rgba(6, 78, 59, 0.55);
+    border-color: rgb(52 211 153);
   }
 }
 
@@ -61,4 +152,34 @@
 
 :host-context(.dark) .discussion-message:hover {
   background: rgb(15 23 42);
+}
+
+:host-context(.dark) .reaction-chip {
+  background: rgb(30 41 59);
+  border-color: rgb(51 65 85);
+  color: rgb(226 232 240);
+}
+
+:host-context(.dark) .reaction-chip:hover,
+:host-context(.dark) .reaction-chip--active {
+  background: rgba(6, 78, 59, 0.55);
+  border-color: rgb(52 211 153);
+  color: rgb(167 243 208);
+}
+
+:host-context(.dark) .reaction-add-button {
+  border-color: rgb(51 65 85);
+  color: rgb(203 213 225);
+}
+
+:host-context(.dark) .reaction-add-button:hover {
+  background: rgb(30 41 59);
+  border-color: rgb(100 116 139);
+  color: rgb(248 250 252);
+}
+
+:host-context(.dark) .reaction-picker-button:hover,
+:host-context(.dark) .reaction-picker-button--active {
+  background: rgba(6, 78, 59, 0.55);
+  border-color: rgb(52 211 153);
 }
