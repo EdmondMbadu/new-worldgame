@@ -70,6 +70,12 @@ interface AiEvaluatorOption {
   collectionKey: string;
 }
 
+interface ReportPdfCacheEntry {
+  key: string;
+  filename: string;
+  blob: Blob;
+}
+
 interface ReportType {
   id: string;
   title: string;
@@ -330,6 +336,9 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   selectedReportTypeId = 'funding-sources';
   private reportDocSub?: Subscription;
   private reportTimeoutHandle?: ReturnType<typeof setTimeout>;
+  private reportPdfCache: ReportPdfCacheEntry | null = null;
+  private reportPdfBuildPromise: Promise<ReportPdfCacheEntry> | null = null;
+  private reportPdfBuildKey = '';
 
   // Download loading states
   downloadingDraftPdf = false;
@@ -3028,6 +3037,7 @@ Infographic requirements:
   selectReportType(report: ReportType) {
     this.selectedReportTypeId = report.id;
     this.reportInstruction = report.instruction;
+    this.clearReportPdfCache();
   }
 
   getReportsByGroup(groupId: string): ReportType[] {
@@ -3116,6 +3126,7 @@ Infographic requirements:
         this.reportStatus = '';
         this.reportText = this.sanitizeGeneratedReportText(snapshot.response ?? '');
         this.reportFormatted = this.formatAiFeedback(this.reportText);
+        this.prepareReportPdfInBackground();
         this.reportDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
         if (this.reportTimeoutHandle) {
@@ -3153,16 +3164,14 @@ Infographic requirements:
       return;
     }
     this.downloadingReportPdf = true;
-    this.reportDownloadStatus = 'Preparing PDF export...';
+    this.reportDownloadStatus = this.reportPdfCache
+      ? 'Opening prepared PDF...'
+      : 'Preparing PDF export...';
     let success = false;
     try {
       await this.waitForUiPaint();
-      const title = this.buildReportTitle();
-      const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
-      const cleaned = isImpactBmcReport
-        ? this.reportText
-        : this.normalizeReportText(this.reportText);
-      await this.downloadReportPdfStyled(cleaned, title, this.buildReportFileName('pdf'));
+      const entry = await this.getOrBuildReportPdf(true);
+      this.triggerDownload(entry.blob, entry.filename);
       success = true;
       this.reportDownloadStatus = 'PDF download ready.';
     } catch (error) {
@@ -3223,6 +3232,155 @@ Infographic requirements:
     }
   }
 
+  private clearReportPdfCache(): void {
+    this.reportPdfCache = null;
+    this.reportPdfBuildPromise = null;
+    this.reportPdfBuildKey = '';
+  }
+
+  private prepareReportPdfInBackground(): void {
+    if (!this.reportText || typeof window === 'undefined') {
+      return;
+    }
+
+    const key = this.buildReportPdfCacheKey();
+    if (this.reportPdfCache?.key === key || (this.reportPdfBuildPromise && this.reportPdfBuildKey === key)) {
+      return;
+    }
+
+    this.reportDownloadStatus = 'Preparing PDF in the background...';
+    const schedule = (callback: () => void) => {
+      const idleCallback = (window as any).requestIdleCallback as
+        | ((cb: () => void, options?: { timeout?: number }) => void)
+        | undefined;
+      if (idleCallback) {
+        idleCallback(callback, { timeout: 1500 });
+      } else {
+        window.setTimeout(callback, 250);
+      }
+    };
+
+    schedule(() => {
+      this.getOrBuildReportPdf(false)
+        .then((entry) => {
+          if (entry.key !== this.buildReportPdfCacheKey()) {
+            return;
+          }
+          this.reportDownloadStatus = 'PDF ready. Click PDF to download instantly.';
+          window.setTimeout(() => {
+            if (this.reportPdfCache?.key === entry.key && this.reportDownloadStatus.includes('PDF ready')) {
+              this.reportDownloadStatus = '';
+            }
+          }, 4500);
+        })
+        .catch((error) => {
+          console.warn('Background report PDF preparation failed', error);
+          if (!this.downloadingReportPdf) {
+            this.reportDownloadStatus = '';
+          }
+        });
+    });
+  }
+
+  private async getOrBuildReportPdf(showProgress: boolean): Promise<ReportPdfCacheEntry> {
+    const input = this.buildReportPdfInput();
+
+    if (this.reportPdfCache?.key === input.key) {
+      return this.reportPdfCache;
+    }
+
+    if (this.reportPdfBuildPromise && this.reportPdfBuildKey === input.key) {
+      if (showProgress) {
+        this.reportDownloadStatus = 'Finishing prepared PDF...';
+        await this.waitForUiPaint();
+      }
+      return this.reportPdfBuildPromise;
+    }
+
+    const promise = this.buildReportPdfEntry(input, showProgress)
+      .then((entry) => {
+        if (entry.key === this.buildReportPdfCacheKey()) {
+          this.reportPdfCache = entry;
+        }
+        return entry;
+      })
+      .finally(() => {
+        if (this.reportPdfBuildKey === input.key) {
+          this.reportPdfBuildPromise = null;
+          this.reportPdfBuildKey = '';
+        }
+      });
+
+    this.reportPdfBuildPromise = promise;
+    this.reportPdfBuildKey = input.key;
+    return promise;
+  }
+
+  private buildReportPdfInput(): {
+    key: string;
+    filename: string;
+    reportTypeId: string;
+    text: string;
+    title: string;
+  } {
+    const reportTypeId = this.selectedReportTypeId || 'report';
+    const title = this.buildReportTitle();
+    const filename = this.buildReportFileName('pdf');
+    const text =
+      reportTypeId === 'business-model-canvas'
+        ? this.reportText
+        : this.normalizeReportText(this.reportText);
+    const key = this.hashReportPdfInput(
+      [reportTypeId, title, filename, this.currentSolution?.title || '', this.reportText].join('\n')
+    );
+
+    return { key, filename, reportTypeId, text, title };
+  }
+
+  private buildReportPdfCacheKey(): string {
+    return this.buildReportPdfInput().key;
+  }
+
+  private hashReportPdfInput(value: string): string {
+    let hash = 2166136261;
+    for (let i = 0; i < value.length; i += 1) {
+      hash ^= value.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `${value.length}-${(hash >>> 0).toString(16)}`;
+  }
+
+  private async buildReportPdfEntry(
+    input: {
+      key: string;
+      filename: string;
+      reportTypeId: string;
+      text: string;
+      title: string;
+    },
+    showProgress: boolean
+  ): Promise<ReportPdfCacheEntry> {
+    const html =
+      input.reportTypeId === 'business-model-canvas'
+        ? this.buildStyledImpactBmcReportPrintHtml(input.text, input.title)
+        : this.buildStyledReportPrintHtml(input.text, input.title);
+    const blob = await this.renderPaginatedHtmlToPdfBlob(
+      html,
+      showProgress
+        ? async (message) => {
+            this.reportDownloadStatus = message;
+            await this.waitForUiPaint();
+          }
+        : undefined
+    );
+
+    return {
+      key: input.key,
+      filename: input.filename,
+      blob,
+    };
+  }
+
   private async waitForUiPaint(): Promise<void> {
     if (typeof window === 'undefined') {
       return;
@@ -3245,6 +3403,7 @@ Infographic requirements:
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();
+    this.clearReportPdfCache();
     if (this.reportTimeoutHandle) {
       clearTimeout(this.reportTimeoutHandle);
       this.reportTimeoutHandle = undefined;
@@ -3312,6 +3471,7 @@ Infographic requirements:
     this.reportText = '';
     this.reportFormatted = '';
     this.reportDownloadStatus = '';
+    this.clearReportPdfCache();
   }
 
   private parseAiFeedback(raw: string): AiFeedbackDisplay {
@@ -5077,8 +5237,16 @@ INTEGRITY RULES:
   }
 
   private async renderPaginatedHtmlToPdf(html: string, filename: string): Promise<void> {
+    const blob = await this.renderPaginatedHtmlToPdfBlob(html);
+    this.triggerDownload(blob, filename);
+  }
+
+  private async renderPaginatedHtmlToPdfBlob(
+    html: string,
+    onProgress?: (message: string) => void | Promise<void>
+  ): Promise<Blob> {
     if (typeof document === 'undefined') {
-      return;
+      return new Blob([], { type: 'application/pdf' });
     }
 
     const container = document.createElement('div');
@@ -5101,9 +5269,8 @@ INTEGRITY RULES:
     document.body.appendChild(container);
     try {
       const { default: html2canvas } = await import('html2canvas');
-      if (this.downloadingReportPdf) {
-        this.reportDownloadStatus = 'Preparing report pages...';
-        await this.waitForUiPaint();
+      if (onProgress) {
+        await onProgress('Preparing report pages...');
       }
       await this.waitForImages(container);
       const pageElements = this.paginateStyledDraftPrint(container);
@@ -5114,9 +5281,8 @@ INTEGRITY RULES:
       const pageHeight = pdf.internal.pageSize.getHeight();
 
       for (let page = 0; page < pageElements.length; page += 1) {
-        if (this.downloadingReportPdf) {
-          this.reportDownloadStatus = `Rendering PDF page ${page + 1} of ${pageElements.length}...`;
-          await this.waitForUiPaint();
+        if (onProgress) {
+          await onProgress(`Rendering PDF page ${page + 1} of ${pageElements.length}...`);
         }
         const canvas = await html2canvas(pageElements[page], {
           backgroundColor: '#ffffff',
@@ -5133,15 +5299,14 @@ INTEGRITY RULES:
         if (page > 0) {
           pdf.addPage();
         }
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pageWidth, pageHeight);
+        pdf.addImage(canvas, 'PNG', 0, 0, pageWidth, pageHeight);
         await this.yieldToBrowser();
       }
 
-      if (this.downloadingReportPdf) {
-        this.reportDownloadStatus = 'Finalizing PDF download...';
-        await this.waitForUiPaint();
+      if (onProgress) {
+        await onProgress('Finalizing PDF download...');
       }
-      pdf.save(filename);
+      return pdf.output('blob');
     } finally {
       document.body.removeChild(container);
     }
