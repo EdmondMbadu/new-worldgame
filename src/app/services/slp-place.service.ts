@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 export interface SlpPlace {
   city: string;
@@ -6,12 +9,31 @@ export interface SlpPlace {
   country: string;
   label: string;
   aliases?: string[];
+  source?: 'local' | 'open-meteo';
+}
+
+interface OpenMeteoGeocodingResponse {
+  results?: OpenMeteoGeocodingResult[];
+}
+
+interface OpenMeteoGeocodingResult {
+  id?: number;
+  name?: string;
+  admin1?: string;
+  admin2?: string;
+  country?: string;
+  country_code?: string;
+  feature_code?: string;
+  population?: number;
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class SlpPlaceService {
+  private readonly openMeteoGeocodingUrl =
+    'https://geocoding-api.open-meteo.com/v1/search';
+  private readonly remoteCache = new Map<string, SlpPlace[]>();
   private readonly usStateCodes = new Set([
     'AL',
     'AK',
@@ -65,6 +87,61 @@ export class SlpPlaceService {
     'WY',
     'DC',
   ]);
+  private readonly usStateNameToCode = new Map(
+    [
+      ['Alabama', 'AL'],
+      ['Alaska', 'AK'],
+      ['Arizona', 'AZ'],
+      ['Arkansas', 'AR'],
+      ['California', 'CA'],
+      ['Colorado', 'CO'],
+      ['Connecticut', 'CT'],
+      ['Delaware', 'DE'],
+      ['Florida', 'FL'],
+      ['Georgia', 'GA'],
+      ['Hawaii', 'HI'],
+      ['Idaho', 'ID'],
+      ['Illinois', 'IL'],
+      ['Indiana', 'IN'],
+      ['Iowa', 'IA'],
+      ['Kansas', 'KS'],
+      ['Kentucky', 'KY'],
+      ['Louisiana', 'LA'],
+      ['Maine', 'ME'],
+      ['Maryland', 'MD'],
+      ['Massachusetts', 'MA'],
+      ['Michigan', 'MI'],
+      ['Minnesota', 'MN'],
+      ['Mississippi', 'MS'],
+      ['Missouri', 'MO'],
+      ['Montana', 'MT'],
+      ['Nebraska', 'NE'],
+      ['Nevada', 'NV'],
+      ['New Hampshire', 'NH'],
+      ['New Jersey', 'NJ'],
+      ['New Mexico', 'NM'],
+      ['New York', 'NY'],
+      ['North Carolina', 'NC'],
+      ['North Dakota', 'ND'],
+      ['Ohio', 'OH'],
+      ['Oklahoma', 'OK'],
+      ['Oregon', 'OR'],
+      ['Pennsylvania', 'PA'],
+      ['Rhode Island', 'RI'],
+      ['South Carolina', 'SC'],
+      ['South Dakota', 'SD'],
+      ['Tennessee', 'TN'],
+      ['Texas', 'TX'],
+      ['Utah', 'UT'],
+      ['Vermont', 'VT'],
+      ['Virginia', 'VA'],
+      ['Washington', 'WA'],
+      ['West Virginia', 'WV'],
+      ['Wisconsin', 'WI'],
+      ['Wyoming', 'WY'],
+      ['District of Columbia', 'DC'],
+    ].map(([name, code]) => [this.normalize(name), code])
+  );
 
   private readonly places: SlpPlace[] = [
     { city: 'Philadelphia', region: 'PA', country: 'United States', label: 'Philadelphia, PA, United States', aliases: ['philly'] },
@@ -77,6 +154,7 @@ export class SlpPlaceService {
     { city: 'Seattle', region: 'WA', country: 'United States', label: 'Seattle, WA, United States' },
     { city: 'Atlanta', region: 'GA', country: 'United States', label: 'Atlanta, GA, United States' },
     { city: 'Miami', region: 'FL', country: 'United States', label: 'Miami, FL, United States' },
+    { city: 'Gainesville', region: 'FL', country: 'United States', label: 'Gainesville, FL, United States', aliases: ['gainseville', 'gainseville florida', 'gainseville fl'] },
     { city: 'Las Vegas', region: 'NV', country: 'United States', label: 'Las Vegas, NV, United States', aliases: ['vegas'] },
     { city: 'Phoenix', region: 'AZ', country: 'United States', label: 'Phoenix, AZ, United States' },
     { city: 'Portland', region: 'OR', country: 'United States', label: 'Portland, OR, United States' },
@@ -213,6 +291,8 @@ export class SlpPlaceService {
     { city: 'Port of Spain', region: 'Port of Spain', country: 'Trinidad and Tobago', label: 'Port of Spain, Trinidad and Tobago' },
   ];
 
+  constructor(private http: HttpClient) {}
+
   search(query: string, limit = 7): SlpPlace[] {
     const normalizedQuery = this.normalize(query);
     if (!normalizedQuery) {
@@ -228,6 +308,35 @@ export class SlpPlaceService {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map((entry) => entry.place);
+  }
+
+  searchRemote(query: string, limit = 7): Observable<SlpPlace[]> {
+    const trimmedQuery = String(query || '').trim();
+    const normalizedQuery = this.normalize(trimmedQuery);
+    if (normalizedQuery.length < 3) {
+      return of([]);
+    }
+
+    const cacheKey = `${normalizedQuery}:${limit}`;
+    const cached = this.remoteCache.get(cacheKey);
+    if (cached) {
+      return of(cached);
+    }
+
+    const searchTerm = this.getRemoteSearchTerm(trimmedQuery);
+    const params = new HttpParams()
+      .set('name', searchTerm)
+      .set('count', String(Math.min(Math.max(limit, 1), 25)))
+      .set('language', 'en')
+      .set('format', 'json');
+
+    return this.http
+      .get<OpenMeteoGeocodingResponse>(this.openMeteoGeocodingUrl, { params })
+      .pipe(
+        map((response) => this.mapRemoteResults(response.results || [], limit)),
+        tap((places) => this.remoteCache.set(cacheKey, places)),
+        catchError(() => of([]))
+      );
   }
 
   parse(value: string): SlpPlace | null {
@@ -251,6 +360,11 @@ export class SlpPlaceService {
       return this.toPlace(normalized.city, normalized.region, normalized.country);
     }
 
+    const looseUsLocation = this.parseLooseUsLocation(raw);
+    if (looseUsLocation) {
+      return looseUsLocation;
+    }
+
     const suggested = this.search(raw, 1)[0];
     return suggested || null;
   }
@@ -264,12 +378,37 @@ export class SlpPlaceService {
     let normalizedRegion = region.trim();
     let normalizedCountry = country.trim();
     const countryUpper = normalizedCountry.toUpperCase();
+    const regionUpper = normalizedRegion.toUpperCase();
+    const countryStateCode = this.usStateNameToCode.get(
+      this.normalize(normalizedCountry)
+    );
+    const regionStateCode = this.usStateNameToCode.get(
+      this.normalize(normalizedRegion)
+    );
 
     if (!normalizedRegion && this.usStateCodes.has(countryUpper)) {
       normalizedRegion = countryUpper;
       normalizedCountry = 'United States';
+    } else if (!normalizedRegion && countryStateCode) {
+      normalizedRegion = countryStateCode;
+      normalizedCountry = 'United States';
+    } else if (
+      normalizedCountry.toLowerCase() === 'united states' &&
+      regionStateCode
+    ) {
+      normalizedRegion = regionStateCode;
+    } else if (
+      normalizedCountry.toLowerCase() === 'united states' &&
+      this.usStateCodes.has(regionUpper)
+    ) {
+      normalizedRegion = regionUpper;
     } else if (['US', 'USA', 'U.S.', 'U.S.A.'].includes(countryUpper)) {
       normalizedCountry = 'United States';
+      if (regionStateCode) {
+        normalizedRegion = regionStateCode;
+      } else if (this.usStateCodes.has(regionUpper)) {
+        normalizedRegion = regionUpper;
+      }
     }
 
     return {
@@ -290,6 +429,97 @@ export class SlpPlaceService {
       country,
       label: this.format(city, region, country),
     };
+  }
+
+  private mapRemoteResults(
+    results: OpenMeteoGeocodingResult[],
+    limit: number
+  ): SlpPlace[] {
+    const seen = new Set<string>();
+    return results
+      .map((result): SlpPlace | null => {
+        const city = String(result.name || '').trim();
+        const country = String(result.country || '').trim();
+        if (!city || !country) {
+          return null;
+        }
+
+        const normalized = this.normalizeLocationParts(
+          city,
+          String(result.admin1 || result.admin2 || '').trim(),
+          country
+        );
+        return {
+          ...this.toPlace(
+            normalized.city,
+            normalized.region,
+            normalized.country
+          ),
+          source: 'open-meteo' as const,
+        };
+      })
+      .filter((place): place is SlpPlace => place !== null)
+      .filter((place) => {
+        const key = this.normalize(place.label);
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      })
+      .slice(0, limit);
+  }
+
+  private parseLooseUsLocation(raw: string): SlpPlace | null {
+    const normalizedRaw = this.normalize(raw);
+    if (!normalizedRaw) {
+      return null;
+    }
+
+    const stateCandidates = [
+      ...Array.from(this.usStateNameToCode.entries()),
+      ...Array.from(this.usStateCodes).map((code) => [code.toLowerCase(), code]),
+    ].sort((a, b) => b[0].length - a[0].length);
+
+    for (const [stateName, stateCode] of stateCandidates) {
+      if (
+        normalizedRaw === stateName ||
+        !normalizedRaw.endsWith(` ${stateName}`)
+      ) {
+        continue;
+      }
+
+      const city = raw
+        .slice(0, normalizedRaw.length - stateName.length)
+        .trim()
+        .replace(/[,\s]+$/, '');
+      if (!city) {
+        continue;
+      }
+
+      const normalized = this.normalizeLocationParts(
+        this.toTitleCase(city),
+        stateCode,
+        'United States'
+      );
+      return this.toPlace(
+        normalized.city,
+        normalized.region,
+        normalized.country
+      );
+    }
+
+    return null;
+  }
+
+  private getRemoteSearchTerm(raw: string): string {
+    const looseUsLocation = this.parseLooseUsLocation(raw);
+    if (looseUsLocation?.city) {
+      return looseUsLocation.city;
+    }
+
+    const firstCommaPart = raw.split(',')[0]?.trim();
+    return firstCommaPart || raw;
   }
 
   private scorePlace(place: SlpPlace, normalizedQuery: string): number {
@@ -315,5 +545,12 @@ export class SlpPlaceService {
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
+  }
+
+  private toTitleCase(value: string): string {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
   }
 }

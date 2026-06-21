@@ -21,6 +21,10 @@
       >
         <span class="material-symbols-outlined text-base">task_alt</span>
       </span>
+      <span
+        *ngIf="remoteSearching && !selectedPlace"
+        class="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-[color:var(--slp-border)] border-t-[color:var(--slp-primary)]"
+      ></span>
       <div
         *ngIf="suggestions.length && !selectedPlace"
         class="slp-location-suggestions"
@@ -39,6 +43,12 @@
             <span class="block truncate text-xs text-[color:var(--slp-muted)]">{{ place.label }}</span>
           </span>
         </button>
+        <div
+          *ngIf="hasRemoteSuggestions"
+          class="px-3 py-1.5 text-[0.65rem] text-[color:var(--slp-muted)]"
+        >
+          Global city data: Open-Meteo / GeoNames
+        </div>
       </div>
     </div>
   </label>
