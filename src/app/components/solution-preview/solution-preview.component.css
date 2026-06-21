@@ -101,6 +101,11 @@
   line-height: 1.75;
   color: var(--nwg-ink-soft);
   letter-spacing: -0.002em;
+  /* Keep long words / URLs inside the column so the page never
+     scrolls horizontally — only vertically. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 :host-context(.dark) .nwg-article {
@@ -169,6 +174,9 @@
   text-underline-offset: 3px;
   text-decoration-color: rgba(17, 122, 96, 0.4);
   transition: all 140ms ease;
+  /* Wrap long URLs so they never force horizontal scrolling */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .nwg-article :where(a:hover) {
   text-decoration-color: var(--nwg-primary);
