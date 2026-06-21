@@ -7093,11 +7093,11 @@ export const onReportRequest = functions
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
       const modelConfig: Record<string, unknown> = {
-        model: isFundingReport ? 'gemini-2.0-flash' : 'gemini-2.5-flash',
+        model: 'gemini-2.5-flash',
         generationConfig: {
           temperature: isBusinessPlanReport ? 0.18 : 0.2,
           maxOutputTokens: isFundingReport
-            ? 3500
+            ? 6500
             : isBusinessPlanReport
               ? 9000
               : 5000,
@@ -7106,8 +7106,30 @@ export const onReportRequest = functions
       modelConfig['tools'] = [{ google_search: {} }];
       const model = genAI.getGenerativeModel(modelConfig as any);
 
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
+      let response: any;
+      try {
+        const result = await model.generateContent(prompt);
+        response = await result.response;
+      } catch (primaryError: any) {
+        if (!isFundingReport) {
+          throw primaryError;
+        }
+        console.warn('Funding report grounded generation failed; retrying without search tool.', {
+          message: primaryError?.message || String(primaryError),
+        });
+        const fallbackModel = genAI.getGenerativeModel({
+          model: 'gemini-2.5-flash',
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 5500,
+          },
+        } as any);
+        const fallbackPrompt = `${prompt}
+
+If live web-search grounding is temporarily unavailable, still produce the Funding Sources List using only well-known public official funding programs and funder pages you are confident exist. Keep every link to an official funder, program, or application page when possible. Mark unclear deadlines as "Check current cycle" and do not invent deadlines, dollar amounts, or contacts.`;
+        const fallbackResult = await fallbackModel.generateContent(fallbackPrompt);
+        response = await fallbackResult.response;
+      }
       const text = response.text();
 
       // Extract sources from grounding metadata

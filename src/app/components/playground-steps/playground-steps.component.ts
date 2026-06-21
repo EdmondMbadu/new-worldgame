@@ -476,7 +476,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       title: 'Funding Sources List',
       group: 'funder',
       instruction:
-        'After the draft is done, research the web to find real, active funding opportunities that fit this specific solution (region, sector, stage, applicant type). Follow this exact structure: Cover Page, Funding Landscape Overview, Recommended Priority Targets, Funder Directory (repeat standardized profile card with fields A-H), Master Table (top 10 summary table), Contact Directory, and Annex (keywords, excluded funders, links dump). Do NOT output a "Quick Summary" heading. The Funding Landscape Overview and Recommended Priority Targets must be structured data only (no narrative paragraphs). Each funder entry must name a specific, active funding opportunity/program/call with a direct official link; do not list generic orgs without a specific opportunity. Include only opportunities with verified working links. If an opportunity link cannot be verified, exclude that funder from the main list and place it in Annex (Excluded) with reason. Target up to 10 verified funders. Only include opportunities that are open or accept rolling applications; if closed, move to Annex (Excluded) with reason. Include source links and last-updated dates for every included funder. Use concise, premium, human but professional language suitable for a PDF.',
+        'Research the web for real, current funding routes that fit this specific solution by topic, region, implementation stage, applicant type, and beneficiary group. Use a geographic ladder: exact city or local area, nearby counties/metro, state/region, then national programs with explicit thematic fit. Do not stop after 1-2 easy results; build a candidate pool across community foundations, city/state/federal grants, education/civic innovation programs, accelerators, challenge prizes, corporate social impact programs, and mission-aligned foundations, then return the strongest 8-10. Follow this structure: Cover Page, Funding Landscape Overview, Recommended Priority Targets, Funder Directory, Master Table, Contact Directory, and Annex. Each Funder Directory entry must include: A. Opportunity or program name, B. Funder or sponsor, C. Direct official link, D. Fit rationale, E. Eligibility, F. Deadline or cycle, G. Suggested ask or angle, H. Next action. Do not output a "Quick Summary" heading. Exclude generic advice pages, broad directories, social media, search result pages, and opportunities that are clearly closed. If a cycle is unclear, say "Check current cycle" rather than inventing a date. Use concise, premium, human but professional language suitable for a PDF.',
       summary: 'A structured funding directory with prioritized targets and contacts.',
     },
     {
@@ -3834,15 +3834,26 @@ Niveau de préparation: ______`;
     let intro: string;
     if (reportType?.id === 'funding-sources') {
       intro = `Role: You are a senior funding research analyst.
-Use web research to identify real, active funding opportunities that match the specific solution.
-Only include opportunities with a direct official program or call page link that appears in your sources.
-Include only opportunities with verified working links. If fewer than 10 are verifiable, return fewer.
-Do not output a "Quick Summary" heading; use "Funding Landscape Overview" and "Recommended Priority Targets" only.
-Those two sections must be structured data only (no narrative paragraphs).
-Exclude closed opportunities from the main list; move them to Annex with the reason.
-Do not use placeholder text like "Unverified (link unavailable)" in the main list.
-Prioritize official sources and funder program pages, and include source links and last-updated dates when available.
-Output plain text only (no markdown, no asterisks, no special formatting).`;
+Use web research to identify real, current funding opportunities that match this exact solution.
+
+Search method:
+- Infer 4 to 8 search themes from the solution draft, focus area, beneficiary group, implementation profile, and SDGs.
+- Use a geographic ladder: exact city/local area -> metro/nearby counties -> state/region -> national programs with explicit thematic fit.
+- Search across a funding lane matrix before deciding the final list: community foundations, local/regional grantmakers, city/state/federal programs, education or civic innovation funds, accelerators, challenge prizes, corporate social impact programs, and mission-aligned foundations.
+- Do not stop after the first 1 or 2 easy results. Build a candidate pool, remove duplicates, then return the strongest 8 to 10 funders.
+
+Quality rules:
+- Prefer direct official program, grant, application, request for proposals, funder initiative, or eligibility pages over generic homepages.
+- Exclude search result pages, social feeds, generic fundraising advice pages, broad directories, and opportunities that are clearly closed.
+- If a current deadline is visible, include it. If the page has no visible current cycle, write "Check current cycle" rather than inventing a date.
+- Each funder must have a concrete fit rationale tied to the actual solution, not a generic "supports innovation" explanation.
+- Include eligibility, suggested ask/angle, contact route when visible, and a specific next action.
+
+Output rules:
+- Output plain text only: no markdown tables, no asterisks, no decorative separators.
+- Do not output a "Quick Summary" heading.
+- Use these sections in order: Cover Page, Funding Landscape Overview, Recommended Priority Targets, Funder Directory, Master Table, Contact Directory, Annex.
+- Funding Landscape Overview and Recommended Priority Targets must be structured data only, not narrative paragraphs.`;
     } else if (hasCustomSystemPrompt) {
       // Use the specialized system prompt for reports like Business Model Canvas
       intro = reportType!.systemPrompt!;
