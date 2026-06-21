@@ -1,3 +1,347 @@
+/* ============================================================
+   NewWorld Game — Editorial / Substack-quality solution page
+   Brand colors preserved: teal/green primary (#117a60 / teal-600),
+   warm ink, generous reading layout.
+   ============================================================ */
+
+:host {
+  --nwg-primary: #117a60;
+  --nwg-primary-deep: #0b5d49;
+  --nwg-ink: #1a1a1a;
+  --nwg-ink-soft: #404040;
+  --nwg-muted: #6b7280;
+  --nwg-rule: #e7e5e0;
+  --nwg-bg: #ffffff;
+  --nwg-reading: 1.18rem;
+}
+
+/* ---------- Reading shell ---------- */
+.nwg-shell {
+  font-family: 'Inter', 'Nunito', system-ui, sans-serif;
+}
+
+/* ---------- Hero ---------- */
+.nwg-hero-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(10, 12, 14, 0.15) 0%,
+    rgba(10, 12, 14, 0.45) 55%,
+    rgba(10, 12, 14, 0.78) 100%
+  );
+}
+
+.nwg-hero-title {
+  font-family: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Byline / meta ---------- */
+.nwg-divider {
+  height: 1px;
+  background: var(--nwg-rule);
+}
+
+.nwg-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--nwg-rule);
+  background: #fff;
+  transition: all 160ms ease;
+}
+.nwg-action-btn svg { width: 1.25rem; height: 1.25rem; }
+.nwg-action-btn:hover {
+  border-color: rgba(17, 122, 96, 0.4);
+  background: rgba(17, 122, 96, 0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17, 122, 96, 0.12);
+}
+:host-context(.dark) .nwg-action-btn {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.nwg-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid var(--nwg-rule);
+  background: #fafafa;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--nwg-ink-soft);
+  transition: all 150ms ease;
+}
+.nwg-stat:hover {
+  border-color: rgba(17, 122, 96, 0.35);
+  color: var(--nwg-primary-deep);
+  background: rgba(17, 122, 96, 0.05);
+}
+:host-context(.dark) .nwg-stat {
+  background: #1f2937;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+/* ============================================================
+   ARTICLE PROSE  — the AI-generated content (innerHTML)
+   This is the heart of the redesign. Flowbite's .format class
+   does nothing here (no plugin), so we style the raw HTML.
+   ============================================================ */
+.nwg-article {
+  font-family: 'Inter', 'Nunito', system-ui, sans-serif;
+  font-size: var(--nwg-reading);
+  line-height: 1.75;
+  color: var(--nwg-ink-soft);
+  letter-spacing: -0.002em;
+}
+
+:host-context(.dark) .nwg-article {
+  color: #d6d6d6;
+}
+
+/* Paragraphs */
+.nwg-article :where(p) {
+  margin: 0 0 1.5rem 0;
+}
+.nwg-article :where(p:first-child) { margin-top: 0; }
+
+/* Lead paragraph feel for the very first paragraph */
+.nwg-article > :where(p:first-of-type) {
+  font-size: 1.32rem;
+  line-height: 1.6;
+  color: var(--nwg-ink);
+}
+:host-context(.dark) .nwg-article > :where(p:first-of-type) {
+  color: #f3f4f6;
+}
+
+/* Headings — serif display, tight tracking, clear hierarchy */
+.nwg-article :where(h1, h2, h3, h4) {
+  font-family: 'Instrument Serif', Georgia, serif;
+  color: var(--nwg-ink);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  scroll-margin-top: 6rem;
+}
+:host-context(.dark) .nwg-article :where(h1, h2, h3, h4) {
+  color: #f9fafb;
+}
+
+.nwg-article :where(h1) {
+  font-size: 2.4rem;
+  margin: 3rem 0 1.25rem;
+}
+.nwg-article :where(h2) {
+  font-size: 1.95rem;
+  margin: 2.75rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--nwg-rule);
+}
+:host-context(.dark) .nwg-article :where(h2) {
+  border-color: #374151;
+}
+.nwg-article :where(h3) {
+  font-size: 1.55rem;
+  margin: 2.25rem 0 0.85rem;
+}
+.nwg-article :where(h4) {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 1.75rem 0 0.6rem;
+}
+
+/* Links */
+.nwg-article :where(a) {
+  color: var(--nwg-primary-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(17, 122, 96, 0.4);
+  transition: all 140ms ease;
+}
+.nwg-article :where(a:hover) {
+  text-decoration-color: var(--nwg-primary);
+  color: var(--nwg-primary);
+}
+:host-context(.dark) .nwg-article :where(a) {
+  color: #5eead4;
+  text-decoration-color: rgba(94, 234, 212, 0.4);
+}
+
+/* Bold / emphasis */
+.nwg-article :where(strong, b) {
+  color: var(--nwg-ink);
+  font-weight: 700;
+}
+:host-context(.dark) .nwg-article :where(strong, b) { color: #fff; }
+
+/* Lists */
+.nwg-article :where(ul, ol) {
+  margin: 0 0 1.5rem 0;
+  padding-left: 1.5rem;
+}
+.nwg-article :where(ul) { list-style: none; }
+.nwg-article :where(ul > li) {
+  position: relative;
+  padding-left: 1.4rem;
+  margin-bottom: 0.6rem;
+}
+.nwg-article :where(ul > li)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: var(--nwg-primary);
+}
+.nwg-article :where(ol) {
+  list-style: decimal;
+  padding-left: 1.6rem;
+}
+.nwg-article :where(ol > li) {
+  margin-bottom: 0.6rem;
+  padding-left: 0.35rem;
+}
+.nwg-article :where(ol > li)::marker {
+  color: var(--nwg-primary);
+  font-weight: 700;
+}
+.nwg-article :where(li > ul, li > ol) {
+  margin: 0.6rem 0 0.4rem;
+}
+
+/* Blockquote — editorial pull-quote */
+.nwg-article :where(blockquote) {
+  margin: 2rem 0;
+  padding: 0.5rem 0 0.5rem 1.5rem;
+  border-left: 3px solid var(--nwg-primary);
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--nwg-ink);
+}
+:host-context(.dark) .nwg-article :where(blockquote) { color: #e5e7eb; }
+.nwg-article :where(blockquote p) { margin-bottom: 0.5rem; }
+
+/* Images & figures */
+.nwg-article :where(img) {
+  border-radius: 0.75rem;
+  margin: 2rem auto;
+  max-width: 100%;
+  height: auto;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+.nwg-article :where(figure) { margin: 2rem 0; }
+.nwg-article :where(figcaption) {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--nwg-muted);
+  margin-top: 0.6rem;
+}
+
+/* Code */
+.nwg-article :where(code) {
+  font-family: 'DM Mono', ui-monospace, monospace;
+  font-size: 0.88em;
+  background: rgba(17, 122, 96, 0.08);
+  color: var(--nwg-primary-deep);
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+}
+.nwg-article :where(pre) {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  margin: 2rem 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.nwg-article :where(pre code) {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+/* Tables */
+.nwg-article :where(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.98rem;
+  display: block;
+  overflow-x: auto;
+}
+.nwg-article :where(th) {
+  text-align: left;
+  font-weight: 700;
+  color: var(--nwg-ink);
+  background: rgba(17, 122, 96, 0.06);
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid rgba(17, 122, 96, 0.2);
+}
+.nwg-article :where(td) {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--nwg-rule);
+}
+:host-context(.dark) .nwg-article :where(td) { border-color: #374151; }
+:host-context(.dark) .nwg-article :where(th) { color: #f9fafb; }
+
+/* Horizontal rule */
+.nwg-article :where(hr) {
+  border: none;
+  height: 1px;
+  background: var(--nwg-rule);
+  margin: 2.5rem 0;
+}
+:host-context(.dark) .nwg-article :where(hr) { background: #374151; }
+
+/* ---------- Comments ---------- */
+.nwg-comment {
+  border: 1px solid var(--nwg-rule);
+  border-radius: 1rem;
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+.nwg-comment:hover {
+  border-color: rgba(17, 122, 96, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+:host-context(.dark) .nwg-comment { border-color: #374151; }
+
+.nwg-comment-box {
+  border: 1px solid var(--nwg-rule);
+  border-radius: 1rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.nwg-comment-box:focus-within {
+  border-color: rgba(17, 122, 96, 0.4);
+  box-shadow: 0 0 0 4px rgba(17, 122, 96, 0.08);
+}
+:host-context(.dark) .nwg-comment-box { border-color: #374151; }
+
+/* ---------- existing copy-flash animation (kept) ---------- */
+.flash-animation {
+  animation: flash 0.6s ease;
+}
+@keyframes flash {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 .comment-author-popover {
   transform-origin: bottom left;
 }

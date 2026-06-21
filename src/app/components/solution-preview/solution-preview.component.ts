@@ -642,4 +642,21 @@ export class SolutionPreviewComponent implements OnInit {
     // Or directly save:
     // pdf.save(`${this.currentSolution.title}.pdf`);
   }
+
+  getAvatarColor(uid: string): string {
+    const colors = [
+      '#4285F4', // blue
+      '#DB4437', // red
+      '#F4B400', // yellow
+      '#0F9D58', // green
+      '#AB47BC', // purple
+      '#00ACC1', // cyan
+      '#FF7043', // orange
+    ];
+    // pick a stable color by hashing uid
+    const index =
+      Math.abs(uid.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) %
+      colors.length;
+    return colors[index];
+  }
 }
