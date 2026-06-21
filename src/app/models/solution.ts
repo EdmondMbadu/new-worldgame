@@ -148,6 +148,7 @@ export class Comment {
   likes?: string;
   dislikes?: string;
   reactions?: CommentReactions;
+  replyTo?: CommentReply;
   profilePic?: string;
   attachments?: Attachment[]; // NEW
   linkPreview?: LinkPreview;
@@ -157,6 +158,15 @@ export class Comment {
 
 export interface CommentReactions {
   [emoji: string]: string[];
+}
+
+export interface CommentReply {
+  messageId?: string;
+  authorId?: string;
+  authorName?: string;
+  content?: string;
+  date?: string;
+  createdAtMs?: number;
 }
 
 export class Roles {

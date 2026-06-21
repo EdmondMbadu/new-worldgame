@@ -14,6 +14,20 @@ export interface DirectMessageRecord {
   text: string;
   createdAt?: firebase.firestore.Timestamp | null;
   createdAtMs: number;
+  reactions?: DirectMessageReactions;
+  replyTo?: DirectMessageReply;
+}
+
+export interface DirectMessageReactions {
+  [emoji: string]: string[];
+}
+
+export interface DirectMessageReply {
+  messageId: string;
+  senderUid: string;
+  senderName: string;
+  text: string;
+  createdAtMs?: number;
 }
 
 export interface DirectMessageThread {
@@ -82,7 +96,12 @@ export class DirectMessageService {
     );
   }
 
-  async sendMessage(sender: User, recipient: User, text: string): Promise<void> {
+  async sendMessage(
+    sender: User,
+    recipient: User,
+    text: string,
+    replyTo?: DirectMessageReply | null
+  ): Promise<void> {
     const senderUid = sender?.uid || '';
     const recipientUid = recipient?.uid || '';
     const cleanText = this.cleanMessageText(text);
@@ -137,7 +156,7 @@ export class DirectMessageService {
       { merge: true }
     );
 
-    batch.set(messageRef, {
+    const messagePayload: Record<string, any> = {
       id: messageId,
       conversationId,
       senderUid,
@@ -146,7 +165,14 @@ export class DirectMessageService {
       text: cleanText,
       createdAt: now,
       createdAtMs: nowMs,
-    });
+    };
+
+    const cleanReplyTo = this.cleanReply(replyTo);
+    if (cleanReplyTo) {
+      messagePayload['replyTo'] = cleanReplyTo;
+    }
+
+    batch.set(messageRef, messagePayload);
 
     batch.set(
       senderThreadRef,
@@ -185,6 +211,50 @@ export class DirectMessageService {
     );
 
     await batch.commit();
+  }
+
+  async toggleReaction(
+    currentUid: string,
+    otherUid: string,
+    messageId: string,
+    emoji: string
+  ): Promise<void> {
+    const uid = String(currentUid || '').trim();
+    const targetMessageId = String(messageId || '').trim();
+    const cleanEmoji = String(emoji || '').trim();
+
+    if (!uid || !otherUid || uid === otherUid || !targetMessageId || !cleanEmoji) {
+      return;
+    }
+
+    const conversationId = this.conversationIdFor(uid, otherUid);
+    const messageRef = this.afs.firestore.doc(
+      `directMessages/${conversationId}/messages/${targetMessageId}`
+    );
+
+    await this.afs.firestore.runTransaction(async (transaction) => {
+      const snap = await transaction.get(messageRef);
+      if (!snap.exists) {
+        throw new Error('Direct message was not found.');
+      }
+
+      const data = snap.data() as DirectMessageRecord;
+      const reactions = this.normalizeReactions(data.reactions);
+      const currentUsers = reactions[cleanEmoji] || [];
+      reactions[cleanEmoji] = currentUsers.includes(uid)
+        ? currentUsers.filter((reactorUid) => reactorUid !== uid)
+        : [...currentUsers, uid];
+
+      if (!reactions[cleanEmoji].length) {
+        delete reactions[cleanEmoji];
+      }
+
+      transaction.set(
+        messageRef,
+        Object.keys(reactions).length ? { reactions } : { reactions: {} },
+        { merge: true }
+      );
+    });
   }
 
   async markRead(uid: string, otherUid: string): Promise<void> {
@@ -260,6 +330,54 @@ export class DirectMessageService {
 
   private cleanMessageText(text: string): string {
     return String(text || '').replace(/\s+/g, ' ').trim().slice(0, 2000);
+  }
+
+  private cleanReply(
+    replyTo?: DirectMessageReply | null
+  ): DirectMessageReply | null {
+    if (!replyTo?.messageId) return null;
+
+    const text = this.cleanMessageText(replyTo.text).slice(0, 220);
+    const clean: DirectMessageReply = {
+      messageId: String(replyTo.messageId),
+      senderUid: String(replyTo.senderUid || ''),
+      senderName: String(replyTo.senderName || 'NewWorld Game user').trim(),
+      text,
+    };
+
+    const createdAtMs = Number(replyTo.createdAtMs || 0);
+    if (createdAtMs) {
+      clean.createdAtMs = createdAtMs;
+    }
+
+    return clean;
+  }
+
+  private normalizeReactions(
+    reactions: unknown
+  ): DirectMessageReactions {
+    if (!reactions || typeof reactions !== 'object') return {};
+
+    return Object.entries(reactions as Record<string, unknown>).reduce(
+      (normalized, [emoji, userIds]) => {
+        if (!emoji || !Array.isArray(userIds)) return normalized;
+
+        const cleanUserIds = Array.from(
+          new Set(
+            userIds
+              .map((userId) => String(userId || '').trim())
+              .filter(Boolean)
+          )
+        );
+
+        if (cleanUserIds.length) {
+          normalized[emoji] = cleanUserIds;
+        }
+
+        return normalized;
+      },
+      {} as DirectMessageReactions
+    );
   }
 
   private displayName(user: User): string {

@@ -256,6 +256,20 @@
                   {{ comment.displayTime || comment.date | date:'M/d/yy, h:mm a'  }}
                 </span>
               </div>
+              <button
+                *ngIf="comment.replyTo"
+                type="button"
+                (click)="scrollToComment(comment.replyTo.messageId)"
+                class="mt-2 block max-w-xl rounded-lg border-l-4 border-emerald-400 bg-slate-100 px-3 py-2 text-left text-xs text-slate-600 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                title="Jump to replied message"
+              >
+                <span class="block font-semibold text-slate-800 dark:text-slate-100">
+                  {{ comment.replyTo.authorName }}
+                </span>
+                <span class="block truncate">
+                  {{ replyPreviewText(comment.replyTo) }}
+                </span>
+              </button>
               <!-- Content or editor -->
               <ng-container *ngIf="editingId !== comment.date; else editor">
                 <!-- Loading state for AI responses -->
@@ -321,6 +335,16 @@
                 >
                   <span aria-hidden="true">{{ reaction.emoji }}</span>
                   <span>{{ reaction.count }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  (click)="startReply(comment)"
+                  class="reaction-add-button"
+                  aria-label="Reply to message"
+                  title="Reply"
+                >
+                  Reply
                 </button>
 
                 <button
@@ -502,6 +526,31 @@
 
         <!-- Textarea with mention dropdown -->
         <div class="flex-1 relative">
+          <div
+            *ngIf="replyTarget"
+            class="absolute bottom-full left-0 right-0 mb-2 flex items-start justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm shadow-sm dark:border-emerald-900 dark:bg-emerald-950/50"
+          >
+            <div class="min-w-0">
+              <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                Replying to {{ getCommentAuthorDisplayName(replyTarget) }}
+              </p>
+              <p class="truncate text-slate-700 dark:text-slate-200">
+                {{ replyPreviewText(replyTarget) }}
+              </p>
+            </div>
+            <button
+              type="button"
+              (click)="cancelReply()"
+              class="grid h-7 w-7 shrink-0 place-content-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label="Cancel reply"
+              title="Cancel reply"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
+
           <textarea
             [(ngModel)]="prompt"
             (input)="onPromptInput($event)"

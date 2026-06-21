@@ -16,7 +16,12 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { Attachment, Comment, Solution } from 'src/app/models/solution';
+import {
+  Attachment,
+  Comment,
+  CommentReply,
+  Solution,
+} from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DiscussionNotificationsService } from 'src/app/services/discussion-notifications.service';
@@ -145,6 +150,7 @@ export class FullDiscussionComponent
   commentAuthorProfiles: Record<string, User | null | undefined> = {};
   readonly reactionOptions = MAIN_REACTION_OPTIONS;
   activeReactionPickerKey = '';
+  replyTarget: Comment | null = null;
 
   constructor(
     private afs: AngularFirestore,
@@ -356,6 +362,10 @@ Please choose a file under 5 MB.`);
       // helper visible immediately in the UI
       displayTime: this.time.formatDateStringComment(nowIso),
     };
+    const replyTo = this.buildReplyPayload();
+    if (replyTo) {
+      msg.replyTo = replyTo;
+    }
     this.cacheCurrentUserProfile();
     if (this.pendingFiles.length) {
       msg.attachments = [];
@@ -404,6 +414,7 @@ Please choose a file under 5 MB.`);
     this.previews = [];
     this.pendingFiles = [];
     this.prompt = '';
+    this.replyTarget = null;
     this.showMentionDropdown = false;
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => this.scrollToBottom(), 0);
@@ -524,6 +535,28 @@ Please choose a file under 5 MB.`);
   async selectReaction(comment: Comment, option: ReactionOption): Promise<void> {
     this.activeReactionPickerKey = '';
     await this.toggleReaction(comment, option.emoji);
+  }
+
+  startReply(comment: Comment): void {
+    this.replyTarget = comment;
+    this.activeReactionPickerKey = '';
+  }
+
+  cancelReply(): void {
+    this.replyTarget = null;
+  }
+
+  replyPreviewText(reply?: CommentReply | Comment | null): string {
+    const text = String(reply?.content || '').trim();
+    if (!text) return 'Message';
+    return text.length > 160 ? `${text.slice(0, 160)}...` : text;
+  }
+
+  scrollToComment(messageId?: string): void {
+    if (!messageId) return;
+    document
+      .getElementById(`message-${messageId}`)
+      ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   async toggleReaction(comment: Comment, emoji: string): Promise<void> {
@@ -844,13 +877,60 @@ Please choose a file under 5 MB.`);
   private serializeCommentForSave(comment: Comment): Comment {
     const { displayTime, ...raw } = comment;
     const reactions = this.normalizeReactions(raw.reactions);
+    const replyTo = this.cleanReply(raw.replyTo);
+    const base = replyTo ? { ...raw, replyTo } : this.withoutReply(raw);
 
     if (Object.keys(reactions).length) {
-      return { ...raw, reactions };
+      return { ...base, reactions };
     }
 
-    const { reactions: _emptyReactions, ...withoutReactions } = raw;
+    const { reactions: _emptyReactions, ...withoutReactions } = base;
     return withoutReactions;
+  }
+
+  private buildReplyPayload(): CommentReply | null {
+    if (!this.replyTarget) return null;
+
+    return this.cleanReply({
+      messageId: this.replyTarget.messageId || this.getCommentKey(this.replyTarget),
+      authorId: this.replyTarget.authorId || '',
+      authorName: this.getCommentAuthorDisplayName(this.replyTarget),
+      content: this.replyTarget.content || '',
+      date: this.replyTarget.date,
+      createdAtMs: Date.parse(this.replyTarget.date || '') || undefined,
+    });
+  }
+
+  private cleanReply(reply?: CommentReply | null): CommentReply | null {
+    if (!reply?.messageId) return null;
+
+    const content = String(reply.content || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 240);
+
+    const clean: CommentReply = {
+      messageId: String(reply.messageId),
+      authorId: String(reply.authorId || ''),
+      authorName: String(reply.authorName || 'NewWorld Game member').trim(),
+      content,
+    };
+
+    if (reply.date) {
+      clean.date = reply.date;
+    }
+
+    const createdAtMs = Number(reply.createdAtMs || 0);
+    if (createdAtMs) {
+      clean.createdAtMs = createdAtMs;
+    }
+
+    return clean;
+  }
+
+  private withoutReply(comment: Comment): Comment {
+    const { replyTo: _replyTo, ...withoutReplyTo } = comment;
+    return withoutReplyTo;
   }
 
   private findMatchingCommentIndex(

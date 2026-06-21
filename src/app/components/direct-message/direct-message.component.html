@@ -112,7 +112,8 @@
       <div *ngIf="!loading && messages.length > 0" class="space-y-3">
         <div
           *ngFor="let message of messages; trackBy: trackMessage"
-          class="flex items-end gap-2"
+          [attr.id]="'dm-message-' + message.id"
+          class="group flex items-end gap-2"
           [class.justify-end]="isMine(message)"
           [class.justify-start]="!isMine(message)"
         >
@@ -131,25 +132,101 @@
           </ng-container>
 
           <div
-            class="rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
+            class="flex min-w-0 flex-col"
             [ngClass]="expanded ? 'max-w-[min(42rem,76%)]' : 'max-w-[76%]'"
-            [class.rounded-br-md]="isMine(message)"
-            [class.bg-emerald-600]="isMine(message)"
-            [class.text-white]="isMine(message)"
-            [class.rounded-bl-md]="!isMine(message)"
-            [class.bg-white]="!isMine(message)"
-            [class.text-slate-800]="!isMine(message)"
-            [class.dark:bg-slate-800]="!isMine(message)"
-            [class.dark:text-slate-100]="!isMine(message)"
+            [class.items-end]="isMine(message)"
+            [class.items-start]="!isMine(message)"
           >
-            <p class="whitespace-pre-wrap break-words">{{ message.text }}</p>
-            <p
-              class="mt-1 text-[11px]"
-              [class.text-emerald-50]="isMine(message)"
-              [class.text-slate-400]="!isMine(message)"
+            <div
+              class="rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm"
+              [class.rounded-br-md]="isMine(message)"
+              [class.bg-emerald-600]="isMine(message)"
+              [class.text-white]="isMine(message)"
+              [class.rounded-bl-md]="!isMine(message)"
+              [class.bg-white]="!isMine(message)"
+              [class.text-slate-800]="!isMine(message)"
+              [class.dark:bg-slate-800]="!isMine(message)"
+              [class.dark:text-slate-100]="!isMine(message)"
             >
-              {{ messageTime(message) }}
-            </p>
+              <button
+                *ngIf="message.replyTo"
+                type="button"
+                (click)="scrollToMessage(message.replyTo.messageId)"
+                class="mb-2 block w-full rounded-lg border-l-4 px-3 py-2 text-left text-xs"
+                [ngClass]="
+                  isMine(message)
+                    ? 'border-emerald-200 bg-white/15 text-emerald-50'
+                    : 'border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300'
+                "
+              >
+                <span class="block font-semibold">{{ message.replyTo.senderName }}</span>
+                <span class="block truncate">{{ replyPreviewText(message.replyTo) }}</span>
+              </button>
+
+              <p class="whitespace-pre-wrap break-words">{{ message.text }}</p>
+              <p
+                class="mt-1 text-[11px]"
+                [class.text-emerald-50]="isMine(message)"
+                [class.text-slate-400]="!isMine(message)"
+              >
+                {{ messageTime(message) }}
+              </p>
+            </div>
+
+            <div
+              class="mt-1 flex flex-wrap items-center gap-1"
+              [class.justify-end]="isMine(message)"
+            >
+              <button
+                *ngFor="let reaction of getReactionEntries(message); trackBy: trackByReactionEntry"
+                type="button"
+                (click)="toggleReaction(message, reaction.emoji)"
+                class="dm-reaction-chip"
+                [class.dm-reaction-chip--active]="reaction.reacted"
+                [attr.aria-label]="reaction.label + ': ' + reaction.count + ' reaction' + (reaction.count === 1 ? '' : 's')"
+                [title]="reaction.label"
+              >
+                <span aria-hidden="true">{{ reaction.emoji }}</span>
+                <span>{{ reaction.count }}</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="startReply(message)"
+                class="dm-message-action"
+                aria-label="Reply to message"
+                title="Reply"
+              >
+                Reply
+              </button>
+
+              <button
+                type="button"
+                (click)="toggleReactionPicker(message)"
+                class="dm-message-action"
+                aria-label="Add emoji reaction"
+                title="Add reaction"
+              >
+                + 😊
+              </button>
+            </div>
+
+            <div
+              *ngIf="activeReactionPickerId === message.id"
+              class="dm-reaction-picker mt-1 flex flex-wrap items-center gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+            >
+              <button
+                *ngFor="let option of reactionOptions; trackBy: trackByReactionOption"
+                type="button"
+                (click)="selectReaction(message, option)"
+                class="dm-reaction-picker-button"
+                [class.dm-reaction-picker-button--active]="hasUserReacted(message, option.emoji)"
+                [attr.aria-label]="option.label"
+                [title]="option.label"
+              >
+                {{ option.emoji }}
+              </button>
+            </div>
           </div>
 
           <ng-container *ngIf="isMine(message)">
@@ -182,6 +259,31 @@
       <p *ngIf="errorMessage" class="mb-2 text-xs font-medium text-red-600 dark:text-red-400">
         {{ errorMessage }}
       </p>
+
+      <div
+        *ngIf="replyTarget"
+        class="mb-2 flex items-start justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm dark:border-emerald-900 dark:bg-emerald-950/40"
+      >
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+            Replying to {{ replyTarget.senderName }}
+          </p>
+          <p class="truncate text-sm text-slate-700 dark:text-slate-200">
+            {{ replyPreviewText(replyTarget) }}
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="cancelReply()"
+          class="grid h-7 w-7 shrink-0 place-content-center rounded-full text-slate-500 transition hover:bg-white hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+          aria-label="Cancel reply"
+          title="Cancel reply"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </div>
 
       <div class="flex items-end gap-2">
         <textarea

@@ -14,9 +14,33 @@ import { Subscription } from 'rxjs';
 import { User } from 'src/app/models/user';
 import {
   DirectMessageRecord,
+  DirectMessageReply,
   DirectMessageService,
 } from 'src/app/services/direct-message.service';
 import { AuthService } from 'src/app/services/auth.service';
+
+interface ReactionOption {
+  emoji: string;
+  label: string;
+}
+
+interface ReactionEntry extends ReactionOption {
+  count: number;
+  reacted: boolean;
+}
+
+const MAIN_REACTION_OPTIONS: ReactionOption[] = [
+  { emoji: '👍', label: 'Like' },
+  { emoji: '❤️', label: 'Love' },
+  { emoji: '😂', label: 'Funny' },
+  { emoji: '🎉', label: 'Excitement' },
+  { emoji: '😮', label: 'Surprised' },
+  { emoji: '😢', label: 'Sad' },
+  { emoji: '🙌', label: 'Celebrate' },
+  { emoji: '👀', label: 'Watching' },
+  { emoji: '💡', label: 'Great idea' },
+  { emoji: '🚀', label: 'Launch it' },
+];
 
 @Component({
   selector: 'app-direct-message',
@@ -36,6 +60,9 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   sending = false;
   errorMessage = '';
   expanded = false;
+  replyTarget: DirectMessageRecord | null = null;
+  readonly reactionOptions = MAIN_REACTION_OPTIONS;
+  activeReactionPickerId = '';
 
   private authSub?: Subscription;
   private messagesSub?: Subscription;
@@ -105,6 +132,8 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
 
   close(): void {
     this.open = false;
+    this.replyTarget = null;
+    this.activeReactionPickerId = '';
     this.openChange.emit(false);
   }
 
@@ -134,8 +163,10 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
       await this.directMessages.sendMessage(
         this.currentUser || this.auth.currentUser,
         this.recipient!,
-        text
+        text,
+        this.buildReplyPayload()
       );
+      this.replyTarget = null;
       this.scrollToBottomSoon();
     } catch (error: any) {
       this.errorMessage =
@@ -183,6 +214,102 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     return message.id || String(index);
   }
 
+  trackByReactionOption(_index: number, option: ReactionOption): string {
+    return option.emoji;
+  }
+
+  trackByReactionEntry(_index: number, reaction: ReactionEntry): string {
+    return reaction.emoji;
+  }
+
+  getReactionEntries(message?: DirectMessageRecord | null): ReactionEntry[] {
+    const reactions = this.normalizeReactions(message?.reactions);
+    const mainOrder = this.reactionOptions.map((option) => option.emoji);
+    const optionByEmoji = new Map(
+      this.reactionOptions.map((option) => [option.emoji, option])
+    );
+    const uid = this.currentUser?.uid || this.auth.currentUser?.uid || '';
+
+    return Object.entries(reactions)
+      .filter(([, userIds]) => userIds.length > 0)
+      .sort(([emojiA], [emojiB]) => {
+        const aIndex = mainOrder.indexOf(emojiA);
+        const bIndex = mainOrder.indexOf(emojiB);
+        if (aIndex === -1 && bIndex === -1) return emojiA.localeCompare(emojiB);
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return aIndex - bIndex;
+      })
+      .map(([emoji, userIds]) => ({
+        ...(optionByEmoji.get(emoji) || { emoji, label: 'Reaction' }),
+        count: userIds.length,
+        reacted: !!uid && userIds.includes(uid),
+      }));
+  }
+
+  hasUserReacted(message: DirectMessageRecord, emoji: string): boolean {
+    const uid = this.currentUser?.uid || this.auth.currentUser?.uid || '';
+    return !!uid && (message.reactions?.[emoji] || []).includes(uid);
+  }
+
+  toggleReactionPicker(message: DirectMessageRecord): void {
+    this.activeReactionPickerId =
+      this.activeReactionPickerId === message.id ? '' : message.id;
+  }
+
+  async selectReaction(
+    message: DirectMessageRecord,
+    option: ReactionOption
+  ): Promise<void> {
+    this.activeReactionPickerId = '';
+    await this.toggleReaction(message, option.emoji);
+  }
+
+  async toggleReaction(
+    message: DirectMessageRecord,
+    emoji: string
+  ): Promise<void> {
+    const currentUid = this.currentUser?.uid || this.auth.currentUser?.uid || '';
+    const recipientUid = this.recipient?.uid || '';
+    if (!currentUid || !recipientUid || !message.id || !emoji) return;
+
+    try {
+      await this.directMessages.toggleReaction(
+        currentUid,
+        recipientUid,
+        message.id,
+        emoji
+      );
+    } catch (error: any) {
+      this.errorMessage =
+        error?.message || 'Reaction could not be updated right now.';
+    }
+  }
+
+  startReply(message: DirectMessageRecord): void {
+    this.replyTarget = message;
+    this.activeReactionPickerId = '';
+  }
+
+  cancelReply(): void {
+    this.replyTarget = null;
+  }
+
+  replyPreviewText(
+    reply: DirectMessageReply | DirectMessageRecord | null | undefined
+  ): string {
+    const text = String(reply?.text || '').trim();
+    if (!text) return 'Message';
+    return text.length > 140 ? `${text.slice(0, 140)}...` : text;
+  }
+
+  scrollToMessage(messageId?: string): void {
+    if (!messageId) return;
+    document
+      .getElementById(`dm-message-${messageId}`)
+      ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
   private connectIfReady(): void {
     const currentUid = this.currentUser?.uid || this.auth.currentUser?.uid || '';
     const recipientUid = this.recipient?.uid || '';
@@ -195,6 +322,8 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     if (nextKey === this.activeConversationKey) return;
 
     this.activeConversationKey = nextKey;
+    this.replyTarget = null;
+    this.activeReactionPickerId = '';
     this.loading = true;
     this.errorMessage = '';
     this.messagesSub?.unsubscribe();
@@ -231,6 +360,45 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
       if (!el) return;
       el.scrollTop = el.scrollHeight;
     });
+  }
+
+  private buildReplyPayload(): DirectMessageReply | null {
+    if (!this.replyTarget?.id) return null;
+
+    return {
+      messageId: this.replyTarget.id,
+      senderUid: this.replyTarget.senderUid,
+      senderName: this.replyTarget.senderName || 'NewWorld Game user',
+      text: this.replyTarget.text || '',
+      createdAtMs: this.replyTarget.createdAtMs,
+    };
+  }
+
+  private normalizeReactions(
+    reactions: unknown
+  ): Record<string, string[]> {
+    if (!reactions || typeof reactions !== 'object') return {};
+
+    return Object.entries(reactions as Record<string, unknown>).reduce(
+      (normalized, [emoji, userIds]) => {
+        if (!emoji || !Array.isArray(userIds)) return normalized;
+
+        const cleanUserIds = Array.from(
+          new Set(
+            userIds
+              .map((userId) => String(userId || '').trim())
+              .filter(Boolean)
+          )
+        );
+
+        if (cleanUserIds.length) {
+          normalized[emoji] = cleanUserIds;
+        }
+
+        return normalized;
+      },
+      {} as Record<string, string[]>
+    );
   }
 
   private initialsFromLabel(label: string): string {
