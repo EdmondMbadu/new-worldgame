@@ -7126,7 +7126,7 @@ export const onReportRequest = functions
         } as any);
         const fallbackPrompt = `${prompt}
 
-If live web-search grounding is temporarily unavailable, still produce the Funding Sources List using only well-known public official funding programs and funder pages you are confident exist. Keep every link to an official funder, program, or application page when possible. Mark unclear deadlines as "Check current cycle" and do not invent deadlines, dollar amounts, or contacts.`;
+If live web-search grounding is temporarily unavailable, still produce the Funding Sources List using only well-known public official funding programs and funder pages you are confident exist. Keep every link to an official funder, program, or application page when possible. Include full https:// URLs directly in the Funder Directory and Master Table. Mark unclear deadlines as "Check current cycle" and do not invent deadlines, dollar amounts, or contacts.`;
         const fallbackResult = await fallbackModel.generateContent(fallbackPrompt);
         response = await fallbackResult.response;
       }
@@ -7251,6 +7251,22 @@ If live web-search grounding is temporarily unavailable, still produce the Fundi
             // Clean extra blank lines introduced by removals.
             finalText = sanitizeGeneratedReportText(finalText);
           }
+        }
+
+        const existingUrls = new Set(
+          (finalText.match(/https?:\/\/[^\s<>"')\]]+/g) || []).map((url) =>
+            url.replace(/[),.;]+$/g, '')
+          )
+        );
+        const missingSourceLinks = cleanSources
+          .filter((source) => !existingUrls.has(source.url))
+          .slice(0, 12)
+          .map((source, index) => `${index + 1}. ${source.title}: ${source.url}`);
+
+        if (missingSourceLinks.length) {
+          finalText = sanitizeGeneratedReportText(
+            `${finalText}\n\nAnnex: Verified Source Links\n${missingSourceLinks.join('\n')}`
+          );
         }
       }
 

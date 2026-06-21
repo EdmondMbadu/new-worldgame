@@ -476,7 +476,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       title: 'Funding Sources List',
       group: 'funder',
       instruction:
-        'Research the web for real, current funding routes that fit this specific solution by topic, region, implementation stage, applicant type, and beneficiary group. Use a geographic ladder: exact city or local area, nearby counties/metro, state/region, then national programs with explicit thematic fit. Do not stop after 1-2 easy results; build a candidate pool across community foundations, city/state/federal grants, education/civic innovation programs, accelerators, challenge prizes, corporate social impact programs, and mission-aligned foundations, then return the strongest 8-10. Follow this structure: Cover Page, Funding Landscape Overview, Recommended Priority Targets, Funder Directory, Master Table, Contact Directory, and Annex. Each Funder Directory entry must include: A. Opportunity or program name, B. Funder or sponsor, C. Direct official link, D. Fit rationale, E. Eligibility, F. Deadline or cycle, G. Suggested ask or angle, H. Next action. Do not output a "Quick Summary" heading. Exclude generic advice pages, broad directories, social media, search result pages, and opportunities that are clearly closed. If a cycle is unclear, say "Check current cycle" rather than inventing a date. Use concise, premium, human but professional language suitable for a PDF.',
+        'Research the web for real, current funding routes that fit this specific solution by topic, region, implementation stage, applicant type, and beneficiary group. Use a geographic ladder: exact city or local area, nearby counties/metro, state/region, then national programs with explicit thematic fit. Do not stop after 1-2 easy results; build a candidate pool across community foundations, city/state/federal grants, education/civic innovation programs, accelerators, challenge prizes, corporate social impact programs, and mission-aligned foundations, then return the strongest 8-10. Follow this structure: Cover Page, Funding Landscape Overview, Recommended Priority Targets, Funder Directory, Master Table, Contact Directory, and Annex. Each Funder Directory entry must include: A. Opportunity or program name, B. Funder or sponsor, C. Direct official link with the full https:// URL, D. Application URL if different from the main program page, E. Fit rationale, F. Eligibility, G. Deadline or cycle, H. Suggested ask or angle, I. Next action. The Master Table must include a Link column with the full URL. Do not output a "Quick Summary" heading. Exclude generic advice pages, broad directories, social media, search result pages, and opportunities that are clearly closed. If a cycle is unclear, say "Check current cycle" rather than inventing a date. Use concise, premium, human but professional language suitable for a PDF.',
       summary: 'A structured funding directory with prioritized targets and contacts.',
     },
     {
@@ -2772,16 +2772,13 @@ Infographic requirements:
     return new Paragraph({
       alignment: opts.alignment,
       spacing: { before: 40, after: 130, line: 300 },
-      children: [
-        new TextRun({
-          text,
-          font: 'Arial',
-          size: 22,
-          color: opts.color || '444441',
-          bold: !!opts.bold,
-          italics: !!opts.italic,
-        }),
-      ],
+      children: this.buildDocxLinkedRuns(text, {
+        font: 'Arial',
+        size: 22,
+        color: opts.color || '444441',
+        bold: !!opts.bold,
+        italics: !!opts.italic,
+      }),
     });
   }
 
@@ -2789,7 +2786,7 @@ Infographic requirements:
     return new Paragraph({
       numbering: { reference: ordered ? 'draft-numbers' : 'draft-bullets', level: 0 },
       spacing: { before: 40, after: 90, line: 300 },
-      children: [new TextRun({ text, font: 'Arial', size: 21, color: '444441' })],
+      children: this.buildDocxLinkedRuns(text, { font: 'Arial', size: 21, color: '444441' }),
     });
   }
 
@@ -3126,7 +3123,6 @@ Infographic requirements:
         this.reportStatus = '';
         this.reportText = this.sanitizeGeneratedReportText(snapshot.response ?? '');
         this.reportFormatted = this.formatAiFeedback(this.reportText);
-        this.prepareReportPdfInBackground();
         this.reportDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
         if (this.reportTimeoutHandle) {
@@ -3236,50 +3232,6 @@ Infographic requirements:
     this.reportPdfCache = null;
     this.reportPdfBuildPromise = null;
     this.reportPdfBuildKey = '';
-  }
-
-  private prepareReportPdfInBackground(): void {
-    if (!this.reportText || typeof window === 'undefined') {
-      return;
-    }
-
-    const key = this.buildReportPdfCacheKey();
-    if (this.reportPdfCache?.key === key || (this.reportPdfBuildPromise && this.reportPdfBuildKey === key)) {
-      return;
-    }
-
-    this.reportDownloadStatus = 'Preparing PDF in the background...';
-    const schedule = (callback: () => void) => {
-      const idleCallback = (window as any).requestIdleCallback as
-        | ((cb: () => void, options?: { timeout?: number }) => void)
-        | undefined;
-      if (idleCallback) {
-        idleCallback(callback, { timeout: 1500 });
-      } else {
-        window.setTimeout(callback, 250);
-      }
-    };
-
-    schedule(() => {
-      this.getOrBuildReportPdf(false)
-        .then((entry) => {
-          if (entry.key !== this.buildReportPdfCacheKey()) {
-            return;
-          }
-          this.reportDownloadStatus = 'PDF ready. Click PDF to download instantly.';
-          window.setTimeout(() => {
-            if (this.reportPdfCache?.key === entry.key && this.reportDownloadStatus.includes('PDF ready')) {
-              this.reportDownloadStatus = '';
-            }
-          }, 4500);
-        })
-        .catch((error) => {
-          console.warn('Background report PDF preparation failed', error);
-          if (!this.downloadingReportPdf) {
-            this.reportDownloadStatus = '';
-          }
-        });
-    });
   }
 
   private async getOrBuildReportPdf(showProgress: boolean): Promise<ReportPdfCacheEntry> {
@@ -3573,6 +3525,79 @@ Infographic requirements:
       .trim();
   }
 
+  private splitTextByUrls(value: string): Array<{ text: string; url?: string }> {
+    const parts: Array<{ text: string; url?: string }> = [];
+    const urlRegex = /https?:\/\/[^\s<>"')\]]+/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = urlRegex.exec(value)) !== null) {
+      const rawUrl = match[0];
+      const cleanUrl = rawUrl.replace(/[.,;:]+$/g, '');
+      const trailing = rawUrl.slice(cleanUrl.length);
+      if (match.index > lastIndex) {
+        parts.push({ text: value.slice(lastIndex, match.index) });
+      }
+      parts.push({ text: cleanUrl, url: cleanUrl });
+      if (trailing) {
+        parts.push({ text: trailing });
+      }
+      lastIndex = match.index + rawUrl.length;
+    }
+
+    if (lastIndex < value.length) {
+      parts.push({ text: value.slice(lastIndex) });
+    }
+
+    return parts.length ? parts : [{ text: value }];
+  }
+
+  private linkifyEscapedText(escapedValue: string): string {
+    return this.splitTextByUrls(escapedValue)
+      .map((part) => {
+        if (!part.url) {
+          return part.text;
+        }
+        return `<a href="${part.url}" target="_blank" rel="noopener noreferrer">${part.text}</a>`;
+      })
+      .join('');
+  }
+
+  private buildDocxLinkedRuns(
+    text: string,
+    opts: { font?: string; size?: number; color?: string; bold?: boolean; italics?: boolean } = {}
+  ): Array<TextRun | ExternalHyperlink> {
+    const font = opts.font || 'Arial';
+    const size = opts.size || 22;
+    const color = opts.color || '444441';
+
+    return this.splitTextByUrls(text).map((part) => {
+      if (!part.url) {
+        return new TextRun({
+          text: part.text,
+          font,
+          size,
+          color,
+          bold: !!opts.bold,
+          italics: !!opts.italics,
+        });
+      }
+
+      return new ExternalHyperlink({
+        link: part.url,
+        children: [
+          new TextRun({
+            text: part.text,
+            font,
+            size,
+            color: '0F766E',
+            underline: {},
+          }),
+        ],
+      });
+    });
+  }
+
   private formatAiFeedback(value: string): string {
     if (!value) {
       return '';
@@ -3598,6 +3623,7 @@ Infographic requirements:
         escaped = escaped.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-slate-700 dark:text-slate-300">$1</li>');
         // Wrap consecutive list items in <ul>
         escaped = escaped.replace(/(<li[^>]*>.*?<\/li>\s*)+/gs, '<ul class="my-2 space-y-1">$&</ul>');
+        escaped = this.linkifyEscapedText(escaped);
         // Format newlines
         escaped = escaped.replace(/\n/g, '<br>');
         // Clean up extra breaks after headings and lists
@@ -3848,6 +3874,9 @@ Quality rules:
 - If a current deadline is visible, include it. If the page has no visible current cycle, write "Check current cycle" rather than inventing a date.
 - Each funder must have a concrete fit rationale tied to the actual solution, not a generic "supports innovation" explanation.
 - Include eligibility, suggested ask/angle, contact route when visible, and a specific next action.
+- Every funder entry must include a full https:// URL that a user can open directly.
+- If an application page is different from the program page, include both the program URL and the application URL.
+- The Master Table must include a Link column containing the full URL, not only the funder name.
 
 Output rules:
 - Output plain text only: no markdown tables, no asterisks, no decorative separators.
@@ -4328,6 +4357,11 @@ INTEGRITY RULES:
           font-size: 14px;
           line-height: 1.58;
         }
+        .draft-content a {
+          color: #0f766e;
+          text-decoration: underline;
+          overflow-wrap: anywhere;
+        }
         .draft-content p { margin: 0 0 13px; }
         .draft-content ul,
         .draft-content ol {
@@ -4457,7 +4491,7 @@ INTEGRITY RULES:
           html += '<ul>';
           listMode = 'ul';
         }
-        html += `<li>${this.escapeHtml(bulletText)}</li>`;
+        html += `<li>${this.linkifyEscapedText(this.escapeHtml(bulletText))}</li>`;
         continue;
       }
 
@@ -4471,16 +4505,16 @@ INTEGRITY RULES:
             html += '<ol>';
             listMode = 'ol';
           }
-          html += `<li>${this.escapeHtml(rest)}</li>`;
+          html += `<li>${this.linkifyEscapedText(this.escapeHtml(rest))}</li>`;
         } else {
           closeList();
-          html += `<p class="report-indexed"><strong>${this.escapeHtml(label)}</strong> ${this.escapeHtml(rest)}</p>`;
+          html += `<p class="report-indexed"><strong>${this.escapeHtml(label)}</strong> ${this.linkifyEscapedText(this.escapeHtml(rest))}</p>`;
         }
         continue;
       }
 
       closeList();
-      html += `<p>${this.escapeHtml(line)}</p>`;
+      html += `<p>${this.linkifyEscapedText(this.escapeHtml(line))}</p>`;
     }
 
     closeList();
@@ -4576,8 +4610,7 @@ INTEGRITY RULES:
                   bold: true,
                   color: '0F766E',
                 }),
-                new TextRun({
-                  text: numberedMatch[2],
+                ...this.buildDocxLinkedRuns(numberedMatch[2], {
                   font: 'Arial',
                   size: 21,
                   color: '444441',
@@ -5311,6 +5344,7 @@ INTEGRITY RULES:
           pdf.addPage();
         }
         pdf.addImage(canvas, 'PNG', 0, 0, pageWidth, pageHeight);
+        this.addHtmlLinkAnnotationsToPdf(pdf, pageElements[page], pageWidth, pageHeight);
         await this.yieldToBrowser();
       }
 
@@ -5321,6 +5355,41 @@ INTEGRITY RULES:
     } finally {
       document.body.removeChild(container);
     }
+  }
+
+  private addHtmlLinkAnnotationsToPdf(
+    pdf: jsPDF,
+    pageElement: HTMLElement,
+    pageWidth: number,
+    pageHeight: number
+  ): void {
+    const linkFn = (pdf as any).link;
+    if (typeof linkFn !== 'function') {
+      return;
+    }
+
+    const pageRect = pageElement.getBoundingClientRect();
+    const scaleX = pageWidth / pageRect.width;
+    const scaleY = pageHeight / pageRect.height;
+    const anchors = Array.from(pageElement.querySelectorAll('a[href]')) as HTMLAnchorElement[];
+
+    anchors.forEach((anchor) => {
+      const url = anchor.href;
+      if (!/^https?:\/\//i.test(url)) {
+        return;
+      }
+
+      Array.from(anchor.getClientRects()).forEach((rect) => {
+        const x = (rect.left - pageRect.left) * scaleX;
+        const y = (rect.top - pageRect.top) * scaleY;
+        const width = rect.width * scaleX;
+        const height = rect.height * scaleY;
+        if (width < 1 || height < 1) {
+          return;
+        }
+        (pdf as any).link(x, y, width, height, { url });
+      });
+    });
   }
 
   private paginateStyledDraftPrint(container: HTMLElement): HTMLElement[] {
