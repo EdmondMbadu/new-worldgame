@@ -1767,6 +1767,20 @@ const validateLinks = async <T extends { url: string }>(items: T[]) => {
   return results.filter((r) => r.valid).map((r) => r.item);
 };
 
+const sanitizeGeneratedReportText = (value: string): string =>
+  String(value || '')
+    .split(/\r?\n/)
+    .filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return true;
+      if (/^[-_\u2014\u2013]{20,}$/.test(trimmed)) return false;
+      if (/^\|?\s*[:\-\| ]{6,}\s*\|?$/.test(trimmed)) return false;
+      return true;
+    })
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
 type ReachLookupRequest = {
   solutionId?: string;
   page?: number;
@@ -7173,7 +7187,7 @@ export const onReportRequest = functions
         .slice(0, isFundingReport ? 15 : isBusinessPlanReport ? 12 : 10)
         .map(({ source }) => ({ title: source.title, url: source.url }));
 
-      let finalText = text || '';
+      let finalText = sanitizeGeneratedReportText(text || '');
       if (isFundingReport && finalText) {
         const extracted = finalText.match(/https?:\/\/[^\s<>"')\]]+/g) || [];
         const uniqueUrls = Array.from(
@@ -7213,7 +7227,7 @@ export const onReportRequest = functions
             });
 
             // Clean extra blank lines introduced by removals.
-            finalText = finalText.replace(/\n{3,}/g, '\n\n');
+            finalText = sanitizeGeneratedReportText(finalText);
           }
         }
       }
@@ -7242,6 +7256,7 @@ export const onReportRequest = functions
       await snap.ref.update({
         status: {
           state: 'ERRORED',
+          message: userFriendlyError,
           error: userFriendlyError,
           technicalError: errorMsg,
         },

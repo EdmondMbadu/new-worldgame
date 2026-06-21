@@ -765,7 +765,7 @@ You write with moral clarity, intellectual force, stylistic precision, and publi
 
 Your strengths:
 - A headline that feels inevitable in hindsight
-- Openings that seize attention immediately
+- Openings that capture attention immediately
 - A thesis that is bold, specific, and arguable
 - Elegant integration of evidence without sounding academic
 - Paragraphs that build pressure and momentum
@@ -774,7 +774,7 @@ Your strengths:
 
 STYLE REQUIREMENTS:
 - Write for an intelligent general audience, not a specialist audience
-- Prefer short, muscular sentences mixed with occasional longer, elegant ones
+- Prefer direct sentences mixed with occasional longer, elegant ones
 - Avoid jargon, puffery, cliches, and corporate language
 - Avoid generic inspiration and empty uplift
 - Use vivid nouns and verbs; every sentence should move the argument forward
@@ -3114,7 +3114,7 @@ Infographic requirements:
         }
         this.reportLoading = false;
         this.reportStatus = '';
-        this.reportText = snapshot.response ?? '';
+        this.reportText = this.sanitizeGeneratedReportText(snapshot.response ?? '');
         this.reportFormatted = this.formatAiFeedback(this.reportText);
         this.reportDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
@@ -3126,6 +3126,7 @@ Infographic requirements:
         this.reportStatus = '';
         this.reportError =
           snapshot.status?.message ||
+          snapshot.status?.error ||
           'We could not generate the report. Please try again in a moment.';
         this.reportDocSub?.unsubscribe();
       }
@@ -4948,12 +4949,36 @@ INTEGRITY RULES:
     return hasLetters && trimmed.length <= 60 && trimmed === upper;
   }
 
+  private isReportSeparatorLine(line: string): boolean {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return false;
+    }
+    if (/^[-_\u2014\u2013]{20,}$/.test(trimmed)) {
+      return true;
+    }
+    return /^\|?\s*[:\-\| ]{6,}\s*\|?$/.test(trimmed);
+  }
+
+  private sanitizeGeneratedReportText(value: string): string {
+    if (!value) {
+      return '';
+    }
+
+    return value
+      .split(/\r?\n/)
+      .filter((line) => !this.isReportSeparatorLine(line))
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
   private normalizeReportText(value: string): string {
     if (!value) {
       return '';
     }
 
-    let cleaned = value;
+    let cleaned = this.sanitizeGeneratedReportText(value);
 
     // Normalize HTML line breaks that sometimes appear in AI output
     cleaned = cleaned.replace(/<br\s*\/?>\s*-\s*/gi, '\n- ');
@@ -4966,6 +4991,8 @@ INTEGRITY RULES:
 
     // Convert markdown tables to readable text format
     cleaned = this.convertMarkdownTableToText(cleaned);
+
+    cleaned = this.sanitizeGeneratedReportText(cleaned);
 
     // Convert bullet points to clean format
     cleaned = cleaned.replace(/^\s*[-*]\s+(.+)$/gm, '  • $1');
