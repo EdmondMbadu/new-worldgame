@@ -552,18 +552,46 @@
           </div>
 
           <textarea
+            #promptTextarea
             [(ngModel)]="prompt"
             (input)="onPromptInput($event)"
             (keydown.enter)="sendOnEnter($event)"
-            (keydown.escape)="closeMentionDropdown()"
+            (keydown.escape)="closeComposerPanels()"
             id="user-input"
             placeholder="Message #team-discussion — use @ to mention"
             class="w-full resize-none 
                    dark:bg-slate-900 bg-slate-100
                    dark:text-gray-200 text-slate-800
-                   text-sm rounded-md px-3 py-2 outline-none
+                   text-sm rounded-md py-2 pl-3 pr-12 outline-none
                    focus:ring-2 focus:ring-emerald-500"
           ></textarea>
+
+          <button
+            type="button"
+            (click)="toggleComposerEmojiPicker()"
+            class="absolute bottom-1.5 right-1.5 grid h-8 w-8 place-content-center rounded-full text-base transition hover:bg-slate-200 dark:hover:bg-slate-800"
+            [attr.aria-expanded]="showComposerEmojiPicker"
+            aria-label="Add emoji"
+            title="Add emoji"
+          >
+            😊
+          </button>
+
+          <div
+            *ngIf="showComposerEmojiPicker"
+            class="composer-emoji-picker absolute bottom-full right-0 mb-2 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-800"
+          >
+            <button
+              *ngFor="let option of composerEmojiOptions; trackBy: trackByReactionOption"
+              type="button"
+              (click)="insertEmojiIntoPrompt(option.emoji)"
+              class="reaction-picker-button"
+              [attr.aria-label]="option.label"
+              [title]="option.label"
+            >
+              {{ option.emoji }}
+            </button>
+          </div>
 
           <!-- Mention dropdown -->
           <div

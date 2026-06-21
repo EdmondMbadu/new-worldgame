@@ -52,6 +52,8 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   @Input() open = false;
   @Output() openChange = new EventEmitter<boolean>();
   @ViewChild('messageList') messageList?: ElementRef<HTMLDivElement>;
+  @ViewChild('composerTextarea')
+  composerTextarea?: ElementRef<HTMLTextAreaElement>;
 
   currentUser: User | null = null;
   messages: DirectMessageRecord[] = [];
@@ -62,7 +64,9 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   expanded = false;
   replyTarget: DirectMessageRecord | null = null;
   readonly reactionOptions = MAIN_REACTION_OPTIONS;
+  readonly composerEmojiOptions = MAIN_REACTION_OPTIONS;
   activeReactionPickerId = '';
+  showComposerEmojiPicker = false;
 
   private authSub?: Subscription;
   private messagesSub?: Subscription;
@@ -134,6 +138,7 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     this.open = false;
     this.replyTarget = null;
     this.activeReactionPickerId = '';
+    this.showComposerEmojiPicker = false;
     this.openChange.emit(false);
   }
 
@@ -158,6 +163,7 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     this.sending = true;
     this.errorMessage = '';
     this.draft = '';
+    this.showComposerEmojiPicker = false;
 
     try {
       await this.directMessages.sendMessage(
@@ -178,9 +184,33 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onComposerKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.showComposerEmojiPicker = false;
+      return;
+    }
     if (event.key !== 'Enter' || event.shiftKey) return;
     event.preventDefault();
     void this.send();
+  }
+
+  toggleComposerEmojiPicker(): void {
+    this.showComposerEmojiPicker = !this.showComposerEmojiPicker;
+    this.activeReactionPickerId = '';
+  }
+
+  insertEmojiIntoDraft(emoji: string): void {
+    if (!emoji) return;
+    const textarea = this.composerTextarea?.nativeElement;
+    const start = textarea?.selectionStart ?? this.draft.length;
+    const end = textarea?.selectionEnd ?? this.draft.length;
+    this.draft = `${this.draft.slice(0, start)}${emoji}${this.draft.slice(end)}`;
+    this.showComposerEmojiPicker = false;
+
+    setTimeout(() => {
+      textarea?.focus();
+      const nextCursor = start + emoji.length;
+      textarea?.setSelectionRange(nextCursor, nextCursor);
+    });
   }
 
   isMine(message: DirectMessageRecord): boolean {
@@ -253,6 +283,7 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   toggleReactionPicker(message: DirectMessageRecord): void {
+    this.showComposerEmojiPicker = false;
     this.activeReactionPickerId =
       this.activeReactionPickerId === message.id ? '' : message.id;
   }

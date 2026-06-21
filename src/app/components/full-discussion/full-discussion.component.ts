@@ -114,6 +114,7 @@ export class FullDiscussionComponent
   notifyAudio!: ElementRef<HTMLAudioElement>;
   @ViewChild('bottomAnchor') bottomAnchor!: ElementRef<HTMLDivElement>;
   @ViewChild('chatScroller') chatScroller!: ElementRef<HTMLDivElement>;
+  @ViewChild('promptTextarea') promptTextarea?: ElementRef<HTMLTextAreaElement>;
 
   editingId: string | null = null; // holds ISO date (acts as unique id)
   editingContent = '';
@@ -149,8 +150,10 @@ export class FullDiscussionComponent
   highlightedMessageId = '';
   commentAuthorProfiles: Record<string, User | null | undefined> = {};
   readonly reactionOptions = MAIN_REACTION_OPTIONS;
+  readonly composerEmojiOptions = MAIN_REACTION_OPTIONS;
   activeReactionPickerKey = '';
   replyTarget: Comment | null = null;
+  showComposerEmojiPicker = false;
 
   constructor(
     private afs: AngularFirestore,
@@ -416,6 +419,7 @@ Please choose a file under 5 MB.`);
     this.prompt = '';
     this.replyTarget = null;
     this.showMentionDropdown = false;
+    this.showComposerEmojiPicker = false;
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => this.scrollToBottom(), 0);
     });
@@ -489,6 +493,35 @@ Please choose a file under 5 MB.`);
     return reaction.emoji;
   }
 
+  toggleComposerEmojiPicker(): void {
+    const nextOpen = !this.showComposerEmojiPicker;
+    this.showComposerEmojiPicker = nextOpen;
+    if (nextOpen) {
+      this.closeMentionDropdown();
+    }
+    this.activeReactionPickerKey = '';
+  }
+
+  insertEmojiIntoPrompt(emoji: string): void {
+    if (!emoji) return;
+    const textarea = this.promptTextarea?.nativeElement;
+    const start = textarea?.selectionStart ?? this.prompt.length;
+    const end = textarea?.selectionEnd ?? this.prompt.length;
+    this.prompt = `${this.prompt.slice(0, start)}${emoji}${this.prompt.slice(end)}`;
+    this.showComposerEmojiPicker = false;
+
+    setTimeout(() => {
+      textarea?.focus();
+      const nextCursor = start + emoji.length;
+      textarea?.setSelectionRange(nextCursor, nextCursor);
+    });
+  }
+
+  closeComposerPanels(): void {
+    this.showComposerEmojiPicker = false;
+    this.closeMentionDropdown();
+  }
+
   getCommentKey(comment: Comment): string {
     return (
       comment.messageId ||
@@ -527,6 +560,7 @@ Please choose a file under 5 MB.`);
   }
 
   toggleReactionPicker(comment: Comment): void {
+    this.showComposerEmojiPicker = false;
     const key = this.getCommentKey(comment);
     this.activeReactionPickerKey =
       this.activeReactionPickerKey === key ? '' : key;

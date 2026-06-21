@@ -92,6 +92,11 @@
   max-width: min(24rem, 100%);
 }
 
+.composer-emoji-picker {
+  max-width: min(18rem, calc(100vw - 3rem));
+  z-index: 60;
+}
+
 .reaction-picker-button {
   background: transparent;
   border-color: transparent;

@@ -286,15 +286,45 @@
       </div>
 
       <div class="flex items-end gap-2">
-        <textarea
-          [(ngModel)]="draft"
-          name="directMessage"
-          rows="1"
-          maxlength="2000"
-          (keydown)="onComposerKeydown($event)"
-          placeholder="Message..."
-          class="max-h-28 min-h-[2.75rem] flex-1 resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
-        ></textarea>
+        <div class="relative flex flex-1 items-end">
+          <textarea
+            #composerTextarea
+            [(ngModel)]="draft"
+            name="directMessage"
+            rows="1"
+            maxlength="2000"
+            (keydown)="onComposerKeydown($event)"
+            placeholder="Message..."
+            class="max-h-28 min-h-[2.75rem] w-full resize-none rounded-2xl border border-slate-300 bg-white py-3 pl-4 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500"
+          ></textarea>
+
+          <button
+            type="button"
+            (click)="toggleComposerEmojiPicker()"
+            class="absolute bottom-1.5 right-1.5 grid h-8 w-8 place-content-center rounded-full text-base transition hover:bg-slate-100 dark:hover:bg-slate-800"
+            [attr.aria-expanded]="showComposerEmojiPicker"
+            aria-label="Add emoji"
+            title="Add emoji"
+          >
+            😊
+          </button>
+
+          <div
+            *ngIf="showComposerEmojiPicker"
+            class="dm-composer-emoji-picker absolute bottom-full right-0 mb-2 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-800"
+          >
+            <button
+              *ngFor="let option of composerEmojiOptions; trackBy: trackByReactionOption"
+              type="button"
+              (click)="insertEmojiIntoDraft(option.emoji)"
+              class="dm-reaction-picker-button"
+              [attr.aria-label]="option.label"
+              [title]="option.label"
+            >
+              {{ option.emoji }}
+            </button>
+          </div>
+        </div>
 
         <button
           type="submit"
