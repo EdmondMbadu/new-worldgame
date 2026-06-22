@@ -92,6 +92,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   documentDownloadUrl: string = '';
   documentId: string = '';
   documentDescription: string = '';
+  private uploadedDocumentIsPresentation = false;
   // Track which doc is “open” for the 3-dot menu.
   openDocIndex: number | null = null;
   openPresentationMenuId: string | null = null;
@@ -120,6 +121,10 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
     this.documentType = file.type || 'application/octet-stream';
     this.originalFilename = file.name;
+    this.uploadedDocumentIsPresentation = this.isPowerPointFile(
+      this.documentType,
+      this.originalFilename
+    );
     this.documentName = this.stripExt(file.name);
     this.documentDescription = '';
     this.documentId ||= this.afs.createId();
@@ -177,8 +182,19 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     };
 
     this.documents = [newDoc, ...this.documents]; // prepend
-    this.data
-      .addDocument(this.documents, this.currentSolution.solutionId)
+    const saveTasks: Promise<unknown>[] = [
+      this.data.addDocument(this.documents, this.currentSolution.solutionId),
+    ];
+
+    if (this.uploadedDocumentIsPresentation) {
+      saveTasks.push(
+        this.data.addPresentation(
+          this.buildUploadedPowerPointPresentation(newDoc)
+        )
+      );
+    }
+
+    Promise.all(saveTasks)
       .then(() => this.resetForm())
       .catch((err) => console.error(err));
   }
@@ -191,6 +207,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     this.documentDownloadUrl = '';
     this.documentId = '';
     this.originalFilename = '';
+    this.uploadedDocumentIsPresentation = false;
     this.toggle('showAddDocument');
   }
 
@@ -468,15 +485,23 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
     return this.activePresentationEmbedUrl;
   }
 
+  presentationViewerStatusText(): string {
+    if (this.presentationEmbedUrl()) {
+      return this.activePresentation?.pptxDownloadURL &&
+        !this.googleSlidesId(this.activePresentation)
+        ? 'PowerPoint preview'
+        : 'Google Slides presentation';
+    }
+
+    return `Slide ${this.activeSlideIndex + 1} of ${this.presentationSlideCount()}`;
+  }
+
   private buildPresentationEmbedUrl(p: Presentation): SafeResourceUrl | null {
     if (!p) {
       return null;
     }
 
-    const googleSlidesId =
-      p.googleSlidesId ||
-      p.googleSlidesUrl?.match(/\/presentation\/d\/([^/]+)/)?.[1] ||
-      p.googleSlidesPresentUrl?.match(/\/presentation\/d\/([^/]+)/)?.[1];
+    const googleSlidesId = this.googleSlidesId(p);
 
     if (googleSlidesId) {
       return this.sanitizer.bypassSecurityTrustResourceUrl(
@@ -484,7 +509,29 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       );
     }
 
+    if (p.pptxDownloadURL) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        this.googleViewerUrl(p.pptxDownloadURL, true)
+      );
+    }
+
     return null;
+  }
+
+  private googleSlidesId(p: Presentation | null | undefined): string {
+    return (
+      p?.googleSlidesId ||
+      p?.googleSlidesUrl?.match(/\/presentation\/d\/([^/]+)/)?.[1] ||
+      p?.googleSlidesPresentUrl?.match(/\/presentation\/d\/([^/]+)/)?.[1] ||
+      ''
+    );
+  }
+
+  private googleViewerUrl(url: string, embedded = false): string {
+    const embeddedParam = embedded ? '&embedded=true' : '';
+    return `https://docs.google.com/gview?url=${encodeURIComponent(
+      url
+    )}${embeddedParam}`;
   }
 
   private setPresentationBodyLock(locked: boolean) {
@@ -536,13 +583,14 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   }
 
   googleSlidesOpenUrl(p: Presentation): string {
-    const nativeSlidesUrl = p.googleSlidesEditUrl || p.googleSlidesUrl || p.googleSlidesPresentUrl;
+    const nativeSlidesUrl =
+      p.googleSlidesEditUrl || p.googleSlidesUrl || p.googleSlidesPresentUrl;
     if (nativeSlidesUrl) {
       return nativeSlidesUrl;
     }
 
     if (p.pptxDownloadURL) {
-      return `https://docs.google.com/viewer?url=${encodeURIComponent(p.pptxDownloadURL)}`;
+      return this.googleViewerUrl(p.pptxDownloadURL);
     }
 
     return '';
@@ -589,7 +637,10 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
   }
 
   private isPresentationExportDocument(doc: Avatar): boolean {
-    if (!doc || !this.isPowerPoint(doc.type || '')) {
+    if (
+      !doc ||
+      !this.isPowerPointFile(doc.type || '', doc.originalFilename || doc.name || '')
+    ) {
       return false;
     }
 
@@ -605,8 +656,9 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       const generatedExport =
         (doc.description || '').toLowerCase().includes('powerpoint export') &&
         this.stripExt(doc.name || '') === this.stripExt(presentation.name || '');
+      const shouldHideExport = !!presentation.generatedByAi || generatedExport;
 
-      return sameDownload || sameFileName || generatedExport;
+      return shouldHideExport && (sameDownload || sameFileName || generatedExport);
     });
   }
   /* NEW ──────────────────────────────────────────────── */
@@ -624,6 +676,48 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       'application/vnd.ms-powerpoint',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     ].includes(mime);
+  }
+
+  private isPowerPointFile(mime: string, filename = ''): boolean {
+    return this.isPowerPoint(mime) || /\.(ppt|pptx)$/i.test(filename);
+  }
+
+  private buildUploadedPowerPointPresentation(doc: Avatar): Presentation {
+    const name =
+      doc.name || this.stripExt(doc.originalFilename || 'Presentation');
+    return {
+      id: this.documentId || this.afs.createId(),
+      solutionId: this.currentSolution.solutionId || this.id,
+      name,
+      description:
+        doc.description ||
+        `Uploaded PowerPoint file${doc.originalFilename ? `: ${doc.originalFilename}` : ''}.`,
+      dateCreated: doc.dateSorted || Date.now(),
+      slides: [
+        {
+          title: name,
+          subtitle: 'Uploaded PowerPoint presentation',
+          layout: 'center',
+          bullets: doc.originalFilename ? [doc.originalFilename] : [],
+        },
+      ],
+      thumbnail: '../../../assets/img/world-game-presentation.jpeg',
+      generatedByAi: false,
+      pptxDownloadURL: doc.downloadURL,
+      pptxFileName: doc.originalFilename || `${name}.pptx`,
+      primaryFormat: this.powerPointFormat(
+        doc.type || '',
+        doc.originalFilename || ''
+      ),
+      slideCount: 1,
+    };
+  }
+
+  private powerPointFormat(mime: string, filename = ''): string {
+    if (/\.ppt$/i.test(filename) || mime === 'application/vnd.ms-powerpoint') {
+      return 'ppt';
+    }
+    return 'pptx';
   }
 
   /* ---------------------------------------------------------
