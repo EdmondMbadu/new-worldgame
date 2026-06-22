@@ -54,13 +54,6 @@
         </div>
 
         <div
-          *ngIf="submissionSucceeded"
-          class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200"
-        >
-          Thank you. Your feedback was submitted successfully.
-        </div>
-
-        <div
           *ngIf="submitError"
           class="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-200"
         >
@@ -162,7 +155,7 @@
             placeholder="How would you make the strategy better?"
           ></textarea>
           <p *ngIf="commentRequired" class="mt-2 text-xs text-rose-600">
-            Please write your feedback before submitting.
+            Please write a suggestion before submitting. We moved you here so you can add it.
           </p>
 
           <div class="mt-4 text-center md:text-left">
@@ -181,7 +174,7 @@
 
     <!-- Right column: The evaluation panel with sliders -->
     <!-- NOTE the added classes: md:sticky md:top-20 md:max-h-screen md:overflow-y-auto -->
-    <div class="md:mx-10 flex flex-col w-full lg:w-1/3 mt-10 lg:mt-0 
+    <div id="feedback-scores-panel" class="md:mx-10 flex flex-col w-full lg:w-1/3 mt-10 lg:mt-0 
                 md:sticky md:top-28 md:max-h-screen md:overflow-y-auto">
       <div class="feedback-panel w-full">
         <div class="feedback-panel__hero">
@@ -232,6 +225,68 @@
 
 </div>
 
+<!-- Evaluation Submitted Modal -->
+<div
+  *ngIf="submissionSucceeded"
+  class="evaluation-success-modal fixed inset-0 z-[80] flex items-center justify-center p-4"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="evaluation-success-title"
+>
+  <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"></div>
+
+  <div class="evaluation-success-modal__card relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+    <div class="evaluation-success-modal__banner">
+      <div class="evaluation-success-modal__badge">
+        <img src="../../../assets/img/congrats.png" alt="" />
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="closeSuccessModal()"
+      class="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm transition hover:bg-white hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:bg-slate-800/90 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+      aria-label="Close confirmation"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 14 14" aria-hidden="true">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+      </svg>
+    </button>
+
+    <div class="px-6 pb-6 pt-14 text-center sm:px-8 sm:pb-8">
+      <p class="evaluation-success-modal__eyebrow">Evaluation submitted</p>
+      <h2 id="evaluation-success-title" class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">
+        Congratulations for evaluating this strategy.
+      </h2>
+      <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+        Your scores and suggestions have been saved. The strategy team now has clear feedback they can use to improve their solution.
+      </p>
+
+      <div class="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-900/25 dark:text-emerald-100">
+        <strong>Submitted successfully.</strong>
+        Thank you for taking the time to evaluate this NewWorld Game strategy.
+      </div>
+
+      <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <button
+          type="button"
+          (click)="closeSuccessModal()"
+          class="inline-flex items-center justify-center rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-200 dark:focus:ring-teal-900"
+        >
+          Done
+        </button>
+
+        <a
+          [routerLink]="['/evaluation-summary', userSolution.solutionId || id]"
+          class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 dark:focus:ring-slate-700"
+        >
+          View evaluation summary
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Confirmation Modal -->
 <div *ngIf="submitDisplay" id="popup-modal"
     class="fixed inset-0 z-[70] flex items-center justify-center p-4">
@@ -272,7 +327,15 @@
         Are you sure you want to submit this feedback?
       </h3>
 
-      <div *ngIf="hasZeroScores"
+      <div *ngIf="hasAllZeroScores"
+          class="px-4 py-3 text-sm rounded-md bg-rose-100 text-rose-800
+                  dark:bg-rose-900/30 dark:text-rose-200">
+        <strong>Everything is currently scored 0.</strong>
+        Are you sure you want to give every category the lowest possible grade?
+        If not, go back and move the sliders to different scores before submitting.
+      </div>
+
+      <div *ngIf="hasZeroScores && !hasAllZeroScores"
           class="px-4 py-3 text-sm rounded-md bg-amber-100 text-amber-800
                   dark:bg-amber-900/30 dark:text-amber-300">
         One or more sliders is still at <b>0</b>.
@@ -288,10 +351,10 @@
                       disabled:cursor-not-allowed disabled:opacity-60
                       focus:outline-none focus:ring-4 focus:ring-teal-300
                       dark:focus:ring-teal-800 transition">
-          {{ isSubmitting ? 'Submitting...' : 'Yes, I’m sure' }}
+          {{ isSubmitting ? 'Submitting...' : (hasAllZeroScores ? 'Yes, submit all 0' : 'Yes, I’m sure') }}
         </button>
 
-        <button (click)="closeSubmission()"
+        <button (click)="hasAllZeroScores ? adjustSliderGrades() : closeSubmission()"
                 [disabled]="isSubmitting"
                 class="px-5 py-2.5 rounded-lg text-sm font-medium
                       text-gray-700 bg-gray-100 hover:bg-gray-200
@@ -299,7 +362,7 @@
                       border border-gray-300 dark:border-slate-600
                       focus:outline-none focus:ring-4 focus:ring-gray-300
                       dark:focus:ring-gray-700 transition">
-          No, cancel
+          {{ hasAllZeroScores ? 'No, adjust grades' : 'No, cancel' }}
         </button>
       </div>
     </div>

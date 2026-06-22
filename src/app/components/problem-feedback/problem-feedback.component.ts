@@ -26,6 +26,7 @@ export class ProblemFeedbackComponent implements OnInit, OnDestroy {
   submitDisplay: boolean = false;
   comment: string = '';
   hasZeroScores = false;
+  hasAllZeroScores = false;
 
   sendFeedback: boolean = false;
   evaluationSummary: Evaluation = {};
@@ -131,6 +132,23 @@ export class ProblemFeedbackComponent implements OnInit, OnDestroy {
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  scrollToSuggestionBox() {
+    const suggestionBox = document.getElementById('strategyComment');
+
+    (suggestionBox || document.getElementById('feedback-form-section'))
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    setTimeout(() => {
+      suggestionBox?.focus();
+    }, 350);
+  }
+
+  scrollToScoresPanel() {
+    document
+      .getElementById('feedback-scores-panel')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   continueAsGuest() {
     this.guestMode = true;
     this.submissionSucceeded = false;
@@ -154,7 +172,7 @@ export class ProblemFeedbackComponent implements OnInit, OnDestroy {
     this.commentRequired = this.comment.trim().length === 0;
 
     if (this.commentRequired) {
-      this.scrollToFeedbackSection();
+      this.scrollToSuggestionBox();
       return;
     }
 
@@ -177,6 +195,7 @@ export class ProblemFeedbackComponent implements OnInit, OnDestroy {
     }
 
     this.hasZeroScores = this.values.some((v) => v === 0);
+    this.hasAllZeroScores = this.values.every((v) => v === 0);
     this.submitDisplay = true;
   }
   async submitEvaluation() {
@@ -319,6 +338,17 @@ export class ProblemFeedbackComponent implements OnInit, OnDestroy {
   }
   closeSubmission() {
     this.submitDisplay = false;
+  }
+
+  adjustSliderGrades() {
+    this.closeSubmission();
+    setTimeout(() => {
+      this.scrollToScoresPanel();
+    }, 0);
+  }
+
+  closeSuccessModal() {
+    this.submissionSucceeded = false;
   }
   async accept() {
     if (this.isSubmitting) return;
