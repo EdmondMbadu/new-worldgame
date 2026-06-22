@@ -1,0 +1,36 @@
+.user-management-table-scroll {
+  border-radius: 1rem;
+  background:
+    linear-gradient(90deg, rgba(248, 250, 252, 1), rgba(248, 250, 252, 0)),
+    linear-gradient(270deg, rgba(248, 250, 252, 1), rgba(248, 250, 252, 0));
+  background-attachment: local, local;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+.user-management-table-scroll::-webkit-scrollbar {
+  height: 0.75rem;
+}
+
+.user-management-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.user-management-table-scroll::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border: 0.2rem solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+}
+
+:host-context(.dark) .user-management-table-scroll {
+  background:
+    linear-gradient(90deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0)),
+    linear-gradient(270deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0));
+  scrollbar-color: #475569 transparent;
+}
+
+:host-context(.dark) .user-management-table-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+  background-clip: padding-box;
+}

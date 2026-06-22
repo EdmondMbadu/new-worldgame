@@ -1,4 +1,4 @@
-<div class="problem-feedback-page dark:bg-slate-900 min-h-screen w-full">
+<div class="problem-feedback-page min-h-screen w-full overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
 <div *ngIf="!isLoggedIn"><app-navbar></app-navbar></div>
 <app-navbar 
   *ngIf="isLoggedIn"
@@ -23,7 +23,7 @@
   </svg>
 </button>
 
-<body class="">
+<main>
   <!-- Main container: Two-column layout -->
   <div class="container flex flex-col lg:flex-row mx-auto lg:justify-between justify-center mt-20 problem-feedback-layout">
 
@@ -221,7 +221,7 @@
       </div>
     </div>
   </div>
-</body>
+</main>
 
 </div>
 

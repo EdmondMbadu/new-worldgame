@@ -6,10 +6,31 @@
 .problem-feedback-page {
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at top left, rgba(20, 184, 166, 0.08), transparent 24rem),
     radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 24rem),
     linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+.problem-feedback-page :where(main, app-solution-evaluation) {
+  min-width: 0;
+}
+
+.problem-feedback-page ::ng-deep app-solution-evaluation main {
+  border-radius: 1.5rem;
+}
+
+.problem-feedback-page ::ng-deep app-solution-evaluation article {
+  min-width: 0;
+}
+
+.problem-feedback-page ::ng-deep app-solution-evaluation .format :where(table, pre, code, img, iframe) {
+  max-width: 100%;
+}
+
+.problem-feedback-page ::ng-deep app-solution-evaluation .format :where(table, pre) {
+  overflow-x: auto;
 }
 
 .problem-feedback-layout {
@@ -273,58 +294,77 @@
   }
 }
 
-.dark .problem-feedback-page {
+:host-context(.dark) .problem-feedback-page {
   background:
     radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 24rem),
     radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 24rem),
     linear-gradient(180deg, #020617 0%, #0f172a 100%);
 }
 
-.dark .feedback-panel {
+:host-context(.dark) .problem-feedback-page ::ng-deep app-solution-evaluation main,
+:host-context(.dark) .problem-feedback-page ::ng-deep app-solution-evaluation article,
+:host-context(.dark) .problem-feedback-page ::ng-deep app-solution-evaluation section {
+  background-color: #020617;
+}
+
+:host-context(.dark) .problem-feedback-page ::ng-deep app-solution-evaluation .format :where(p, li, td, th, blockquote, span) {
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .problem-feedback-page ::ng-deep app-solution-evaluation .format :where(h1, h2, h3, h4, strong) {
+  color: #f8fafc;
+}
+
+:host-context(.dark) .problem-feedback-page ::ng-deep app-solution-evaluation .format :where(table, pre, blockquote) {
+  background-color: #0f172a;
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+:host-context(.dark) .feedback-panel {
   background: rgba(15, 23, 42, 0.82);
   border-color: rgba(148, 163, 184, 0.12);
   box-shadow: 0 24px 60px rgba(2, 6, 23, 0.3);
 }
 
-.dark .feedback-panel__hero {
+:host-context(.dark) .feedback-panel__hero {
   border-color: rgba(148, 163, 184, 0.12);
 }
 
-.dark .feedback-panel__eyebrow,
-.dark .feedback-form-card__eyebrow {
+:host-context(.dark) .feedback-panel__eyebrow,
+:host-context(.dark) .feedback-form-card__eyebrow {
   color: #5eead4;
 }
 
-.dark .feedback-panel__title,
-.dark .criterion-card__title {
+:host-context(.dark) .feedback-panel__title,
+:host-context(.dark) .criterion-card__title {
   color: #f8fafc;
 }
 
-.dark .feedback-form-card,
-.dark .criterion-card {
+:host-context(.dark) .feedback-form-card,
+:host-context(.dark) .criterion-card {
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.9));
   border-color: rgba(148, 163, 184, 0.12);
 }
 
-.dark .criterion-card__scale {
+:host-context(.dark) .criterion-card__scale {
   color: #cbd5e1;
 }
 
-.dark .criterion-score {
+:host-context(.dark) .criterion-score {
   background: rgba(45, 212, 191, 0.14);
   color: #5eead4;
 }
 
-.dark .evaluation-success-modal__badge {
+:host-context(.dark) .evaluation-success-modal__badge {
   border-color: #0f172a;
   background: #0f172a;
 }
 
-.dark .evaluation-success-modal__eyebrow {
+:host-context(.dark) .evaluation-success-modal__eyebrow {
   color: #5eead4;
 }
 
-.dark .criterion-card ::ng-deep .mdc-slider {
+:host-context(.dark) .criterion-card ::ng-deep .mdc-slider {
   --mdc-slider-handle-color: #5eead4;
   --mdc-slider-focus-handle-color: #5eead4;
   --mdc-slider-hover-handle-color: #5eead4;
@@ -334,63 +374,9 @@
   --mdc-slider-with-tick-marks-active-container-color: rgba(15, 23, 42, 0.96);
 }
 
-.dark .criterion-card ::ng-deep .mdc-slider__thumb-knob {
+:host-context(.dark) .criterion-card ::ng-deep .mdc-slider__thumb-knob {
   border-color: #0f172a;
   box-shadow: 0 8px 18px rgba(94, 234, 212, 0.2);
-}
-
-@media (prefers-color-scheme: dark) {
-  .problem-feedback-page {
-    background:
-      radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 24rem),
-      radial-gradient(circle at top right, rgba(14, 165, 233, 0.12), transparent 24rem),
-      linear-gradient(180deg, #020617 0%, #0f172a 100%);
-  }
-
-  .feedback-panel {
-    background: rgba(15, 23, 42, 0.82);
-    border-color: rgba(148, 163, 184, 0.12);
-    box-shadow: 0 24px 60px rgba(2, 6, 23, 0.3);
-  }
-
-  .feedback-panel__hero {
-    border-color: rgba(148, 163, 184, 0.12);
-  }
-
-  .feedback-panel__eyebrow {
-    color: #5eead4;
-  }
-
-  .feedback-panel__title {
-    color: #f8fafc;
-  }
-
-  .criterion-card__scale {
-    color: #cbd5e1;
-  }
-
-  .feedback-form-card,
-  .criterion-card {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.9));
-    border-color: rgba(148, 163, 184, 0.12);
-  }
-
-  .criterion-card__title {
-    color: #f8fafc;
-  }
-
-  .feedback-form-card__eyebrow {
-    color: #5eead4;
-  }
-
-  .criterion-score {
-    background: rgba(45, 212, 191, 0.14);
-    color: #5eead4;
-  }
-
-  .feedback-scroll-cta {
-    box-shadow: 0 18px 44px rgba(2, 6, 23, 0.45);
-  }
 }
 
 @media (max-width: 768px) {

@@ -1,4 +1,4 @@
-<div class="dark:bg-slate-900 min-h-screen">
+<div class="min-h-screen overflow-x-hidden bg-gray-50 dark:bg-slate-900">
   <app-navbar
     [sideBarSmall]="true"
     [sideBarBig]="false"
@@ -1899,7 +1899,7 @@
           </div>
         </div>
       </div>
-      <div class="overflow-x-auto xl:overflow-x-visible">
+      <div class="max-w-full overflow-x-auto">
         <!-- Bulk Actions / Filters -->
         <div class="mt-2 mb-3">
           <div
@@ -2047,9 +2047,9 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto xl:overflow-x-visible">
+        <div class="user-management-table-scroll max-w-full overflow-x-auto">
           <table
-            class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+            class="min-w-[1280px] w-full text-sm text-left text-gray-500 dark:text-gray-400"
           >
             <thead
               class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
