@@ -340,6 +340,37 @@
   color: #94a3b8;
 }
 
+:host-context(.dark) .feedback-panel {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: #334155;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.32);
+}
+
+:host-context(.dark) .feedback-panel__hero {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+:host-context(.dark) .criterion-card {
+  background: #020617;
+  border-color: #334155;
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.24);
+}
+
+:host-context(.dark) .criterion-card ::ng-deep .mdc-slider {
+  --mdc-slider-handle-color: #5eead4;
+  --mdc-slider-focus-handle-color: #5eead4;
+  --mdc-slider-hover-handle-color: #5eead4;
+  --mdc-slider-active-track-color: #5eead4;
+  --mdc-slider-inactive-track-color: rgba(148, 163, 184, 0.32);
+  --mdc-slider-with-tick-marks-inactive-container-color: rgba(148, 163, 184, 0.45);
+  --mdc-slider-with-tick-marks-active-container-color: rgba(15, 23, 42, 0.98);
+}
+
+:host-context(.dark) .criterion-card ::ng-deep .mdc-slider__thumb-knob {
+  border-color: #0f172a;
+  box-shadow: 0 8px 18px rgba(94, 234, 212, 0.2);
+}
+
 :host-context(.dark) .evaluation-success-modal__badge {
   border-color: #0f172a;
   background: #0f172a;

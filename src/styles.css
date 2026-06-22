@@ -168,3 +168,39 @@
 .slp-quiet-link:hover {
   color: var(--slp-primary);
 }
+
+.dark app-problem-feedback #feedback-scores-panel .feedback-panel {
+  background: rgb(15 23 42) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(241 245 249) !important;
+}
+
+.dark app-problem-feedback #feedback-scores-panel .criterion-card {
+  background: rgb(2 6 23) !important;
+  border-color: rgb(51 65 85) !important;
+  color: rgb(241 245 249) !important;
+}
+
+.dark app-problem-feedback #feedback-scores-panel .criterion-card__title,
+.dark app-problem-feedback #feedback-scores-panel .feedback-panel__title {
+  color: rgb(248 250 252) !important;
+}
+
+.dark app-problem-feedback #feedback-scores-panel .criterion-card__scale {
+  color: rgb(203 213 225) !important;
+}
+
+.dark app-problem-feedback #feedback-scores-panel .criterion-score {
+  background: rgb(45 212 191 / 0.14) !important;
+  color: rgb(94 234 212) !important;
+}
+
+.dark app-problem-feedback #feedback-scores-panel .mdc-slider {
+  --mdc-slider-handle-color: rgb(94 234 212);
+  --mdc-slider-focus-handle-color: rgb(94 234 212);
+  --mdc-slider-hover-handle-color: rgb(94 234 212);
+  --mdc-slider-active-track-color: rgb(94 234 212);
+  --mdc-slider-inactive-track-color: rgb(148 163 184 / 0.32);
+  --mdc-slider-with-tick-marks-inactive-container-color: rgb(148 163 184 / 0.45);
+  --mdc-slider-with-tick-marks-active-container-color: rgb(15 23 42 / 0.98);
+}
