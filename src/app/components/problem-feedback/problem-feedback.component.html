@@ -40,7 +40,7 @@
       </app-solution-evaluation>
 
       <!-- Comment box and “Submit Feedback” at the bottom, after scrolling the solution -->
-      <div id="feedback-form-section" class="feedback-form-card my-6 p-5 bg-white border border-gray-200 dark:bg-slate-800 dark:border-gray-700 rounded-lg shadow-sm">
+      <div id="feedback-form-section" class="feedback-form-card my-6 p-5 bg-white border border-gray-200 dark:!bg-slate-900 dark:!border-slate-700 dark:!text-slate-100 rounded-lg shadow-sm">
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
             <p class="feedback-form-card__eyebrow">Feedback</p>
@@ -151,7 +151,7 @@
             id="strategyComment"
             rows="5"
             [(ngModel)]="comment"
-            class="mt-2 w-full rounded-lg border-2 border-gray-300 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="mt-2 w-full rounded-lg border-2 border-gray-300 p-3 dark:!bg-slate-950 dark:!border-slate-700 dark:!text-white dark:!placeholder-slate-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="How would you make the strategy better?"
           ></textarea>
           <p *ngIf="commentRequired" class="mt-2 text-xs text-rose-600">
