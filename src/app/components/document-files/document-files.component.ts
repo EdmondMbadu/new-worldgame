@@ -20,6 +20,8 @@ import { Subscription } from 'rxjs';
   styleUrl: './document-files.component.css',
 })
 export class DocumentFilesComponent implements OnInit, OnDestroy {
+  private readonly maxDocumentUploadBytes = 50 * 1024 * 1024;
+
   constructor(
     public auth: AuthService,
     private activatedRoute: ActivatedRoute,
@@ -100,7 +102,7 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
 
   /**
    * Called when user selects a file OR drops a file in the drop zone.
-   * We'll reject if >10MB or if it's a video file.
+   * We'll reject if >50MB or if it's a video file.
    * Otherwise, we'll store the MIME type, upload to Firestore, and get a download URL.
    */
   async startUpload(fileList: FileList | null) {
@@ -109,8 +111,8 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      return alert('File exceeds 10 MB limit.');
+    if (file.size > this.maxDocumentUploadBytes) {
+      return alert('File exceeds 50 MB limit.');
     }
     if (file.type.startsWith('video/')) {
       return alert('Video files are not allowed.');
@@ -131,7 +133,8 @@ export class DocumentFilesComponent implements OnInit, OnDestroy {
         fileList,
         `documents/${this.documentId}`,
         'false',
-        meta
+        meta,
+        this.maxDocumentUploadBytes
       );
       this.documentDownloadUrl = url ?? '';
     } catch (err) {

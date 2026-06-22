@@ -744,7 +744,8 @@ export class DataService implements OnInit {
     fileOrList: File | FileList,
     currentPath: string,
     upload = '',
-    metadata: Record<string, any> | undefined = undefined // <- NE
+    metadata: Record<string, any> | undefined = undefined, // <- NE
+    maxFileBytes = 10 * 1024 * 1024
   ) {
     const file: File | null =
       fileOrList instanceof File ? fileOrList : fileOrList.item(0);
@@ -759,13 +760,17 @@ export class DataService implements OnInit {
       // Proceed with file processing
       console.log('File is supported:', file);
       // Your file handling logic here
-      if (file?.size >= 10000000) {
+      if (file?.size > maxFileBytes) {
         console.log('the file is too big');
-        alert('The document is too big. It should be less than 10MB');
+        alert(
+          `The document is too big. It should be less than ${this.formatUploadLimit(
+            maxFileBytes
+          )}.`
+        );
         return;
       }
     }
-    // the file should not be larger than 10MB
+    // the file should not be larger than the configured limit
 
     const path = currentPath;
 
@@ -800,6 +805,11 @@ export class DataService implements OnInit {
   private getFileExtension(name: string): string {
     const dot = name.lastIndexOf('.');
     return dot >= 0 ? name.slice(dot).toLowerCase() : '';
+  }
+
+  private formatUploadLimit(bytes: number): string {
+    const megabytes = bytes / (1024 * 1024);
+    return `${Number.isInteger(megabytes) ? megabytes : megabytes.toFixed(1)} MB`;
   }
 
   parseDateMMDDYYYY(dateStr?: string): number {
