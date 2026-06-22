@@ -169,6 +169,11 @@
   color: var(--slp-primary);
 }
 
+.dark body,
+.dark app-root {
+  background-color: rgb(2 6 23);
+}
+
 .dark app-problem-feedback #feedback-scores-panel .feedback-panel {
   background: rgb(15 23 42) !important;
   border-color: rgb(51 65 85) !important;

@@ -1,5 +1,21 @@
+.user-management-page {
+  background-color: #f8fafc;
+}
+
+:host {
+  display: block;
+  min-width: 100%;
+  background-color: #f8fafc;
+}
+
+:host-context(.dark),
+:host-context(.dark) .user-management-page {
+  background-color: #020617;
+}
+
 .user-management-table-scroll {
   border-radius: 1rem;
+  background-color: #f8fafc;
   background:
     linear-gradient(90deg, rgba(248, 250, 252, 1), rgba(248, 250, 252, 0)),
     linear-gradient(270deg, rgba(248, 250, 252, 1), rgba(248, 250, 252, 0));
@@ -24,10 +40,25 @@
 }
 
 :host-context(.dark) .user-management-table-scroll {
+  background-color: #020617;
   background:
-    linear-gradient(90deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0)),
-    linear-gradient(270deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0));
+    linear-gradient(90deg, rgba(2, 6, 23, 1), rgba(2, 6, 23, 0)),
+    linear-gradient(270deg, rgba(2, 6, 23, 1), rgba(2, 6, 23, 0));
   scrollbar-color: #475569 transparent;
+}
+
+:host-context(.dark) .user-management-table-scroll table,
+:host-context(.dark) .user-management-table-scroll tbody,
+:host-context(.dark) .user-management-table-scroll tr,
+:host-context(.dark) .user-management-table-scroll td,
+:host-context(.dark) .user-management-table-scroll th {
+  background-color: #020617;
+}
+
+:host-context(.dark) .user-management-table-scroll thead,
+:host-context(.dark) .user-management-table-scroll thead tr,
+:host-context(.dark) .user-management-table-scroll thead th {
+  background-color: #0f172a;
 }
 
 :host-context(.dark) .user-management-table-scroll::-webkit-scrollbar-thumb {
