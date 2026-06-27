@@ -554,20 +554,19 @@ export class DataService implements OnInit {
     email: string;
 
     opinion: string; // A
-    levels: string[]; // B
-    levelsDetails: {
-      hsCourses: string;
-      collegeCourses: string;
-      professionalAreas: string;
-      otherText: string;
-    };
     improvements: string; // C
     askBuckyUseful: 'yes' | 'somewhat' | 'no' | 'not_sure'; // F
     concerns: string; // G
-    otherAgents: string; // H
+    resourcesUsed?: string[]; // G
+    resourcesOther?: string; // G
+    videoChatUse?: string; // G
+    otherAgents?: string; // Old H, kept for existing submitters
+    avatarUse?: string; // H
     prompts: string; // I
-    courseUse: string; // J
+    courseUse?: string; // Old J, kept for existing submitters
     teamBuilding: string; // K
+    enoughTime?: string; // L
+    additionalCapabilities?: string; // L
     more: string; // L
 
     uid: string | null;

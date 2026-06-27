@@ -6,27 +6,11 @@ import {
   ViewChild,
 } from '@angular/core';
 import {
-  AbstractControl,
-  ValidationErrors,
-  ValidatorFn,
-  FormArray,
   FormBuilder,
-  FormControl,
   Validators,
 } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
-import { TimeService } from 'src/app/services/time.service';
-import { TranslateService } from '@ngx-translate/core';
-
-function atLeastOneChecked(): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const fa = control as FormArray<FormControl<boolean>>;
-    const hasOne =
-      Array.isArray(fa?.controls) && fa.controls.some((c) => !!c.value);
-    return hasOne ? null : { required: true };
-  };
-}
 
 type AskBuckyUseful = 'yes' | 'somewhat' | 'no' | 'not_sure';
 
@@ -48,13 +32,35 @@ export class AskFeedbackComponent implements OnInit {
   @ViewChild('successDialog') successDialog?: ElementRef<HTMLDivElement>;
   @ViewChild('successCloseBtn') successCloseBtn?: ElementRef<HTMLButtonElement>;
 
-  // Updated levels
-  levelOptions = [
-    'High School',
-    'College',
-    'Professionals',
-    'Business',
-    'Other',
+  resourceOptions = [
+    {
+      value: 'Solutions Library',
+      labelKey: 'askFeedback.questionG.resources.solutionsLibrary',
+    },
+    {
+      value: 'Global Statistical Data and Analysis Tools',
+      labelKey: 'askFeedback.questionG.resources.globalStatisticalTools',
+    },
+    {
+      value: 'Sample Preferred States',
+      labelKey: 'askFeedback.questionG.resources.samplePreferredStates',
+    },
+    {
+      value: 'State of the World Reports',
+      labelKey: 'askFeedback.questionG.resources.stateOfWorldReports',
+    },
+    {
+      value: 'Steps I to IV AI Introductions',
+      labelKey: 'askFeedback.questionG.resources.stepsAiIntroductions',
+    },
+    {
+      value: 'Ask Bucky Prompts for Implementation',
+      labelKey: 'askFeedback.questionG.resources.askBuckyPrompts',
+    },
+    {
+      value: 'Tools for Changing the World book',
+      labelKey: 'askFeedback.questionG.resources.toolsBook',
+    },
   ];
 
   form = this.fb.group({
@@ -66,19 +72,6 @@ export class AskFeedbackComponent implements OnInit {
     // A
     opinion: ['', [Validators.required, Validators.minLength(20)]],
 
-    // B (non-nullable checkboxes created here)
-    levels: this.fb.array(
-      this.levelOptions.map(() => this.fb.nonNullable.control(false)),
-      { validators: atLeastOneChecked() }
-    ),
-
-    levelsDetails: this.fb.group({
-      hsCourses: [''],
-      collegeCourses: [''],
-      professionalAreas: [''],
-      otherText: [''],
-    }),
-
     // C
     improvements: ['', [Validators.required, Validators.minLength(5)]],
 
@@ -87,46 +80,26 @@ export class AskFeedbackComponent implements OnInit {
       validators: Validators.required,
     }),
 
-    // G, H, I, J, K, L
+    // G, H, I, K, L
     concerns: ['', Validators.required],
-    otherAgents: [''],
+    resourcesUsed: this.fb.array(
+      this.resourceOptions.map(() => this.fb.nonNullable.control(false))
+    ),
+    resourcesOther: [''],
+    videoChatUse: [''],
+    avatarUse: [''],
     prompts: [''],
-    courseUse: ['', [Validators.required, Validators.minLength(10)]],
     teamBuilding: [''],
+    enoughTime: [''],
+    additionalCapabilities: [''],
     more: ['', Validators.required],
   });
   constructor(
     public auth: AuthService,
     private data: DataService,
-    private time: TimeService,
-    private fb: FormBuilder,
-    private translate: TranslateService
+    private fb: FormBuilder
   ) {
     window.scroll(0, 0);
-    // init levels FormArray
-    // this.levelOptions.forEach(() => this.levelsFA.push(this.fb.control(false)));
-  }
-
-  getLevelLabel(option: string): string {
-    const keyMap: { [key: string]: string } = {
-      'High School': 'askFeedback.questionB.highSchool',
-      'College': 'askFeedback.questionB.college',
-      'Professionals': 'askFeedback.questionB.professionals',
-      'Business': 'askFeedback.questionB.business',
-      'Other': 'askFeedback.questionB.other'
-    };
-    const key = keyMap[option];
-    return key ? this.translate.instant(key) : option;
-  }
-
-  get levelsFA(): FormArray<FormControl<boolean>> {
-    return this.form.get('levels') as FormArray<FormControl<boolean>>;
-  }
-
-  isLevelSelected(label: string): boolean {
-    const idx = this.levelOptions.indexOf(label);
-    if (idx < 0) return false;
-    return !!this.levelsFA.at(idx)?.value;
   }
 
   // ✅ Open / Close helpers
@@ -173,10 +146,10 @@ export class AskFeedbackComponent implements OnInit {
     document.body.style.overflow = ''; // restore scroll
   }
 
-  private selectedLevels(): string[] {
+  private selectedResources(): string[] {
     const selected: string[] = [];
-    this.levelsFA.controls.forEach((ctrl, idx) => {
-      if (ctrl.value) selected.push(this.levelOptions[idx]);
+    this.form.controls.resourcesUsed.controls.forEach((ctrl, idx) => {
+      if (ctrl.value) selected.push(this.resourceOptions[idx].value);
     });
     return selected;
   }
@@ -222,20 +195,17 @@ export class AskFeedbackComponent implements OnInit {
 
       // A–L answers
       opinion: (v.opinion || '').trim(),
-      levels: this.selectedLevels(),
-      levelsDetails: {
-        hsCourses: (v.levelsDetails?.hsCourses || '').trim(),
-        collegeCourses: (v.levelsDetails?.collegeCourses || '').trim(),
-        professionalAreas: (v.levelsDetails?.professionalAreas || '').trim(),
-        otherText: (v.levelsDetails?.otherText || '').trim(),
-      },
       improvements: (v.improvements || '').trim(),
       askBuckyUseful, // 'yes' | 'somewhat' | 'no' | 'not_sure'
       concerns: (v.concerns || '').trim(),
-      otherAgents: (v.otherAgents || '').trim(),
+      resourcesUsed: this.selectedResources(),
+      resourcesOther: (v.resourcesOther || '').trim(),
+      videoChatUse: (v.videoChatUse || '').trim(),
+      avatarUse: (v.avatarUse || '').trim(),
       prompts: (v.prompts || '').trim(),
-      courseUse: (v.courseUse || '').trim(),
       teamBuilding: (v.teamBuilding || '').trim(),
+      enoughTime: (v.enoughTime || '').trim(),
+      additionalCapabilities: (v.additionalCapabilities || '').trim(),
       more: (v.more || '').trim(),
 
       // meta
@@ -251,8 +221,7 @@ export class AskFeedbackComponent implements OnInit {
       this.success = true;
       this.submitted = false;
 
-      // reset levels
-      this.levelsFA.controls.forEach((c) => c.setValue(false));
+      this.form.controls.resourcesUsed.controls.forEach((c) => c.setValue(false));
 
       // keep identity if logged in
       const identity = this.isLoggedIn
@@ -266,19 +235,16 @@ export class AskFeedbackComponent implements OnInit {
       this.form.reset({
         ...identity,
         opinion: '',
-        levelsDetails: {
-          hsCourses: '',
-          collegeCourses: '',
-          professionalAreas: '',
-          otherText: '',
-        },
         improvements: '',
         askBuckyUseful: null,
         concerns: '',
-        otherAgents: '',
+        resourcesOther: '',
+        videoChatUse: '',
+        avatarUse: '',
         prompts: '',
-        courseUse: '',
         teamBuilding: '',
+        enoughTime: '',
+        additionalCapabilities: '',
         more: '',
       });
 
@@ -316,33 +282,23 @@ export class AskFeedbackComponent implements OnInit {
     else if (f.opinion.errors?.['minlength'])
       list.push('A) Opinion must be at least 20 characters.');
 
-    // B) Levels
-    if (this.levelsFA.errors?.['required'])
-      list.push('B) Select at least one level.');
-
-    // C) Improvements
+    // B) Improvements
     if (f.improvements.errors?.['required'])
-      list.push('C) Improvements is required.');
+      list.push('B) Improvements is required.');
     else if (f.improvements.errors?.['minlength'])
-      list.push('C) Improvements must be at least 5 characters.');
+      list.push('B) Improvements must be at least 5 characters.');
 
-    // F) Ask Bucky
+    // C) Ask Bucky
     if (f.askBuckyUseful.errors?.['required'])
-      list.push('F) Please select if “Ask Bucky” was useful.');
+      list.push('C) Please select if “Ask Bucky” was useful.');
 
-    // G) Concerns
+    // D) Concerns
     if (f.concerns.errors?.['required'])
-      list.push('G) Problems/issues is required.');
+      list.push('D) Problems/issues is required.');
 
-    // J) Course usefulness
-    if (f.courseUse.errors?.['required'])
-      list.push('J) Course usefulness is required.');
-    else if (f.courseUse.errors?.['minlength'])
-      list.push('J) Course usefulness must be at least 10 characters.');
-
-    // L) Anything else
+    // H) Anything else
     if (f.more.errors?.['required'])
-      list.push('L) What else would you like to add? is required.');
+      list.push('H) What else would you like to add? is required.');
 
     return list;
   }

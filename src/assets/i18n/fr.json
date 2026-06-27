@@ -1160,24 +1160,10 @@
     "emailRequired": "Un courriel valide est requis.",
     "questionA": {
       "title": "Que pensez-vous de NewWorld Game (NWG) ?",
-      "description": "Avez-vous aimé ? Aidera-t-il à développer des solutions aux problèmes mondiaux/locaux — y compris développer des entreprises, produits ou services qui soutiennent les ODD ? Qu'en pensez-vous d'autre ?",
+      "description": "Avez-vous aimé ? Peut-il aider à développer des solutions aux problèmes mondiaux/locaux — y compris développer des entreprises, produits ou services qui soutiennent les ODD ? Qu'en pensez-vous d'autre ?",
       "placeholder": "Partagez vos pensées…",
       "minLength": "Veuillez ajouter au moins 20 caractères.",
       "chars": "caractères"
-    },
-    "questionB": {
-      "title": "Pour quel niveau d'âge/expertise NWG fonctionnera-t-il ?",
-      "description": "Cochez toutes les cases qui s'appliquent et (optionnellement) ajoutez des détails.",
-      "selectAtLeastOne": "Veuillez sélectionner au moins un niveau.",
-      "highSchool": "École secondaire",
-      "college": "Université",
-      "professionals": "Professionnels",
-      "business": "Entreprise",
-      "other": "Autre",
-      "highSchoolLabel": "École secondaire — quels domaines/cours ?",
-      "collegeLabel": "Université — quels domaines/cours ?",
-      "professionalsLabel": "Professionnels — quel domaine ?",
-      "otherLabel": "Autre — veuillez préciser"
     },
     "questionC": {
       "title": "Que souhaiteriez-vous ajouter à NWG pour le rendre meilleur, plus utile, plus facile à utiliser ?",
@@ -1195,21 +1181,29 @@
     "questionG": {
       "title": "Y a-t-il des problèmes ou des enjeux pour lesquels vous pourriez utiliser NWG pour développer des solutions ?",
       "placeholder": "Décrivez brièvement les problèmes/enjeux…",
-      "required": "Ce champ est requis."
+      "required": "Ce champ est requis.",
+      "resourcesTitle": "Avez-vous utilisé l'un des éléments suivants ?",
+      "resources": {
+        "solutionsLibrary": "Solutions Library",
+        "globalStatisticalTools": "Global Statistical Data and Analysis Tools",
+        "samplePreferredStates": "Sample Preferred States",
+        "stateOfWorldReports": "State of the World Reports",
+        "stepsAiIntroductions": "Steps I to IV AI Introductions",
+        "askBuckyPrompts": "Ask Bucky Prompts for Implementation",
+        "toolsBook": "Tools for Changing the World book"
+      },
+      "resourcesPlaceholder": "Autres outils ou ressources NWG que vous avez utilisés, et ce que vous en avez appris…",
+      "videoChatTitle": "Avez-vous utilisé la salle de visioconférence de votre équipe ? Si oui, comment l'avez-vous utilisée ?",
+      "videoChatPlaceholder": "Dites-nous si vous avez utilisé la salle de visioconférence et comment elle a aidé ou non…"
     },
     "questionH": {
-      "title": "Avez-vous utilisé d'autres agents IA ? Pour quoi ? C'était utile ?",
-      "placeholder": "Quel(s) agent(s), comment vous les avez utilisés, et si cela a aidé…"
+      "title": "Combien d'avatars IA avez-vous utilisés ? Comment cela s'est-il passé ? Utile ? Qu'avez-vous appris ?",
+      "placeholder": "Nombre d'avatars IA utilisés, comment vous les avez utilisés, ce qui a été utile, et ce que vous avez appris…"
     },
     "questionI": {
       "title": "Invites que vous avez utilisées ou créées",
       "description": "Avez-vous utilisé des invites suggérées par Jim Walker ou <em>Ask Bucky Prompts</em> (Manuel d'utilisation) ? Avez-vous créé de nouvelles invites utiles ? Veuillez les partager pour que nous puissions aider d'autres utilisateurs.",
       "placeholder": "Collez ou écrivez les invites qui ont fonctionné pour vous…"
-    },
-    "questionJ": {
-      "title": "Que rendrait NWG plus utile dans votre cours ?",
-      "placeholder": "Pensez à ce qui aiderait vos pairs (école secondaire, université, chercheurs, organisations, etc.)…",
-      "minLength": "Veuillez ajouter au moins 10 caractères."
     },
     "questionK": {
       "title": "Qu'est-ce qui pourrait améliorer la constitution d'équipes et le fonctionnement global des équipes ?",
@@ -1217,6 +1211,11 @@
     },
     "questionL": {
       "title": "Qu'y a-t-il d'autre que vous aimeriez ajouter ?",
+      "enoughTimeTitle": "Avez-vous eu assez de temps pour travailler sur votre solution ?",
+      "enoughTimePlaceholder": "Dites-nous si le temps disponible était suffisant et ce qui aurait aidé…",
+      "capabilitiesTitle": "Quelles capacités ou fonctions NWG supplémentaires seraient utiles à votre travail ?",
+      "capabilitiesPlaceholder": "Capacités, fonctions, outils, données, flux de travail ou soutien qui aideraient…",
+      "moreTitle": "Y a-t-il autre chose que vous aimeriez ajouter ?",
       "placeholder": "Tout ce que nous avons manqué…",
       "required": "Ce champ est requis."
     },

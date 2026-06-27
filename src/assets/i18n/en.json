@@ -1411,24 +1411,10 @@
     "emailRequired": "Valid email is required.",
     "questionA": {
       "title": "What do you think of NewWorld Game (NWG)?",
-      "description": "Did you like it? Will it help develop solutions to global/local problems—including developing businesses, products, or services that support the SDGs? What else do you think?",
+      "description": "Did you like it? Can it help develop solutions to global/local problems—including developing businesses, products, or services that support the SDGs? What else do you think?",
       "placeholder": "Share your thoughts…",
       "minLength": "Please add at least 20 characters.",
       "chars": "chars"
-    },
-    "questionB": {
-      "title": "What age/expertise level will NWG work for?",
-      "description": "Check all that apply and (optionally) add details.",
-      "selectAtLeastOne": "Please select at least one level.",
-      "highSchool": "High School",
-      "college": "College",
-      "professionals": "Professionals",
-      "business": "Business",
-      "other": "Other",
-      "highSchoolLabel": "High School — what areas/courses?",
-      "collegeLabel": "College — what areas/courses?",
-      "professionalsLabel": "Professionals — what area?",
-      "otherLabel": "Other — please specify"
     },
     "questionC": {
       "title": "What would you add to NWG to make it better, more useful, easier to use?",
@@ -1446,21 +1432,29 @@
     "questionG": {
       "title": "Are there problems or issues you could use NWG for developing solutions?",
       "placeholder": "Briefly describe the problems/issues…",
-      "required": "This field is required."
+      "required": "This field is required.",
+      "resourcesTitle": "Did you use any of the following?",
+      "resources": {
+        "solutionsLibrary": "Solutions Library",
+        "globalStatisticalTools": "Global Statistical Data and Analysis Tools",
+        "samplePreferredStates": "Sample Preferred States",
+        "stateOfWorldReports": "State of the World Reports",
+        "stepsAiIntroductions": "Steps I to IV AI Introductions",
+        "askBuckyPrompts": "Ask Bucky Prompts for Implementation",
+        "toolsBook": "Tools for Changing the World book"
+      },
+      "resourcesPlaceholder": "Other NWG tools or resources you used, plus anything useful you learned from them…",
+      "videoChatTitle": "Did you use your team’s video chat room? If so, how did you use it?",
+      "videoChatPlaceholder": "Tell us whether you used the video chat room and how it helped or did not help…"
     },
     "questionH": {
-      "title": "Did you use any other AI agents? What for? Was it useful?",
-      "placeholder": "Which agent(s), how you used them, and whether it helped…"
+      "title": "How many AI avatars did you use? How did it go? Useful? What did you learn?",
+      "placeholder": "Number of AI avatars used, how you used them, what was useful, and what you learned…"
     },
     "questionI": {
       "title": "Prompts you used or created",
       "description": "Did you use prompts suggested by Jim Walker or <em>Ask Bucky Prompts</em> (Operating Manual)? Did you create new, useful prompts? Please share so we can help other users.",
       "placeholder": "Paste or write the prompts that worked for you…"
-    },
-    "questionJ": {
-      "title": "What would make NWG more useful in your course?",
-      "placeholder": "Think of what would help your peers (HS, college, researchers, orgs, etc.)…",
-      "minLength": "Please add at least 10 characters."
     },
     "questionK": {
       "title": "What could improve team building and overall functioning of Teams?",
@@ -1468,7 +1462,12 @@
     },
     "questionL": {
       "title": "What else would you like to add?",
-      "placeholder": "Anything we missed…",
+      "enoughTimeTitle": "Did you have enough time to work on your solution?",
+      "enoughTimePlaceholder": "Tell us whether the time available was enough and what would have helped…",
+      "capabilitiesTitle": "What additional NWG capabilities or functions would be helpful to your work?",
+      "capabilitiesPlaceholder": "Capabilities, functions, tools, data, workflows, or support that would help…",
+      "moreTitle": "Anything else you would like to add?",
+      "placeholder": "Anything else we missed…",
       "required": "This field is required."
     },
     "submit": {

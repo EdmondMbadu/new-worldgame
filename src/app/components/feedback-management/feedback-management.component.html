@@ -270,11 +270,11 @@
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.opinion || '—' }}</p>
                       </div>
 
-                      <!-- B) Levels + details -->
-                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                      <!-- Legacy levels + details -->
+                      <div *ngIf="r.levels?.length || r.levelsDetails" class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">B</span>
-                          <h4 class="font-semibold text-slate-900 dark:text-white">Levels & details</h4>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/10 text-slate-700 dark:text-slate-300 ring-1 ring-slate-500/30 text-xs font-bold">Old</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Old levels & details</h4>
                         </div>
                         <div class="flex flex-wrap gap-2 mb-3">
                           <span *ngFor="let lv of r.levels"
@@ -294,19 +294,19 @@
                         </div>
                       </div>
 
-                      <!-- C) Improvements -->
+                      <!-- B) Improvements -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">C</span>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">B</span>
                           <h4 class="font-semibold text-slate-900 dark:text-white">Improvements</h4>
                         </div>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.improvements || '—' }}</p>
                       </div>
 
-                      <!-- F) Ask Bucky useful? -->
+                      <!-- C) Ask Bucky useful? -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">F</span>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">C</span>
                           <h4 class="font-semibold text-slate-900 dark:text-white">“Ask Bucky” useful?</h4>
                         </div>
                         <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -315,57 +315,76 @@
                         </span>
                       </div>
 
-                      <!-- G) Problems / issues to use NWG for -->
+                      <!-- D) Problems, resources, and video chat -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">G</span>
-                          <h4 class="font-semibold text-slate-900 dark:text-white">Problems / issues for NWG</h4>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">D</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Problems, NWG resources, and video chat</h4>
                         </div>
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Problems / issues</p>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.concerns || '—' }}</p>
-                      </div>
-
-                      <!-- H) Other AI agents -->
-                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
-                        <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">H</span>
-                          <h4 class="font-semibold text-slate-900 dark:text-white">Other AI agents used</h4>
+                        <p class="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Resources used</p>
+                        <div class="flex flex-wrap gap-2">
+                          <span *ngFor="let resource of r.resourcesUsed"
+                                class="inline-flex items-center rounded-full border px-3 py-1 text-xs
+                                       border-slate-300 bg-white text-slate-700 shadow-sm
+                                       dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200">
+                            {{ resource }}
+                          </span>
+                          <span *ngIf="!r.resourcesUsed?.length" class="text-sm text-slate-500 dark:text-slate-400">—</span>
                         </div>
-                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.otherAgents || '—' }}</p>
+                        <p *ngIf="r.resourcesOther" class="mt-2 whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.resourcesOther }}</p>
+                        <p class="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Team video chat room</p>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.videoChatUse || '—' }}</p>
                       </div>
 
-                      <!-- I) Prompts -->
+                      <!-- E) AI avatars -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">I</span>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">E</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">AI avatars used</h4>
+                        </div>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.avatarUse || r.otherAgents || '—' }}</p>
+                      </div>
+
+                      <!-- F) Prompts -->
+                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">F</span>
                           <h4 class="font-semibold text-slate-900 dark:text-white">Prompts used/created</h4>
                         </div>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.prompts || '—' }}</p>
                       </div>
 
-                      <!-- J) Course usefulness -->
-                      <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                      <!-- Legacy course usefulness -->
+                      <div *ngIf="r.courseUse" class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">J</span>
-                          <h4 class="font-semibold text-slate-900 dark:text-white">Course usefulness</h4>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-500/10 text-slate-700 dark:text-slate-300 ring-1 ring-slate-500/30 text-xs font-bold">Old</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Old course usefulness</h4>
                         </div>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.courseUse || '—' }}</p>
                       </div>
 
-                      <!-- K) Team building -->
+                      <!-- G) Team building -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">K</span>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">G</span>
                           <h4 class="font-semibold text-slate-900 dark:text-white">Team building & functioning</h4>
                         </div>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.teamBuilding || '—' }}</p>
                       </div>
 
-                      <!-- L) More -->
+                      <!-- H) More -->
                       <div class="rounded-2xl p-5 border border-slate-200 dark:border-slate-700 lg:col-span-2">
                         <div class="flex items-center gap-2 mb-2">
-                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">L</span>
-                          <h4 class="font-semibold text-slate-900 dark:text-white">Anything else</h4>
+                          <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 text-xs font-bold">H</span>
+                          <h4 class="font-semibold text-slate-900 dark:text-white">Time, capabilities, and anything else</h4>
                         </div>
+                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Enough time?</p>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.enoughTime || '—' }}</p>
+                        <p class="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Additional NWG capabilities/functions</p>
+                        <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.additionalCapabilities || '—' }}</p>
+                        <p class="mt-4 mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Anything else</p>
                         <p class="whitespace-pre-line text-sm text-slate-700 dark:text-slate-300">{{ r.more || '—' }}</p>
 
                         <div class="mt-4 flex flex-wrap gap-3">

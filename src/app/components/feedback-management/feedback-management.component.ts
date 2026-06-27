@@ -23,17 +23,23 @@ export interface FeedbackDoc {
   email: string;
 
   opinion: string; // A
-  levels: string[]; // B
+  levels?: string[]; // Old B, kept for existing records
   levelsDetails?: LevelsDetails; // B details
 
   improvements: string; // C
   prompts: string; // I (letter kept from form)
-  courseUse: string; // J
+  courseUse?: string; // Old J, kept for existing records
 
   askBuckyUseful?: AskBuckyUseful; // F
   concerns?: string; // G
-  otherAgents?: string; // H
+  resourcesUsed?: string[]; // G
+  resourcesOther?: string; // G
+  videoChatUse?: string; // G
+  otherAgents?: string; // Old H, kept for existing records
+  avatarUse?: string; // H
   teamBuilding?: string; // K
+  enoughTime?: string; // L
+  additionalCapabilities?: string; // L
   more?: string; // L
 
   uid?: string | null;
@@ -197,8 +203,13 @@ export class FeedbackManagementComponent implements OnInit {
         i.prompts,
         i.courseUse,
         i.concerns,
+        i.resourcesOther,
+        i.videoChatUse,
         i.otherAgents,
+        i.avatarUse,
         i.teamBuilding,
+        i.enoughTime,
+        i.additionalCapabilities,
         i.more,
         i.howDoing,
         i.solutionName,
@@ -208,6 +219,7 @@ export class FeedbackManagementComponent implements OnInit {
         i.feedbackCategory === 'email_feedback' ? 'email feedback' : '',
         levelDetailsBlob,
         ...(i.levels || []),
+        ...(i.resourcesUsed || []),
         i.askBuckyUseful ? this.formatBucky(i.askBuckyUseful) : '',
       ]
         .join(' ')
@@ -297,7 +309,7 @@ export class FeedbackManagementComponent implements OnInit {
       : 'bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200';
   }
 
-  // --- CSV export (A–L) ---
+  // --- CSV export (A-H) ---
   downloadCsv(): void {
     const esc = (s: any) => `"${String(s ?? '').replace(/"/g, '""')}"`;
     const rows = this.filtered.map((r) =>
@@ -316,10 +328,15 @@ export class FeedbackManagementComponent implements OnInit {
         r.improvements,
         this.formatBucky(r.askBuckyUseful),
         r.concerns,
-        r.otherAgents,
+        (r.resourcesUsed || []).join('; '),
+        r.resourcesOther,
+        r.videoChatUse,
+        r.avatarUse || r.otherAgents,
         r.prompts,
         r.courseUse,
         r.teamBuilding,
+        r.enoughTime,
+        r.additionalCapabilities,
         r.more,
         r.howDoing,
         r.solutionName,
@@ -338,19 +355,24 @@ export class FeedbackManagementComponent implements OnInit {
       'Status',
       'Submitted',
       'A_Opinion',
-      'B_Levels',
-      'B_HS_Courses',
-      'B_College_Courses',
-      'B_Professional_Areas',
-      'B_Other',
-      'C_Improvements',
-      'F_AskBuckyUseful',
-      'G_Concerns',
-      'H_OtherAgents',
-      'I_Prompts',
-      'J_CourseUse',
-      'K_TeamBuilding',
-      'L_More',
+      'Legacy_Levels',
+      'Legacy_HS_Courses',
+      'Legacy_College_Courses',
+      'Legacy_Professional_Areas',
+      'Legacy_Other',
+      'B_Improvements',
+      'C_AskBuckyUseful',
+      'D_Concerns',
+      'D_ResourcesUsed',
+      'D_ResourcesOther',
+      'D_VideoChatUse',
+      'E_AvatarUse',
+      'F_Prompts',
+      'Legacy_CourseUse',
+      'G_TeamBuilding',
+      'H_EnoughTime',
+      'H_AdditionalCapabilities',
+      'H_More',
       'Email_HowDoing',
       'Email_SolutionName',
       'Email_WhatToAdd',
@@ -418,35 +440,46 @@ Type: ${this.feedbackTypeLabel(r)}
 A) Opinion:
 ${r.opinion || '—'}
 
-B) Levels:
+Legacy levels:
 ${(r.levels || []).join(', ') || '—'}
-B) Details:
+Legacy level details:
 HS: ${r.levelsDetails?.hsCourses || '—'}
 College: ${r.levelsDetails?.collegeCourses || '—'}
 Professional: ${r.levelsDetails?.professionalAreas || '—'}
 Other: ${r.levelsDetails?.otherText || '—'}
 
-C) Improvements:
+B) Improvements:
 ${r.improvements || '—'}
 
-F) Ask Bucky useful?: ${this.formatBucky(r.askBuckyUseful)}
+C) Ask Bucky useful?: ${this.formatBucky(r.askBuckyUseful)}
 
-G) Problems / issues:
+D) Problems / issues:
 ${r.concerns || '—'}
 
-H) Other AI agents:
-${r.otherAgents || '—'}
+D) NWG resources used:
+${(r.resourcesUsed || []).join(', ') || '—'}
+D) Other resource notes:
+${r.resourcesOther || '—'}
+D) Team video chat room:
+${r.videoChatUse || '—'}
 
-I) Prompts:
+E) AI avatars:
+${r.avatarUse || r.otherAgents || '—'}
+
+F) Prompts:
 ${r.prompts || '—'}
 
-J) Course usefulness:
+Legacy course usefulness:
 ${r.courseUse || '—'}
 
-K) Team building:
+G) Team building:
 ${r.teamBuilding || '—'}
 
-L) Anything else:
+H) Enough time:
+${r.enoughTime || '—'}
+H) Additional NWG capabilities/functions:
+${r.additionalCapabilities || '—'}
+H) Anything else:
 ${r.more || '—'}
 `;
     this.copyToClipboard(txt);

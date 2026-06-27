@@ -115,67 +115,10 @@
               </div>
             </section>
 
-            <!-- B) Levels + details -->
-            <section id="qB" class="space-y-4">
+            <!-- B) Improvements (required) -->
+            <section id="qB" class="space-y-3">
               <div class="flex items-center gap-3">
                 <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">B</span>
-                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  {{ "askFeedback.questionB.title" | translate }} <span class="text-rose-600">*</span>
-                </h2>
-              </div>
-              <p class="text-sm text-slate-600 dark:text-slate-400">{{ "askFeedback.questionB.description" | translate }}</p>
-
-              <div formArrayName="levels" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label *ngFor="let opt of levelOptions; let i = index"
-                       class="inline-flex items-center gap-3 rounded-2xl border px-4 py-3 text-base
-                              border-slate-200 bg-white text-slate-800 shadow-sm
-                              dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer select-none">
-                  <input type="checkbox" [formControlName]="i" class="accent-sky-500 h-5 w-5">
-                  <span>{{ getLevelLabel(opt) }}</span>
-                </label>
-              </div>
-              <p *ngIf="(levelsFA.touched || submitted) && levelsFA.invalid" class="text-xs text-rose-600">{{ "askFeedback.questionB.selectAtLeastOne" | translate }}</p>
-
-              <!-- Details (conditional) -->
-              <div formGroupName="levelsDetails" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div *ngIf="isLevelSelected('High School')">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-                    {{ "askFeedback.questionB.highSchoolLabel" | translate }}
-                  </label>
-                  <input type="text" formControlName="hsCourses"
-                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
-                </div>
-
-                <div *ngIf="isLevelSelected('College')">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-                    {{ "askFeedback.questionB.collegeLabel" | translate }}
-                  </label>
-                  <input type="text" formControlName="collegeCourses"
-                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
-                </div>
-
-                <div *ngIf="isLevelSelected('Professionals')">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">
-                    {{ "askFeedback.questionB.professionalsLabel" | translate }}
-                  </label>
-                  <input type="text" formControlName="professionalAreas"
-                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 text-base"/>
-                </div>
-
-                <div *ngIf="isLevelSelected('Other')">
-                  <label class="block text-sm font-medium text-slate-800 dark:text-white mb-1">
-                    {{ "askFeedback.questionB.otherLabel" | translate }}
-                  </label>
-                  <input type="text" formControlName="otherText"
-                         class="w-full dark:text-white rounded-xl border border-slate-200/80 dark:border-slate-700/70 bg-white dark:bg-slate-800/80 px-3 py-3 "/>
-                </div>
-              </div>
-            </section>
-
-            <!-- C) Improvements (required) -->
-            <section id="qC" class="space-y-3">
-              <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">C</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionC.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
@@ -190,10 +133,10 @@
                  class="text-xs text-rose-600">{{ "askFeedback.questionC.minLength" | translate }}</p>
             </section>
 
-            <!-- NEW: F) Ask Bucky useful? -->
-            <section id="qF" class="space-y-3">
+            <!-- C) Ask Bucky useful? -->
+            <section id="qC" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">F</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">C</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionF.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
@@ -224,10 +167,10 @@
                  class="text-xs text-rose-600">{{ "askFeedback.questionF.selectOne" | translate }}</p>
             </section>
 
-            <!-- NEW: G) Problems you could use NWG for -->
-            <section id="qG" class="space-y-3">
+            <!-- D) Problems, resources, and video chat -->
+            <section id="qD" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">G</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">D</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionG.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
@@ -240,17 +183,50 @@
                         [placeholder]="'askFeedback.questionG.placeholder' | translate"></textarea>
               <p *ngIf="(form.controls.concerns.touched || submitted) && form.controls.concerns.invalid"
                  class="text-xs text-rose-600">{{ "askFeedback.questionG.required" | translate }}</p>
+
+              <div class="space-y-3 pt-4">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+                  {{ "askFeedback.questionG.resourcesTitle" | translate }}
+                </h3>
+                <div formArrayName="resourcesUsed" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <label *ngFor="let opt of resourceOptions; let i = index"
+                         class="inline-flex items-center gap-3 rounded-2xl border px-4 py-3 text-base
+                                border-slate-200 bg-white text-slate-800 shadow-sm
+                                dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer select-none">
+                    <input type="checkbox" [formControlName]="i" class="accent-sky-500 h-5 w-5">
+                    <span>{{ opt.labelKey | translate }}</span>
+                  </label>
+                </div>
+                <textarea formControlName="resourcesOther" rows="3"
+                          class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                                 bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                                 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                                 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                          [placeholder]="'askFeedback.questionG.resourcesPlaceholder' | translate"></textarea>
+              </div>
+
+              <div class="space-y-3 pt-4">
+                <h3 class="text-base font-semibold text-slate-900 dark:text-white">
+                  {{ "askFeedback.questionG.videoChatTitle" | translate }}
+                </h3>
+                <textarea formControlName="videoChatUse" rows="4"
+                          class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                                 bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                                 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                                 focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                          [placeholder]="'askFeedback.questionG.videoChatPlaceholder' | translate"></textarea>
+              </div>
             </section>
 
-            <!-- NEW: H) Other AI agents -->
-            <section id="qH" class="space-y-3">
+            <!-- E) AI avatars -->
+            <section id="qE" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">H</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">E</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionH.title" | translate }}
                 </h2>
               </div>
-              <textarea formControlName="otherAgents" rows="4"
+              <textarea formControlName="avatarUse" rows="4"
                         class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
                                text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
@@ -258,10 +234,10 @@
                         [placeholder]="'askFeedback.questionH.placeholder' | translate"></textarea>
             </section>
 
-            <!-- D) Prompts (kept) -->
-            <section id="qD" class="space-y-3">
+            <!-- F) Prompts -->
+            <section id="qF" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">I</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">F</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionI.title" | translate }}
                 </h2>
@@ -276,28 +252,10 @@
                         [placeholder]="'askFeedback.questionI.placeholder' | translate"></textarea>
             </section>
 
-            <!-- E) Course usefulness (kept, required) -->
-            <section id="qE" class="space-y-3">
+            <!-- G) Team building -->
+            <section id="qG" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">J</span>
-                <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
-                  {{ "askFeedback.questionJ.title" | translate }} <span class="text-rose-600">*</span>
-                </h2>
-              </div>
-              <textarea formControlName="courseUse" rows="5"
-                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
-                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
-                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
-                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
-                        [placeholder]="'askFeedback.questionJ.placeholder' | translate"></textarea>
-              <p *ngIf="(form.controls.courseUse.touched || submitted) && form.controls.courseUse.invalid"
-                 class="text-xs text-rose-600">{{ "askFeedback.questionJ.minLength" | translate }}</p>
-            </section>
-
-            <!-- NEW: K) Team building -->
-            <section id="qK" class="space-y-3">
-              <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">K</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">G</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionK.title" | translate }}
                 </h2>
@@ -310,14 +268,37 @@
                         [placeholder]="'askFeedback.questionK.placeholder' | translate"></textarea>
             </section>
 
-            <!-- NEW: L) Anything else (required) -->
-            <section id="qL" class="space-y-3">
+            <!-- H) Additional questions -->
+            <section id="qH" class="space-y-3">
               <div class="flex items-center gap-3">
-                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">L</span>
+                <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 font-semibold">H</span>
                 <h2 class="text-lg md:text-xl font-semibold text-slate-900 dark:text-white">
                   {{ "askFeedback.questionL.title" | translate }} <span class="text-rose-600">*</span>
                 </h2>
               </div>
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                {{ "askFeedback.questionL.enoughTimeTitle" | translate }}
+              </label>
+              <textarea formControlName="enoughTime" rows="3"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        [placeholder]="'askFeedback.questionL.enoughTimePlaceholder' | translate"></textarea>
+
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                {{ "askFeedback.questionL.capabilitiesTitle" | translate }}
+              </label>
+              <textarea formControlName="additionalCapabilities" rows="4"
+                        class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
+                               bg-white dark:bg-slate-800/80 px-4 py-4 text-base
+                               text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500
+                               focus:outline-none focus:ring-2 focus:ring-sky-400/70 dark:focus:ring-sky-400/60"
+                        [placeholder]="'askFeedback.questionL.capabilitiesPlaceholder' | translate"></textarea>
+
+              <label class="block text-sm font-medium text-slate-800 dark:text-slate-200">
+                {{ "askFeedback.questionL.moreTitle" | translate }}
+              </label>
               <textarea formControlName="more" rows="4"
                         class="w-full rounded-2xl border border-slate-200/80 dark:border-slate-700/70
                                bg-white dark:bg-slate-800/80 px-4 py-4 text-base
