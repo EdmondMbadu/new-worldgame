@@ -3,6 +3,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
+import { SiteSettingsService } from 'src/app/services/site-settings.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
@@ -39,12 +40,18 @@ export class ManagementGsl2025Component implements OnInit {
   dropdownOpen = false;
   summaryByFocusTopic: { [key: string]: number } = {};
   removingRegistrationKey: string | null = null;
+  gsl2026BannerEnabled = true;
+  gsl2026BannerLoading = true;
+  gsl2026BannerSaving = false;
+  gsl2026BannerSaveError = '';
+  gsl2026BannerSaveMessage = '';
   constructor(
     public auth: AuthService,
     private data: DataService,
     private router: Router,
     private fns: AngularFireFunctions,
-    private time: TimeService
+    private time: TimeService,
+    private siteSettings: SiteSettingsService
   ) {}
 
   ngOnInit(): void {
@@ -70,6 +77,62 @@ export class ManagementGsl2025Component implements OnInit {
         this.refreshRegistrationData();
       }
     });
+
+    this.subscribeGsl2026BannerSetting();
+  }
+
+  private subscribeGsl2026BannerSetting(): void {
+    this.siteSettings.watchGsl2026BannerConfig().subscribe({
+      next: (config) => {
+        this.gsl2026BannerEnabled = config.enabled;
+        this.gsl2026BannerLoading = false;
+      },
+      error: (error) => {
+        console.error('Unable to load GSL 2026 banner setting', error);
+        this.gsl2026BannerLoading = false;
+        this.gsl2026BannerSaveError =
+          'Unable to load the Global Solutions Lab banner setting.';
+      },
+    });
+  }
+
+  async saveGsl2026BannerEnabled(enabled: boolean): Promise<void> {
+    if (this.gsl2026BannerSaving) return;
+
+    this.gsl2026BannerEnabled = enabled;
+    this.gsl2026BannerSaving = true;
+    this.gsl2026BannerSaveError = '';
+    this.gsl2026BannerSaveMessage = '';
+
+    try {
+      const authorName = `${this.auth.currentUser?.firstName || ''} ${
+        this.auth.currentUser?.lastName || ''
+      }`.trim();
+      const email = this.normalizeEmail(this.auth.currentUser?.email);
+
+      await this.siteSettings.setGsl2026BannerEnabled(enabled, {
+        uid: this.auth.currentUser?.uid || '',
+        email,
+        name: authorName || email,
+      });
+
+      this.gsl2026BannerSaveMessage = enabled
+        ? 'Global Solutions Lab 2026 banner is visible.'
+        : 'Global Solutions Lab 2026 banner is hidden.';
+    } catch (error) {
+      console.error('Unable to save GSL 2026 banner setting', error);
+      this.gsl2026BannerEnabled = !enabled;
+      this.gsl2026BannerSaveError =
+        'Unable to save the Global Solutions Lab banner setting right now.';
+    } finally {
+      this.gsl2026BannerSaving = false;
+    }
+  }
+
+  private normalizeEmail(value: unknown): string {
+    return String(value || '')
+      .trim()
+      .toLowerCase();
   }
 
   // Filter results based on search input

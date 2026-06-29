@@ -29,6 +29,7 @@ import { SchoolService } from 'src/app/services/school.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { environment } from 'environments/environments';
 import { DirectMessageService } from 'src/app/services/direct-message.service';
+import { SiteSettingsService } from 'src/app/services/site-settings.service';
 
 interface NavbarSearchItem {
   type: 'solution' | 'person';
@@ -127,7 +128,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private schoolService: SchoolService,
     private languageService: LanguageService,
     private discussionNotifications: DiscussionNotificationsService,
-    private directMessages: DirectMessageService
+    private directMessages: DirectMessageService,
+    private siteSettings: SiteSettingsService
   ) {}
 
   @Input() hoveredHomePath: string = ``;
@@ -146,6 +148,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   beta: boolean = true;
   lab: boolean = true;
   gsl2026: boolean = true;
+  globalSolutionsLabBannerEnabled: boolean = true;
   solutionDropDown = false;
   guideDropDown = false;
   @Input() showMoreOrLess!: boolean;
@@ -169,6 +172,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((event) => {
         this.currentLanguage = event.lang;
+      });
+
+    this.siteSettings
+      .watchGsl2026BannerConfig()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((config) => {
+        this.globalSolutionsLabBannerEnabled = config.enabled;
       });
 
     // this.applyTheme();
