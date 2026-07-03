@@ -11,15 +11,15 @@
       [path]="'home'" 
       >
     </app-navbar>
-    <section class="py-8 mt-14">
-    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+<section class="mt-14 py-8">
+    <div class="mx-auto max-w-7xl px-3 sm:px-4 lg:px-8">
 
       <!-- Title -->
       <div class="text-center mb-10">
-        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white">
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
           Past Tournaments
         </h1>
-        <p class="mt-2 text-gray-500 dark:text-gray-400 italic">
+        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400 sm:text-base">
           Explore completed challenges and winning ideas
         </p>
       </div>
@@ -53,21 +53,18 @@
           <img [src]="coverImage(t)" alt="cover"
                class="w-full md:w-1/3 object-cover">
 
-          <div class="p-6 flex flex-col justify-between w-full">
+          <div class="flex w-full flex-col justify-between p-4 sm:p-6">
             <div>
-              <h2 class="text-2xl font-semibold italic
-                         text-gray-900 dark:text-white">
+              <h2 class="text-xl font-semibold italic text-gray-900 dark:text-white sm:text-2xl">
                 {{ t.title }}
               </h2>
 
-              <p class="mt-2 text-gray-700 dark:text-gray-300 text-base
-                        line-clamp-3">
+              <p class="mt-2 line-clamp-3 text-sm text-gray-700 dark:text-gray-300 sm:text-base">
                 {{ t.subtTitle || t.instruction }}
               </p>
             </div>
 
-            <div class="mt-4 flex flex-wrap gap-8 text-sm
-                        text-gray-700 dark:text-gray-300">
+            <div class="mt-4 flex flex-wrap gap-3 text-sm text-gray-700 dark:text-gray-300 sm:gap-8">
               <div>Participants:
                 <span class="font-semibold">{{ participantsCount(t) }}</span>
               </div>
@@ -89,6 +86,5 @@
     </div>
   </section>
 </div>
-
 
 

@@ -12,10 +12,10 @@
 ></app-navbar>
 
 <!-- Dark background container -->
-<div class="dark:bg-slate-900 min-h-screen min-w-max">
+<div class="min-h-screen overflow-x-hidden dark:bg-slate-900">
 
   <!-- Centered content -->
-  <div class="flex flex-col items-center p-4 mt-20">
+  <div class="mt-20 flex flex-col items-center p-3 sm:p-4">
     <div class="w-full max-w-5xl flex justify-center sm:justify-end mb-4">
       <a
         [routerLink]="['/dashboard', solutionId]"
@@ -84,15 +84,17 @@
     </div>
 
     <!-- Canvas -->
-    <canvas
-      #canvas
-      class="border border-gray-300 rounded shadow bg-white"
-      (mousedown)="startDrawing($event)"
-      (mousemove)="draw($event)"
-      (mouseup)="endDrawing()"
-      (mouseleave)="endDrawing()"
-    >
-      Your browser does not support HTML canvas.
-    </canvas>
+    <div class="w-full overflow-x-auto pb-3">
+      <canvas
+        #canvas
+        class="mx-auto rounded border border-gray-300 bg-white shadow"
+        (mousedown)="startDrawing($event)"
+        (mousemove)="draw($event)"
+        (mouseup)="endDrawing()"
+        (mouseleave)="endDrawing()"
+      >
+        Your browser does not support HTML canvas.
+      </canvas>
+    </div>
   </div>
 </div>

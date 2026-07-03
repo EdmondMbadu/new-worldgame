@@ -1,20 +1,20 @@
 <nav
-  class="w-full p-4 fixed top-0 left-0 right-0 bg-white dark:bg-slate-900 z-50"
+  class="w-full px-3 py-3 sm:p-4 fixed top-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur z-50 shadow-sm shadow-slate-900/5"
   *ngIf="!email"
 >
   <!-- ── Global Solutions Lab 2026 — Top Announcement Bar ── -->
   <div
     *ngIf="currenPageLabBanner && gsl2026 && globalSolutionsLabBannerEnabled"
-    class="relative -mx-4 -mt-4 mb-3 overflow-hidden
+    class="relative -mx-3 -mt-3 mb-3 hidden overflow-hidden sm:-mx-4 sm:-mt-4 sm:block
            bg-gradient-to-r from-teal-700 via-emerald-700 to-teal-800
            dark:from-[#0d1f2d] dark:via-[#0a3d2e] dark:to-[#0d1f2d]"
   >
     <!-- shimmer top line (dark mode accent) -->
     <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent dark:via-emerald-400/50"></div>
 
-    <div class="relative flex items-center justify-center px-10 py-2">
+    <div class="relative flex items-center justify-center px-9 py-2 sm:px-10">
       <!-- Centered content: globe + badge + headline + CTA -->
-      <div class="flex items-center gap-3">
+      <div class="flex min-w-0 flex-wrap items-center justify-center gap-2 sm:gap-3">
         <!-- pulsing globe -->
         <span class="relative flex-shrink-0">
           <span class="absolute inline-flex h-full w-full rounded-full bg-white opacity-20 dark:bg-emerald-400 dark:opacity-20 animate-ping"></span>
@@ -36,8 +36,8 @@
         </span>
 
         <!-- headline -->
-        <span class="text-white font-semibold text-sm leading-none">
-          🌍 Global Solutions Lab 2026
+        <span class="min-w-0 text-center text-xs font-semibold leading-snug text-white sm:text-sm">
+          Global Solutions Lab 2026
           <span class="hidden md:inline font-normal opacity-80"> — Collaborate. Innovate. Transform.</span>
         </span>
 
@@ -50,6 +50,7 @@
                  bg-white dark:bg-gradient-to-r dark:from-emerald-400 dark:to-teal-400
                  hover:bg-emerald-50 dark:hover:from-emerald-300 dark:hover:to-teal-300
                  shadow-sm transition-all duration-200"
+          (click)="closePublicMobileMenu()"
         >
           See More
           <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -79,23 +80,24 @@
   </div>
 
   <div
-    class="container mx-auto flex items-center justify-between gap-6 dark:text-white px-6 lg:px-12"
+    class="container mx-auto flex items-center justify-between gap-3 dark:text-white px-0 sm:px-6 lg:px-12"
   >
     <div
       *ngIf="showLogo"
-      class="pt-2 flex items-center space-x-4 cursor-pointer hover:scale-105 transition-transform duration-300"
+      class="flex min-w-0 items-center gap-3 cursor-pointer transition-transform duration-300 hover:scale-[1.02]"
       routerLink="/{{ path }}"
+      (click)="closePublicMobileMenu()"
     >
       <!-- Logo Image -->
       <img
-        class="w-20 rounded-lg shadow-lg"
+        class="w-12 shrink-0 rounded-lg shadow-lg sm:w-16 md:w-20"
         src="../../../assets/img/earth-triangle-test.png"
         [attr.alt]="'navbar.logoAlt' | translate"
       />
 
       <!-- Logo Text -->
       <h1
-        class="hidden md:block md:text-3xl font-bold bg-gradient-to-r to-emerald-600 from-sky-400 bg-clip-text text-transparent drop-shadow-lg"
+        class="hidden truncate md:block md:text-3xl font-bold bg-gradient-to-r to-emerald-600 from-sky-400 bg-clip-text text-transparent drop-shadow-lg"
       >
         {{ "navbar.brand" | translate }}
       </h1>
@@ -109,9 +111,9 @@
         </svg>
       </a> -->
 
-    <div class="flex flex-row items-center space-x-4 shrink-0">
+    <div class="flex flex-row items-center gap-2 shrink-0 sm:gap-4">
       <!-- Minimal Language Dropdown with Flags -->
-      <div *ngIf="canShowLanguageSwitcher" class="relative" (clickOutside)="showLanguageDropdown = false">
+      <div *ngIf="canShowLanguageSwitcher" class="relative hidden sm:block" (clickOutside)="showLanguageDropdown = false">
         <button
           type="button"
           (click)="showLanguageDropdown = !showLanguageDropdown"
@@ -227,16 +229,163 @@
       <a
         *ngIf="showLoginButton"
         routerLink="/login"
-        class="flex p-2 px-6 pt-2 text-gray-900 border-2 border-gray-400 bg-white rounded-full hover:border-gray-900"
+        class="hidden p-2 px-6 pt-2 text-gray-900 border-2 border-gray-400 bg-white rounded-full hover:border-gray-900 sm:flex"
+        (click)="closePublicMobileMenu()"
         >{{ "navbar.login" | translate }}</a
       >
+      <button
+        type="button"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 sm:hidden"
+        (click)="togglePublicMobileMenu()"
+        [attr.aria-expanded]="publicMobileMenuOpen"
+        aria-controls="public-mobile-menu"
+        aria-label="Open navigation menu"
+      >
+        <svg
+          *ngIf="!publicMobileMenuOpen"
+          class="h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+        </svg>
+        <svg
+          *ngIf="publicMobileMenuOpen"
+          class="h-6 w-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 6l12 12" />
+          <path d="M18 6L6 18" />
+        </svg>
+      </button>
       <!-- <button type="button" class="text-gray-900 bg-white border border-gray-500 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-full text-md px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Log In</button> -->
+    </div>
+  </div>
+
+  <div
+    *ngIf="publicMobileMenuOpen"
+    id="public-mobile-menu"
+    class="absolute left-3 right-3 top-full mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 sm:hidden"
+  >
+    <div class="max-h-[calc(100vh-5.25rem)] overflow-y-auto p-2">
+      <a
+        routerLink="/"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        {{ "navbar.home" | translate }}
+      </a>
+      <a
+        routerLink="/about"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        About
+      </a>
+      <a
+        routerLink="/landing-college"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        Schools
+      </a>
+      <a
+        routerLink="/landing-community"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        Communities
+      </a>
+      <a
+        routerLink="/global-labs"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        Global Lab
+      </a>
+      <a
+        routerLink="/tournament-landing"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        {{ "navbar.tournament" | translate }}
+      </a>
+      <a
+        routerLink="/pricing"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        Pricing
+      </a>
+      <a
+        routerLink="/contact-us"
+        (click)="closePublicMobileMenu()"
+        class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+      >
+        Contact
+      </a>
+
+      <div *ngIf="canShowLanguageSwitcher" class="mt-2 border-t border-slate-200 pt-3 dark:border-slate-700">
+        <p class="px-4 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          Language
+        </p>
+        <button
+          *ngFor="let option of languageOptions"
+          type="button"
+          (click)="changeLanguage(option.code); closePublicMobileMenu()"
+          class="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-left text-sm font-semibold transition-colors"
+          [ngClass]="currentLanguage === option.code
+            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+            : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'"
+        >
+          <span class="w-5 h-4 rounded overflow-hidden shadow-sm flex-shrink-0">
+            <ng-container *ngIf="option.code === 'en'">
+              <svg viewBox="0 0 512 512" class="w-full h-full"><rect fill="#fff" width="512" height="512"/><g fill="#bf0a30"><rect y="0" width="512" height="39.4"/><rect y="78.8" width="512" height="39.4"/><rect y="157.5" width="512" height="39.4"/><rect y="236.3" width="512" height="39.4"/><rect y="315" width="512" height="39.4"/><rect y="393.8" width="512" height="39.4"/><rect y="472.6" width="512" height="39.4"/></g><rect fill="#002868" width="204.8" height="275.7"/></svg>
+            </ng-container>
+            <ng-container *ngIf="option.code === 'fr'">
+              <svg viewBox="0 0 512 512" class="w-full h-full"><rect fill="#002654" width="170.7" height="512"/><rect fill="#fff" x="170.7" width="170.7" height="512"/><rect fill="#ce1126" x="341.3" width="170.7" height="512"/></svg>
+            </ng-container>
+          </span>
+          <span>{{ option.labelKey | translate }}</span>
+        </button>
+      </div>
+
+      <div class="mt-3 grid gap-2 border-t border-slate-200 pt-3 dark:border-slate-700">
+        <a
+          routerLink="/get-started"
+          (click)="closePublicMobileMenu()"
+          class="inline-flex min-h-11 items-center justify-center rounded-full bg-teal-700 px-5 py-2.5 text-base font-bold text-white shadow-sm hover:bg-teal-800"
+        >
+          Get Started
+        </a>
+        <a
+          *ngIf="showLoginButton"
+          routerLink="/login"
+          (click)="closePublicMobileMenu()"
+          class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-base font-bold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
+        >
+          {{ "navbar.login" | translate }}
+        </a>
+      </div>
     </div>
   </div>
 </nav>
 
 <nav
-  class="w-full p-4 fixed top-0 left-0 right-0 bg-white dark:bg-slate-900"
+  class="w-full px-3 py-3 sm:p-4 fixed top-0 left-0 right-0 z-50 bg-white/95 shadow-sm shadow-slate-900/5 backdrop-blur dark:bg-slate-900/95"
   *ngIf="email"
 >
   <aside
@@ -1221,14 +1370,14 @@
   </aside>
 
   <div
-    class="container mx-auto flex items-center justify-between dark:text-white"
+    class="container mx-auto flex items-center justify-between gap-2 px-0 dark:text-white sm:px-4 lg:px-8"
   >
     <div
-      class="sm:flex-col md:hidden mx-auto items-center"
+      class="flex shrink-0 items-center md:hidden"
       routerLink="/{{ path }}"
     >
       <img
-        class="w-20 rounded-lg"
+        class="w-12 rounded-lg shadow-sm"
         src="../../../assets/img/earth-triangle-test.png"
         alt=""
       />
@@ -1441,7 +1590,7 @@
     </div>
     <a
       routerLink="/notifications"
-      class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+      class="relative hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 lg:inline-flex"
       aria-label="Messages and notifications"
       title="Messages and notifications"
     >
@@ -1467,7 +1616,7 @@
         {{ discussionNotificationBadgeLabel }}
       </span>
     </a>
-    <a class="lg:mx-4 mx-16 cursor-pointer">
+    <a class="hidden cursor-pointer lg:mx-4 lg:block">
       <svg
         *ngIf="!dark"
         (click)="darkMode()"
@@ -1526,7 +1675,7 @@
       </div>
     </a>
 
-    <div class="lg:flex md:flex-col mx-auto items-center">
+    <div class="hidden lg:flex md:flex-col mx-auto items-center">
       <!-- Always-visible pending invites bell -->
 
       <!-- <div class="">
@@ -1842,7 +1991,42 @@
       </div>
     </div>
 
-    <div class="lg:hidden flex items-center gap-2">
+    <div class="relative flex items-center gap-2 lg:hidden">
+      <button
+        type="button"
+        (click)="dark ? lightMode() : darkMode()"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+        aria-label="Toggle theme"
+        title="Toggle theme"
+      >
+        <svg
+          *ngIf="!dark"
+          class="h-5 w-5"
+          viewBox="0 0 35 35"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M18.44,34.68a18.22,18.22,0,0,1-2.94-.24,18.18,18.18,0,0,1-15-20.86A18.06,18.06,0,0,1,9.59.63,2.42,2.42,0,0,1,12.2.79a2.39,2.39,0,0,1,1,2.41L11.9,3.1l1.23.22A15.66,15.66,0,0,0,23.34,21h0a15.82,15.82,0,0,0,8.47.53A2.44,2.44,0,0,1,34.47,25,18.18,18.18,0,0,1,18.44,34.68ZM10.67,2.89a15.67,15.67,0,0,0-5,22.77A15.66,15.66,0,0,0,32.18,24a18.49,18.49,0,0,1-9.65-.64A18.18,18.18,0,0,1,10.67,2.89Z"
+          />
+        </svg>
+        <svg
+          *ngIf="dark"
+          class="h-5 w-5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 5V3m0 18v-2M7.05 7.05 5.636 5.636m12.728 12.728L16.95 16.95M5 12H3m18 0h-2M7.05 16.95l-1.414 1.414M18.364 5.636 16.95 7.05M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+          />
+        </svg>
+      </button>
       <a
         routerLink="/notifications"
         class="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
@@ -1871,96 +2055,202 @@
           {{ discussionNotificationBadgeLabel }}
         </span>
       </a>
-      <a (click)="toggleHamburgerHome()" class="">
+      <button
+        type="button"
+        (click)="toggleHamburgerHome()"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+        [attr.aria-expanded]="displayHamburgerHomeMenuClose"
+        aria-label="Open navigation menu"
+      >
         <svg
-          class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"
+          class="h-6 w-6"
           *ngIf="displayHamburgerHomeMenu"
-          width="35px"
-          height="35px"
           viewBox="0 -0.5 25 25"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
             d="M6.5 11.75C6.08579 11.75 5.75 12.0858 5.75 12.5C5.75 12.9142 6.08579 13.25 6.5 13.25V11.75ZM18.5 13.25C18.9142 13.25 19.25 12.9142 19.25 12.5C19.25 12.0858 18.9142 11.75 18.5 11.75V13.25ZM6.5 15.75C6.08579 15.75 5.75 16.0858 5.75 16.5C5.75 16.9142 6.08579 17.25 6.5 17.25V15.75ZM18.5 17.25C18.9142 17.25 19.25 16.9142 19.25 16.5C19.25 16.0858 18.9142 15.75 18.5 15.75V17.25ZM6.5 7.75C6.08579 7.75 5.75 8.08579 5.75 8.5C5.75 8.91421 6.08579 9.25 6.5 9.25V7.75ZM18.5 9.25C18.9142 9.25 19.25 8.91421 19.25 8.5C19.25 8.08579 18.9142 7.75 18.5 7.75V9.25ZM6.5 13.25H18.5V11.75H6.5V13.25ZM6.5 17.25H18.5V15.75H6.5V17.25ZM6.5 9.25H18.5V7.75H6.5V9.25Z"
-            fill="#000000"
+            fill="currentColor"
           />
         </svg>
-      </a>
 
-      <div
-        (click)="toggleHamburgerHome()"
-        *ngIf="displayHamburgerHomeMenuClose"
-        class=""
-      >
         <svg
-          width="35px"
-          class="dark:stroke-white stroke-black mr-1 hover:fill-blue-700"
-          height="35px"
+          *ngIf="displayHamburgerHomeMenuClose"
+          class="h-6 w-6"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <!-- <rect width="24" height="24" /> -->
           <path
             d="M7 17L16.8995 7.10051"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
           />
           <path
             d="M7 7.00001L16.8995 16.8995"
+            stroke="currentColor"
             stroke-linecap="round"
             stroke-linejoin="round"
           />
         </svg>
-      </div>
+      </button>
 
       <div
         *ngIf="displayHamburgerHomeMenuClose"
-        class="z-10 mt-44 right-12 absolute bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600"
+        class="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-1.5rem)] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
       >
-        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+        <div class="border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+          <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+            {{ firstName }} {{ lastName }}
+          </div>
+          <div class="truncate text-xs text-slate-500 dark:text-slate-400">
+            {{ email }}
+          </div>
+        </div>
+        <ul class="max-h-[calc(100vh-8rem)] overflow-y-auto p-2 text-base text-slate-700 dark:text-slate-200">
           <li>
             <a
               routerLink="/home"
-              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
               >Home</a
             >
           </li>
           <li>
             <a
+              routerLink="/create-solution"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Start a Challenge</a
+            >
+          </li>
+          <li>
+            <a
               routerLink="/problem-list-view"
-              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
               >Pending Solutions</a
             >
           </li>
           <li>
             <a
               routerLink="/problem-list-feedback"
-              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
               >Strategy Evaluations</a
             >
           </li>
           <li>
             <a
+              routerLink="/challenge-spaces"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Challenge Spaces</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/broadcasts"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Join a Solution</a
+            >
+          </li>
+          <li>
+            <a
               routerLink="/join-tournament"
-              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
               >Tournament
             </a>
           </li>
+          <li>
+            <a
+              routerLink="/discover"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >General Assembly</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/blogs/nwg-solution-tour"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Solution Tour</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/other-ais"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Other AIs</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/profile"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Profile</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/blogs/instructions"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Instructions</a
+            >
+          </li>
+          <li>
+            <a
+              routerLink="/operating-manual"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Operating Manual</a
+            >
+          </li>
+          <li *ngIf="hasSchoolAccess">
+            <a
+              [routerLink]="schoolRoute"
+              [queryParams]="schoolQuery"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >{{ schoolNavLabel }}</a
+            >
+          </li>
+          <li *ngIf="this.auth.currentUser.admin">
+            <a
+              routerLink="/user-management"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >User Management</a
+            >
+          </li>
+          <li *ngIf="this.auth.currentUser.admin">
+            <a
+              routerLink="/generate-challenges"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >Generate Challenge Page</a
+            >
+          </li>
           <!-- Mobile Language Selector -->
-          <li class="px-4 py-2" *ngIf="canShowLanguageSwitcher">
+          <li class="mt-2 border-t border-slate-200 px-2 py-3 dark:border-slate-700" *ngIf="canShowLanguageSwitcher">
             <div class="space-y-1">
               <button
                 *ngFor="let option of languageOptions"
                 type="button"
-                (click)="changeLanguage(option.code)"
-                class="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors"
-                [class]="currentLanguage === option.code 
-                  ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200'"
+                (click)="changeLanguage(option.code); toggleHamburgerHome()"
+                class="flex w-full items-center gap-2 rounded-xl px-3 py-3 font-semibold transition-colors"
+                [ngClass]="currentLanguage === option.code
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                  : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'"
               >
-                <!-- Flag -->
                 <span class="w-5 h-4 rounded overflow-hidden shadow-sm flex-shrink-0">
                   <ng-container *ngIf="option.code === 'en'">
                     <svg viewBox="0 0 512 512" class="w-full h-full"><rect fill="#fff" width="512" height="512"/><g fill="#bf0a30"><rect y="0" width="512" height="39.4"/><rect y="78.8" width="512" height="39.4"/><rect y="157.5" width="512" height="39.4"/><rect y="236.3" width="512" height="39.4"/><rect y="315" width="512" height="39.4"/><rect y="393.8" width="512" height="39.4"/><rect y="472.6" width="512" height="39.4"/></g><rect fill="#002868" width="204.8" height="275.7"/></svg>
@@ -1970,10 +2260,18 @@
                   </ng-container>
                 </span>
                 <span class="text-sm">{{ option.labelKey | translate }}</span>
-                <!-- Checkmark for selected -->
                 <svg *ngIf="currentLanguage === option.code" class="w-4 h-4 ml-auto text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
               </button>
             </div>
+          </li>
+          <li class="border-t border-slate-200 px-2 py-3 dark:border-slate-700">
+            <button
+              type="button"
+              (click)="logOut(); toggleHamburgerHome()"
+              class="flex w-full items-center rounded-xl px-3 py-3 text-left font-semibold text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/20"
+            >
+              Log out
+            </button>
           </li>
         </ul>
       </div>

@@ -59,6 +59,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Input() lastName: string = '';
   @Input() email: string = '';
   showDropDown: boolean = false;
+  publicMobileMenuOpen: boolean = false;
   filteredItems: NavbarSearchItem[] = [];
   isSearching: boolean = false;
   displayHamburgerMenu: boolean = true;
@@ -394,6 +395,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   toggleDropDown() {
     this.showDropDown = !this.showDropDown;
   }
+
+  togglePublicMobileMenu() {
+    this.publicMobileMenuOpen = !this.publicMobileMenuOpen;
+  }
+
+  closePublicMobileMenu() {
+    this.publicMobileMenuOpen = false;
+  }
+
   toggleDropDownTheme() {
     this.showThemeDropDown = !this.showThemeDropDown;
   }

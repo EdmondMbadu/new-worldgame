@@ -209,3 +209,136 @@
   --mdc-slider-with-tick-marks-inactive-container-color: rgb(148 163 184 / 0.45);
   --mdc-slider-with-tick-marks-active-container-color: rgb(15 23 42 / 0.98);
 }
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+@media (max-width: 640px) {
+  app-landing-page,
+  app-landing-test,
+  app-landing-college,
+  app-landing-un,
+  app-landing-community,
+  app-tournament-landing {
+    display: block;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  app-landing-page section,
+  app-landing-test section,
+  app-landing-college section,
+  app-landing-un section,
+  app-landing-community section,
+  app-tournament-landing section {
+    padding-top: 3.75rem !important;
+    padding-bottom: 3.75rem !important;
+  }
+
+  app-landing-page :is(.container, [class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"]),
+  app-landing-test :is(.container, [class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"]),
+  app-landing-college :is(.container, [class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"]),
+  app-landing-un :is(.container, [class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"]),
+  app-landing-community :is(.container, [class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"]),
+  app-tournament-landing :is(.container, [class*="max-w-7xl"], [class*="max-w-6xl"], [class*="max-w-5xl"]) {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  app-landing-page h1,
+  app-landing-test h1,
+  app-landing-college h1,
+  app-landing-un h1,
+  app-landing-community h1,
+  app-tournament-landing h1 {
+    font-size: clamp(2rem, 10vw, 2.75rem) !important;
+    line-height: 1.08 !important;
+    overflow-wrap: anywhere;
+  }
+
+  app-landing-page h2,
+  app-landing-test h2,
+  app-landing-college h2,
+  app-landing-un h2,
+  app-landing-community h2,
+  app-tournament-landing h2 {
+    font-size: clamp(1.75rem, 7.5vw, 2.25rem) !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere;
+  }
+
+  app-landing-page h3,
+  app-landing-test h3,
+  app-landing-college h3,
+  app-landing-un h3,
+  app-landing-community h3,
+  app-tournament-landing h3 {
+    overflow-wrap: anywhere;
+  }
+
+  app-landing-page p,
+  app-landing-test p,
+  app-landing-college p,
+  app-landing-un p,
+  app-landing-community p,
+  app-tournament-landing p,
+  app-landing-page li,
+  app-landing-test li,
+  app-landing-college li,
+  app-landing-un li,
+  app-landing-community li,
+  app-tournament-landing li {
+    overflow-wrap: anywhere;
+  }
+
+  app-landing-page :is(a, button)[class*="rounded-full"],
+  app-landing-test :is(a, button)[class*="rounded-full"],
+  app-landing-college :is(a, button)[class*="rounded-full"],
+  app-landing-un :is(a, button)[class*="rounded-full"],
+  app-landing-community :is(a, button)[class*="rounded-full"],
+  app-tournament-landing :is(a, button)[class*="rounded-full"] {
+    min-height: 48px;
+    width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  app-landing-page :is(a, button)[class*="px-10"],
+  app-landing-test :is(a, button)[class*="px-10"],
+  app-landing-college :is(a, button)[class*="px-10"],
+  app-landing-un :is(a, button)[class*="px-10"],
+  app-landing-community :is(a, button)[class*="px-10"],
+  app-tournament-landing :is(a, button)[class*="px-10"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  app-landing-page img,
+  app-landing-test img,
+  app-landing-college img,
+  app-landing-un img,
+  app-landing-community img,
+  app-tournament-landing img,
+  app-landing-page iframe,
+  app-landing-test iframe,
+  app-landing-college iframe,
+  app-landing-un iframe,
+  app-landing-community iframe,
+  app-tournament-landing iframe {
+    max-width: 100%;
+  }
+
+  app-landing-page [class*="p-8"],
+  app-landing-test [class*="p-8"],
+  app-landing-college [class*="p-8"],
+  app-landing-un [class*="p-8"],
+  app-landing-community [class*="p-8"],
+  app-tournament-landing [class*="p-8"] {
+    padding: 1.25rem !important;
+  }
+}
