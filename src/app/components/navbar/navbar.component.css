@@ -1,3 +1,16 @@
 nav{
     z-index: 99;
 }
+
+@media (max-width: 640px) {
+  .public-navbar-icon-button {
+    width: 2.75rem !important;
+    min-width: 2.75rem !important;
+    max-width: 2.75rem !important;
+    height: 2.75rem !important;
+    min-height: 2.75rem !important;
+    padding: 0 !important;
+    flex: 0 0 2.75rem !important;
+    white-space: nowrap !important;
+  }
+}
