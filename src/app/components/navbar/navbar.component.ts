@@ -149,7 +149,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   beta: boolean = true;
   lab: boolean = true;
   gsl2026: boolean = true;
-  globalSolutionsLabBannerEnabled: boolean = true;
+  globalSolutionsLabBannerEnabled: boolean = false;
   solutionDropDown = false;
   guideDropDown = false;
   @Input() showMoreOrLess!: boolean;
@@ -162,6 +162,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   toggleMoreOrLess() {
     this.showMoreOrLess = !this.showMoreOrLess;
     this.showMoreOrLessChange.emit(this.showMoreOrLess);
+  }
+
+  get showGsl2026Banner(): boolean {
+    return this.gsl2026 && this.globalSolutionsLabBannerEnabled === true;
   }
 
   ngOnInit(): void {

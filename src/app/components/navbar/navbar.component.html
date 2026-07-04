@@ -4,7 +4,7 @@
 >
   <!-- ── Global Solutions Lab 2026 — Top Announcement Bar ── -->
   <div
-    *ngIf="currenPageLabBanner && gsl2026 && globalSolutionsLabBannerEnabled"
+    *ngIf="currenPageLabBanner && showGsl2026Banner"
     class="relative -mx-3 -mt-3 mb-3 hidden overflow-hidden sm:-mx-4 sm:-mt-4 sm:block
            bg-gradient-to-r from-teal-700 via-emerald-700 to-teal-800
            dark:from-[#0d1f2d] dark:via-[#0a3d2e] dark:to-[#0d1f2d]"
@@ -895,7 +895,7 @@
 
       <!-- ── Global Solutions Lab 2026 Sidebar Banner ── -->
       <div
-        *ngIf="gsl2026 && globalSolutionsLabBannerEnabled"
+        *ngIf="showGsl2026Banner"
         class="relative mt-6 rounded-xl overflow-hidden
                bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800
                dark:from-[#0d1f2d] dark:via-[#0a3d2e] dark:to-[#0d1f2d]"
