@@ -11,19 +11,6 @@
   font-family: Inter, system-ui, sans-serif;
 }
 
-.solution-a-thon-page *,
-.solution-a-thon-page h1,
-.solution-a-thon-page h2,
-.solution-a-thon-page h3,
-.solution-a-thon-page p,
-.solution-a-thon-page a,
-.solution-a-thon-page button,
-.solution-a-thon-page li,
-.solution-a-thon-page span,
-.solution-a-thon-page strong {
-  letter-spacing: 0;
-}
-
 .sat-wrap,
 .sat-hero__grid {
   width: min(100% - 32px, 1180px);
@@ -45,7 +32,6 @@
   padding: clamp(56px, 8vw, 96px) 0;
 }
 
-.sat-kicker,
 .sat-eyebrow,
 .sat-card-label {
   margin: 0;
@@ -53,6 +39,23 @@
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.sat-briefing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 24px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 14px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sat-briefing strong {
+  color: white;
 }
 
 .sat-hero h1,
@@ -68,16 +71,21 @@
   font-size: clamp(2.65rem, 6vw, 5.4rem);
 }
 
+.sat-accent {
+  color: var(--sat-coral);
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
 .sat-section h2,
 .sat-final h2 {
   font-size: clamp(2rem, 4vw, 3.6rem);
 }
 
 .sat-panel h3,
-.sat-track h3,
 .sat-time-row h3,
-.sat-format-row h3,
-.sat-prize-item h3 {
+.sat-format-row h3 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 850;
@@ -144,25 +152,10 @@
   font-weight: 700;
 }
 
-.sat-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.sat-meta span::before {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--sat-coral);
-  content: "";
-}
-
 .sat-prize-card {
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   padding: clamp(22px, 3vw, 32px);
 }
@@ -178,8 +171,19 @@
 
 .sat-prize span {
   color: var(--sat-coral);
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
   font-size: 0.62em;
   vertical-align: text-top;
+}
+
+.sat-prize-sub {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .sat-prize-breakdown {
@@ -275,7 +279,6 @@
 
 .sat-two-col,
 .sat-section-head,
-.sat-host-grid,
 .sat-final__grid {
   display: grid;
   grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
@@ -298,8 +301,10 @@
   margin-top: 16px;
 }
 
-.sat-copy--light {
-  color: rgba(255, 255, 255, 0.76);
+.sat-lead-copy {
+  color: var(--sat-ink);
+  font-size: 1.12rem;
+  line-height: 1.6;
 }
 
 .sat-copy blockquote {
@@ -318,8 +323,7 @@
   line-height: 1.7;
 }
 
-.sat-division-grid,
-.sat-prize-grid {
+.sat-division-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
@@ -327,16 +331,15 @@
   background: var(--sat-rule);
 }
 
-.sat-prize-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.sat-panel,
-.sat-track,
-.sat-prize-item {
+.sat-panel {
   border-radius: 0;
   background: white;
   padding: clamp(24px, 3vw, 34px);
+}
+
+.sat-panel p {
+  color: var(--sat-muted);
+  line-height: 1.65;
 }
 
 .sat-panel ul {
@@ -359,22 +362,28 @@
   font-weight: 900;
 }
 
-.sat-track-grid {
+.sat-track-list {
+  border-top: 1px solid var(--sat-rule);
+}
+
+.sat-track-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: 56px 1fr;
+  gap: 18px;
+  align-items: baseline;
+  border-bottom: 1px solid var(--sat-rule);
+  padding: 18px 0;
 }
 
-.sat-track {
-  border: 1px solid var(--sat-rule);
-  border-radius: 8px;
-}
-
-.sat-track span {
-  display: inline-flex;
-  margin-bottom: 18px;
+.sat-track-row span {
   color: var(--sat-coral-deep);
   font-weight: 900;
+}
+
+.sat-track-row h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 850;
 }
 
 .sat-timeline {
@@ -395,8 +404,7 @@
 }
 
 .sat-time-row p,
-.sat-format-row p,
-.sat-prize-item p {
+.sat-format-row p {
   margin: 8px 0 0;
   color: inherit;
   line-height: 1.7;
@@ -404,8 +412,7 @@
 }
 
 .sat-rubric {
-  display: grid;
-  gap: 12px;
+  border-top: 1px solid var(--sat-rule);
 }
 
 .sat-rubric div {
@@ -413,10 +420,8 @@
   grid-template-columns: 80px 1fr;
   gap: 18px;
   align-items: center;
-  border: 1px solid var(--sat-rule);
-  border-radius: 8px;
-  background: white;
-  padding: 18px 20px;
+  border-bottom: 1px solid var(--sat-rule);
+  padding: 18px 0;
 }
 
 .sat-rubric strong {
@@ -455,8 +460,8 @@
   text-transform: uppercase;
 }
 
-.sat-host-grid {
-  align-items: center;
+.sat-check-list {
+  border-top: 1px solid var(--sat-rule);
 }
 
 .sat-check-row {
@@ -535,13 +540,11 @@
   .sat-hero__grid,
   .sat-two-col,
   .sat-section-head,
-  .sat-host-grid,
   .sat-final__grid {
     grid-template-columns: 1fr;
   }
 
-  .sat-facts,
-  .sat-prize-grid {
+  .sat-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -566,9 +569,7 @@
   }
 
   .sat-facts,
-  .sat-division-grid,
-  .sat-prize-grid,
-  .sat-track-grid {
+  .sat-division-grid {
     grid-template-columns: 1fr;
   }
 

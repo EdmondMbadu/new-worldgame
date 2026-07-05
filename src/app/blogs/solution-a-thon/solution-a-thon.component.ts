@@ -7,11 +7,11 @@ import { Component } from '@angular/core';
 })
 export class SolutionAThonComponent {
   readonly facts = [
-    { value: 'Oct 24', label: 'Saturday, 2026' },
-    { value: '$15K', label: 'Prize pool' },
-    { value: '3-5', label: 'Students per team' },
-    { value: '2', label: 'Student divisions' },
-    { value: '5', label: 'SDG tracks' },
+    { value: '20+', label: 'Years of methodology' },
+    { value: '300+', label: 'Student designers in the corpus' },
+    { value: '40', label: 'Countries represented' },
+    { value: '3', label: 'Volumes published' },
+    { value: '1', label: 'Deployed in 2025' },
   ];
 
   readonly tracks = [
