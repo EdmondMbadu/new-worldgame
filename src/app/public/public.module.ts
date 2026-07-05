@@ -60,6 +60,7 @@ import { ChesterReportComponent } from '../blogs/chester-report/chester-report.c
 import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
 import { IntellectualPropertyComponent } from '../blogs/intellectual-property/intellectual-property.component';
+import { SolutionAThonComponent } from '../blogs/solution-a-thon/solution-a-thon.component';
 import { SlpShellComponent } from '../components/slp-shell/slp-shell.component';
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
@@ -126,6 +127,7 @@ import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
     CommunitySponsorshipComponent,
     GslSponsorshipComponent,
     IntellectualPropertyComponent,
+    SolutionAThonComponent,
     SlpShellComponent,
     SlpPublishComponent,
     SlpFundComponent,

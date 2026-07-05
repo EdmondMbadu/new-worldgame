@@ -56,6 +56,7 @@ import { ChesterReportComponent } from '../blogs/chester-report/chester-report.c
 import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/community-sponsorship.component';
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
 import { IntellectualPropertyComponent } from '../blogs/intellectual-property/intellectual-property.component';
+import { SolutionAThonComponent } from '../blogs/solution-a-thon/solution-a-thon.component';
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
@@ -106,6 +107,8 @@ const routes: Routes = [
   { path: 'welcome', component: WelcomeComponent },
   { path: 'global-lab', component: GlobalLabComponent },
   { path: 'global-labs', component: GlobalLabsComponent },
+  { path: 'solution-a-thon', component: SolutionAThonComponent },
+  { path: 'gsl-solution-a-thon', component: SolutionAThonComponent },
   { path: 'global-register', component: GlobalRegisterComponent },
   { path: 'global-registers', component: GlobalRegistersComponent },
   {

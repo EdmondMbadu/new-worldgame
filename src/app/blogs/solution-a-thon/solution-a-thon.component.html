@@ -1,0 +1,306 @@
+<div class="solution-a-thon-page min-h-screen bg-[#faf7f0] text-slate-950">
+  <app-navbar [currenPageLabBanner]="false" [showLoginButton]="true"></app-navbar>
+
+  <main class="pt-24">
+    <section class="sat-hero">
+      <div class="sat-hero__grid">
+        <div>
+          <p class="sat-kicker">Inaugural Solution-a-thon · Saturday, October 24, 2026</p>
+          <h1>The one-day SDG sprint for students who want to build something real.</h1>
+          <p class="sat-lede">
+            High school and university teams use NewWorld Game, Bucky, and a structured design-science process to create Solution Briefs for urgent local and global problems.
+          </p>
+          <div class="sat-actions">
+            <button type="button" class="sat-btn sat-btn--primary" (click)="scrollTo('register')">
+              Register your team
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+            <button type="button" class="sat-btn sat-btn--secondary" (click)="scrollTo('host')">
+              Host a hub
+            </button>
+          </div>
+          <div class="sat-meta">
+            <span>Regional hubs plus virtual teams</span>
+            <span>High school and university divisions</span>
+            <span>Teams of 3-5</span>
+          </div>
+        </div>
+
+        <aside class="sat-prize-card" aria-label="Prize pool summary">
+          <p class="sat-card-label">Total prize pool</p>
+          <div class="sat-prize"><span>$</span>15,000</div>
+          <div class="sat-prize-breakdown" aria-label="Prize breakdown">
+            <div class="sat-prize-row"><span>Grand Prize</span><strong>$5,000</strong></div>
+            <div class="sat-prize-row"><span>SDG Track Winners</span><strong>5 awards</strong></div>
+            <div class="sat-prize-row"><span>Best AI-Native Solution</span><strong>$2,000</strong></div>
+            <div class="sat-prize-row"><span>People's Choice</span><strong>$1,000</strong></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="sat-strip" aria-label="Event facts">
+      <div class="sat-wrap sat-facts">
+        <div *ngFor="let fact of facts" class="sat-fact">
+          <strong>{{ fact.value }}</strong>
+          <span>{{ fact.label }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sat-section">
+      <div class="sat-wrap sat-two-col">
+        <div>
+          <p class="sat-eyebrow">The premise</p>
+          <h2>Not a hackathon. A solution sprint.</h2>
+        </div>
+        <div class="sat-copy">
+          <p>
+            A traditional hackathon assumes the output is software. The Solution-a-thon keeps the urgency, teamwork, pitch energy, and prize money, but changes the deliverable.
+          </p>
+          <p>
+            Teams produce a <strong>Solution Brief</strong>: a structured, decision-ready design document showing the problem, preferred future state, intervention architecture, stakeholders, resources, first-year plan, second-order effects, and measurement plan.
+          </p>
+          <blockquote>
+            The goal is not a compressed ten-day Global Solutions Lab. It is a different artifact built for a one-day sprint.
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section class="sat-section sat-section--muted">
+      <div class="sat-wrap">
+        <div class="sat-section-head">
+          <div>
+            <p class="sat-eyebrow">Who can compete</p>
+            <h2>Built for every level of student.</h2>
+          </div>
+          <p class="sat-lede sat-lede--dark">
+            The 2026 Solution-a-thon runs two parallel divisions using the same five tracks and the same judging rubric, with separate award recognition.
+          </p>
+        </div>
+
+        <div class="sat-division-grid">
+          <article class="sat-panel">
+            <p class="sat-card-label">High School Division</p>
+            <h3>Grades 9-12. Public, private, charter, and homeschool.</h3>
+            <ul>
+              <li>Teams of 3-5 students</li>
+              <li>Adult sponsor recommended</li>
+              <li>Eligible for Grand Prize, AI-Native, and People's Choice awards</li>
+            </ul>
+          </article>
+          <article class="sat-panel">
+            <p class="sat-card-label">University Division</p>
+            <h3>Undergraduate, graduate, two-year, four-year, and online.</h3>
+            <ul>
+              <li>Teams of 3-5 students</li>
+              <li>Mixed-level teams register here</li>
+              <li>Eligible for Grand Prize, AI-Native, and People's Choice awards</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tracks" class="sat-section scroll-mt-28">
+      <div class="sat-wrap sat-two-col">
+        <div>
+          <p class="sat-eyebrow">Challenge tracks</p>
+          <h2>Choose one SDG-aligned problem space.</h2>
+          <p class="sat-small-copy">
+            Every registered team receives a track packet two weeks ahead of the sprint so event day can focus on design, not basic research.
+          </p>
+        </div>
+        <div class="sat-track-grid">
+          <article *ngFor="let track of tracks; let i = index" class="sat-track">
+            <span>{{ i + 1 | number: '2.0' }}</span>
+            <h3>{{ track }}</h3>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="schedule" class="sat-section sat-section--navy scroll-mt-28">
+      <div class="sat-wrap">
+        <div class="sat-section-head">
+          <div>
+            <p class="sat-eyebrow">Event day</p>
+            <h2>Eight hours. From brief to pitch.</h2>
+          </div>
+          <p class="sat-lede">
+            The day is phase-boxed around the Solution Brief sections, so teams keep moving through design rather than drifting into polish work too early.
+          </p>
+        </div>
+
+        <div class="sat-timeline">
+          <article *ngFor="let item of schedule" class="sat-time-row">
+            <time>{{ item[0] }}</time>
+            <div>
+              <h3>{{ item[1] }}</h3>
+              <p>{{ item[2] }}</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sat-section">
+      <div class="sat-wrap">
+        <div class="sat-section-head">
+          <div>
+            <p class="sat-eyebrow">Awards</p>
+            <h2>$15,000 across 13 awards and recognitions.</h2>
+          </div>
+          <p class="sat-lede sat-lede--dark">
+            We are not judging finished companies. We are judging the quality of design thinking made visible in one day.
+          </p>
+        </div>
+
+        <div class="sat-prize-grid">
+          <article *ngFor="let prize of prizes" class="sat-panel sat-prize-item">
+            <p class="sat-card-label">{{ prize.value }}</p>
+            <h3>{{ prize.title }}</h3>
+            <p>{{ prize.detail }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sat-section sat-section--muted">
+      <div class="sat-wrap sat-two-col">
+        <div>
+          <p class="sat-eyebrow">Judging rubric</p>
+          <h2>Five criteria. Same rubric for every team.</h2>
+        </div>
+        <div class="sat-rubric">
+          <div><strong>25%</strong><span>Comprehensive anticipatory design</span></div>
+          <div><strong>25%</strong><span>Feasibility and first-year execution</span></div>
+          <div><strong>20%</strong><span>Problem framing and evidence</span></div>
+          <div><strong>15%</strong><span>AI-native thinking and methodology</span></div>
+          <div><strong>15%</strong><span>Clarity, communication, and pitch</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="format" class="sat-section scroll-mt-28">
+      <div class="sat-wrap">
+        <div class="sat-section-head">
+          <div>
+            <p class="sat-eyebrow">How 8 hours is enough</p>
+            <h2>Preload everything except the creative design.</h2>
+          </div>
+          <p class="sat-lede sat-lede--dark">
+            The hidden secret of a longer Lab is that much of the time goes into learning the method, framing the problem, forming teams, and reviewing prior work. We move that work before event day.
+          </p>
+        </div>
+
+        <div class="sat-format-list">
+          <article *ngFor="let move of formatMoves" class="sat-format-row">
+            <strong>{{ move.number }}</strong>
+            <div>
+              <h3>{{ move.title }}</h3>
+              <p>{{ move.body }}</p>
+            </div>
+            <span>{{ move.timing }}</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sat-section sat-section--navy">
+      <div class="sat-wrap sat-two-col">
+        <div>
+          <p class="sat-eyebrow">Proven playbook</p>
+          <h2>New event. Tested methodology.</h2>
+        </div>
+        <div class="sat-copy sat-copy--light">
+          <p>
+            The Solution-a-thon is new, but the design-science method behind it comes from years of Global Solutions Lab work across the UN Sustainable Development Goals.
+          </p>
+          <p>
+            The 2026 sprint turns that longer methodology into a focused entry point: students leave with broad-brush solution strategies, schools bring more learners onto NewWorld Game, and sponsors can back visible, constructive work on real problems.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="host" class="sat-section sat-section--muted scroll-mt-28">
+      <div class="sat-wrap sat-host-grid">
+        <div>
+          <p class="sat-eyebrow">Bring it to your school</p>
+          <h2>Host a hub.</h2>
+          <p class="sat-lede sat-lede--dark">
+            Schools with a room, reliable WiFi, one faculty sponsor, and enough recruiting reach for at least five student teams can host a regional Solution-a-thon hub.
+          </p>
+          <a class="sat-btn sat-btn--dark" href="mailto:hubs@newworld-game.org?subject=Solution-a-thon%20hub%20interest">
+            Apply to host
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
+        </div>
+        <div class="sat-panel">
+          <p class="sat-card-label">Hub checklist</p>
+          <div class="sat-check-row"><span>Room with 30+ seats</span><strong>Full day</strong></div>
+          <div class="sat-check-row"><span>Reliable WiFi and A/V</span><strong>Required</strong></div>
+          <div class="sat-check-row"><span>Faculty sponsor</span><strong>1 contact</strong></div>
+          <div class="sat-check-row"><span>Student teams</span><strong>5+ teams</strong></div>
+          <div class="sat-check-row"><span>Campus promotion</span><strong>Email, posters, social</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sponsor" class="sat-section scroll-mt-28">
+      <div class="sat-wrap sat-two-col">
+        <div>
+          <p class="sat-eyebrow">Sponsorship</p>
+          <h2>Sponsor the Solution-a-thon.</h2>
+          <p class="sat-lede sat-lede--dark">
+            Sponsors fund prize money that goes directly to students, support regional hubs, and place their mission in front of self-selected problem solvers.
+          </p>
+          <a class="sat-btn sat-btn--dark" href="mailto:sponsor@newworld-game.org?subject=Solution-a-thon%20sponsorship">
+            Become a sponsor
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
+        </div>
+        <div class="sat-sponsor-list">
+          <div class="sat-sponsor-row"><strong>Title Sponsor</strong><span>$50,000</span></div>
+          <div class="sat-sponsor-row"><strong>Track Sponsor</strong><span>$20,000</span></div>
+          <div class="sat-sponsor-row"><strong>Regional Sponsor</strong><span>$10,000</span></div>
+          <div class="sat-sponsor-row"><strong>Hub Underwriter</strong><span>$5,000</span></div>
+          <div class="sat-sponsor-row"><strong>Community Partner</strong><span>No charge</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="register" class="sat-final scroll-mt-28">
+      <div class="sat-wrap sat-final__grid">
+        <div>
+          <p class="sat-eyebrow">Saturday · October 24 · 2026</p>
+          <h2>Show up. Build something real.</h2>
+          <p>
+            Register as a team of 3-5 and lock your roster at registration. Students at partner schools enroll free. Virtual teams are welcome from anywhere with WiFi.
+          </p>
+          <div class="sat-actions">
+            <a class="sat-btn sat-btn--primary" href="mailto:info@newworld-game.org?subject=Solution-a-thon%20team%20registration">
+              Register your team
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </a>
+            <a class="sat-btn sat-btn--secondary" routerLink="/contact">
+              Bring a community problem
+            </a>
+          </div>
+        </div>
+        <aside class="sat-final-card">
+          <div class="sat-check-row"><span>Sprint begins</span><strong>11:00 AM ET</strong></div>
+          <div class="sat-check-row"><span>Submissions due</span><strong>4:30 PM ET</strong></div>
+          <div class="sat-check-row"><span>Awards livestream</span><strong>6:30 PM ET</strong></div>
+          <div class="sat-check-row"><span>Team size</span><strong>3-5 students</strong></div>
+          <div class="sat-check-row"><span>Partner schools</span><strong>Free</strong></div>
+          <div class="sat-check-row"><span>Apply by</span><strong>Oct 20, 2026</strong></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+</div>

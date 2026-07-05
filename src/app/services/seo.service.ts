@@ -176,6 +176,18 @@ export class SeoService {
         keywords: 'NewWorld Game community, global problem solvers, collaborative learning community, educational network',
         url: `${baseUrl}/landing-community`
       },
+      '/solution-a-thon': {
+        title: 'Solution-a-thon 2026 | One-Day SDG Sprint for Student Teams',
+        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using NewWorld Game, Bucky, and design science to create structured Solution Briefs.',
+        keywords: 'Solution-a-thon, NewWorld Game Solution-a-thon, student SDG sprint, design science competition, student solution brief, global challenges competition',
+        url: `${baseUrl}/solution-a-thon`
+      },
+      '/gsl-solution-a-thon': {
+        title: 'Solution-a-thon 2026 | One-Day SDG Sprint for Student Teams',
+        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using NewWorld Game, Bucky, and design science to create structured Solution Briefs.',
+        keywords: 'Solution-a-thon, GSL Solution-a-thon, NewWorld Game Solution-a-thon, student SDG sprint, design science competition',
+        url: `${baseUrl}/solution-a-thon`
+      },
       '/pricing': {
         title: 'NewWorld Game Pricing Plans | Programs for Schools, Universities, and Teams',
         description: 'Explore NewWorld Game pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
