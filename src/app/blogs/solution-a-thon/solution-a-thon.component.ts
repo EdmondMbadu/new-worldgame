@@ -7,11 +7,10 @@ import { Component } from '@angular/core';
 })
 export class SolutionAThonComponent {
   readonly facts = [
-    { value: '20+', label: 'Years of methodology' },
-    { value: '300+', label: 'Student designers in the corpus' },
+    { value: '20+', label: 'Years of GSL methodology' },
+    { value: '300+', label: 'Student designers and participants' },
     { value: '40', label: 'Countries represented' },
-    { value: '3', label: 'Volumes published' },
-    { value: '1', label: 'Deployed in 2025' },
+    { value: '3', label: 'Published solution volumes' },
   ];
 
   readonly tracks = [
@@ -29,15 +28,6 @@ export class SolutionAThonComponent {
     ['3:00 PM', 'Stress Test', 'Teams examine second-order effects, scale risks, failure modes, and measurement.'],
     ['4:30 PM', 'Submit Brief', 'Solution Briefs are submitted for judging; teams prepare a concise final pitch.'],
     ['6:30 PM', 'Awards Livestream', 'Judges announce the winning solutions, track awards, AI-native award, and audience choice.'],
-  ];
-
-  readonly prizes = [
-    { title: 'Grand Prize', value: '$5,000', detail: 'Best overall Solution Brief across both divisions.' },
-    { title: 'SDG Track Winners', value: '5 awards', detail: 'One winning team in each challenge track.' },
-    { title: 'Best AI-Native Solution', value: '$2,000', detail: 'For the team that uses AI most thoughtfully as a design partner.' },
-    { title: "People's Choice", value: '$1,000', detail: 'Selected by the national audience during the awards livestream.' },
-    { title: 'Solutions Fellow Badges', value: 'Recognition', detail: 'Awarded to outstanding students and teams for post-event momentum.' },
-    { title: 'School Banner Award', value: 'Recognition', detail: 'For the hub with the strongest participation and solution quality.' },
   ];
 
   readonly formatMoves = [

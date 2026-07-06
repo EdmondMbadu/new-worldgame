@@ -61,6 +61,8 @@ import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/co
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
 import { IntellectualPropertyComponent } from '../blogs/intellectual-property/intellectual-property.component';
 import { SolutionAThonComponent } from '../blogs/solution-a-thon/solution-a-thon.component';
+import { SolutionAThonHubsComponent } from '../blogs/solution-a-thon-hubs/solution-a-thon-hubs.component';
+import { SolutionAThonSponsorsComponent } from '../blogs/solution-a-thon-sponsors/solution-a-thon-sponsors.component';
 import { SlpShellComponent } from '../components/slp-shell/slp-shell.component';
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
@@ -128,6 +130,8 @@ import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
     GslSponsorshipComponent,
     IntellectualPropertyComponent,
     SolutionAThonComponent,
+    SolutionAThonHubsComponent,
+    SolutionAThonSponsorsComponent,
     SlpShellComponent,
     SlpPublishComponent,
     SlpFundComponent,

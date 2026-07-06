@@ -24,7 +24,7 @@ export interface Gsl2026BannerConfig {
 export class SiteSettingsService {
   private readonly gsl2026BannerDocPath = 'admin_settings/gsl2026_banner';
   private readonly defaultGsl2026BannerConfig: Gsl2026BannerConfig = {
-    enabled: true,
+    enabled: false,
     label: 'Global Solutions Lab 2026',
   };
 
@@ -68,7 +68,7 @@ export class SiteSettingsService {
     return {
       ...this.defaultGsl2026BannerConfig,
       ...(config || {}),
-      enabled: config?.enabled !== false,
+      enabled: config?.enabled === true,
       label,
     };
   }

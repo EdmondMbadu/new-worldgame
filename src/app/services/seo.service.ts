@@ -188,6 +188,18 @@ export class SeoService {
         keywords: 'Solution-a-thon, GSL Solution-a-thon, NewWorld Game Solution-a-thon, student SDG sprint, design science competition',
         url: `${baseUrl}/solution-a-thon`
       },
+      '/solution-a-thon-hubs': {
+        title: 'Host a Solution-a-thon Hub | NewWorld Game',
+        description: 'Learn how schools, departments, student groups, and community organizations can host a local Solution-a-thon hub for the one-day SDG sprint.',
+        keywords: 'host Solution-a-thon hub, NewWorld Game hub, school SDG sprint, university challenge hub, student innovation event',
+        url: `${baseUrl}/solution-a-thon-hubs`
+      },
+      '/solution-a-thon-sponsors': {
+        title: 'Sponsor the Solution-a-thon | NewWorld Game',
+        description: 'Learn how sponsors can support student awards, access, hub operations, and follow-on support for the NewWorld Game Solution-a-thon.',
+        keywords: 'sponsor Solution-a-thon, NewWorld Game sponsor, student SDG competition sponsor, design science sponsorship',
+        url: `${baseUrl}/solution-a-thon-sponsors`
+      },
       '/pricing': {
         title: 'NewWorld Game Pricing Plans | Programs for Schools, Universities, and Teams',
         description: 'Explore NewWorld Game pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',

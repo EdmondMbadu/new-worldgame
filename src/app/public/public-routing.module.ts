@@ -57,6 +57,8 @@ import { CommunitySponsorshipComponent } from '../blogs/community-sponsorship/co
 import { GslSponsorshipComponent } from '../blogs/gsl-sponsorship/gsl-sponsorship.component';
 import { IntellectualPropertyComponent } from '../blogs/intellectual-property/intellectual-property.component';
 import { SolutionAThonComponent } from '../blogs/solution-a-thon/solution-a-thon.component';
+import { SolutionAThonHubsComponent } from '../blogs/solution-a-thon-hubs/solution-a-thon-hubs.component';
+import { SolutionAThonSponsorsComponent } from '../blogs/solution-a-thon-sponsors/solution-a-thon-sponsors.component';
 import { SlpPublishComponent } from '../components/slp-publish/slp-publish.component';
 import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
@@ -109,6 +111,8 @@ const routes: Routes = [
   { path: 'global-labs', component: GlobalLabsComponent },
   { path: 'solution-a-thon', component: SolutionAThonComponent },
   { path: 'gsl-solution-a-thon', component: SolutionAThonComponent },
+  { path: 'solution-a-thon-hubs', component: SolutionAThonHubsComponent },
+  { path: 'solution-a-thon-sponsors', component: SolutionAThonSponsorsComponent },
   { path: 'global-register', component: GlobalRegisterComponent },
   { path: 'global-registers', component: GlobalRegistersComponent },
   {
