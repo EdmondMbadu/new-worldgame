@@ -12,7 +12,7 @@
   "navbar": {
     "logoAlt": "Logo de Global Solutions Lab",
     "brand": "Global Solutions Lab",
-    "tagline": "Designing solutions for global and local problems.",
+    "tagline": "Developing solutions for global and local problems.",
     "theme": {
       "light": "Clair",
       "dark": "Sombre"
@@ -384,7 +384,7 @@
   },
   "landingHome": {
     "hero": {
-      "tagline": "Designing solutions for global and local problems.",
+      "tagline": "Developing solutions for global and local problems.",
       "actionLine": "solutions to world problems with people around the world.",
       "quote": "Nous sommes appelés à être les architectes de l'avenir, pas ses victimes.",
       "quoteAuthor": "- Buckminster Fuller",
@@ -396,7 +396,7 @@
       "text": "Nous ne pouvons pas construire un avenir pour nos petits-enfants avec un système pensé pour nos grands-parents.",
       "name": "António Guterres",
       "title": "Secrétaire général des Nations Unies",
-      "tagline": "Designing solutions for global and local problems.",
+      "tagline": "Developing solutions for global and local problems.",
       "taglinePrefix": "Nous avons besoin d'un",
       "taglineSuffix": "D'un"
     },

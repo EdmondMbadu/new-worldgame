@@ -412,7 +412,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async deleteVideo(video: Video) {
     if (!this.canManageVideo(video) || !video.id || this.isDeletingVideo) return;
-    const confirmed = window.confirm(`Delete "${video.title}" from GSL News?`);
+    const confirmed = window.confirm(`Delete "${video.title}" from Global Solutions Lab News?`);
     if (!confirmed) return;
 
     this.isDeletingVideo = true;

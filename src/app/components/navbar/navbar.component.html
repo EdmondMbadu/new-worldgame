@@ -441,21 +441,26 @@
           >
             <!-- Logo Container -->
             <div
-              class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center space-x-2 hover:scale-105 transition-transform duration-300"
+              routerLink="/home"
+              class="min-w-0 flex-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center gap-2 transition-transform duration-300 hover:scale-[1.02]"
             >
               <!-- Logo Image -->
               <img
-                routerLink="/home"
                 class="w-12 h-12 rounded-lg shadow-lg"
                 src="../../../assets/img/gsl-logo.png"
                 [attr.alt]="'navbar.logoAlt' | translate"
               />
               <!-- Logo Text -->
-              <span routerLink="/home" class="min-w-0">
+              <span class="min-w-0 flex-1">
                 <span
-                  class="block truncate text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent drop-shadow-lg to-emerald-600 from-sky-400"
+                  class="block text-base font-bold leading-tight bg-gradient-to-r bg-clip-text text-transparent drop-shadow-lg to-emerald-600 from-sky-400"
                 >
-                  GSL
+                  Global Solutions Lab
+                </span>
+                <span
+                  class="mt-0.5 block text-[10px] font-semibold leading-tight text-slate-500 dark:text-slate-300"
+                >
+                  {{ "navbar.tagline" | translate }}
                 </span>
               </span>
             </div>
@@ -830,7 +835,7 @@
               />
             </svg>
 
-            <span class="flex-1 ms-3 whitespace-nowrap">{{
+            <span class="flex-1 ms-3 min-w-0 text-sm leading-tight">{{
               "navbar.solutionTour" | translate
             }}</span>
           </a>
@@ -1345,7 +1350,7 @@
               />
             </svg>
 
-            <!-- <span class="flex-1 ms-3 whitespace-nowrap">GSL Solution Tour</span> -->
+            <!-- <span class="flex-1 ms-3 whitespace-nowrap">Global Solutions Lab Solution Tour</span> -->
           </a>
         </li>
         <li>
@@ -1373,7 +1378,7 @@
               />
             </svg>
 
-            <!-- <span class="flex-1 ms-3 whitespace-nowrap">GSL Solution Tour</span> -->
+            <!-- <span class="flex-1 ms-3 whitespace-nowrap">Global Solutions Lab Solution Tour</span> -->
           </a>
         </li>
         <li *ngIf="hasSchoolAccess">

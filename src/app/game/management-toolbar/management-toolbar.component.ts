@@ -23,7 +23,7 @@ export class ManagementToolbarComponent {
     { path: '/management-demo', label: 'Demo Sign-ups' },
     { path: '/schools-management', label: 'Schools' },
     { path: '/management-ask', label: 'Questions' },
-    { path: '/feedback-management', label: 'GSL Feedback' },
+    { path: '/feedback-management', label: 'Global Solutions Lab Feedback' },
     { path: '/bulk-emails', label: 'Bulk Emails' },
     { path: '/contact-emails', label: 'Contact Emails' },
     { path: '/admin-invite', label: 'Publish Invite' },

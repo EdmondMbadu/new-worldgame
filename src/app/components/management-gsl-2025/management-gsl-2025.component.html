@@ -90,7 +90,7 @@
                             (ngModelChange)="onYearChange($event)"
                           >
                             <option *ngFor="let year of availableYears" [value]="year">
-                              GSL {{ year }}
+                              Global Solutions Lab {{ year }}
                             </option>
                           </select>
                         </div>
@@ -198,7 +198,7 @@
                             </ng-container>
                             <tr *ngIf="filteredData.length === 0">
                               <td colspan="7" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
-                                No registrations found for GSL {{ selectedYear }}.
+                                No registrations found for Global Solutions Lab {{ selectedYear }}.
                               </td>
                             </tr>
                         </tbody>
@@ -209,7 +209,7 @@
 
         <!-- ========== SUMMARY SECTION ========== -->
 <div class="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden my-10 p-4 mx-auto max-w-screen-xl px-4 lg:px-12">
-    <h4 class="text-lg font-bold mb-2 text-gray-700 dark:text-gray-300">Summary (GSL {{ selectedYear }})</h4>
+    <h4 class="text-lg font-bold mb-2 text-gray-700 dark:text-gray-300">Summary (Global Solutions Lab {{ selectedYear }})</h4>
 
     <div class="mb-6">
       <h5 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Registrations Grouped By Year</h5>
@@ -222,7 +222,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let year of getYearKeys()">
-            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">GSL {{ year }}</td>
+            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">Global Solutions Lab {{ year }}</td>
             <td class="px-4 py-2">{{ registrationsByYear[year] || 0 }}</td>
           </tr>
         </tbody>

@@ -37,8 +37,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     // Update SEO meta tags for landing page
     this.seoService.updateMetaTags({
-      title: 'Global Solutions Lab - Designing solutions for global and local problems.',
-      description: 'Global Solutions Lab designs solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',
+      title: 'Global Solutions Lab - Developing solutions for global and local problems.',
+      description: 'Global Solutions Lab develops solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',
       keywords: 'Global Solutions Lab, GSL, global challenges, educational platform, collaborative learning, sustainability, world game, Buckminster Fuller, design science',
       url: 'https://newworld-game.org/',
       type: 'website'

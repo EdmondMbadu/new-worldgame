@@ -2181,7 +2181,7 @@ export class UserManagementComponent implements OnInit {
                         </td>
                         <td style="vertical-align:middle;">
                           <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">Global Solutions Lab</span>
-                          <div style="font-size:11px;line-height:1.35;font-weight:600;color:#64748b;">Designing solutions for global and local problems.</div>
+                          <div style="font-size:11px;line-height:1.35;font-weight:600;color:#64748b;">Developing solutions for global and local problems.</div>
                         </td>
                       </tr>
                     </table>

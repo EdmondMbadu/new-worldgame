@@ -12,7 +12,7 @@
   "navbar": {
     "logoAlt": "Global Solutions Lab logo",
     "brand": "Global Solutions Lab",
-    "tagline": "Designing solutions for global and local problems.",
+    "tagline": "Developing solutions for global and local problems.",
     "theme": {
       "light": "Light",
       "dark": "Dark"
@@ -26,7 +26,7 @@
     "joinSolution": "Join a Solution",
     "tournament": "Tournament",
     "generalAssembly": "General Assembly",
-    "solutionTour": "GSL Solution Tour",
+    "solutionTour": "Global Solutions Lab Solution Tour",
     "otherAis": "Talk to Multiple AIs",
     "myChallengeSpaces": "Challenge Spaces",
     "languageLabel": "Language",
@@ -249,7 +249,7 @@
       "contact": "Contact Us",
       "startFree": "Start Free",
       "signUp": "Sign Up",
-      "downloadGuide": "Download a Guide for Exploring GSL",
+      "downloadGuide": "Download a Guide for Exploring Global Solutions Lab",
       "exploreAi": "Explore All AI Colleagues"
     },
     "hero": {
@@ -304,8 +304,8 @@
       "subtitle": "Everything your students need to turn challenges and their bold ideas into opportunities with real-world impact.",
       "cards": {
         "fullAccess": {
-          "title": "Full GSL Feature Access",
-          "description": "Access to all GSL features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full Global Solutions Lab Feature Access",
+          "description": "Access to all Global Solutions Lab features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "dashboard": {
           "title": "Private Dashboard for Class",
@@ -379,7 +379,7 @@
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring GSL, sign up your class, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring Global Solutions Lab, sign up your class, or reach out so we can walk through the platform together."
     }
   },
   "landingUn": {
@@ -388,7 +388,7 @@
       "contact": "Contact Us",
       "startFree": "Start Free",
       "signUp": "Sign Up",
-      "downloadGuide": "Download a Guide for Exploring GSL",
+      "downloadGuide": "Download a Guide for Exploring Global Solutions Lab",
       "exploreAi": "Explore All AI Colleagues"
     },
     "hero": {
@@ -413,8 +413,8 @@
           "description": "Choose from a spectrum of AI assistants (from a notable collection of \"Elders\" to a gang of contemporary researchers from around their world, each with a special skill-set) to help in your work"
         },
         "fullAccess": {
-          "title": "Full GSL Feature Access",
-          "description": "Full GSL Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full Global Solutions Lab Feature Access",
+          "description": "Full Global Solutions Lab Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "collaboration": {
           "title": "Team Collaboration Tools",
@@ -422,7 +422,7 @@
         },
         "dashboard": {
           "title": "Private Dashboard for Each Project",
-          "description": "Keep every project you use GSL for organized with a dedicated workspace."
+          "description": "Keep every project you use Global Solutions Lab for organized with a dedicated workspace."
         }
       }
     },
@@ -473,8 +473,8 @@
       "subtitle": "",
       "cards": {
         "fullAccess": {
-          "title": "Full GSL Feature Access",
-          "description": "Access to all GSL features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full Global Solutions Lab Feature Access",
+          "description": "Access to all Global Solutions Lab features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "dashboard": {
           "title": "Guided Strategic Design Process",
@@ -530,7 +530,7 @@
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring GSL, sign up and begin your work, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring Global Solutions Lab, sign up and begin your work, or reach out so we can walk through the platform together."
     }
   },
   "landingCommunity": {
@@ -539,7 +539,7 @@
       "contact": "Contact Us",
       "startFree": "Start Free",
       "signUp": "Sign Up",
-      "downloadGuide": "Download a Guide for Exploring GSL",
+      "downloadGuide": "Download a Guide for Exploring Global Solutions Lab",
       "exploreAi": "Explore All AI Colleagues"
     },
     "hero": {
@@ -562,8 +562,8 @@
           "description": "Choose from a spectrum of AI assistants (from a notable collection of \"Elders\" to a gang of contemporary researchers from around their world, each with a special skill set) to help in your work"
         },
         "fullAccess": {
-          "title": "Full GSL Feature Access",
-          "description": "Full GSL Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full Global Solutions Lab Feature Access",
+          "description": "Full Global Solutions Lab Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "collaboration": {
           "title": "Team Collaboration Tools",
@@ -571,7 +571,7 @@
         },
         "dashboard": {
           "title": "Private Dashboard for Each Community",
-          "description": "Keep every project you use GSL for organized with a dedicated workspace."
+          "description": "Keep every project you use Global Solutions Lab for organized with a dedicated workspace."
         }
       }
     },
@@ -630,12 +630,12 @@
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring GSL, sign up and begin your work, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring Global Solutions Lab, sign up and begin your work, or reach out so we can walk through the platform together."
     }
   },
   "landingHome": {
     "hero": {
-      "tagline": "Designing solutions for global and local problems.",
+      "tagline": "Developing solutions for global and local problems.",
       "actionLine": "solutions to world problems with people around the world.",
       "quote": "We are called to be the architects of the future, not its victims.",
       "quoteAuthor": "- Buckminster Fuller",
@@ -647,7 +647,7 @@
       "text": "We can’t build a future for our grandchildren with a system built for our grandparents.",
       "name": "António Guterres",
       "title": "United Nations Secretary-General",
-      "tagline": "Designing solutions for global and local problems.",
+      "tagline": "Developing solutions for global and local problems.",
       "taglinePrefix": "We need a",
       "taglineSuffix": "A"
     },
@@ -681,7 +681,7 @@
     "sdgs": {
       "badge": "UN SDGs • Global Impact",
       "title": "SDGs you can achieve",
-      "description": "The UN’s Sustainable Development Goals (SDGs) aim to transform our world—ending poverty and inequality, protecting the planet, and ensuring health, justice, and prosperity for all. The Global Solutions Lab helps you design concrete, actionable ways to advance them.",
+      "description": "The UN’s Sustainable Development Goals (SDGs) aim to transform our world—ending poverty and inequality, protecting the planet, and ensuring health, justice, and prosperity for all. The Global Solutions Lab helps you develop concrete, actionable ways to advance them.",
       "badges": {
         "noPoverty": "1 • No Poverty",
         "goodHealth": "3 • Good Health",
@@ -849,12 +849,12 @@
     "sections": {
       "ideasHeading": "Turn Your Ideas into Real Solutions",
       "partsHeading": "1. Parts and Wholes",
-      "partsText": "The Global Solutions Lab (GSL) takes technological advancements of the 21st century and creatively couples them with the design science engine that was used to play the original World Game “longhand” in the month-long World Game workshops and shorter in-person and online Global Solutions Labs. It couples an easy-to-use interface with AI, an empowered methodology for developing real-world solutions, comprehensive world statistical resources, solution libraries, and a community of problem solvers. It builds and leverages the power of a diverse, collaborative, cross-cultural, multi-disciplinary, and intergenerational global community with linkages to real organizations implementing solutions.",
+      "partsText": "The Global Solutions Lab takes technological advancements of the 21st century and creatively couples them with the design science engine that was used to play the original World Game “longhand” in the month-long World Game workshops and shorter in-person and online Global Solutions Labs. It couples an easy-to-use interface with AI, an empowered methodology for developing real-world solutions, comprehensive world statistical resources, solution libraries, and a community of problem solvers. It builds and leverages the power of a diverse, collaborative, cross-cultural, multi-disciplinary, and intergenerational global community with linkages to real organizations implementing solutions.",
       "roleHeading": "2. Your Role",
       "roleText": "Your role, and challenge, in the Global Solutions Lab is to develop solutions to global and local problems. You also have a critical role to play in making other teams’ solutions better. You will be chosen, at random, to be an Evaluator of other strategies. Here you will have the opportunity to learn what other teams are doing and help make their work better. You win (we all win) when your solution gets through the Peer Review process and enters the Global Solutions Lab Tournament and is added to the Global Solutions Lab Solutions Library.<br><br>Ideally, you develop your solution as part of a team, but it is possible to play the Global Solutions Lab alone. The fact that you are here is important. On several levels—for the world, for you, and for the community you will be a part of as you work together on what you care about. Thank you.",
       "pdfPrefix": "This",
       "pdfLink": "link",
-      "pdfSuffix": "will take you to a PDF that provides more details on what GSL is, can do, special features, history, and its possible uses by organizations and schools."
+      "pdfSuffix": "will take you to a PDF that provides more details on what Global Solutions Lab is, can do, special features, history, and its possible uses by organizations and schools."
     }
   },
   "createSolution": {
@@ -863,8 +863,8 @@
       "focusArea": "What is the Global Solutions Lab Solution General Focus Area?",
       "projectTitle": "Provide a starting title to your project. You can change it later as your work progresses.",
       "problemDescription": "In a few words, how would you describe the specific problem you're focusing on, and the opportunity its solution presents.",
-      "teamMembers": "If there is a team, list its members, and add their emails below. (This enables communication between team members and, as per GSL Privacy Policy, their information will remain private.)",
-      "evaluators": "Add below GSL members that you want to be reviewers/evaluators of your team’s work. (The names you supply will be supplemented by others chosen at random from other GSL members.)",
+      "teamMembers": "If there is a team, list its members, and add their emails below. (This enables communication between team members and, as per Global Solutions Lab Privacy Policy, their information will remain private.)",
+      "evaluators": "Add below Global Solutions Lab members that you want to be reviewers/evaluators of your team’s work. (The names you supply will be supplemented by others chosen at random from other Global Solutions Lab members.)",
       "sdgs": "Select any Sustainable Development Goals (SDGs) that are related to your chosen problem area.",
       "submit": "Almost done! Submit to start solving your new solution."
     },
@@ -1388,7 +1388,7 @@
   },
   "archivePictures": {
     "eyebrow": "Archive",
-    "heading": "GSL Archive Pictures",
+    "heading": "Global Solutions Lab Archive Pictures",
     "description": "Previous Lab participants have come from:",
     "countries": "Spain, France, Germany, England, Ireland, Poland, Georgia, Lithuania, Ukraine, Tanzania, Nigeria, Ghana, Cameroon, Sudan, South Sudan, Senegal, Ivory Coast, Kenya, Uganda, Zimbabwe, South Africa, DR Congo, Congo, Mozambique, Gabon, Togo, Haiti, Canada, Mexico, Honduras, Venezuela, China, Hong Kong, Vietnam, Singapore, Thailand, Japan, New Zealand, Australia, India, Pakistan, Bangladesh, Palestine, United Arab Emirates, Saudi Arabia, Nepal, Turkey, and across the United States.",
     "viewLabel": "View",
@@ -1403,7 +1403,7 @@
   },
   "askFeedback": {
     "title": "Global Solutions Lab — Feedback",
-    "description": "After completing a full solution on GSL, please answer the questions below. Your input helps us make GSL better.",
+    "description": "After completing a full solution on Global Solutions Lab, please answer the questions below. Your input helps us make Global Solutions Lab better.",
     "yourInformation": "Your information",
     "firstName": "First name",
     "lastName": "Last name",
@@ -1412,14 +1412,14 @@
     "lastNameRequired": "Last name is required.",
     "emailRequired": "Valid email is required.",
     "questionA": {
-      "title": "What do you think of Global Solutions Lab (GSL)?",
+      "title": "What do you think of Global Solutions Lab?",
       "description": "Did you like it? Can it help develop solutions to global/local problems—including developing businesses, products, or services that support the SDGs? What else do you think?",
       "placeholder": "Share your thoughts…",
       "minLength": "Please add at least 20 characters.",
       "chars": "chars"
     },
     "questionC": {
-      "title": "What would you add to GSL to make it better, more useful, easier to use?",
+      "title": "What would you add to Global Solutions Lab to make it better, more useful, easier to use?",
       "placeholder": "Features, UI ideas, integrations, anything…",
       "minLength": "Please add at least 5 characters."
     },
@@ -1432,7 +1432,7 @@
       "selectOne": "Please select one option."
     },
     "questionG": {
-      "title": "Are there problems or issues you could use GSL for developing solutions?",
+      "title": "Are there problems or issues you could use Global Solutions Lab for developing solutions?",
       "placeholder": "Briefly describe the problems/issues…",
       "required": "This field is required.",
       "resourcesTitle": "Did you use any of the following?",
@@ -1445,7 +1445,7 @@
         "askBuckyPrompts": "Ask Bucky Prompts for Implementation",
         "toolsBook": "Tools for Changing the World book"
       },
-      "resourcesPlaceholder": "Other GSL tools or resources you used, plus anything useful you learned from them…",
+      "resourcesPlaceholder": "Other Global Solutions Lab tools or resources you used, plus anything useful you learned from them…",
       "videoChatTitle": "Did you use your team’s video chat room? If so, how did you use it?",
       "videoChatPlaceholder": "Tell us whether you used the video chat room and how it helped or did not help…"
     },
@@ -1466,7 +1466,7 @@
       "title": "What else would you like to add?",
       "enoughTimeTitle": "Did you have enough time to work on your solution?",
       "enoughTimePlaceholder": "Tell us whether the time available was enough and what would have helped…",
-      "capabilitiesTitle": "What additional GSL capabilities or functions would be helpful to your work?",
+      "capabilitiesTitle": "What additional Global Solutions Lab capabilities or functions would be helpful to your work?",
       "capabilitiesPlaceholder": "Capabilities, functions, tools, data, workflows, or support that would help…",
       "moreTitle": "Anything else you would like to add?",
       "placeholder": "Anything else we missed…",

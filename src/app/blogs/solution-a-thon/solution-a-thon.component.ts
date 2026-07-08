@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 })
 export class SolutionAThonComponent {
   readonly facts = [
-    { value: '20+', label: 'Years of GSL methodology' },
+    { value: '20+', label: 'Years of Global Solutions Lab methodology' },
     { value: '300+', label: 'Student designers and participants' },
     { value: '40', label: 'Countries represented' },
     { value: '3', label: 'Published solution volumes' },

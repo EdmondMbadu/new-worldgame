@@ -32,10 +32,10 @@ export class TournamentLandingComponent {
   // Plans (match the card headers exactly)
   PLANS = [
     'Free Evaluation',
-    'GSL Only',
-    'GSL & Tournament',
-    'GSL & Your Tournament',
-    'GSL and Your District or University',
+    'Global Solutions Lab Only',
+    'Global Solutions Lab & Tournament',
+    'Global Solutions Lab & Your Tournament',
+    'Global Solutions Lab and Your District or University',
   ];
 
   plans = this.PLANS;
@@ -57,7 +57,7 @@ export class TournamentLandingComponent {
       name: 'Private Dashboard (School/Class)',
       values: [false, true, true, true, true],
       detail:
-        'Admin dashboard for teachers/classes. Included from GSL Only upward and inherited by all higher tiers.',
+        'Admin dashboard for teachers/classes. Included from Global Solutions Lab Only upward and inherited by all higher tiers.',
     },
     {
       name: 'Tournament access',
@@ -92,10 +92,10 @@ export class TournamentLandingComponent {
         'Hands-on set-up for your own school/class tournament. Inherited by District/University.',
     },
     {
-      name: 'Use of GSL in any class (curriculum-related)',
+      name: 'Use of Global Solutions Lab in any class (curriculum-related)',
       values: ['—', '—', '—', true, true],
       detail:
-        'Explicit allowance to integrate GSL into any class/curriculum use case.',
+        'Explicit allowance to integrate Global Solutions Lab into any class/curriculum use case.',
     },
     {
       name: 'Support level',

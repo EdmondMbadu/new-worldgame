@@ -299,7 +299,7 @@ export class ManagementGsl2025Component implements OnInit {
       user.email ||
       'this registration';
     const confirmed = window.confirm(
-      `Remove ${displayName} from GSL ${this.extractYear(
+      `Remove ${displayName} from Global Solutions Lab ${this.extractYear(
         user.registerDate
       )}? This cannot be undone.`
     );
@@ -474,7 +474,7 @@ export class ManagementGsl2025Component implements OnInit {
 
   composeBulkEmail() {
     if (!this.filteredData.length) {
-      alert(`No registrations found for GSL ${this.selectedYear}.`);
+      alert(`No registrations found for Global Solutions Lab ${this.selectedYear}.`);
       this.dropdownOpen = false;
       return;
     }
@@ -511,7 +511,7 @@ export class ManagementGsl2025Component implements OnInit {
       this.bulkEmailImportKey,
       JSON.stringify({
         source: 'management-gsl',
-        label: `GSL ${this.selectedYear} filtered registrations (${recipients.length})`,
+        label: `Global Solutions Lab ${this.selectedYear} filtered registrations (${recipients.length})`,
         recipients,
       })
     );

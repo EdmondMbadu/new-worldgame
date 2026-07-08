@@ -22,8 +22,8 @@ export class SeoService {
   private readonly defaultImage = `${this.primaryDomain}/assets/img/gsl-logo.png`;
 
   private defaultConfig: SeoConfig = {
-    title: 'Global Solutions Lab - Designing solutions for global and local problems.',
-    description: 'Global Solutions Lab designs solutions for global and local problems through design science, AI guidance, structured collaboration, workshops, labs, and tournaments.',
+    title: 'Global Solutions Lab - Developing solutions for global and local problems.',
+    description: 'Global Solutions Lab develops solutions for global and local problems through design science, AI guidance, structured collaboration, workshops, labs, and tournaments.',
     keywords: 'Global Solutions Lab, GSL, global challenges, local problems, educational platform, collaborative learning, sustainability, problem-solving, tournaments, world game, Buckminster Fuller',
     image: this.defaultImage,
     url: `${this.primaryDomain}/`,
@@ -68,7 +68,7 @@ export class SeoService {
     this.metaService.updateTag({ property: 'og:url', content: canonicalUrl });
     this.metaService.updateTag({ property: 'og:type', content: seoConfig.type || 'website' });
     this.metaService.updateTag({ property: 'og:site_name', content: 'Global Solutions Lab' });
-    this.metaService.updateTag({ property: 'og:image:alt', content: 'Global Solutions Lab - Designing solutions for global and local problems.' });
+    this.metaService.updateTag({ property: 'og:image:alt', content: 'Global Solutions Lab - Developing solutions for global and local problems.' });
 
     // Twitter Card tags
     this.metaService.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
@@ -128,8 +128,8 @@ export class SeoService {
     const baseUrl = this.primaryDomain;
     const configs: { [key: string]: SeoConfig } = {
       '/': {
-        title: 'Global Solutions Lab - Designing solutions for global and local problems.',
-        description: 'Global Solutions Lab designs solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',
+        title: 'Global Solutions Lab - Developing solutions for global and local problems.',
+        description: 'Global Solutions Lab develops solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',
         keywords: 'Global Solutions Lab, GSL, global challenges, educational platform, Buckminster Fuller, design science, sustainability education, collaborative learning, AI problem solving',
         url: `${baseUrl}/`,
         type: 'website'

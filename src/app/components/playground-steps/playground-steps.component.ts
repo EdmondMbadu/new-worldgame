@@ -4446,7 +4446,7 @@ INTEGRITY RULES:
             </section>
           </div>
           <footer class="draft-page-footer">
-            <span>Global Solutions Lab | Designing solutions for global and local problems.</span>
+            <span>Global Solutions Lab | Developing solutions for global and local problems.</span>
             <span class="draft-page-number"></span>
           </footer>
         </section>
@@ -4901,7 +4901,7 @@ INTEGRITY RULES:
           url: 'https://newworld-game.org/',
         });
       } else {
-        pdf.text('Global Solutions Lab  \u00B7  Designing solutions for global and local problems.', marginLeft, y);
+        pdf.text('Global Solutions Lab  \u00B7  Developing solutions for global and local problems.', marginLeft, y);
       }
 
       pdf.setTextColor(150, 150, 150);
@@ -5408,7 +5408,7 @@ INTEGRITY RULES:
       page.innerHTML = `
         <div class="draft-page-body draft-content"></div>
         <footer class="draft-page-footer">
-          <span>Global Solutions Lab | Designing solutions for global and local problems.</span>
+          <span>Global Solutions Lab | Developing solutions for global and local problems.</span>
           <span class="draft-page-number"></span>
         </footer>
       `;
@@ -5901,7 +5901,7 @@ INTEGRITY RULES:
             </section>
           </div>
           <footer class="draft-page-footer">
-            <span>Global Solutions Lab | Designing solutions for global and local problems.</span>
+            <span>Global Solutions Lab | Developing solutions for global and local problems.</span>
             <span class="draft-page-number"></span>
           </footer>
         </section>

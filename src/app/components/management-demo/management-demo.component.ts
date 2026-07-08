@@ -134,7 +134,7 @@ export class ManagementDemoComponent implements OnInit {
 
   resetTemplateToDefault(): void {
     const confirmed = window.confirm(
-      'Reset the team meeting email template to the default Medard/GSL copy? Save after resetting to make it active.'
+      'Reset the team meeting email template to the default Medard/Global Solutions Lab copy? Save after resetting to make it active.'
     );
     if (!confirmed) return;
     this.setTemplateDraft(this.defaultGslPrepEmailTemplate);
@@ -198,7 +198,7 @@ export class ManagementDemoComponent implements OnInit {
   }
 
   getBookingTypeLabel(booking: DemoBooking): string {
-    return booking.bookingType === 'gsl2026Prep' ? 'GSL Team Meeting' : 'Demo';
+    return booking.bookingType === 'gsl2026Prep' ? 'Global Solutions Lab Team Meeting' : 'Demo';
   }
 
   getBookingKey(booking: DemoBooking): string {
