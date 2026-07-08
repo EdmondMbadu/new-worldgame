@@ -69,7 +69,7 @@ export class FeaturesComponent implements OnInit {
       eyebrow: 'Why it matters',
       title: 'Your solution now has an AI agent working for it every week',
       description:
-        'The Weekly Intelligence Report turns NewWorld Game from a one-time drafting tool into an ongoing intelligence system. It keeps scanning for what your team needs next so your work does not go stale after the first draft.',
+        'The Weekly Intelligence Report turns Global Solutions Lab from a one-time drafting tool into an ongoing intelligence system. It keeps scanning for what your team needs next so your work does not go stale after the first draft.',
       items: [
         'Connects new funding opportunities to the mission of your solution',
         'Surfaces relevant news, frameworks, and emerging developments',
@@ -93,7 +93,7 @@ export class FeaturesComponent implements OnInit {
       eyebrow: 'What makes it special',
       title: 'This is platform intelligence tied to an actual problem-solving workflow',
       description:
-        'Most AI tools answer a prompt and stop. NewWorld Game keeps supporting the solution after the initial build, using the context of the challenge, preferred state, strategy, and team to generate an ongoing stream of useful intelligence.',
+        'Most AI tools answer a prompt and stop. Global Solutions Lab keeps supporting the solution after the initial build, using the context of the challenge, preferred state, strategy, and team to generate an ongoing stream of useful intelligence.',
       items: [
         'Grounded in your solution title, mission, and challenge area',
         'Useful for classrooms, communities, nonprofits, and local teams',
@@ -108,7 +108,7 @@ export class FeaturesComponent implements OnInit {
       step: '01',
       title: 'Build your solution',
       description:
-        'Use the 5-step NewWorld Game workflow to define the problem state, preferred future, strategy, resources, and review plan.',
+        'Use the 5-step Global Solutions Lab workflow to define the problem state, preferred future, strategy, resources, and review plan.',
     },
     {
       step: '02',
@@ -223,7 +223,7 @@ export class FeaturesComponent implements OnInit {
     {
       title: 'Build the team',
       description:
-        'NewWorld Game is designed for collaborative work, not solo documents sitting in folders.',
+        'Global Solutions Lab is designed for collaborative work, not solo documents sitting in folders.',
       items: [
         'Invite team members and evaluators into each solution',
         'Coordinate asynchronous collaboration from one workspace',
@@ -263,7 +263,7 @@ export class FeaturesComponent implements OnInit {
     {
       title: 'Open Team Opportunities',
       detail:
-        'Other active projects people can explore or join, reinforcing the network effect of NewWorld Game.',
+        'Other active projects people can explore or join, reinforcing the network effect of Global Solutions Lab.',
     },
     {
       title: 'Take Action',

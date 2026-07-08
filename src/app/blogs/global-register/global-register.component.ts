@@ -194,8 +194,8 @@ export class GlobalRegisterComponent implements OnInit, OnDestroy {
               : '$1,000 Tournament Visibility & Award',
           description:
             this.currentLanguage === 'fr'
-              ? 'Soumettez votre projet au tournoi NewWorld, où la solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour aider à concrétiser votre idée.'
-              : 'Submit your project to the NewWorld Tournament where the winning solution receives $1,000 in award/seed funding to help bring your idea to life.',
+              ? 'Soumettez votre projet au tournoi Global Solutions Lab, où la solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour aider à concrétiser votre idée.'
+              : 'Submit your project to the Global Solutions Lab Tournament where the winning solution receives $1,000 in award/seed funding to help bring your idea to life.',
         };
       }
 

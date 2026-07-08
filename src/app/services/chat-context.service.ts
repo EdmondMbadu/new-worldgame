@@ -163,7 +163,7 @@ export class ChatContextService {
     
     // Solution context (if available)
     if (ctx) {
-      prompt += `[CONTEXT: You are helping with a NewWorld Game solution called "${ctx.solutionTitle}". `;
+      prompt += `[CONTEXT: You are helping with a Global Solutions Lab solution called "${ctx.solutionTitle}". `;
       prompt += `The user is currently on ${ctx.currentStepName}. `;
       
       if (ctx.solutionDescription) {

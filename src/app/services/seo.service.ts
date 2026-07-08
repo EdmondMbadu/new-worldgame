@@ -19,16 +19,16 @@ export interface SeoConfig {
 })
 export class SeoService {
   private readonly primaryDomain = 'https://newworld-game.org';
-  private readonly defaultImage = `${this.primaryDomain}/assets/img/earth-triangle-test.png`;
+  private readonly defaultImage = `${this.primaryDomain}/assets/img/gsl-logo.png`;
 
   private defaultConfig: SeoConfig = {
-    title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
-    description: 'NewWorld Game is an educational platform where students, educators, and teams collaborate to solve real-world global challenges through design science, AI guidance, and structured programs.',
-    keywords: 'NewWorld Game, New World Game, global challenges, educational game, collaborative learning, sustainability, problem-solving, tournaments, world game, Buckminster Fuller',
+    title: 'Global Solutions Lab - Designing solutions for global and local problems.',
+    description: 'Global Solutions Lab designs solutions for global and local problems through design science, AI guidance, structured collaboration, workshops, labs, and tournaments.',
+    keywords: 'Global Solutions Lab, GSL, global challenges, local problems, educational platform, collaborative learning, sustainability, problem-solving, tournaments, world game, Buckminster Fuller',
     image: this.defaultImage,
     url: `${this.primaryDomain}/`,
     type: 'website',
-    author: 'NewWorld Game Team',
+    author: 'Global Solutions Lab Team',
     robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
   };
 
@@ -67,8 +67,8 @@ export class SeoService {
     this.metaService.updateTag({ property: 'og:image', content: this.toAbsoluteUrl(seoConfig.image || this.defaultImage) });
     this.metaService.updateTag({ property: 'og:url', content: canonicalUrl });
     this.metaService.updateTag({ property: 'og:type', content: seoConfig.type || 'website' });
-    this.metaService.updateTag({ property: 'og:site_name', content: 'NewWorld Game' });
-    this.metaService.updateTag({ property: 'og:image:alt', content: 'NewWorld Game - educational platform for solving global challenges' });
+    this.metaService.updateTag({ property: 'og:site_name', content: 'Global Solutions Lab' });
+    this.metaService.updateTag({ property: 'og:image:alt', content: 'Global Solutions Lab - Designing solutions for global and local problems.' });
 
     // Twitter Card tags
     this.metaService.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
@@ -128,154 +128,154 @@ export class SeoService {
     const baseUrl = this.primaryDomain;
     const configs: { [key: string]: SeoConfig } = {
       '/': {
-        title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
-        description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students, educators, and communities collaborate to solve global challenges through AI guidance, design science, tournaments, and solution-building programs.',
-        keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational platform, Buckminster Fuller, design science, sustainability education, collaborative learning, AI problem solving',
+        title: 'Global Solutions Lab - Designing solutions for global and local problems.',
+        description: 'Global Solutions Lab designs solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',
+        keywords: 'Global Solutions Lab, GSL, global challenges, educational platform, Buckminster Fuller, design science, sustainability education, collaborative learning, AI problem solving',
         url: `${baseUrl}/`,
         type: 'website'
       },
       '/get-started': {
-        title: 'Get Started with NewWorld Game | Global Challenge Learning Platform',
-        description: 'Start using NewWorld Game. Explore the onboarding path for students, educators, and partners who want to solve global challenges through collaborative gameplay and design science.',
-        keywords: 'get started NewWorld Game, NewWorld Game onboarding, start New World Game, design science learning platform',
+        title: 'Get Started with Global Solutions Lab | Global Challenge Learning Platform',
+        description: 'Start using Global Solutions Lab. Explore the onboarding path for students, educators, and partners who want to solve global challenges through collaborative gameplay and design science.',
+        keywords: 'get started Global Solutions Lab onboarding, start Global Solutions Lab, design science learning platform',
         url: `${baseUrl}/get-started`
       },
       '/welcome': {
-        title: 'Get Started with NewWorld Game | Global Challenge Learning Platform',
-        description: 'Start using NewWorld Game. Explore the onboarding path for students, educators, and partners who want to solve global challenges through collaborative gameplay and design science.',
-        keywords: 'get started NewWorld Game, NewWorld Game onboarding, start New World Game, design science learning platform',
+        title: 'Get Started with Global Solutions Lab | Global Challenge Learning Platform',
+        description: 'Start using Global Solutions Lab. Explore the onboarding path for students, educators, and partners who want to solve global challenges through collaborative gameplay and design science.',
+        keywords: 'get started Global Solutions Lab onboarding, start Global Solutions Lab, design science learning platform',
         url: `${baseUrl}/get-started`
       },
       '/about': {
-        title: 'About NewWorld Game | Buckminster Fuller Inspired Learning Platform',
-        description: 'Learn what NewWorld Game is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',
-        keywords: 'about NewWorld Game, Buckminster Fuller world game, design science education, global problem solving platform',
+        title: 'About Global Solutions Lab | Buckminster Fuller Inspired Learning Platform',
+        description: 'Learn what Global Solutions Lab is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',
+        keywords: 'about Global Solutions Lab, Buckminster Fuller world game, design science education, global problem solving platform',
         url: `${baseUrl}/about`
       },
       '/landing': {
-        title: 'Welcome to NewWorld Game - Transform Learning Through Global Problem Solving',
-        description: 'Engage students in solving real-world challenges. NewWorld Game combines education, collaboration, and innovation to create meaningful learning experiences.',
-        keywords: 'NewWorld Game, educational platform, student engagement, global learning, collaborative problem solving',
+        title: 'Welcome to Global Solutions Lab - Transform Learning Through Global Problem Solving',
+        description: 'Engage students in solving real-world challenges. Global Solutions Lab combines education, collaboration, and innovation to create meaningful learning experiences.',
+        keywords: 'Global Solutions Lab, educational platform, student engagement, global learning, collaborative problem solving',
         url: `${baseUrl}/landing`
       },
       '/landing-college': {
-        title: 'NewWorld Game for Colleges - University-Level Global Challenge Platform',
-        description: 'Bring NewWorld Game to your college or university. Engage students in collaborative problem-solving for real-world global challenges.',
-        keywords: 'NewWorld Game college, university game, higher education, collaborative learning, global challenges university',
+        title: 'Global Solutions Lab for Colleges - University-Level Global Challenge Platform',
+        description: 'Bring Global Solutions Lab to your college or university. Engage students in collaborative problem-solving for real-world global challenges.',
+        keywords: 'Global Solutions Lab college, university game, higher education, collaborative learning, global challenges university',
         url: `${baseUrl}/landing-college`
       },
       '/landing-un': {
-        title: 'NewWorld Game & United Nations SDGs - Sustainable Development Goals Platform',
-        description: 'Align your learning with UN Sustainable Development Goals through NewWorld Game. Tackle global challenges connected to the UN SDGs.',
-        keywords: 'NewWorld Game UN, SDGs, sustainable development goals, global challenges, United Nations education',
+        title: 'Global Solutions Lab & United Nations SDGs - Sustainable Development Goals Platform',
+        description: 'Align your learning with UN Sustainable Development Goals through Global Solutions Lab. Tackle global challenges connected to the UN SDGs.',
+        keywords: 'Global Solutions Lab UN, SDGs, sustainable development goals, global challenges, United Nations education',
         url: `${baseUrl}/landing-un`
       },
       '/landing-community': {
-        title: 'NewWorld Game Community - Join Global Problem Solvers',
-        description: 'Join the NewWorld Game community of educators, students, and problem solvers working together to address global challenges.',
-        keywords: 'NewWorld Game community, global problem solvers, collaborative learning community, educational network',
+        title: 'Global Solutions Lab Community - Join Global Problem Solvers',
+        description: 'Join the Global Solutions Lab community of educators, students, and problem solvers working together to address global challenges.',
+        keywords: 'Global Solutions Lab community, global problem solvers, collaborative learning community, educational network',
         url: `${baseUrl}/landing-community`
       },
       '/solution-a-thon': {
         title: 'Solution-a-thon 2026 | One-Day SDG Sprint for Student Teams',
-        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using NewWorld Game, Bucky, and design science to create structured Solution Briefs.',
-        keywords: 'Solution-a-thon, NewWorld Game Solution-a-thon, student SDG sprint, design science competition, student solution brief, global challenges competition',
+        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using Global Solutions Lab, Bucky, and design science to create structured Solution Briefs.',
+        keywords: 'Solution-a-thon, Global Solutions Lab Solution-a-thon, student SDG sprint, design science competition, student solution brief, global challenges competition',
         url: `${baseUrl}/solution-a-thon`
       },
       '/gsl-solution-a-thon': {
         title: 'Solution-a-thon 2026 | One-Day SDG Sprint for Student Teams',
-        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using NewWorld Game, Bucky, and design science to create structured Solution Briefs.',
-        keywords: 'Solution-a-thon, GSL Solution-a-thon, NewWorld Game Solution-a-thon, student SDG sprint, design science competition',
+        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using Global Solutions Lab, Bucky, and design science to create structured Solution Briefs.',
+        keywords: 'Solution-a-thon, GSL Solution-a-thon, Global Solutions Lab Solution-a-thon, student SDG sprint, design science competition',
         url: `${baseUrl}/solution-a-thon`
       },
       '/solution-a-thon-hubs': {
-        title: 'Host a Solution-a-thon Hub | NewWorld Game',
+        title: 'Host a Solution-a-thon Hub | Global Solutions Lab',
         description: 'Learn how schools, departments, student groups, and community organizations can host a local Solution-a-thon hub for the one-day SDG sprint.',
-        keywords: 'host Solution-a-thon hub, NewWorld Game hub, school SDG sprint, university challenge hub, student innovation event',
+        keywords: 'host Solution-a-thon hub, Global Solutions Lab hub, school SDG sprint, university challenge hub, student innovation event',
         url: `${baseUrl}/solution-a-thon-hubs`
       },
       '/solution-a-thon-sponsors': {
-        title: 'Sponsor the Solution-a-thon | NewWorld Game',
-        description: 'Learn how sponsors can support student awards, access, hub operations, and follow-on support for the NewWorld Game Solution-a-thon.',
-        keywords: 'sponsor Solution-a-thon, NewWorld Game sponsor, student SDG competition sponsor, design science sponsorship',
+        title: 'Sponsor the Solution-a-thon | Global Solutions Lab',
+        description: 'Learn how sponsors can support student awards, access, hub operations, and follow-on support for the Global Solutions Lab Solution-a-thon.',
+        keywords: 'sponsor Solution-a-thon, Global Solutions Lab sponsor, student SDG competition sponsor, design science sponsorship',
         url: `${baseUrl}/solution-a-thon-sponsors`
       },
       '/pricing': {
-        title: 'NewWorld Game Pricing Plans | Programs for Schools, Universities, and Teams',
-        description: 'Explore NewWorld Game pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
-        keywords: 'NewWorld Game pricing, NewWorld Game plans, educational platform pricing, school packages, university challenge platform',
+        title: 'Global Solutions Lab Pricing Plans | Programs for Schools, Universities, and Teams',
+        description: 'Explore Global Solutions Lab pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
+        keywords: 'Global Solutions Lab pricing, Global Solutions Lab plans, educational platform pricing, school packages, university challenge platform',
         url: `${baseUrl}/pricing`
       },
       '/plans': {
-        title: 'NewWorld Game Pricing Plans | Programs for Schools, Universities, and Teams',
-        description: 'Explore NewWorld Game pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
-        keywords: 'NewWorld Game pricing, NewWorld Game plans, educational platform pricing, school packages, university challenge platform',
+        title: 'Global Solutions Lab Pricing Plans | Programs for Schools, Universities, and Teams',
+        description: 'Explore Global Solutions Lab pricing and program options for schools, universities, nonprofits, and organizations ready to run workshops, labs, and tournaments.',
+        keywords: 'Global Solutions Lab pricing, Global Solutions Lab plans, educational platform pricing, school packages, university challenge platform',
         url: `${baseUrl}/pricing`
       },
       '/workshop': {
-        title: 'NewWorld Game Workshop - Interactive Learning Experience',
-        description: 'Join our NewWorld Game workshop and learn how to facilitate collaborative problem-solving sessions for global challenges.',
-        keywords: 'NewWorld Game workshop, educational workshop, facilitator training, problem-solving workshop',
+        title: 'Global Solutions Lab Workshop - Interactive Learning Experience',
+        description: 'Join our Global Solutions Lab workshop and learn how to facilitate collaborative problem-solving sessions for global challenges.',
+        keywords: 'Global Solutions Lab workshop, educational workshop, facilitator training, problem-solving workshop',
         url: `${baseUrl}/workshop`
       },
       '/tournament-landing': {
-        title: 'NewWorld Game Tournaments - Compete to Solve Global Challenges',
-        description: 'Participate in NewWorld Game tournaments. Teams compete to develop the best solutions for real-world global challenges.',
-        keywords: 'NewWorld Game tournament, global challenge competition, student tournament, problem-solving competition',
+        title: 'Global Solutions Lab Tournaments - Compete to Solve Global Challenges',
+        description: 'Participate in Global Solutions Lab tournaments. Teams compete to develop the best solutions for real-world global challenges.',
+        keywords: 'Global Solutions Lab tournament, global challenge competition, student tournament, problem-solving competition',
         url: `${baseUrl}/tournament-landing`
       },
       '/our-team': {
-        title: 'Our Team - NewWorld Game Leadership & Creators',
-        description: 'Meet the NewWorld Game team dedicated to creating innovative educational experiences for global problem-solving.',
-        keywords: 'NewWorld Game team, about us, educational innovators, game creators',
+        title: 'Our Team - Global Solutions Lab Leadership & Creators',
+        description: 'Meet the Global Solutions Lab team dedicated to creating innovative educational experiences for global problem-solving.',
+        keywords: 'Global Solutions Lab team, about us, educational innovators, game creators',
         url: `${baseUrl}/our-team`
       },
       '/contact': {
-        title: 'Contact NewWorld Game | Partnerships, Workshops, and Support',
-        description: 'Contact the NewWorld Game team for partnerships, school programs, workshops, tournaments, and platform support.',
-        keywords: 'contact NewWorld Game, support, workshops, partnerships, New World Game contact',
+        title: 'Contact Global Solutions Lab | Partnerships, Workshops, and Support',
+        description: 'Contact the Global Solutions Lab team for partnerships, school programs, workshops, tournaments, and platform support.',
+        keywords: 'contact Global Solutions Lab, support, workshops, partnerships, Global Solutions Lab contact',
         url: `${baseUrl}/contact`
       },
       '/contact-us': {
-        title: 'Contact NewWorld Game | Partnerships, Workshops, and Support',
-        description: 'Contact the NewWorld Game team for partnerships, school programs, workshops, tournaments, and platform support.',
-        keywords: 'contact NewWorld Game, support, workshops, partnerships, New World Game contact',
+        title: 'Contact Global Solutions Lab | Partnerships, Workshops, and Support',
+        description: 'Contact the Global Solutions Lab team for partnerships, school programs, workshops, tournaments, and platform support.',
+        keywords: 'contact Global Solutions Lab, support, workshops, partnerships, Global Solutions Lab contact',
         url: `${baseUrl}/contact`
       },
       '/blogs/features': {
-        title: 'NewWorld Game Features - Weekly Intelligence Reports, AI Tools, and Collaboration',
-        description: 'Explore NewWorld Game features including the Weekly Intelligence Report, Ask Bucky, AI colleagues, collaborative solution building, and tournament pathways.',
-        keywords: 'NewWorld Game features, Weekly Intelligence Report, Ask Bucky, AI collaboration, solution platform, funding intelligence',
+        title: 'Global Solutions Lab Features - Weekly Intelligence Reports, AI Tools, and Collaboration',
+        description: 'Explore Global Solutions Lab features including the Weekly Intelligence Report, Ask Bucky, AI colleagues, collaborative solution building, and tournament pathways.',
+        keywords: 'Global Solutions Lab features, Weekly Intelligence Report, Ask Bucky, AI collaboration, solution platform, funding intelligence',
         url: `${baseUrl}/blogs/features`
       },
       '/ask-bucky': {
-        title: 'Ask Bucky - AI Assistant for Global Challenges | NewWorld Game',
+        title: 'Ask Bucky - AI Assistant for Global Challenges | Global Solutions Lab',
         description: 'Chat with Bucky, our AI assistant inspired by Buckminster Fuller. Get insights on global challenges and sustainable solutions.',
-        keywords: 'Ask Bucky, AI assistant, Buckminster Fuller AI, global challenges chatbot, NewWorld Game AI',
+        keywords: 'Ask Bucky, AI assistant, Buckminster Fuller AI, global challenges chatbot, Global Solutions Lab AI',
         url: `${baseUrl}/ask-bucky`
       },
       '/bucky': {
         title: 'Meet Bucky - Your AI Guide to Global Problem Solving',
-        description: 'Bucky is your AI companion for exploring global challenges and discovering innovative solutions in NewWorld Game.',
+        description: 'Bucky is your AI companion for exploring global challenges and discovering innovative solutions in Global Solutions Lab.',
         keywords: 'Bucky AI, virtual assistant, Buckminster Fuller, AI guide, problem solving assistant',
         url: `${baseUrl}/bucky`
       },
       '/privacy': {
-        title: 'Privacy Policy - NewWorld Game',
-        description: 'Read NewWorld Game\'s privacy policy to understand how we protect and handle your data.',
-        keywords: 'privacy policy, data protection, NewWorld Game privacy, user data',
+        title: 'Privacy Policy - Global Solutions Lab',
+        description: 'Read Global Solutions Lab\'s privacy policy to understand how we protect and handle your data.',
+        keywords: 'privacy policy, data protection, Global Solutions Lab privacy, user data',
         url: `${baseUrl}/privacy`
       },
       '/intellectual-property': {
-        title: 'Intellectual Property & Honor Code - NewWorld Game',
-        description: 'Learn how NewWorld Game handles participant ownership, attribution, protected work, commercialization, and embargo options.',
-        keywords: 'NewWorld Game intellectual property, honor code, student IP, solution ownership, attribution',
+        title: 'Intellectual Property & Honor Code - Global Solutions Lab',
+        description: 'Learn how Global Solutions Lab handles participant ownership, attribution, protected work, commercialization, and embargo options.',
+        keywords: 'Global Solutions Lab intellectual property, honor code, student IP, solution ownership, attribution',
         url: `${baseUrl}/intellectual-property`
       },
       '/overview': {
-        title: 'About NewWorld Game | Buckminster Fuller Inspired Learning Platform',
-        description: 'Learn what NewWorld Game is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',
-        keywords: 'about NewWorld Game, Buckminster Fuller world game, design science education, global problem solving platform',
+        title: 'About Global Solutions Lab | Buckminster Fuller Inspired Learning Platform',
+        description: 'Learn what Global Solutions Lab is, how it works, and how it brings Buckminster Fuller’s World Game ideas into modern education, collaboration, and global problem solving.',
+        keywords: 'about Global Solutions Lab, Buckminster Fuller world game, design science education, global problem solving platform',
         url: `${baseUrl}/about`
       }
     };

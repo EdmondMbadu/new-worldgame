@@ -118,7 +118,7 @@ export class UserManagementComponent implements OnInit {
     'admin_settings/weekly_email_automation';
   private readonly fallbackAutomationTimezone = 'America/Los_Angeles';
   private readonly defaultWeeklyReminderSubject =
-    'Your weekly NewWorld Game progress';
+    'Your weekly Global Solutions Lab progress';
   private readonly defaultWeeklyReminderIntroHtml =
     '<p>Keep the momentum going—here are your in-progress solutions.</p>';
   constructor(
@@ -329,7 +329,7 @@ export class UserManagementComponent implements OnInit {
   sending = false;
   targetMode: 'selected' | 'all' = 'selected';
 
-  reminderSubject = 'Your weekly NewWorld Game progress';
+  reminderSubject = 'Your weekly Global Solutions Lab progress';
   reminderIntroHtml =
     '<p>Keep the momentum going—here are your in-progress solutions.</p>';
   weeklyAutomationConfig = this.createDefaultWeeklyAutomationConfig();
@@ -693,7 +693,7 @@ export class UserManagementComponent implements OnInit {
     }
 
     if (reminder.enabled && reminder.recipientEmails.length === 0) {
-      return 'Weekly reminder automation needs at least one NewWorld Game recipient.';
+      return 'Weekly reminder automation needs at least one Global Solutions Lab recipient.';
     }
 
     if (activity.enabled && activity.recipientEmails.length === 0) {
@@ -797,7 +797,7 @@ export class UserManagementComponent implements OnInit {
     );
     if (!existsInUsers) {
       this.automationSaveError =
-        'Weekly reminder recipients must already exist as NewWorld Game users.';
+        'Weekly reminder recipients must already exist as Global Solutions Lab users.';
       return;
     }
 
@@ -2078,7 +2078,7 @@ export class UserManagementComponent implements OnInit {
     const signupDeltaColor = m.weeklySignupIncreasePct >= 0 ? '#059669' : '#dc2626';
     const workedDeltaColor =
       m.weeklyWorkedSolutionsIncreasePct >= 0 ? '#059669' : '#dc2626';
-    const logoUrl = 'https://newworld-game.org/assets/img/earth-triangle-test.png';
+    const logoUrl = 'https://newworld-game.org/assets/img/gsl-logo.png';
     const safe = (value: unknown) =>
       String(value || '')
         .replace(/&/g, '&amp;')
@@ -2177,10 +2177,11 @@ export class UserManagementComponent implements OnInit {
                     <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                       <tr>
                         <td style="vertical-align:middle;padding-right:8px;">
-                          <img src="${logoUrl}" alt="NewWorld Game" width="40" style="display:block;width:40px;max-width:40px;height:auto;">
+                          <img src="${logoUrl}" alt="Global Solutions Lab" width="40" style="display:block;width:40px;max-width:40px;height:auto;">
                         </td>
                         <td style="vertical-align:middle;">
-                          <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">NewWorld Game</span>
+                          <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">Global Solutions Lab</span>
+                          <div style="font-size:11px;line-height:1.35;font-weight:600;color:#64748b;">Designing solutions for global and local problems.</div>
                         </td>
                       </tr>
                     </table>
@@ -2196,7 +2197,7 @@ export class UserManagementComponent implements OnInit {
                       </tr>
                       <tr>
                         <td style="padding:22px 24px 8px;">
-                          <h2 style="margin:0;color:#0f172a;font-size:24px;line-height:1.2;font-weight:800;">NewWorld Game Community Snapshot</h2>
+                          <h2 style="margin:0;color:#0f172a;font-size:24px;line-height:1.2;font-weight:800;">Global Solutions Lab Community Snapshot</h2>
                           <p style="margin:8px 0 0;color:#475569;font-size:13px;">
                             Reporting window: <strong>${fromDate}</strong> to <strong>${toDate}</strong>
                           </p>
@@ -2298,7 +2299,7 @@ export class UserManagementComponent implements OnInit {
                       <tr>
                         <td style="padding:12px 24px 20px;">
                           <a href="https://newworld-game.org/user-management" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;">
-                            Open NewWorld Game Admin
+                            Open Global Solutions Lab Admin
                           </a>
                         </td>
                       </tr>
@@ -2307,8 +2308,8 @@ export class UserManagementComponent implements OnInit {
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td style="border-top:1px solid #e2e8f0;padding:12px 24px;background:#f8fafc;font-size:12px;color:#64748b;">
-                          Sent by <strong style="color:#0f172a;">NewWorld Game</strong> •
-                          <a href="https://newworld-game.org" style="color:#0f766e;text-decoration:none;">newworld-game.org</a><br>
+                          Sent by <strong style="color:#0f172a;">Global Solutions Lab</strong> •
+                          <a href="https://newworld-game.org" style="color:#0f766e;text-decoration:none;">Global Solutions Lab</a><br>
                           Generated on ${generatedAt}
                         </td>
                       </tr>
@@ -2368,7 +2369,7 @@ export class UserManagementComponent implements OnInit {
         sendBulkHtml({
           title: 'Weekly Activity Report',
           subject: this.weeklyActivitySubject,
-          preheader: 'NewWorld Game weekly activity summary',
+          preheader: 'Global Solutions Lab weekly activity summary',
           from: 'newworld@newworld-game.org',
           recipients,
           html: this.weeklyActivityPreviewHtml,
@@ -2444,7 +2445,7 @@ export class UserManagementComponent implements OnInit {
       </div>
       <p>
         <a href="${homeUrl}" style="display:inline-block;background:#111827;color:#ffffff;
-           text-decoration:none;border-radius:10px;padding:10px 14px;font-weight:600">Go to NewWorld Game</a>
+           text-decoration:none;border-radius:10px;padding:10px 14px;font-weight:600">Go to Global Solutions Lab</a>
       </p>`;
 
     return `
@@ -2455,7 +2456,7 @@ export class UserManagementComponent implements OnInit {
     </div>
     ${listSection}
     <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0"/>
-    <p style="font-size:12px;color:#64748b">Sent by NewWorld Game • <a href="${homeUrl}" style="color:#059669;text-decoration:none">newworld-game.org</a></p>
+    <p style="font-size:12px;color:#64748b">Sent by Global Solutions Lab • <a href="${homeUrl}" style="color:#059669;text-decoration:none">Global Solutions Lab</a></p>
   </div>`;
   }
 

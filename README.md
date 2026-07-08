@@ -1,4 +1,4 @@
-# 🌍 NewWorld Game
+# 🌍 Global Solutions Lab
 
 > *"We are called to be the architects of the future, not its victims."* - Buckminster Fuller
 
@@ -6,7 +6,7 @@ A collaborative problem-solving platform inspired by the [Global Solutions Lab](
 
 ## 🎯 Mission
 
-NewWorld Game aims to **solve problems at scale with people around the world** by creating an engaging, interactive environment where individuals and teams can collaborate on solutions aligned with the United Nations Sustainable Development Goals (SDGs).
+Global Solutions Lab aims to **solve problems at scale with people around the world** by creating an engaging, interactive environment where individuals and teams can collaborate on solutions aligned with the United Nations Sustainable Development Goals (SDGs).
 
 ## ✨ Key Features
 

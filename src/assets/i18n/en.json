@@ -10,8 +10,9 @@
     }
   },
   "navbar": {
-    "logoAlt": "NewWorld Game logo",
-    "brand": "NewWorld Game",
+    "logoAlt": "Global Solutions Lab logo",
+    "brand": "Global Solutions Lab",
+    "tagline": "Designing solutions for global and local problems.",
     "theme": {
       "light": "Light",
       "dark": "Dark"
@@ -25,7 +26,7 @@
     "joinSolution": "Join a Solution",
     "tournament": "Tournament",
     "generalAssembly": "General Assembly",
-    "solutionTour": "NWG Solution Tour",
+    "solutionTour": "GSL Solution Tour",
     "otherAis": "Talk to Multiple AIs",
     "myChallengeSpaces": "Challenge Spaces",
     "languageLabel": "Language",
@@ -111,7 +112,7 @@
         "intro": "{{name}} is an American marine biologist, writer, and conservationist whose work galvanized modern environmental awareness and protection."
       },
       "bucky": {
-        "intro": "{{name}} was described as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Marshall McLuhan called him “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he believed design and technology could continually do more with less so everyone could thrive. He developed the geodesic dome, coined “Spaceship Earth,” and envisioned a World Game that empowered everyone to solve global problems. NewWorld Game is inspired by his pioneering work. For more information see <a href=\"/bucky\" class=\"text-blue-500 underline hover:text-blue-800\">here</a>."
+        "intro": "{{name}} was described as an architect, engineer, designer, cartographer, geometer, philosopher, poet, inventor, author, global thinker, and humanist. Marshall McLuhan called him “the Leonardo da Vinci of the 20th century.” Trained as a naval officer, he believed design and technology could continually do more with less so everyone could thrive. He developed the geodesic dome, coined “Spaceship Earth,” and envisioned a World Game that empowered everyone to solve global problems. Global Solutions Lab is inspired by his pioneering work. For more information see <a href=\"/bucky\" class=\"text-blue-500 underline hover:text-blue-800\">here</a>."
       },
       "albert": {
         "intro": "{{name}} is a German-born physicist who developed the special and general theories of relativity and was a vocal peace activist."
@@ -248,11 +249,11 @@
       "contact": "Contact Us",
       "startFree": "Start Free",
       "signUp": "Sign Up",
-      "downloadGuide": "Download a Guide for Exploring NWG",
+      "downloadGuide": "Download a Guide for Exploring GSL",
       "exploreAi": "Explore All AI Colleagues"
     },
     "hero": {
-      "title": "NewWorld Game for Colleges",
+      "title": "Global Solutions Lab for Colleges",
       "subtitle": "Add a Innovation Lab to your classes where design science, AI colleagues, and motivated students tackle global and local issues that matter."
     },
     "steps": {
@@ -285,16 +286,16 @@
     "simple": {
       "title": "As simple as . . .",
       "items": {
-        "first": "You: Explore, test and use the NewWorld Game— for free. See if it is appropriate for your needs.",
+        "first": "You: Explore, test and use the Global Solutions Lab— for free. See if it is appropriate for your needs.",
         "second": "SIGN UP YOUR CLASS— FOR FREE. See how easy it is.",
         "third": "Choose a challenge, form teams, begin at Step 1 end at Step 5—and transform learning into impact. Yes, for free. Have fun."
       }
     },
     "intro": {
-      "title": "NewWorld Game is . . .",
-      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work- and learning-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
+      "title": "Global Solutions Lab is . . .",
+      "paragraph1": "The Global Solutions Lab is a platform, an AI-empowered work- and learning-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
       "paragraph2": "Its goal is to have real impact—to change the world—by providing you and your students with space and tools for developing solutions to the problems and issues you care about.",
-      "paragraph3": "The NewWorld Game is where students learn the subject matter you teach while developing solutions to global and/or local real-world problems and enter them in a NewWorld Tournament where they compete for recognition and real-world impact.",
+      "paragraph3": "The Global Solutions Lab is where students learn the subject matter you teach while developing solutions to global and/or local real-world problems and enter them in a Global Solutions Lab Tournament where they compete for recognition and real-world impact.",
       "paragraph4": "This is made possible by the creative combination of AI and human intelligence.",
       "learnMore": "Learn more."
     },
@@ -303,8 +304,8 @@
       "subtitle": "Everything your students need to turn challenges and their bold ideas into opportunities with real-world impact.",
       "cards": {
         "fullAccess": {
-          "title": "Full NWG Feature Access",
-          "description": "Access to all NWG features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full GSL Feature Access",
+          "description": "Access to all GSL features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "dashboard": {
           "title": "Private Dashboard for Class",
@@ -319,7 +320,7 @@
           "description": "Messaging boards, shared files, and peer feedback flows built directly into each project."
         },
         "tournament": {
-          "title": "Access to the NewWorld Tournament",
+          "title": "Access to the Global Solutions Lab Tournament",
           "description": "Move from classroom pilots to national and global recognition with tournament entries."
         },
         "support": {
@@ -347,7 +348,7 @@
     },
     "ai": {
       "title": "Hear It from Our AI Colleagues",
-      "subtitle": "Powered by the latest AI models and trained to support educators and students through each phase of the NewWorld Game.",
+      "subtitle": "Powered by the latest AI models and trained to support educators and students through each phase of the Global Solutions Lab.",
       "teacher": "For Teachers",
       "teacherText": "Use AI partners for research prompts, lesson planning, formative feedback, and quick exemplars tailored to each discipline.",
       "student": "For Students",
@@ -361,7 +362,7 @@
         "features": {
           "item1": "30 Students and/or up to Five Teams Full Access (If you have more students, contact us)",
           "item2": "Unlimited use",
-          "item3": "Unlimited NewWorld Tournament Entries"
+          "item3": "Unlimited Global Solutions Lab Tournament Entries"
         }
       },
       "schoolPlan": {
@@ -370,7 +371,7 @@
         "subtitle": "for",
         "features": {
           "item1": "Unlimited use",
-          "item2": "Unlimited NewWorld Tournament Entries",
+          "item2": "Unlimited Global Solutions Lab Tournament Entries",
           "item3": "Customization options"
         }
       },
@@ -378,7 +379,7 @@
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring NWG, sign up your class, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring GSL, sign up your class, or reach out so we can walk through the platform together."
     }
   },
   "landingUn": {
@@ -387,17 +388,17 @@
       "contact": "Contact Us",
       "startFree": "Start Free",
       "signUp": "Sign Up",
-      "downloadGuide": "Download a Guide for Exploring NWG",
+      "downloadGuide": "Download a Guide for Exploring GSL",
       "exploreAi": "Explore All AI Colleagues"
     },
     "hero": {
-      "title": "NewWorld Game for the United Nations",
+      "title": "Global Solutions Lab for the United Nations",
       "subtitle": "Add a new dimension to your work— an Innovation Lab along with Assistants who are expert researchers who work super fast, answer your questions with depth and breath, and can lead to innovative solutions to the critical problems on which you work."
     },
     "whatYouGet": {
-      "title": "What You Get With NewWorld Game",
+      "title": "What You Get With Global Solutions Lab",
       "titleLine1": "What You Get",
-      "titleLine2": "With NewWorld Game",
+      "titleLine2": "With Global Solutions Lab",
       "cards": {
         "strategicPlanning": {
           "title": "State-of-the-art Problem Solving",
@@ -412,8 +413,8 @@
           "description": "Choose from a spectrum of AI assistants (from a notable collection of \"Elders\" to a gang of contemporary researchers from around their world, each with a special skill-set) to help in your work"
         },
         "fullAccess": {
-          "title": "Full NWG Feature Access",
-          "description": "Full NWG Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full GSL Feature Access",
+          "description": "Full GSL Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "collaboration": {
           "title": "Team Collaboration Tools",
@@ -421,7 +422,7 @@
         },
         "dashboard": {
           "title": "Private Dashboard for Each Project",
-          "description": "Keep every project you use NWG for organized with a dedicated workspace."
+          "description": "Keep every project you use GSL for organized with a dedicated workspace."
         }
       }
     },
@@ -455,16 +456,16 @@
     "simple": {
       "title": "AS SIMPLE AS . . .",
       "items": {
-        "first": "You: Explore, test and use the NewWorld Game— for free. See how it can be used in your work.",
+        "first": "You: Explore, test and use the Global Solutions Lab— for free. See how it can be used in your work.",
         "second": "Sign up— FOR FREE.",
         "third": "Choose a challenge, form a team if you want, begin at Step 1 end at Step 5—and transform research into impact. Yes, for free. Have fun."
       }
     },
     "intro": {
-      "title": "NewWorld Game Overview",
-      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work-space and innovation lab for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
+      "title": "Global Solutions Lab Overview",
+      "paragraph1": "The Global Solutions Lab is a platform, an AI-empowered work-space and innovation lab for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
       "paragraph2": "Its goal is to help you and your work have real impact— to change the world— by providing you and your organization with space and tools for developing solutions to the problems and issues you are charged with dealing with.",
-      "paragraph3": "The NewWorld Game is where you develop solutions to global and/or local real-world problems— and figure out the best paths for achieving the SDGs. All made possible by the creative combination of AI and human intelligence.",
+      "paragraph3": "The Global Solutions Lab is where you develop solutions to global and/or local real-world problems— and figure out the best paths for achieving the SDGs. All made possible by the creative combination of AI and human intelligence.",
       "learnMore": "Learn more."
     },
     "included": {
@@ -472,8 +473,8 @@
       "subtitle": "",
       "cards": {
         "fullAccess": {
-          "title": "Full NWG Feature Access",
-          "description": "Access to all NWG features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full GSL Feature Access",
+          "description": "Access to all GSL features, including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "dashboard": {
           "title": "Guided Strategic Design Process",
@@ -488,7 +489,7 @@
           "description": "Peer review that deepens learning while strengthening solutions."
         },
         "tournament": {
-          "title": "Access to the NewWorld Tournament",
+          "title": "Access to the Global Solutions Lab Tournament",
           "description": "Move from classroom pilots to national and global recognition with tournament entries."
         },
         "support": {
@@ -529,7 +530,7 @@
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring NWG, sign up and begin your work, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring GSL, sign up and begin your work, or reach out so we can walk through the platform together."
     }
   },
   "landingCommunity": {
@@ -538,15 +539,15 @@
       "contact": "Contact Us",
       "startFree": "Start Free",
       "signUp": "Sign Up",
-      "downloadGuide": "Download a Guide for Exploring NWG",
+      "downloadGuide": "Download a Guide for Exploring GSL",
       "exploreAi": "Explore All AI Colleagues"
     },
     "hero": {
-      "title": "NewWorld Game for Your Community",
+      "title": "Global Solutions Lab for Your Community",
       "subtitle": "Add a new dimension to your community— a state-of-the-art Community Innovation Lab fully staffed with expert AI researchers who work super-fast, answer your questions with surprising depth and breath, and lead to innovative solutions to the critical problems on which you're working."
     },
     "whatYouGet": {
-      "title": "What Your Get With NewWorld Game's AI for Communities",
+      "title": "What Your Get With Global Solutions Lab's AI for Communities",
       "cards": {
         "strategicPlanning": {
           "title": "State-of-the-art Strategic Planning",
@@ -561,8 +562,8 @@
           "description": "Choose from a spectrum of AI assistants (from a notable collection of \"Elders\" to a gang of contemporary researchers from around their world, each with a special skill set) to help in your work"
         },
         "fullAccess": {
-          "title": "Full NWG Feature Access",
-          "description": "Full NWG Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
+          "title": "Full GSL Feature Access",
+          "description": "Full GSL Feature Access— including AIs, Team video channel, peer review, Global Data and State of the World Reports, Solutions Libraries, etc."
         },
         "collaboration": {
           "title": "Team Collaboration Tools",
@@ -570,7 +571,7 @@
         },
         "dashboard": {
           "title": "Private Dashboard for Each Community",
-          "description": "Keep every project you use NWG for organized with a dedicated workspace."
+          "description": "Keep every project you use GSL for organized with a dedicated workspace."
         }
       }
     },
@@ -604,16 +605,16 @@
     "simple": {
       "title": "AS SIMPLE AS . . .",
       "items": {
-        "first": "You: Explore, test and use NewWorld Game— for free. See how it can be used in your work.",
+        "first": "You: Explore, test and use Global Solutions Lab— for free. See how it can be used in your work.",
         "second": "Sign up— FOR FREE. (link to sign up page)",
         "third": "Choose a challenge, form teams, begin at Step 1 end at Step 5—and transform learning into impact. Yes, for free. Have fun."
       }
     },
     "intro": {
       "title": "NEWWORLD GAME IS . . .",
-      "paragraph1": "The NewWorld Game is a platform, an AI-empowered work-space and innovation lab for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
+      "paragraph1": "The Global Solutions Lab is a platform, an AI-empowered work-space and innovation lab for discovery and developing solutions to real-world problems—and getting those solutions implemented.",
       "paragraph2": "Its goal is to help you and your work have real impact— to change the world— by providing you and your organization with space and tools for developing solutions to the problems and issues you are charged with dealing with.",
-      "paragraph3": "The NewWorld Game is where you develop solutions to global and/or local real-world problems— and determine the best paths for achieving them.",
+      "paragraph3": "The Global Solutions Lab is where you develop solutions to global and/or local real-world problems— and determine the best paths for achieving them.",
       "paragraph4": "All made possible by the creative combination of AI and human intelligence.",
       "learnMore": "Learn more."
     },
@@ -624,17 +625,18 @@
     "pricing": {
       "title": "COSTS",
       "free": "For now, for your community— free.",
-      "later": "For later, if NewWorld Game works for you and your community, pay us/ invest in our work what you think it is worth.",
+      "later": "For later, if Global Solutions Lab works for you and your community, pay us/ invest in our work what you think it is worth.",
       "customized": "If you want a customized, community-branded and focused version for use by everyone from high school students to community organizations, elected leaders and their staffs and everyone in between: contact us."
     },
     "finalCta": {
       "title": "Ready to explore?",
-      "subtitle": "Download a Guide for Exploring NWG, sign up and begin your work, or reach out so we can walk through the platform together."
+      "subtitle": "Download a Guide for Exploring GSL, sign up and begin your work, or reach out so we can walk through the platform together."
     }
   },
   "landingHome": {
     "hero": {
-      "tagline": "solutions to world problems with people around the world.",
+      "tagline": "Designing solutions for global and local problems.",
+      "actionLine": "solutions to world problems with people around the world.",
       "quote": "We are called to be the architects of the future, not its victims.",
       "quoteAuthor": "- Buckminster Fuller",
       "cta": "Get Started",
@@ -645,24 +647,24 @@
       "text": "We can’t build a future for our grandchildren with a system built for our grandparents.",
       "name": "António Guterres",
       "title": "United Nations Secretary-General",
-      "tagline": "We need a NewWorld. A NewWorld Game.",
+      "tagline": "Designing solutions for global and local problems.",
       "taglinePrefix": "We need a",
       "taglineSuffix": "A"
     },
     "introVideo": {
       "badge": "Watch • 2 min intro",
       "title": "Intro Video",
-      "description": "Watch a short introduction to how NewWorld Game turns bold ideas into real-world impact.",
+      "description": "Watch a short introduction to how Global Solutions Lab turns bold ideas into real-world impact.",
       "cta": "Watch on YouTube",
       "cornerLabel": "Intro Video",
-      "caption": "Short, visual overview of NewWorld Game."
+      "caption": "Short, visual overview of Global Solutions Lab."
     },
     "challenge": {
       "badge": "Bold ideas • Real impact",
-      "title": "NewWorld Game: Shape the Future",
-      "description": "NewWorld Game is a challenge like you’ve never seen—powered by boldness, creativity, collaboration, and a sense of fun. It’s where your vision builds the future you want. You’re not the victim—you’re the challenger.",
+      "title": "Global Solutions Lab: Shape the Future",
+      "description": "Global Solutions Lab is a challenge like you’ve never seen—powered by boldness, creativity, collaboration, and a sense of fun. It’s where your vision builds the future you want. You’re not the victim—you’re the challenger.",
       "calloutTitle": "It’s not a fantasy game—it's real.",
-      "calloutText": "You don’t need luck to win. You need a clear idea of the world you want and the courage to make it real. NewWorld Game will show you how—and you’ll show the world what you can do.",
+      "calloutText": "You don’t need luck to win. You need a clear idea of the world you want and the courage to make it real. Global Solutions Lab will show you how—and you’ll show the world what you can do.",
       "support": "Compete with the so-called “leaders” to solve the problems you care about—political, social, economic, environmental. The rewards? For you and for the world.",
       "traits": {
         "boldness": "Boldness",
@@ -679,7 +681,7 @@
     "sdgs": {
       "badge": "UN SDGs • Global Impact",
       "title": "SDGs you can achieve",
-      "description": "The UN’s Sustainable Development Goals (SDGs) aim to transform our world—ending poverty and inequality, protecting the planet, and ensuring health, justice, and prosperity for all. The NewWorld Game helps you design concrete, actionable ways to advance them.",
+      "description": "The UN’s Sustainable Development Goals (SDGs) aim to transform our world—ending poverty and inequality, protecting the planet, and ensuring health, justice, and prosperity for all. The Global Solutions Lab helps you design concrete, actionable ways to advance them.",
       "badges": {
         "noPoverty": "1 • No Poverty",
         "goodHealth": "3 • Good Health",
@@ -687,7 +689,7 @@
         "energy": "7 • Clean Energy",
         "climate": "13 • Climate Action"
       },
-      "cta": "Support NewWorld Game",
+      "cta": "Support Global Solutions Lab",
       "imageCaption": "Built for real-world impact with the UN SDGs in mind.",
       "imageAlt": "UN Sustainable Development Goals graphic"
     },
@@ -702,7 +704,7 @@
     },
     "testimonials": {
       "title": "What People Are Saying",
-      "subtitle": "Real feedback from educators, students, and collaborators of the NewWorld Game.",
+      "subtitle": "Real feedback from educators, students, and collaborators of the Global Solutions Lab.",
       "cta": "Watch video testimonials",
       "cards": {
         "one": {
@@ -712,7 +714,7 @@
           "role": "Drexel University"
         },
         "two": {
-          "quote": "Your tools and collaborative mindset are a perfect fit for what we’re learning. It's great to see someone so deeply connected to NewWorld Game and eager to support others.",
+          "quote": "Your tools and collaborative mindset are a perfect fit for what we’re learning. It's great to see someone so deeply connected to Global Solutions Lab and eager to support others.",
           "initials": "CB",
           "name": "C.B.",
           "role": "Participant"
@@ -724,7 +726,7 @@
           "role": "Educator"
         },
         "four": {
-          "quote": "Thanks so much for the help and insight you're bringing. Looking forward to learning more about NewWorld Game this quarter.",
+          "quote": "Thanks so much for the help and insight you're bringing. Looking forward to learning more about Global Solutions Lab this quarter.",
           "initials": "BS",
           "name": "B.S.",
           "role": "Student"
@@ -740,21 +742,21 @@
     "design": {
       "badge": "Design Science • Methodology",
       "title": "Design Science",
-      "description": "Design Science is the methodology used by NewWorld Game for developing life-preserving and enhancing solutions to society's problems. This methodology is inspired by the work of Buckminster Fuller and others through the World Game and Global Solutions Lab—on which the NewWorld Game is based. For details see Tools For Changing the World—A Design Science Primer.",
+      "description": "Design Science is the methodology used by Global Solutions Lab for developing life-preserving and enhancing solutions to society's problems. This methodology is inspired by the work of Buckminster Fuller and others through the World Game and Global Solutions Lab—on which the Global Solutions Lab is based. For details see Tools For Changing the World—A Design Science Primer.",
       "imageCaption": "A practical methodology for world-changing solutions.",
       "cta": "Read the Primer"
     },
     "cta": {
       "badge": "Start solving real problems",
-      "title": "Try NewWorld Game Now",
+      "title": "Try Global Solutions Lab Now",
       "description": "Start solving problems and making a difference.",
       "cta": "Get Started"
     }
   },
   "welcomeFlow": {
     "steps": {
-      "intro": "Hi, I am Bucky, your NewWorld Game AI colleague. To start the NewWorld Game, let's build a solution environment just for you.",
-      "focusQuestion": "What is your focus for using NewWorld Game?",
+      "intro": "Hi, I am Bucky, your Global Solutions Lab AI colleague. To start the Global Solutions Lab, let's build a solution environment just for you.",
+      "focusQuestion": "What is your focus for using Global Solutions Lab?",
       "imagePlaceholder": "",
       "sdgPrompt": "Select all Sustainable Development Goals (SDGs) that interest you.",
       "namePrompt": "Enter your first and last name.",
@@ -789,7 +791,7 @@
     },
     "terms": {
       "title": "Terms and Conditions",
-      "body": "NewWorld Game will not, under any circumstances, release, sell, or make available to anyone for any reason any information obtained during your interactions with NewWorld Game. The solutions written on the platform will be made public for the world to see and use for the benefit of the world.",
+      "body": "Global Solutions Lab will not, under any circumstances, release, sell, or make available to anyone for any reason any information obtained during your interactions with Global Solutions Lab. The solutions written on the platform will be made public for the world to see and use for the benefit of the world.",
       "checkboxTerms": {
         "prefix": "I agree with the",
         "link": "terms and conditions"
@@ -835,34 +837,34 @@
   "overviewPage": {
     "metadata": {
       "authorName": "Medard Gabel",
-      "authorTitle": "EarthGame Inc Director, NewWorld Game Designer",
+      "authorTitle": "EarthGame Inc Director, Global Solutions Lab Designer",
       "date": "Dec. 15, 2023"
     },
     "intro": {
-      "heading": "Welcome to the NewWorld Game.",
-      "paragraph1": "The NewWorld Game is a game like you have never played before. Yes, there are some rules (including think outside the box), goals and winning conditions (most set by the players), challenges (real-world problems), outcomes (impacts in the real world), interaction, and fun. NewWorld Game platform is a work- and play-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented. Its goal is to have real impact—to change the world—by providing you and millions of other like-minded creative individuals with space and tools for developing solutions to the problem and issues about which you care. It is a place that focuses your creativity, experience, values, and perspective on problems and issues that matter—and provides you a set of tools, and how to use them, that lead to new paths of action and impact—to strategic designs, plans, and solutions that are viable, regenerative, inclusive, resilient, and cost-effective—and that get implemented. That it is also fun, helps.",
-      "paragraph2": "The NewWorld Game’s name draws on its history as being a direct descendant and outgrowth of the original World Game that was inspired by and based on the work and vision of Buckminster Fuller. Its developers worked with Fuller on the first iterations of the World Game. It points to the need for a new world, one that not only replaces the old world, but makes new options and solutions that engender new possibilities for everyone. The NewWorld Game does this by empowering you with ways of developing new options for a better future that works for all life on Earth, not just those with large quantities of money and the delusion of thinking they are in control.",
+      "heading": "Welcome to the Global Solutions Lab.",
+      "paragraph1": "The Global Solutions Lab is a game like you have never played before. Yes, there are some rules (including think outside the box), goals and winning conditions (most set by the players), challenges (real-world problems), outcomes (impacts in the real world), interaction, and fun. Global Solutions Lab platform is a work- and play-space, for discovery and developing solutions to real-world problems—and getting those solutions implemented. Its goal is to have real impact—to change the world—by providing you and millions of other like-minded creative individuals with space and tools for developing solutions to the problem and issues about which you care. It is a place that focuses your creativity, experience, values, and perspective on problems and issues that matter—and provides you a set of tools, and how to use them, that lead to new paths of action and impact—to strategic designs, plans, and solutions that are viable, regenerative, inclusive, resilient, and cost-effective—and that get implemented. That it is also fun, helps.",
+      "paragraph2": "The Global Solutions Lab’s name draws on its history as being a direct descendant and outgrowth of the original World Game that was inspired by and based on the work and vision of Buckminster Fuller. Its developers worked with Fuller on the first iterations of the World Game. It points to the need for a new world, one that not only replaces the old world, but makes new options and solutions that engender new possibilities for everyone. The Global Solutions Lab does this by empowering you with ways of developing new options for a better future that works for all life on Earth, not just those with large quantities of money and the delusion of thinking they are in control.",
       "figureCaption": "Medard Gabel and children prepare for World Game Presentation on the world’s largest world map."
     },
     "sections": {
       "ideasHeading": "Turn Your Ideas into Real Solutions",
       "partsHeading": "1. Parts and Wholes",
-      "partsText": "The NewWorld Game (NWG) takes technological advancements of the 21st century and creatively couples them with the design science engine that was used to play the original World Game “longhand” in the month-long World Game workshops and shorter in-person and online Global Solutions Labs. It couples an easy-to-use interface with AI, an empowered methodology for developing real-world solutions, comprehensive world statistical resources, solution libraries, and a community of problem solvers. It builds and leverages the power of a diverse, collaborative, cross-cultural, multi-disciplinary, and intergenerational global community with linkages to real organizations implementing solutions.",
+      "partsText": "The Global Solutions Lab (GSL) takes technological advancements of the 21st century and creatively couples them with the design science engine that was used to play the original World Game “longhand” in the month-long World Game workshops and shorter in-person and online Global Solutions Labs. It couples an easy-to-use interface with AI, an empowered methodology for developing real-world solutions, comprehensive world statistical resources, solution libraries, and a community of problem solvers. It builds and leverages the power of a diverse, collaborative, cross-cultural, multi-disciplinary, and intergenerational global community with linkages to real organizations implementing solutions.",
       "roleHeading": "2. Your Role",
-      "roleText": "Your role, and challenge, in the NewWorld Game is to develop solutions to global and local problems. You also have a critical role to play in making other teams’ solutions better. You will be chosen, at random, to be an Evaluator of other strategies. Here you will have the opportunity to learn what other teams are doing and help make their work better. You win (we all win) when your solution gets through the Peer Review process and enters the NewWorld Tournament and is added to the NewWorld Solutions Library.<br><br>Ideally, you develop your solution as part of a team, but it is possible to play the NewWorld Game alone. The fact that you are here is important. On several levels—for the world, for you, and for the community you will be a part of as you work together on what you care about. Thank you.",
+      "roleText": "Your role, and challenge, in the Global Solutions Lab is to develop solutions to global and local problems. You also have a critical role to play in making other teams’ solutions better. You will be chosen, at random, to be an Evaluator of other strategies. Here you will have the opportunity to learn what other teams are doing and help make their work better. You win (we all win) when your solution gets through the Peer Review process and enters the Global Solutions Lab Tournament and is added to the Global Solutions Lab Solutions Library.<br><br>Ideally, you develop your solution as part of a team, but it is possible to play the Global Solutions Lab alone. The fact that you are here is important. On several levels—for the world, for you, and for the community you will be a part of as you work together on what you care about. Thank you.",
       "pdfPrefix": "This",
       "pdfLink": "link",
-      "pdfSuffix": "will take you to a PDF that provides more details on what NWG is, can do, special features, history, and its possible uses by organizations and schools."
+      "pdfSuffix": "will take you to a PDF that provides more details on what GSL is, can do, special features, history, and its possible uses by organizations and schools."
     }
   },
   "createSolution": {
     "steps": {
-      "intro": "Welcome to the NewWorld Game!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global problem on which you choose to work. Let’s start.",
-      "focusArea": "What is the NewWorld Game Solution General Focus Area?",
+      "intro": "Welcome to the Global Solutions Lab!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global problem on which you choose to work. Let’s start.",
+      "focusArea": "What is the Global Solutions Lab Solution General Focus Area?",
       "projectTitle": "Provide a starting title to your project. You can change it later as your work progresses.",
       "problemDescription": "In a few words, how would you describe the specific problem you're focusing on, and the opportunity its solution presents.",
-      "teamMembers": "If there is a team, list its members, and add their emails below. (This enables communication between team members and, as per NWG Privacy Policy, their information will remain private.)",
-      "evaluators": "Add below NWG members that you want to be reviewers/evaluators of your team’s work. (The names you supply will be supplemented by others chosen at random from other NWG members.)",
+      "teamMembers": "If there is a team, list its members, and add their emails below. (This enables communication between team members and, as per GSL Privacy Policy, their information will remain private.)",
+      "evaluators": "Add below GSL members that you want to be reviewers/evaluators of your team’s work. (The names you supply will be supplemented by others chosen at random from other GSL members.)",
       "sdgs": "Select any Sustainable Development Goals (SDGs) that are related to your chosen problem area.",
       "submit": "Almost done! Submit to start solving your new solution."
     },
@@ -988,11 +990,11 @@
   },
   "operatingManual": {
     "title": "Operating Manual",
-    "subtitle": "Quick reads and walkthroughs for NewWorld Game.",
+    "subtitle": "Quick reads and walkthroughs for Global Solutions Lab.",
     "cards": {
       "howToUse": {
-        "title": "How To Use NewWorld Game",
-        "desc": "A cheatsheet for everything in the NewWorld Game web application.",
+        "title": "How To Use Global Solutions Lab",
+        "desc": "A cheatsheet for everything in the Global Solutions Lab web application.",
         "cta": "Read in 3 minutes"
       },
       "about": {
@@ -1001,7 +1003,7 @@
         "cta": "Read in 3 minutes"
       },
       "solutionTour": {
-        "title": "NewWorld Game Solution Tour",
+        "title": "Global Solutions Lab Solution Tour",
         "desc": "A step-by-step guide to solving problems on the platform.",
         "cta": "Read in 5 minutes"
       },
@@ -1024,15 +1026,15 @@
       },
       "stepsTour": {
         "title": "Step I–V AI Tour",
-        "desc": "AI tour of Step I–V of the NewWorld Game."
+        "desc": "AI tour of Step I–V of the Global Solutions Lab."
       },
       "evaluator": {
-        "title": "NewWorld Game Evaluator",
+        "title": "Global Solutions Lab Evaluator",
         "desc": "Join the design team that reviews and strengthens solutions.",
         "cta": "Read in 2 minutes"
       },
       "tournament": {
-        "title": "NewWorld Tournament",
+        "title": "Global Solutions Lab Tournament",
         "desc": "An exciting option for all players/designers in the Game.",
         "cta": "Read in 3 minutes"
       },
@@ -1042,7 +1044,7 @@
         "cta": "Read in 5 minutes"
       },
       "nwgAi": {
-        "title": "NewWorld Game AI",
+        "title": "Global Solutions Lab AI",
         "desc": "LLMs assist across the solution design workflow.",
         "cta": "Read in ~3 minutes"
       },
@@ -1052,7 +1054,7 @@
         "cta": "Watch on YouTube"
       },
       "news": {
-        "title": "NewWorld News",
+        "title": "Global Solutions Lab News",
         "desc": "Weekly updates on solutions being developed."
       },
       "askBucky": {
@@ -1065,7 +1067,7 @@
       },
       "worldGame": {
         "title": "World Game",
-        "desc": "Predecessor and inspiration for NewWorld Game.",
+        "desc": "Predecessor and inspiration for Global Solutions Lab.",
         "cta": "Read in 2 minutes"
       }
     }
@@ -1152,7 +1154,7 @@
   "broadcasts": {
     "hero": {
       "title": "You are Invited to Join These Challenges!",
-      "subtitle": "Discover solutions currently inviting collaborators across NewWorld Game.",
+      "subtitle": "Discover solutions currently inviting collaborators across Global Solutions Lab.",
       "filters": {
         "searchPlaceholder": "Search by title, pitch, author…",
         "allStatuses": "All statuses",
@@ -1187,12 +1189,12 @@
   },
   "joinTournament": {
     "hero": {
-      "title": "NewWorld Tournament: Real Solutions Start Here",
-      "announcementPrefix": "The winning team of the 2024 NewWorld Tournament has been announced — congratulations to the ",
+      "title": "Global Solutions Lab Tournament: Real Solutions Start Here",
+      "announcementPrefix": "The winning team of the 2024 Global Solutions Lab Tournament has been announced — congratulations to the ",
       "winnerName": "Electrifying Health Clinics in the Democratic Republic of Congo",
       "announcementSuffix": " team! Their solution is now moving from concept to implementation.",
       "beginning": "But this is just the beginning.",
-      "invitation": "The NewWorld Tournament is your chance to take bold ideas from game to reality. Whether you want to join a challenge, start a new tournament, or explore past winners, this is where innovation meets action.",
+      "invitation": "The Global Solutions Lab Tournament is your chance to take bold ideas from game to reality. Whether you want to join a challenge, start a new tournament, or explore past winners, this is where innovation meets action.",
       "prompt": "👇 Ready to make an impact?",
       "cta": "Choose an option below to get started."
     },
@@ -1242,7 +1244,7 @@
   },
   "discover": {
     "hero": {
-      "title": "NewWorld Game General Assembly",
+      "title": "Global Solutions Lab General Assembly",
       "subtitle": "Discover and support innovative solutions already developed by our community to address local and global challenges."
     },
     "categories": {
@@ -1303,15 +1305,15 @@
       "heading": "Our Human Team Includes",
       "members": {
         "medard": {
-          "title": "Director of EarthGame, NewWorld Game Designer",
+          "title": "Director of EarthGame, Global Solutions Lab Designer",
           "description": "Medard is the executive director of the non-profit research and development organization EarthGame and founding director of the World Game Institute. He also leads BigPictureSmallWorld and the Global Solutions Lab and is author of books on the global energy and food situations, multinational corporations, and strategic planning, and editor of three volumes of books on global options."
         },
         "jim": {
-          "title": "Head of AI, NewWorld Game Designer",
-          "description": "Jim oversees all AI development at EarthGame and is one of the creative minds shaping NewWorld Game’s experiences."
+          "title": "Head of AI, Global Solutions Lab Designer",
+          "description": "Jim oversees all AI development at EarthGame and is one of the creative minds shaping Global Solutions Lab’s experiences."
         },
         "edmond": {
-          "title": "Lead Developer, NewWorld Game Designer",
+          "title": "Lead Developer, Global Solutions Lab Designer",
           "description": "Edmond leads software development, focusing on scalable architecture, team support, and delivering reliable, high-quality releases."
         },
         "rain": {
@@ -1326,7 +1328,7 @@
     },
     "ai": {
       "heading": "Our AI Team",
-      "subheading": "The AI Team from NewWorld Game",
+      "subheading": "The AI Team from Global Solutions Lab",
       "cta": "Chat with the AIs",
       "members": {
         "zara": {
@@ -1355,7 +1357,7 @@
   },
   "contactPage": {
     "heading": "Contact Us",
-    "description": "Have a question about NewWorld Game and how you can use or customize it? Got a technical issue? Want to send feedback about a beta feature? Need details about supporting NewWorld Game? Let us know.",
+    "description": "Have a question about Global Solutions Lab and how you can use or customize it? Got a technical issue? Want to send feedback about a beta feature? Need details about supporting Global Solutions Lab? Let us know.",
     "emailPrompt": "Send us an email at",
     "alerts": {
       "completeFields": "Complete all fields",
@@ -1364,23 +1366,23 @@
   },
   "privacyPage": {
     "heading": "Privacy Policy",
-    "paragraph1": "NewWorld Game will not, under any circumstances, release, sell, or make available to anyone for any reason any personal information obtained during your interactions with NewWorld Game.",
+    "paragraph1": "Global Solutions Lab will not, under any circumstances, release, sell, or make available to anyone for any reason any personal information obtained during your interactions with Global Solutions Lab.",
     "paragraph2": "The solutions written on the platform will be made public for the world to see and use for the benefit of the world.",
     "imageAlt": "Privacy illustration"
   },
   "careersPage": {
-    "heading": "Internship at NewWorld Game",
-    "intro": "At NewWorld Game, we are on the lookout for talented individuals passionate about shaping the future. Our team is growing, and we invite professionals and enthusiasts from various backgrounds to contribute their unique skills and perspectives.",
+    "heading": "Internship at Global Solutions Lab",
+    "intro": "At Global Solutions Lab, we are on the lookout for talented individuals passionate about shaping the future. Our team is growing, and we invite professionals and enthusiasts from various backgrounds to contribute their unique skills and perspectives.",
     "seeking": "We Are Seeking:",
     "roles": {
       "engineering": "Software Engineers with a robust understanding of web frameworks, such as Angular.",
       "design": "UI/UX Designers who are creative and have an eye for designing intuitive and user-friendly interfaces.",
-      "research": "Researchers who want to expand NewWorld Game resources—solutions, statistical data, AI tools, and more.",
-      "education": "Educators and Marketing Professionals interested in growing the NewWorld Game community across schools, NGOs, communities, and governments.",
+      "research": "Researchers who want to expand Global Solutions Lab resources—solutions, statistical data, AI tools, and more.",
+      "education": "Educators and Marketing Professionals interested in growing the Global Solutions Lab community across schools, NGOs, communities, and governments.",
       "students": "Students eager to learn and ready to tackle complex challenges."
     },
     "cta": "If you align with any of the above, send your résumé (and optional cover letter) to",
-    "closing": "Join us at NewWorld Game, where innovation meets collaboration. Together, we can create solutions that make a difference.",
+    "closing": "Join us at Global Solutions Lab, where innovation meets collaboration. Together, we can create solutions that make a difference.",
     "imageAlt1": "Team collaboration illustration",
     "imageAlt2": "Team working illustration"
   },
@@ -1400,8 +1402,8 @@
     }
   },
   "askFeedback": {
-    "title": "NewWorld Game — Feedback",
-    "description": "After completing a full solution on NWG, please answer the questions below. Your input helps us make NWG better.",
+    "title": "Global Solutions Lab — Feedback",
+    "description": "After completing a full solution on GSL, please answer the questions below. Your input helps us make GSL better.",
     "yourInformation": "Your information",
     "firstName": "First name",
     "lastName": "Last name",
@@ -1410,14 +1412,14 @@
     "lastNameRequired": "Last name is required.",
     "emailRequired": "Valid email is required.",
     "questionA": {
-      "title": "What do you think of NewWorld Game (NWG)?",
+      "title": "What do you think of Global Solutions Lab (GSL)?",
       "description": "Did you like it? Can it help develop solutions to global/local problems—including developing businesses, products, or services that support the SDGs? What else do you think?",
       "placeholder": "Share your thoughts…",
       "minLength": "Please add at least 20 characters.",
       "chars": "chars"
     },
     "questionC": {
-      "title": "What would you add to NWG to make it better, more useful, easier to use?",
+      "title": "What would you add to GSL to make it better, more useful, easier to use?",
       "placeholder": "Features, UI ideas, integrations, anything…",
       "minLength": "Please add at least 5 characters."
     },
@@ -1430,7 +1432,7 @@
       "selectOne": "Please select one option."
     },
     "questionG": {
-      "title": "Are there problems or issues you could use NWG for developing solutions?",
+      "title": "Are there problems or issues you could use GSL for developing solutions?",
       "placeholder": "Briefly describe the problems/issues…",
       "required": "This field is required.",
       "resourcesTitle": "Did you use any of the following?",
@@ -1443,7 +1445,7 @@
         "askBuckyPrompts": "Ask Bucky Prompts for Implementation",
         "toolsBook": "Tools for Changing the World book"
       },
-      "resourcesPlaceholder": "Other NWG tools or resources you used, plus anything useful you learned from them…",
+      "resourcesPlaceholder": "Other GSL tools or resources you used, plus anything useful you learned from them…",
       "videoChatTitle": "Did you use your team’s video chat room? If so, how did you use it?",
       "videoChatPlaceholder": "Tell us whether you used the video chat room and how it helped or did not help…"
     },
@@ -1464,7 +1466,7 @@
       "title": "What else would you like to add?",
       "enoughTimeTitle": "Did you have enough time to work on your solution?",
       "enoughTimePlaceholder": "Tell us whether the time available was enough and what would have helped…",
-      "capabilitiesTitle": "What additional NWG capabilities or functions would be helpful to your work?",
+      "capabilitiesTitle": "What additional GSL capabilities or functions would be helpful to your work?",
       "capabilitiesPlaceholder": "Capabilities, functions, tools, data, workflows, or support that would help…",
       "moreTitle": "Anything else you would like to add?",
       "placeholder": "Anything else we missed…",
@@ -1502,8 +1504,8 @@
     "startSolution": "Start Solution",
     "deleteChallenge": "Delete Challenge",
     "welcomeTitle": "Welcome to Your Challenge",
-    "intro1": "This challenge is part of the NewWorld Game, a platform designed to turn your bold ideas into implementable solutions to real-world problems. Here, your creativity, experience, and values come together with proven tools, methodologies, reliable data, possible partners and funding to design, develop and implement solutions that are inclusive, sustainable, and impactful.",
-    "intro2": "The NewWorld Game empowers individuals like you to envision a better future and develop your ideas into strategies that work for everyone, not just a select few.",
+    "intro1": "This challenge is part of the Global Solutions Lab, a platform designed to turn your bold ideas into implementable solutions to real-world problems. Here, your creativity, experience, and values come together with proven tools, methodologies, reliable data, possible partners and funding to design, develop and implement solutions that are inclusive, sustainable, and impactful.",
+    "intro2": "The Global Solutions Lab empowers individuals like you to envision a better future and develop your ideas into strategies that work for everyone, not just a select few.",
     "intro3": "As you embark on this challenge, remember: every solution starts with one idea. Your journey here is part of a larger global effort to address challenges that matter and make meaningful change.",
     "outro": "Let's get started. Your ideas could shape a brighter future.",
     "solutionCreated": "Solution Lab Created Successfully.",

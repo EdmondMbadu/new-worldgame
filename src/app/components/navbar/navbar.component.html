@@ -91,16 +91,21 @@
       <!-- Logo Image -->
       <img
         class="w-12 shrink-0 rounded-lg shadow-lg sm:w-16 md:w-20"
-        src="../../../assets/img/earth-triangle-test.png"
+        src="../../../assets/img/gsl-logo.png"
         [attr.alt]="'navbar.logoAlt' | translate"
       />
 
       <!-- Logo Text -->
-      <h1
-        class="hidden truncate md:block md:text-3xl font-bold bg-gradient-to-r to-emerald-600 from-sky-400 bg-clip-text text-transparent drop-shadow-lg"
-      >
-        {{ "navbar.brand" | translate }}
-      </h1>
+      <div class="hidden min-w-0 md:flex md:flex-col">
+        <h1
+          class="truncate text-2xl font-bold bg-gradient-to-r to-emerald-600 from-sky-400 bg-clip-text text-transparent drop-shadow-lg lg:text-3xl"
+        >
+          {{ "navbar.brand" | translate }}
+        </h1>
+        <p class="hidden truncate text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300 lg:block">
+          {{ "navbar.tagline" | translate }}
+        </p>
+      </div>
     </div>
 
     <!-- <a *ngIf="currenPageLabBanner" routerLink="/global-lab" class="hidden md:inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-teal-900 bg-teal-100 rounded-full dark:bg-teal-900 dark:text-white hover:bg-teal-200 dark:hover:bg-teal-800" role="alert">
@@ -442,15 +447,16 @@
               <img
                 routerLink="/home"
                 class="w-12 h-12 rounded-lg shadow-lg"
-                src="../../../assets/img/earth-triangle-test.png"
+                src="../../../assets/img/gsl-logo.png"
                 [attr.alt]="'navbar.logoAlt' | translate"
               />
               <!-- Logo Text -->
-              <span
-                routerLink="/home"
-                class="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent drop-shadow-lg to-emerald-600 from-sky-400"
-              >
-                {{ "navbar.brand" | translate }}
+              <span routerLink="/home" class="min-w-0">
+                <span
+                  class="block truncate text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent drop-shadow-lg to-emerald-600 from-sky-400"
+                >
+                  GSL
+                </span>
               </span>
             </div>
             <button (click)="toggleAside()">
@@ -1010,7 +1016,7 @@
           </button>
         </div>
         <p class="mb-3 text-sm text-blue-800 dark:text-blue-400">
-          The NewWorld Game site is currently in beta mode. We are improving the
+          The Global Solutions Lab site is currently in beta mode. We are improving the
           site and implementing new features.
         </p>
         <a
@@ -1339,7 +1345,7 @@
               />
             </svg>
 
-            <!-- <span class="flex-1 ms-3 whitespace-nowrap">NWG Solution Tour</span> -->
+            <!-- <span class="flex-1 ms-3 whitespace-nowrap">GSL Solution Tour</span> -->
           </a>
         </li>
         <li>
@@ -1367,7 +1373,7 @@
               />
             </svg>
 
-            <!-- <span class="flex-1 ms-3 whitespace-nowrap">NWG Solution Tour</span> -->
+            <!-- <span class="flex-1 ms-3 whitespace-nowrap">GSL Solution Tour</span> -->
           </a>
         </li>
         <li *ngIf="hasSchoolAccess">
@@ -1412,7 +1418,7 @@
     >
       <img
         class="w-12 rounded-lg shadow-sm"
-        src="../../../assets/img/earth-triangle-test.png"
+        src="../../../assets/img/gsl-logo.png"
         alt=""
       />
     </div>

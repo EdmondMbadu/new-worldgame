@@ -339,7 +339,7 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
         this.afs.doc(`schools/${schoolId}`).get()
       );
       const schoolData = schoolDoc.data() as any;
-      const schoolName = schoolData?.name || 'New World Game School';
+      const schoolName = schoolData?.name || 'Global Solutions Lab School';
       const schoolWebsite = schoolData?.website || schoolData?.meta?.website || '';
 
       // Build the school page URL
@@ -391,9 +391,9 @@ export class SchoolDashboardComponent implements OnInit, OnDestroy {
 
           const emailData = {
             email,
-            subject: `You've been invited to join ${schoolName} on New World Game`,
+            subject: `You've been invited to join ${schoolName} on Global Solutions Lab`,
             title: `Welcome to ${schoolName}`,
-            description: `You have been invited by ${adminName} to join ${schoolName} on New World Game. New World Game is an innovative platform for collaborative problem-solving and learning.`,
+            description: `You have been invited by ${adminName} to join ${schoolName} on Global Solutions Lab. Global Solutions Lab is an innovative platform for collaborative problem-solving and learning.`,
             path: schoolPageUrl,
             image: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/emails-hero%2Fhero-college-2.png?alt=media&token=3242573b-13b5-40ef-a29d-8a46f9ed2812',
             author: adminName,

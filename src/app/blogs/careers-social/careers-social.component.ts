@@ -9,7 +9,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 })
 export class CareersSocialComponent implements OnInit {
   email = 'newworld@newworld-game.org';
-  subject = 'NWG Social Media Fellow – Your Name';
+  subject = 'GSL Social Media Fellow – Your Name';
   copied = false;
 
   get mailto() {

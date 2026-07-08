@@ -211,7 +211,7 @@ export class ProblemListViewComponent implements OnInit {
     return (
       this.weeklyBriefSelectedSolution?.title ||
       this.auth.currentUser.weeklyBriefSolutionTitle ||
-      'Use NewWorld Game fallback'
+      'Use Global Solutions Lab fallback'
     );
   }
 

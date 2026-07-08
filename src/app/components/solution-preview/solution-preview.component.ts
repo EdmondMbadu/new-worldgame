@@ -127,7 +127,7 @@ export class SolutionPreviewComponent implements OnInit {
       user?.email ||
       comment?.authorName ||
       comment?.email ||
-      'NewWorld Game member'
+      'Global Solutions Lab member'
     );
   }
 
@@ -320,13 +320,13 @@ export class SolutionPreviewComponent implements OnInit {
 
       window.open(url, '_blank');
     } else if (social === 'twitter') {
-      const message = `Hi! I've recently developed a NewWorld Game solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
+      const message = `Hi! I've recently developed a Global Solutions Lab solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
       const encodedMessage = encodeURIComponent(message);
       const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view-external/${this.currentSolution.solutionId}&text=${encodedMessage}`;
 
       window.open(url, '_blank');
     } else if (social === 'email') {
-      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
+      const url = `mailto:?subject=Global Solutions Lab Solution Invitation &body=Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
       window.open(url, '_blank');
     } else if (social === 'linkedin') {
       const linkedInMessage = `Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
@@ -445,7 +445,7 @@ export class SolutionPreviewComponent implements OnInit {
     this.teamMembers.forEach((evaluator) => {
       const emailData = {
         email: evaluator.email,
-        subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} has commented on your NewWorld Game solution: ${this.currentSolution.title}`,
+        subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} has commented on your Global Solutions Lab solution: ${this.currentSolution.title}`,
         // title: this.myForm.value.title,
         // description: this.myForm.value.description,
         path: `https://newworld-game.org/solution-view/${this.currentSolution.solutionId}`,
@@ -496,7 +496,7 @@ export class SolutionPreviewComponent implements OnInit {
     this.evaluators.forEach((evaluator) => {
       const emailData = {
         email: evaluator.name,
-        subject: `You have been invited to evaluate the NewWorld Game solution: ...`,
+        subject: `You have been invited to evaluate the Global Solutions Lab solution: ...`,
         title: this.currentSolution.title,
         description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
         path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
@@ -558,7 +558,7 @@ export class SolutionPreviewComponent implements OnInit {
 
     // -- (A) Insert the logo at the top --
     const logoImg = document.createElement('img');
-    logoImg.src = '../../../assets/img/earth-triangle-test.png';
+    logoImg.src = '../../../assets/img/gsl-logo.png';
     logoImg.style.display = 'block';
     logoImg.style.margin = '0 auto 20px';
     logoImg.style.width = '80px';

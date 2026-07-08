@@ -98,11 +98,11 @@ export class SlpReachComponent implements OnInit, OnDestroy {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.shell.solutionTitle} | Solution Launch Reach | NewWorld Game`
-            : 'Solution Launch Reach | NewWorld Game',
+            ? `${vm.shell.solutionTitle} | Solution Launch Reach | Global Solutions Lab`
+            : 'Solution Launch Reach | Global Solutions Lab',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game reach, solution launch reach, outreach contacts, real people lookup, public contact discovery',
+            'Global Solutions Lab reach, solution launch reach, outreach contacts, real people lookup, public contact discovery',
           url: 'https://newworld-game.org/reach',
           type: 'website',
         });

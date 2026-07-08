@@ -77,7 +77,7 @@ export class GlobalLabsComponent implements OnInit {
       icon: 'psychology',
       title: 'Build a real solution with AI support',
       body:
-        'Use the NewWorld Game platform, custom-trained AIs, global data, state-of-the-world reports, and solution libraries to research and design practical strategies.',
+        'Use the Global Solutions Lab platform, custom-trained AIs, global data, state-of-the-world reports, and solution libraries to research and design practical strategies.',
     },
     {
       icon: 'groups',
@@ -95,7 +95,7 @@ export class GlobalLabsComponent implements OnInit {
       icon: 'travel_explore',
       title: 'Keep support after the Lab',
       body:
-        'Participants continue with NewWorld Game access and project support, including AI-assisted updates on research, funding, partners, and NewWorld Tournament readiness.',
+        'Participants continue with Global Solutions Lab access and project support, including AI-assisted updates on research, funding, partners, and Global Solutions Lab Tournament readiness.',
     },
   ];
 
@@ -136,7 +136,7 @@ export class GlobalLabsComponent implements OnInit {
       icon: 'bolt',
       title: 'Work that reaches implementation',
       body:
-        'A previous NewWorld Tournament award helped a DR Congo team electrify a village health clinic as proof of concept for scaling clinic power access.',
+        'A previous Global Solutions Lab Tournament award helped a DR Congo team electrify a village health clinic as proof of concept for scaling clinic power access.',
     },
   ];
 

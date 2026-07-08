@@ -195,8 +195,8 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
       ],
       aiTitle: 'AI For Good . . . For Real',
       aiParagraphs: [
-        "The 2026 Global Solutions Lab will use the latest version of the extraordinary AI-empowered research, problem-solving/solution development and implementation platform, the NewWorld Game. This platform combines the Lab's problem-solving methodology with our set of unique custom-trained AIs. There's also over 100 global statistical databases, 600+ state-of-the-world reports from every UN agency and many international research organizations, as well as a dozen+ libraries of global solutions that add additional real-world depth to any problem solving.",
-        "With your perspective, knowledge, values, and experience, the process of researching and developing new, innovative, affordable, regenerative, and immediately implementable strategies for achieving one or more of the UN SDGs will be faster, more thorough, and more creative. Plus, there's the NewWorld Tournament where the Lab's best strategies compete for prizes, adding yet another level to the Lab's work.",
+        "The 2026 Global Solutions Lab will use the latest version of the extraordinary AI-empowered research, problem-solving/solution development and implementation platform, the Global Solutions Lab. This platform combines the Lab's problem-solving methodology with our set of unique custom-trained AIs. There's also over 100 global statistical databases, 600+ state-of-the-world reports from every UN agency and many international research organizations, as well as a dozen+ libraries of global solutions that add additional real-world depth to any problem solving.",
+        "With your perspective, knowledge, values, and experience, the process of researching and developing new, innovative, affordable, regenerative, and immediately implementable strategies for achieving one or more of the UN SDGs will be faster, more thorough, and more creative. Plus, there's the Global Solutions Lab Tournament where the Lab's best strategies compete for prizes, adding yet another level to the Lab's work.",
       ],
       featureTitle: 'Everyone in the World',
       quote:
@@ -251,7 +251,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
         },
         {
           icon: '🕹️',
-          title: 'Free Access to the NewWorld Game Platform, for Life',
+          title: 'Free Access to the Global Solutions Lab Platform, for Life',
           description:
             "Join an interactive platform where you'll take on global and local challenges, get access to the latest AI tools for problem solving, collaborate with change-makers from around the world, unlock new levels of innovation, strategy, and social impact. And, after the Global Solutions Lab, continue to have access to all its current and new features, for free.",
         },
@@ -265,7 +265,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
           icon: '📖',
           title: 'Your Work Published',
           description:
-            'Your work will be featured in a published book shared with UN agencies, NGOs, universities, and global networks, putting your solution in front of global decision-makers. Additionally, the NewWorld Game platform can customize your work so it is suitable for publication as an article, Op-Ed, research report, social media post(s), funding proposal, and more.',
+            'Your work will be featured in a published book shared with UN agencies, NGOs, universities, and global networks, putting your solution in front of global decision-makers. Additionally, the Global Solutions Lab platform can customize your work so it is suitable for publication as an article, Op-Ed, research report, social media post(s), funding proposal, and more.',
         },
         {
           icon: '🌍',
@@ -308,7 +308,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
         "The Global Solutions Lab is generally focused on making real the above quote by Buckminster Fuller and specifically on solving local and global basic human need and environmental challenges, and achieving the UN's Sustainable Development Goals. It is an intense experience. Participants are expected to make a substantial time contribution every day throughout the Lab.",
       formatLabel: 'Format:',
       formatText:
-        "The Lab will be in-person and online. It will use the NewWorld Game global research and problem-solving platform for creative work. Participants can participate in a variety of formats, from as an individual to being part of an international, cross-cultural, multi-disciplinary, intergenerational, collaborative Design Team. Participant time commitment is 4 to 6 hours per day. The Lab culminates with presentations of the work to a group of corporate, philanthropic, academic, and NGO leaders.",
+        "The Lab will be in-person and online. It will use the Global Solutions Lab global research and problem-solving platform for creative work. Participants can participate in a variety of formats, from as an individual to being part of an international, cross-cultural, multi-disciplinary, intergenerational, collaborative Design Team. Participant time commitment is 4 to 6 hours per day. The Lab culminates with presentations of the work to a group of corporate, philanthropic, academic, and NGO leaders.",
       inPersonTitle: 'In-person Lab Participation',
       hostLocationLabel: 'Host & Location:',
       hostLocation:
@@ -331,7 +331,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
         'Tuition scholarships are available for a limited number of students, including international students.',
       ],
       scholarshipNote:
-        'It is our conviction that no one should be denied access to the Lab for financial reasons. Scholarship funds are limited and variable according to expenses and donations. You can contribute to the Global Solutions Lab Scholarship Fund by becoming a NewWorld Game Sponsor. See Sponsorship Opportunities for details on how you or your organization can participate.',
+        'It is our conviction that no one should be denied access to the Lab for financial reasons. Scholarship funds are limited and variable according to expenses and donations. You can contribute to the Global Solutions Lab Scholarship Fund by becoming a Global Solutions Lab Sponsor. See Sponsorship Opportunities for details on how you or your organization can participate.',
       onlineParticipationTitle: 'On-line Lab Participation',
       onlineParticipationIntro:
         "The Lab has participants from all over the world. Different parts of the world don't all have the same level of telecommunications infrastructure, so here is what you will need to participate:",
@@ -346,10 +346,10 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
       applicationCta: 'Apply Here',
     },
     winner: {
-      title: 'Previous NewWorld Tournament Winner',
+      title: 'Previous Global Solutions Lab Tournament Winner',
       projectTitle: 'Electrifying Health Clinics in Democratic Republic of Congo',
       description:
-        "The first NewWorld Tournament award went to a team in the D.R. Congo who used the award to electrify a village health clinic, where 60% of the health clinics don't have electricity. It is serving as a proof-of-concept for their solution. Next steps include scaling their solution to meet health clinic electricity needs for the rest of the country.",
+        "The first Global Solutions Lab Tournament award went to a team in the D.R. Congo who used the award to electrify a village health clinic, where 60% of the health clinics don't have electricity. It is serving as a proof-of-concept for their solution. Next steps include scaling their solution to meet health clinic electricity needs for the rest of the country.",
       linkText: 'Learn more here',
     },
     summary: {
@@ -366,7 +366,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
     },
     aiTeam: {
       title: 'Recent Additions',
-      subtitle: 'Part of the AI Team from NewWorld Game',
+      subtitle: 'Part of the AI Team from Global Solutions Lab',
       cta: 'Chat with the AIs',
       members: [
         {
@@ -408,9 +408,9 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
     },
     sponsorship: {
       title: 'Sponsorship Opportunities*',
-      note: '* NewWorld Tournament and prizes as described in the AI For Good section above.',
+      note: '* Global Solutions Lab Tournament and prizes as described in the AI For Good section above.',
       intro:
-        'The opportunities below are available for joining the NewWorld Game development team. We are a non-profit, tax-exempt organization. Any contribution helps us continue to grow and improve NewWorld Game. Thank you for your consideration.',
+        'The opportunities below are available for joining the Global Solutions Lab development team. We are a non-profit, tax-exempt organization. Any contribution helps us continue to grow and improve Global Solutions Lab. Thank you for your consideration.',
       opportunitiesCta: 'View Sponsorship Opportunities',
       donateCta: 'Donate to EarthGame',
     },
@@ -450,8 +450,8 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
       ],
       aiTitle: "L'IA au service du bien commun... pour de vrai",
       aiParagraphs: [
-        "Le Global Solutions Lab 2026 utilisera la dernière version de l’extraordinaire plateforme de recherche, de résolution de problèmes, de développement de solutions et de mise en œuvre assistée par l’IA : le NewWorld Game. Cette plateforme combine la méthodologie du laboratoire avec notre ensemble d’IA uniques entraînées sur mesure. Elle donne aussi accès à plus de 100 bases de données statistiques mondiales, à plus de 600 rapports sur l’état du monde provenant de chaque agence de l’ONU et de nombreuses organisations internationales de recherche, ainsi qu’à plus d’une douzaine de bibliothèques de solutions mondiales qui donnent encore plus de profondeur concrète à tout travail de résolution de problème.",
-        "Avec votre point de vue, vos connaissances, vos valeurs et votre expérience, le processus de recherche et de développement de stratégies nouvelles, innovantes, abordables, régénératives et immédiatement applicables pour atteindre un ou plusieurs ODD de l’ONU sera plus rapide, plus approfondi et plus créatif. Et il y a aussi le tournoi NewWorld, où les meilleures stratégies du laboratoire concourent pour des prix, ajoutant un niveau supplémentaire à l’expérience.",
+        "Le Global Solutions Lab 2026 utilisera la dernière version de l’extraordinaire plateforme de recherche, de résolution de problèmes, de développement de solutions et de mise en œuvre assistée par l’IA : le Global Solutions Lab. Cette plateforme combine la méthodologie du laboratoire avec notre ensemble d’IA uniques entraînées sur mesure. Elle donne aussi accès à plus de 100 bases de données statistiques mondiales, à plus de 600 rapports sur l’état du monde provenant de chaque agence de l’ONU et de nombreuses organisations internationales de recherche, ainsi qu’à plus d’une douzaine de bibliothèques de solutions mondiales qui donnent encore plus de profondeur concrète à tout travail de résolution de problème.",
+        "Avec votre point de vue, vos connaissances, vos valeurs et votre expérience, le processus de recherche et de développement de stratégies nouvelles, innovantes, abordables, régénératives et immédiatement applicables pour atteindre un ou plusieurs ODD de l’ONU sera plus rapide, plus approfondi et plus créatif. Et il y a aussi le tournoi Global Solutions Lab, où les meilleures stratégies du laboratoire concourent pour des prix, ajoutant un niveau supplémentaire à l’expérience.",
       ],
       featureTitle: 'Pour tout le monde',
       quote:
@@ -506,7 +506,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
         },
         {
           icon: '🕹️',
-          title: 'Accès gratuit à vie à la plateforme NewWorld Game',
+          title: 'Accès gratuit à vie à la plateforme Global Solutions Lab',
           description:
             "Rejoignez une plateforme interactive où vous relèverez des défis mondiaux et locaux, aurez accès aux derniers outils d’IA pour la résolution de problèmes, collaborerez avec des acteurs du changement du monde entier et débloquerez de nouveaux niveaux d’innovation, de stratégie et d’impact social. Après le laboratoire, vous conserverez gratuitement l’accès à toutes les fonctionnalités actuelles et futures.",
         },
@@ -520,7 +520,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
           icon: '📖',
           title: 'Votre travail publié',
           description:
-            "Votre travail sera présenté dans un ouvrage publié et diffusé auprès d’agences de l’ONU, d’ONG, d’universités et de réseaux mondiaux, plaçant votre solution devant des décideurs internationaux. La plateforme NewWorld Game pourra aussi adapter votre travail pour le rendre publiable sous forme d’article, de tribune, de rapport de recherche, de publication sur les réseaux sociaux ou de proposition de financement.",
+            "Votre travail sera présenté dans un ouvrage publié et diffusé auprès d’agences de l’ONU, d’ONG, d’universités et de réseaux mondiaux, plaçant votre solution devant des décideurs internationaux. La plateforme Global Solutions Lab pourra aussi adapter votre travail pour le rendre publiable sous forme d’article, de tribune, de rapport de recherche, de publication sur les réseaux sociaux ou de proposition de financement.",
         },
         {
           icon: '🌍',
@@ -563,7 +563,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
         "Le Global Solutions Lab vise de manière générale à rendre concrète la citation ci-dessus de Buckminster Fuller et, plus précisément, à résoudre des défis locaux et mondiaux liés aux besoins humains fondamentaux et à l’environnement, tout en contribuant aux objectifs de développement durable de l’ONU. C’est une expérience intense. Les participants doivent prévoir une contribution importante chaque jour pendant toute la durée du laboratoire.",
       formatLabel: 'Format :',
       formatText:
-        "Le laboratoire aura lieu en présentiel et en ligne. Il utilisera la plateforme mondiale de recherche et de résolution de problèmes NewWorld Game pour le travail créatif. Les participants pourront prendre part à l’expérience sous diverses formes, de manière individuelle ou au sein d’une équipe internationale, interculturelle, multidisciplinaire et intergénérationnelle de design collaboratif. Le temps d’engagement est de 4 à 6 heures par jour. Le laboratoire se conclut par des présentations devant un groupe de dirigeants d’entreprises, de fondations, du monde académique et d’ONG.",
+        "Le laboratoire aura lieu en présentiel et en ligne. Il utilisera la plateforme mondiale de recherche et de résolution de problèmes Global Solutions Lab pour le travail créatif. Les participants pourront prendre part à l’expérience sous diverses formes, de manière individuelle ou au sein d’une équipe internationale, interculturelle, multidisciplinaire et intergénérationnelle de design collaboratif. Le temps d’engagement est de 4 à 6 heures par jour. Le laboratoire se conclut par des présentations devant un groupe de dirigeants d’entreprises, de fondations, du monde académique et d’ONG.",
       inPersonTitle: 'Participation en présentiel',
       hostLocationLabel: 'Hôte et lieu :',
       hostLocation:
@@ -586,7 +586,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
         'Des bourses de participation sont disponibles pour un nombre limité d’étudiants, y compris les étudiants internationaux.',
       ],
       scholarshipNote:
-        'Nous sommes convaincus que personne ne devrait être privé du laboratoire pour des raisons financières. Les fonds de bourse sont limités et varient selon les dépenses et les dons. Vous pouvez contribuer au fonds de bourses du Global Solutions Lab en devenant sponsor du NewWorld Game. Consultez les opportunités de sponsoring pour savoir comment vous ou votre organisation pouvez participer.',
+        'Nous sommes convaincus que personne ne devrait être privé du laboratoire pour des raisons financières. Les fonds de bourse sont limités et varient selon les dépenses et les dons. Vous pouvez contribuer au fonds de bourses du Global Solutions Lab en devenant sponsor du Global Solutions Lab. Consultez les opportunités de sponsoring pour savoir comment vous ou votre organisation pouvez participer.',
       onlineParticipationTitle: 'Participation en ligne',
       onlineParticipationIntro:
         'Le laboratoire accueille des participants du monde entier. Les infrastructures de télécommunications ne sont pas identiques partout, voici donc ce dont vous aurez besoin pour participer :',
@@ -601,11 +601,11 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
       applicationCta: 'Postuler ici',
     },
     winner: {
-      title: 'Lauréat précédent du tournoi NewWorld',
+      title: 'Lauréat précédent du tournoi Global Solutions Lab',
       projectTitle:
         'Électrification de centres de santé en République démocratique du Congo',
       description:
-        "Le premier prix du tournoi NewWorld a été attribué à une équipe de la RDC qui a utilisé cette récompense pour électrifier un centre de santé de village, alors que 60 % des centres de santé n’ont pas d’électricité. Ce projet sert de preuve de concept pour leur solution. Les prochaines étapes consistent à étendre la solution pour répondre aux besoins en électricité des centres de santé dans le reste du pays.",
+        "Le premier prix du tournoi Global Solutions Lab a été attribué à une équipe de la RDC qui a utilisé cette récompense pour électrifier un centre de santé de village, alors que 60 % des centres de santé n’ont pas d’électricité. Ce projet sert de preuve de concept pour leur solution. Les prochaines étapes consistent à étendre la solution pour répondre aux besoins en électricité des centres de santé dans le reste du pays.",
       linkText: 'En savoir plus ici',
     },
     summary: {
@@ -622,7 +622,7 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
     },
     aiTeam: {
       title: 'Ajouts récents',
-      subtitle: "Une partie de l'équipe IA de NewWorld Game",
+      subtitle: "Une partie de l'équipe IA de Global Solutions Lab",
       cta: 'Discuter avec les IA',
       members: [
         {
@@ -665,9 +665,9 @@ export const GLOBAL_LAB_CONTENT: Record<'en' | 'fr', GlobalLabContent> = {
     sponsorship: {
       title: 'Opportunités de sponsoring*',
       note:
-        '* Tournoi NewWorld et prix tels que décrits dans la section IA au service du bien commun ci-dessus.',
+        '* Tournoi Global Solutions Lab et prix tels que décrits dans la section IA au service du bien commun ci-dessus.',
       intro:
-        "Les opportunités ci-dessous permettent de rejoindre l’équipe de développement de NewWorld Game. Nous sommes une organisation à but non lucratif exonérée d’impôt. Toute contribution nous aide à continuer à faire grandir et à améliorer NewWorld Game. Merci pour votre attention.",
+        "Les opportunités ci-dessous permettent de rejoindre l’équipe de développement de Global Solutions Lab. Nous sommes une organisation à but non lucratif exonérée d’impôt. Toute contribution nous aide à continuer à faire grandir et à améliorer Global Solutions Lab. Merci pour votre attention.",
       opportunitiesCta: 'Voir les opportunités de sponsoring',
       donateCta: 'Faire un don à EarthGame',
     },

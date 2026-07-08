@@ -683,7 +683,7 @@ Please choose a file under 5 MB.`);
       fullName ||
       author?.email ||
       comment?.authorName ||
-      'NewWorld Game member'
+      'Global Solutions Lab member'
     );
   }
 
@@ -745,7 +745,7 @@ Please choose a file under 5 MB.`);
   getParticipantDisplayName(participant?: ParticipantInfo | null): string {
     const profile = this.getParticipantProfile(participant);
     const fullName = `${profile?.firstName || ''} ${profile?.lastName || ''}`.trim();
-    return fullName || profile?.email || participant?.displayName || 'NewWorld Game member';
+    return fullName || profile?.email || participant?.displayName || 'Global Solutions Lab member';
   }
 
   async sendOnEnter(event: Event): Promise<void> {
@@ -946,7 +946,7 @@ Please choose a file under 5 MB.`);
     const clean: CommentReply = {
       messageId: String(reply.messageId),
       authorId: String(reply.authorId || ''),
-      authorName: String(reply.authorName || 'NewWorld Game member').trim(),
+      authorName: String(reply.authorName || 'Global Solutions Lab member').trim(),
       content,
     };
 
@@ -1045,7 +1045,7 @@ Please choose a file under 5 MB.`);
           `${this.auth.currentUser.firstName || ''} ${
             this.auth.currentUser.lastName || ''
           }`.trim() ||
-          'NewWorld Game teammate',
+          'Global Solutions Lab teammate',
         senderAvatar: message.profilePic || '',
         messageId,
         messageText:

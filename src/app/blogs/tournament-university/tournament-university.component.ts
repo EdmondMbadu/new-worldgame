@@ -32,10 +32,10 @@ export class TournamentUniversityComponent {
   // Plans (match the card headers exactly)
   PLANS = [
     'Free Evaluation',
-    'NWG Only',
-    'NWG & Tournament',
-    'NWG & Your Tournament',
-    'NWG and Your District or University',
+    'GSL Only',
+    'GSL & Tournament',
+    'GSL & Your Tournament',
+    'GSL and Your District or University',
   ];
 
   plans = this.PLANS;
@@ -57,7 +57,7 @@ export class TournamentUniversityComponent {
       name: 'Private Dashboard (School/Class)',
       values: [false, true, true, true, true],
       detail:
-        'Admin dashboard for teachers/classes. Included from NWG Only upward and inherited by all higher tiers.',
+        'Admin dashboard for teachers/classes. Included from GSL Only upward and inherited by all higher tiers.',
     },
     {
       name: 'Tournament access',
@@ -92,10 +92,10 @@ export class TournamentUniversityComponent {
         'Hands-on set-up for your own school/class tournament. Inherited by District/University.',
     },
     {
-      name: 'Use of NWG in any class (curriculum-related)',
+      name: 'Use of GSL in any class (curriculum-related)',
       values: ['—', '—', '—', true, true],
       detail:
-        'Explicit allowance to integrate NWG into any class/curriculum use case.',
+        'Explicit allowance to integrate GSL into any class/curriculum use case.',
     },
     {
       name: 'Support level',

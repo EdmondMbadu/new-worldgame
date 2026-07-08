@@ -894,7 +894,7 @@ export class DataService implements OnInit {
       },
     };
   }
-  /** Create OR update an NWG presentation (sub-collection of the solution) */
+  /** Create OR update an GSL presentation (sub-collection of the solution) */
   addPresentation(p: Presentation) {
     return this.afs
       .collection('solutions')

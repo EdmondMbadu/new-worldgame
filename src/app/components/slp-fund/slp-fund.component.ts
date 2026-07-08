@@ -87,11 +87,11 @@ export class SlpFundComponent implements OnInit, OnDestroy {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.shell.solutionTitle} | Solution Launch Funding | NewWorld Game`
-            : 'Solution Launch Funding | NewWorld Game',
+            ? `${vm.shell.solutionTitle} | Solution Launch Funding | Global Solutions Lab`
+            : 'Solution Launch Funding | Global Solutions Lab',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game funding, Solution Launch funding pathway, solution funding readiness, team signal, evidence pack',
+            'Global Solutions Lab funding, Solution Launch funding pathway, solution funding readiness, team signal, evidence pack',
           url: 'https://newworld-game.org/fund',
           type: 'website',
         });

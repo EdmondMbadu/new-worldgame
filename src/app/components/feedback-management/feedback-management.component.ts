@@ -300,7 +300,7 @@ export class FeedbackManagementComponent implements OnInit {
   feedbackTypeLabel(row: Row): string {
     return row.feedbackCategory === 'email_feedback'
       ? 'Email Feedback'
-      : 'NWG Feedback';
+      : 'GSL Feedback';
   }
 
   feedbackTypeBadgeClass(row: Row) {
@@ -432,7 +432,7 @@ What to add: ${r.whatToAdd || '—'}
 Which solution/support: ${r.whichSolution || '—'}
 Additional feedback: ${r.emailFeedback || '—'}
 `
-        : `NWG Feedback — ${r.name} <${r.email}>
+        : `GSL Feedback — ${r.name} <${r.email}>
 Submitted: ${r.createdAtMs ? new Date(r.createdAtMs).toLocaleString() : '—'}
 Status: ${r.status.toUpperCase()}
 Type: ${this.feedbackTypeLabel(r)}
@@ -456,7 +456,7 @@ C) Ask Bucky useful?: ${this.formatBucky(r.askBuckyUseful)}
 D) Problems / issues:
 ${r.concerns || '—'}
 
-D) NWG resources used:
+D) GSL resources used:
 ${(r.resourcesUsed || []).join(', ') || '—'}
 D) Other resource notes:
 ${r.resourcesOther || '—'}
@@ -477,7 +477,7 @@ ${r.teamBuilding || '—'}
 
 H) Enough time:
 ${r.enoughTime || '—'}
-H) Additional NWG capabilities/functions:
+H) Additional GSL capabilities/functions:
 ${r.additionalCapabilities || '—'}
 H) Anything else:
 ${r.more || '—'}

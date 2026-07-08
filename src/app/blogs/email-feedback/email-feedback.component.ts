@@ -81,7 +81,7 @@ export class EmailFeedbackComponent implements OnInit {
       email: (v.email || this.auth.currentUser?.email || '').trim(),
 
       opinion: `How well are we doing: ${howDoing}\n\nFeedback:\n${emailFeedback}`,
-      levels: ['Weekly NewWorld Game Intelligence Brief'],
+      levels: ['Weekly Global Solutions Lab Intelligence Brief'],
       levelsDetails: {
         hsCourses: `Solution in email: ${solutionName}`,
         collegeCourses: `Requested solution/support: ${whichSolution}`,

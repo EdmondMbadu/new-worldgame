@@ -1,7 +1,7 @@
-# NewWorld Game - SEO Implementation Guide
+# Global Solutions Lab - SEO Implementation Guide
 
 ## Overview
-This guide documents the comprehensive SEO implementation for NewWorld Game to achieve top Google search rankings for "NewWorld Game" and "New World Game" queries.
+This guide documents the comprehensive SEO implementation for Global Solutions Lab to achieve top Google search rankings for "Global Solutions Lab" and "Global Solutions Lab" queries.
 
 ## Implementation Date
 December 27, 2025
@@ -13,9 +13,9 @@ December 27, 2025
 ### 1. Enhanced Meta Tags (index.html)
 
 **Primary Meta Tags:**
-- Title: "NewWorld Game - Solve Global Challenges Through Collaborative Gameplay"
+- Title: "Global Solutions Lab - Solve Global Challenges Through Collaborative Gameplay"
 - Description: Comprehensive description highlighting Buckminster Fuller inspiration
-- Keywords: NewWorld Game, New World Game, NWG, global challenges, educational game, etc.
+- Keywords: Global Solutions Lab, GSL, global challenges, educational game, etc.
 - Author and robots tags
 
 **Open Graph Tags (Facebook/LinkedIn):**
@@ -236,9 +236,9 @@ For immediate indexing of key pages:
 ## Keyword Strategy
 
 ### Primary Keywords
-1. **NewWorld Game** (exact match)
-2. **New World Game** (exact match with space)
-3. **NWG** (abbreviation)
+1. **Global Solutions Lab** (exact match)
+2. **Global Solutions Lab** (exact match with space)
+3. **GSL** (abbreviation)
 
 ### Secondary Keywords
 - global challenges educational game
@@ -263,7 +263,7 @@ For immediate indexing of key pages:
 
 ### Weekly Tasks
 - Check Google Search Console for indexing status
-- Monitor search rankings for "NewWorld Game"
+- Monitor search rankings for "Global Solutions Lab"
 - Review site performance metrics
 - Check for crawl errors
 
@@ -288,7 +288,7 @@ For immediate indexing of key pages:
 ### Week 1-2
 - Google/Bing index sitemap
 - Homepage and key pages appear in search results
-- Basic brand searches ("NewWorld Game") start showing results
+- Basic brand searches ("Global Solutions Lab") start showing results
 
 ### Month 1
 - Rankings improve for exact brand matches
@@ -302,7 +302,7 @@ For immediate indexing of key pages:
 - Backlinks begin accumulating
 
 ### Month 3-6
-- Top 3 rankings for "NewWorld Game" and "New World Game"
+- Top 3 rankings for "Global Solutions Lab" and "Global Solutions Lab"
 - Expansion to secondary keywords
 - Significant organic traffic growth
 - Featured snippets potential
@@ -395,8 +395,8 @@ Monitor and optimize:
 Track these KPIs to measure SEO success:
 
 ### Search Rankings
-- Position for "NewWorld Game" - Target: #1-3
-- Position for "New World Game" - Target: #1-3
+- Position for "Global Solutions Lab" - Target: #1-3
+- Position for "Global Solutions Lab" - Target: #1-3
 - Number of keywords in top 10 - Target: 20+
 - Number of keywords in top 100 - Target: 100+
 

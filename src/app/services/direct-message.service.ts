@@ -341,7 +341,7 @@ export class DirectMessageService {
     const clean: DirectMessageReply = {
       messageId: String(replyTo.messageId),
       senderUid: String(replyTo.senderUid || ''),
-      senderName: String(replyTo.senderName || 'NewWorld Game user').trim(),
+      senderName: String(replyTo.senderName || 'Global Solutions Lab user').trim(),
       text,
     };
 
@@ -382,7 +382,7 @@ export class DirectMessageService {
 
   private displayName(user: User): string {
     const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
-    return fullName || user?.email || 'NewWorld Game user';
+    return fullName || user?.email || 'Global Solutions Lab user';
   }
 
   private avatarUrl(user: User): string {

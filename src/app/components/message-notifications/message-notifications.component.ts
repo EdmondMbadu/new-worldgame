@@ -212,7 +212,7 @@ export class MessageNotificationsComponent implements OnInit, OnDestroy {
       kind: 'direct',
       id: `direct_${thread.conversationId}`,
       unread: Number(thread.unreadCount || 0) > 0,
-      senderName: thread.otherName || 'NewWorld Game user',
+      senderName: thread.otherName || 'Global Solutions Lab user',
       senderAvatar: thread.otherAvatar,
       messageText: thread.latestMessageText || '',
       contextTitle: 'Direct message',

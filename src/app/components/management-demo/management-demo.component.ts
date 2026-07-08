@@ -38,7 +38,7 @@ export class ManagementDemoComponent implements OnInit {
       "One or two questions where Medard's feedback would help most.",
     ],
     ctaLabel: 'Join the Google Meet',
-    signoff: 'Thank you,\nMedard Gabel and the NewWorld Team',
+    signoff: 'Thank you,\nMedard Gabel and the Global Solutions Lab Team',
   };
 
   bookings: DemoBooking[] = [];

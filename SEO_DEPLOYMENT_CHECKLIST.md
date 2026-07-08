@@ -1,4 +1,4 @@
-# SEO Deployment Checklist - NewWorld Game
+# SEO Deployment Checklist - Global Solutions Lab
 
 ## Pre-Deployment Verification
 
@@ -133,8 +133,8 @@ Steps for each:
 - [ ] Check for any structured data issues
 
 ### Day 7
-- [ ] Test branded search: "NewWorld Game" in Google
-- [ ] Test branded search: "New World Game" in Google
+- [ ] Test branded search: "Global Solutions Lab" in Google
+- [ ] Test branded search: "Global Solutions Lab" in Google
 - [ ] Check search appearance (title, description)
 - [ ] Review first week analytics data
 
@@ -150,9 +150,9 @@ Steps for each:
   - Average position
 
 - [ ] Monitor keyword rankings:
-  - "NewWorld Game"
-  - "New World Game"
-  - "NWG educational game"
+  - "Global Solutions Lab"
+  - "Global Solutions Lab"
+  - "GSL educational game"
   - Track changes week-over-week
 
 - [ ] Review pages with errors in Coverage report
@@ -189,7 +189,7 @@ Steps for each:
 1. **Share on Social Media**
    - Post on LinkedIn, Twitter, Facebook with proper hashtags
    - Tag educational influencers
-   - Use keywords: #NewWorldGame #GlobalChallenges #EdTech
+   - Use keywords: #Global Solutions Lab #GlobalChallenges #EdTech
 
 2. **Email Signature**
    - Add website link to team email signatures
@@ -202,7 +202,7 @@ Steps for each:
 
 ### Short-term Actions (Month 1)
 1. **Content Expansion**
-   - Write "How NewWorld Game Works" guide
+   - Write "How Global Solutions Lab Works" guide
    - Create "Getting Started" tutorial
    - Publish tournament success stories
 
@@ -237,7 +237,7 @@ Steps for each:
 
 ### Poor Rankings After 2+ Weeks
 ✅ **Solution:**
-- Review competitor pages for "NewWorld Game"
+- Review competitor pages for "Global Solutions Lab"
 - Add more unique content to homepage
 - Build quality backlinks from .edu sites
 - Increase social media presence
@@ -259,11 +259,11 @@ Steps for each:
 - ✅ Site is indexed by Google
 - ✅ Sitemap is processed
 - ✅ No crawl errors
-- ✅ Homepage appears for "NewWorld Game" search
+- ✅ Homepage appears for "Global Solutions Lab" search
 
 ### Month 1
-- ✅ Top 10 for "NewWorld Game"
-- ✅ Top 10 for "New World Game"
+- ✅ Top 10 for "Global Solutions Lab"
+- ✅ Top 10 for "Global Solutions Lab"
 - ✅ 20+ pages indexed
 - ✅ Rich snippets showing in search results
 
@@ -296,7 +296,7 @@ Steps for each:
 
 ## Notes
 - SEO results take time (2-12 weeks typically)
-- Branded searches ("NewWorld Game") rank faster than generic terms
+- Branded searches ("Global Solutions Lab") rank faster than generic terms
 - Quality content + backlinks = long-term success
 - Monitor weekly, optimize monthly, be patient
 

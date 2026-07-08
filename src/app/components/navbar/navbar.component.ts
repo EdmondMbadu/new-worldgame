@@ -439,7 +439,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const name =
       `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
       user.email ||
-      'NewWorld Game member';
+      'Global Solutions Lab member';
     const isCurrentUser = user.uid === this.auth.currentUser?.uid;
 
     return {

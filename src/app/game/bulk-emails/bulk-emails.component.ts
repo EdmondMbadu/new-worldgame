@@ -747,13 +747,13 @@ export class BulkEmailsComponent implements OnDestroy {
     localStorage.removeItem(this.draftKey);
   }
   loadSample(): void {
-    const sampleSubject = 'Welcome to NewWorld Game 🌍';
+    const sampleSubject = 'Welcome to Global Solutions Lab 🌍';
     const sampleHtml = `
       <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f6f7f9;padding:24px 0">
         <tr><td align="center">
           <table role="presentation" cellpadding="0" cellspacing="0" width="640" style="background:#ffffff;border-radius:12px;overflow:hidden">
             <tr><td style="padding:28px 32px;font-family:Arial,Helvetica,sans-serif">
-              <h1 style="margin:0 0 12px;font-size:24px;line-height:32px;color:#111827">Welcome to NewWorld Game</h1>
+              <h1 style="margin:0 0 12px;font-size:24px;line-height:32px;color:#111827">Welcome to Global Solutions Lab</h1>
               <p style="margin:0 0 16px;font-size:15px;line-height:22px;color:#374151">Thanks for joining! This is a sample HTML email.</p>
               <p style="margin:0 0 24px">
                 <a href="https://newworld-game.org" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:10px 16px;border-radius:8px;font-size:14px">

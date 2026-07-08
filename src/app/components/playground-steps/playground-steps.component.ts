@@ -562,7 +562,7 @@ STYLE REQUIREMENTS:
       summary: 'A complete plan with model, roadmap, budget, risks, metrics, and next actions.',
       systemPrompt: `You are a senior venture strategist, operating partner, and social-impact business-plan writer.
 
-Your job is to turn a NewWorld Game solution draft into a complete, execution-ready business plan that a founder, nonprofit lead, student team, funder, or civic partner can use immediately.
+Your job is to turn a Global Solutions Lab solution draft into a complete, execution-ready business plan that a founder, nonprofit lead, student team, funder, or civic partner can use immediately.
 
 You are rigorous, practical, and specific. You do not write generic startup advice. You convert the available solution data into decisions, operating assumptions, milestones, budgets, partnership moves, and next actions.
 
@@ -671,7 +671,7 @@ STYLE REQUIREMENTS:
 - Be direct, premium, and professional.
 - Make every section actionable.
 - Never include generic filler such as "leverage synergies" or "robust ecosystem".
-- Reference NewWorld Game naturally only as the source context, not as the business unless the source says it is.`,
+- Reference Global Solutions Lab naturally only as the source context, not as the business unless the source says it is.`,
     },
     {
       id: 'executive-summary',
@@ -684,7 +684,7 @@ STYLE REQUIREMENTS:
 
 Your summaries are known for razor-sharp clarity, leading with the single most compelling data point, distilling complexity into clean hierarchical insights, and closing with actionable recommendations. Every sentence must earn its place.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Use descriptive section titles that tell a story — never generic headings. Section headings end with a colon on their own line. Reference NewWorld Game naturally in the opening. Do not invent facts not present in the source.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Use descriptive section titles that tell a story — never generic headings. Section headings end with a colon on their own line. Reference Global Solutions Lab naturally in the opening. Do not invent facts not present in the source.`,
     },
     {
       id: 'funder-brief',
@@ -699,7 +699,7 @@ You write funding briefs that lead with a crystal-clear impact thesis, present e
 
 Write with the rigor expected by the Gates Foundation, Ford Foundation, or USAID review panels.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game once for context. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab once for context. Do not invent facts.`,
     },
     {
       id: 'teacher-guide',
@@ -714,7 +714,7 @@ Your guides are known for clear learning progressions aligned to Bloom's taxonom
 
 Write in a warm, professional tone appropriate for educators. Assume the teacher may not be an expert in the topic.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game as the platform context. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab as the platform context. Do not invent facts.`,
     },
     {
       id: 'social-media-pack',
@@ -729,7 +729,7 @@ Your content is known for scroll-stopping hooks, platform-native formatting opti
 
 Write each post as if it must perform in a crowded feed. No generic filler — every word earns attention.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab naturally. Do not invent facts.`,
     },
     {
       id: 'article-500',
@@ -744,7 +744,7 @@ Your articles are known for opening lines that make readers lean in, vivid concr
 
 Write with clarity, warmth, and intellectual rigor. Avoid jargon. Make the reader care.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab naturally. Do not invent facts.`,
     },
     {
       id: 'article-1000',
@@ -759,7 +759,7 @@ Your writing is known for immersive scene-setting, layered storytelling that wea
 
 Write with the depth of investigative journalism and the readability of the best magazine writing.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab naturally. Do not invent facts.`,
     },
     {
       id: 'op-ed',
@@ -800,7 +800,7 @@ OUTPUT RULES:
 - Output plain text only (no markdown, no asterisks, no special formatting)
 - Use section headings exactly as requested by the instruction
 - Section headings end with a colon on their own line
-- Reference NewWorld Game naturally once for context if useful, but do not over-explain the platform
+- Reference Global Solutions Lab naturally once for context if useful, but do not over-explain the platform
 - Do not invent facts, quotes, awards, endorsements, metrics, or case studies not present in the source
 
 The final piece should feel magnificent: urgent, quotable, grounded, and worthy of publication.`,
@@ -818,7 +818,7 @@ You know what makes reviewers say yes: a title specific enough to promise value 
 
 Write with academic precision but accessible language suitable for interdisciplinary conferences.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game as context. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab as context. Do not invent facts.`,
     },
     {
       id: 'youtube-script',
@@ -833,7 +833,7 @@ Your scripts are known for hooks that achieve 80%+ retention past the first 5 se
 
 Write as if the creator will read this into a camera. Short sentences. Production notes in [brackets]. Make it alive.
 
-Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference NewWorld Game naturally. Do not invent facts.`,
+Output plain text only (no markdown, no asterisks, no special formatting). Section headings end with a colon on their own line. Reference Global Solutions Lab naturally. Do not invent facts.`,
     },
     {
       id: 'press-release',
@@ -1271,7 +1271,7 @@ STYLE REQUIREMENTS:
     this.evaluators.forEach((evaluator) => {
       const emailData = {
         email: evaluator.email,
-        subject: `You have been invited to evaluate the NewWorld Game solution: ...`,
+        subject: `You have been invited to evaluate the Global Solutions Lab solution: ...`,
         title: this.currentSolution.title,
         description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
         path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
@@ -1373,7 +1373,7 @@ STYLE REQUIREMENTS:
   private getEvaluatorInvitePayload(email: string) {
     return {
       email,
-      subject: `Please review this NewWorld Game solution: ${this.currentSolution.title || 'NewWorld Game Solution'}`,
+      subject: `Please review this Global Solutions Lab solution: ${this.currentSolution.title || 'Global Solutions Lab Solution'}`,
       title: this.currentSolution.title,
       description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
       path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
@@ -2390,7 +2390,7 @@ Infographic requirements:
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(8.5);
       pdf.setTextColor(colors.muted[0], colors.muted[1], colors.muted[2]);
-      pdf.text('NewWorld Game', marginLeft, pageHeight - 10);
+      pdf.text('Global Solutions Lab', marginLeft, pageHeight - 10);
       
       // Page number - elegant format
       pdf.setFont('times', 'italic');
@@ -2541,13 +2541,13 @@ Infographic requirements:
           },
           spacing: { before: 120 },
           children: [
-            new TextRun({ text: 'NewWorld Game  ', size: 16, color: '6B7280', font: 'Arial' }),
+            new TextRun({ text: 'Global Solutions Lab  ', size: 16, color: '6B7280', font: 'Arial' }),
             new TextRun({ text: '|  ', size: 16, color: 'CBD5E1', font: 'Arial' }),
             new ExternalHyperlink({
               link: 'https://newworld-game.org/',
               children: [
                 new TextRun({
-                  text: 'newworld-game.org',
+                  text: 'Global Solutions Lab',
                   size: 16,
                   color: '0F766E',
                   font: 'Arial',
@@ -3706,7 +3706,7 @@ Infographic requirements:
   private buildAiPrompt(): string {
     const useFrench = this.currentLanguage === 'fr';
     
-    const instructionsEn = `Role: You are the Evaluator for NewWorld Game.
+    const instructionsEn = `Role: You are the Evaluator for Global Solutions Lab.
 Your job is to evaluate the user's solution using the official criteria and provide numerical scores + improvement feedback that align with the solution content.
 
 Do the following every time:
@@ -3772,7 +3772,7 @@ Improvements:
 
 Readiness Level: ______`;
 
-    const instructionsFr = `Rôle : Vous êtes l'Évaluateur du NewWorld Game.
+    const instructionsFr = `Rôle : Vous êtes l'Évaluateur du Global Solutions Lab.
 Votre mission est d'évaluer la solution de l'utilisateur selon les critères officiels et de fournir des scores numériques + un retour d'amélioration alignés avec le contenu de la solution.
 
 IMPORTANT : Répondez ENTIÈREMENT en français.
@@ -3895,7 +3895,7 @@ WRITING STANDARDS:
 - Every paragraph earns its place — ruthlessly cut filler, cliches, and passive constructions
 - Ground assertions in specific data points, figures, and evidence from the source material
 - Write with authority and precision, as if for The Economist, McKinsey Quarterly, or a UN policy briefing
-- Reference NewWorld Game naturally in the opening for context
+- Reference Global Solutions Lab naturally in the opening for context
 
 STRUCTURAL RULES:
 - Begin with a one-line executive hook — the single most important takeaway
@@ -4446,7 +4446,7 @@ INTEGRITY RULES:
             </section>
           </div>
           <footer class="draft-page-footer">
-            <span>NewWorld Game | newworld-game.org</span>
+            <span>Global Solutions Lab | Designing solutions for global and local problems.</span>
             <span class="draft-page-number"></span>
           </footer>
         </section>
@@ -4854,12 +4854,12 @@ INTEGRITY RULES:
             top: { style: BorderStyle.SINGLE, size: 2, color: 'BEBEBE' },
           },
           children: [
-            new TextRun({ text: 'NewWorld Game  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
+            new TextRun({ text: 'Global Solutions Lab  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
             new ExternalHyperlink({
               link: 'https://newworld-game.org/',
               children: [
                 new TextRun({
-                  text: 'newworld-game.org',
+                  text: 'Global Solutions Lab',
                   size: 15,
                   color: '787878',
                   font: 'Calibri',
@@ -4893,15 +4893,15 @@ INTEGRITY RULES:
       pdf.setTextColor(150, 150, 150);
 
       if (typeof (pdf as any).textWithLink === 'function') {
-        const prefix = 'NewWorld Game  \u00B7  ';
+        const prefix = 'Global Solutions Lab  \u00B7  ';
         pdf.text(prefix, marginLeft, y);
         const prefixWidth = pdf.getTextWidth(prefix);
         pdf.setTextColor(120, 120, 120);
-        (pdf as any).textWithLink('newworld-game.org', marginLeft + prefixWidth, y, {
+        (pdf as any).textWithLink('Global Solutions Lab', marginLeft + prefixWidth, y, {
           url: 'https://newworld-game.org/',
         });
       } else {
-        pdf.text('NewWorld Game  \u00B7  newworld-game.org', marginLeft, y);
+        pdf.text('Global Solutions Lab  \u00B7  Designing solutions for global and local problems.', marginLeft, y);
       }
 
       pdf.setTextColor(150, 150, 150);
@@ -5408,7 +5408,7 @@ INTEGRITY RULES:
       page.innerHTML = `
         <div class="draft-page-body draft-content"></div>
         <footer class="draft-page-footer">
-          <span>NewWorld Game | newworld-game.org</span>
+          <span>Global Solutions Lab | Designing solutions for global and local problems.</span>
           <span class="draft-page-number"></span>
         </footer>
       `;
@@ -5901,7 +5901,7 @@ INTEGRITY RULES:
             </section>
           </div>
           <footer class="draft-page-footer">
-            <span>NewWorld Game | newworld-game.org</span>
+            <span>Global Solutions Lab | Designing solutions for global and local problems.</span>
             <span class="draft-page-number"></span>
           </footer>
         </section>

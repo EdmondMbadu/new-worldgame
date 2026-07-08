@@ -309,7 +309,7 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
           icon: '🏆',
           title: '$1,000 NW Tournament Award',
           description:
-            'Submit your Lab solution to the NewWorld Tournament. The winning solution receives $1,000 in award/seed funding to help bring the idea to life.',
+            'Submit your Lab solution to the Global Solutions Lab Tournament. The winning solution receives $1,000 in award/seed funding to help bring the idea to life.',
         },
         {
           icon: '🚀',
@@ -326,7 +326,7 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
         },
         {
           icon: '🕹️',
-          title: 'Access to the NewWorld Game Platform',
+          title: 'Access to the Global Solutions Lab Platform',
           description:
             'Join an interactive platform where you will take on global missions, collaborate with changemakers, and unlock new levels of innovation, strategy, and social impact.',
         },
@@ -336,7 +336,7 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
       eyebrow: 'NW Tournament award',
       title: '$1,000 award/seed funding for the winning solution',
       body:
-        'Your Lab project can be entered into the NewWorld Tournament. The winning solution receives $1,000 in award/seed funding to help move from concept toward implementation.',
+        'Your Lab project can be entered into the Global Solutions Lab Tournament. The winning solution receives $1,000 in award/seed funding to help move from concept toward implementation.',
     },
     spinner: {
       srOnly: 'Loading...',
@@ -540,9 +540,9 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
         },
         {
           icon: '🏆',
-          title: 'Prix de 1 000 $ du tournoi NewWorld',
+          title: 'Prix de 1 000 $ du tournoi Global Solutions Lab',
           description:
-            'Soumettez votre solution au tournoi NewWorld. La solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour aider à concrétiser l’idée.',
+            'Soumettez votre solution au tournoi Global Solutions Lab. La solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour aider à concrétiser l’idée.',
         },
         {
           icon: '🚀',
@@ -559,17 +559,17 @@ export const GLOBAL_REGISTER_CONTENT: Record<'en' | 'fr', GlobalRegisterContent>
         },
         {
           icon: '🕹️',
-          title: 'Accès à la plateforme NewWorld Game',
+          title: 'Accès à la plateforme Global Solutions Lab',
           description:
             'Rejoignez une plateforme interactive où vous relèverez des missions mondiales, collaborerez avec des acteurs du changement et débloquerez de nouveaux niveaux d’innovation, de stratégie et d’impact social.',
         },
       ],
     },
     award: {
-      eyebrow: 'Prix du tournoi NewWorld',
+      eyebrow: 'Prix du tournoi Global Solutions Lab',
       title: '1 000 $ de prix/financement de démarrage pour la solution gagnante',
       body:
-        'Votre projet du Lab peut être présenté au tournoi NewWorld. La solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour passer du concept à la mise en oeuvre.',
+        'Votre projet du Lab peut être présenté au tournoi Global Solutions Lab. La solution gagnante reçoit 1 000 $ de prix/financement de démarrage pour passer du concept à la mise en oeuvre.',
     },
     spinner: {
       srOnly: 'Chargement...',

@@ -130,7 +130,7 @@ export class DiscussionNotificationsService {
               recipientUid: recipient.uid,
               recipientEmail: this.normalizeEmail(recipient.email),
               senderUid: params.senderUid,
-              senderName: params.senderName || 'NewWorld Game teammate',
+              senderName: params.senderName || 'Global Solutions Lab teammate',
               senderAvatar: params.senderAvatar || '',
               messageId: params.messageId,
               messageText: cleanText,

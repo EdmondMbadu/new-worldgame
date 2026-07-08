@@ -141,7 +141,7 @@ const WEEKLY_EMAIL_AUTOMATION_DOC_PATH =
   'admin_settings/weekly_email_automation';
 const DEFAULT_AUTOMATION_TIMEZONE = 'America/Los_Angeles';
 const DEFAULT_WEEKLY_REMINDER_SUBJECT =
-  'Your weekly NewWorld Game progress';
+  'Your weekly Global Solutions Lab progress';
 const DEFAULT_WEEKLY_REMINDER_INTRO_HTML =
   '<p>Keep the momentum going—here are your in-progress solutions.</p>';
 const WEEKLY_ACTIVITY_WINDOW_DAYS = 7;
@@ -609,7 +609,7 @@ async function sendAutomatedWeeklyReminderEmail(data: {
       hasSolutions: Array.isArray(data.solutions) && data.solutions.length > 0,
       solutions: data.solutions,
       homeUrl: APP_BASE_URL,
-      author: data.author || 'NewWorld Game',
+      author: data.author || 'Global Solutions Lab',
       unsubscribe_url: data.unsubscribeUrl,
       year: new Date().getFullYear(),
     },
@@ -878,7 +878,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
     report.weeklySignupIncreasePct >= 0 ? '#059669' : '#dc2626';
   const workedDeltaColor =
     report.weeklyWorkedSolutionsIncreasePct >= 0 ? '#059669' : '#dc2626';
-  const logoUrl = `${APP_BASE_URL}/assets/img/earth-triangle-test.png`;
+  const logoUrl = `${APP_BASE_URL}/assets/img/gsl-logo.png`;
   const metricCard = (
     label: string,
     value: string | number,
@@ -971,10 +971,11 @@ function buildWeeklyActivityReportHtmlForAutomation(
                   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                     <tr>
                       <td style="vertical-align:middle;padding-right:8px;">
-                        <img src="${logoUrl}" alt="NewWorld Game" width="40" style="display:block;width:40px;max-width:40px;height:auto;">
+                        <img src="${logoUrl}" alt="Global Solutions Lab" width="40" style="display:block;width:40px;max-width:40px;height:auto;">
                       </td>
                       <td style="vertical-align:middle;">
-                        <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">NewWorld Game</span>
+                        <span style="font-size:20px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">Global Solutions Lab</span>
+                        <div style="font-size:11px;line-height:1.35;font-weight:600;color:#64748b;">Designing solutions for global and local problems.</div>
                       </td>
                     </tr>
                   </table>
@@ -990,7 +991,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
                     </tr>
                     <tr>
                       <td style="padding:22px 24px 8px;">
-                        <h2 style="margin:0;color:#0f172a;font-size:24px;line-height:1.2;font-weight:800;">NewWorld Game Community Snapshot</h2>
+                        <h2 style="margin:0;color:#0f172a;font-size:24px;line-height:1.2;font-weight:800;">Global Solutions Lab Community Snapshot</h2>
                         <p style="margin:8px 0 0;color:#475569;font-size:13px;">
                           Reporting window: <strong>${fromDate}</strong> to <strong>${toDate}</strong>
                         </p>
@@ -1092,7 +1093,7 @@ function buildWeeklyActivityReportHtmlForAutomation(
                     <tr>
                       <td style="padding:12px 24px 20px;">
                         <a href="${APP_BASE_URL}/user-management" style="display:inline-block;background:#0f766e;color:#ffffff;text-decoration:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;">
-                          Open NewWorld Game Admin
+                          Open Global Solutions Lab Admin
                         </a>
                       </td>
                     </tr>
@@ -1101,8 +1102,8 @@ function buildWeeklyActivityReportHtmlForAutomation(
                   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="border-top:1px solid #e2e8f0;padding:12px 24px;background:#f8fafc;font-size:12px;color:#64748b;">
-                        Sent by <strong style="color:#0f172a;">NewWorld Game</strong> •
-                        <a href="${APP_BASE_URL}" style="color:#0f766e;text-decoration:none;">newworld-game.org</a><br>
+                        Sent by <strong style="color:#0f172a;">Global Solutions Lab</strong> •
+                        <a href="${APP_BASE_URL}" style="color:#0f766e;text-decoration:none;">Global Solutions Lab</a><br>
                         Generated on ${generatedAt}
                       </td>
                     </tr>
@@ -1128,7 +1129,7 @@ async function sendWeeklyActivityReportEmailsForAutomation(
 
   const finalHtml = injectHiddenPreheader(
     html,
-    'NewWorld Game weekly activity summary'
+    'Global Solutions Lab weekly activity summary'
   );
   const text = htmlToPlainText(finalHtml);
 
@@ -1203,7 +1204,7 @@ export const weeklyReminder = functions.https.onCall(
         homeUrl: data.homeUrl ?? 'https://newworld-game.org',
 
         // optional footer/byline
-        author: data.author ?? 'NewWorld Game',
+        author: data.author ?? 'Global Solutions Lab',
         unsubscribe_url: data.unsubscribeUrl,
         year: new Date().getFullYear(), // your template already uses {{year}}
       },
@@ -1326,7 +1327,7 @@ export const runWeeklyEmailAutomation = functions.pubsub
                   String(run.schedule.introHtml || '').trim() ||
                   DEFAULT_WEEKLY_REMINDER_INTRO_HTML,
                 solutions: pending,
-                author: 'NewWorld Game automation',
+                author: 'Global Solutions Lab automation',
                 unsubscribeUrl: unsubscribeUrlForAutomation(email),
               });
               sentCount += 1;
@@ -1687,7 +1688,7 @@ const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> =
       signal: controller.signal,
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+          'Mozilla/5.0 (compatible; Global Solutions LabBot/1.0; +https://newworld-game.org)',
       },
     });
     clearTimeout(timeoutId);
@@ -1700,7 +1701,7 @@ const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> =
         signal: controller2.signal,
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+            'Mozilla/5.0 (compatible; Global Solutions LabBot/1.0; +https://newworld-game.org)',
           Range: 'bytes=0-1024',
         },
       });
@@ -1723,7 +1724,7 @@ const isUrlUsableForReport = async (url: string, timeoutMs = 3500): Promise<bool
       signal: controller.signal,
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+          'Mozilla/5.0 (compatible; Global Solutions LabBot/1.0; +https://newworld-game.org)',
       },
     });
     clearTimeout(timeoutId);
@@ -1742,7 +1743,7 @@ const isUrlUsableForReport = async (url: string, timeoutMs = 3500): Promise<bool
         signal: controller2.signal,
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (compatible; NewWorldGameBot/1.0; +https://newworld-game.org)',
+            'Mozilla/5.0 (compatible; Global Solutions LabBot/1.0; +https://newworld-game.org)',
           Range: 'bytes=0-1024',
         },
       });
@@ -2683,7 +2684,7 @@ const buildSolutionLaunchResourcePrompt = (params: {
     .filter(Boolean)
     .join('\n');
 
-  return `You are a meticulous Solution Launch researcher for NewWorld Game.
+  return `You are a meticulous Solution Launch researcher for Global Solutions Lab.
 
 Task:
 ${laneBrief}
@@ -3143,7 +3144,7 @@ const buildAIInsightsEmailFromCache = (
               <h3 style="margin:0 0 8px;font-size:12px;color:#166534;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;">Open Team Opportunities</h3>
               <p style="margin:0 0 10px;font-size:22px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">Solutions looking for participants to join</p>
               <p style="margin:0 0 24px;font-size:15px;color:#4b5563;line-height:1.7;">
-                Other active teams across NewWorld Game are inviting collaborators right now.
+                Other active teams across Global Solutions Lab are inviting collaborators right now.
               </p>
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 ${joinOpportunitiesHtml}
@@ -3183,8 +3184,8 @@ const buildAIInsightsEmailFromCache = (
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
                   <td>
-                    <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;">NewWorld Game</p>
-                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Weekly NewWorld Game Intelligence Brief</h1>
+                    <p style="margin:0;font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;">Global Solutions Lab</p>
+                    <h1 style="margin:8px 0 0;font-size:28px;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;letter-spacing:-0.5px;">Weekly Global Solutions Lab Intelligence Brief</h1>
                     <p style="margin:8px 0 0;font-size:13px;color:#9ca3af;">${currentDate}</p>
                   </td>
                 </tr>
@@ -3204,7 +3205,7 @@ const buildAIInsightsEmailFromCache = (
                 Dear ${userFirstName || 'there'},
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
-                Welcome to this week's NewWorld Game Intelligence Brief - and thank you for being part of NewWorld Game.
+                Welcome to this week's Global Solutions Lab Intelligence Brief - and thank you for being part of Global Solutions Lab.
               </p>
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 Your work on real-world challenges matters. To support you, you now have a personal AI assistant that continuously scans for relevant research, emerging insights, and funding opportunities connected to your solution.
@@ -3228,7 +3229,7 @@ const buildAIInsightsEmailFromCache = (
                       Choose which solution receives your weekly brief
                     </p>
                     <p style="margin:0 0 14px;font-size:14px;line-height:1.65;color:#4b5563;">
-                      You can change this anytime. If you do not choose one, NewWorld Game will use the weekly fallback selection.
+                      You can change this anytime. If you do not choose one, Global Solutions Lab will use the weekly fallback selection.
                     </p>
                     <a href="${manageBriefUrl}" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:12px 18px;font-size:14px;font-weight:700;border-radius:10px;">
                       Choose My Weekly Brief Solution
@@ -3246,7 +3247,7 @@ const buildAIInsightsEmailFromCache = (
                   </td>
                   <td style="vertical-align:middle;">
                     <p style="margin:0;font-size:16px;font-weight:600;color:#111827;">Medard Gabel</p>
-                    <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">EarthGame Inc Director, NewWorld Game Designer</p>
+                    <p style="margin:4px 0 0;font-size:14px;color:#6b7280;">EarthGame Inc Director, Global Solutions Lab Designer</p>
                   </td>
                 </tr>
               </table>
@@ -3338,12 +3339,12 @@ const buildAIInsightsEmailFromCache = (
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
                   <td>
-                    <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#111827;">NewWorld Game</p>
+                    <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#111827;">Global Solutions Lab</p>
                     <p style="margin:0 0 16px;font-size:13px;color:#6b7280;line-height:1.5;">
                       Empowering changemakers to solve the world's most pressing challenges.
                     </p>
                     <p style="margin:0;font-size:12px;color:#9ca3af;">
-                      <a href="https://newworld-game.org" style="color:#6b7280;text-decoration:none;">newworld-game.org</a>
+                      <a href="https://newworld-game.org" style="color:#6b7280;text-decoration:none;">Global Solutions Lab</a>
                       <span style="color:#d1d5db;"> • </span>
                       <a href="${feedbackUrl}" style="color:#6b7280;text-decoration:none;">Share Feedback</a>
                       <span style="color:#d1d5db;"> • </span>
@@ -3362,7 +3363,7 @@ const buildAIInsightsEmailFromCache = (
             <td style="padding:24px;text-align:center;">
               <p style="margin:0;font-size:11px;color:#9ca3af;line-height:1.6;">
                 This email was sent to ${userEmail}<br>
-                © ${new Date().getFullYear()} NewWorld Game. All rights reserved.
+                © ${new Date().getFullYear()} Global Solutions Lab. All rights reserved.
               </p>
             </td>
           </tr>
@@ -3376,7 +3377,7 @@ const buildAIInsightsEmailFromCache = (
 
   return {
     html: emailHtml,
-    subject: `Weekly NewWorld Game Intelligence Brief: ${solutionTitle}`,
+    subject: `Weekly Global Solutions Lab Intelligence Brief: ${solutionTitle}`,
     verifiedFunders: validFundersCount,
     verifiedNews: validNewsCount,
   };
@@ -3710,7 +3711,7 @@ export const sendAIInsightsEmail = functions.https.onCall(
 
       const msg = {
         to: userEmail,
-        from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
+        from: { name: 'Global Solutions Lab', email: 'newworld@newworld-game.org' },
         subject,
         html,
       };
@@ -4015,7 +4016,7 @@ async function enqueueAIInsightsBulkJob(data: {
     Math.max(Number(data.concurrency) || 4, 1),
     6
   );
-  const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
+  const subject = `Weekly Global Solutions Lab Intelligence Brief (bulk)`;
 
   const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
     mode: 'bulk',
@@ -4119,7 +4120,7 @@ export const processAIInsightsBulkJob = functions
       logRef = admin.firestore().collection('ai_insights_send_logs').doc(logId);
     } else {
       // This is an old-style job without logId (backward compatibility)
-      const subject = `Weekly NewWorld Game Intelligence Brief (bulk)`;
+      const subject = `Weekly Global Solutions Lab Intelligence Brief (bulk)`;
       logRef = await admin.firestore().collection('ai_insights_send_logs').add({
         mode: 'bulk',
         subject,
@@ -4274,7 +4275,7 @@ export const processAIInsightsBulkJob = functions
         );
         await sgMail.send({
           to: userEmail,
-          from: { name: 'NewWorld Game', email: 'newworld@newworld-game.org' },
+          from: { name: 'Global Solutions Lab', email: 'newworld@newworld-game.org' },
           subject: emailSubject,
           html,
         });
@@ -4547,7 +4548,7 @@ export const requestChallengePageJoin = functions.https.onCall(
     const manageUrl = `${APP_BASE_URL.replace(/\/$/, '')}/challenge-spaces`;
 
     await sgMail.send({
-      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      from: { email: 'newworld@newworld-game.org', name: 'Global Solutions Lab' },
       subject: `New request to join ${title}`,
       html: `
         <div style="font-family: Arial, sans-serif; color:#0f172a; line-height:1.6;">
@@ -4646,7 +4647,7 @@ export const acceptChallengePageJoinRequest = functions.https.onCall(
     try {
       await sgMail.send({
         to: requesterEmail,
-        from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+        from: { email: 'newworld@newworld-game.org', name: 'Global Solutions Lab' },
         subject: `Your request to join ${title} was accepted`,
         html: `
           <div style="font-family: Arial, sans-serif; color:#0f172a; line-height:1.6;">
@@ -4848,7 +4849,7 @@ export const notifyJoinRequest = functions.https.onCall(
         </div>
         <p style="margin:0 0 20px;">Review the request and respond from your team hub:</p>
         <a href="${manageUrl}" style="display:inline-block; padding:12px 24px; background:#047857; color:#ffffff; border-radius:9999px; text-decoration:none; font-weight:600;">Open join requests</a>
-        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">You are receiving this notification because you are part of the ${safeTitle} team on NewWorld Game.</p>
+        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">You are receiving this notification because you are part of the ${safeTitle} team on Global Solutions Lab.</p>
       </div>
     `;
 
@@ -4856,7 +4857,7 @@ export const notifyJoinRequest = functions.https.onCall(
 
     const subject = `New join request for ${title}`;
     const mail: sgMail.MailDataRequired = {
-      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      from: { email: 'newworld@newworld-game.org', name: 'Global Solutions Lab' },
       subject,
       html,
       text,
@@ -4977,7 +4978,7 @@ export const notifyJoinApproved = functions.https.onCall(
         <p style="margin:0 0 20px; font-size:14px; color:#334155;">
           Need help getting started? Reply to this email and we’ll point you toward the right resources.
         </p>
-        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">— The NewWorld Game team</p>
+        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">— The Global Solutions Lab team</p>
       </div>
     `;
 
@@ -4985,7 +4986,7 @@ export const notifyJoinApproved = functions.https.onCall(
 
     const mail: sgMail.MailDataRequired = {
       to: requesterEmail,
-      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      from: { email: 'newworld@newworld-game.org', name: 'Global Solutions Lab' },
       subject: `You’re now part of ${title}`,
       html,
       text,
@@ -5587,7 +5588,7 @@ export const sendBulkTestEmail = functions
 
     const msg: sgMail.MailDataRequired = {
       to,
-      from: { email: fromEmail, name: 'NewWorld Game' }, // adjust branding
+      from: { email: fromEmail, name: 'Global Solutions Lab' }, // adjust branding
       subject,
       html,
       text: htmlToPlainText(html),
@@ -5702,7 +5703,7 @@ export const sendBulkTestEmail = functions
 //   for (let i = 0; i < chunks.length; i++) {
 //     const batch = chunks[i];
 //     const msg: sgMail.MailDataRequired = {
-//       from: { email: fromEmail, name: 'NewWorld Game' },
+//       from: { email: fromEmail, name: 'Global Solutions Lab' },
 //       subject,
 //       html,
 //       text,
@@ -5983,7 +5984,7 @@ export const sendBulkHtml = functions
   for (let i = 0; i < valid.length; i += chunkSize) {
     const batch = valid.slice(i, i + chunkSize);
     const msg: sgMail.MailDataRequired = {
-      from: { email: fromEmail, name: 'NewWorld Game' },
+      from: { email: fromEmail, name: 'Global Solutions Lab' },
       subject,
       html,
       text,
@@ -6132,7 +6133,7 @@ const DEFAULT_GSL_PREP_EMAIL_TEMPLATE: GslPrepEmailTemplate = {
     "One or two questions where Medard's feedback would help most.",
   ],
   ctaLabel: 'Join the Google Meet',
-  signoff: 'Thank you,\nMedard Gabel and the NewWorld Team',
+  signoff: 'Thank you,\nMedard Gabel and the Global Solutions Lab Team',
 };
 
 function normalizeGslPrepEmailTemplate(raw?: any): GslPrepEmailTemplate {
@@ -6343,12 +6344,12 @@ export const sendDemoInvite = functions.firestore
       data['meetingTitle'] ||
       (isGslPrep
         ? 'Team meeting with Medard Gabel for Global Solutions Lab 2026 prep'
-        : 'NewWorld Game Workshop');
+        : 'Global Solutions Lab Workshop');
     const meetingDescription =
       data['meetingDescription'] ||
       (isGslPrep
         ? 'Final presentation prep meeting for Global Solutions Lab 2026 teams. Final presentations are Wednesday, June 24, 2026.'
-        : 'Live NewWorld Game workshop with the NewWorld team.');
+        : 'Live Global Solutions Lab workshop with the Global Solutions Lab team.');
     const timeZone = data['bookingTimeZone'] || 'America/New_York';
     const startUTC = buildUtcDateFromBooking(
       data['demoDate'],
@@ -6384,7 +6385,7 @@ export const sendDemoInvite = functions.firestore
           gslPrepTemplate?.subject || DEFAULT_GSL_PREP_EMAIL_TEMPLATE.subject,
           gslPrepTokens || gslPrepTemplateTokens(data, meetingLink)
         )
-      : `✅ NewWorld Game Workshop – ${data['demoDate']} ${data['demoTime']} EST`;
+      : `✅ Global Solutions Lab Workshop – ${data['demoDate']} ${data['demoTime']} EST`;
     const opsSubject = isGslPrep
       ? `📆 GSL team meeting booked - ${data['teamName'] || 'Team'} - ${
           data['demoDate']
@@ -8496,7 +8497,7 @@ function setPageBackground(pageObjectId: string, color: string): SlidesBatchRequ
 function addFooter(pageObjectId: string, prefix: string, slideNumber: number, totalSlides: number): SlidesBatchRequest[] {
   return [
     ...createRect(pageObjectId, `${prefix}_footer_rule`, 32, 370, 656, 1, 'CBD5E1'),
-    ...createTextBox(pageObjectId, `${prefix}_footer_brand`, 'NewWorld Game', 34, 378, 170, 12, {
+    ...createTextBox(pageObjectId, `${prefix}_footer_brand`, 'Global Solutions Lab', 34, 378, 170, 12, {
       color: '64748B',
       fontSize: 7,
       bold: true,
@@ -8627,7 +8628,7 @@ function addPptxFooter(slide: any, slideNumber: number, totalSlides: number): vo
     h: 0,
     line: { color: 'CBD5E1', width: 1 },
   });
-  slide.addText('NewWorld Game', {
+  slide.addText('Global Solutions Lab', {
     x: 0.62,
     y: 7.02,
     w: 2.2,
@@ -8736,8 +8737,8 @@ async function createPowerPointDeck(
 ): Promise<Buffer> {
   const pptx = new pptxgen();
   pptx.layout = 'LAYOUT_WIDE';
-  pptx.author = 'NewWorld Game';
-  pptx.company = 'NewWorld Game';
+  pptx.author = 'Global Solutions Lab';
+  pptx.company = 'Global Solutions Lab';
   pptx.subject = pptxText(plan.subtitle || 'AI-generated presentation', 180);
   pptx.title = pptxText(plan.title || sourceTitle || 'AI Presentation', 120);
   pptx.lang = 'en-US';
@@ -9463,7 +9464,7 @@ function buildGoogleSlidesRequests(
       bold: true,
     }));
   });
-  requests.push(...createTextBox(closeId, `${safePrefix}_close_url`, 'newworld-game.org', 540, 368, 112, 12, {
+  requests.push(...createTextBox(closeId, `${safePrefix}_close_url`, 'Global Solutions Lab', 540, 368, 112, 12, {
     color: '94A3B8',
     fontSize: 8,
     align: 'END',
@@ -10725,14 +10726,14 @@ export const sendMentionNotification = functions.https.onCall(
         ${discussionUrl ? `
         <a href="${discussionUrl}" style="display:inline-block; padding:12px 24px; background:#047857; color:#ffffff; border-radius:9999px; text-decoration:none; font-weight:600;">View Discussion</a>
         ` : ''}
-        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">You are receiving this notification because you are part of the ${safeTitle} discussion on NewWorld Game.</p>
+        <p style="margin:24px 0 0; font-size:12px; color:#64748b;">You are receiving this notification because you are part of the ${safeTitle} discussion on Global Solutions Lab.</p>
       </div>
     `;
 
     const text = `${senderName} mentioned ${mentionLabel} in ${challengeTitle}. Message: ${messageContent || 'No message content.'}\n${discussionUrl ? `View discussion: ${discussionUrl}` : ''}`;
 
     const mail: sgMail.MailDataRequired = {
-      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      from: { email: 'newworld@newworld-game.org', name: 'Global Solutions Lab' },
       subject,
       html,
       text,
@@ -10820,7 +10821,7 @@ export const sendParticipantInvite = functions.https.onCall(
     const safeInviteUrl = escapeHtml(inviteUrl);
     const safeProjectImage = projectImage ? escapeHtml(projectImage) : '';
     const safeWorkspaceLogo = workspaceLogo ? escapeHtml(workspaceLogo) : '';
-    const brandLogoUrl = `${APP_BASE_URL.replace(/\/$/, '')}/assets/img/earth-triangle-test.png`;
+    const brandLogoUrl = `${APP_BASE_URL.replace(/\/$/, '')}/assets/img/gsl-logo.png`;
     const roleLabel = inviteRole === 'evaluator' ? 'evaluator' : 'designer';
     const roleArticle = inviteRole === 'evaluator' ? 'an' : 'a';
     const roleBadge = inviteRole === 'evaluator' ? 'Evaluator Added' : 'Designer Added';
@@ -10851,8 +10852,8 @@ export const sendParticipantInvite = functions.https.onCall(
         : 'View Invitation';
 
     const subject = isRoleAssignment
-      ? `${inviterName} added you as ${roleArticle} ${roleLabel} for "${projectTitle}" on NewWorld Game`
-      : `${inviterName} invited you to join "${projectTitle}" on NewWorld Game`;
+      ? `${inviterName} added you as ${roleArticle} ${roleLabel} for "${projectTitle}" on Global Solutions Lab`
+      : `${inviterName} invited you to join "${projectTitle}" on Global Solutions Lab`;
 
     const html = `
 <!DOCTYPE html>
@@ -10883,10 +10884,11 @@ export const sendParticipantInvite = functions.https.onCall(
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
                 <tr>
                   <td style="vertical-align:middle;padding-right:10px;">
-                    <img src="${brandLogoUrl}" alt="NewWorld Game" width="42" style="display:block;width:42px;max-width:42px;height:auto;border:0;">
+                    <img src="${brandLogoUrl}" alt="Global Solutions Lab" width="42" style="display:block;width:42px;max-width:42px;height:auto;border:0;">
                   </td>
                   <td style="vertical-align:middle;">
-                    <span style="font-size:21px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">NewWorld Game</span>
+                    <span style="font-size:21px;line-height:1.1;font-weight:800;color:#0f172a;letter-spacing:-0.01em;">Global Solutions Lab</span>
+                    <div style="font-size:11px;line-height:1.35;font-weight:600;color:#64748b;">Designing solutions for global and local problems.</div>
                   </td>
                 </tr>
               </table>
@@ -10928,8 +10930,8 @@ export const sendParticipantInvite = functions.https.onCall(
                     <!-- Main Message -->
                     <p style="margin:0 0 24px; font-size:16px; color:#334155; line-height:1.6;">
                       ${isRoleAssignment
-                        ? `You have been added as ${roleArticle} <strong style="color:#0f172a;">${roleLabel}</strong> for this solution on NewWorld Game.`
-                        : `<strong style="color:#0f172a;">${safeInviter}</strong> has invited you to collaborate on a ${typeLabel} on NewWorld Game.`}
+                        ? `You have been added as ${roleArticle} <strong style="color:#0f172a;">${roleLabel}</strong> for this solution on Global Solutions Lab.`
+                        : `<strong style="color:#0f172a;">${safeInviter}</strong> has invited you to collaborate on a ${typeLabel} on Global Solutions Lab.`}
                     </p>
 
                     ${safeWorkspaceLogo ? `
@@ -10972,15 +10974,15 @@ export const sendParticipantInvite = functions.https.onCall(
                       </tr>
                     </table>
                     
-                    <!-- What is NewWorld Game -->
+                    <!-- What is Global Solutions Lab -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-top:1px solid #e2e8f0; padding-top:24px;">
                       <tr>
                         <td>
                           <p style="margin:0 0 8px; font-size:13px; font-weight:600; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
-                            What is NewWorld Game?
+                            What is Global Solutions Lab?
                           </p>
                           <p style="margin:0; font-size:14px; color:#64748b; line-height:1.6;">
-                            NewWorld Game is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
+                            Global Solutions Lab is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
                           </p>
                         </td>
                       </tr>
@@ -10997,11 +10999,11 @@ export const sendParticipantInvite = functions.https.onCall(
             <td style="padding: 32px 20px; text-align:center;">
               <p style="margin:0 0 8px; font-size:13px; color:#94a3b8;">
                 ${isRoleAssignment
-                  ? `This ${roleLabel} notification was sent by ${safeInviter} via NewWorld Game.`
-                  : `This invitation was sent by ${safeInviter} via NewWorld Game.`}
+                  ? `This ${roleLabel} notification was sent by ${safeInviter} via Global Solutions Lab.`
+                  : `This invitation was sent by ${safeInviter} via Global Solutions Lab.`}
               </p>
               <p style="margin:0; font-size:12px; color:#94a3b8;">
-                © ${new Date().getFullYear()} NewWorld Game · <a href="https://newworld-game.org" style="color:#64748b; text-decoration:underline;">newworld-game.org</a>
+                © ${new Date().getFullYear()} Global Solutions Lab · <a href="https://newworld-game.org" style="color:#64748b; text-decoration:underline;">Global Solutions Lab</a>
               </p>
             </td>
           </tr>
@@ -11017,31 +11019,31 @@ export const sendParticipantInvite = functions.https.onCall(
     const text = isRoleAssignment
       ? `${greeting}
 
-You have been added as ${roleArticle} ${roleLabel} for "${projectTitle}" on NewWorld Game.
+You have been added as ${roleArticle} ${roleLabel} for "${projectTitle}" on Global Solutions Lab.
 
 ${safeDescription ? `About this solution: ${projectDescription}\n\n` : ''}Open your ${roleLabel === 'evaluator' ? 'evaluation page' : 'team dashboard'}: ${inviteUrl}
 
 ---
-What is NewWorld Game?
-NewWorld Game is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
+What is Global Solutions Lab?
+Global Solutions Lab is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
 
-This ${roleLabel} notification was sent by ${inviterName} via NewWorld Game.
+This ${roleLabel} notification was sent by ${inviterName} via Global Solutions Lab.
 `
       : `${greeting}
 
-${inviterName} has invited you to collaborate on "${projectTitle}" on NewWorld Game.
+${inviterName} has invited you to collaborate on "${projectTitle}" on Global Solutions Lab.
 
 ${safeDescription ? `About this ${typeLabel}: ${projectDescription}\n\n` : ''}To view this invitation and join, visit: ${inviteUrl}
 
 ---
-What is NewWorld Game?
-NewWorld Game is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
+What is Global Solutions Lab?
+Global Solutions Lab is a collaborative platform where teams design solutions to global challenges using systems thinking and the UN Sustainable Development Goals.
 
-This invitation was sent by ${inviterName} via NewWorld Game.
+This invitation was sent by ${inviterName} via Global Solutions Lab.
 `;
 
     const mail: sgMail.MailDataRequired = {
-      from: { email: 'newworld@newworld-game.org', name: 'NewWorld Game' },
+      from: { email: 'newworld@newworld-game.org', name: 'Global Solutions Lab' },
       to: recipientEmail,
       subject,
       html,
@@ -11445,7 +11447,7 @@ export const createNwgSchoolCheckoutSession = functions.https.onCall(
             price_data: {
               currency,
               product_data: {
-                name: `NWG ${
+                name: `GSL ${
                   plan.charAt(0).toUpperCase() + plan.slice(1)
                 } Plan`,
                 description: addOns
@@ -11722,7 +11724,7 @@ function buildGslRegistrationConfirmationEmail(data: any): {
     <div style="background:#f4f7fb;padding:32px 16px;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
       <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #dbe4ee;border-radius:18px;overflow:hidden;">
         <div style="background:#0f172a;padding:20px 28px;">
-          <div style="font-size:22px;font-weight:700;color:#ffffff;">NewWorld Game</div>
+          <div style="font-size:22px;font-weight:700;color:#ffffff;">Global Solutions Lab</div>
         </div>
         <div style="padding:28px;">
           <p style="margin:0 0 16px;font-size:16px;line-height:1.6;">Dear ${escapeHtml(displayName)},</p>
@@ -11739,7 +11741,7 @@ function buildGslRegistrationConfirmationEmail(data: any): {
           </p>
           <p style="margin:0;font-size:16px;line-height:1.7;">
             Best,<br />
-            NewWorld Game Team
+            Global Solutions Lab Team
           </p>
         </div>
       </div>
@@ -11747,7 +11749,7 @@ function buildGslRegistrationConfirmationEmail(data: any): {
   `.trim();
 
   const text = [
-    'NewWorld Game',
+    'Global Solutions Lab',
     '',
     `Dear ${displayName},`,
     '',
@@ -11758,7 +11760,7 @@ function buildGslRegistrationConfirmationEmail(data: any): {
     "We can't wait to see you at GSL 2026.",
     '',
     'Best,',
-    'NewWorld Game Team',
+    'Global Solutions Lab Team',
   ].join('\n');
 
   return { subject, html, text };
@@ -11771,7 +11773,7 @@ export const gslRegistrationEmail = functions.https.onCall(
       to: data.email,
       from: {
         email: 'newworld@newworld-game.org',
-        name: 'NewWorld Game',
+        name: 'Global Solutions Lab',
       },
       replyTo: GSL_2026_CONTACT_EMAIL,
       subject: emailContent.subject,
@@ -11835,7 +11837,7 @@ async function runGslRegistrationEmail(data: any) {
     to: data.email,
     from: {
       email: 'newworld@newworld-game.org',
-      name: 'NewWorld Game',
+      name: 'Global Solutions Lab',
     },
     replyTo: GSL_2026_CONTACT_EMAIL,
     subject: emailContent.subject,

@@ -5,14 +5,14 @@ import { randomUUID } from 'crypto';
 const toICS = (d: Date) =>
   d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
-/** Builds a 30-min NewWorld Game invite */
+/** Builds a 30-min Global Solutions Lab invite */
 export function buildICS(
   startUTC: Date, // workshop start, already in UTC
   name: string,
   email: string,
   meetingLink: string,
-  summary = 'NewWorld Game Workshop',
-  description = 'Live hands-on workshop with the NewWorld team'
+  summary = 'Global Solutions Lab Workshop',
+  description = 'Live hands-on workshop with the Global Solutions Lab team'
 ) {
   const endUTC = new Date(startUTC.getTime() + 30 * 60_000);
   const uid = randomUUID();
@@ -20,7 +20,7 @@ export function buildICS(
   return `
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//NewWorld Game//EN
+PRODID:-//Global Solutions Lab//EN
 CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
@@ -31,7 +31,7 @@ DTEND:${toICS(endUTC)}
 SUMMARY:${summary}
 DESCRIPTION:${description} - ${meetingLink}
 LOCATION:${meetingLink}
-ORGANIZER;CN=NewWorld Team:MAILTO:newworld@newworld-game.org
+ORGANIZER;CN=Global Solutions Lab Team:MAILTO:newworld@newworld-game.org
 ATTENDEE;CN=${name};RSVP=TRUE:MAILTO:${email}
 END:VEVENT
 END:VCALENDAR`.trim();

@@ -638,7 +638,7 @@ export class SlpContextService {
     const authorName =
       solution?.authorName?.trim() ||
       solution?.recruitmentProfile?.teamLabel?.trim() ||
-      'The NewWorld Game team';
+      'The Global Solutions Lab team';
     const routes = this.buildRoutes(solutionId);
     const laneReason = this.getLaneReason(primaryLane, stageLabel, solutionSummary);
     const nextStep = this.getNextStep(
@@ -756,7 +756,7 @@ export class SlpContextService {
     const previewUrl = this.buildAbsoluteUrl(context.routes.externalView);
     const shareTitle = context.hasSolution
       ? `${context.solutionTitle} | Solution Launch`
-      : 'Solution Launch on NewWorld Game';
+      : 'Solution Launch on Global Solutions Lab';
     const shareSummary = this.truncate(context.solutionSummary, 180);
     const shareText = `${shareTitle} — ${shareSummary}`;
 

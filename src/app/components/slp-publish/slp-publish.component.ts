@@ -87,11 +87,11 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.solutionTitle} | Solution Launch Publish | NewWorld Game`
-            : 'Solution Launch Publish | NewWorld Game',
+            ? `${vm.solutionTitle} | Solution Launch Publish | Global Solutions Lab`
+            : 'Solution Launch Publish | Global Solutions Lab',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game Solution Launch, publish pathway, solution launch, public preview, launch workflow',
+            'Global Solutions Lab Solution Launch, publish pathway, solution launch, public preview, launch workflow',
           url: 'https://newworld-game.org/solution-launch',
           type: 'website',
         });

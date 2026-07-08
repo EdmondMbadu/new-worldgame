@@ -295,7 +295,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     return (
       space.imageChallenge ||
       space.logoImage ||
-      'assets/img/earth-triangle-test.png'
+      'assets/img/gsl-logo.png'
     );
   }
 

@@ -37,9 +37,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     // Update SEO meta tags for landing page
     this.seoService.updateMetaTags({
-      title: 'NewWorld Game - Solve Global Challenges Through Collaborative Gameplay',
-      description: 'NewWorld Game is an educational platform inspired by Buckminster Fuller where students, educators, and communities collaborate to solve global challenges through AI guidance, design science, tournaments, and solution-building programs.',
-      keywords: 'NewWorld Game, New World Game, NWG, global challenges, educational platform, collaborative learning, sustainability, world game, Buckminster Fuller, design science',
+      title: 'Global Solutions Lab - Designing solutions for global and local problems.',
+      description: 'Global Solutions Lab designs solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',
+      keywords: 'Global Solutions Lab, GSL, global challenges, educational platform, collaborative learning, sustainability, world game, Buckminster Fuller, design science',
       url: 'https://newworld-game.org/',
       type: 'website'
     });

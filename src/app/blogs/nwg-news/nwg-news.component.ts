@@ -84,17 +84,17 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly curatedVideos: Video[] = [
     {
       id: 'tane-kahu',
-      title: `NewWorld Game: Changing the World`,
+      title: `Global Solutions Lab: Changing the World`,
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FIB%20Flyer-%20Tane%20Kahu.mp4?alt=media&token=438a21d0-82a9-4043-ad20-0b004d895101',
       speaker: 'Tane Kahu',
       thumbUrl: '../../../assets/img/tane-agent.png',
-      tagline: 'NewWorld Game AI colleague Tane Kahu',
+      tagline: 'Global Solutions Lab AI colleague Tane Kahu',
       source: 'curated',
       createdAtMs: Date.UTC(2026, 5, 1, 9, 0),
     },
     {
       id: 'sofia-change',
-      title: `NewWorld Game Changemakers Tournament 2025-26`,
+      title: `Global Solutions Lab Changemakers Tournament 2025-26`,
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FFor%20Tachers.%20_TN.mp4?alt=media&token=3d72ed6d-9baa-46e7-b4fc-801dcaba9208',
       speaker: 'Sofia',
       thumbUrl: '../../../assets/img/sofia-agent.png',
@@ -158,7 +158,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'renaldo',
-      title: 'NewWorld Game News',
+      title: 'Global Solutions Lab News',
       url: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/videos%2FWelcome%20GSL%202025v2.mp4?alt=media&token=37dab895-9458-4865-a7bf-cc7ad853cf80',
       speaker: 'Renaldo',
       thumbUrl: '../../../assets/img/renaldo.webp',
@@ -322,7 +322,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.resetVideoForm();
       document.body.style.overflow = '';
     } catch (error) {
-      console.error('Could not add NWG news video', error);
+      console.error('Could not add GSL news video', error);
       this.addVideoError = 'Could not add this video. Please try again.';
     } finally {
       progressSub.unsubscribe();
@@ -401,7 +401,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
       this.resetEditVideoForm();
       document.body.style.overflow = '';
     } catch (error) {
-      console.error('Could not update NWG news video', error);
+      console.error('Could not update GSL news video', error);
       this.editVideoError = 'Could not update this video. Please try again.';
     } finally {
       progressSub?.unsubscribe();
@@ -412,7 +412,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async deleteVideo(video: Video) {
     if (!this.canManageVideo(video) || !video.id || this.isDeletingVideo) return;
-    const confirmed = window.confirm(`Delete "${video.title}" from NWG News?`);
+    const confirmed = window.confirm(`Delete "${video.title}" from GSL News?`);
     if (!confirmed) return;
 
     this.isDeletingVideo = true;
@@ -435,7 +435,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
         document.body.style.overflow = '';
       }
     } catch (error) {
-      console.error('Could not delete NWG news video', error);
+      console.error('Could not delete GSL news video', error);
       alert('Could not delete this video. Please try again.');
     } finally {
       this.isDeletingVideo = false;
@@ -635,7 +635,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       await lastValueFrom(this.storage.ref(storagePath).delete());
     } catch (error) {
-      console.warn('Could not delete stored NWG news video file', error);
+      console.warn('Could not delete stored GSL news video file', error);
     }
   }
 

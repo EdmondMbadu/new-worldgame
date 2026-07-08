@@ -262,13 +262,13 @@ export class SolutionViewComponent implements OnInit {
 
       window.open(url, '_blank');
     } else if (social === 'twitter') {
-      const message = `Hi! I've recently developed a NewWorld Game solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
+      const message = `Hi! I've recently developed a Global Solutions Lab solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness`;
       const encodedMessage = encodeURIComponent(message);
       const url = `https://twitter.com/intent/tweet?url=https://new-worldgame.web.app/solution-view-external/${this.currentSolution.solutionId}&text=${encodedMessage}`;
 
       window.open(url, '_blank');
     } else if (social === 'email') {
-      const url = `mailto:?subject=NewWorld Game Solution Invitation &body=Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
+      const url = `mailto:?subject=Global Solutions Lab Solution Invitation &body=Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness! https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
       window.open(url, '_blank');
     } else if (social === 'linkedin') {
       const linkedInMessage = `Hi! I've recently developed a solution titled ${this.currentSolution.title}. I would greatly appreciate your insights and feedback to enhance its effectiveness. Check it out here: https://new-worldgame.web.app/solution-view-external/${this.solution.solutionId}`;
@@ -381,7 +381,7 @@ export class SolutionViewComponent implements OnInit {
     const emailData = {
       email: 'newworld@newworld-game.org',
       // email: this.auth.currentUser.email,
-      subject: `Call for Publication: Evaluation of NewWorld Game Solution: ...`,
+      subject: `Call for Publication: Evaluation of Global Solutions Lab Solution: ...`,
       title: this.currentSolution.title,
       description: `${this.currentSolution.title} by ${this.currentSolution.authorName}`,
       path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
@@ -428,7 +428,7 @@ export class SolutionViewComponent implements OnInit {
     this.teamMembers.forEach((evaluator) => {
       const emailData = {
         email: evaluator.email,
-        subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} has commented on your NewWorld Game solution: ${this.currentSolution.title}`,
+        subject: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName} has commented on your Global Solutions Lab solution: ${this.currentSolution.title}`,
         // title: this.myForm.value.title,
         // description: this.myForm.value.description,
         path: `https://newworld-game.org/solution-view/${this.currentSolution.solutionId}`,
@@ -498,7 +498,7 @@ export class SolutionViewComponent implements OnInit {
       user?.email ||
       comment?.authorName ||
       comment?.email ||
-      'NewWorld Game member'
+      'Global Solutions Lab member'
     );
   }
 

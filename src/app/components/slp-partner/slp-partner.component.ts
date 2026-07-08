@@ -87,11 +87,11 @@ export class SlpPartnerComponent implements OnInit, OnDestroy {
       tap((vm) => {
         this.seoService.updateMetaTags({
           title: vm.shell.hasSolution
-            ? `${vm.shell.solutionTitle} | Solution Launch Partner | NewWorld Game`
-            : 'Solution Launch Partner | NewWorld Game',
+            ? `${vm.shell.solutionTitle} | Solution Launch Partner | Global Solutions Lab`
+            : 'Solution Launch Partner | Global Solutions Lab',
           description: vm.heroDescription,
           keywords:
-            'NewWorld Game Solution Launch partner pathway, solution partner workflow, collaboration room, invite flow, launch coordination',
+            'Global Solutions Lab Solution Launch partner pathway, solution partner workflow, collaboration room, invite flow, launch coordination',
           url: 'https://newworld-game.org/partner',
           type: 'website',
         });

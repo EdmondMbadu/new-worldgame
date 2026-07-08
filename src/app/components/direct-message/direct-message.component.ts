@@ -100,7 +100,7 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     const fullName = `${this.recipient?.firstName || ''} ${
       this.recipient?.lastName || ''
     }`.trim();
-    return fullName || this.recipient?.email || 'NewWorld Game user';
+    return fullName || this.recipient?.email || 'Global Solutions Lab user';
   }
 
   get recipientInitials(): string {
@@ -399,7 +399,7 @@ export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
     return {
       messageId: this.replyTarget.id,
       senderUid: this.replyTarget.senderUid,
-      senderName: this.replyTarget.senderName || 'NewWorld Game user',
+      senderName: this.replyTarget.senderName || 'Global Solutions Lab user',
       text: this.replyTarget.text || '',
       createdAtMs: this.replyTarget.createdAtMs,
     };

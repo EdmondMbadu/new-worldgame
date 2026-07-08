@@ -418,7 +418,7 @@ export class CreateSolutionStepsComponent implements OnInit {
   //   this.solution.newSolution.participantsHolder!.forEach((participant) => {
   //     const emailData = {
   //       email: participant.name,
-  //       subject: `You Have Been Invited to Join a Solution Lab (NewWorld Game)`,
+  //       subject: `You Have Been Invited to Join a Solution Lab (Global Solutions Lab)`,
   //       title: this.solution.newSolution.title,
   //       description: this.solution.newSolution.description,
   //       author: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
