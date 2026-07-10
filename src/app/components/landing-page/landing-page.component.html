@@ -606,59 +606,95 @@
 
       <!-- Featured participant reflection -->
       <article
-        class="mb-10 rounded-2xl border border-slate-200 bg-slate-50 p-8 dark:border-slate-700 dark:bg-slate-800/60 md:p-10"
+        class="relative mb-10 overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 p-[1px] shadow-xl"
       >
-        <div class="max-w-5xl">
-          <p
-            class="text-sm font-semibold tracking-wide text-slate-500 dark:text-slate-400"
-          >
-            {{ 'landingHome.testimonials.featured.badge' | translate }}
-          </p>
-
-          <blockquote
-            class="mt-5 border-l-4 border-indigo-500 pl-5 text-xl font-medium leading-relaxed text-slate-900 dark:border-indigo-400 dark:text-white md:text-2xl"
-          >
-            “{{ 'landingHome.testimonials.featured.quote' | translate }}”
-          </blockquote>
-
-          <p
-            class="mt-5 max-w-4xl text-base leading-7 text-slate-600 dark:text-slate-300"
-          >
-            {{ 'landingHome.testimonials.featured.summary' | translate }}
-          </p>
-
+        <div
+          class="relative h-full rounded-[calc(1.5rem-1px)] bg-white/95 p-8 dark:bg-slate-900/95 md:p-10"
+        >
           <div
-            class="mt-7 flex flex-col gap-5 border-t border-slate-200 pt-6 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div class="flex items-center gap-3">
-              <div
-                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-100"
-                aria-hidden="true"
-              >
-                {{
-                  'landingHome.testimonials.featured.initials' | translate
-                }}
-              </div>
-
-              <div>
-                <p class="font-semibold text-slate-900 dark:text-white">
-                  {{ 'landingHome.testimonials.featured.name' | translate }}
-                </p>
-                <p class="text-sm text-slate-500 dark:text-slate-400">
-                  {{ 'landingHome.testimonials.featured.role' | translate }}
-                </p>
-              </div>
+            class="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-fuchsia-300/20 blur-3xl dark:bg-fuchsia-500/10"
+            aria-hidden="true"
+          ></div>
+          <div class="relative grid gap-8 md:grid-cols-[auto_1fr] md:items-start">
+            <div
+              class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-xl font-bold text-white shadow-lg"
+              aria-hidden="true"
+            >
+              {{
+                'landingHome.testimonials.featured.initials' | translate
+              }}
             </div>
 
-            <a
-              href="https://www.linkedin.com/feed/update/urn:li:activity:7480196933341331456/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex w-fit items-center gap-2 text-sm font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-4 transition hover:text-indigo-900 dark:text-indigo-300 dark:decoration-indigo-700 dark:hover:text-indigo-200"
-            >
-              {{ 'landingHome.testimonials.featured.cta' | translate }}
-              <span aria-hidden="true">&rarr;</span>
-            </a>
+            <div>
+              <p
+                class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300"
+              >
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path d="m12 3 1.9 5.8H20l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8L4 8.8h6.1L12 3Z" />
+                </svg>
+                {{ 'landingHome.testimonials.featured.badge' | translate }}
+              </p>
+
+              <blockquote
+                class="mt-5 text-2xl font-semibold leading-relaxed text-slate-900 dark:text-white md:text-3xl"
+              >
+                “{{
+                  'landingHome.testimonials.featured.quote' | translate
+                }}”
+              </blockquote>
+
+              <p
+                class="mt-5 max-w-4xl text-base leading-7 text-slate-600 dark:text-slate-300"
+              >
+                {{ 'landingHome.testimonials.featured.summary' | translate }}
+              </p>
+
+              <div
+                class="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p
+                    class="font-bold text-indigo-700 dark:text-indigo-300"
+                  >
+                    {{ 'landingHome.testimonials.featured.name' | translate }}
+                  </p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ 'landingHome.testimonials.featured.role' | translate }}
+                  </p>
+                </div>
+
+                <a
+                  href="https://www.linkedin.com/feed/update/urn:li:activity:7480196933341331456/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex w-fit items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+                >
+                  {{
+                    'landingHome.testimonials.featured.cta' | translate
+                  }}
+                  <svg
+                    class="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="m12 5 7 7-7 7" />
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </article>
