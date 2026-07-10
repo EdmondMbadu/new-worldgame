@@ -455,6 +455,15 @@
       "title": "Ce que l'on en dit",
       "subtitle": "Des retours authentiques d'enseignants, d'étudiants et de partenaires de Global Solutions Lab.",
       "cta": "Voir les témoignages vidéo",
+      "featured": {
+        "badge": "Témoignage d’une participante",
+        "quote": "Participer aux dix jours du Global Solutions Lab a été tout simplement époustouflant.",
+        "summary": "Après avoir rejoint l’équipe Building Community in a Changing Environment, Cynthia a créé une bande dessinée sur les énergies renouvelables, un récit sur la préservation des semences autochtones et un prototype du World House Game qui associe l’action climatique au jeu.",
+        "initials": "CN",
+        "name": "Cynthia Nekesa",
+        "role": "Participante au Global Solutions Lab 2026",
+        "cta": "Lire le témoignage complet de Cynthia"
+      },
       "cards": {
         "one": {
           "quote": "Ce que vous avez construit dans cette simulation est incroyable — l'innovation, l'inclusion et la diversité des avatars IA sont vraiment inspirantes.",

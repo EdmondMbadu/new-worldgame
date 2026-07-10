@@ -706,6 +706,15 @@
       "title": "What People Are Saying",
       "subtitle": "Real feedback from educators, students, and collaborators of the Global Solutions Lab.",
       "cta": "Watch video testimonials",
+      "featured": {
+        "badge": "Participant reflection",
+        "quote": "Participating in the 10-day Global Solutions Lab was nothing short of mind-blowing.",
+        "summary": "After joining the Building Community in a Changing Environment team, Cynthia created a renewable-energy comic, an Indigenous-seed preservation story, and a World House Game prototype that connects climate action with play.",
+        "initials": "CN",
+        "name": "Cynthia Nekesa",
+        "role": "Global Solutions Lab 2026 participant",
+        "cta": "Read Cynthia’s full reflection"
+      },
       "cards": {
         "one": {
           "quote": "It’s amazing what you’ve put together in this simulation — the innovation, inclusiveness, and diversity of the AI avatars are truly inspiring.",
