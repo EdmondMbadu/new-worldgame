@@ -12,6 +12,21 @@ service firebase.storage {
         && request.resource.contentType.matches('video/.*');
     }
 
+    function isPlatformAdmin() {
+      return signedIn()
+        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
+        && (
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.admin == 'true'
+          || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        );
+    }
+
+    match /avatarIntroVideos/{avatarSlug}/{fileName} {
+      allow read: if true;
+      allow create, update: if isPlatformAdmin() && isVideoUpload();
+      allow delete: if isPlatformAdmin();
+    }
+
     match /nwgNewsVideos/videos/{year}/{fileName} {
       allow read: if true;
       allow create, update: if signedIn() && isVideoUpload();
@@ -20,7 +35,9 @@ service firebase.storage {
 
     match /{topLevel}/{allPaths=**} {
       allow read: if true;
-      allow write: if signedIn() && topLevel != 'nwgNewsVideos';
+      allow write: if signedIn()
+        && topLevel != 'nwgNewsVideos'
+        && topLevel != 'avatarIntroVideos';
     }
   }
 }

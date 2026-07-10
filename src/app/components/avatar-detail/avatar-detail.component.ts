@@ -13,6 +13,10 @@ import {
   AngularFirestore,
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
+import { AngularFireStorage } from '@angular/fire/compat/storage';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { AvatarRegistryService } from '../../services/avatar-registry.service';
 import { AuthService } from '../../services/auth.service';
 import { ChatBotService } from '../../services/chat-bot.service';
@@ -28,6 +32,19 @@ interface DisplayMessage {
   loading?: boolean;
   pending?: string;
   typing?: boolean;
+}
+
+interface AvatarIntroVideo {
+  title: string;
+  url: string;
+  storagePath: string;
+  fileName: string;
+  contentType: string;
+  size: number;
+  createdAt?: any;
+  createdBy?: string;
+  updatedAt?: any;
+  updatedBy?: string;
 }
 
 @Component({
@@ -61,6 +78,17 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   private suppressNextAutoListen = false;
   private lastAssistantSpeechText = '';
   private lastAssistantSpeechTextNormalized = '';
+  introVideo: AvatarIntroVideo | null = null;
+  showVideoEditor = false;
+  videoTitle = '';
+  selectedVideoFile: File | null = null;
+  videoError = '';
+  videoStatus = '';
+  videoUploadProgress: number | null = null;
+  isSavingVideo = false;
+  isDeletingVideo = false;
+  private introVideoSub?: Subscription;
+  private currentAvatarSlug = '';
 
   /** NEW: persistent guest id for anonymous users */
   private guestId = '';
@@ -70,6 +98,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private registry: AvatarRegistryService,
     private afs: AngularFirestore,
+    private storage: AngularFireStorage,
     private cdRef: ChangeDetectorRef,
     public chat: ChatBotService,
     public auth: AuthService,
@@ -78,7 +107,8 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   get isAdmin(): boolean {
-    return !!this.auth?.currentUser?.admin;
+    const user = this.auth?.currentUser;
+    return user?.admin?.toLowerCase() === 'true' || user?.role === 'admin';
   }
 
   /** NEW: unify actor id so backend can attribute prompts */
@@ -110,6 +140,8 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.introVideoSub?.unsubscribe();
+    document.body.style.overflow = '';
     this.endConversation();
   }
 
@@ -146,7 +178,9 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.avatar = next;
+    this.currentAvatarSlug = slug;
+    this.avatar = { ...next, slug };
+    this.watchIntroVideo(slug);
     this.responses = [{ text: this.avatar.name || '', type: 'RESPONSE' }];
     this.singleCopyStates = [];
     this.spokenMessages = new WeakSet<DisplayMessage>();
@@ -171,6 +205,198 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       }, 0);
       sessionStorage.removeItem('pendingPrompt');
     }
+  }
+
+  private watchIntroVideo(slug: string): void {
+    this.introVideoSub?.unsubscribe();
+    this.introVideo = null;
+    this.introVideoSub = this.afs
+      .doc<AvatarIntroVideo>(`avatar_intro_videos/${slug}`)
+      .valueChanges()
+      .subscribe((video) => (this.introVideo = video || null));
+  }
+
+  openVideoEditor(): void {
+    if (!this.isAdmin) return;
+    this.videoTitle = this.introVideo?.title || `Meet ${this.avatar.name}`;
+    this.selectedVideoFile = null;
+    this.videoError = '';
+    this.videoStatus = '';
+    this.videoUploadProgress = null;
+    this.showVideoEditor = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeVideoEditor(): void {
+    if (this.isSavingVideo) return;
+    this.showVideoEditor = false;
+    this.selectedVideoFile = null;
+    this.videoError = '';
+    this.videoStatus = '';
+    this.videoUploadProgress = null;
+    document.body.style.overflow = '';
+  }
+
+  onIntroVideoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedVideoFile = input.files?.[0] || null;
+    this.videoError = '';
+    this.videoStatus = this.selectedVideoFile
+      ? `${this.selectedVideoFile.name} is ready to upload.`
+      : '';
+  }
+
+  async saveIntroVideo(): Promise<void> {
+    if (!this.isAdmin) {
+      this.videoError = 'Your account no longer has permission to manage this video. Refresh the page and sign in again.';
+      return;
+    }
+    if (this.isSavingVideo) {
+      this.videoStatus = 'The video is already being uploaded. Please wait for it to finish.';
+      return;
+    }
+    const avatarSlug = this.currentAvatarSlug || this.avatar?.slug || '';
+    if (!avatarSlug) {
+      this.videoError = 'This avatar could not be identified. Refresh the page and try again.';
+      return;
+    }
+    const title = this.videoTitle.trim();
+    const file = this.selectedVideoFile;
+    if (!title) {
+      this.videoError = 'Add a clear title for the introduction.';
+      return;
+    }
+    if (!this.introVideo && !file) {
+      this.videoError = 'Choose a video file to upload.';
+      return;
+    }
+    if (file && !file.type.startsWith('video/')) {
+      this.videoError = 'Choose a valid video file.';
+      return;
+    }
+    if (file && file.size === 0) {
+      this.videoError = 'The selected video file is empty. Choose a different file.';
+      return;
+    }
+    if (file && file.size >= 2 * 1024 * 1024 * 1024) {
+      this.videoError = 'The selected video must be smaller than 2 GB.';
+      return;
+    }
+
+    this.isSavingVideo = true;
+    this.videoError = '';
+    this.videoStatus = file ? 'Starting upload…' : 'Saving changes…';
+    let progressSub: Subscription | undefined;
+    let newStoragePath = '';
+    let savedSuccessfully = false;
+    try {
+      const now = Date.now();
+      const video: AvatarIntroVideo = this.introVideo
+        ? { ...this.introVideo, title }
+        : {
+            title,
+            url: '',
+            storagePath: '',
+            fileName: '',
+            contentType: '',
+            size: 0,
+          };
+
+      if (file) {
+        const safeName = this.safeVideoFileName(file.name);
+        newStoragePath = `avatarIntroVideos/${avatarSlug}/${now}-${safeName}`;
+        const storageRef = this.storage.ref(newStoragePath);
+        const task = this.storage.upload(newStoragePath, file, {
+          contentType: file.type,
+          customMetadata: {
+            avatarSlug,
+            uploadedBy: this.auth.currentUser?.uid || '',
+            originalName: file.name,
+          },
+        });
+        progressSub = task.percentageChanges().subscribe((progress) => {
+          this.videoUploadProgress = Math.round(progress || 0);
+          this.videoStatus = `Uploading ${file.name}: ${this.videoUploadProgress}%`;
+        });
+        // Waiting on the upload task itself is deterministic. snapshotChanges()
+        // can remain open in some AngularFire/browser combinations after 100%.
+        await task;
+        this.videoStatus = 'Upload complete. Saving the video details…';
+        video.url = await lastValueFrom(storageRef.getDownloadURL());
+        video.storagePath = newStoragePath;
+        video.fileName = file.name;
+        video.contentType = file.type;
+        video.size = file.size;
+      }
+
+      const oldStoragePath = this.introVideo?.storagePath || '';
+      const userId = this.auth.currentUser?.uid || '';
+      await this.afs.doc(`avatar_intro_videos/${avatarSlug}`).set(
+        {
+          ...video,
+          ...(this.introVideo
+            ? {
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: userId,
+              }
+            : {
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdBy: userId,
+              }),
+        },
+        { merge: true }
+      );
+      if (file && oldStoragePath && oldStoragePath !== newStoragePath) {
+        await this.deleteStoredVideo(oldStoragePath);
+      }
+      savedSuccessfully = true;
+      this.videoStatus = 'Video saved.';
+    } catch (error) {
+      console.error('Could not save avatar introduction video', error);
+      this.videoError = 'Could not save this video. Please try again.';
+      if (newStoragePath) await this.deleteStoredVideo(newStoragePath);
+    } finally {
+      progressSub?.unsubscribe();
+      this.isSavingVideo = false;
+      this.videoUploadProgress = null;
+      if (savedSuccessfully) this.closeVideoEditor();
+    }
+  }
+
+  async deleteIntroVideo(): Promise<void> {
+    const avatarSlug = this.currentAvatarSlug || this.avatar?.slug || '';
+    if (!this.isAdmin || !this.introVideo || !avatarSlug || this.isDeletingVideo) return;
+    if (!window.confirm(`Delete the introduction video for ${this.avatar.name}?`)) return;
+    this.isDeletingVideo = true;
+    try {
+      const storagePath = this.introVideo.storagePath;
+      await this.afs.doc(`avatar_intro_videos/${avatarSlug}`).delete();
+      if (storagePath) await this.deleteStoredVideo(storagePath);
+      this.closeVideoEditor();
+    } catch (error) {
+      console.error('Could not delete avatar introduction video', error);
+      this.videoError = 'Could not delete this video. Please try again.';
+    } finally {
+      this.isDeletingVideo = false;
+    }
+  }
+
+  private async deleteStoredVideo(path: string): Promise<void> {
+    try {
+      await lastValueFrom(this.storage.ref(path).delete());
+    } catch (error) {
+      console.warn('Could not delete stored avatar video', error);
+    }
+  }
+
+  private safeVideoFileName(fileName: string): string {
+    return (
+      fileName
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'intro-video.mp4'
+    );
   }
 
   scrollToChat() {
