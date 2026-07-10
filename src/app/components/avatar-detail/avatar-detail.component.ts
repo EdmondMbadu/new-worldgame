@@ -288,6 +288,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     this.videoStatus = file ? 'Starting upload…' : 'Saving changes…';
     let progressSub: Subscription | undefined;
     let newStoragePath = '';
+    let uploadCompleted = false;
     let savedSuccessfully = false;
     try {
       const now = Date.now();
@@ -321,6 +322,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
         // Waiting on the upload task itself is deterministic. snapshotChanges()
         // can remain open in some AngularFire/browser combinations after 100%.
         await task;
+        uploadCompleted = true;
         this.videoStatus = 'Upload complete. Saving the video details…';
         video.url = await lastValueFrom(storageRef.getDownloadURL());
         video.storagePath = newStoragePath;
@@ -353,8 +355,13 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
       this.videoStatus = 'Video saved.';
     } catch (error) {
       console.error('Could not save avatar introduction video', error);
-      this.videoError = 'Could not save this video. Please try again.';
-      if (newStoragePath) await this.deleteStoredVideo(newStoragePath);
+      const code = (error as any)?.code || '';
+      this.videoError = code === 'storage/unauthorized'
+        ? 'Firebase Storage denied this upload. The video storage rules need to be deployed.'
+        : 'Could not save this video. Please try again.';
+      // Only clean up when Storage confirmed that a file was created. A denied
+      // upload has nothing to delete and would otherwise create a second 403.
+      if (newStoragePath && uploadCompleted) await this.deleteStoredVideo(newStoragePath);
     } finally {
       progressSub?.unsubscribe();
       this.isSavingVideo = false;

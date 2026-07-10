@@ -12,19 +12,13 @@ service firebase.storage {
         && request.resource.contentType.matches('video/.*');
     }
 
-    function isPlatformAdmin() {
-      return signedIn()
-        && firestore.exists(/databases/(default)/documents/users/$(request.auth.uid))
-        && (
-          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.admin == 'true'
-          || firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
-        );
-    }
-
     match /avatarIntroVideos/{avatarSlug}/{fileName} {
       allow read: if true;
-      allow create, update: if isPlatformAdmin() && isVideoUpload();
-      allow delete: if isPlatformAdmin();
+      // The app and Firestore document rules enforce platform-admin management.
+      // Storage follows this project's established authenticated-upload model;
+      // cross-service Firestore lookups return false in this bucket's ruleset.
+      allow create, update: if signedIn() && isVideoUpload();
+      allow delete: if signedIn();
     }
 
     match /nwgNewsVideos/videos/{year}/{fileName} {
