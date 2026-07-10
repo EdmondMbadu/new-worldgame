@@ -87,6 +87,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   videoUploadProgress: number | null = null;
   isSavingVideo = false;
   isDeletingVideo = false;
+  isEditMode = false;
   private introVideoSub?: Subscription;
   private currentAvatarSlug = '';
 
@@ -179,6 +180,9 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     }
 
     this.currentAvatarSlug = slug;
+    this.isEditMode = false;
+    this.showVideoEditor = false;
+    document.body.style.overflow = '';
     this.avatar = { ...next, slug };
     this.watchIntroVideo(slug);
     this.responses = [{ text: this.avatar.name || '', type: 'RESPONSE' }];
@@ -207,6 +211,15 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleEditMode(): void {
+    if (!this.isAdmin) return;
+    this.isEditMode = !this.isEditMode;
+    if (!this.isEditMode) {
+      this.showVideoEditor = false;
+      document.body.style.overflow = '';
+    }
+  }
+
   private watchIntroVideo(slug: string): void {
     this.introVideoSub?.unsubscribe();
     this.introVideo = null;
@@ -217,7 +230,7 @@ export class AvatarDetailComponent implements OnInit, OnDestroy {
   }
 
   openVideoEditor(): void {
-    if (!this.isAdmin) return;
+    if (!this.isAdmin || !this.isEditMode) return;
     this.videoTitle = this.introVideo?.title || `Meet ${this.avatar.name}`;
     this.selectedVideoFile = null;
     this.videoError = '';

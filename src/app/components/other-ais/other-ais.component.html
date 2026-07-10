@@ -100,42 +100,54 @@
           class="rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-black/5 dark:border-white/10 shadow-lg"
         >
           <div
-            class="px-4 md:px-6 py-4 flex flex-col md:flex-row gap-3 md:items-center"
+            class="px-4 py-5 md:px-6"
           >
             <!-- Search -->
-            <div class="flex-1">
-              <label class="sr-only" for="q">
-                {{ 'otherAis.filters.searchLabel' | translate }}
+            <div class="mx-auto w-full max-w-4xl">
+              <label class="mb-2 block text-sm font-bold text-slate-800 dark:text-slate-100" for="avatar-search">
+                Search all avatars
               </label>
               <div class="relative">
+                <svg
+                  class="pointer-events-none absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.2-5.2m1.7-4.3a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
+                </svg>
                 <input
                   #q
+                  id="avatar-search"
                   type="search"
                   (input)="onSearch(q.value)"
                   [placeholder]="
                     'otherAis.filters.searchPlaceholder' | translate
                   "
-                  class="w-full rounded-xl bg-slate-100 dark:bg-slate-800 px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+                  autocomplete="off"
+                  class="h-14 w-full rounded-2xl border border-slate-300 bg-white py-3 pl-12 pr-14 text-base text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400 dark:focus:border-indigo-400"
                 />
-
-                <svg
-                  class="pointer-events-none absolute right-3 top-2.5 h-5 w-5 opacity-60"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
+                <button
+                  *ngIf="search"
+                  type="button"
+                  (click)="q.value = ''; onSearch(''); q.focus()"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:hover:bg-slate-700 dark:hover:text-white"
+                  aria-label="Clear avatar search"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m21 21-5.2-5.2m1.7-4.3a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"
-                  />
-                </svg>
+                  <span aria-hidden="true" class="text-xl leading-none">×</span>
+                </button>
+              </div>
+              <div class="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400" aria-live="polite">
+                <span>Search by name, description, or SDG number.</span>
+                <span class="shrink-0 font-semibold">{{ visibleAvatars.length }} result{{ visibleAvatars.length === 1 ? '' : 's' }}</span>
               </div>
             </div>
 
-            <!-- Group filter -->
-            <div class="flex items-center gap-2">
+            <div class="mt-5 flex flex-col gap-3 border-t border-black/5 pt-4 dark:border-white/10 md:flex-row md:items-center">
+              <!-- Group filter -->
+              <div class="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 (click)="setGroup('all')"
@@ -174,8 +186,8 @@
               </button>
             </div>
 
-            <!-- SDG chips (horizontal scroll) -->
-            <div class="md:ml-auto overflow-x-auto">
+              <!-- SDG chips (horizontal scroll) -->
+              <div class="overflow-x-auto md:ml-auto">
               <div class="flex gap-2">
                 <button
                   type="button"
@@ -205,6 +217,7 @@
                   }}
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </div>
