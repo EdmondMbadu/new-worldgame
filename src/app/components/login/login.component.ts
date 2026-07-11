@@ -18,9 +18,19 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
 export class LoginComponent implements OnInit {
   myForm: FormGroup;
   loading: boolean = false;
+  accountNotice: string = '';
   ngOnInit() {
     window.scroll(0, 0);
     this.auth.logingError = of(null);
+    const accountRecovered =
+      this.route.snapshot.queryParamMap.get('accountRecovered');
+    if (accountRecovered === 'repaired') {
+      this.accountNotice =
+        'Your existing account was already verified. We restored its missing profile—sign in to continue.';
+    } else if (accountRecovered === 'verified') {
+      this.accountNotice =
+        'Your account is already created and verified, and its profile is ready. Sign in to continue.';
+    }
 
     // If someone lands on /login?redirectTo=... (from a public page or bookmark),
     // capture it for AuthService and for refresh resilience.

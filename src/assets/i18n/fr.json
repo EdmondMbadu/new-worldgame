@@ -565,6 +565,7 @@
     },
     "toasts": {
       "success": "Inscription réussie",
+      "recovered": "Votre compte existant a été récupéré",
       "failure": "Échec de l'inscription. Réessaie !"
     },
     "alerts": {
@@ -582,6 +583,9 @@
     },
     "verification": {
       "title": "Vérifiez votre courriel",
+      "accountFoundTitle": "Nous avons trouvé votre compte existant",
+      "recoveredUnverified": "Le profil manquant a été restauré. Nous avons envoyé un nouveau courriel de vérification—cliquez sur le lien, puis continuez ci-dessous ou allez à la connexion.",
+      "existingUnverified": "Votre profil existait déjà, mais le courriel n'est pas encore vérifié. Nous avons envoyé un nouveau courriel de vérification.",
       "preparing": "Création de votre compte et préparation du courriel de vérification…",
       "preparingButton": "Préparation de votre compte…",
       "instructions": "Nous avons envoyé un courriel de vérification à votre adresse. Veuillez cliquer sur le lien dans ce courriel pour vérifier votre compte, puis cliquez sur le bouton ci-dessous.",

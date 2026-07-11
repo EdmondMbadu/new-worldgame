@@ -11,6 +11,7 @@ export class VerifyEmailComponent implements OnInit {
   redirectTarget = '/home';
   checking = false;
   errorMessage = '';
+  recoveryNotice = '';
 
   constructor(
     private router: Router,
@@ -23,6 +24,14 @@ export class VerifyEmailComponent implements OnInit {
     const qp = this.route.snapshot.queryParamMap.get('redirectTo');
     if (qp && qp.startsWith('/')) {
       this.redirectTarget = qp;
+    }
+    const recoveryState = this.route.snapshot.queryParamMap.get('recovered');
+    if (recoveryState === 'repaired') {
+      this.recoveryNotice =
+        'We found your existing account and restored its missing profile. Please verify your email to finish recovery.';
+    } else if (recoveryState === 'existing') {
+      this.recoveryNotice =
+        'Your account and profile are already present. Please verify your email to finish setting up access.';
     }
 
     // Auto-check if already verified

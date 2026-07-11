@@ -136,7 +136,7 @@ export class SignupComponent implements OnInit {
     this.createAccountError = false;
     this.accountErrorMessage = '';
     try {
-      await this.auth.register(
+      const outcome = await this.auth.register(
         this.firstName,
         this.lastName,
         this.email,
@@ -145,7 +145,22 @@ export class SignupComponent implements OnInit {
         []
       );
       this.resetFields();
-      await this.router.navigate(['/verify-email']);
+      if (outcome.status === 'recovered-verified') {
+        await this.router.navigate(['/login'], {
+          queryParams: {
+            accountRecovered: outcome.profileRepaired ? 'repaired' : 'verified',
+          },
+        });
+      } else {
+        await this.router.navigate(['/verify-email'], {
+          queryParams:
+            outcome.status === 'recovered-unverified'
+              ? {
+                  recovered: outcome.profileRepaired ? 'repaired' : 'existing',
+                }
+              : undefined,
+        });
+      }
     } catch (error: any) {
       console.error('Account creation failed', error);
       this.accountErrorMessage = this.registrationErrorMessage(error);
@@ -159,6 +174,8 @@ export class SignupComponent implements OnInit {
     switch (error?.code) {
       case 'auth/email-already-in-use':
         return 'An account already exists for this email. Sign in or reset your password.';
+      case 'auth/existing-account-sign-in-required':
+        return 'Your account already exists. Go to login with your existing password, reset it, or use the social sign-in method you originally chose.';
       case 'auth/invalid-email':
         return 'Enter a valid email address.';
       case 'auth/weak-password':

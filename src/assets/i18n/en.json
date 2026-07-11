@@ -816,6 +816,7 @@
     },
     "toasts": {
       "success": "Registration was successful",
+      "recovered": "Your existing account was recovered",
       "failure": "Registration failed. Try again!"
     },
     "alerts": {
@@ -833,6 +834,9 @@
     },
     "verification": {
       "title": "Verify Your Email",
+      "accountFoundTitle": "We found your existing account",
+      "recoveredUnverified": "Its missing profile has been restored. We sent a fresh verification email—click that link, then continue below or go to login.",
+      "existingUnverified": "Your profile was already present, but the email is not verified yet. We sent a fresh verification email.",
       "preparing": "Creating your account and preparing your verification email…",
       "preparingButton": "Preparing your account…",
       "instructions": "We've sent a verification email to your inbox. Please click the link in that email to verify your account, then click the button below.",

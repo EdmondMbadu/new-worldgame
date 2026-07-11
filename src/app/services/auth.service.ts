@@ -36,6 +36,11 @@ interface RegisterSchoolMeta {
   specificFocus?: string;
 }
 
+export type RegistrationOutcome =
+  | { status: 'created'; profileRepaired: true }
+  | { status: 'recovered-unverified'; profileRepaired: boolean }
+  | { status: 'recovered-verified'; profileRepaired: boolean };
+
 @Injectable({
   providedIn: 'root',
 })
@@ -145,7 +150,7 @@ export class AuthService {
     password: string,
     goal: string,
     sdgsSelected: string[]
-  ): Promise<void> {
+  ): Promise<RegistrationOutcome> {
     // `undefined` means registration is still in progress. Setting this to
     // false here made the UI briefly show a failure before the async work
     // completed successfully.
@@ -153,10 +158,27 @@ export class AuthService {
     this.newUser.errorMessage = '';
 
     try {
-      const credential = await this.fireauth.createUserWithEmailAndPassword(
-        email.trim(),
-        password
-      );
+      let credential: firebase.auth.UserCredential;
+      try {
+        credential = await this.fireauth.createUserWithEmailAndPassword(
+          email.trim(),
+          password
+        );
+      } catch (error: any) {
+        if (error?.code === 'auth/email-already-in-use') {
+          const outcome = await this.recoverExistingRegistration(
+            firstName,
+            lastName,
+            email,
+            password,
+            goal,
+            sdgsSelected
+          );
+          this.newUser.success = true;
+          return outcome;
+        }
+        throw error;
+      }
       if (!credential.user) {
         throw new Error('Firebase did not return the newly created account.');
       }
@@ -173,12 +195,156 @@ export class AuthService {
       );
       await this.sendEmailForVerification(credential.user);
       this.newUser.success = true;
+      return { status: 'created', profileRepaired: true };
     } catch (error: any) {
       this.newUser.success = false;
       this.newUser.errorMessage =
         error?.message || 'Unable to create your account. Please try again.';
       throw error;
     }
+  }
+
+  private async recoverExistingRegistration(
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+    goal: string,
+    sdgsSelected: string[]
+  ): Promise<RegistrationOutcome> {
+    let credential: firebase.auth.UserCredential;
+    try {
+      // The password proves ownership before any profile is repaired. This
+      // also prevents the Get Started form from exposing another account.
+      credential = await this.fireauth.signInWithEmailAndPassword(
+        email.trim(),
+        password
+      );
+    } catch (error: any) {
+      const ownershipError: any = new Error(
+        'Your account already exists. Go to login with your existing password, use password reset, or choose the social sign-in method you originally used.'
+      );
+      ownershipError.code = 'auth/existing-account-sign-in-required';
+      ownershipError.cause = error;
+      throw ownershipError;
+    }
+
+    const user = credential.user;
+    if (!user) {
+      throw new Error('Unable to open the existing account for recovery.');
+    }
+
+    await user.reload();
+    const profileRepaired = await this.repairRegistrationProfile(
+      user,
+      firstName,
+      lastName,
+      goal,
+      sdgsSelected
+    );
+
+    if (user.emailVerified) {
+      await this.markUserVerified(user.uid);
+      // Send the user through a deliberate login after recovery so they start
+      // with a fresh token and a predictable post-repair session.
+      await this.fireauth.signOut();
+      return { status: 'recovered-verified', profileRepaired };
+    }
+
+    try {
+      await this.sendEmailForVerification(user);
+    } catch (error: any) {
+      // A recent request may already have sent the email. The account is still
+      // safely recovered and the verification screen offers a resend action.
+      if (error?.code !== 'functions/resource-exhausted') {
+        throw error;
+      }
+    }
+    return { status: 'recovered-unverified', profileRepaired };
+  }
+
+  private async repairRegistrationProfile(
+    user: firebase.User,
+    firstName: string,
+    lastName: string,
+    goal: string,
+    sdgsSelected: string[]
+  ): Promise<boolean> {
+    const userRef = this.afs.doc<User>(`users/${user.uid}`);
+    const snapshot = await userRef.ref.get();
+
+    if (!snapshot.exists) {
+      await this.addNewUser(
+        firstName.trim(),
+        lastName.trim(),
+        user,
+        goal,
+        sdgsSelected
+      );
+      return true;
+    }
+
+    const current = snapshot.data() as User;
+    const updates: Record<string, unknown> = {};
+    const submittedFirstName = firstName.trim();
+    const submittedLastName = lastName.trim();
+    const emailLocalPart = (user.email || '').split('@')[0] || '';
+    const normalizeNameToken = (value: string) =>
+      value.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const currentFirstName = (current?.firstName || '').trim();
+    const currentFirstWasDerivedFromEmail =
+      !!currentFirstName &&
+      !!emailLocalPart &&
+      normalizeNameToken(currentFirstName) === normalizeNameToken(emailLocalPart);
+    const setIfMissing = (key: string, value: unknown) => {
+      const existing = (current as any)?.[key];
+      if (
+        existing === undefined ||
+        existing === null ||
+        (typeof existing === 'string' && existing.trim() === '')
+      ) {
+        updates[key] = value;
+      }
+    };
+
+    setIfMissing('uid', user.uid);
+    setIfMissing('email', user.email || '');
+    setIfMissing('emailLower', (user.email || '').toLowerCase());
+    if (
+      currentFirstWasDerivedFromEmail &&
+      submittedFirstName &&
+      normalizeNameToken(currentFirstName) !==
+        normalizeNameToken(submittedFirstName)
+    ) {
+      // Older repair logic used the email's local part as a placeholder name.
+      // An explicitly submitted name from an authenticated owner is the more
+      // reliable value and should replace that placeholder.
+      updates['firstName'] = submittedFirstName;
+      updates['firstNameLower'] = submittedFirstName.toLowerCase();
+      if (submittedLastName) {
+        updates['lastName'] = submittedLastName;
+        updates['lastNameLower'] = submittedLastName.toLowerCase();
+      }
+    } else {
+      setIfMissing('firstName', submittedFirstName);
+      setIfMissing('firstNameLower', submittedFirstName.toLowerCase());
+      setIfMissing('lastName', submittedLastName);
+      setIfMissing('lastNameLower', submittedLastName.toLowerCase());
+    }
+    setIfMissing('goal', goal);
+    if (!Array.isArray(current?.sdgsSelected) || !current.sdgsSelected.length) {
+      updates['sdgsSelected'] = sdgsSelected;
+    }
+    setIfMissing('dateJoined', this.time.getCurrentDate());
+    setIfMissing('followers', '0');
+    setIfMissing('following', '0');
+    setIfMissing('contentViews', '0');
+
+    if (Object.keys(updates).length) {
+      await userRef.set(updates as Partial<User>, { merge: true });
+      return true;
+    }
+    return false;
   }
 
   async sendEmailForVerification(user: firebase.User | null): Promise<void> {
@@ -978,8 +1144,10 @@ export class AuthService {
       '';
     const displayName = user.displayName?.trim() || '';
     const [firstRaw, ...rest] = displayName.split(' ').filter(Boolean);
-    const firstName =
-      firstRaw || this.deriveNameFromEmail(email) || 'Creator';
+    // Never invent a person's name from their email address. Social providers
+    // normally supply displayName; password accounts can complete a real name
+    // through Get Started or profile editing.
+    const firstName = firstRaw || '';
     const lastName = rest.join(' ');
 
     if (!snap.exists) {

@@ -61,6 +61,8 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
   checkingVerification: boolean = false;
   verificationError: string = '';
   registrationSubmitting: boolean = false;
+  registrationWasRecovered: boolean = false;
+  recoveryNotice: string = '';
 
   focus: Focus[] = [
     {
@@ -309,7 +311,7 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
     this.registrationSubmitting = true;
     this.verificationError = '';
     try {
-      await this.auth.register(
+      const outcome = await this.auth.register(
         this.auth.newUser.firstName!,
         this.auth.newUser.lastname!,
         this.auth.newUser.email!,
@@ -318,6 +320,22 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
         this.auth.newUser.sdgsSelected!
       );
       this.resetFields();
+      this.registrationWasRecovered = outcome.status !== 'created';
+      if (outcome.status === 'recovered-verified') {
+        await this.router.navigate(['/login'], {
+          queryParams: {
+            accountRecovered: outcome.profileRepaired ? 'repaired' : 'verified',
+          },
+        });
+        return;
+      }
+      if (outcome.status === 'recovered-unverified') {
+        this.recoveryNotice = this.translate.instant(
+          outcome.profileRepaired
+            ? 'welcomeFlow.verification.recoveredUnverified'
+            : 'welcomeFlow.verification.existingUnverified'
+        );
+      }
       setTimeout(() => {
         this.registrationSuccess = false;
         this.cdRef.detectChanges();
