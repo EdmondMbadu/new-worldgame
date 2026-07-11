@@ -582,6 +582,8 @@
     },
     "verification": {
       "title": "Vérifiez votre courriel",
+      "preparing": "Création de votre compte et préparation du courriel de vérification…",
+      "preparingButton": "Préparation de votre compte…",
       "instructions": "Nous avons envoyé un courriel de vérification à votre adresse. Veuillez cliquer sur le lien dans ce courriel pour vérifier votre compte, puis cliquez sur le bouton ci-dessous.",
       "confirmButton": "J'ai vérifié mon courriel",
       "checking": "Vérification...",
@@ -589,7 +591,8 @@
       "error": "Une erreur s'est produite lors de la vérification. Veuillez réessayer.",
       "emailResent": "Le courriel de vérification a été renvoyé. Veuillez vérifier votre boîte de réception.",
       "resendError": "Échec de l'envoi du courriel de vérification. Veuillez réessayer.",
-      "resendLink": "Renvoyer le courriel de vérification"
+      "resendLink": "Renvoyer le courriel de vérification",
+      "goToLogin": "Aller à la connexion"
     }
   },
   "overviewPage": {

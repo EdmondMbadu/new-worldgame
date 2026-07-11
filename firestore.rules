@@ -1,3 +1,5 @@
+rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     function isPlatformAdmin() {
@@ -14,7 +16,7 @@ service cloud.firestore {
       allow create, update, delete: if isPlatformAdmin();
     }
 
-    match /{document=**} {
+    match /{topLevelCollection}/{document=**} {
       // This rule allows anyone with your database reference to view, edit,
       // and delete all data in your database. It is useful for getting
       // started, but it is configured to expire after 30 days because it
@@ -26,7 +28,7 @@ service cloud.firestore {
       // update your rules.
       allow read: if request.time < timestamp.date(2028, 11, 3);
       allow write: if request.time < timestamp.date(2028, 11, 3)
-        && !document.matches('avatar_intro_videos/[^/]+');
+        && topLevelCollection != 'avatar_intro_videos';
     }
   }
 }

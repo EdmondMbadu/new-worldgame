@@ -138,57 +138,73 @@ export class AuthService {
   getObservableUser() {
     return this.user$;
   }
-  register(
+  async register(
     firstName: string,
     lastName: string,
     email: string,
     password: string,
     goal: string,
     sdgsSelected: string[]
-  ) {
-    this.fireauth
-      .createUserWithEmailAndPassword(email, password)
-      .then(
-        (res) => {
-          // alert('Registration was Successful');
-          this.newUser.success = true;
-          this.sendEmailForVerification(res.user);
+  ): Promise<void> {
+    // `undefined` means registration is still in progress. Setting this to
+    // false here made the UI briefly show a failure before the async work
+    // completed successfully.
+    this.newUser.success = undefined;
+    this.newUser.errorMessage = '';
 
-          this.addNewUser(firstName, lastName, res.user, goal, sdgsSelected);
-          // this.router.navigate(['/verify-email']);
-        },
-        (err) => {
-          this.newUser.success = false;
-          this.newUser.errorMessage = err.message;
-          // alert(err.message);
-        }
-      )
-      .catch((error) => {
-        this.newUser.success = false;
-        this.newUser.errorMessage = error.message;
-        // alert('Something went wrong');
-        // this.router.navigate(['/']);
-        // ...
-      });
+    try {
+      const credential = await this.fireauth.createUserWithEmailAndPassword(
+        email.trim(),
+        password
+      );
+      if (!credential.user) {
+        throw new Error('Firebase did not return the newly created account.');
+      }
+
+      // Create the profile before sending the user away. Awaiting this write is
+      // important: the previous fire-and-forget flow reported success even when
+      // Firestore rejected the profile document.
+      await this.addNewUser(
+        firstName.trim(),
+        lastName.trim(),
+        credential.user,
+        goal,
+        sdgsSelected
+      );
+      await this.sendEmailForVerification(credential.user);
+      this.newUser.success = true;
+    } catch (error: any) {
+      this.newUser.success = false;
+      this.newUser.errorMessage =
+        error?.message || 'Unable to create your account. Please try again.';
+      throw error;
+    }
   }
 
-  sendEmailForVerification(user: any) {
-    user
-      .sendEmailVerification()
-      .then(
-        (res: any) => {
-          console.log('verify your email');
-          // this.router.navigate(['verify-email']);
-        },
-        (err: any) => {
-          alert('Something went wrong. Unable to send you an email');
-        }
-      )
-      .catch((error: any) => {
-        alert('Something went wrong');
-        this.router.navigate(['/']);
-        // ...
+  async sendEmailForVerification(user: firebase.User | null): Promise<void> {
+    if (!user) {
+      throw new Error('No signed-in user is available for email verification.');
+    }
+
+    try {
+      const sendVerification = this.fns.httpsCallable(
+        'sendBrandedVerificationEmail'
+      );
+      await firstValueFrom(sendVerification({}));
+    } catch (error) {
+      if ((error as any)?.code === 'functions/resource-exhausted') {
+        throw error;
+      }
+      // Keep verification available while a new Functions deployment is
+      // propagating, or if the email provider has a temporary outage.
+      console.warn(
+        'Branded verification email failed; using Firebase fallback.',
+        error
+      );
+      await user.sendEmailVerification({
+        url: 'https://newworld-game.org/verify-email?verified=1',
       });
+    }
   }
   getAUser(uid: string) {
     return this.afs.doc<User>(`users/${uid}`).valueChanges();
@@ -758,7 +774,7 @@ export class AuthService {
   async resendVerificationEmail(): Promise<void> {
     const user = await this.fireauth.currentUser;
     if (user && !user.emailVerified) {
-      await user.sendEmailVerification();
+      await this.sendEmailForVerification(user);
     }
   }
 
@@ -832,6 +848,15 @@ export class AuthService {
 
     await this.updateLastLogin(user);
 
+    // Repair profile documents for users whose Auth account was created while
+    // Firestore writes were unavailable. A login should never be reported as a
+    // bad password merely because this secondary profile sync fails.
+    try {
+      await this.ensureUserProfileDocument(user);
+    } catch (error) {
+      console.warn('Unable to ensure user profile during sign-in:', user.uid, error);
+    }
+
     const providerIds = user.providerData
       .map((p) => p?.providerId)
       .filter((id): id is string => !!id);
@@ -840,7 +865,11 @@ export class AuthService {
       user.emailVerified || isSocialProvider || opts.fallbackVerify === true;
 
     if (consideredVerified) {
-      await this.markUserVerified(user.uid);
+      try {
+        await this.markUserVerified(user.uid);
+      } catch (error) {
+        console.warn('Unable to sync verified profile flag:', user.uid, error);
+      }
       const dest = this.popRedirect();
       this.router.navigateByUrl(dest);
     } else {

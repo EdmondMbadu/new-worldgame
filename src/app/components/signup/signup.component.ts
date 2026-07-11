@@ -19,6 +19,8 @@ export class SignupComponent implements OnInit {
   createAccountSuccess: boolean = false;
   createAccountPopUp: boolean = false;
   createAccountError: boolean = false;
+  submitting: boolean = false;
+  accountErrorMessage: string = '';
 
   // Bot protection fields
   honeypot: string = ''; // Hidden field - bots will fill this
@@ -77,7 +79,8 @@ export class SignupComponent implements OnInit {
     return timeSpent < minimumTimeMs;
   }
 
-  createAccount() {
+  async createAccount() {
+    if (this.submitting) return;
     // Bot detection: honeypot field should be empty
     if (this.honeypot !== '') {
       console.log('Bot detected: honeypot filled');
@@ -129,15 +132,42 @@ export class SignupComponent implements OnInit {
       alert(' Both Passwords need to match');
       return;
     }
-    this.auth.register(
-      this.firstName,
-      this.lastName,
-      this.email,
-      this.password,
-      this.goal.trim(),
-      []
-    );
-    this.resetFields();
+    this.submitting = true;
+    this.createAccountError = false;
+    this.accountErrorMessage = '';
+    try {
+      await this.auth.register(
+        this.firstName,
+        this.lastName,
+        this.email,
+        this.password,
+        this.goal.trim(),
+        []
+      );
+      this.resetFields();
+      await this.router.navigate(['/verify-email']);
+    } catch (error: any) {
+      console.error('Account creation failed', error);
+      this.accountErrorMessage = this.registrationErrorMessage(error);
+      this.createAccountError = true;
+    } finally {
+      this.submitting = false;
+    }
+  }
+
+  private registrationErrorMessage(error: any): string {
+    switch (error?.code) {
+      case 'auth/email-already-in-use':
+        return 'An account already exists for this email. Sign in or reset your password.';
+      case 'auth/invalid-email':
+        return 'Enter a valid email address.';
+      case 'auth/weak-password':
+        return 'Choose a stronger password with at least 6 characters.';
+      case 'auth/network-request-failed':
+        return 'We could not reach the server. Check your connection and try again.';
+      default:
+        return 'We could not finish creating your account. Please try again.';
+    }
   }
   onCheckboxChangeAgree(event: Event) {
     // Access the checkbox via event.target, which is typed as EventTarget, so cast it

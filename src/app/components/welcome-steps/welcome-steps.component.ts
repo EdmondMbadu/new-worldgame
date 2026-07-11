@@ -60,6 +60,7 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
   // Email verification state
   checkingVerification: boolean = false;
   verificationError: string = '';
+  registrationSubmitting: boolean = false;
 
   focus: Focus[] = [
     {
@@ -146,7 +147,7 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
       this.buttonInfoEvent.emit(current);
     }
     if (current === 8 && this.buttonKey !== 'done') {
-      let createAccount = await this.createAccount();
+      await this.createAccount();
     } else {
       if (this.buttonKey === 'done') {
         // Check email verification before allowing to proceed
@@ -163,7 +164,15 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
     this.verificationError = '';
 
     try {
-      const isVerified = await this.auth.syncEmailVerified();
+      let isVerified = false;
+      // Verification may happen in another tab. Give Firebase Auth a brief
+      // moment to propagate the updated token before showing guidance.
+      for (let attempt = 0; attempt < 3 && !isVerified; attempt++) {
+        isVerified = await this.auth.syncEmailVerified();
+        if (!isVerified && attempt < 2) {
+          await new Promise((resolve) => setTimeout(resolve, 700));
+        }
+      }
 
       if (isVerified) {
         // Email is verified, proceed directly to home (user is already logged in)
@@ -280,7 +289,7 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
       this.auth.newUser.password !== this.rePassword
     );
   }
-  createAccount() {
+  async createAccount(): Promise<void> {
     if (
       this.auth.newUser.email === '' ||
       this.auth.newUser.password === '' ||
@@ -297,15 +306,34 @@ export class WelcomeStepsComponent implements OnInit, OnDestroy {
       this.auth.newUser.email,
       this.auth.newUser.password
     );
-    this.auth.register(
-      this.auth.newUser.firstName!,
-      this.auth.newUser.lastname!,
-      this.auth.newUser.email!,
-      this.auth.newUser.password!,
-      this.auth.newUser.goal!,
-      this.auth.newUser.sdgsSelected!
-    );
-    this.resetFields();
+    this.registrationSubmitting = true;
+    this.verificationError = '';
+    try {
+      await this.auth.register(
+        this.auth.newUser.firstName!,
+        this.auth.newUser.lastname!,
+        this.auth.newUser.email!,
+        this.auth.newUser.password!,
+        this.auth.newUser.goal!,
+        this.auth.newUser.sdgsSelected!
+      );
+      this.resetFields();
+      setTimeout(() => {
+        this.registrationSuccess = false;
+        this.cdRef.detectChanges();
+      }, 4500);
+    } catch (error) {
+      // AuthService preserves the actionable message in newUser.errorMessage,
+      // which is displayed by this flow's existing failure toast.
+      console.error('Welcome-flow account creation failed', error);
+    } finally {
+      this.registrationSubmitting = false;
+      this.cdRef.detectChanges();
+    }
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
   }
   onCheckboxChangeAgree(event: Event) {
     // Access the checkbox via event.target, which is typed as EventTarget, so cast it

@@ -833,6 +833,8 @@
     },
     "verification": {
       "title": "Verify Your Email",
+      "preparing": "Creating your account and preparing your verification email…",
+      "preparingButton": "Preparing your account…",
       "instructions": "We've sent a verification email to your inbox. Please click the link in that email to verify your account, then click the button below.",
       "confirmButton": "I've Verified My Email",
       "checking": "Checking...",
@@ -840,7 +842,8 @@
       "error": "An error occurred while checking your verification status. Please try again.",
       "emailResent": "Verification email has been resent. Please check your inbox.",
       "resendError": "Failed to resend verification email. Please try again.",
-      "resendLink": "Resend verification email"
+      "resendLink": "Resend verification email",
+      "goToLogin": "Go to login"
     }
   },
   "overviewPage": {

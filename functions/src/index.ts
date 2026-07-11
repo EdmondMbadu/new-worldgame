@@ -1152,6 +1152,141 @@ async function sendWeeklyActivityReportEmailsForAutomation(
   return { successCount, failureCount, recipientCount: validRecipients.length };
 }
 
+export const sendBrandedVerificationEmail = functions.https.onCall(
+  async (_data: unknown, context: functions.https.CallableContext) => {
+    if (!context.auth?.uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Sign in before requesting a verification email.'
+      );
+    }
+
+    const authUser = await admin.auth().getUser(context.auth.uid);
+    if (!authUser.email) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'This account does not have an email address.'
+      );
+    }
+    if (authUser.emailVerified) {
+      return { success: true, alreadyVerified: true };
+    }
+
+    const db = admin.firestore();
+    const rateLimitRef = db.doc(
+      `_system_mail_rate_limits/email_verification_${context.auth.uid}`
+    );
+    const rateLimitSnapshot = await rateLimitRef.get();
+    const lastSentAt = rateLimitSnapshot.get('sentAt') as
+      | admin.firestore.Timestamp
+      | undefined;
+    if (lastSentAt && Date.now() - lastSentAt.toMillis() < 60_000) {
+      throw new functions.https.HttpsError(
+        'resource-exhausted',
+        'Please wait one minute before requesting another email.'
+      );
+    }
+
+    const verificationLink = await admin.auth().generateEmailVerificationLink(
+      authUser.email,
+      {
+        url: `${APP_BASE_URL}/verify-email?verified=1`,
+        handleCodeInApp: false,
+      }
+    );
+    const profileSnapshot = await db.doc(`users/${context.auth.uid}`).get();
+    const firstName = escapeEmailHtml(
+      String(profileSnapshot.get('firstName') || authUser.displayName || 'there')
+    );
+    const safeVerificationLink = escapeEmailHtml(verificationLink);
+    const year = new Date().getFullYear();
+    const subject = 'Verify your email | Global Solutions Lab';
+    const preheader =
+      'One quick step: verify your email to activate your Global Solutions Lab account.';
+    const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${subject}</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">${preheader}</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f1f5f9;">
+      <tr>
+        <td align="center" style="padding:36px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,.12);">
+            <tr>
+              <td align="center" style="padding:34px 32px 28px;background:linear-gradient(135deg,#0f766e,#059669,#0891b2);">
+                <img src="${APP_BASE_URL}/assets/img/gsl-logo.png" width="112" alt="Global Solutions Lab" style="display:block;width:112px;max-width:100%;height:auto;margin:0 auto 18px;">
+                <div style="font-size:12px;line-height:18px;font-weight:700;letter-spacing:2.2px;color:#ccfbf1;text-transform:uppercase;">Global Solutions Lab</div>
+                <h1 style="margin:8px 0 0;font-size:30px;line-height:38px;color:#ffffff;font-weight:800;">Welcome to a world of solutions</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:38px 42px 34px;">
+                <p style="margin:0 0 18px;font-size:18px;line-height:28px;font-weight:700;color:#0f172a;">Hello ${firstName},</p>
+                <p style="margin:0 0 26px;font-size:16px;line-height:26px;color:#475569;">Thank you for joining Global Solutions Lab. Verify your email address to activate your account and begin collaborating on solutions for a better world.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 28px;">
+                  <tr>
+                    <td align="center" bgcolor="#0f766e" style="border-radius:999px;">
+                      <a href="${safeVerificationLink}" style="display:inline-block;padding:15px 30px;font-size:16px;line-height:20px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:999px;">Verify my email</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 10px;font-size:13px;line-height:21px;color:#64748b;">For your security, this verification link can only be used once. If the button does not work, copy and paste this link into your browser:</p>
+                <p style="margin:0;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;line-height:19px;word-break:break-all;"><a href="${safeVerificationLink}" style="color:#0f766e;text-decoration:underline;">${safeVerificationLink}</a></p>
+                <p style="margin:26px 0 0;font-size:13px;line-height:21px;color:#64748b;">If you did not create this account, you can safely ignore this email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:24px 32px;background:#0f172a;color:#cbd5e1;">
+                <p style="margin:0 0 6px;font-size:13px;line-height:20px;font-weight:700;color:#ffffff;">Global Solutions Lab</p>
+                <p style="margin:0 0 8px;font-size:12px;line-height:19px;">Designing solutions for Spaceship Earth.</p>
+                <p style="margin:0;font-size:11px;line-height:18px;color:#94a3b8;">&copy; ${year} Global Solutions Lab &middot; <a href="${APP_BASE_URL}" style="color:#5eead4;text-decoration:none;">newworld-game.org</a></p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+    const text = `Hello ${String(
+      profileSnapshot.get('firstName') || authUser.displayName || 'there'
+    )},\n\nThank you for joining Global Solutions Lab. Verify your email address to activate your account:\n\n${verificationLink}\n\nIf you did not create this account, you can safely ignore this email.\n\nGlobal Solutions Lab\n${APP_BASE_URL}`;
+
+    try {
+      await sgMail.send({
+        to: authUser.email,
+        from: {
+          email: 'newworld@newworld-game.org',
+          name: 'Global Solutions Lab',
+        },
+        replyTo: 'info@newworld-game.org',
+        subject,
+        html,
+        text,
+      } as any);
+      await rateLimitRef.set(
+        { sentAt: admin.firestore.FieldValue.serverTimestamp() },
+        { merge: true }
+      );
+      return { success: true, alreadyVerified: false };
+    } catch (error) {
+      console.error(
+        'Unable to send branded verification email',
+        context.auth.uid,
+        error
+      );
+      throw new functions.https.HttpsError(
+        'internal',
+        'We could not send the verification email. Please try again.'
+      );
+    }
+  }
+);
+
 export const welcomeEmail = functions.auth.user().onCreate((user: any) => {
   const msg = {
     to: user.email,
