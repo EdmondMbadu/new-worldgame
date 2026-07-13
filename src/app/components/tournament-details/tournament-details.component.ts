@@ -175,6 +175,12 @@ export class TournamentDetailsComponent implements OnInit {
     this.editing = false;
   }
 
+  scrollToDetails(): void {
+    document
+      .getElementById('tournament-information')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   private lines(value: string): string[] {
     return (value ?? '')
       .split('\n')
