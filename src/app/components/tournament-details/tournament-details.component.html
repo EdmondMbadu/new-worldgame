@@ -1,4 +1,4 @@
-<div class="dark:bg-slate-900 bg-gray-100 min-h-screen">
+<div class="min-h-screen overflow-x-hidden bg-slate-50 dark:bg-slate-950">
   <app-navbar
     [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
     [showMoreOrLess]="true"
@@ -12,389 +12,328 @@
   >
   </app-navbar>
 
-  <section class="mt-20" *ngIf="t">
-    <div class="mx-auto max-w-7xl px-4 lg:px-8">
-      <!-- Banner -->
-      <div class="relative rounded-lg overflow-hidden shadow-lg">
+  <main *ngIf="t" class="pb-20 pt-16 sm:pt-20">
+    <!-- Reusable tournament hero -->
+    <section class="px-3 sm:px-5 lg:px-8">
+      <div class="tournament-hero relative mx-auto min-h-[32rem] max-w-7xl overflow-hidden rounded-[2rem] bg-slate-950 shadow-2xl shadow-slate-900/20">
         <img
           [src]="t.image || '../../../assets/img/generic.webp'"
-          class="w-full h-64 object-cover"
+          [alt]="t.title || 'Tournament cover'"
+          class="absolute inset-0 h-full w-full object-cover opacity-40"
         />
-        <div
-          class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-700/50 to-transparent flex flex-col justify-center items-center text-center"
-        >
-          <h1 class="text-4xl font-bold text-white">{{ t.title }}</h1>
-        </div>
-      </div>
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-900/30"></div>
+        <div class="tournament-grid absolute inset-0 opacity-25"></div>
 
-      <!-- Description + files -->
-      <div
-        class="bg-white dark:bg-gray-800 mt-6 p-6 rounded-lg shadow-md text-center"
-      >
-        <!-- editable TITLE -->
-        <div *ngIf="editing; else titleStatic" class="mb-4">
-          <input
-            [(ngModel)]="tempTitle"
-            class="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-gray-100"
-          />
-        </div>
-        <ng-template #titleStatic>
-          <p class="text-2xl font-semibold mb-4 dark:text-white">
-            {{ t.title }}
-          </p>
-        </ng-template>
-
-        <!-- editable INSTRUCTIONS -->
-        <div *ngIf="editing; else instrStatic">
-          <textarea
-            rows="6"
-            [(ngModel)]="tempInstr"
-            class="w-full px-3 py-2 border rounded resize-y dark:bg-slate-700 dark:border-slate-600 dark:text-gray-100"
-          ></textarea>
-        </div>
-        <ng-template #instrStatic>
-          <p
-            class="text-lg text-gray-700 dark:text-gray-300 whitespace-pre-line"
-          >
-            {{ t.instruction }}
-          </p>
-        </ng-template>
-
-        <!-- editable OTHER PRIZES -->
-        <div class="mt-4">
-          <label class="text-sm font-medium dark:text-gray-100 block mb-1">
-            Other Prizes
-          </label>
-
-          <div *ngIf="editing; else prizeOtherStatic">
-            <input
-              [(ngModel)]="tempPrizeOther"
-              class="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-gray-100"
-            />
-          </div>
-          <ng-template #prizeOtherStatic>
-            <p class="text-gray-700 dark:text-gray-300">
-              {{ t.prizeOther || "—" }}
-            </p>
-          </ng-template>
-        </div>
-
-        <!-- editable DEADLINE -->
-        <div class="mt-4">
-          <label class="text-sm font-medium dark:text-gray-100 block mb-1">
-            Deadline
-          </label>
-
-          <div *ngIf="editing; else deadlineStatic">
-            <input
-              type="date"
-              [(ngModel)]="tempDeadline"
-              class="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-gray-100"
-            />
-          </div>
-          <ng-template #deadlineStatic>
-            <p class="text-gray-700 dark:text-gray-300">
-              {{ t.deadline | date : "MMM d, y" }}
-            </p>
-          </ng-template>
-        </div>
-
-        <!-- editable PRIZE AMOUNT -->
-        <div class="mt-4">
-          <label class="text-sm font-medium dark:text-gray-100 block mb-1">
-            Prize Amount (USD)
-          </label>
-
-          <div *ngIf="editing; else prizeAmountStatic">
-            <input
-              type="text"
-              [(ngModel)]="tempPrizeAmount"
-              class="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:border-slate-600 dark:text-gray-100"
-            />
-          </div>
-
-          <ng-template #prizeAmountStatic>
-            <p class="text-gray-700 dark:text-gray-300">
-              {{ t.prizeAmount | currency : "USD" : "symbol" : "1.0-0" }}
-            </p>
-          </ng-template>
-        </div>
-
-        <!-- SAVE / CANCEL buttons -->
-        <div *ngIf="editing" class="mt-6 space-x-3">
-          <button
-            (click)="saveEdit()"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium"
-          >
-            Save
-          </button>
-
-          <button
-            (click)="cancelEdit()"
-            class="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md text-sm font-medium"
-          >
-            Cancel
-          </button>
-        </div>
-
-        <div *ngIf="t.files?.length" class="mt-8 flex flex-col items-center">
-          <h2
-            class="text-xl font-bold mb-4 text-gray-900 dark:text-white text-center"
-          >
-            Other&nbsp;Resources
-          </h2>
-
-          <div
-            class="grid gap-4 justity-center mx-auto grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-          >
-            <a
-              *ngFor="let f of t.files"
-              [href]="f"
-              target="_blank"
-              class="group"
-            >
-              <div
-                class="aspect-square flex flex-col justify-center items-center rounded-lg bg-slate-100 dark:bg-slate-700 shadow-sm group-hover:shadow-lg transition"
-              >
-                <span
-                  class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide text-white"
-                  [ngClass]="fileBadgeColour(f)"
-                >
-                  {{ fileExt(f) | uppercase }}
-                </span>
-
-                <svg
-                  class="w-10 h-10 text-gray-500 group-hover:text-teal-600 dark:text-gray-300 transition"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-
-                <p
-                  class="mt-3 w-24 px-2 py-1 text-center text-xs font-medium text-gray-800 dark:text-gray-100 truncate"
-                >
-                  {{ fileName(f) }}
-                </p>
-              </div>
-            </a>
-          </div>
-        </div>
-
-        <!-- AUTHOR-ONLY upload -->
-        <div *ngIf="isAuthor" class="mt-6">
-          <label class="inline-flex items-center gap-2 cursor-pointer">
-            <input
-              type="file"
-              class="hidden"
-              (change)="addReferenceFile($any($event.target).files)"
-            />
-            <span
-              class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition"
-              [class.opacity-60]="uploadBusy"
-            >
-              {{ uploadBusy ? "Uploading…" : "Add reference file" }}
-            </span>
-          </label>
-        </div>
-
-        <!-- Stats -->
-        <div
-          class="flex flex-wrap justify-center gap-8 mt-8 text-lg text-gray-800 dark:text-gray-200"
-        >
-          <div>
-            {{ "tournament.submittedSolutions" | translate }}:
-            <span class="font-semibold">{{ completedSolutions.length }}</span>
-          </div>
-          <div>
-            Deadline:
-            <span class="font-semibold">{{
-              t.deadline | date : "MMM d, y"
-            }}</span>
-          </div>
-          <div>
-            Prize:
-            <span class="font-semibold">{{
-              t.prizeAmount | currency : "USD"
-            }}</span>
-          </div>
-          <div>
-            Other Prizes:
-            <span class="font-semibold">
-              {{ t.prizeOther || "—" }}
-            </span>
-          </div>
-        </div>
-        <!-- AUTHOR controls when status=pending -->
-        <div *ngIf="canEdit" class="mt-6 space-x-3 text-center">
-          <button
-            *ngIf="!editing"
-            (click)="startEdit()"
-            class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-md text-sm font-medium"
-          >
-            Edit details
-          </button>
-
-          <button
-            *ngIf="!editing"
-            (click)="deleteTournament()"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-md text-sm font-medium"
-          >
-            Delete tournament
-          </button>
-        </div>
-
-        <!-- Pre-deadline buttons -->
-        <div
-          *ngIf="!isPostDeadline"
-          class="relative mt-10 flex flex-col md:flex-row justify-center items-center gap-6"
-        >
-          <button
-            (click)="openSolutionPicker()"
-            class="px-6 py-3 bg-white text-gray-900 border border-gray-300 dark:bg-transparent dark:text-white dark:border-white rounded-md text-lg font-medium italic shadow hover:scale-105 transition"
-          >
-            {{ "tournament.submitSolution" | translate }}
-          </button>
-
-          <span class="text-gray-600 dark:text-gray-400 text-lg italic"
-            >or</span
-          >
-
-          <button
-            (click)="createNewSolution()"
-            class="px-6 py-3 bg-white text-gray-900 border border-gray-300 dark:bg-transparent dark:text-white dark:border-white rounded-md text-lg font-medium italic shadow hover:scale-105 transition"
-          >
-            {{ "tournament.createNewSolution" | translate }}
-          </button>
-          <!-- Solution picker tooltip -->
-          <div
-            *ngIf="pickerOpen"
-            class="fixed inset-0 z-50 flex items-start justify-center pt-24 md:pt-32 lg:pt-40 bg-black/40 backdrop-blur-sm"
-            (click)="openSolutionPicker()"
-          >
-            <!-- click backdrop to close -->
-
-            <!-- Dialog card -->
-            <div
-              (click)="$event.stopPropagation()"
-              class="w-[22rem] md:w-[26rem] max-h-[26rem] overflow-y-auto bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100 shadow-2xl rounded-2xl ring-1 ring-slate-200 dark:ring-slate-700 animate-fade-in"
-            >
-              <!-- Header -->
-              <div
-                class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700"
-              >
-                <h3 class="text-lg font-semibold">
-                  Select a finished solution
-                </h3>
-                <button
-                  (click)="openSolutionPicker()"
-                  class="text-slate-500 dark:text-slate-400 hover:text-red-500 rounded-full p-1 transition"
-                >
-                  <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fill-rule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586
-                              l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Content -->
-              <div class="px-5 py-4">
-                <!-- Empty state -->
-                <p
-                  *ngIf="solutions.length === 0"
-                  class="text-sm italic text-slate-600 dark:text-slate-400"
-                >
-                  You don’t have any completed solutions yet.
-                </p>
-
-                <!-- List -->
-                <button
-                  *ngFor="let s of solutions"
-                  (click)="attachSolution(s)"
-                  class="block w-full text-left mt-2 first:mt-0 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white/80 dark:bg-slate-700/70 hover:bg-teal-600 hover:text-white dark:hover:bg-teal-600 transition"
-                >
-                  {{ s.title || "Untitled solution" }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Post-deadline winner banner -->
-      <div *ngIf="isPostDeadline && isAuthor" class="text-center mt-12 mb-6">
-        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">
-          It's time to choose a winner!
-        </h2>
-      </div>
-
-      <!-- Solutions grid -->
-      <div class="text-center mt-12">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ "tournament.submittedSolutions" | translate }} ({{
-            completedSolutions.length
-          }})
-        </h2>
-      </div>
-
-      <div class="max-w-7xl mx-auto mt-4">
-        <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          <div
-            *ngFor="let sol of completedSolutions; let i = index"
-            class="relative transform hover:scale-105 transition duration-300"
-          >
-            <!-- Unsubmit pill (only if allowed) -->
-            <!-- Winner ribbon -->
-            <div
-              *ngIf="currentWinnerId === sol.solutionId"
-              class="absolute -top-2 -left-2 rotate-[-45deg] bg-amber-500 text-white text-xs font-bold px-8 py-1 shadow-lg"
-            >
-              WINNER
+        <div class="relative z-10 grid min-h-[32rem] items-end gap-10 px-6 py-10 sm:px-10 sm:py-12 lg:grid-cols-[minmax(0,1fr)_19rem] lg:px-16 lg:py-16">
+          <div class="max-w-3xl">
+            <div class="mb-5 flex flex-wrap items-center gap-3">
+              <span class="rounded-full border border-teal-300/30 bg-teal-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-teal-200">
+                Tournament opportunity
+              </span>
+              <span class="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
+                {{ isPostDeadline ? "Submissions closed" : "Entries now open" }}
+              </span>
             </div>
 
-            <!-- Set/Clear buttons (author only, after deadline) -->
-            <button
-              *ngIf="isAuthor && isPostDeadline"
-              (click)="
-                currentWinnerId === sol.solutionId
-                  ? clearWinner()
-                  : chooseWinner(sol)
-              "
-              class="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-600 text-white hover:bg-emerald-700 shadow"
-            >
-              {{
-                currentWinnerId === sol.solutionId ? "Clear" : "Pick as winner"
-              }}
-            </button>
+            <h1 class="max-w-4xl text-4xl font-black leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              {{ t.title }}
+            </h1>
+            <p class="mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
+              {{ t.subtTitle || aboutText }}
+            </p>
 
-            <!-- Unsubmit pill (kept) -->
-            <button
-              *ngIf="canUnsubmit(sol)"
-              (click)="unsubmitSolution(sol)"
-              class="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded-full text-xs font-medium bg-rose-600 text-white hover:bg-rose-700 shadow hidden md:block"
-            >
-              × Unsubmit
-            </button>
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                *ngIf="!isPostDeadline"
+                type="button"
+                (click)="openSolutionPicker()"
+                class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-xl bg-amber-400 px-6 py-3 text-base font-extrabold text-slate-950 shadow-lg transition hover:-translate-y-0.5 hover:bg-amber-300"
+              >
+                Submit a completed solution <span aria-hidden="true">→</span>
+              </button>
+              <a href="#tournament-information" class="inline-flex min-h-[3.25rem] items-center justify-center rounded-xl border border-white/25 bg-white/10 px-6 py-3 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20">
+                See tournament details
+              </a>
+              <button
+                *ngIf="canEdit && !editing"
+                type="button"
+                (click)="startEdit()"
+                class="inline-flex min-h-[3.25rem] items-center justify-center rounded-xl border border-amber-300/50 px-5 py-3 text-sm font-bold text-amber-200 transition hover:bg-amber-300/10"
+              >
+                Edit tournament
+              </button>
+            </div>
+          </div>
 
-            <!-- Solution card -->
-            <app-solution
-              [solution]="sol"
-              [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }"
-            >
-            </app-solution>
+          <aside class="rounded-2xl border border-white/15 bg-white/10 p-6 text-white shadow-xl backdrop-blur-md">
+            <p class="text-xs font-bold uppercase tracking-[0.17em] text-amber-300">
+              Primary {{ awardLabel }}
+            </p>
+            <p class="mt-2 text-3xl font-black tracking-tight">
+              {{ formatAward(t.prizeAmount) }}
+            </p>
+            <div class="my-5 h-px bg-white/15"></div>
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-300">Submission deadline</dt>
+                <dd class="mt-1 text-lg font-bold">{{ t.deadline | date : "MMMM d, y" }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-300">Solutions submitted</dt>
+                <dd class="mt-1 text-lg font-bold">{{ completedSolutions.length }}</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Complete generic editor -->
+    <section *ngIf="editing" class="mx-auto mt-8 max-w-5xl px-4 sm:px-6">
+      <div class="rounded-3xl border border-amber-200 bg-white p-6 shadow-xl dark:border-amber-900/50 dark:bg-slate-900 sm:p-8">
+        <div class="mb-7 flex items-start justify-between gap-4">
+          <div>
+            <p class="section-kicker">Author tools</p>
+            <h2 class="mt-1 text-2xl font-black text-slate-950 dark:text-white">Edit tournament page</h2>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Enter one eligibility rule, requirement, or judging criterion per line.</p>
+          </div>
+          <button type="button" (click)="cancelEdit()" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Close editor">✕</button>
+        </div>
+
+        <div class="editor-grid">
+          <label class="editor-field sm:col-span-2">
+            <span>Title</span>
+            <input [(ngModel)]="tempTitle" />
+          </label>
+          <label class="editor-field sm:col-span-2">
+            <span>Short summary</span>
+            <textarea rows="3" [(ngModel)]="tempSubtitle"></textarea>
+          </label>
+          <label class="editor-field sm:col-span-2">
+            <span>About the tournament</span>
+            <textarea rows="6" [(ngModel)]="tempInstr"></textarea>
+          </label>
+          <label class="editor-field">
+            <span>Eligibility — one per line</span>
+            <textarea rows="6" [(ngModel)]="tempEligibility"></textarea>
+          </label>
+          <label class="editor-field">
+            <span>Submission requirements — one per line</span>
+            <textarea rows="6" [(ngModel)]="tempSubmissionRequirements"></textarea>
+          </label>
+          <label class="editor-field sm:col-span-2">
+            <span>Judging criteria — one per line</span>
+            <textarea rows="5" [(ngModel)]="tempJudgingCriteria"></textarea>
+          </label>
+          <label class="editor-field">
+            <span>Award label</span>
+            <input [(ngModel)]="tempAwardLabel" placeholder="Prize, Grant, Investment…" />
+          </label>
+          <label class="editor-field">
+            <span>Primary award</span>
+            <input [(ngModel)]="tempPrizeAmount" />
+          </label>
+          <label class="editor-field">
+            <span>Additional awards</span>
+            <textarea rows="4" [(ngModel)]="tempPrizeOther"></textarea>
+          </label>
+          <label class="editor-field">
+            <span>Award purpose</span>
+            <textarea rows="4" [(ngModel)]="tempAwardPurpose"></textarea>
+          </label>
+          <label class="editor-field">
+            <span>Deadline</span>
+            <input type="date" [(ngModel)]="tempDeadline" />
+          </label>
+          <label class="editor-field sm:col-span-2">
+            <span>Intellectual property or ownership terms</span>
+            <textarea rows="4" [(ngModel)]="tempIntellectualProperty"></textarea>
+          </label>
+          <label class="editor-field sm:col-span-2">
+            <span>Closing call to action</span>
+            <textarea rows="3" [(ngModel)]="tempCallToAction"></textarea>
+          </label>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button type="button" (click)="saveEdit()" class="rounded-xl bg-teal-700 px-5 py-3 font-bold text-white transition hover:bg-teal-800">Save changes</button>
+          <button type="button" (click)="cancelEdit()" class="rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Submitted solutions are prominent and near the top -->
+    <section id="submitted-solutions" class="scroll-mt-24 px-4 py-16 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="section-kicker">Tournament entries</p>
+            <h2 class="section-title">Submitted solutions</h2>
+            <p class="mt-3 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
+              Review the ideas already entered, or submit one of your own completed solutions.
+            </p>
+          </div>
+          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="inline-flex shrink-0 items-center justify-center rounded-xl bg-teal-700 px-5 py-3 font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-teal-800">
+            + Add your solution
+          </button>
+        </div>
+
+        <div *ngIf="isPostDeadline && isAuthor" class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100">
+          <p class="font-bold">The submission period is over. It is time to choose a winner.</p>
+          <p class="mt-1 text-sm opacity-80">Use the control on each solution card to select the winning entry.</p>
+        </div>
+
+        <div *ngIf="completedSolutions.length === 0" class="mt-10 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center dark:border-slate-700 dark:bg-slate-900">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-2xl dark:bg-teal-950/50">💡</div>
+          <h3 class="mt-5 text-xl font-bold text-slate-950 dark:text-white">No solutions have been submitted yet</h3>
+          <p class="mx-auto mt-2 max-w-lg text-slate-600 dark:text-slate-300">Completed solutions can be entered here before the tournament deadline.</p>
+          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-extrabold text-slate-950 transition hover:bg-amber-300">Submit a completed solution</button>
+        </div>
+
+        <div *ngIf="completedSolutions.length > 0" class="mt-10 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <article *ngFor="let sol of completedSolutions; let i = index" class="solution-entry relative rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <div *ngIf="currentWinnerId === sol.solutionId" class="absolute -left-2 top-4 z-20 rounded-r-full bg-amber-400 px-4 py-1 text-xs font-black uppercase tracking-wider text-slate-950 shadow">Winner</div>
+            <button *ngIf="isAuthor && isPostDeadline" type="button" (click)="currentWinnerId === sol.solutionId ? clearWinner() : chooseWinner(sol)" class="absolute right-4 top-4 z-20 rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold text-white shadow hover:bg-emerald-800">
+              {{ currentWinnerId === sol.solutionId ? "Clear winner" : "Choose winner" }}
+            </button>
+            <app-solution [solution]="sol" [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }"></app-solution>
+            <div *ngIf="canUnsubmit(sol)" class="px-3 pb-3 pt-2 text-right">
+              <button type="button" (click)="unsubmitSolution(sol)" class="text-sm font-semibold text-rose-700 underline-offset-4 hover:underline dark:text-rose-400">Remove submission</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data-driven tournament information -->
+    <section id="tournament-information" class="scroll-mt-24 border-y border-slate-200 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-900 sm:px-6 lg:px-8">
+      <div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="space-y-14">
+          <section>
+            <p class="section-kicker">About the tournament</p>
+            <h2 class="section-title">The opportunity</h2>
+            <p class="prose-copy mt-5 whitespace-pre-line">{{ aboutText }}</p>
+          </section>
+
+          <section *ngIf="t.eligibility?.length">
+            <p class="section-kicker">Eligibility</p>
+            <h2 class="section-title">Who can participate</h2>
+            <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+              <li *ngFor="let item of t.eligibility" class="check-card">
+                <span class="check-icon">✓</span><span>{{ item }}</span>
+              </li>
+            </ul>
+          </section>
+
+          <section *ngIf="t.submissionRequirements?.length">
+            <p class="section-kicker">Submission requirements</p>
+            <h2 class="section-title">What every entry needs</h2>
+            <ol class="mt-7 space-y-4">
+              <li *ngFor="let requirement of t.submissionRequirements; let i = index" class="flex items-start gap-4">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white dark:bg-amber-400 dark:text-slate-950">{{ i + 1 }}</span>
+                <span class="pt-1.5 text-base font-semibold text-slate-800 dark:text-slate-100">{{ requirement }}</span>
+              </li>
+            </ol>
+          </section>
+
+          <section *ngIf="t.judgingCriteria?.length">
+            <p class="section-kicker">Judging criteria</p>
+            <h2 class="section-title">How entries will be evaluated</h2>
+            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div *ngFor="let criterion of t.judgingCriteria" class="criterion-card">{{ criterion }}</div>
+            </div>
+          </section>
+
+          <section *ngIf="t.intellectualProperty">
+            <p class="section-kicker">Intellectual property</p>
+            <h2 class="section-title">Ownership and permissions</h2>
+            <p class="prose-copy mt-5 whitespace-pre-line">{{ t.intellectualProperty }}</p>
+          </section>
+        </div>
+
+        <aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <div class="rounded-3xl bg-slate-950 p-6 text-white shadow-xl">
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">{{ awardLabel }}</p>
+            <p class="mt-3 text-3xl font-black">{{ formatAward(t.prizeAmount) }}</p>
+            <div *ngIf="t.prizeOther" class="mt-5 border-t border-white/15 pt-5">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Additional awards</p>
+              <p class="mt-2 whitespace-pre-line text-sm font-semibold leading-6 text-white">{{ t.prizeOther }}</p>
+            </div>
+            <div *ngIf="t.awardPurpose" class="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Purpose</p>
+              <p class="mt-2 whitespace-pre-line text-sm leading-6 text-slate-200">{{ t.awardPurpose }}</p>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-700 dark:bg-slate-800">
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">Submission period</p>
+            <p class="mt-3 text-xl font-black text-slate-950 dark:text-white">{{ isPostDeadline ? "Entries are closed" : "Entries are now open" }}</p>
+            <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Deadline: <strong>{{ t.deadline | date : "MMMM d, y" }}</strong></p>
+          </div>
+
+          <div *ngIf="t.files?.length || isAuthor" class="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-black text-slate-950 dark:text-white">Resources</h3>
+              <label *ngIf="isAuthor" class="cursor-pointer text-xs font-bold text-teal-700 hover:underline dark:text-teal-300">
+                <input type="file" class="hidden" (change)="addReferenceFile($any($event.target).files)" />
+                {{ uploadBusy ? "Uploading…" : "+ Add file" }}
+              </label>
+            </div>
+            <div *ngIf="t.files?.length" class="mt-4 space-y-3">
+              <a *ngFor="let f of t.files" [href]="f" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 rounded-xl border border-slate-200 p-3 hover:border-teal-500 dark:border-slate-700">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-black text-white" [ngClass]="fileBadgeColour(f)">{{ fileExt(f) | uppercase }}</span>
+                <span class="min-w-0 truncate text-sm font-bold text-slate-800 group-hover:text-teal-700 dark:text-slate-100 dark:group-hover:text-teal-300">{{ fileName(f) }}</span>
+              </a>
+            </div>
+            <p *ngIf="!t.files?.length" class="mt-3 text-sm text-slate-500 dark:text-slate-400">No resources added yet.</p>
+          </div>
+
+          <button *ngIf="canEdit" type="button" (click)="deleteTournament()" class="w-full rounded-xl border border-rose-300 px-5 py-3 text-sm font-bold text-rose-700 transition hover:bg-rose-50 dark:border-rose-900 dark:text-rose-400 dark:hover:bg-rose-950/30">Delete tournament</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Generic bottom CTA -->
+    <section class="px-4 pt-16 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-teal-900 via-teal-800 to-slate-950 px-6 py-12 text-center text-white shadow-2xl sm:px-12 sm:py-16">
+        <p class="text-sm font-bold uppercase tracking-[0.2em] text-amber-300">Ready to take part?</p>
+        <h2 class="mx-auto mt-4 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">Bring your strongest solution forward.</h2>
+        <p class="mx-auto mt-5 max-w-2xl whitespace-pre-line text-base leading-8 text-teal-50/85 sm:text-lg">{{ closingCallToAction }}</p>
+        <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="rounded-xl bg-amber-400 px-7 py-3.5 text-base font-extrabold text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-300">Submit a completed solution</button>
+          <button *ngIf="!isPostDeadline" type="button" (click)="createNewSolution()" class="rounded-xl border border-white/25 bg-white/10 px-7 py-3.5 text-base font-bold text-white transition hover:bg-white/20">Create a new solution</button>
+          <p *ngIf="isPostDeadline" class="rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-bold">Submissions are closed</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shared finished-solution picker -->
+    <div *ngIf="pickerOpen" class="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 px-4 pt-20 backdrop-blur-sm sm:pt-28" (click)="openSolutionPicker()">
+      <div (click)="$event.stopPropagation()" class="max-h-[70vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white text-slate-900 shadow-2xl dark:bg-slate-900 dark:text-white">
+        <div class="sticky top-0 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-6 py-5 dark:border-slate-800 dark:bg-slate-900">
+          <div>
+            <p class="section-kicker">Tournament entry</p>
+            <h3 class="mt-1 text-xl font-black">Choose a finished solution</h3>
+          </div>
+          <button type="button" (click)="openSolutionPicker()" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Close solution picker">✕</button>
+        </div>
+        <div class="p-6">
+          <div *ngIf="solutions.length === 0" class="rounded-2xl bg-slate-50 p-6 text-center dark:bg-slate-800">
+            <p class="font-bold">You do not have a completed solution yet.</p>
+            <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Complete a solution before entering this tournament.</p>
+            <button type="button" (click)="createNewSolution()" class="mt-5 rounded-xl bg-teal-700 px-5 py-3 text-sm font-bold text-white hover:bg-teal-800">Create a new solution</button>
+          </div>
+          <div *ngIf="solutions.length > 0" class="space-y-3">
+            <button *ngFor="let s of solutions" type="button" [disabled]="submitBusy" (click)="attachSolution(s)" class="flex w-full items-center justify-between gap-4 rounded-2xl border border-slate-200 px-5 py-4 text-left transition hover:border-teal-500 hover:bg-teal-50 disabled:cursor-wait disabled:opacity-60 dark:border-slate-700 dark:hover:bg-teal-950/40">
+              <span>
+                <span class="block font-bold">{{ s.title || "Untitled solution" }}</span>
+                <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">Completed solution</span>
+              </span>
+              <span class="font-bold text-teal-700 dark:text-teal-300">Select →</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </main>
 </div>

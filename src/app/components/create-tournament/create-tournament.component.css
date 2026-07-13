@@ -1,0 +1,144 @@
+:host {
+  display: block;
+}
+
+.form-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+}
+
+.form-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.form-section-heading h2 {
+  color: #0f172a;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.form-section-heading p {
+  margin-top: 0.25rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.step-number {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.85rem;
+  background: #0f766e;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.field-block {
+  display: block;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.field-label strong {
+  color: #e11d48;
+}
+
+.field-block input:not([type='file']),
+.field-block textarea {
+  display: block;
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  padding: 0.85rem 1rem;
+  color: #0f172a;
+  line-height: 1.55;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.field-block textarea {
+  resize: vertical;
+}
+
+.field-block input:not([type='file']):focus,
+.field-block textarea:focus {
+  border-color: #0f766e;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+}
+
+.field-help,
+.field-error {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.field-help {
+  color: #64748b;
+}
+
+.field-error {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.file-input {
+  display: block;
+  width: 100%;
+  border: 1px dashed #94a3b8;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  padding: 1rem;
+  color: #334155;
+  cursor: pointer;
+}
+
+:host-context(.dark) .form-section {
+  border-color: #1e293b;
+  background: #0f172a;
+  box-shadow: none;
+}
+
+:host-context(.dark) .form-section-heading h2,
+:host-context(.dark) .field-label {
+  color: #f8fafc;
+}
+
+:host-context(.dark) .form-section-heading p,
+:host-context(.dark) .field-help {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .field-block input:not([type='file']),
+:host-context(.dark) .field-block textarea,
+:host-context(.dark) .file-input {
+  border-color: #475569;
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+:host-context(.dark) .field-block input:not([type='file']):focus,
+:host-context(.dark) .field-block textarea:focus {
+  border-color: #2dd4bf;
+  background: #0f172a;
+}

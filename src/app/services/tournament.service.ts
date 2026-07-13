@@ -19,25 +19,11 @@ export class TournamentService {
     private time: TimeService
   ) {}
 
-  async createdNewTournament(
-    title: string,
-    subtitle: string,
-    instruction: string,
-    image: string,
-    prizeAmount: string,
-    prizeOther: string,
-    deadline: string
-  ) {
+  async createdNewTournament(tournament: Partial<Tournament>) {
     const tournamentId = this.afs.createId();
     const data: Tournament = {
+      ...tournament,
       tournamentId,
-      title,
-      subtTitle: subtitle,
-      instruction,
-      image,
-      prizeAmount,
-      prizeOther,
-      deadline,
       submittedSolutions: [],
       winningSolution: '',
       authorId: this.auth.currentUser.uid,

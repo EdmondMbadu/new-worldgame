@@ -1,0 +1,179 @@
+:host {
+  display: block;
+}
+
+.tournament-hero::after {
+  position: absolute;
+  right: -8rem;
+  bottom: -10rem;
+  width: 28rem;
+  height: 28rem;
+  content: '';
+  border-radius: 9999px;
+  background: rgba(20, 184, 166, 0.18);
+  filter: blur(60px);
+}
+
+.tournament-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to right, transparent, black);
+}
+
+.section-kicker {
+  margin: 0;
+  color: #0f766e;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1.25rem;
+  text-transform: uppercase;
+}
+
+.section-title {
+  margin-top: 0.5rem;
+  color: #020617;
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.prose-copy {
+  max-width: 52rem;
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.85;
+}
+
+.check-card {
+  display: flex;
+  min-height: 5rem;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #f8fafc;
+  padding: 1rem;
+  color: #1e293b;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.check-icon {
+  display: flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.criterion-card {
+  display: flex;
+  min-height: 6rem;
+  align-items: flex-end;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: linear-gradient(145deg, #ffffff, #f1f5f9);
+  padding: 1rem;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.35;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.solution-entry app-solution {
+  display: block;
+  overflow: hidden;
+  border-radius: 0.85rem;
+}
+
+.editor-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.editor-field {
+  display: block;
+}
+
+.editor-field > span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.editor-field input,
+.editor-field textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.8rem;
+  background: #f8fafc;
+  padding: 0.75rem 0.9rem;
+  color: #0f172a;
+  line-height: 1.5;
+  outline: none;
+}
+
+.editor-field input:focus,
+.editor-field textarea:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+}
+
+@media (min-width: 640px) {
+  .editor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+:host-context(.dark) .section-kicker {
+  color: #5eead4;
+}
+
+:host-context(.dark) .section-title {
+  color: #ffffff;
+}
+
+:host-context(.dark) .prose-copy {
+  color: #cbd5e1;
+}
+
+:host-context(.dark) .check-card {
+  border-color: #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .check-icon {
+  background: rgba(13, 148, 136, 0.22);
+  color: #5eead4;
+}
+
+:host-context(.dark) .criterion-card {
+  border-color: #334155;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  color: #f8fafc;
+}
+
+:host-context(.dark) .editor-field > span {
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .editor-field input,
+:host-context(.dark) .editor-field textarea {
+  border-color: #475569;
+  background: #1e293b;
+  color: #f8fafc;
+}

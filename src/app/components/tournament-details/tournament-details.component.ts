@@ -28,7 +28,15 @@ export class TournamentDetailsComponent implements OnInit {
 
   editing = false;
   tempTitle = '';
+  tempSubtitle = '';
   tempInstr = '';
+  tempEligibility = '';
+  tempSubmissionRequirements = '';
+  tempJudgingCriteria = '';
+  tempAwardLabel = '';
+  tempAwardPurpose = '';
+  tempIntellectualProperty = '';
+  tempCallToAction = '';
   tempPrizeOther = '';
   tempDeadline = '';
   tempPrizeAmount = '';
@@ -73,13 +81,53 @@ export class TournamentDetailsComponent implements OnInit {
   }
 
   get canEdit(): boolean {
-    return this.isAuthor && this.t?.status === 'pending';
+    return this.isAuthor && this.t?.status !== 'approved';
+  }
+
+  get aboutText(): string {
+    return this.t?.about || this.t?.instruction || '';
+  }
+
+  get awardLabel(): string {
+    return this.t?.awardLabel || 'Prize';
+  }
+
+  get closingCallToAction(): string {
+    return (
+      this.t?.callToAction ||
+      `Submit your completed solution before the deadline and show what your idea can achieve.`
+    );
+  }
+
+  formatAward(value?: string): string {
+    const raw = (value ?? '').trim();
+    if (!raw) return 'To be announced';
+    if (raw.includes('$') || /[a-z]/i.test(raw)) return raw;
+
+    const amount = Number(raw.replace(/[^0-9.-]/g, ''));
+    if (!Number.isFinite(amount)) return raw;
+
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(amount);
   }
   startEdit() {
     if (!this.canEdit) return;
     this.editing = true;
     this.tempTitle = this.t!.title!;
-    this.tempInstr = this.t!.instruction!;
+    this.tempSubtitle = this.t!.subtTitle ?? '';
+    this.tempInstr = this.aboutText;
+    this.tempEligibility = (this.t!.eligibility ?? []).join('\n');
+    this.tempSubmissionRequirements = (
+      this.t!.submissionRequirements ?? []
+    ).join('\n');
+    this.tempJudgingCriteria = (this.t!.judgingCriteria ?? []).join('\n');
+    this.tempAwardLabel = this.awardLabel;
+    this.tempAwardPurpose = this.t!.awardPurpose ?? '';
+    this.tempIntellectualProperty = this.t!.intellectualProperty ?? '';
+    this.tempCallToAction = this.t!.callToAction ?? '';
     this.tempPrizeOther = this.t!.prizeOther ?? '';
     this.tempDeadline = this.t!.deadline!; // YYYY-MM-DD
     this.tempPrizeAmount = this.t!.prizeAmount ?? '';
@@ -89,7 +137,16 @@ export class TournamentDetailsComponent implements OnInit {
     this.editing = false;
     Object.assign(this.t!, {
       title: this.tempTitle.trim(),
+      subtTitle: this.tempSubtitle.trim(),
       instruction: this.tempInstr.trim(),
+      about: this.tempInstr.trim(),
+      eligibility: this.lines(this.tempEligibility),
+      submissionRequirements: this.lines(this.tempSubmissionRequirements),
+      judgingCriteria: this.lines(this.tempJudgingCriteria),
+      awardLabel: this.tempAwardLabel.trim(),
+      awardPurpose: this.tempAwardPurpose.trim(),
+      intellectualProperty: this.tempIntellectualProperty.trim(),
+      callToAction: this.tempCallToAction.trim(),
       prizeOther: this.tempPrizeOther.trim(),
       deadline: this.tempDeadline, // ISO-date from <input type="date">
       prizeAmount: this.tempPrizeAmount.trim(),
@@ -98,7 +155,16 @@ export class TournamentDetailsComponent implements OnInit {
     /* 2️⃣ persist to Firestore  */
     await this.tourneySvc.updateTournament(this.t!.tournamentId!, {
       title: this.t!.title,
+      subtTitle: this.t!.subtTitle,
       instruction: this.t!.instruction,
+      about: this.t!.about,
+      eligibility: this.t!.eligibility,
+      submissionRequirements: this.t!.submissionRequirements,
+      judgingCriteria: this.t!.judgingCriteria,
+      awardLabel: this.t!.awardLabel,
+      awardPurpose: this.t!.awardPurpose,
+      intellectualProperty: this.t!.intellectualProperty,
+      callToAction: this.t!.callToAction,
       prizeOther: this.t!.prizeOther,
       deadline: this.t!.deadline,
       prizeAmount: this.t!.prizeAmount,
@@ -107,6 +173,13 @@ export class TournamentDetailsComponent implements OnInit {
 
   cancelEdit() {
     this.editing = false;
+  }
+
+  private lines(value: string): string[] {
+    return (value ?? '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
   }
   /* UI toggle */
   openSolutionPicker() {

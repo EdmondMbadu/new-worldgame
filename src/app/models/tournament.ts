@@ -3,6 +3,14 @@ export class Tournament {
   title?: string;
   subtTitle?: string;
   instruction?: string;
+  about?: string;
+  eligibility?: string[];
+  judgingCriteria?: string[];
+  submissionRequirements?: string[];
+  awardLabel?: string;
+  awardPurpose?: string;
+  intellectualProperty?: string;
+  callToAction?: string;
   files?: string[];
   image?: string;
   prizeAmount?: string;

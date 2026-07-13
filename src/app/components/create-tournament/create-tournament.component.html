@@ -1,210 +1,266 @@
-<div class="dark:bg-slate-900 bg-gray-100 min-h-screen">
-  <!-- ▸ NAVBAR (unchanged) -->
+<div class="min-h-screen bg-slate-50 dark:bg-slate-950">
   <app-navbar
-      [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
-      [showMoreOrLess]="true"
-      [sideBarSmall]="true"
-      [sideBarBig]="false"
-      [email]="this.auth.currentUser.email"
-      [firstName]="this.auth.currentUser.firstName"
-      [lastName]="this.auth.currentUser.lastName"
-      [path]="'home'"
-      [currentPageTournament]="true">
+    [hoveredTournamentPath]="'bg-gray-100 dark:bg-gray-700'"
+    [showMoreOrLess]="true"
+    [sideBarSmall]="true"
+    [sideBarBig]="false"
+    [email]="this.auth.currentUser.email"
+    [firstName]="this.auth.currentUser.firstName"
+    [lastName]="this.auth.currentUser.lastName"
+    [path]="'home'"
+    [currentPageTournament]="true"
+  >
   </app-navbar>
 
-  <!-- ▸ HERO SECTION -->
-  <section class="bg-white dark:bg-gray-900 mt-20">
-    <div class="py-4 px-4 mx-auto max-w-screen-xl text-center lg:px-12">
-      <h1 class="mb-4 text-4xl md:text-5xl lg:text-6xl font-extrabold
-                 tracking-tight leading-none text-gray-900 dark:text-white">
-            Create a Global Solutions Lab Tournament
-          </h1>
+  <main class="px-4 pb-20 pt-24 sm:px-6 lg:px-8">
+    <header class="mx-auto max-w-4xl text-center">
+      <p class="text-sm font-extrabold uppercase tracking-[0.2em] text-teal-700 dark:text-teal-400">
+        Tournament builder
+      </p>
+      <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-5xl">
+        Create a clear, compelling tournament page
+      </h1>
+      <p class="mx-auto mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+        Answer the essential questions below. We will organize your information
+        into a consistent page with a strong submission flow.
+      </p>
+      <a
+        routerLink="/active-tournaments"
+        class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-teal-800 hover:underline dark:text-teal-300"
+      >
+        View active tournaments <span aria-hidden="true">→</span>
+      </a>
+    </header>
 
-          <p class="mb-8 text-lg lg:text-xl text-gray-600 dark:text-gray-300
-                    sm:px-16 xl:px-48">
-            Ready to turn big ideas into real-world impact? Use the form below to launch a Global Solutions Lab Tournament. Define the challenge, set the prize, and invite others to submit bold, actionable solutions. The most compelling entries can go from concept to implementation — with funding, support, and visibility along the way.
-          </p>
-
-
-      <div class="flex flex-col lg:flex-row justify-center space-y-4
-                  sm:space-y-0 sm:space-x-4 mb-2 lg:mb-4">
-        <a routerLink="/active-tournaments"
-           class="inline-flex items-center justify-center
-                  py-3 px-5 text-base font-medium rounded-lg
-                  text-gray-900 dark:text-white
-                  border border-gray-300 dark:border-gray-700
-                  hover:bg-gray-100 dark:hover:bg-gray-700
-                  focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-800">
-          Active Tournaments
-          <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor"
-               viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                  clip-rule="evenodd"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
-
-    <!-- ▸ TOURNAMENT FORM -->
     <form
-        [formGroup]="tournamentForm"
-        (ngSubmit)="createTournament()"
-        novalidate
-        class="py-8 px-6 mx-auto max-w-screen-md
-               bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      [formGroup]="tournamentForm"
+      (ngSubmit)="createTournament()"
+      novalidate
+      class="mx-auto mt-12 max-w-4xl space-y-8"
+    >
+      <!-- 1. Overview -->
+      <section class="form-section">
+        <div class="form-section-heading">
+          <span class="step-number">1</span>
+          <div>
+            <h2>Tournament overview</h2>
+            <p>Give visitors the headline and the reason to care.</p>
+          </div>
+        </div>
 
-      <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
-        Enter Tournament Details
-      </h2>
+        <div class="mt-7 space-y-6">
+          <label class="field-block" for="title">
+            <span class="field-label">What is the tournament called? <strong>*</strong></span>
+            <input
+              id="title"
+              type="text"
+              formControlName="title"
+              placeholder="Example: 2026 Community Climate Challenge"
+            />
+            <span class="field-help">This becomes the main page headline.</span>
+            <span *ngIf="title.invalid && title.touched" class="field-error">A title is required.</span>
+          </label>
 
-      <!-- TITLE -->
-      <div class="mb-4">
-        <label for="title"
-               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          New Title
-        </label>
-        <input id="title" type="text" formControlName="title"
-               placeholder="Enter a descriptive title"
-               class="block w-full p-2.5 rounded-lg shadow-sm
-                      bg-gray-50 dark:bg-gray-700
-                      border border-gray-300 dark:border-gray-600
-                      text-gray-900 dark:text-gray-100
-                      focus:ring-blue-500 focus:border-blue-500">
-        <p *ngIf="title.invalid && title.touched"
-           class="mt-2 text-sm text-red-600">Title is required</p>
-        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
-          Shown as the tournament headline
+          <label class="field-block" for="subtitle">
+            <span class="field-label">What is the opportunity in one or two sentences? <strong>*</strong></span>
+            <textarea
+              id="subtitle"
+              rows="3"
+              formControlName="subtitle"
+              placeholder="Explain what participants can accomplish and why they should enter."
+            ></textarea>
+            <span class="field-help">Used in the hero and on tournament cards.</span>
+            <span *ngIf="subtitle.invalid && subtitle.touched" class="field-error">A short summary is required.</span>
+          </label>
+
+          <label class="field-block" for="about">
+            <span class="field-label">What is this tournament about? <strong>*</strong></span>
+            <textarea
+              id="about"
+              rows="7"
+              formControlName="about"
+              placeholder="Describe the purpose, context, desired impact, and what makes this tournament important."
+            ></textarea>
+            <span class="field-help">This becomes the main “About the tournament” section.</span>
+            <span *ngIf="about.invalid && about.touched" class="field-error">A full description is required.</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Participation -->
+      <section class="form-section">
+        <div class="form-section-heading">
+          <span class="step-number">2</span>
+          <div>
+            <h2>Participation and evaluation</h2>
+            <p>Set clear expectations before someone submits.</p>
+          </div>
+        </div>
+
+        <div class="mt-7 grid gap-6 lg:grid-cols-2">
+          <label class="field-block" for="eligibility">
+            <span class="field-label">Who is eligible? <strong>*</strong></span>
+            <textarea
+              id="eligibility"
+              rows="7"
+              formControlName="eligibility"
+              placeholder="One item per line&#10;Open to registered teams&#10;Participants must be 18 or older"
+            ></textarea>
+            <span class="field-help">Enter one eligibility rule per line.</span>
+            <span *ngIf="eligibility.invalid && eligibility.touched" class="field-error">Add at least one eligibility rule.</span>
+          </label>
+
+          <label class="field-block" for="submissionRequirements">
+            <span class="field-label">What must each entry include? <strong>*</strong></span>
+            <textarea
+              id="submissionRequirements"
+              rows="7"
+              formControlName="submissionRequirements"
+              placeholder="One item per line&#10;A completed solution&#10;Evidence and citations&#10;An implementation plan"
+            ></textarea>
+            <span class="field-help">Enter one submission requirement per line.</span>
+            <span *ngIf="submissionRequirements.invalid && submissionRequirements.touched" class="field-error">Add at least one submission requirement.</span>
+          </label>
+
+          <label class="field-block lg:col-span-2" for="judgingCriteria">
+            <span class="field-label">How will entries be judged? <strong>*</strong></span>
+            <textarea
+              id="judgingCriteria"
+              rows="5"
+              formControlName="judgingCriteria"
+              placeholder="One criterion per line&#10;Innovation&#10;Feasibility&#10;Potential impact&#10;Quality of presentation"
+            ></textarea>
+            <span class="field-help">These appear as easy-to-scan evaluation cards.</span>
+            <span *ngIf="judgingCriteria.invalid && judgingCriteria.touched" class="field-error">Add at least one judging criterion.</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 3. Awards and timing -->
+      <section class="form-section">
+        <div class="form-section-heading">
+          <span class="step-number">3</span>
+          <div>
+            <h2>Awards and timing</h2>
+            <p>Choose language that fits the purpose of your tournament.</p>
+          </div>
+        </div>
+
+        <div class="mt-7 grid gap-6 sm:grid-cols-2">
+          <label class="field-block" for="awardLabel">
+            <span class="field-label">What should the award be called? <strong>*</strong></span>
+            <input
+              id="awardLabel"
+              type="text"
+              formControlName="awardLabel"
+              placeholder="Prize, Award, Grant, Implementation Investment…"
+            />
+            <span class="field-help">Use “Investment” or “Grant” when funds must support implementation.</span>
+          </label>
+
+          <label class="field-block" for="prizeAmount">
+            <span class="field-label">What is the primary award? <strong>*</strong></span>
+            <input
+              id="prizeAmount"
+              type="text"
+              formControlName="prizeAmount"
+              placeholder="$2,000 USD"
+            />
+            <span *ngIf="prizeAmount.invalid && prizeAmount.touched" class="field-error">The primary award is required.</span>
+          </label>
+
+          <label class="field-block" for="prizeOther">
+            <span class="field-label">Are there additional awards?</span>
+            <textarea
+              id="prizeOther"
+              rows="4"
+              formControlName="prizeOther"
+              placeholder="Example: Second award — $750&#10;Third award — $500"
+            ></textarea>
+          </label>
+
+          <label class="field-block" for="awardPurpose">
+            <span class="field-label">How should the award be used?</span>
+            <textarea
+              id="awardPurpose"
+              rows="4"
+              formControlName="awardPurpose"
+              placeholder="Explain whether funds support prototyping, research, implementation, travel, or another purpose."
+            ></textarea>
+          </label>
+
+          <label class="field-block sm:col-span-2" for="deadline">
+            <span class="field-label">When do submissions close? <strong>*</strong></span>
+            <input id="deadline" type="date" formControlName="deadline" />
+            <span *ngIf="deadline.invalid && deadline.touched" class="field-error">A submission deadline is required.</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 4. Terms and presentation -->
+      <section class="form-section">
+        <div class="form-section-heading">
+          <span class="step-number">4</span>
+          <div>
+            <h2>Terms and presentation</h2>
+            <p>Add trust-building details and a strong closing invitation.</p>
+          </div>
+        </div>
+
+        <div class="mt-7 space-y-6">
+          <label class="field-block" for="intellectualProperty">
+            <span class="field-label">What should participants know about ownership or intellectual property?</span>
+            <textarea
+              id="intellectualProperty"
+              rows="5"
+              formControlName="intellectualProperty"
+              placeholder="Explain who retains ownership and what permission is granted for review, judging, or showcasing."
+            ></textarea>
+          </label>
+
+          <label class="field-block" for="callToAction">
+            <span class="field-label">What final message should encourage people to enter?</span>
+            <textarea
+              id="callToAction"
+              rows="3"
+              formControlName="callToAction"
+              placeholder="Example: Ready to turn your idea into impact? Submit your completed solution before the deadline."
+            ></textarea>
+          </label>
+
+          <label class="field-block" for="coverImage">
+            <span class="field-label">Cover image</span>
+            <input
+              id="coverImage"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              (change)="startUpload($any($event.target).files)"
+              class="file-input"
+            />
+            <span class="field-help">Landscape PNG, JPEG, or WebP under 10 MB.</span>
+          </label>
+
+          <img
+            *ngIf="imageDownloadUrl"
+            [src]="imageDownloadUrl"
+            alt="Tournament cover preview"
+            class="h-64 w-full rounded-2xl border border-slate-200 object-cover dark:border-slate-700"
+          />
+        </div>
+      </section>
+
+      <div class="sticky bottom-4 z-20 flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-2xl backdrop-blur sm:flex-row dark:border-slate-700 dark:bg-slate-900/95">
+        <p class="text-sm text-slate-600 dark:text-slate-300">
+          Required fields are marked with <strong class="text-rose-600">*</strong>.
         </p>
-      </div>
-
-      <!-- SUBTITLE -->
-      <div class="mb-4">
-        <label for="subtitle"
-               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Subtitle
-        </label>
-        <input id="subtitle" type="text" formControlName="subtitle"
-               placeholder="Enter a subtitle explaining the tournament"
-               class="block w-full p-2.5 rounded-lg shadow-sm
-                      bg-gray-50 dark:bg-gray-700
-                      border border-gray-300 dark:border-gray-600
-                      text-gray-900 dark:text-gray-100
-                      focus:ring-blue-500 focus:border-blue-500">
-        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
-          Short teaser visible on the tournament card
-        </p>
-      </div>
-
-      <!-- INSTRUCTIONS -->
-      <div class="mb-4">
-        <label for="instructions"
-               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Instructions
-        </label>
-        <textarea id="instructions" rows="6" formControlName="instructions"
-                  placeholder="Enter the instructions and guidelines…"
-                  class="block w-full p-2.5 rounded-lg
-                         bg-gray-50 dark:bg-gray-700
-                         border border-gray-300 dark:border-gray-600
-                         text-gray-900 dark:text-gray-100
-                         focus:ring-blue-500 focus:border-blue-500"></textarea>
-        <p *ngIf="instructions.invalid && instructions.touched"
-           class="mt-2 text-sm text-red-600">Instructions are required</p>
-        <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
-          Include evaluation criteria, file types, team size, etc.
-        </p>
-      </div>
-
-      <!-- PRIZE -->
-      <div class="mb-4">
-        <label for="prizeAmount"
-               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Prize
-        </label>
-        <input id="prizeAmount" type="text" formControlName="prizeAmount"
-               placeholder="$1 500"
-               class="block w-full p-2.5 rounded-lg shadow-sm
-                      bg-gray-50 dark:bg-gray-700
-                      border border-gray-300 dark:border-gray-600
-                      text-gray-900 dark:text-gray-100
-                      focus:ring-blue-500 focus:border-blue-500">
-        <p *ngIf="prizeAmount.invalid && prizeAmount.touched"
-           class="mt-2 text-sm text-red-600">Prize amount required</p>
-      </div>
-
-      <!-- OTHER PRIZES -->
-      <div class="mb-4">
-        <label for="prizeOther"
-               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Other Prizes
-        </label>
-        <input id="prizeOther" type="text" formControlName="prizeOther"
-               placeholder="Recognition, pilot opportunity, mentorship…"
-               class="block w-full p-2.5 rounded-lg shadow-sm
-                      bg-gray-50 dark:bg-gray-700
-                      border border-gray-300 dark:border-gray-600
-                      text-gray-900 dark:text-gray-100
-                      focus:ring-blue-500 focus:border-blue-500">
-      </div>
-      <!-- --- COVER IMAGE --- -->
-<div class="mb-4">
-  <label for="coverImage"
-         class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-    Cover Image
-  </label>
-
-  <!-- file selector -->
-  <input  type="file"
-          id="coverImage"
-          accept="image/png,image/jpeg,image/webp"
-          (change)="startUpload($any($event.target).files)"
-          class="block w-full text-sm text-gray-900 dark:text-gray-100
-                 border border-gray-300 dark:border-gray-600 rounded-lg
-                 cursor-pointer bg-gray-50 dark:bg-gray-700 focus:outline-none">
-
-  <p class="mt-2 text-sm italic text-gray-500 dark:text-gray-400">
-    Landscape (3 : 2) PNG/JPEG/WebP · &lt; 10 MB
-  </p>
-
-  <!-- live preview -->
-  <img *ngIf="imageDownloadUrl"
-       [src]="imageDownloadUrl"
-       alt="Cover preview"
-       class="mt-4 rounded-lg w-full object-cover max-h-60
-              border border-gray-300 dark:border-gray-600">
-</div>
-
-      <!-- DEADLINE -->
-      <div class="mb-6">
-        <label for="deadline"
-               class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-          Deadline
-        </label>
-        <input id="deadline" type="date" formControlName="deadline"
-               class="block w-full p-2.5 rounded-lg shadow-sm
-                      bg-gray-50 dark:bg-gray-700
-                      border border-gray-300 dark:border-gray-600
-                      text-gray-900 dark:text-gray-100
-                      focus:ring-blue-500 focus:border-blue-500">
-        <p *ngIf="deadline.invalid && deadline.touched"
-           class="mt-2 text-sm text-red-600">Deadline required</p>
-      </div>
-
-      <!-- COVER IMAGE uploader + preview block stays where you inserted it -->
-
-      <!-- SUBMIT -->
-      <div class="flex justify-center">
-        <button type="submit"
-                [disabled]="tournamentForm.invalid || isLoading"
-                class="px-5 py-2.5 text-sm font-medium
-                       text-white bg-teal-700 rounded-lg
-                       hover:bg-teal-800 focus:ring-4 focus:ring-teal-300
-                       disabled:opacity-60 disabled:cursor-not-allowed
-                       dark:focus:ring-teal-800">
-          CREATE
+        <button
+          type="submit"
+          [disabled]="tournamentForm.invalid || isLoading"
+          class="w-full rounded-xl bg-teal-700 px-7 py-3.5 font-extrabold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+        >
+          {{ isLoading ? "Creating tournament…" : "Create tournament" }}
         </button>
       </div>
     </form>
-  </section>
+  </main>
 </div>

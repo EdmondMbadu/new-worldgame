@@ -34,18 +34,37 @@ export class CreateTournamentComponent implements OnInit {
     window.scroll(0, 0);
     this.tournamentForm = this.fb.group({
       title: ['', Validators.required],
-      subtitle: [''],
-      instructions: ['', Validators.required],
+      subtitle: ['', Validators.required],
+      about: ['', Validators.required],
+      eligibility: ['', Validators.required],
+      submissionRequirements: ['', Validators.required],
+      judgingCriteria: ['', Validators.required],
+      awardLabel: ['Prize', Validators.required],
       prizeAmount: ['', Validators.required],
       prizeOther: [''],
+      awardPurpose: [''],
+      intellectualProperty: [''],
+      callToAction: [''],
       deadline: ['', Validators.required],
     });
   }
   get title() {
     return this.tournamentForm.get('title')!;
   }
-  get instructions() {
-    return this.tournamentForm.get('instructions')!;
+  get subtitle() {
+    return this.tournamentForm.get('subtitle')!;
+  }
+  get about() {
+    return this.tournamentForm.get('about')!;
+  }
+  get eligibility() {
+    return this.tournamentForm.get('eligibility')!;
+  }
+  get submissionRequirements() {
+    return this.tournamentForm.get('submissionRequirements')!;
+  }
+  get judgingCriteria() {
+    return this.tournamentForm.get('judgingCriteria')!;
   }
   get prizeAmount() {
     return this.tournamentForm.get('prizeAmount')!;
@@ -80,19 +99,27 @@ export class CreateTournamentComponent implements OnInit {
     }
     this.isLoading = true;
 
-    const { title, subtitle, instructions, prizeAmount, prizeOther, deadline } =
-      this.tournamentForm.value;
+    const values = this.tournamentForm.value;
 
     try {
-      await this.tourneySvc.createdNewTournament(
-        title,
-        subtitle,
-        instructions,
-        this.imageDownloadUrl,
-        prizeAmount,
-        prizeOther,
-        deadline
-      );
+      await this.tourneySvc.createdNewTournament({
+        title: values.title.trim(),
+        subtTitle: values.subtitle.trim(),
+        about: values.about.trim(),
+        // Keep the legacy field populated for older cards and integrations.
+        instruction: values.about.trim(),
+        eligibility: this.lines(values.eligibility),
+        submissionRequirements: this.lines(values.submissionRequirements),
+        judgingCriteria: this.lines(values.judgingCriteria),
+        awardLabel: values.awardLabel.trim(),
+        prizeAmount: values.prizeAmount.trim(),
+        prizeOther: values.prizeOther.trim(),
+        awardPurpose: values.awardPurpose.trim(),
+        intellectualProperty: values.intellectualProperty.trim(),
+        callToAction: values.callToAction.trim(),
+        image: this.imageDownloadUrl,
+        deadline: values.deadline,
+      });
 
       // success – reset form, go to join page
       this.tournamentForm.reset();
@@ -104,5 +131,12 @@ export class CreateTournamentComponent implements OnInit {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  private lines(value: string): string[] {
+    return (value ?? '')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
   }
 }
