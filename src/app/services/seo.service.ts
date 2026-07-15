@@ -218,6 +218,12 @@ export class SeoService {
         keywords: 'Global Solutions Lab workshop, educational workshop, facilitator training, problem-solving workshop',
         url: `${baseUrl}/workshop`
       },
+      '/global-labs': {
+        title: 'GSL Workshop 2027 | Global Solutions Lab',
+        description: 'GSL Workshop 2027 is coming soon. Join the announcement list for dates, participation options, and registration details for the Global Solutions Lab Solutions-a-thon.',
+        keywords: 'GSL Workshop 2027, Global Solutions Lab workshop, Solutions-a-thon, design science workshop, global problem solving',
+        url: `${baseUrl}/global-labs`
+      },
       '/tournament-landing': {
         title: 'Global Solutions Lab Tournaments - Compete to Solve Global Challenges',
         description: 'Participate in Global Solutions Lab tournaments. Teams compete to develop the best solutions for real-world global challenges.',

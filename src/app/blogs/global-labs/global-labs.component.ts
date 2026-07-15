@@ -1,15 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DataService } from 'src/app/services/data.service';
 
 interface ConversionCard {
   icon: string;
   title: string;
   body: string;
-}
-
-interface TuitionGroup {
-  label: string;
-  items: string[];
 }
 
 interface LabVideo {
@@ -29,6 +25,10 @@ interface LabVideo {
 })
 export class GlobalLabsComponent implements OnInit {
   loadedVideoIds: Record<string, boolean> = {};
+  announcementEmail = '';
+  announcementSubmitting = false;
+  announcementSuccess = false;
+  announcementError = '';
 
   readonly videos: LabVideo[] = [
     {
@@ -44,8 +44,8 @@ export class GlobalLabsComponent implements OnInit {
     {
       id: 'promo',
       title: 'Global Solutions Lab Promo',
-      eyebrow: '2026 overview',
-      heading: 'What you are joining',
+      eyebrow: 'The workshop experience',
+      heading: 'See the Lab in action',
       body:
         'See the Lab experience, the community, and the kind of work participants take away.',
       src: 'https://app.heygen.com/embeds/625a1fb51b704c7796b455de9cdb2970',
@@ -99,26 +99,6 @@ export class GlobalLabsComponent implements OnInit {
     },
   ];
 
-  readonly tuitionGroups: TuitionGroup[] = [
-    {
-      label: 'In-person',
-      items: [
-        '$800 for professionals',
-        '$400 for students',
-        '$0 for UN, community organizations, and Drexel University students',
-      ],
-    },
-    {
-      label: 'Online',
-      items: [
-        '$250 for professionals',
-        '$200 for students and seniors',
-        '$0 for Drexel University students',
-        'Scholarships are available for a limited number of students, including international students',
-      ],
-    },
-  ];
-
   readonly proofPoints: ConversionCard[] = [
     {
       icon: 'public',
@@ -140,7 +120,10 @@ export class GlobalLabsComponent implements OnInit {
     },
   ];
 
-  constructor(private readonly sanitizer: DomSanitizer) {}
+  constructor(
+    private readonly sanitizer: DomSanitizer,
+    private readonly data: DataService
+  ) {}
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
@@ -155,6 +138,29 @@ export class GlobalLabsComponent implements OnInit {
       behavior: 'smooth',
       block: 'start',
     });
+  }
+
+  async joinAnnouncementList(): Promise<void> {
+    this.announcementError = '';
+    const email = this.announcementEmail.trim().toLowerCase();
+
+    if (!this.data.isValidEmail(email)) {
+      this.announcementError = 'Please enter a valid email address.';
+      return;
+    }
+
+    this.announcementSubmitting = true;
+    try {
+      await this.data.gslWorkshopAnnouncementSignUp(email);
+      this.announcementEmail = '';
+      this.announcementSuccess = true;
+    } catch (error) {
+      console.error('Could not join the GSL Workshop announcement list', error);
+      this.announcementError =
+        'We could not add you right now. Please try again in a moment.';
+    } finally {
+      this.announcementSubmitting = false;
+    }
   }
 
   trustedVideoUrl(src: string): SafeResourceUrl {

@@ -8,7 +8,7 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 
-type SourceKey = 'registered' | 'primer' | 'contact_list';
+type SourceKey = 'registered' | 'primer' | 'workshop_announcement' | 'contact_list';
 
 type ContactList = {
   id: string;
@@ -138,6 +138,7 @@ export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
 
   users: User[] = [];
   primerDocs: any[] = [];
+  workshopAnnouncementSignups: any[] = [];
   contactLists: ContactList[] = [];
   unsubscribedEmails = new Set<string>();
   unsubscribedList: string[] = [];
@@ -190,6 +191,9 @@ export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
       this.afs.collection<User>('users').valueChanges(),
       this.afs.collection<any>('primer').valueChanges({ idField: 'id' }),
       this.afs
+        .collection<any>('gsl-workshop-announcement-signups')
+        .valueChanges({ idField: 'id' }),
+      this.afs
         .collection<ContactList>('contact_lists')
         .valueChanges({ idField: 'id' }),
       this.afs
@@ -199,9 +203,10 @@ export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
         .collection<DomainLabel>('contact_domain_labels')
         .valueChanges({ idField: 'id' }),
     ]).subscribe({
-      next: ([users, primerDocs, contactLists, unsubscribes, domainLabels]) => {
+      next: ([users, primerDocs, workshopAnnouncementSignups, contactLists, unsubscribes, domainLabels]) => {
         this.users = users || [];
         this.primerDocs = primerDocs || [];
+        this.workshopAnnouncementSignups = workshopAnnouncementSignups || [];
         this.contactLists = contactLists || [];
         this.unsubscribedEmails = this.normalizeUnsubscribes(unsubscribes || []);
         this.unsubscribedList = Array.from(this.unsubscribedEmails).sort((a, b) =>
@@ -566,6 +571,20 @@ export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
       });
     });
 
+    this.workshopAnnouncementSignups.forEach((signup) => {
+      seeds.push({
+        email: signup?.email || '',
+        source: 'workshop_announcement',
+        sourceLabel: 'GSL Workshop 2027 announcements',
+        labels: ['GSL Workshop 2027'],
+        category: 'workshop',
+        fields: {
+          workshop_year: String(signup?.workshopYear || 2027),
+          signup_source: signup?.source || 'global-labs-page',
+        },
+      });
+    });
+
     this.parsedContactListsById.forEach((parsed) => {
       seeds.push(...parsed.contacts);
     });
@@ -671,6 +690,7 @@ export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
     const rows: SourceSummary[] = [
       { key: 'registered', label: 'Registered users', count: 0, color: '#2563eb' },
       { key: 'primer', label: 'Primer signups', count: 0, color: '#059669' },
+      { key: 'workshop_announcement', label: 'Workshop announcements', count: 0, color: '#0f766e' },
       { key: 'contact_list', label: 'Uploaded lists', count: 0, color: '#ea580c' },
     ];
 

@@ -518,6 +518,20 @@ export class DataService implements OnInit {
     };
     return primerRef.set(data, { merge: true });
   }
+  gslWorkshopAnnouncementSignUp(email: string): Promise<void> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const signupId = encodeURIComponent(normalizedEmail);
+
+    return this.afs.doc(`gsl-workshop-announcement-signups/${signupId}`).set(
+      {
+        email: normalizedEmail,
+        workshopYear: 2027,
+        source: 'global-labs-page',
+        subscribedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
   // NEW: Ask Anything submission
   askAnythingSubmit(payload: {
     firstName: string;

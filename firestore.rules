@@ -16,6 +16,22 @@ service cloud.firestore {
       allow create, update, delete: if isPlatformAdmin();
     }
 
+    match /gsl-workshop-announcement-signups/{signupId} {
+      allow read, delete: if isPlatformAdmin();
+      allow create, update: if request.time < timestamp.date(2028, 11, 3)
+        && request.resource.data.keys().hasOnly([
+          'email',
+          'workshopYear',
+          'source',
+          'subscribedAt'
+        ])
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@]+@[^@]+[.][^@]+$')
+        && request.resource.data.workshopYear == 2027
+        && request.resource.data.source == 'global-labs-page'
+        && request.resource.data.subscribedAt == request.time;
+    }
+
     match /{topLevelCollection}/{document=**} {
       // This rule allows anyone with your database reference to view, edit,
       // and delete all data in your database. It is useful for getting
@@ -26,9 +42,11 @@ service cloud.firestore {
       // Make sure to write security rules for your app before that time, or
       // else all client requests to your database will be denied until you
       // update your rules.
-      allow read: if request.time < timestamp.date(2028, 11, 3);
+      allow read: if request.time < timestamp.date(2028, 11, 3)
+        && topLevelCollection != 'gsl-workshop-announcement-signups';
       allow write: if request.time < timestamp.date(2028, 11, 3)
-        && topLevelCollection != 'avatar_intro_videos';
+        && topLevelCollection != 'avatar_intro_videos'
+        && topLevelCollection != 'gsl-workshop-announcement-signups';
     }
   }
 }
