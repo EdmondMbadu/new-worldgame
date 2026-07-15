@@ -1,5 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ChangeDetectorRef } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   AngularFirestore,
   AngularFirestoreDocument,
@@ -56,6 +63,11 @@ interface PendingPreview {
   url?: string;
 }
 
+interface AvatarIntroVideo {
+  title: string;
+  url: string;
+}
+
 interface ChatScope {
   scopeType: ChatScopeType;
   scopeId: string | null;
@@ -69,6 +81,9 @@ interface ChatScope {
   styleUrls: ['./chatbot.component.css'],
 })
 export class ChatbotComponent implements OnInit, OnDestroy {
+  @ViewChild('introVideoPlayer')
+  private introVideoPlayer?: ElementRef<HTMLVideoElement>;
+
   showBot = false;
   isEnlarged = false;
   isFullScreen = false;
@@ -93,6 +108,9 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   // AI Avatar Selection
   showAiSelector = false;
   selectedAi: AiAvatar;
+  selectedAiIntroVideo: AvatarIntroVideo | null = null;
+  showIntroVideoModal = false;
+  private introVideoSub?: Subscription;
   private readonly aiSelectionStorageKey = 'nwg_selected_ai';
   
   // Context Integration
@@ -292,13 +310,17 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopThinking();
+    this.introVideoSub?.unsubscribe();
     this.contextSub?.unsubscribe();
     this.insertCompleteSub?.unsubscribe();
     this.sessionsSub?.unsubscribe();
     this.messagesSub?.unsubscribe();
+    document.body.style.overflow = '';
   }
 
   ngOnInit(): void {
+    this.watchSelectedAiIntroVideo();
+
     if (this.user?.profilePicture?.path) {
       this.profilePicturePath = this.user.profilePicture.downloadURL!;
     }
@@ -377,6 +399,8 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     }
     
     this.selectedAi = ai;
+    this.closeIntroVideo();
+    this.watchSelectedAiIntroVideo();
     this.persistAiSelection(ai);
     this.collectionPath = `users/${this.auth.currentUser.uid}/${ai.collectionKey}`;
     this.updateIntroMessage();
@@ -393,6 +417,62 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   toggleAiSelector(): void {
     this.showAiSelector = !this.showAiSelector;
+  }
+
+  openIntroVideo(): void {
+    if (!this.selectedAiIntroVideo) return;
+
+    this.showAiSelector = false;
+    this.showHistoryPanel = false;
+    this.showIntroVideoModal = true;
+    document.body.style.overflow = 'hidden';
+
+    this.cdRef.detectChanges();
+    const player = this.introVideoPlayer?.nativeElement;
+    if (player) {
+      player.currentTime = 0;
+      void player.play().catch(() => {
+        // Native controls remain available if the browser blocks autoplay.
+      });
+    }
+  }
+
+  closeIntroVideo(): void {
+    this.introVideoPlayer?.nativeElement.pause();
+    this.showIntroVideoModal = false;
+    document.body.style.overflow = '';
+  }
+
+  @HostListener('document:keydown.escape')
+  closeIntroVideoOnEscape(): void {
+    if (this.showIntroVideoModal) this.closeIntroVideo();
+  }
+
+  private watchSelectedAiIntroVideo(): void {
+    this.introVideoSub?.unsubscribe();
+    this.selectedAiIntroVideo = null;
+
+    const slug = this.selectedAi.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    this.introVideoSub = this.afs
+      .doc<AvatarIntroVideo>(`avatar_intro_videos/${slug}`)
+      .valueChanges()
+      .subscribe({
+        next: (video) => {
+          this.selectedAiIntroVideo = video || null;
+          if (!video) this.closeIntroVideo();
+          this.cdRef.detectChanges();
+        },
+        error: (error) => {
+          console.warn(`Could not load intro video for ${this.selectedAi.name}`, error);
+          this.selectedAiIntroVideo = null;
+          this.closeIntroVideo();
+          this.cdRef.detectChanges();
+        },
+      });
   }
 
   // =========== Session Management Methods ===========
@@ -618,11 +698,13 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   openFullPage(): void {
+    this.closeIntroVideo();
     this.showBot = false;
     this.router.navigate(['/ask-bucky'], { queryParams: { from: 'widget' } });
   }
 
   toggleBot() {
+    if (this.showBot) this.closeIntroVideo();
     this.showBot = !this.showBot;
     if (this.showBot) {
       this.showAiSelector = false;

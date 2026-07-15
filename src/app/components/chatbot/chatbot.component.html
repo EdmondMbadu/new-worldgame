@@ -219,6 +219,23 @@
         </div>
       </div>
 
+      <!-- Character introduction: shown only when this avatar has a video -->
+      <button
+        *ngIf="selectedAiIntroVideo"
+        type="button"
+        (click)="openIntroVideo()"
+        class="mt-2 inline-flex items-center gap-1.5 rounded-full border border-teal-200/80 bg-teal-50/80 px-2.5 py-1 text-xs font-semibold text-teal-700 transition-colors hover:border-teal-300 hover:bg-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500/40 dark:border-teal-700/60 dark:bg-teal-900/20 dark:text-teal-300 dark:hover:bg-teal-900/35"
+        [attr.aria-label]="'Play ' + selectedAi.name + ' character introduction'"
+        [title]="'Meet ' + getDisplayName(selectedAi)"
+      >
+        <span class="flex h-4 w-4 items-center justify-center rounded-full bg-teal-600 text-white dark:bg-teal-400 dark:text-slate-950" aria-hidden="true">
+          <svg class="ml-px h-2.5 w-2.5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M6.3 3.7a1 1 0 0 1 1.05.08l7.1 5.3a1.15 1.15 0 0 1 0 1.84l-7.1 5.3A1 1 0 0 1 5.75 15.4V4.6a1 1 0 0 1 .55-.9Z" />
+          </svg>
+        </span>
+        Meet {{ getDisplayName(selectedAi) }}
+      </button>
+
       <!-- Active Conversation Indicator -->
       <div *ngIf="currentSessionId" class="mt-2 flex items-center gap-2">
         <div
@@ -1334,4 +1351,51 @@
       </p>
     </div>
   </footer>
+</div>
+
+<!-- Large, focused character introduction modal -->
+<div
+  *ngIf="showIntroVideoModal && selectedAiIntroVideo"
+  class="fixed inset-0 z-[140] flex items-center justify-center bg-slate-950/85 p-3 backdrop-blur-sm sm:p-6"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="chat-intro-video-title"
+  (click)="closeIntroVideo()"
+>
+  <section
+    class="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/15 bg-slate-950 text-white shadow-2xl"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4">
+      <div class="min-w-0">
+        <p class="text-[11px] font-bold uppercase tracking-widest text-teal-300">Character introduction</p>
+        <h2 id="chat-intro-video-title" class="mt-1 truncate text-lg font-semibold sm:text-xl">
+          {{ selectedAiIntroVideo.title || ('Meet ' + selectedAi.name) }}
+        </h2>
+      </div>
+      <button
+        type="button"
+        (click)="closeIntroVideo()"
+        class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-200 transition hover:bg-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-teal-300"
+        aria-label="Close character introduction"
+        title="Close"
+      >
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </header>
+    <video
+      #introVideoPlayer
+      class="aspect-video max-h-[78vh] w-full bg-black object-contain"
+      [src]="selectedAiIntroVideo.url"
+      controls
+      autoplay
+      playsinline
+      preload="metadata"
+      [attr.aria-label]="selectedAiIntroVideo.title || ('Meet ' + selectedAi.name)"
+    >
+      Your browser does not support video playback.
+    </video>
+  </section>
 </div>
