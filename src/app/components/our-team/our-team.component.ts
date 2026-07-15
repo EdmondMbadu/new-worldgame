@@ -1,14 +1,43 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
+
+interface AvatarIntroVideo {
+  id?: string;
+  title: string;
+  url: string;
+}
 
 @Component({
   selector: 'app-our-team',
   templateUrl: './our-team.component.html',
   styleUrl: './our-team.component.css',
 })
-export class OurTeamComponent implements OnInit {
+export class OurTeamComponent implements OnInit, OnDestroy {
+  @ViewChild('teamIntroVideoPlayer')
+  private introVideoPlayer?: ElementRef<HTMLVideoElement>;
+
   isLoggedIn: boolean = false;
-  constructor(public auth: AuthService) {
+  introVideos: Record<string, AvatarIntroVideo> = {};
+  selectedAi: Team | null = null;
+  selectedIntroVideo: AvatarIntroVideo | null = null;
+  showIntroVideoModal = false;
+  private introVideosSub?: Subscription;
+
+  constructor(
+    public auth: AuthService,
+    private readonly afs: AngularFirestore,
+    private readonly cdRef: ChangeDetectorRef
+  ) {
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
     });
@@ -97,6 +126,66 @@ export class OurTeamComponent implements OnInit {
   ];
   ngOnInit(): void {
     window.scroll(0, 0);
+    this.introVideosSub = this.afs
+      .collection<AvatarIntroVideo>('avatar_intro_videos')
+      .valueChanges({ idField: 'id' })
+      .subscribe((videos) => {
+        this.introVideos = videos.reduce<Record<string, AvatarIntroVideo>>(
+          (result, video) => {
+            if (video.id) result[video.id] = video;
+            return result;
+          },
+          {}
+        );
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.introVideosSub?.unsubscribe();
+    document.body.style.overflow = '';
+  }
+
+  hasIntroVideo(team: Team): boolean {
+    return Boolean(this.introVideos[this.slugify(team.name)]);
+  }
+
+  openIntroVideo(team: Team): void {
+    const video = this.introVideos[this.slugify(team.name)];
+    if (!video) return;
+
+    this.selectedAi = team;
+    this.selectedIntroVideo = video;
+    this.showIntroVideoModal = true;
+    document.body.style.overflow = 'hidden';
+
+    this.cdRef.detectChanges();
+    const player = this.introVideoPlayer?.nativeElement;
+    if (player) {
+      player.currentTime = 0;
+      void player.play().catch(() => {
+        // Native controls remain available if autoplay is blocked.
+      });
+    }
+  }
+
+  closeIntroVideo(): void {
+    this.introVideoPlayer?.nativeElement.pause();
+    this.showIntroVideoModal = false;
+    this.selectedAi = null;
+    this.selectedIntroVideo = null;
+    document.body.style.overflow = '';
+  }
+
+  @HostListener('document:keydown.escape')
+  closeIntroVideoOnEscape(): void {
+    if (this.showIntroVideoModal) this.closeIntroVideo();
+  }
+
+  private slugify(name?: string): string {
+    return (name || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 }
 interface Team {

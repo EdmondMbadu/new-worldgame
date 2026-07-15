@@ -99,7 +99,7 @@
         <!-- Card -->
         <div
           *ngFor="let t of aiOptions"
-          class="group relative h-full overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/60"
+          class="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800/60 dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/60"
         >
           <!-- Media -->
           <div class="relative aspect-[4/3]">
@@ -113,7 +113,7 @@
           </div>
 
           <!-- Content (AI unchanged) -->
-          <div class="p-6">
+          <div class="flex flex-1 flex-col p-6">
             <div class="flex items-center gap-2">
               <span
                 *ngIf="t.title"
@@ -127,13 +127,28 @@
               {{ t.name }}
             </h3>
 
-            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+            <p class="mt-2 flex-1 text-sm text-slate-600 dark:text-slate-300">
               {{
                 t.descriptionKey
                   ? (t.descriptionKey | translate : { name: t.name })
                   : t.description
               }}
             </p>
+
+            <button
+              *ngIf="hasIntroVideo(t)"
+              type="button"
+              (click)="openIntroVideo(t)"
+              class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-800 shadow-sm transition hover:border-teal-300 hover:bg-teal-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-teal-700/70 dark:bg-teal-900/25 dark:text-teal-200 dark:hover:bg-teal-900/40 dark:focus-visible:ring-offset-slate-900"
+              [attr.aria-label]="'Watch ' + t.name + ' introduction video'"
+            >
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-teal-600 text-white dark:bg-teal-400 dark:text-slate-950" aria-hidden="true">
+                <svg class="ml-px h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M6.3 3.7a1 1 0 0 1 1.05.08l7.1 5.3a1.15 1.15 0 0 1 0 1.84l-7.1 5.3A1 1 0 0 1 5.75 15.4V4.6a1 1 0 0 1 .55-.9Z" />
+                </svg>
+              </span>
+              Watch introduction
+            </button>
           </div>
 
           <div
@@ -155,4 +170,50 @@
   </section>
 
   <app-footer></app-footer>
+
+  <div
+    *ngIf="showIntroVideoModal && selectedAi && selectedIntroVideo"
+    class="fixed inset-0 z-[140] flex items-center justify-center bg-slate-950/85 p-3 backdrop-blur-sm sm:p-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="team-intro-video-title"
+    (click)="closeIntroVideo()"
+  >
+    <section
+      class="w-full max-w-5xl overflow-hidden rounded-2xl border border-white/20 bg-slate-950 text-white shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4">
+        <div class="min-w-0">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-teal-300">AI character introduction</p>
+          <h2 id="team-intro-video-title" class="mt-1 truncate text-lg font-semibold sm:text-2xl">
+            {{ selectedIntroVideo.title || ('Meet ' + selectedAi.name) }}
+          </h2>
+        </div>
+        <button
+          type="button"
+          (click)="closeIntroVideo()"
+          class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-slate-200 transition hover:bg-white/20 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300"
+          aria-label="Close introduction video"
+          title="Close"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </header>
+      <video
+        #teamIntroVideoPlayer
+        class="aspect-video max-h-[78vh] w-full bg-black object-contain"
+        [src]="selectedIntroVideo.url"
+        controls
+        autoplay
+        playsinline
+        preload="metadata"
+        [attr.aria-label]="selectedIntroVideo.title || ('Meet ' + selectedAi.name)"
+      >
+        Your browser does not support video playback.
+      </video>
+    </section>
+  </div>
 </div>
