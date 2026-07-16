@@ -8,9 +8,10 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
-import { ChangeEvent } from '@ckeditor/ckeditor5-angular';
+// The custom build is a default export. Importing it as a namespace produces an
+// object (instead of the editor constructor) with Angular's ESM application
+// builder, so CKEditor cannot call Editor.create() and renders nothing.
+import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
 import { SolutionService } from 'src/app/services/solution.service';

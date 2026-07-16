@@ -8,8 +8,7 @@ import {
   AfterViewInit,
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-// import Editor from 'ckeditor5-custom-build';
-import * as CustomEditor from 'ckeditor5-custom-build';
+import CustomEditor from 'ckeditor5-custom-build';
 
 const CLOUD_SERVICES_TOKEN_URL = `https://114601.cke-cs.com/token/dev/ICPnWKHvbj405PI1XEnTtbyKwRknJbglm6dQ?limit=10`;
 const WEBSOCKET_URL = 'wss://114601.cke-cs.com/ws';

@@ -5,7 +5,7 @@ declare module '@ckeditor/ckeditor5-build-classic' {
 
 declare module 'ckeditor5-custom-build/build/ckeditor' {
   const CustomCkEditorBuild: any;
-  export = CustomCkEditorBuild;
+  export default CustomCkEditorBuild;
 }
 
 declare module 'd3-geo-polygon' {

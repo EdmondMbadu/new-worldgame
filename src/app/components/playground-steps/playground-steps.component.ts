@@ -1,9 +1,6 @@
 import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
-import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
-// import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { ChangeEvent } from '@ckeditor/ckeditor5-angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { Evaluator, Roles, Solution } from 'src/app/models/solution';
