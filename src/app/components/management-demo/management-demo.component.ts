@@ -17,9 +17,10 @@ interface BookingEditDraft {
 }
 
 @Component({
-  selector: 'app-management-demo',
-  templateUrl: './management-demo.component.html',
-  styleUrl: './management-demo.component.css',
+    selector: 'app-management-demo',
+    templateUrl: './management-demo.component.html',
+    styleUrl: './management-demo.component.css',
+    standalone: false
 })
 export class ManagementDemoComponent implements OnInit {
   readonly defaultGslPrepEmailTemplate: GslPrepEmailTemplate = {

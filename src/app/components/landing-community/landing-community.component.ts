@@ -8,10 +8,11 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AIOption, DataService } from 'src/app/services/data.service';
 
 @Component({
-  selector: 'app-landing-community',
-  templateUrl: './landing-community.component.html',
-  styleUrls: ['./landing-community.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-landing-community',
+    templateUrl: './landing-community.component.html',
+    styleUrls: ['./landing-community.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class LandingCommunityComponent implements OnInit {
   aiOptions: AIOption[] = [];

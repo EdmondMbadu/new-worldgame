@@ -154,13 +154,13 @@
 }
 
 .criterion-card ::ng-deep .mdc-slider {
-  --mdc-slider-handle-color: #0f766e;
-  --mdc-slider-focus-handle-color: #0f766e;
-  --mdc-slider-hover-handle-color: #0f766e;
-  --mdc-slider-active-track-color: #0f766e;
-  --mdc-slider-inactive-track-color: rgba(148, 163, 184, 0.28);
-  --mdc-slider-with-tick-marks-inactive-container-color: rgba(148, 163, 184, 0.38);
-  --mdc-slider-with-tick-marks-active-container-color: rgba(255, 255, 255, 0.95);
+  --mat-slider-handle-color: #0f766e;
+  --mat-slider-focus-handle-color: #0f766e;
+  --mat-slider-hover-handle-color: #0f766e;
+  --mat-slider-active-track-color: #0f766e;
+  --mat-slider-inactive-track-color: rgba(148, 163, 184, 0.28);
+  --mat-slider-with-tick-marks-inactive-container-color: rgba(148, 163, 184, 0.38);
+  --mat-slider-with-tick-marks-active-container-color: rgba(255, 255, 255, 0.95);
 }
 
 .criterion-card ::ng-deep .mdc-slider__track--active_fill {
@@ -357,13 +357,13 @@
 }
 
 :host-context(.dark) .criterion-card ::ng-deep .mdc-slider {
-  --mdc-slider-handle-color: #5eead4;
-  --mdc-slider-focus-handle-color: #5eead4;
-  --mdc-slider-hover-handle-color: #5eead4;
-  --mdc-slider-active-track-color: #5eead4;
-  --mdc-slider-inactive-track-color: rgba(148, 163, 184, 0.32);
-  --mdc-slider-with-tick-marks-inactive-container-color: rgba(148, 163, 184, 0.45);
-  --mdc-slider-with-tick-marks-active-container-color: rgba(15, 23, 42, 0.98);
+  --mat-slider-handle-color: #5eead4;
+  --mat-slider-focus-handle-color: #5eead4;
+  --mat-slider-hover-handle-color: #5eead4;
+  --mat-slider-active-track-color: #5eead4;
+  --mat-slider-inactive-track-color: rgba(148, 163, 184, 0.32);
+  --mat-slider-with-tick-marks-inactive-container-color: rgba(148, 163, 184, 0.45);
+  --mat-slider-with-tick-marks-active-container-color: rgba(15, 23, 42, 0.98);
 }
 
 :host-context(.dark) .criterion-card ::ng-deep .mdc-slider__thumb-knob {

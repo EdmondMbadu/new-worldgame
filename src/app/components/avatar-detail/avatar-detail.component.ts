@@ -48,8 +48,9 @@ interface AvatarIntroVideo {
 }
 
 @Component({
-  selector: 'app-avatar-detail',
-  templateUrl: './avatar-detail.component.html',
+    selector: 'app-avatar-detail',
+    templateUrl: './avatar-detail.component.html',
+    standalone: false
 })
 export class AvatarDetailComponent implements OnInit, OnDestroy {
   @ViewChild('bottomAnchor') private bottomAnchor!: ElementRef<HTMLDivElement>;

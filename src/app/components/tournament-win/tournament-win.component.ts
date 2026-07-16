@@ -9,9 +9,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-tournament-win',
-  templateUrl: './tournament-win.component.html',
-  styleUrl: './tournament-win.component.css',
+    selector: 'app-tournament-win',
+    templateUrl: './tournament-win.component.html',
+    styleUrl: './tournament-win.component.css',
+    standalone: false
 })
 export class TournamentWinComponent implements OnInit {
   tournament!: Tournament;

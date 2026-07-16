@@ -9,9 +9,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-generate-challenges',
-  templateUrl: './generate-challenges.component.html',
-  styleUrl: './generate-challenges.component.css',
+    selector: 'app-generate-challenges',
+    templateUrl: './generate-challenges.component.html',
+    styleUrl: './generate-challenges.component.css',
+    standalone: false
 })
 export class GenerateChallengesComponent implements OnInit {
   heading: string = '';

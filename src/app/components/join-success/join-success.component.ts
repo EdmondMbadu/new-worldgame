@@ -7,9 +7,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 
 @Component({
-  selector: 'app-join-success',
-  templateUrl: './join-success.component.html',
-  styleUrl: './join-success.component.css',
+    selector: 'app-join-success',
+    templateUrl: './join-success.component.html',
+    styleUrl: './join-success.component.css',
+    standalone: false
 })
 export class JoinSuccessComponent implements OnInit, OnDestroy {
   sessionId = '';

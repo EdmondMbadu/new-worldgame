@@ -16,9 +16,10 @@ import { TimeService } from 'src/app/services/time.service';
 import { ToastService } from 'src/app/services/toast.service';
 
 @Component({
-  selector: 'app-home-challenge',
-  templateUrl: './home-challenge.component.html',
-  styleUrl: './home-challenge.component.css',
+    selector: 'app-home-challenge',
+    templateUrl: './home-challenge.component.html',
+    styleUrl: './home-challenge.component.css',
+    standalone: false
 })
 export class HomeChallengeComponent implements OnDestroy {
   titleCreateChallenge: string = '';

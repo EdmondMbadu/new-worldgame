@@ -9,9 +9,10 @@ import { TimeService } from 'src/app/services/time.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-tournament-management',
-  templateUrl: './tournament-management.component.html',
-  styleUrl: './tournament-management.component.css',
+    selector: 'app-tournament-management',
+    templateUrl: './tournament-management.component.html',
+    styleUrl: './tournament-management.component.css',
+    standalone: false
 })
 export class TournamentManagementComponent {
   constructor(

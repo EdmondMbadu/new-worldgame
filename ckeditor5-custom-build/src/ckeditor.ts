@@ -61,7 +61,6 @@ import { Style } from '@ckeditor/ckeditor5-style';
 import { Table, TableToolbar } from '@ckeditor/ckeditor5-table';
 import { TextTransformation } from '@ckeditor/ckeditor5-typing';
 import { WordCount } from '@ckeditor/ckeditor5-word-count';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
 // You can read more about extending the build with additional plugins in the "Installing plugins" guide.
 // See https://ckeditor.com/docs/ckeditor5/latest/installation/plugins/installing-plugins.html for details.
 

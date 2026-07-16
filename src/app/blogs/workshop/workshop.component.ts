@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-workshop',
-  templateUrl: './workshop.component.html',
-  styleUrl: './workshop.component.css',
+    selector: 'app-workshop',
+    templateUrl: './workshop.component.html',
+    styleUrl: './workshop.component.css',
+    standalone: false
 })
 export class WorkshopComponent implements OnInit {
   ngOnInit(): void {

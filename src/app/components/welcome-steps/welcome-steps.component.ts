@@ -15,9 +15,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-welcome-steps',
-  templateUrl: './welcome-steps.component.html',
-  styleUrl: './welcome-steps.component.css',
+    selector: 'app-welcome-steps',
+    templateUrl: './welcome-steps.component.html',
+    styleUrl: './welcome-steps.component.css',
+    standalone: false
 })
 export class WelcomeStepsComponent implements OnInit, OnDestroy {
   result: string = '';

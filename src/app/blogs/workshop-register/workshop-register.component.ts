@@ -8,9 +8,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-workshop-register',
-  templateUrl: './workshop-register.component.html',
-  styleUrl: './workshop-register.component.css',
+    selector: 'app-workshop-register',
+    templateUrl: './workshop-register.component.html',
+    styleUrl: './workshop-register.component.css',
+    standalone: false
 })
 export class WorkshopRegisterComponent implements OnInit {
   ngOnInit(): void {

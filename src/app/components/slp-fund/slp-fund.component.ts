@@ -25,9 +25,10 @@ import { SlpLocationService } from 'src/app/services/slp-location.service';
 import { SeoService } from 'src/app/services/seo.service';
 
 @Component({
-  selector: 'app-slp-fund',
-  templateUrl: './slp-fund.component.html',
-  styleUrls: ['./slp-fund.component.css'],
+    selector: 'app-slp-fund',
+    templateUrl: './slp-fund.component.html',
+    styleUrls: ['./slp-fund.component.css'],
+    standalone: false
 })
 export class SlpFundComponent implements OnInit, OnDestroy {
   vm$!: Observable<SlpFundViewModel>;

@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-state-of-world',
-  templateUrl: './state-of-world.component.html',
-  styleUrl: './state-of-world.component.css',
+    selector: 'app-state-of-world',
+    templateUrl: './state-of-world.component.html',
+    styleUrl: './state-of-world.component.css',
+    standalone: false
 })
 export class StateOfWorldComponent implements OnInit {
   ngOnInit(): void {

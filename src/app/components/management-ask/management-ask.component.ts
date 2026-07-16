@@ -13,9 +13,10 @@ interface AskRow extends AskDoc {
 }
 
 @Component({
-  selector: 'app-management-ask',
-  templateUrl: './management-ask.component.html',
-  styleUrls: ['./management-ask.component.css'], // (file can exist empty; UI uses inline tailwind)
+    selector: 'app-management-ask',
+    templateUrl: './management-ask.component.html',
+    styleUrls: ['./management-ask.component.css'],
+    standalone: false
 })
 export class ManagementAskComponent implements OnInit {
   isLoggedIn = false;

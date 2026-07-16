@@ -31,9 +31,10 @@ interface Participant {
   lastName?: string;
 }
 @Component({
-  selector: 'app-video-call',
-  template: '',
-  styleUrl: './video-call.component.css',
+    selector: 'app-video-call',
+    template: '',
+    styleUrl: './video-call.component.css',
+    standalone: false
 })
 export class VideoCallComponent
   implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy

@@ -43,9 +43,10 @@ const MAIN_REACTION_OPTIONS: ReactionOption[] = [
 ];
 
 @Component({
-  selector: 'app-direct-message',
-  templateUrl: './direct-message.component.html',
-  styleUrls: ['./direct-message.component.css'],
+    selector: 'app-direct-message',
+    templateUrl: './direct-message.component.html',
+    styleUrls: ['./direct-message.component.css'],
+    standalone: false
 })
 export class DirectMessageComponent implements OnInit, OnChanges, OnDestroy {
   @Input() recipient: User | null = null;

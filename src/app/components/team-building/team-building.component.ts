@@ -38,8 +38,9 @@ interface EntryView extends EntryDoc {
 }
 
 @Component({
-  selector: 'app-team-building',
-  templateUrl: './team-building.component.html',
+    selector: 'app-team-building',
+    templateUrl: './team-building.component.html',
+    standalone: false
 })
 export class TeamBuildingComponent implements OnInit, OnDestroy {
   truth1 = '';

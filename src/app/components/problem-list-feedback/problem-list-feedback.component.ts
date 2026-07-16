@@ -5,9 +5,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-problem-list-feedback',
-  templateUrl: './problem-list-feedback.component.html',
-  styleUrls: ['./problem-list-feedback.component.css'],
+    selector: 'app-problem-list-feedback',
+    templateUrl: './problem-list-feedback.component.html',
+    styleUrls: ['./problem-list-feedback.component.css'],
+    standalone: false
 })
 export class ProblemListFeedbackComponent implements OnInit {
   evaluationSolutions: Solution[] = [];

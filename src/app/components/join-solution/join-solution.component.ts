@@ -9,9 +9,10 @@ import { DataService } from 'src/app/services/data.service';
 type ReqStatus = 'none' | 'pending' | 'cancelled' | 'approved' | 'rejected';
 
 @Component({
-  selector: 'app-join-solution',
-  templateUrl: './join-solution.component.html',
-  styleUrl: './join-solution.component.css',
+    selector: 'app-join-solution',
+    templateUrl: './join-solution.component.html',
+    styleUrl: './join-solution.component.css',
+    standalone: false
 })
 export class JoinSolutionComponent implements OnInit, OnDestroy {
   solution: Solution = {};

@@ -11,9 +11,10 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { firstValueFrom, of } from 'rxjs';
 
 @Component({
-  selector: 'app-tournament-details',
-  templateUrl: './tournament-details.component.html',
-  styleUrls: ['./tournament-details.component.css'],
+    selector: 'app-tournament-details',
+    templateUrl: './tournament-details.component.html',
+    styleUrls: ['./tournament-details.component.css'],
+    standalone: false
 })
 export class TournamentDetailsComponent implements OnInit {
   t?: Tournament;

@@ -4,9 +4,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-past-tournaments',
-  templateUrl: './past-tournaments.component.html',
-  styleUrl: './past-tournaments.component.css',
+    selector: 'app-past-tournaments',
+    templateUrl: './past-tournaments.component.html',
+    styleUrl: './past-tournaments.component.css',
+    standalone: false
 })
 export class PastTournamentsComponent implements OnInit {
   tournaments: Tournament[] = [];

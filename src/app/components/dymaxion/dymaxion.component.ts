@@ -110,10 +110,11 @@ const COUNTRY_ALIASES: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-dymaxion',
-  templateUrl: './dymaxion.component.html',
-  styleUrls: ['./dymaxion.component.css'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'app-dymaxion',
+    templateUrl: './dymaxion.component.html',
+    styleUrls: ['./dymaxion.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class DymaxionComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('frame') frameRef!: ElementRef<HTMLDivElement>;

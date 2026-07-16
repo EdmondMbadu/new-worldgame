@@ -36,9 +36,10 @@ interface Video {
 type VideoSort = 'latest' | 'oldest' | 'title';
 
 @Component({
-  selector: 'app-nwg-news',
-  templateUrl: './nwg-news.component.html',
-  styleUrl: './nwg-news.component.css',
+    selector: 'app-nwg-news',
+    templateUrl: './nwg-news.component.html',
+    styleUrl: './nwg-news.component.css',
+    standalone: false
 })
 export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('heroVideo') heroVideo?: ElementRef<HTMLVideoElement>;

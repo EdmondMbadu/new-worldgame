@@ -28,10 +28,11 @@ interface MonthLabel {
 }
 
 @Component({
-  selector: 'app-activity-heatmap',
-  templateUrl: './activity-heatmap.component.html',
-  styleUrls: ['./activity-heatmap.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-activity-heatmap',
+    templateUrl: './activity-heatmap.component.html',
+    styleUrls: ['./activity-heatmap.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ActivityHeatmapComponent implements OnInit, OnChanges {
   @Input() uid: string | null | undefined = null;

@@ -3,10 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-evaluators',
-
-  templateUrl: './evaluators.component.html',
-  styleUrl: './evaluators.component.css',
+    selector: 'app-evaluators',
+    templateUrl: './evaluators.component.html',
+    styleUrl: './evaluators.component.css',
+    standalone: false
 })
 export class EvaluatorsComponent implements OnInit {
   ngOnInit(): void {

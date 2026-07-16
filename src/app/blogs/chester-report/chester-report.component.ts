@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
-  selector: 'app-chester-report',
-  templateUrl: './chester-report.component.html',
-  styleUrl: './chester-report.component.css',
+    selector: 'app-chester-report',
+    templateUrl: './chester-report.component.html',
+    styleUrl: './chester-report.component.css',
+    standalone: false
 })
 export class ChesterReportComponent implements OnInit {
   readonly reportUrl: string =

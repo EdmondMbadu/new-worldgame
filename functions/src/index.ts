@@ -7,7 +7,7 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 // const cors = require('cors');
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
 import { buildICS } from './ics';
@@ -12035,7 +12035,7 @@ exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
   //   console.log('This is a post method', req.method);
   //   return res.status(200).send('Method Processed!');
   // }
-  const busboy = new Busboy({ headers: req.headers });
+  const busboy = Busboy({ headers: req.headers });
   const tmpdir = os.tmpdir();
   let fileWrites: any = [];
   let publicUrls = [];
@@ -12045,10 +12045,9 @@ exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
     (
       fieldname: any,
       file: any,
-      filename: any,
-      encoding: any,
-      mimetype: any
+      info: { filename: string; encoding: string; mimeType: string }
     ) => {
+      const filename = path.basename(info.filename || 'upload');
       const filepath = path.join(tmpdir, filename);
       // const filenamePath = `ckeditor-images/${filename}`;
       const writeStream = fs.createWriteStream(filepath);
@@ -12067,7 +12066,7 @@ exports.uploadImage = functions.https.onRequest((req: any, res: any) => {
               .file(filename)
               .createWriteStream({
                 metadata: {
-                  contentType: mimetype,
+                  contentType: info.mimeType,
                 },
               })
               .on('error', (error: any) => {
@@ -12145,13 +12144,12 @@ export const createGoogleMeet = functions.https.onCall(
       // Impersonate a user in your Google Workspace domain
       const userEmail = 'newworld@newworld-game.org'; // Replace with the user to impersonate
 
-      const jwtClient = new google.auth.JWT(
-        serviceAccount.client_email,
-        undefined,
-        serviceAccount.private_key,
-        ['https://www.googleapis.com/auth/calendar'],
-        userEmail // User to impersonate
-      );
+      const jwtClient = new google.auth.JWT({
+        email: serviceAccount.client_email,
+        key: serviceAccount.private_key,
+        scopes: ['https://www.googleapis.com/auth/calendar'],
+        subject: userEmail,
+      });
 
       // Authorize the client
       await jwtClient.authorize();

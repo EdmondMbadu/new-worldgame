@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-global-statistical-tools',
-  templateUrl: './global-statistical-tools.component.html',
-  styleUrl: './global-statistical-tools.component.css',
+    selector: 'app-global-statistical-tools',
+    templateUrl: './global-statistical-tools.component.html',
+    styleUrl: './global-statistical-tools.component.css',
+    standalone: false
 })
 export class GlobalStatisticalToolsComponent implements OnInit {
   ngOnInit(): void {

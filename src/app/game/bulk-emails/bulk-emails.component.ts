@@ -79,9 +79,10 @@ type PendingRecipientImport = {
 };
 
 @Component({
-  selector: 'app-bulk-emails',
-  templateUrl: './bulk-emails.component.html',
-  styleUrls: ['./bulk-emails.component.css'],
+    selector: 'app-bulk-emails',
+    templateUrl: './bulk-emails.component.html',
+    styleUrls: ['./bulk-emails.component.css'],
+    standalone: false
 })
 export class BulkEmailsComponent implements OnDestroy {
   private readonly recipientImportKey = 'bulkEmail.recipientImport.v1';

@@ -19,9 +19,10 @@ declare var am4maps: any;
 declare var am4geodata_worldLow: any;
 declare var am4themes_animated: any;
 @Component({
-  selector: 'app-landing-page',
-  templateUrl: './landing-page.component.html',
-  styleUrls: ['./landing-page.component.css'],
+    selector: 'app-landing-page',
+    templateUrl: './landing-page.component.html',
+    styleUrls: ['./landing-page.component.css'],
+    standalone: false
 })
 export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   themeSubscription?: Subscription;

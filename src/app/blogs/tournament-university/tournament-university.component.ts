@@ -11,9 +11,10 @@ interface FeatureRow {
 }
 
 @Component({
-  selector: 'app-tournament-university',
-  templateUrl: './tournament-university.component.html',
-  styleUrl: './tournament-university.component.css',
+    selector: 'app-tournament-university',
+    templateUrl: './tournament-university.component.html',
+    styleUrl: './tournament-university.component.css',
+    standalone: false
 })
 export class TournamentUniversityComponent {
   ngOnInit(): void {

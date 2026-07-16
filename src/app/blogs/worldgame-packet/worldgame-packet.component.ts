@@ -6,9 +6,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-worldgame-packet',
-  templateUrl: './worldgame-packet.component.html',
-  styleUrl: './worldgame-packet.component.css',
+    selector: 'app-worldgame-packet',
+    templateUrl: './worldgame-packet.component.html',
+    styleUrl: './worldgame-packet.component.css',
+    standalone: false
 })
 export class WorldgamePacketComponent implements OnInit {
   ngOnInit(): void {}

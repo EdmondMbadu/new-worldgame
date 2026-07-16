@@ -201,13 +201,13 @@
 }
 
 .dark app-problem-feedback #feedback-scores-panel .mdc-slider {
-  --mdc-slider-handle-color: rgb(94 234 212);
-  --mdc-slider-focus-handle-color: rgb(94 234 212);
-  --mdc-slider-hover-handle-color: rgb(94 234 212);
-  --mdc-slider-active-track-color: rgb(94 234 212);
-  --mdc-slider-inactive-track-color: rgb(148 163 184 / 0.32);
-  --mdc-slider-with-tick-marks-inactive-container-color: rgb(148 163 184 / 0.45);
-  --mdc-slider-with-tick-marks-active-container-color: rgb(15 23 42 / 0.98);
+  --mat-slider-handle-color: rgb(94 234 212);
+  --mat-slider-focus-handle-color: rgb(94 234 212);
+  --mat-slider-hover-handle-color: rgb(94 234 212);
+  --mat-slider-active-track-color: rgb(94 234 212);
+  --mat-slider-inactive-track-color: rgb(148 163 184 / 0.32);
+  --mat-slider-with-tick-marks-inactive-container-color: rgb(148 163 184 / 0.45);
+  --mat-slider-with-tick-marks-active-container-color: rgb(15 23 42 / 0.98);
 }
 
 html,

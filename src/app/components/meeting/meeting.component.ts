@@ -11,9 +11,10 @@ import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-meeting',
-  templateUrl: './meeting.component.html',
-  styleUrls: ['./meeting.component.css'],
+    selector: 'app-meeting',
+    templateUrl: './meeting.component.html',
+    styleUrls: ['./meeting.component.css'],
+    standalone: false
 })
 export class MeetingComponent implements OnInit {
   id: string = '';

@@ -10,9 +10,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-challenge',
-  templateUrl: './challenge.component.html',
-  styleUrl: './challenge.component.css',
+    selector: 'app-challenge',
+    templateUrl: './challenge.component.html',
+    styleUrl: './challenge.component.css',
+    standalone: false
 })
 export class ChallengeComponent implements OnInit {
   @Input() image: string = '';

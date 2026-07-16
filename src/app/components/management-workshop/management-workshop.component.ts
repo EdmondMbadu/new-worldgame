@@ -7,10 +7,10 @@ import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-management-workshop',
-
-  templateUrl: './management-workshop.component.html',
-  styleUrl: './management-workshop.component.css',
+    selector: 'app-management-workshop',
+    templateUrl: './management-workshop.component.html',
+    styleUrl: './management-workshop.component.css',
+    standalone: false
 })
 export class ManagementWorkshopComponent implements OnInit {
   ngOnInit(): void {

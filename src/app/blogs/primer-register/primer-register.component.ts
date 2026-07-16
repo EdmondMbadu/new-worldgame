@@ -7,10 +7,10 @@ import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-primer-register',
-
-  templateUrl: './primer-register.component.html',
-  styleUrl: './primer-register.component.css',
+    selector: 'app-primer-register',
+    templateUrl: './primer-register.component.html',
+    styleUrl: './primer-register.component.css',
+    standalone: false
 })
 export class PrimerRegisterComponent implements OnInit {
   ngOnInit(): void {

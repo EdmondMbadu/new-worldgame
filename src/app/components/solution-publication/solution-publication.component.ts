@@ -11,9 +11,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-solution-publication',
-  templateUrl: './solution-publication.component.html',
-  styleUrl: './solution-publication.component.css',
+    selector: 'app-solution-publication',
+    templateUrl: './solution-publication.component.html',
+    styleUrl: './solution-publication.component.css',
+    standalone: false
 })
 export class SolutionPublicationComponent implements OnDestroy {
   allSolutions: Solution[] = [];

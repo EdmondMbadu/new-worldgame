@@ -9,9 +9,10 @@ import { ChatContextService } from 'src/app/services/chat-context.service';
 import { ChatSessionService } from 'src/app/services/chat-session.service';
 
 @Component({
-  selector: 'app-chabot-standalone',
-  templateUrl: './chabot-standalone.component.html',
-  styleUrls: ['./chabot-standalone.component.css'],
+    selector: 'app-chabot-standalone',
+    templateUrl: './chabot-standalone.component.html',
+    styleUrls: ['./chabot-standalone.component.css'],
+    standalone: false
 })
 export class ChabotStandaloneComponent extends ChatbotComponent {
   /* ── UI flags ─────────────────────────────────────────────── */

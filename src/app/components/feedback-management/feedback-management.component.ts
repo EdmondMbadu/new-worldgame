@@ -63,9 +63,10 @@ interface Row extends FeedbackDoc {
 }
 
 @Component({
-  selector: 'app-feedback-management',
-  templateUrl: './feedback-management.component.html',
-  styleUrls: ['./feedback-management.component.css'],
+    selector: 'app-feedback-management',
+    templateUrl: './feedback-management.component.html',
+    styleUrls: ['./feedback-management.component.css'],
+    standalone: false
 })
 export class FeedbackManagementComponent implements OnInit {
   isLoggedIn = false;

@@ -25,9 +25,10 @@ import { SlpLocationService } from 'src/app/services/slp-location.service';
 import { SeoService } from 'src/app/services/seo.service';
 
 @Component({
-  selector: 'app-slp-publish',
-  templateUrl: './slp-publish.component.html',
-  styleUrls: ['./slp-publish.component.css'],
+    selector: 'app-slp-publish',
+    templateUrl: './slp-publish.component.html',
+    styleUrls: ['./slp-publish.component.css'],
+    standalone: false
 })
 export class SlpPublishComponent implements OnInit, OnDestroy {
   vm$!: Observable<SlpPublishViewModel>;

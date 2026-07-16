@@ -20,9 +20,10 @@ interface EvaluationArchiveRound {
 }
 
 @Component({
-  selector: 'app-evaluation-summary',
-  templateUrl: './evaluation-summary.component.html',
-  styleUrls: ['./evaluation-summary.component.css'],
+    selector: 'app-evaluation-summary',
+    templateUrl: './evaluation-summary.component.html',
+    styleUrls: ['./evaluation-summary.component.css'],
+    standalone: false
 })
 export class EvaluationSummaryComponent {
   id: any = '';

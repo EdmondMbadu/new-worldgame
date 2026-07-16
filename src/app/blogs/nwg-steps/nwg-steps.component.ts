@@ -15,9 +15,10 @@ interface StepBlock {
 }
 
 @Component({
-  selector: 'app-nwg-steps',
-  templateUrl: './nwg-steps.component.html',
-  styleUrl: './nwg-steps.component.css',
+    selector: 'app-nwg-steps',
+    templateUrl: './nwg-steps.component.html',
+    styleUrl: './nwg-steps.component.css',
+    standalone: false
 })
 export class NwgStepsComponent implements OnInit {
   isLoggedIn = false;

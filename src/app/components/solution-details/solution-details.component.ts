@@ -40,9 +40,10 @@ function toSdgKey(n: number): string {
 type InviteRole = 'designer' | 'evaluator' | 'admin';
 
 @Component({
-  selector: 'app-solution-details',
-  templateUrl: './solution-details.component.html',
-  styleUrl: './solution-details.component.css',
+    selector: 'app-solution-details',
+    templateUrl: './solution-details.component.html',
+    styleUrl: './solution-details.component.css',
+    standalone: false
 })
 export class SolutionDetailsComponent implements OnInit, OnDestroy {
   constructor(

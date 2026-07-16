@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-operating-manual',
-  templateUrl: './operating-manual.component.html',
-  styleUrl: './operating-manual.component.css',
+    selector: 'app-operating-manual',
+    templateUrl: './operating-manual.component.html',
+    styleUrl: './operating-manual.component.css',
+    standalone: false
 })
 export class OperatingManualComponent implements OnInit {
   ngOnInit(): void {

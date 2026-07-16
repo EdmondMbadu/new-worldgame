@@ -3,7 +3,7 @@ import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
+import { ChangeEvent } from '@ckeditor/ckeditor5-angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { Evaluator, Roles, Solution } from 'src/app/models/solution';
@@ -118,9 +118,10 @@ interface SavedAiFeedback {
 }
 
 @Component({
-  selector: 'app-playground-steps',
-  templateUrl: './playground-steps.component.html',
-  styleUrls: ['./playground-steps.component.css'],
+    selector: 'app-playground-steps',
+    templateUrl: './playground-steps.component.html',
+    styleUrls: ['./playground-steps.component.css'],
+    standalone: false
 })
 export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   id: any = '';

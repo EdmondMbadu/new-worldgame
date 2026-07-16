@@ -4,9 +4,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 
 @Component({
-  selector: 'app-tournament-instructions',
-  templateUrl: './tournament-instructions.component.html',
-  styleUrl: './tournament-instructions.component.css',
+    selector: 'app-tournament-instructions',
+    templateUrl: './tournament-instructions.component.html',
+    styleUrl: './tournament-instructions.component.css',
+    standalone: false
 })
 export class TournamentInstructionsComponent implements OnInit {
   ngOnInit(): void {

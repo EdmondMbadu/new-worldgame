@@ -21,9 +21,10 @@ interface SchoolRow {
 }
 
 @Component({
-  selector: 'app-schools-management',
-  templateUrl: './school-management.component.html',
-  styleUrls: ['./school-management.component.css'],
+    selector: 'app-schools-management',
+    templateUrl: './school-management.component.html',
+    styleUrls: ['./school-management.component.css'],
+    standalone: false
 })
 export class SchoolManagementComponent implements OnInit, OnDestroy {
   searchTerm = '';

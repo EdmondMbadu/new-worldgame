@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
-import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
+import { ChangeEvent } from '@ckeditor/ckeditor5-angular';
 import { AuthService } from 'src/app/services/auth.service';
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
@@ -37,9 +37,10 @@ export interface Email {
   evaluated?: string;
 }
 @Component({
-  selector: 'app-create-playground',
-  templateUrl: './create-playground.component.html',
-  styleUrls: ['./create-playground.component.css'],
+    selector: 'app-create-playground',
+    templateUrl: './create-playground.component.html',
+    styleUrls: ['./create-playground.component.css'],
+    standalone: false
 })
 export class CreatePlaygroundComponent {
   myForm: FormGroup;

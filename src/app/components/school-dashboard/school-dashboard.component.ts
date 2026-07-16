@@ -35,8 +35,9 @@ interface SchoolDoc {
   meta?: { website?: string; country?: string; type?: string } | any; // nested
 }
 @Component({
-  selector: 'app-school-dashboard',
-  templateUrl: './school-dashboard.component.html',
+    selector: 'app-school-dashboard',
+    templateUrl: './school-dashboard.component.html',
+    standalone: false
 })
 export class SchoolDashboardComponent implements OnInit, OnDestroy {
   currentSchoolId = '';

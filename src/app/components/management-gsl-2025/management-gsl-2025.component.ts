@@ -7,9 +7,10 @@ import { SiteSettingsService } from 'src/app/services/site-settings.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-management-gsl-2025',
-  templateUrl: './management-gsl-2025.component.html',
-  styleUrl: './management-gsl-2025.component.css',
+    selector: 'app-management-gsl-2025',
+    templateUrl: './management-gsl-2025.component.html',
+    styleUrl: './management-gsl-2025.component.css',
+    standalone: false
 })
 export class ManagementGsl2025Component implements OnInit {
   private readonly bulkEmailImportKey = 'bulkEmail.recipientImport.v1';

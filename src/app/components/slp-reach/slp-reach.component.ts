@@ -25,9 +25,10 @@ import { SlpLocationService } from 'src/app/services/slp-location.service';
 import { SeoService } from 'src/app/services/seo.service';
 
 @Component({
-  selector: 'app-slp-reach',
-  templateUrl: './slp-reach.component.html',
-  styleUrls: ['./slp-reach.component.css'],
+    selector: 'app-slp-reach',
+    templateUrl: './slp-reach.component.html',
+    styleUrls: ['./slp-reach.component.css'],
+    standalone: false
 })
 export class SlpReachComponent implements OnInit, OnDestroy {
   readonly loadingSteps = [

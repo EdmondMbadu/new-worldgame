@@ -18,9 +18,10 @@ import {
 import { SlpPlace, SlpPlaceService } from 'src/app/services/slp-place.service';
 
 @Component({
-  selector: 'app-slp-location-picker',
-  templateUrl: './slp-location-picker.component.html',
-  styleUrls: ['./slp-location-picker.component.css'],
+    selector: 'app-slp-location-picker',
+    templateUrl: './slp-location-picker.component.html',
+    styleUrls: ['./slp-location-picker.component.css'],
+    standalone: false
 })
 export class SlpLocationPickerComponent
   implements OnChanges, OnDestroy, OnInit

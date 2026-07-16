@@ -6,10 +6,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-primer',
-
-  templateUrl: './primer.component.html',
-  styleUrl: './primer.component.css',
+    selector: 'app-primer',
+    templateUrl: './primer.component.html',
+    styleUrl: './primer.component.css',
+    standalone: false
 })
 export class PrimerComponent implements OnInit {
   ngOnInit(): void {}

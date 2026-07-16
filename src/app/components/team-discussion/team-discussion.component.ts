@@ -21,9 +21,10 @@ interface DisplayMessage {
   type: 'PROMPT' | 'RESPONSE';
 }
 @Component({
-  selector: 'app-team-discussion',
-  templateUrl: './team-discussion.component.html',
-  styleUrl: './team-discussion.component.css',
+    selector: 'app-team-discussion',
+    templateUrl: './team-discussion.component.html',
+    styleUrl: './team-discussion.component.css',
+    standalone: false
 })
 export class TeamDiscussionComponent implements OnInit {
   showDiscussion: boolean = false;

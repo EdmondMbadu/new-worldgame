@@ -10,8 +10,9 @@ export interface LeaderRow {
   totalScore: number;
 }
 @Component({
-  selector: 'app-mini-game',
-  templateUrl: './mini-game.component.html', // retains big template from prior message
+    selector: 'app-mini-game',
+    templateUrl: './mini-game.component.html',
+    standalone: false
 })
 export class MiniGameComponent implements OnInit {
   scenarios: WGScenario[] = [];

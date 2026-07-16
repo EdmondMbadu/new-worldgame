@@ -9,9 +9,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-create-tournament',
-  templateUrl: './create-tournament.component.html',
-  styleUrl: './create-tournament.component.css',
+    selector: 'app-create-tournament',
+    templateUrl: './create-tournament.component.html',
+    styleUrl: './create-tournament.component.css',
+    standalone: false
 })
 export class CreateTournamentComponent implements OnInit {
   tournamentForm!: FormGroup;

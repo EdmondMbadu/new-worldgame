@@ -8,9 +8,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-solution-view-external',
-  templateUrl: './solution-view-external.component.html',
-  styleUrl: './solution-view-external.component.css',
+    selector: 'app-solution-view-external',
+    templateUrl: './solution-view-external.component.html',
+    styleUrl: './solution-view-external.component.css',
+    standalone: false
 })
 export class SolutionViewExternalComponent {
   solutionId: any = '';

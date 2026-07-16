@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-solution-libraries',
-  templateUrl: './solution-libraries.component.html',
-  styleUrl: './solution-libraries.component.css',
+    selector: 'app-solution-libraries',
+    templateUrl: './solution-libraries.component.html',
+    styleUrl: './solution-libraries.component.css',
+    standalone: false
 })
 export class SolutionLibrariesComponent {
   isLoggedIn: boolean = false;

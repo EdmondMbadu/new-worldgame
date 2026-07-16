@@ -7,10 +7,10 @@ import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-management-primer',
-
-  templateUrl: './management-primer.component.html',
-  styleUrl: './management-primer.component.css',
+    selector: 'app-management-primer',
+    templateUrl: './management-primer.component.html',
+    styleUrl: './management-primer.component.css',
+    standalone: false
 })
 export class ManagementPrimerComponent implements OnInit {
   ngOnInit(): void {

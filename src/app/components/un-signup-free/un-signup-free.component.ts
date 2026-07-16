@@ -7,8 +7,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { PlanKey, User } from 'src/app/models/user';
 
 @Component({
-  selector: 'app-un-signup-free',
-  templateUrl: './un-signup-free.component.html',
+    selector: 'app-un-signup-free',
+    templateUrl: './un-signup-free.component.html',
+    standalone: false
 })
 export class UnSignupFreeComponent implements OnInit {
   /* form fields */

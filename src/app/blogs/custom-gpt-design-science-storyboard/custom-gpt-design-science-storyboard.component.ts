@@ -3,10 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-custom-gpt-design-science-storyboard',
-
-  templateUrl: './custom-gpt-design-science-storyboard.component.html',
-  styleUrl: './custom-gpt-design-science-storyboard.component.css',
+    selector: 'app-custom-gpt-design-science-storyboard',
+    templateUrl: './custom-gpt-design-science-storyboard.component.html',
+    styleUrl: './custom-gpt-design-science-storyboard.component.css',
+    standalone: false
 })
 export class CustomGptDesignScienceStoryboardComponent {
   isLoggedIn: boolean = false;

@@ -10,10 +10,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-solution-preview',
-
-  templateUrl: './solution-preview.component.html',
-  styleUrl: './solution-preview.component.css',
+    selector: 'app-solution-preview',
+    templateUrl: './solution-preview.component.html',
+    styleUrl: './solution-preview.component.css',
+    standalone: false
 })
 export class SolutionPreviewComponent implements OnInit {
   solutionId: any = '';

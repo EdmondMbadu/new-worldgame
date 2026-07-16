@@ -16,9 +16,10 @@ const WEBSOCKET_URL = 'wss://114601.cke-cs.com/ws';
 const CHANNEL_ID = 'sampleChannelId123';
 
 @Component({
-  selector: 'app-ckeditor',
-  templateUrl: './ckeditor.component.html',
-  styleUrls: ['./ckeditor.component.css'],
+    selector: 'app-ckeditor',
+    templateUrl: './ckeditor.component.html',
+    styleUrls: ['./ckeditor.component.css'],
+    standalone: false
 })
 export class CkeditorComponent implements OnInit, AfterViewInit {
   @ViewChild('editorAnnotationsElement')

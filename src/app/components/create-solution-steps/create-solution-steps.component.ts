@@ -31,10 +31,10 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-create-solution-steps',
-
-  templateUrl: './create-solution-steps.component.html',
-  styleUrl: './create-solution-steps.component.css',
+    selector: 'app-create-solution-steps',
+    templateUrl: './create-solution-steps.component.html',
+    styleUrl: './create-solution-steps.component.css',
+    standalone: false
 })
 export class CreateSolutionStepsComponent implements OnInit {
   myForm: FormGroup;

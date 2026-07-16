@@ -95,9 +95,10 @@ const MAIN_REACTION_OPTIONS: ReactionOption[] = [
 ];
 
 @Component({
-  selector: 'app-full-discussion',
-  templateUrl: './full-discussion.component.html',
-  styleUrls: ['./full-discussion.component.css'],
+    selector: 'app-full-discussion',
+    templateUrl: './full-discussion.component.html',
+    styleUrls: ['./full-discussion.component.css'],
+    standalone: false
 })
 export class FullDiscussionComponent
   implements OnInit, AfterViewChecked, OnDestroy

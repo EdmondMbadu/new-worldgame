@@ -11,9 +11,10 @@ interface FeatureRow {
 }
 
 @Component({
-  selector: 'app-tournament-landing',
-  templateUrl: './tournament-landing.component.html',
-  styleUrl: './tournament-landing.component.css',
+    selector: 'app-tournament-landing',
+    templateUrl: './tournament-landing.component.html',
+    styleUrl: './tournament-landing.component.css',
+    standalone: false
 })
 export class TournamentLandingComponent {
   ngOnInit(): void {

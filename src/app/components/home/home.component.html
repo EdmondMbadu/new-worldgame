@@ -4,9 +4,9 @@
   <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
     <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'"
                 [sideBarBig]="isSidebarOpen"
-                [email]="this.auth.currentUser.email"
-                [firstName]="this.auth.currentUser.firstName"
-                [lastName]="this.auth.currentUser.lastName"
+                [email]="this.auth.currentUser?.email || ''"
+                [firstName]="this.auth.currentUser?.firstName || ''"
+                [lastName]="this.auth.currentUser?.lastName || ''"
                 [path]="'home'"
                 [currentPageHome]="true"
                 (toggleAsideEvent)="toggleAside()">
@@ -66,7 +66,7 @@
             {{ getCategoryLabelKey(category) | translate }}
           </button>
 
-          <div *ngIf="this.auth.currentUser.admin"
+          <div *ngIf="this.auth.currentUser?.admin"
                class="relative group cursor-pointer"
                (click)="toggle('showAddChallenge')">
             <svg class="w-[36px] h-[36px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"

@@ -4,10 +4,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-template-thanks',
-
-  templateUrl: './template-thanks.component.html',
-  styleUrl: './template-thanks.component.css',
+    selector: 'app-template-thanks',
+    templateUrl: './template-thanks.component.html',
+    styleUrl: './template-thanks.component.css',
+    standalone: false
 })
 export class TemplateThanksComponent implements OnInit {
   @Input() paragraph: string =

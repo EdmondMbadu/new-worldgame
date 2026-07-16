@@ -25,9 +25,10 @@ import { SlpLocationService } from 'src/app/services/slp-location.service';
 import { SeoService } from 'src/app/services/seo.service';
 
 @Component({
-  selector: 'app-slp-partner',
-  templateUrl: './slp-partner.component.html',
-  styleUrls: ['./slp-partner.component.css'],
+    selector: 'app-slp-partner',
+    templateUrl: './slp-partner.component.html',
+    styleUrls: ['./slp-partner.component.css'],
+    standalone: false
 })
 export class SlpPartnerComponent implements OnInit, OnDestroy {
   vm$!: Observable<SlpPartnerViewModel>;

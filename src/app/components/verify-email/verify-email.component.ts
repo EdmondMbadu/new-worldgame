@@ -3,9 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
-  selector: 'app-verify-email',
-  templateUrl: './verify-email.component.html',
-  styleUrls: ['./verify-email.component.css'],
+    selector: 'app-verify-email',
+    templateUrl: './verify-email.component.html',
+    styleUrls: ['./verify-email.component.css'],
+    standalone: false
 })
 export class VerifyEmailComponent implements OnInit {
   redirectTarget = '/home';

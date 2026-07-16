@@ -12,9 +12,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-discover',
-  templateUrl: './discover.component.html',
-  styleUrl: './discover.component.css',
+    selector: 'app-discover',
+    templateUrl: './discover.component.html',
+    styleUrl: './discover.component.css',
+    standalone: false
 })
 export class DiscoverComponent implements OnInit {
   user: User | null = null; // <-- nullable

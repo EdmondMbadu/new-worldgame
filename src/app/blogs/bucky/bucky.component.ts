@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
-  selector: 'app-bucky',
-  templateUrl: './bucky.component.html',
-  styleUrl: './bucky.component.css',
+    selector: 'app-bucky',
+    templateUrl: './bucky.component.html',
+    styleUrl: './bucky.component.css',
+    standalone: false
 })
 export class BuckyComponent implements OnInit, OnDestroy {
   quotes: string[] = [

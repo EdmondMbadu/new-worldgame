@@ -41,9 +41,10 @@ interface NavbarSearchItem {
 }
 
 @Component({
-  selector: 'app-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css'],
+    selector: 'app-navbar',
+    templateUrl: './navbar.component.html',
+    styleUrls: ['./navbar.component.css'],
+    standalone: false
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   @Input() loggedOn: boolean = false;
@@ -100,6 +101,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private lastUnreadDirectMessageCount: number | null = null;
   private lastDmSoundAtMs = 0;
   private readonly dmSoundMinIntervalMs = 3000;
+  private warnedInvitesUnavailable = false;
   private readonly unlockDmNotificationSound = () => {
     if (!this.dmNotificationAudio || this.dmNotificationAudioUnlocked) return;
 
@@ -258,7 +260,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     combineLatest([
       this.challenge.getAllChallengePagesByThisUser(),
       this.challenge.getAllChallengesWhereUserIsParticipant(),
-    ]).subscribe(([authoredChallenges, participantChallenges]) => {
+    ])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([authoredChallenges, participantChallenges]) => {
       // Merge the two arrays
       const merged = [...authoredChallenges, ...participantChallenges];
 
@@ -276,40 +280,52 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
       this.userChallengePages = uniqueChallenges;
       this.showMyPages = this.userChallengePages.length > 0;
-    });
+      });
 
     this.isSchoolAdmin = this.auth.currentUser?.role === 'schoolAdmin';
     // Watch current user & invites to decide link visibility + query param
     // Make isSchoolAdmin reactive to the live user
-    this.auth.user$.subscribe((u) => {
-      if (!u) {
-        this.isSchoolAdmin = false;
-        return;
-      }
+    this.auth.user$
+      .pipe(
+        switchMap((u) => {
+          if (!u) return of({ user: null, invites: [] as any[] });
 
-      this.isSchoolAdmin = u?.role === 'schoolAdmin';
+          const email = (u.email || '').toLowerCase().trim();
+          if (!email) return of({ user: u, invites: [] as any[] });
 
-      const email = (u.email || '').toLowerCase().trim();
-      const hasSchoolId = !!u.schoolId;
+          return this.schoolService.getPendingInvitesForEmail(email).pipe(
+            map((invites: any[]) => ({ user: u, invites })),
+            catchError((error) => {
+              if (!this.warnedInvitesUnavailable) {
+                this.warnedInvitesUnavailable = true;
+                console.warn(
+                  'School invites are unavailable; continuing without invite data.',
+                  error
+                );
+              }
+              return of({ user: u, invites: [] as any[] });
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(({ user, invites }) => {
+        if (!user) {
+          this.isSchoolAdmin = false;
+          this.hasSchoolAccess = false;
+          this.pendingInvitesCount = 0;
+          this.schoolQuery = {};
+          return;
+        }
 
-      this.schoolService.getPendingInvitesForEmail(email).subscribe({
-        next: (invites: any[]) => {
-          this.pendingInvitesCount = invites.length;
-          this.hasSchoolAccess =
-            this.isSchoolAdmin || hasSchoolId || invites.length > 0;
-
-          // keep your query param logic
-          if (hasSchoolId) this.schoolQuery = {};
-          else if (invites.length > 0)
-            this.schoolQuery = {
-              sid: invites[0].id,
-            };
-          // or .schoolId if that's your field
-          else this.schoolQuery = {};
-        },
-        error: (err) => console.error('Invites stream error:', err),
+        this.isSchoolAdmin = user.role === 'schoolAdmin';
+        const hasSchoolId = !!user.schoolId;
+        this.pendingInvitesCount = invites.length;
+        this.hasSchoolAccess =
+          this.isSchoolAdmin || hasSchoolId || invites.length > 0;
+        this.schoolQuery =
+          !hasSchoolId && invites.length > 0 ? { sid: invites[0].id } : {};
       });
-    });
 
     this.auth.user$
       .pipe(

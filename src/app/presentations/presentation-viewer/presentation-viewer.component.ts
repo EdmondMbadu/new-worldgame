@@ -66,10 +66,11 @@ export const pageTransition = trigger('pageTransition', [
 ]);
 
 @Component({
-  selector: 'app-presentation-viewer',
-  templateUrl: './presentation-viewer.component.html',
-  styleUrls: ['./presentation-viewer.component.css'],
-  animations: [pageTransition],
+    selector: 'app-presentation-viewer',
+    templateUrl: './presentation-viewer.component.html',
+    styleUrls: ['./presentation-viewer.component.css'],
+    animations: [pageTransition],
+    standalone: false
 })
 export class PresentationViewerComponent implements OnInit {
   slides: Slide[] = [];

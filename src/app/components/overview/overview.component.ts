@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
-  selector: 'app-overview',
-  templateUrl: './overview.component.html',
-  styleUrl: './overview.component.css',
+    selector: 'app-overview',
+    templateUrl: './overview.component.html',
+    styleUrl: './overview.component.css',
+    standalone: false
 })
 export class OverviewComponent implements OnInit {
   ngOnInit(): void {

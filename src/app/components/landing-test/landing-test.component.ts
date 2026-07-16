@@ -67,9 +67,10 @@ const COUNTRY_COORDS: Record<string, { lat: number; lng: number }> = {
 };
 
 @Component({
-  selector: 'app-landing-test',
-  templateUrl: './landing-test.component.html',
-  styleUrls: ['./landing-test.component.css'],
+    selector: 'app-landing-test',
+    templateUrl: './landing-test.component.html',
+    styleUrls: ['./landing-test.component.css'],
+    standalone: false
 })
 export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
   playersCount = 0;

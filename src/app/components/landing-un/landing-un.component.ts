@@ -8,10 +8,11 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AIOption, DataService } from 'src/app/services/data.service';
 
 @Component({
-  selector: 'app-landing-un',
-  templateUrl: './landing-un.component.html',
-  styleUrls: ['./landing-un.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-landing-un',
+    templateUrl: './landing-un.component.html',
+    styleUrls: ['./landing-un.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class LandingUnComponent implements OnInit {
   aiOptions: AIOption[] = [];

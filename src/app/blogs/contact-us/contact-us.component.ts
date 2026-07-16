@@ -3,9 +3,10 @@ import { DataService } from 'src/app/services/data.service';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-contact-us',
-  templateUrl: './contact-us.component.html',
-  styleUrl: './contact-us.component.css',
+    selector: 'app-contact-us',
+    templateUrl: './contact-us.component.html',
+    styleUrl: './contact-us.component.css',
+    standalone: false
 })
 export class ContactUsComponent implements OnInit {
   firstName: string = '';

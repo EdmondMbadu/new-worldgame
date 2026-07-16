@@ -8,9 +8,10 @@ import { TimeService } from 'src/app/services/time.service';
 import { GlobalRegisterComponent } from '../global-register/global-register.component';
 
 @Component({
-  selector: 'app-global-registers',
-  templateUrl: './global-registers.component.html',
-  styleUrl: './global-registers.component.css',
+    selector: 'app-global-registers',
+    templateUrl: './global-registers.component.html',
+    styleUrl: './global-registers.component.css',
+    standalone: false
 })
 export class GlobalRegistersComponent extends GlobalRegisterComponent {
   constructor(

@@ -5,9 +5,10 @@ import { DataService } from 'src/app/services/data.service';
 import { Presentation, Slide } from 'src/app/models/presentation';
 
 @Component({
-  selector: 'app-presentation-form',
-  templateUrl: './presentation-form.component.html',
-  styleUrls: ['./presentation-form.component.css'],
+    selector: 'app-presentation-form',
+    templateUrl: './presentation-form.component.html',
+    styleUrls: ['./presentation-form.component.css'],
+    standalone: false
 })
 export class PresentationFormComponent {
   /** injected by dialog -> contains the parent solutionId */

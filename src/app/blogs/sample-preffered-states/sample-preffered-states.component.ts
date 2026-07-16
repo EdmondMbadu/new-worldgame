@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-sample-preffered-states',
-  templateUrl: './sample-preffered-states.component.html',
-  styleUrl: './sample-preffered-states.component.css',
+    selector: 'app-sample-preffered-states',
+    templateUrl: './sample-preffered-states.component.html',
+    styleUrl: './sample-preffered-states.component.css',
+    standalone: false
 })
 export class SamplePrefferedStatesComponent {
   email: string = 'newworld@newworld-game.org';

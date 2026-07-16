@@ -3,10 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-nwg-solution-tour',
-
-  templateUrl: './nwg-solution-tour.component.html',
-  styleUrl: './nwg-solution-tour.component.css',
+    selector: 'app-nwg-solution-tour',
+    templateUrl: './nwg-solution-tour.component.html',
+    styleUrl: './nwg-solution-tour.component.css',
+    standalone: false
 })
 export class NwgSolutionTourComponent implements OnInit {
   ngOnInit(): void {

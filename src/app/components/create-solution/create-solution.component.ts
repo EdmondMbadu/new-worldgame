@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-create-solution',
-
-  templateUrl: './create-solution.component.html',
-  styleUrl: './create-solution.component.css',
+    selector: 'app-create-solution',
+    templateUrl: './create-solution.component.html',
+    styleUrl: './create-solution.component.css',
+    standalone: false
 })
 export class CreateSolutionComponent {
   initial: number = 10;

@@ -41,9 +41,10 @@ interface SchedulerConfig {
 }
 
 @Component({
-  selector: 'app-scheduler',
-  templateUrl: './scheduler.component.html',
-  styleUrl: './scheduler.component.css',
+    selector: 'app-scheduler',
+    templateUrl: './scheduler.component.html',
+    styleUrl: './scheduler.component.css',
+    standalone: false
 })
 export class SchedulerComponent implements OnInit, OnDestroy {
   // --- State Management ---

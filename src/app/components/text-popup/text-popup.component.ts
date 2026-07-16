@@ -12,9 +12,10 @@ import {
 import { DataService } from 'src/app/services/data.service';
 
 @Component({
-  selector: 'app-text-popup',
-  templateUrl: './text-popup.component.html',
-  styleUrls: ['./text-popup.component.css'],
+    selector: 'app-text-popup',
+    templateUrl: './text-popup.component.html',
+    styleUrls: ['./text-popup.component.css'],
+    standalone: false
 })
 export class TextPopupComponent {
   constructor(

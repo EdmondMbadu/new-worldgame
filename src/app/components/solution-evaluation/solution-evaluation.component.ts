@@ -8,9 +8,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-solution-evaluation',
-  templateUrl: './solution-evaluation.component.html',
-  styleUrls: ['./solution-evaluation.component.css'],
+    selector: 'app-solution-evaluation',
+    templateUrl: './solution-evaluation.component.html',
+    styleUrls: ['./solution-evaluation.component.css'],
+    standalone: false
 })
 export class SolutionEvaluationComponent implements OnInit {
   @Input() currentSolution: Solution = {};

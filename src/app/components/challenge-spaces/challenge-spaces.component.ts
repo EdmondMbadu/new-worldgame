@@ -12,8 +12,9 @@ interface ChallengeSpaceMember {
 }
 
 @Component({
-  selector: 'app-challenge-spaces',
-  templateUrl: './challenge-spaces.component.html',
+    selector: 'app-challenge-spaces',
+    templateUrl: './challenge-spaces.component.html',
+    standalone: false
 })
 export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   searchTerm = '';

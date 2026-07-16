@@ -10,9 +10,10 @@ import { TimeService } from 'src/app/services/time.service';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 
 @Component({
-  selector: 'app-problem-feedback',
-  templateUrl: './problem-feedback.component.html',
-  styleUrls: ['./problem-feedback.component.css'],
+    selector: 'app-problem-feedback',
+    templateUrl: './problem-feedback.component.html',
+    styleUrls: ['./problem-feedback.component.css'],
+    standalone: false
 })
 export class ProblemFeedbackComponent implements OnInit, OnDestroy {
   user: User = {};

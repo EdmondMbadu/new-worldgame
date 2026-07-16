@@ -311,17 +311,18 @@ export class SolutionService {
     return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
   }
 
-  getAuthenticatedUserAllSolutions() {
+  getAuthenticatedUserAllSolutions(email = this.auth.currentUser?.email) {
+    if (!email) return of([] as Solution[]);
     return this.afs
       .collection<Solution>(`solutions`, (ref) =>
         ref.where('participants', 'array-contains', {
-          name: this.auth.currentUser.email,
+          name: email,
         })
       )
       .valueChanges();
   }
-  getAuthenticatedUserPendingEvaluations() {
-    const email = this.auth.currentUser.email;
+  getAuthenticatedUserPendingEvaluations(email = this.auth.currentUser?.email) {
+    if (!email) return of([] as Solution[]);
 
     // Query for solutions where evaluators contain the email and evaluated is 'false'
     const queryEvaluatedFalse = this.afs

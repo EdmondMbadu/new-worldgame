@@ -7,9 +7,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-join-tournament',
-  templateUrl: './join-tournament.component.html',
-  styleUrl: './join-tournament.component.css',
+    selector: 'app-join-tournament',
+    templateUrl: './join-tournament.component.html',
+    styleUrl: './join-tournament.component.css',
+    standalone: false
 })
 export class JoinTournamentComponent implements OnInit {
   tournamentsJoined: number = 0;

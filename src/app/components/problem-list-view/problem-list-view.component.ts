@@ -17,9 +17,10 @@ interface SolutionMember {
 }
 
 @Component({
-  selector: 'app-problem-list-view',
-  templateUrl: './problem-list-view.component.html',
-  styleUrls: ['./problem-list-view.component.css'],
+    selector: 'app-problem-list-view',
+    templateUrl: './problem-list-view.component.html',
+    styleUrls: ['./problem-list-view.component.css'],
+    standalone: false
 })
 export class ProblemListViewComponent implements OnInit {
   solutions: Solution[] = [];

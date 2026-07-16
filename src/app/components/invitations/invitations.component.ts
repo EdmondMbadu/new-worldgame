@@ -4,9 +4,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { PendingInvite, SchoolService } from 'src/app/services/school.service';
 
 @Component({
-  selector: 'app-invitations',
-  templateUrl: './invitations.component.html',
-  styleUrl: './invitations.component.css',
+    selector: 'app-invitations',
+    templateUrl: './invitations.component.html',
+    styleUrl: './invitations.component.css',
+    standalone: false
 })
 export class InvitationsComponent implements OnInit, OnDestroy {
   invites: PendingInvite[] = [];

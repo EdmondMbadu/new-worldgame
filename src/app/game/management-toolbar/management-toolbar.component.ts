@@ -6,10 +6,10 @@ interface SubToolLink {
 }
 
 @Component({
-  selector: 'app-management-toolbar',
-
-  templateUrl: './management-toolbar.component.html',
-  styleUrl: './management-toolbar.component.css',
+    selector: 'app-management-toolbar',
+    templateUrl: './management-toolbar.component.html',
+    styleUrl: './management-toolbar.component.css',
+    standalone: false
 })
 export class ManagementToolbarComponent {
   currentYear = new Date().getFullYear();

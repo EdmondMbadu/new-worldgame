@@ -7,7 +7,8 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[appSrcObject]',
+    selector: '[appSrcObject]',
+    standalone: false
 })
 export class SrcObjectDirective implements OnChanges {
   @Input('appSrcObject') srcObject: any = null;

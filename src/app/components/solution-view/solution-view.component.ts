@@ -10,9 +10,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-solution-view',
-  templateUrl: './solution-view.component.html',
-  styleUrls: ['./solution-view.component.css'],
+    selector: 'app-solution-view',
+    templateUrl: './solution-view.component.html',
+    styleUrls: ['./solution-view.component.css'],
+    standalone: false
 })
 export class SolutionViewComponent implements OnInit {
   solutionId: any = '';

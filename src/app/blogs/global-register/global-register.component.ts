@@ -14,10 +14,10 @@ import {
 } from './global-register.content';
 
 @Component({
-  selector: 'app-global-register',
-
-  templateUrl: './global-register.component.html',
-  styleUrl: './global-register.component.css',
+    selector: 'app-global-register',
+    templateUrl: './global-register.component.html',
+    styleUrl: './global-register.component.css',
+    standalone: false
 })
 export class GlobalRegisterComponent implements OnInit, OnDestroy {
   isDrexelOnly: boolean = false;

@@ -7,9 +7,10 @@ import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-problem-list',
-  templateUrl: './problem-list.component.html',
-  styleUrls: ['./problem-list.component.css'],
+    selector: 'app-problem-list',
+    templateUrl: './problem-list.component.html',
+    styleUrls: ['./problem-list.component.css'],
+    standalone: false
 })
 export class ProblemListComponent {
   @Input() solutions?: Solution[] = [];

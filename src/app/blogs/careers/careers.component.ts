@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-careers',
-  templateUrl: './careers.component.html',
-  styleUrl: './careers.component.css',
+    selector: 'app-careers',
+    templateUrl: './careers.component.html',
+    styleUrl: './careers.component.css',
+    standalone: false
 })
 export class CareersComponent implements OnInit {
   constructor() {}

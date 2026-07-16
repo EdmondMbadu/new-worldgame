@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-nwg-ai',
-  templateUrl: './nwg-ai.component.html',
-  styleUrl: './nwg-ai.component.css',
+    selector: 'app-nwg-ai',
+    templateUrl: './nwg-ai.component.html',
+    styleUrl: './nwg-ai.component.css',
+    standalone: false
 })
 export class NwgAiComponent implements OnInit {
   ngOnInit(): void {

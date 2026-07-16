@@ -40,9 +40,10 @@ type InboxNotification =
     };
 
 @Component({
-  selector: 'app-message-notifications',
-  templateUrl: './message-notifications.component.html',
-  styleUrls: ['./message-notifications.component.css'],
+    selector: 'app-message-notifications',
+    templateUrl: './message-notifications.component.html',
+    styleUrls: ['./message-notifications.component.css'],
+    standalone: false
 })
 export class MessageNotificationsComponent implements OnInit, OnDestroy {
   notifications: InboxNotification[] = [];

@@ -99,9 +99,10 @@ type PieSegment = {
 };
 
 @Component({
-  selector: 'app-contact-emails-management',
-  templateUrl: './contact-emails-management.component.html',
-  styleUrl: './contact-emails-management.component.css',
+    selector: 'app-contact-emails-management',
+    templateUrl: './contact-emails-management.component.html',
+    styleUrl: './contact-emails-management.component.css',
+    standalone: false
 })
 export class ContactEmailsManagementComponent implements OnInit, OnDestroy {
   @ViewChild('contactImportInput') contactImportInput?: ElementRef<HTMLInputElement>;

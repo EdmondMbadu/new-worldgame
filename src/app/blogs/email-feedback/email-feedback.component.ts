@@ -4,9 +4,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 
 @Component({
-  selector: 'app-email-feedback',
-  templateUrl: './email-feedback.component.html',
-  styleUrls: ['./email-feedback.component.css'],
+    selector: 'app-email-feedback',
+    templateUrl: './email-feedback.component.html',
+    styleUrls: ['./email-feedback.component.css'],
+    standalone: false
 })
 export class EmailFeedbackComponent implements OnInit {
   isLoggedIn = false;

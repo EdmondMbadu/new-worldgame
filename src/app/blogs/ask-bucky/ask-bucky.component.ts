@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-ask-bucky',
-  templateUrl: './ask-bucky.component.html',
-  styleUrl: './ask-bucky.component.css',
+    selector: 'app-ask-bucky',
+    templateUrl: './ask-bucky.component.html',
+    styleUrl: './ask-bucky.component.css',
+    standalone: false
 })
 export class AskBuckyComponent {
   isLoggedIn: boolean = false;

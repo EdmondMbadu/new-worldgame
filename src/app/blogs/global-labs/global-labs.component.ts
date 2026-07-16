@@ -19,9 +19,10 @@ interface LabVideo {
 }
 
 @Component({
-  selector: 'app-global-labs',
-  templateUrl: './global-labs.component.html',
-  styleUrl: './global-labs.component.css',
+    selector: 'app-global-labs',
+    templateUrl: './global-labs.component.html',
+    styleUrl: './global-labs.component.css',
+    standalone: false
 })
 export class GlobalLabsComponent implements OnInit {
   loadedVideoIds: Record<string, boolean> = {};

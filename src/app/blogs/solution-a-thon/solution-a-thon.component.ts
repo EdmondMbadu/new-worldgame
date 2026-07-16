@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-solution-a-thon',
-  templateUrl: './solution-a-thon.component.html',
-  styleUrls: ['./solution-a-thon.component.css'],
+    selector: 'app-solution-a-thon',
+    templateUrl: './solution-a-thon.component.html',
+    styleUrls: ['./solution-a-thon.component.css'],
+    standalone: false
 })
 export class SolutionAThonComponent {
   readonly facts = [

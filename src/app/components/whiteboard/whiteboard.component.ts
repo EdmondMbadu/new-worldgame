@@ -11,9 +11,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-whiteboard',
-  templateUrl: './whiteboard.component.html',
-  styleUrls: ['./whiteboard.component.css'], // or .scss
+    selector: 'app-whiteboard',
+    templateUrl: './whiteboard.component.html',
+    styleUrls: ['./whiteboard.component.css'],
+    standalone: false
 })
 export class WhiteboardComponent implements OnInit {
   @ViewChild('canvas', { static: true })

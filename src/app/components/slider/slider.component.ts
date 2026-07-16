@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-slider',
-  templateUrl: './slider.component.html',
-  styleUrls: ['./slider.component.css'],
+    selector: 'app-slider',
+    templateUrl: './slider.component.html',
+    styleUrls: ['./slider.component.css'],
+    standalone: false
 })
 export class SliderComponent {
   @Input() attribute: string = '';

@@ -4,7 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
@@ -16,12 +16,13 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+    selector: 'app-home',
+    templateUrl: './home.component.html',
+    styleUrls: ['./home.component.css'],
+    standalone: false
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  user: User;
+  user: User | null;
   // Centralized data for all challenges
   challenges: {
     [key: string]: {
@@ -121,51 +122,47 @@ export class HomeComponent implements OnInit, OnDestroy {
     private afs: AngularFirestore,
     private translate: TranslateService
   ) {
-    this.user = this.auth.currentUser;
+    this.user = this.auth.currentUser || null;
   }
   async ngOnInit() {
     this.languageSub = this.translate.onLangChange.subscribe(() => {
       this.updateChallenges();
     });
     this.filterSolutions();
-
-    if (this.user && this.user.location) {
-      this.displayPromptLocation = false;
-    }
     window.scroll(0, 0);
 
-    this.solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
-      this.currentUserSolutions = data;
-      this.findPendingSolutions();
-    });
+    // Categories are defined locally, so fetch the active category directly.
+    // The previous flow downloaded every challenge first and discarded it.
+    this.fetchChallenges(this.activeCategory, { isInitial: true });
 
-    this.solution.getAuthenticatedUserPendingEvaluations().subscribe((data) => {
-      this.evaluationSolutions = data.filter(
-        (e) => e.finished !== undefined && e.finished === 'true'
-      );
-      this.evaluation = this.evaluationSolutions.length;
-    });
+    this.auth.user$
+      .pipe(
+        filter((user): user is User => Boolean(user)),
+        take(1)
+      )
+      .subscribe((user) => {
+        this.user = user;
+        this.displayPromptLocation = !user.location;
 
-    if (this.user!.profilePicture && this.user.profilePicture.path) {
-      this.profilePicturePath = this.user.profilePicture.downloadURL;
-    }
+        this.solution
+          .getAuthenticatedUserAllSolutions(user.email)
+          .subscribe((data) => {
+            this.currentUserSolutions = data;
+            this.findPendingSolutions();
+          });
 
-    // Get categories then load the active one
-    this.challenge
-      .getAllChallenges()
-      .pipe(take(1))
-      .subscribe({
-        next: (challenges: any[]) => {
-          const uniqueCategories = Array.from(
-            new Set(challenges.map((c) => c.category))
-          );
-          // this.categories = uniqueCategories; // if you want the live categories from DB
-          this.fetchChallenges(this.activeCategory, { isInitial: true });
-        },
-        error: () => {
-          // even if categories fail, try loading the default category gracefully
-          this.fetchChallenges(this.activeCategory, { isInitial: true });
-        },
+        this.solution
+          .getAuthenticatedUserPendingEvaluations(user.email)
+          .subscribe((data) => {
+            this.evaluationSolutions = data.filter(
+              (e) => e.finished !== undefined && e.finished === 'true'
+            );
+            this.evaluation = this.evaluationSolutions.length;
+          });
+
+        if (user.profilePicture?.path) {
+          this.profilePicturePath = user.profilePicture.downloadURL;
+        }
       });
   }
 
@@ -301,8 +298,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       alert(this.translate.instant('home.alerts.enterLocation'));
       return;
     }
+    const uid = this.user?.uid;
+    if (!uid) return;
     try {
-      await this.data.updateLocation(this.user.uid!, this.location);
+      await this.data.updateLocation(uid, this.location);
       this.closeDisplayPromptLocation();
       // this.ngOnInit();
     } catch (error) {
@@ -314,8 +313,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.displayPromptLocation = !this.displayPromptLocation;
   }
   async RejectSubmitLocation() {
+    const uid = this.user?.uid;
+    if (!uid) return;
     try {
-      await this.data.updateLocation(this.user.uid!, 'NA');
+      await this.data.updateLocation(uid, 'NA');
       this.closeDisplayPromptLocation();
       // this.ngOnInit();
     } catch (error) {

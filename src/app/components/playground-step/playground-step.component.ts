@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 // import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import * as Editor from 'ckeditor5-custom-build/build/ckeditor';
-import { ChangeEvent } from '@ckeditor/ckeditor5-angular/ckeditor.component';
+import { ChangeEvent } from '@ckeditor/ckeditor5-angular';
 import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -35,9 +35,10 @@ export interface FeedbackRequest {
   evaluated?: string;
 }
 @Component({
-  selector: 'app-playground-step',
-  templateUrl: './playground-step.component.html',
-  styleUrls: ['./playground-step.component.css'],
+    selector: 'app-playground-step',
+    templateUrl: './playground-step.component.html',
+    styleUrls: ['./playground-step.component.css'],
+    standalone: false
 })
 export class PlaygroundStepComponent implements OnInit, OnDestroy {
   strategyReviewSelected: boolean = false;

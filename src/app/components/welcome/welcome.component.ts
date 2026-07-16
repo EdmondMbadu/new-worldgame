@@ -2,10 +2,10 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-welcome',
-
-  templateUrl: './welcome.component.html',
-  styleUrl: './welcome.component.css',
+    selector: 'app-welcome',
+    templateUrl: './welcome.component.html',
+    styleUrl: './welcome.component.css',
+    standalone: false
 })
 export class WelcomeComponent {
   initial: number = 11.1;

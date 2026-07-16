@@ -20,10 +20,10 @@ import { DataService, SDG, SDGPlus } from 'src/app/services/data.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-other-ais',
-
-  templateUrl: './other-ais.component.html',
-  styleUrl: './other-ais.component.css',
+    selector: 'app-other-ais',
+    templateUrl: './other-ais.component.html',
+    styleUrl: './other-ais.component.css',
+    standalone: false
 })
 export class OtherAisComponent implements OnInit, OnDestroy {
   @ViewChild('bottomAnchor') private bottomAnchor!: ElementRef<HTMLDivElement>;

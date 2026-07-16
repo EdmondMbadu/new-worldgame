@@ -6,9 +6,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-active-tournaments',
-  templateUrl: './active-tournaments.component.html',
-  styleUrl: './active-tournaments.component.css',
+    selector: 'app-active-tournaments',
+    templateUrl: './active-tournaments.component.html',
+    styleUrl: './active-tournaments.component.css',
+    standalone: false
 })
 export class ActiveTournamentsComponent implements OnInit {
   tournaments: Tournament[] = [];

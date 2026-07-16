@@ -5,10 +5,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-list-finished-solutions',
-
-  templateUrl: './list-finished-solutions.component.html',
-  styleUrls: ['./list-finished-solutions.component.css'],
+    selector: 'app-list-finished-solutions',
+    templateUrl: './list-finished-solutions.component.html',
+    styleUrls: ['./list-finished-solutions.component.css'],
+    standalone: false
 })
 export class ListFinishedSolutionsComponent implements OnInit {
   solutions: Solution[] = [];

@@ -8,9 +8,10 @@ import {
 } from 'src/app/services/slp-context.service';
 
 @Component({
-  selector: 'app-slp-shell',
-  templateUrl: './slp-shell.component.html',
-  styleUrls: ['./slp-shell.component.css'],
+    selector: 'app-slp-shell',
+    templateUrl: './slp-shell.component.html',
+    styleUrls: ['./slp-shell.component.css'],
+    standalone: false
 })
 export class SlpShellComponent {
   @Input() activeLane: SlpLane = 'publish';

@@ -10,9 +10,10 @@ import {
 } from './global-lab.content';
 
 @Component({
-  selector: 'app-global-lab',
-  templateUrl: './global-lab.component.html',
-  styleUrl: './global-lab.component.css',
+    selector: 'app-global-lab',
+    templateUrl: './global-lab.component.html',
+    styleUrl: './global-lab.component.css',
+    standalone: false
 })
 export class GlobalLabComponent implements OnInit, OnDestroy {
   heroVideoPlaying = false;

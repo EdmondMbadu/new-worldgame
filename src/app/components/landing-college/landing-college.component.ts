@@ -8,10 +8,11 @@ import { AuthService } from 'src/app/services/auth.service';
 import { AIOption, DataService } from 'src/app/services/data.service';
 
 @Component({
-  selector: 'app-landing-college',
-  templateUrl: './landing-college.component.html',
-  styleUrls: ['./landing-college.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-landing-college',
+    templateUrl: './landing-college.component.html',
+    styleUrls: ['./landing-college.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class LandingCollegeComponent implements OnInit {
   aiOptions: AIOption[] = [];

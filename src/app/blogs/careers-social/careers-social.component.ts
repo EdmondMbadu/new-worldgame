@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-careers-social',
-  templateUrl: './careers-social.component.html',
-  styleUrl: './careers-social.component.css',
+    selector: 'app-careers-social',
+    templateUrl: './careers-social.component.html',
+    styleUrl: './careers-social.component.css',
+    standalone: false
 })
 export class CareersSocialComponent implements OnInit {
   email = 'newworld@newworld-game.org';

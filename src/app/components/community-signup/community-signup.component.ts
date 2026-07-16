@@ -7,8 +7,9 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { PlanKey, User } from 'src/app/models/user';
 
 @Component({
-  selector: 'app-community-signup',
-  templateUrl: './community-signup.component.html',
+    selector: 'app-community-signup',
+    templateUrl: './community-signup.component.html',
+    standalone: false
 })
 export class CommunitySignupComponent implements OnInit {
   /* form fields */

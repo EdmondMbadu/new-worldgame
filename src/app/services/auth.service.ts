@@ -14,7 +14,10 @@ import {
   firstValueFrom,
   map,
   of,
+  shareReplay,
   switchMap,
+  take,
+  tap,
 } from 'rxjs';
 import { NewUser, PlanKey, PRICE_BOOK, School, User } from '../models/user';
 import { TimeService } from './time.service';
@@ -90,7 +93,11 @@ export class AuthService {
         } else {
           return of(null);
         }
-      })
+      }),
+      tap((user) => {
+        this.currentUser = user;
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
     );
     this.initLastActiveTracking();
     this.getCurrentUser();
@@ -102,13 +109,10 @@ export class AuthService {
     return this.redirectUrl;
   }
 
-  getCurrentUserPromise() {
-    return new Promise((resolve) => {
-      this.user$.subscribe((user) => {
-        this.currentUser = user;
-        resolve(user);
-      });
-    });
+  async getCurrentUserPromise() {
+    const user = await firstValueFrom(this.user$.pipe(take(1)));
+    this.currentUser = user;
+    return user;
   }
 
   updateStatusOnline(userId: string) {

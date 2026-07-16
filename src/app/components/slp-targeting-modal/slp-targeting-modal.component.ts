@@ -6,9 +6,10 @@ import {
 } from '@angular/core';
 
 @Component({
-  selector: 'app-slp-targeting-modal',
-  templateUrl: './slp-targeting-modal.component.html',
-  styleUrls: ['./slp-targeting-modal.component.css'],
+    selector: 'app-slp-targeting-modal',
+    templateUrl: './slp-targeting-modal.component.html',
+    styleUrls: ['./slp-targeting-modal.component.css'],
+    standalone: false
 })
 export class SlpTargetingModalComponent {
   @Input() visible = false;

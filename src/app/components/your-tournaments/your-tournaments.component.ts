@@ -6,9 +6,10 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TournamentService } from 'src/app/services/tournament.service';
 
 @Component({
-  selector: 'app-your-tournaments',
-  templateUrl: './your-tournaments.component.html',
-  styleUrl: './your-tournaments.component.css',
+    selector: 'app-your-tournaments',
+    templateUrl: './your-tournaments.component.html',
+    styleUrl: './your-tournaments.component.css',
+    standalone: false
 })
 export class YourTournamentsComponent implements OnInit {
   tournaments: Tournament[] = [];

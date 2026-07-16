@@ -9,9 +9,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-instructions',
-  templateUrl: './instructions.component.html',
-  styleUrl: './instructions.component.css',
+    selector: 'app-instructions',
+    templateUrl: './instructions.component.html',
+    styleUrl: './instructions.component.css',
+    standalone: false
 })
 export class InstructionsComponent {
   @ViewChildren('section') sections?: QueryList<ElementRef>;

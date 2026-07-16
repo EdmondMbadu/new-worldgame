@@ -3,9 +3,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 
 @Component({
-  selector: 'app-new-features',
-  templateUrl: './new-features.component.html',
-  styleUrl: './new-features.component.css',
+    selector: 'app-new-features',
+    templateUrl: './new-features.component.html',
+    styleUrl: './new-features.component.css',
+    standalone: false
 })
 export class NewFeaturesComponent {
   ngOnInit(): void {

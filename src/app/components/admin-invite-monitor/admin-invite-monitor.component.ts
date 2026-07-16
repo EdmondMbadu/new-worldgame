@@ -20,8 +20,9 @@ interface AdminBroadcastRow {
 }
 
 @Component({
-  selector: 'app-admin-invite-monitor',
-  templateUrl: './admin-invite-monitor.component.html',
+    selector: 'app-admin-invite-monitor',
+    templateUrl: './admin-invite-monitor.component.html',
+    standalone: false
 })
 export class AdminInviteMonitorComponent implements OnInit, OnDestroy {
   constructor(public auth: AuthService, private solutions: SolutionService) {}

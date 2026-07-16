@@ -32,9 +32,10 @@ interface FeatureCluster {
 }
 
 @Component({
-  selector: 'app-features',
-  templateUrl: './features.component.html',
-  styleUrl: './features.component.css',
+    selector: 'app-features',
+    templateUrl: './features.component.html',
+    styleUrl: './features.component.css',
+    standalone: false
 })
 export class FeaturesComponent implements OnInit {
   isLoggedIn = false;

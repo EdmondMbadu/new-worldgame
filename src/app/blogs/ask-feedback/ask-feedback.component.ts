@@ -15,9 +15,10 @@ import { DataService } from 'src/app/services/data.service';
 type AskBuckyUseful = 'yes' | 'somewhat' | 'no' | 'not_sure';
 
 @Component({
-  selector: 'app-ask-feedback',
-  templateUrl: './ask-feedback.component.html',
-  styleUrls: ['./ask-feedback.component.css'],
+    selector: 'app-ask-feedback',
+    templateUrl: './ask-feedback.component.html',
+    styleUrls: ['./ask-feedback.component.css'],
+    standalone: false
 })
 export class AskFeedbackComponent implements OnInit {
   isLoggedIn = false;

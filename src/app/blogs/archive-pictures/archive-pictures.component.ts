@@ -3,9 +3,10 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { Observable, from, map, mergeMap } from 'rxjs';
 
 @Component({
-  selector: 'app-archive-pictures',
-  templateUrl: './archive-pictures.component.html',
-  styleUrl: './archive-pictures.component.css',
+    selector: 'app-archive-pictures',
+    templateUrl: './archive-pictures.component.html',
+    styleUrl: './archive-pictures.component.css',
+    standalone: false
 })
 export class ArchivePicturesComponent implements OnInit, OnDestroy {
   /** These are the real images retrieved from Firebase **/

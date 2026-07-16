@@ -10,9 +10,10 @@ import { Email } from '../create-playground/create-playground.component';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-start-challenge',
-  templateUrl: './start-challenge.component.html',
-  styleUrl: './start-challenge.component.css',
+    selector: 'app-start-challenge',
+    templateUrl: './start-challenge.component.html',
+    styleUrl: './start-challenge.component.css',
+    standalone: false
 })
 export class StartChallengeComponent implements OnInit, OnDestroy {
   selectedChallengeItem: any;

@@ -109,9 +109,10 @@ type WeeklyEmailAutomationConfig = {
 };
 
 @Component({
-  selector: 'app-user-management',
-  templateUrl: './user-management.component.html',
-  styleUrl: './user-management.component.css',
+    selector: 'app-user-management',
+    templateUrl: './user-management.component.html',
+    styleUrl: './user-management.component.css',
+    standalone: false
 })
 export class UserManagementComponent implements OnInit {
   private readonly weeklyEmailAutomationDocPath =

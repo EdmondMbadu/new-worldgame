@@ -52,9 +52,10 @@ interface BroadcastVM {
   isOwner: boolean;
 }
 @Component({
-  selector: 'app-broadcasted-solutions',
-  templateUrl: './broadcasted-solutions.component.html',
-  styleUrl: './broadcasted-solutions.component.css',
+    selector: 'app-broadcasted-solutions',
+    templateUrl: './broadcasted-solutions.component.html',
+    styleUrl: './broadcasted-solutions.component.css',
+    standalone: false
 })
 export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
   // filters

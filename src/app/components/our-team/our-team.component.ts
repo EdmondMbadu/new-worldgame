@@ -18,9 +18,10 @@ interface AvatarIntroVideo {
 }
 
 @Component({
-  selector: 'app-our-team',
-  templateUrl: './our-team.component.html',
-  styleUrl: './our-team.component.css',
+    selector: 'app-our-team',
+    templateUrl: './our-team.component.html',
+    styleUrl: './our-team.component.css',
+    standalone: false
 })
 export class OurTeamComponent implements OnInit, OnDestroy {
   @ViewChild('teamIntroVideoPlayer')

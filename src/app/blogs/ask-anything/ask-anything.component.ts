@@ -5,9 +5,10 @@ import { DataService } from 'src/app/services/data.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
-  selector: 'app-ask-anything',
-  templateUrl: './ask-anything.component.html',
-  styleUrls: ['./ask-anything.component.css'],
+    selector: 'app-ask-anything',
+    templateUrl: './ask-anything.component.html',
+    styleUrls: ['./ask-anything.component.css'],
+    standalone: false
 })
 export class AskAnythingComponent implements OnInit {
   isLoggedIn = false;

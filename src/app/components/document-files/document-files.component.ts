@@ -15,9 +15,10 @@ import { TimeService } from 'src/app/services/time.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-document-files',
-  templateUrl: './document-files.component.html',
-  styleUrl: './document-files.component.css',
+    selector: 'app-document-files',
+    templateUrl: './document-files.component.html',
+    styleUrl: './document-files.component.css',
+    standalone: false
 })
 export class DocumentFilesComponent implements OnInit, OnDestroy {
   private readonly maxDocumentUploadBytes = 100 * 1024 * 1024;

@@ -8,8 +8,9 @@ import { combineLatest, of, switchMap, map } from 'rxjs';
 import { isPlanKey, PlanKey, PRICE_BOOK } from 'src/app/models/user';
 
 @Component({
-  selector: 'app-school-signup',
-  templateUrl: './school-signup.component.html',
+    selector: 'app-school-signup',
+    templateUrl: './school-signup.component.html',
+    standalone: false
 })
 export class SchoolSignupComponent implements OnInit {
   /* form fields */
