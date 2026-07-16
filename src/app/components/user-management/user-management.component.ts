@@ -85,6 +85,7 @@ type WeeklyAutomationSchedule = {
   fallbackCriteria?: Exclude<AIInsightsBulkCriteria, 'user_selected'>;
   includeUnsubscribed?: boolean;
   excludeEmails?: string[];
+  videoSummaryUrl?: string;
   lastRunAt?: any;
   lastRunStatus?: WeeklyAutomationStatus;
   lastRunSummary?: string;
@@ -253,6 +254,11 @@ export class UserManagementComponent implements OnInit {
   aiInsightsBulkError = '';
   aiInsightsBulkIncludeUnsubscribed = false;
   aiInsightsBulkExcludeEmails = ''; // Paste emails to exclude (one per line or comma-separated)
+  aiInsightsVideoSummaryUrl = '';
+  aiInsightsSavedVideoSummaryUrl = '';
+  aiInsightsVideoSummarySaving = false;
+  aiInsightsVideoSummaryMessage = '';
+  aiInsightsVideoSummaryError = '';
   aiInsightsBulkStats = {
     totalParticipants: 0,
     noSolutions: 0,
@@ -487,6 +493,7 @@ export class UserManagementComponent implements OnInit {
         fallbackCriteria: 'most_recent',
         includeUnsubscribed: false,
         excludeEmails: [],
+        videoSummaryUrl: '',
         lastRunStatus: 'idle',
         lastRunSummary: '',
         lastError: '',
@@ -547,6 +554,103 @@ export class UserManagementComponent implements OnInit {
     return this.normalizeAutomationRecipients(raw);
   }
 
+  private normalizeAIInsightsVideoUrl(value: unknown): string {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+
+    try {
+      const parsed = new URL(raw);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+        ? parsed.toString()
+        : '';
+    } catch {
+      return '';
+    }
+  }
+
+  isValidAIInsightsVideoUrl(value: unknown): boolean {
+    const raw = String(value || '').trim();
+    return !raw || Boolean(this.normalizeAIInsightsVideoUrl(raw));
+  }
+
+  hasUnsavedAIInsightsVideoUrl(): boolean {
+    return (
+      String(this.aiInsightsVideoSummaryUrl || '').trim() !==
+      this.aiInsightsSavedVideoSummaryUrl
+    );
+  }
+
+  clearAIInsightsVideoSummaryStatus(): void {
+    this.aiInsightsVideoSummaryMessage = '';
+    this.aiInsightsVideoSummaryError = '';
+  }
+
+  async saveAIInsightsVideoSummaryUrl(): Promise<void> {
+    if (this.aiInsightsVideoSummarySaving) return;
+
+    const raw = String(this.aiInsightsVideoSummaryUrl || '').trim();
+    const normalized = this.normalizeAIInsightsVideoUrl(raw);
+    if (raw && !normalized) {
+      this.aiInsightsVideoSummaryError =
+        'Enter a valid http or https video summary link.';
+      return;
+    }
+
+    await this.persistAIInsightsVideoSummaryUrl(normalized);
+  }
+
+  async clearAIInsightsVideoSummaryUrl(): Promise<void> {
+    if (this.aiInsightsVideoSummarySaving) return;
+    this.aiInsightsVideoSummaryUrl = '';
+    await this.persistAIInsightsVideoSummaryUrl('');
+  }
+
+  private async persistAIInsightsVideoSummaryUrl(
+    videoSummaryUrl: string
+  ): Promise<void> {
+    this.aiInsightsVideoSummarySaving = true;
+    this.clearAIInsightsVideoSummaryStatus();
+
+    try {
+      const aiInsightsBrief = {
+        ...this.weeklyAutomationConfig.aiInsightsBrief,
+        videoSummaryUrl,
+      };
+      const authorName = `${this.auth.currentUser?.firstName || ''} ${
+        this.auth.currentUser?.lastName || ''
+      }`.trim();
+      const payload = this.stripUndefinedDeep({
+        aiInsightsBrief,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: {
+          uid: this.auth.currentUser?.uid || '',
+          email: this.normalizeEmail(this.auth.currentUser?.email),
+          name: authorName || this.normalizeEmail(this.auth.currentUser?.email),
+        },
+      });
+
+      await this.afs
+        .doc(this.weeklyEmailAutomationDocPath)
+        .set(payload, { merge: true });
+
+      this.weeklyAutomationConfig = {
+        ...this.weeklyAutomationConfig,
+        aiInsightsBrief,
+      };
+      this.aiInsightsVideoSummaryUrl = videoSummaryUrl;
+      this.aiInsightsSavedVideoSummaryUrl = videoSummaryUrl;
+      this.aiInsightsVideoSummaryMessage = videoSummaryUrl
+        ? 'Video summary link saved for weekly intelligence briefs.'
+        : 'Video summary link cleared. Future briefs will not include a video.';
+    } catch (error) {
+      console.error('Unable to save weekly video summary link', error);
+      this.aiInsightsVideoSummaryError =
+        'Unable to save the video summary link right now.';
+    } finally {
+      this.aiInsightsVideoSummarySaving = false;
+    }
+  }
+
   private normalizeAutomationSchedule(
     raw: any,
     defaults: WeeklyAutomationSchedule
@@ -581,6 +685,10 @@ export class UserManagementComponent implements OnInit {
       excludeEmails: defaults.excludeEmails
         ? this.normalizeAutomationEmailList(raw?.excludeEmails)
         : undefined,
+      videoSummaryUrl:
+        defaults.videoSummaryUrl !== undefined
+          ? this.normalizeAIInsightsVideoUrl(raw?.videoSummaryUrl)
+          : undefined,
       lastRunStatus:
         raw?.lastRunStatus === 'running' ||
         raw?.lastRunStatus === 'success' ||
@@ -640,6 +748,10 @@ export class UserManagementComponent implements OnInit {
           this.automationAIInsightsExcludeEmailsDraft = (
             this.weeklyAutomationConfig.aiInsightsBrief.excludeEmails || []
           ).join('\n');
+          this.aiInsightsSavedVideoSummaryUrl =
+            this.weeklyAutomationConfig.aiInsightsBrief.videoSummaryUrl || '';
+          this.aiInsightsVideoSummaryUrl =
+            this.aiInsightsSavedVideoSummaryUrl;
           this.automationLoading = false;
         },
         error: (error) => {
@@ -688,6 +800,7 @@ export class UserManagementComponent implements OnInit {
   private validateWeeklyAutomationConfig(): string {
     const reminder = this.weeklyAutomationConfig.weeklyReminder;
     const activity = this.weeklyAutomationConfig.weeklyActivity;
+    const intelligenceBrief = this.weeklyAutomationConfig.aiInsightsBrief;
 
     if (!this.weeklyAutomationConfig.timezone.trim()) {
       return 'Select a timezone for the automation schedule.';
@@ -713,6 +826,13 @@ export class UserManagementComponent implements OnInit {
       (!reminder.introHtml || !String(reminder.introHtml).trim())
     ) {
       return 'Weekly reminder automation needs intro content.';
+    }
+
+    if (
+      intelligenceBrief.videoSummaryUrl &&
+      !this.isValidAIInsightsVideoUrl(intelligenceBrief.videoSummaryUrl)
+    ) {
+      return 'Enter a valid http or https video summary link for the intelligence brief.';
     }
 
     return '';
@@ -877,6 +997,8 @@ export class UserManagementComponent implements OnInit {
       schedule.includeUnsubscribed
     );
     this.aiInsightsBulkExcludeEmails = (schedule.excludeEmails || []).join('\n');
+    this.aiInsightsVideoSummaryUrl = schedule.videoSummaryUrl || '';
+    this.aiInsightsSavedVideoSummaryUrl = schedule.videoSummaryUrl || '';
     this.buildBulkAIInsightsList();
     this.weeklyAutomationSectionOpen = true;
     this.automationSaveMessage =
@@ -2837,6 +2959,13 @@ export class UserManagementComponent implements OnInit {
       return;
     }
 
+    if (this.hasUnsavedAIInsightsVideoUrl()) {
+      this.aiInsightsError =
+        'Save or clear the weekly video summary link before sending.';
+      return;
+    }
+    const videoSummaryUrl = this.aiInsightsSavedVideoSummaryUrl;
+
     const user = this.aiInsightsSelectedUserData.user;
     const solution = this.aiInsightsSelectedSolution;
 
@@ -2857,6 +2986,7 @@ export class UserManagementComponent implements OnInit {
           sdgs: solution.sdgs || [],
           meetLink: solution.meetLink || '',
           solutionImage: solution.image || '',
+          videoSummaryUrl,
           teamMembers: this.buildAIInsightsTeamMembers(solution),
         })
       );
@@ -3079,6 +3209,14 @@ export class UserManagementComponent implements OnInit {
     this.aiInsightsBulkSent = false;
     this.aiInsightsBulkError = '';
 
+    if (this.hasUnsavedAIInsightsVideoUrl()) {
+      this.aiInsightsBulkError =
+        'Save or clear the weekly video summary link before sending.';
+      this.aiInsightsBulkSending = false;
+      return;
+    }
+    const videoSummaryUrl = this.aiInsightsSavedVideoSummaryUrl;
+
     try {
       const payload = this.aiInsightsBulkSelections.map((item) => {
         const sol = item.solution;
@@ -3092,6 +3230,7 @@ export class UserManagementComponent implements OnInit {
           sdgs: sol.sdgs || [],
           meetLink: sol.meetLink || '',
           solutionImage: sol.image || '',
+          videoSummaryUrl,
         };
       });
 

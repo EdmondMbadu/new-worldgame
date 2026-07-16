@@ -835,6 +835,68 @@
           </div>
         </div>
 
+        <div class="mb-6 rounded-xl border border-violet-200 bg-violet-50/70 p-4 dark:border-violet-900/60 dark:bg-violet-950/20">
+          <label class="block text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300" for="ai-insights-video-summary-url">
+            Weekly video summary link (optional)
+          </label>
+          <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+            <input
+              id="ai-insights-video-summary-url"
+              type="url"
+              [(ngModel)]="aiInsightsVideoSummaryUrl"
+              (ngModelChange)="clearAIInsightsVideoSummaryStatus()"
+              placeholder="https://newworld-game.org/nwg-news?v=..."
+              class="min-w-0 flex-1 rounded-lg border border-violet-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-violet-500 dark:border-violet-900/70 dark:bg-slate-800 dark:text-slate-100"
+            />
+            <a
+              *ngIf="aiInsightsVideoSummaryUrl && isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
+              [href]="aiInsightsVideoSummaryUrl"
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center justify-center rounded-lg border border-violet-300 bg-white px-4 py-2.5 text-sm font-semibold text-violet-700 hover:bg-violet-100 dark:border-violet-800 dark:bg-slate-900 dark:text-violet-300 dark:hover:bg-violet-950/40"
+            >
+              Open video
+            </a>
+            <button
+              type="button"
+              (click)="saveAIInsightsVideoSummaryUrl()"
+              [disabled]="aiInsightsVideoSummarySaving || !hasUnsavedAIInsightsVideoUrl() || !isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
+              class="inline-flex items-center justify-center rounded-lg bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {{ aiInsightsVideoSummarySaving ? 'Saving...' : 'Save link' }}
+            </button>
+            <button
+              type="button"
+              (click)="clearAIInsightsVideoSummaryUrl()"
+              [disabled]="aiInsightsVideoSummarySaving || (!aiInsightsVideoSummaryUrl && !aiInsightsSavedVideoSummaryUrl)"
+              class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Clear
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+            Paste this week's NWG News link and save it. Only the saved link is included in Single, Bulk, and automated intelligence briefs.
+          </p>
+          <p
+            *ngIf="aiInsightsVideoSummaryUrl && !isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
+            class="mt-2 text-xs font-medium text-rose-600 dark:text-rose-300"
+          >
+            Enter a complete http or https link.
+          </p>
+          <p
+            *ngIf="hasUnsavedAIInsightsVideoUrl() && isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
+            class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-300"
+          >
+            Unsaved change — save or clear it before sending the brief.
+          </p>
+          <p *ngIf="aiInsightsVideoSummaryMessage" class="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+            {{ aiInsightsVideoSummaryMessage }}
+          </p>
+          <p *ngIf="aiInsightsVideoSummaryError" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">
+            {{ aiInsightsVideoSummaryError }}
+          </p>
+        </div>
+
         <!-- Selection Form -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -1016,7 +1078,7 @@
             <div class="pt-2">
               <button
                 (click)="sendAIInsightsEmail()"
-                [disabled]="!aiInsightsSelectedUserData || !aiInsightsSelectedSolution || aiInsightsSending"
+                [disabled]="!aiInsightsSelectedUserData || !aiInsightsSelectedSolution || aiInsightsSending || hasUnsavedAIInsightsVideoUrl()"
                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200
                        bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white
                        disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1077,6 +1139,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                   </svg>
                   <span>3 recent news headlines in their field</span>
+                </li>
+                <li *ngIf="aiInsightsVideoSummaryUrl && isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)" class="flex items-start gap-2">
+                  <svg class="w-4 h-4 text-violet-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-5.197-3.028A1 1 0 008 9.004v5.992a1 1 0 001.555.832l5.197-3.028a1 1 0 000-1.632z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span>Weekly video summary</span>
                 </li>
                 <li class="flex items-start gap-2">
                   <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1195,7 +1264,7 @@
             <div class="pt-2">
               <button
                 (click)="sendBulkAIInsightsEmails()"
-                [disabled]="aiInsightsBulkSelections.length === 0 || aiInsightsBulkSending"
+                [disabled]="aiInsightsBulkSelections.length === 0 || aiInsightsBulkSending || hasUnsavedAIInsightsVideoUrl()"
                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200
                        bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white
                        disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1855,6 +1924,18 @@
                       />
                       Include unsubscribed recipients
                     </label>
+
+                    <div>
+                      <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Weekly video summary link
+                      </label>
+                      <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        {{ weeklyAutomationConfig.aiInsightsBrief.videoSummaryUrl || 'No weekly video summary is saved.' }}
+                      </div>
+                      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        This uses the saved link from the Weekly Intelligence Brief panel above.
+                      </p>
+                    </div>
 
                     <div>
                       <label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
