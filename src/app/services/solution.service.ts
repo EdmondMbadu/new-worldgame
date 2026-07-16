@@ -15,6 +15,7 @@ import { ActivityService } from './activity.service';
 import { AuthService } from './auth.service';
 import { TimeService } from './time.service';
 import {
+  catchError,
   combineLatest,
   count,
   firstValueFrom,
@@ -381,7 +382,11 @@ export class SolutionService {
       map(([tournamentSolutions, emailSolutions]) => [
         ...tournamentSolutions,
         ...emailSolutions,
-      ])
+      ]),
+      catchError((error) => {
+        console.error('Unable to load Discover solutions.', error);
+        return of([] as Solution[]);
+      })
     );
   }
 

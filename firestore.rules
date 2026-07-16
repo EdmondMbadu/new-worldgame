@@ -32,6 +32,23 @@ service cloud.firestore {
         && request.resource.data.subscribedAt == request.time;
     }
 
+    // Discover intentionally searches every collection named `solutions`.
+    // Collection-group queries need an explicit recursive match; otherwise
+    // the protected workshop-signup branch makes the whole query ambiguous.
+    match /{path=**}/solutions/{solutionId} {
+      allow read: if request.time < timestamp.date(2028, 11, 3);
+    }
+
+    // School invitation lookup uses a collection-group query. Firestore
+    // requires an explicit collection-group match so the query can prove that
+    // every possible result belongs to the signed-in invitee.
+    match /{path=**}/students/{studentId} {
+      allow read: if request.auth != null
+        && request.auth.token.email is string
+        && resource.data.email is string
+        && resource.data.email == request.auth.token.email;
+    }
+
     match /{topLevelCollection}/{document=**} {
       // This rule allows anyone with your database reference to view, edit,
       // and delete all data in your database. It is useful for getting
