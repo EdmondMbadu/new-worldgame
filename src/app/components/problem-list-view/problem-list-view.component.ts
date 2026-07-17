@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
@@ -16,6 +16,8 @@ interface SolutionMember {
   lastActiveAt?: string;
 }
 
+type SolutionFilter = 'all' | 'pending' | 'submitted';
+
 @Component({
     selector: 'app-problem-list-view',
     templateUrl: './problem-list-view.component.html',
@@ -25,6 +27,7 @@ interface SolutionMember {
 export class ProblemListViewComponent implements OnInit {
   solutions: Solution[] = [];
   pendingSolutions: Solution[] = [];
+  filteredSolutions: Solution[] = [];
   gradientPalette = [
     'from-sky-500 via-indigo-500 to-purple-500',
     'from-emerald-500 via-cyan-500 to-blue-500',
@@ -49,6 +52,7 @@ export class ProblemListViewComponent implements OnInit {
   pending: number = 0;
   /** 🆕 bound to the search box */
   searchTerm = '';
+  solutionFilter: SolutionFilter = 'all';
   viewMode: 'list' | 'grid' = 'grid';
   weeklyBriefSolutionId = '';
   weeklyBriefSavingId = '';
@@ -80,6 +84,7 @@ export class ProblemListViewComponent implements OnInit {
       this.solutions = data;
       console.log('all solutions I am in', this.solutions);
       this.findPendingSolutions();
+      this.applySolutionFilters();
       void this.refreshPresenceForSolutions();
     });
   }
@@ -101,13 +106,11 @@ export class ProblemListViewComponent implements OnInit {
     this.solutionsSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
   }
-  @Input() title: string = 'problemListView.tabs.pending';
-
   async findPendingSolutions() {
     this.pendingSolutions = [];
 
     for (let s of this.solutions) {
-      if (s.finished === undefined || s.finished !== 'true') {
+      if (!this.isSubmitted(s)) {
         this.pendingSolutions.push(s);
       }
     }
@@ -173,11 +176,50 @@ export class ProblemListViewComponent implements OnInit {
   isSidebarOpen = true;
 
   /** search */
-  get filteredPendingSolutions(): Solution[] {
+  applySolutionFilters() {
     const t = this.searchTerm.trim().toLowerCase();
-    return !t
-      ? this.pendingSolutions
-      : this.pendingSolutions.filter((s) => s.title?.toLowerCase().includes(t));
+    this.filteredSolutions = this.solutions.filter((solution) => {
+      const matchesStatus =
+        this.solutionFilter === 'all' ||
+        (this.solutionFilter === 'submitted' && this.isSubmitted(solution)) ||
+        (this.solutionFilter === 'pending' && !this.isSubmitted(solution));
+      const matchesSearch =
+        !t || (solution.title || '').toLowerCase().includes(t);
+      return matchesStatus && matchesSearch;
+    });
+  }
+
+  onSearchTermChange(value: string) {
+    this.searchTerm = value;
+    this.applySolutionFilters();
+  }
+
+  get submittedCount(): number {
+    return this.solutions.filter((solution) => this.isSubmitted(solution)).length;
+  }
+
+  get selectedTitle(): string {
+    return `problemListView.tabs.${this.solutionFilter}`;
+  }
+
+  setSolutionFilter(filter: SolutionFilter) {
+    this.solutionFilter = filter;
+    this.applySolutionFilters();
+  }
+
+  isSubmitted(solution: Solution): boolean {
+    const value = (solution as unknown as { finished?: unknown }).finished;
+    return (
+      value === true ||
+      value === 1 ||
+      String(value).trim().toLowerCase() === 'true'
+    );
+  }
+
+  solutionStatusKey(solution: Solution): string {
+    return this.isSubmitted(solution)
+      ? 'problemListView.status.submitted'
+      : 'problemListView.status.pending';
   }
 
   toggleAside() {
@@ -370,6 +412,7 @@ export class ProblemListViewComponent implements OnInit {
 
   getSolutionDate(solution: Solution): string {
     const raw =
+      (this.isSubmitted(solution) ? solution.submissionDate : undefined) ||
       solution.creationDate ||
       solution.createdAt ||
       solution.updatedAt ||
@@ -538,7 +581,7 @@ export class ProblemListViewComponent implements OnInit {
   private async refreshPresenceForSolutions(): Promise<void> {
     const emails = Array.from(
       new Set(
-        this.pendingSolutions
+        this.solutions
           .flatMap((solution) => this.solutionMemberEmails(solution))
           .map((email) => this.normalizeEmail(email))
           .filter(Boolean)
@@ -552,7 +595,7 @@ export class ProblemListViewComponent implements OnInit {
     this.memberLastActiveByUid.clear();
     this.memberByUid.clear();
 
-    this.pendingSolutions.forEach((solution) => {
+    this.solutions.forEach((solution) => {
       const key = this.solutionKey(solution);
       const uids = new Set<string>();
       const memberEmails = this.solutionMemberEmails(solution);
@@ -584,7 +627,7 @@ export class ProblemListViewComponent implements OnInit {
         this.onlineCountBySolutionId.clear();
         this.onlineMembersBySolutionId.clear();
 
-        this.pendingSolutions.forEach((solution) => {
+        this.solutions.forEach((solution) => {
           const key = this.solutionKey(solution);
           const members = (this.solutionMemberUids.get(key) || [])
             .filter((uid) => onlineUids.has(uid))

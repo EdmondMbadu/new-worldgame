@@ -698,10 +698,11 @@
   },
   "problemListView": {
     "tabs": {
+      "all": "Toutes les solutions",
       "pending": "Solutions en attente",
       "submitted": "Solutions soumises"
     },
-    "subtitle": "Basculez entre les affichages en liste et en grille pour gérer vos solutions comme vous le souhaitez.",
+    "subtitle": "Filtrez toutes les solutions, celles en attente ou soumises, puis choisissez l’affichage souhaité.",
     "view": {
       "label": "Affichage",
       "list": "Liste",
@@ -710,10 +711,11 @@
     "searchPlaceholder": "Rechercher par titre…",
     "empty": {
       "title": "Aucune solution pour l'instant",
-      "desc": "Démarrez une nouvelle idée ou utilisez la recherche pour trouver une solution en attente sur laquelle vous collaborez."
+      "desc": "Démarrez une nouvelle idée ou utilisez la recherche pour trouver une solution sur laquelle vous collaborez."
     },
     "status": {
-      "pending": "En attente"
+      "pending": "En attente",
+      "submitted": "Soumis"
     },
     "untitled": "Solution sans titre",
     "created": "Créé",

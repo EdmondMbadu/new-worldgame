@@ -20,19 +20,47 @@
     <!-- PAGE CONTENT -->
     <section class="max-w-6xl w-full mx-auto mt-20 px-2 md:px-0">
       <!-- Tabs -->
-      <div class="flex justify-center gap-4 my-8">
+      <div class="flex flex-wrap justify-center gap-3 my-8" role="group">
         <button
-          routerLink="/problem-list-view"
-          class="px-4 py-2 text-sm font-medium bg-white text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-blue-500 transition-colors"
+          type="button"
+          (click)="setSolutionFilter('all')"
+          [attr.aria-pressed]="solutionFilter === 'all'"
+          class="px-4 py-2 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-500 transition-colors"
+          [ngClass]="
+            solutionFilter === 'all'
+              ? 'border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500'
+              : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700'
+          "
         >
-          {{ "problemListView.tabs.pending" | translate }}
+          {{ "problemListView.tabs.all" | translate }} ({{ solutions.length }})
         </button>
 
         <button
-          routerLink="/list-finished-solutions"
-          class="px-4 py-2 text-sm font-medium bg-white text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-blue-500 transition-colors"
+          type="button"
+          (click)="setSolutionFilter('pending')"
+          [attr.aria-pressed]="solutionFilter === 'pending'"
+          class="px-4 py-2 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-500 transition-colors"
+          [ngClass]="
+            solutionFilter === 'pending'
+              ? 'border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500'
+              : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700'
+          "
         >
-          {{ "problemListView.tabs.submitted" | translate }}
+          {{ "problemListView.tabs.pending" | translate }} ({{ pending }})
+        </button>
+
+        <button
+          type="button"
+          (click)="setSolutionFilter('submitted')"
+          [attr.aria-pressed]="solutionFilter === 'submitted'"
+          class="px-4 py-2 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 dark:focus:ring-blue-500 transition-colors"
+          [ngClass]="
+            solutionFilter === 'submitted'
+              ? 'border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500'
+              : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700'
+          "
+        >
+          {{ "problemListView.tabs.submitted" | translate }} ({{ submittedCount }})
         </button>
       </div>
 
@@ -43,7 +71,7 @@
         >
           <div class="text-center md:text-left">
             <h1 class="text-xl md:text-3xl font-bold font-Nunito">
-              {{ title | translate }} ({{ filteredPendingSolutions.length }})
+              {{ selectedTitle | translate }} ({{ filteredSolutions.length }})
             </h1>
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
               {{ "problemListView.subtitle" | translate }}
@@ -132,7 +160,8 @@
           </span>
           <input
             type="text"
-            [(ngModel)]="searchTerm"
+            [ngModel]="searchTerm"
+            (ngModelChange)="onSearchTermChange($event)"
             placeholder="{{ 'problemListView.searchPlaceholder' | translate }}"
             class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-800 dark:border-gray-600 dark:text-white"
           />
@@ -231,7 +260,7 @@
         </div>
       </div>
 
-      <div *ngIf="!filteredPendingSolutions.length" class="mt-12 text-center">
+      <div *ngIf="!filteredSolutions.length" class="mt-12 text-center">
         <div
           class="inline-flex flex-col items-center gap-3 px-8 py-12 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white/60 dark:bg-slate-800/60"
         >
@@ -250,19 +279,27 @@
             />
           </svg>
           <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-            {{ "problemListView.empty.title" | translate }}
+            {{
+              (solutionFilter === "submitted"
+                ? "listFinished.empty.title"
+                : "problemListView.empty.title") | translate
+            }}
           </h2>
           <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md">
-            {{ "problemListView.empty.desc" | translate }}
+            {{
+              (solutionFilter === "submitted"
+                ? "listFinished.empty.desc"
+                : "problemListView.empty.desc") | translate
+            }}
           </p>
         </div>
       </div>
 
-      <div *ngIf="filteredPendingSolutions.length" class="space-y-10">
+      <div *ngIf="filteredSolutions.length" class="space-y-10">
         <div *ngIf="viewMode === 'list'">
           <app-problem-list
             [path]="'/dashboard'"
-            [solutions]="filteredPendingSolutions"
+            [solutions]="filteredSolutions"
             [margin]="'p-4'"
             [memberCountBySolutionId]="memberCountBySolutionId"
             [onlineCountBySolutionId]="onlineCountBySolutionId"
@@ -275,7 +312,7 @@
         <div *ngIf="viewMode === 'grid'">
           <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             <article
-              *ngFor="let solution of filteredPendingSolutions; let i = index"
+              *ngFor="let solution of filteredSolutions; let i = index"
               class="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 shadow hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow"
               (click)="openSolution(solution)"
             >
@@ -299,7 +336,7 @@
                     <span
                       class="text-xs font-medium uppercase tracking-widest text-white/70"
                     >
-                      {{ "problemListView.status.pending" | translate }}
+                      {{ solutionStatusKey(solution) | translate }}
                     </span>
                   </div>
                   <div class="text-lg font-semibold leading-tight clamp-2">
@@ -365,7 +402,11 @@
                       />
                     </svg>
                     <span
-                      >{{ "problemListView.created" | translate }}
+                      >{{
+                        (isSubmitted(solution)
+                          ? "listFinished.submittedLabel"
+                          : "problemListView.created") | translate
+                      }}
                       {{ getSolutionDate(solution) }}</span
                     >
                   </div>
@@ -404,6 +445,7 @@
                   </span>
                   <div class="flex items-center gap-2">
                     <button
+                      *ngIf="!isSubmitted(solution)"
                       type="button"
                       (click)="saveWeeklyBriefSolution(solution, $event)"
                       [disabled]="weeklyBriefSavingId === solution.solutionId"

@@ -949,10 +949,11 @@
   },
   "problemListView": {
     "tabs": {
+      "all": "All Solutions",
       "pending": "Pending Solutions",
       "submitted": "Submitted Solutions"
     },
-    "subtitle": "Switch between list and grid layouts to manage your solutions the way you prefer.",
+    "subtitle": "Filter all, pending, or submitted solutions, then choose the layout you prefer.",
     "view": {
       "label": "View",
       "list": "List",
@@ -961,10 +962,11 @@
     "searchPlaceholder": "Search by title…",
     "empty": {
       "title": "No solutions yet",
-      "desc": "Start a new idea or use the search to find a pending solution you are collaborating on."
+      "desc": "Start a new idea or use the search to find a solution you are collaborating on."
     },
     "status": {
-      "pending": "Pending"
+      "pending": "Pending",
+      "submitted": "Submitted"
     },
     "untitled": "Untitled solution",
     "created": "Created",
