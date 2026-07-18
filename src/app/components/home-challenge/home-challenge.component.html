@@ -1169,10 +1169,10 @@
         <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <div
             *ngFor="let t of titles; let i = index"
-            class="relative group bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+            class="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl dark:bg-slate-800"
           >
             <div
-              *ngIf="isAuthorPage || canRemoveSolutionFromPage(i)"
+              *ngIf="isAuthorPage"
               class="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-slate-950/70 p-1 shadow-lg backdrop-blur-md"
             >
               <button
@@ -1218,30 +1218,9 @@
                   ></path>
                 </svg>
               </button>
-              <button
-                *ngIf="canRemoveSolutionFromPage(i)"
-                (click)="openSolutionRemoval(i)"
-                type="button"
-                aria-label="Remove solution from this page"
-                title="Remove from page"
-                class="rounded-full p-2 text-rose-300 transition hover:bg-rose-500/25 hover:text-rose-100"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13.5 10.5l-3 3m-2.25-6.75l-1.5 1.5a3.182 3.182 0 004.5 4.5l1.5-1.5m3-3l1.5-1.5a3.182 3.182 0 00-4.5-4.5l-1.5 1.5m-3 3l7.5 7.5"
-                  ></path>
-                </svg>
-              </button>
             </div>
             <app-challenge
+              class="min-h-0 flex-1"
               [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }"
               [image]="challengeImages[i]"
               [fromChallengeSpace]="true"
@@ -1257,6 +1236,33 @@
               [memberCountOverride]="solutionParticipantCounts[i]"
               [canManage]="isAuthorPage"
             ></app-challenge>
+            <div
+              *ngIf="canRemoveSolutionFromPage(i)"
+              class="flex shrink-0 justify-end border-t border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-slate-700 dark:bg-slate-900/40"
+            >
+              <button
+                (click)="openSolutionRemoval(i)"
+                type="button"
+                aria-label="Remove solution from this challenge page"
+                title="Remove from page"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-600 shadow-sm transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:border-rose-900/70 dark:bg-slate-800 dark:text-rose-300 dark:hover:bg-rose-950/40"
+              >
+                <svg
+                  class="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.5 10.5l-3 3m-2.25-6.75l-1.5 1.5a3.182 3.182 0 004.5 4.5l1.5-1.5m3-3l1.5-1.5a3.182 3.182 0 00-4.5-4.5l-1.5 1.5m-3 3l7.5 7.5"
+                  ></path>
+                </svg>
+                <span class="sr-only">Remove from page</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -2611,7 +2617,7 @@
 <!-- REMOVE SOLUTION FROM PAGE CONFIRMATION -->
 <div
   *ngIf="solutionRemovalTarget"
-  class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+  class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm"
 >
   <div class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10">
     <div class="px-6 pb-4 pt-6">
@@ -2657,7 +2663,7 @@
 <!-- MY SOLUTIONS PICKER -->
 <div
   *ngIf="showMySolutions"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+  class="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm"
 >
   <div class="flex w-full items-center justify-center">
     <div
