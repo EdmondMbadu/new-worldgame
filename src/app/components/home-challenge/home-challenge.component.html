@@ -974,16 +974,7 @@
                       </svg>
                       Challenges
                     </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <button
-                        (click)="toggle('showAddChallenge')"
-                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-all shadow-sm hover:shadow-md"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Add New Challenge
-                      </button>
+                    <div class="grid grid-cols-1 gap-2.5">
                       <button
                         (click)="openExistingChallenges()"
                         class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md"
@@ -992,15 +983,6 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
                         Add Existing Challenge
-                      </button>
-                      <button
-                        (click)="toggle('showMergeSolution')"
-                        class="flex items-center justify-center gap-2 p-3 text-sm font-medium text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-all shadow-sm hover:shadow-md sm:col-span-2"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                        </svg>
-                        Merge Solution by ID
                       </button>
                     </div>
                   </div>
@@ -1149,6 +1131,31 @@
           <p class="mt-2 text-lg text-slate-600 dark:text-slate-400">
             Browse, solve, and manage team challenges.
           </p>
+          <div
+            *ngIf="auth.currentUser?.uid"
+            class="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
+          >
+            <button
+              type="button"
+              (click)="toggle('showAddChallenge')"
+              class="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              Add a solution
+            </button>
+            <button
+              type="button"
+              (click)="toggle('showMergeSolution')"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+              </svg>
+              Merge by solution ID
+            </button>
+          </div>
         </div>
         <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <div
@@ -1576,7 +1583,7 @@
   </div>
 </div>
 
-<!-- ADD CHALLENGE MODAL -->
+<!-- ADD SOLUTION MODAL -->
 <div
   *ngIf="showAddChallenge"
   class="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm"
@@ -1601,10 +1608,10 @@
             </div>
             <div>
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                Create New Challenge
+                Create New Solution
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                Add a challenge to your workspace
+                Add your solution to this challenge
               </p>
             </div>
           </div>
@@ -1625,7 +1632,7 @@
         <!-- Title -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Challenge Title <span class="text-red-500">*</span>
+            Solution Title <span class="text-red-500">*</span>
           </label>
           <input
             [(ngModel)]="titleCreateChallenge"
@@ -1765,7 +1772,7 @@
             <svg *ngIf="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>
-            Create Challenge
+            Create Solution
           </button>
         </div>
       </div>
@@ -2595,6 +2602,10 @@
       <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4">
         Merge Existing Solution
       </h2>
+      <p class="mb-5 text-sm leading-6 text-slate-600 dark:text-slate-300">
+        This adds the solution to this challenge page. Its existing team and
+        participants will not be changed.
+      </p>
 
       <label
         class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"

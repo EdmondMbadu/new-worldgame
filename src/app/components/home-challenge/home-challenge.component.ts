@@ -412,10 +412,7 @@ export class HomeChallengeComponent implements OnDestroy {
 
         this.pageChallengesSub?.unsubscribe();
         this.pageChallengesSub = this.challenge
-          .getUserChallengesForPage(
-            this.challengePage.authorId!,
-            this.challengePageId
-          )
+          .getUserChallengesForPage(this.challengePageId)
           .subscribe((challenges: any[]) => {
             const pageChallenges = challenges || [];
             this.pageChallengeCards = pageChallenges;
@@ -773,6 +770,10 @@ export class HomeChallengeComponent implements OnDestroy {
   }
 
   openExistingChallenges(): void {
+    if (!this.isAuthorPage) {
+      this.toast.error('Only workspace admins can add library challenges.');
+      return;
+    }
     this.showExistingChallenges = true;
     this.loadExistingChallenges();
   }
@@ -829,6 +830,11 @@ export class HomeChallengeComponent implements OnDestroy {
   }
 
   async addExistingChallengeToPage(challenge: any): Promise<void> {
+    if (!this.isAuthorPage) {
+      this.toast.error('Only workspace admins can add library challenges.');
+      return;
+    }
+
     if (!challenge?.title || !challenge?.description || !challenge?.category) {
       this.toast.error('This challenge is missing required details.');
       return;
@@ -1814,14 +1820,24 @@ export class HomeChallengeComponent implements OnDestroy {
   // }
 
   async addCreateChallenge() {
+    const currentUser = this.auth.currentUser;
+    if (!currentUser?.uid || !currentUser?.email || !this.challengePageId) {
+      this.toast.error('Please sign in before adding a solution.');
+      return;
+    }
+
     if (
       !this.titleCreateChallenge ||
       !this.descriptionCreateChallenge ||
       !this.categoryCreateChallenge ||
       !this.imageCreateChallenge
     ) {
-      this.toast.error('Please fill in all required fields before adding the challenge.');
+      this.toast.error('Please fill in all required fields before adding the solution.');
       return;
+    }
+
+    if (!this.challengeId) {
+      this.challengeId = this.afs.createId();
     }
 
     const newChallenge = {
@@ -1830,7 +1846,7 @@ export class HomeChallengeComponent implements OnDestroy {
       description: this.descriptionCreateChallenge,
       category: this.categoryCreateChallenge,
       image: this.imageCreateChallenge,
-      authorId: this.auth.currentUser.uid,
+      authorId: currentUser.uid,
       challengePageId: this.challengePageId,
     };
 
@@ -1847,7 +1863,7 @@ export class HomeChallengeComponent implements OnDestroy {
         newChallenge.description,
         newChallenge.image,
 
-        this.solution.newSolution.participantsHolder, // Assuming 'any' means an array of participants
+        [{ name: currentUser.email }],
         [], // Assuming 'any' means an array of evaluators
         // endDate: "", // This was commented out in your request, so I've kept it out
         [],
@@ -1861,8 +1877,8 @@ export class HomeChallengeComponent implements OnDestroy {
       this.isLoading = false;
       this.router.navigate(['/dashboard', this.challengeId]);
     } catch (err) {
-      console.error('Error creating challenge & solution:', err);
-      this.toast.error('There was a problem creating the challenge.');
+      console.error('Error creating solution:', err);
+      this.toast.error('There was a problem creating the solution.');
     }
 
     // Automatically select the added challenge and navigate
@@ -2328,25 +2344,13 @@ export class HomeChallengeComponent implements OnDestroy {
       : this.mergeCategory || this.categories[0] || 'General';
   }
 
-  private emailsFromSolutionParticipants(pList: any): string[] {
-    // your solution uses array of maps: [{name: 'email'}, ...]
-    if (!Array.isArray(pList)) return [];
-    return pList
-      .map((p: any) => (p?.name || '').toString().trim().toLowerCase())
-      .filter((e) => e && this.data.isValidEmail(e));
-  }
-
-  private uniqueEmails(...groups: string[][]): string[] {
-    const set = new Set<string>();
-    groups.flat().forEach((e) => set.add(e.trim().toLowerCase()));
-    return Array.from(set);
-  }
-
-  private toParticipantObjects(emails: string[]): { name: string }[] {
-    return emails.map((e) => ({ name: e }));
-  }
-
   async mergeExistingSolution() {
+    const currentUser = this.auth.currentUser;
+    if (!currentUser?.uid || !this.challengePageId) {
+      this.toast.error('Please sign in before merging a solution.');
+      return;
+    }
+
     const id = this.mergeSolutionId.trim();
     if (!id) {
       this.toast.warning('Enter a solution ID.');
@@ -2363,22 +2367,9 @@ export class HomeChallengeComponent implements OnDestroy {
       }
       const sol: any = solSnap.data();
 
-      // 2) Build participants unions (solution <-> challenge page)
-      const emailsFromSol = this.emailsFromSolutionParticipants(
-        sol.participants
-      );
-      const emailsFromPage = (this.participants || [])
-        .map((e) => (e || '').toString().trim().toLowerCase())
-        .filter((e) => e && this.data.isValidEmail(e));
-
-      const unionForSolution = this.uniqueEmails(emailsFromSol, emailsFromPage);
-      const unionForPage = this.uniqueEmails(emailsFromPage, emailsFromSol);
-
-      // 3) Determine category + fields for the challenge card
+      // Keep the solution's existing team exactly as it is. Merging only adds
+      // a card that links the solution to this challenge page.
       const category = this.pickMergeCategory();
-
-      // IMPORTANT: authorId should be the page’s author so your queries pick it up
-      const authorIdForCard = this.challengePage.authorId;
 
       const title = (
         sol.title ||
@@ -2389,15 +2380,8 @@ export class HomeChallengeComponent implements OnDestroy {
       const image = (sol.image || '').toString();
       const titleLower = title.toLowerCase();
 
-      // 4) Write in one batch:
-      //    - user-challenges/{solutionId} (the card)
-      //    - solutions/{solutionId} participants + back-link to this page
-      //    - challengePages/{pageId} participants (union)
-      const batch = this.afs.firestore.batch();
-
       const cardRef = this.afs.doc(`user-challenges/${id}`).ref;
-      batch.set(
-        cardRef,
+      await cardRef.set(
         {
           id,
           title,
@@ -2405,38 +2389,11 @@ export class HomeChallengeComponent implements OnDestroy {
           description,
           image,
           category,
-          authorId: authorIdForCard, // ✅ key fix
-          challengePageId: this.challengePageId, // ✅ ensure page linkage
+          authorId: currentUser.uid,
+          challengePageId: this.challengePageId,
         },
         { merge: true }
       );
-
-      const solutionRef = this.afs.doc(`solutions/${id}`).ref;
-      batch.set(
-        solutionRef,
-        {
-          participants: this.toParticipantObjects(unionForSolution),
-          challengePageId: this.challengePageId, // optional but handy back-link
-        },
-        { merge: true }
-      );
-
-      const pageRef = this.afs.doc(
-        `challengePages/${this.challengePageId}`
-      ).ref;
-      batch.set(
-        pageRef,
-        {
-          participants: unionForPage,
-        },
-        { merge: true }
-      );
-
-      await batch.commit();
-
-      // 5) Update local UI instantly
-      this.participants = unionForPage;
-      this.loadParticipantProfiles();
 
       if (!this.categories.includes(category)) {
         this.categories.push(category);
@@ -2450,7 +2407,9 @@ export class HomeChallengeComponent implements OnDestroy {
         this.challengeImages.unshift(image || 'No image available');
         this.challengeTags.unshift(category);
         this.solutionPrivateFlags.unshift(!!sol.isPrivate);
-        this.solutionParticipantCounts.unshift(unionForSolution.length);
+        this.solutionParticipantCounts.unshift(
+          this.countSolutionParticipants(sol.participants)
+        );
       }
 
       // reset modal

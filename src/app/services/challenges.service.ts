@@ -113,19 +113,14 @@ export class ChallengesService {
       .valueChanges();
   }
 
-  getUserChallengesForPage(
-    userId: string,
-    challengePageId: string
-  ): Observable<any[]> {
-    if (!userId || !challengePageId) {
+  getUserChallengesForPage(challengePageId: string): Observable<any[]> {
+    if (!challengePageId) {
       return of([]);
     }
 
     return this.afs
       .collection('user-challenges', (ref) =>
-        ref
-          .where('authorId', '==', userId)
-          .where('challengePageId', '==', challengePageId)
+        ref.where('challengePageId', '==', challengePageId)
       )
       .valueChanges({ idField: 'docId' } as any);
   }
