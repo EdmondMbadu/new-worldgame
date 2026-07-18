@@ -4,7 +4,7 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, startWith } from 'rxjs/operators';
 import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { Solution } from 'src/app/models/solution';
 import { ChallengeJoinRequest, ChallengePage } from 'src/app/models/user';
@@ -322,9 +322,33 @@ export class HomeChallengeComponent implements OnDestroy {
     this.solutionParticipantCounts = [];
     this.ids = [];
 
-    // Try to load by custom URL first, then fall back to ID
+    // Known Firestore document IDs can be loaded directly. This avoids an
+    // unnecessary custom-URL query on the common /home-challenge/:id route.
     const customUrlObservable = this.challenge.getChallengePageByCustomUrl(idOrSlug);
     const idObservable = this.challenge.getChallengePageById(idOrSlug);
+
+    if (/^[A-Za-z0-9]{20}$/.test(idOrSlug)) {
+      idObservable.subscribe((idData: any) => {
+        if (idData) {
+          this.challengePageId = idOrSlug;
+          this.processChallengePageData(idData, false);
+          return;
+        }
+
+        // A custom URL can technically look like a generated ID, so retain a
+        // fallback for that uncommon case.
+        customUrlObservable.subscribe((customUrlData: any) => {
+          if (customUrlData) {
+            this.challengePageId = customUrlData.challengePageId || idOrSlug;
+            this.processChallengePageData(customUrlData, true);
+          } else {
+            console.error('Challenge page not found');
+            this.pageReady = true;
+          }
+        });
+      });
+      return;
+    }
 
     // Track if we loaded by custom URL to avoid unnecessary redirects
     let loadedByCustomUrl = false;
@@ -596,7 +620,11 @@ export class HomeChallengeComponent implements OnDestroy {
         this.solution.getSolution(challenge.id || challenge.docId).pipe(
           map((solution: any) =>
             this.mergeChallengeCardWithSolution(challenge, solution)
-          )
+          ),
+          // The link document already contains everything needed to draw the
+          // card. Render it immediately, then enrich it when the live solution
+          // document arrives instead of holding the whole grid back.
+          startWith(this.mergeChallengeCardWithSolution(challenge, null))
         )
       )
     ).subscribe((data: any[]) => {
@@ -718,6 +746,9 @@ export class HomeChallengeComponent implements OnDestroy {
     this.solutionParticipantCounts = categoryData.participantCounts ?? [];
     this.ids = categoryData.ids!;
   }
+
+  trackChallengeById = (index: number, title: string): string =>
+    this.ids[index] || title;
 
   getOriginalChallengeTitle(index: number): string {
     return this.challenges[this.allChallengesKey]?.titles?.[index] || this.titles[index];

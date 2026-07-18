@@ -1168,7 +1168,7 @@
         </div>
         <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <div
-            *ngFor="let t of titles; let i = index"
+            *ngFor="let t of titles; let i = index; trackBy: trackChallengeById"
             class="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl dark:bg-slate-800"
           >
             <div

@@ -24,6 +24,7 @@ import {
   map,
   Observable,
   of,
+  shareReplay,
   switchMap,
   take,
 } from 'rxjs';
@@ -46,6 +47,10 @@ export class SolutionService {
   newSolution: Solution = {};
   numberOfEvaluators: number = 3;
   evaluatorsEmails: Email[] = [];
+  private readonly solutionStreams = new Map<
+    string,
+    Observable<Solution | undefined>
+  >();
   constructor(
     private auth: AuthService,
     private afs: AngularFirestore,
@@ -277,7 +282,21 @@ export class SolutionService {
   }
 
   getSolution(solutionId: string) {
-    return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
+    const id = String(solutionId || '').trim();
+    if (!id) {
+      return of(undefined);
+    }
+
+    let solutionStream = this.solutionStreams.get(id);
+    if (!solutionStream) {
+      solutionStream = this.afs
+        .doc<Solution>(`solutions/${id}`)
+        .valueChanges()
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+      this.solutionStreams.set(id, solutionStream);
+    }
+
+    return solutionStream;
   }
   updateSolutionMeetLink(solutionId: string, meetLink: string): Promise<void> {
     return this.afs.doc(`solutions/${solutionId}`).update({ meetLink });
