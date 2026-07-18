@@ -33,6 +33,12 @@ interface Video {
   size?: number;
 }
 
+interface NewsVideoSettings {
+  defaultVideoId?: string;
+  updatedAt?: any;
+  updatedBy?: string;
+}
+
 type VideoSort = 'latest' | 'oldest' | 'title';
 
 @Component({
@@ -56,8 +62,10 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   isSavingVideo = false;
   isUpdatingVideo = false;
   isDeletingVideo = false;
+  isSavingDefaultVideo = false;
   addVideoError = '';
   editVideoError = '';
+  defaultVideoError = '';
   sortBy: VideoSort = 'latest';
   selectedVideoFile: File | null = null;
   selectedReplacementVideoFile: File | null = null;
@@ -68,6 +76,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   previousVideos: Video[] = [];
   allVideos: Video[] = [];
   safeHeroEmbedUrl: SafeResourceUrl | null = null;
+  defaultVideoId = '';
 
   videoForm = {
     title: '',
@@ -82,6 +91,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   editingVideo: Video | null = null;
 
   private readonly newsCollection = 'nwgNewsVideos';
+  private readonly newsSettingsDocument = 'nwgNewsSettings/default';
   private readonly curatedVideos: Video[] = [
     {
       id: 'tane-kahu',
@@ -170,6 +180,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private adminVideos: Video[] = [];
   private authSub?: Subscription;
   private newsSub?: Subscription;
+  private newsSettingsSub?: Subscription;
   private routeSub?: Subscription;
 
   constructor(
@@ -206,6 +217,14 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
         this.refreshVideosFromSources();
       });
 
+    this.newsSettingsSub = this.afs
+      .doc<NewsVideoSettings>(this.newsSettingsDocument)
+      .valueChanges()
+      .subscribe((settings) => {
+        this.defaultVideoId = (settings?.defaultVideoId || '').trim();
+        this.refreshVideosFromSources();
+      });
+
     this.routeSub = this.route.queryParamMap.subscribe(() => {
       this.refreshVideosFromSources();
     });
@@ -220,11 +239,38 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.authSub?.unsubscribe();
     this.newsSub?.unsubscribe();
+    this.newsSettingsSub?.unsubscribe();
     this.routeSub?.unsubscribe();
   }
 
   selectVideo(vid: Video) {
     this.setMainVideo(vid, true);
+  }
+
+  isDefaultVideo(video: Video | null | undefined): boolean {
+    return !!video?.id && video.id === this.defaultVideoId;
+  }
+
+  async setDefaultVideo(video: Video) {
+    if (!this.isAdmin || !video.id || this.isSavingDefaultVideo) return;
+    this.isSavingDefaultVideo = true;
+    this.defaultVideoError = '';
+
+    try {
+      await this.afs.doc<NewsVideoSettings>(this.newsSettingsDocument).set(
+        {
+          defaultVideoId: video.id,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedBy: this.auth.currentUser?.uid || '',
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error('Could not set the default GSL news video', error);
+      this.defaultVideoError = 'Could not set this video as the default. Please try again.';
+    } finally {
+      this.isSavingDefaultVideo = false;
+    }
   }
 
   openAddVideoModal() {
@@ -419,6 +465,16 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isDeletingVideo = true;
     try {
       await this.afs.collection(this.newsCollection).doc(video.id).delete();
+      if (this.isDefaultVideo(video)) {
+        await this.afs.doc<NewsVideoSettings>(this.newsSettingsDocument).set(
+          {
+            defaultVideoId: '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedBy: this.auth.currentUser?.uid || '',
+          },
+          { merge: true }
+        );
+      }
       if (video.storagePath) {
         await this.deleteStorageFile(video.storagePath);
       }
@@ -514,6 +570,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     const requestedId = this.route.snapshot.queryParamMap.get('v');
     const candidate =
       this.allVideos.find((v) => v.id === requestedId) ||
+      this.allVideos.find((v) => v.id === this.defaultVideoId) ||
       this.allVideos[0];
 
     this.setMainVideo(candidate, false);

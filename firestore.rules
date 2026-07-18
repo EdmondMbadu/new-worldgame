@@ -16,6 +16,11 @@ service cloud.firestore {
       allow create, update, delete: if isPlatformAdmin();
     }
 
+    match /nwgNewsSettings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
     match /gsl-workshop-announcement-signups/{signupId} {
       allow read, delete: if isPlatformAdmin();
       allow create, update: if request.time < timestamp.date(2028, 11, 3)
@@ -63,6 +68,7 @@ service cloud.firestore {
         && topLevelCollection != 'gsl-workshop-announcement-signups';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
+        && topLevelCollection != 'nwgNewsSettings'
         && topLevelCollection != 'gsl-workshop-announcement-signups';
     }
   }
