@@ -26,6 +26,7 @@ export class ChallengeComponent implements OnInit {
   @Input() fromChallengeSpace: boolean = false;
   @Input() fit: 'cover' | 'contain' = 'cover';
   @Input() challengePageId: string = ''; // The workspace/challenge page ID
+  @Input() tag: string = '';
   @Input() isPrivateSolution: boolean = false;
   @Input() canManage: boolean = false;
   @Input() memberCountOverride: number | null | undefined = null;

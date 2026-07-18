@@ -50,6 +50,7 @@ export class HomeChallengeComponent implements OnDestroy {
       descriptions: string[];
       frenchDescriptions?: string[];
       images: string[];
+      tags?: string[];
       privateFlags?: boolean[];
       participantCounts?: number[];
     };
@@ -59,6 +60,7 @@ export class HomeChallengeComponent implements OnDestroy {
   titles: string[] = [];
   descriptions: string[] = [];
   challengeImages: string[] = [];
+  challengeTags: string[] = [];
   solutionPrivateFlags: boolean[] = [];
   solutionParticipantCounts: number[] = [];
   ids: string[] = [];
@@ -203,6 +205,7 @@ export class HomeChallengeComponent implements OnDestroy {
   private languageSub?: Subscription;
   private pageChallengesSub?: Subscription;
   private challengeHydrationSub?: Subscription;
+  private readonly allChallengesKey = '__all__';
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -220,7 +223,6 @@ export class HomeChallengeComponent implements OnDestroy {
       block: 'start',
     });
   }
-  activeCategory: string = '';
   constructor(
     private activatedRoute: ActivatedRoute,
     public auth: AuthService,
@@ -299,10 +301,10 @@ export class HomeChallengeComponent implements OnDestroy {
     this.pageChallengeCards = [];
     this.categories = [];
     this.challenges = {};
-    this.activeCategory = '';
     this.titles = [];
     this.descriptions = [];
     this.challengeImages = [];
+    this.challengeTags = [];
     this.solutionPrivateFlags = [];
     this.solutionParticipantCounts = [];
     this.ids = [];
@@ -426,10 +428,7 @@ export class HomeChallengeComponent implements OnDestroy {
             );
 
             this.categories = uniqueCategories;
-            if (!this.categories.includes(this.activeCategory)) {
-              this.activeCategory = this.categories[0] || '';
-            }
-            this.fetchChallenges(this.activeCategory, pageChallenges);
+            this.fetchChallenges(pageChallenges);
           });
   }
   private checkAccess(): void {
@@ -539,20 +538,6 @@ export class HomeChallengeComponent implements OnDestroy {
   toggleAside() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
-  async setActiveCategory(category: string) {
-    if (this.activeCategory === category) {
-      return;
-    } // noop if already active
-    this.activeCategory = category;
-
-    // If this category is already in memory, paint it instantly (no flicker)
-    if (this.challenges[category]) {
-      this.updateChallenges();
-    }
-
-    // Always kick off (re)fetch—will refresh data & UI when query returns
-    this.fetchChallenges(category);
-  }
   async saveLinks() {
     try {
       await this.afs.doc(`challengePages/${this.challengePageId}`).set(
@@ -574,34 +559,20 @@ export class HomeChallengeComponent implements OnDestroy {
   /** whether the detailed list is visible */
   showParticipantsList = false;
 
-  fetchChallenges(
-    category: string,
-    pageChallenges: any[] = this.pageChallengeCards
-  ) {
+  fetchChallenges(pageChallenges: any[] = this.pageChallengeCards) {
     this.challengeHydrationSub?.unsubscribe();
 
-    // only fetch challenges if the category is present and not an empty string
-    if (!category) {
-      console.warn('No category provided to fetch challenges.');
-      this.titles = [];
-      this.descriptions = [];
-      this.challengeImages = [];
-      this.ids = [];
-      return;
-    }
-
-    const matchingChallenges = (pageChallenges || []).filter(
-      (challenge) => challenge.category === category
-    );
+    const matchingChallenges = pageChallenges || [];
 
     if (!matchingChallenges.length) {
-      this.challenges[category] = {
+      this.challenges[this.allChallengesKey] = {
         ids: [],
         titles: [],
         frenchTitles: [],
         descriptions: [],
         frenchDescriptions: [],
         images: [],
+        tags: [],
         privateFlags: [],
         participantCounts: [],
       };
@@ -632,13 +603,16 @@ export class HomeChallengeComponent implements OnDestroy {
           images: data.map(
             (challenge) => challenge.image || 'No image available'
           ),
+          tags: data.map((challenge) =>
+            (challenge.category || '').toString().trim()
+          ),
           privateFlags: data.map((challenge) => !!challenge.isPrivate),
           participantCounts: data.map(
             (challenge) => challenge.participantCount || 0
           ),
         };
-        this.challenges[category] = transformedData; // Assign to the challenges object
-        this.updateChallenges(); // Update the active challenge display
+        this.challenges[this.allChallengesKey] = transformedData;
+        this.updateChallenges();
       });
   }
 
@@ -712,18 +686,8 @@ export class HomeChallengeComponent implements OnDestroy {
   }
 
   updateChallenges(): void {
-    const categoryData = this.challenges[this.activeCategory];
-    // ⬅️ NEW – if we haven’t fetched this category yet, don’t blank the UI
+    const categoryData = this.challenges[this.allChallengesKey];
     if (!categoryData) {
-      return;
-    }
-    if (!categoryData) {
-      console.warn(`No challenges found for category: ${this.activeCategory}`);
-      this.titles = [];
-      this.descriptions = [];
-      this.challengeImages = [];
-      this.solutionPrivateFlags = [];
-      this.ids = [];
       return;
     }
     const shouldUseFrenchContent = this.shouldUseFrenchContent();
@@ -734,18 +698,19 @@ export class HomeChallengeComponent implements OnDestroy {
       ? categoryData.frenchDescriptions ?? categoryData.descriptions
       : categoryData.descriptions;
     this.challengeImages = categoryData.images;
+    this.challengeTags = categoryData.tags ?? [];
     this.solutionPrivateFlags = categoryData.privateFlags ?? [];
     this.solutionParticipantCounts = categoryData.participantCounts ?? [];
     this.ids = categoryData.ids!;
   }
 
   getOriginalChallengeTitle(index: number): string {
-    return this.challenges[this.activeCategory]?.titles?.[index] || this.titles[index];
+    return this.challenges[this.allChallengesKey]?.titles?.[index] || this.titles[index];
   }
 
   getOriginalChallengeDescription(index: number): string {
     return (
-      this.challenges[this.activeCategory]?.descriptions?.[index] ||
+      this.challenges[this.allChallengesKey]?.descriptions?.[index] ||
       this.descriptions[index]
     );
   }
@@ -1996,9 +1961,9 @@ export class HomeChallengeComponent implements OnDestroy {
       this.titles.splice(index, 1);
       this.descriptions.splice(index, 1);
       this.challengeImages.splice(index, 1);
+      this.challengeTags.splice(index, 1);
       this.solutionPrivateFlags.splice(index, 1);
-
-      // If you also track counts per category, update them here.
+      this.solutionParticipantCounts.splice(index, 1);
 
       this.toast.success('Challenge deleted.');
     } catch (err) {
@@ -2008,13 +1973,12 @@ export class HomeChallengeComponent implements OnDestroy {
       this.isLoading = false;
     }
   }
-  async moveChallenge(challengeId: string, localIndex: number) {
-    // 1️⃣ Build a list of choices
-    const choices = [...this.categories]; // existing categories
+  async changeSolutionTag(challengeId: string, localIndex: number) {
+    const choices = [...this.categories];
     const newCat = prompt(
-      'Move to which category?\n' +
+      "Change this solution's tag to:\n" +
         choices.map((c, idx) => `${idx + 1}. ${c}`).join('\n') +
-        '\n\nOr type a new category name:'
+        '\n\nOr type a new tag:'
     );
 
     if (!newCat) {
@@ -2028,28 +1992,27 @@ export class HomeChallengeComponent implements OnDestroy {
         .doc(`user-challenges/${challengeId}`)
         .update({ category: newCat });
 
-      /* 3️⃣ Local UI updates */
+      this.challengeTags[localIndex] = newCat;
+      const cachedChallenges = this.challenges[this.allChallengesKey];
+      if (cachedChallenges?.tags) {
+        cachedChallenges.tags[localIndex] = newCat;
+      }
+      const challengeCard = this.pageChallengeCards.find(
+        (card) => (card.id || card.docId) === challengeId
+      );
+      if (challengeCard) {
+        challengeCard.category = newCat;
+      }
 
-      // 3a remove from current lists
-      this.ids.splice(localIndex, 1);
-      this.titles.splice(localIndex, 1);
-      this.descriptions.splice(localIndex, 1);
-      this.challengeImages.splice(localIndex, 1);
-      this.solutionPrivateFlags.splice(localIndex, 1);
-
-      // 3b if new category is brand-new, add it to the filter pills
       if (!this.categories.includes(newCat)) {
         this.categories.push(newCat);
         this.categories.sort();
       }
 
-      // 3c fetch challenges for the destination category so it shows up
-      await this.fetchChallenges(newCat);
-      this.activeCategory = newCat; // auto-switch view
-      this.toast.success('Challenge moved.');
+      this.toast.success('Solution tag updated.');
     } catch (err) {
-      console.error('Move failed:', err);
-      this.toast.error('Could not move challenge—try again.');
+      console.error('Tag update failed:', err);
+      this.toast.error('Could not update the solution tag—try again.');
     } finally {
       this.isLoading = false;
     }
@@ -2233,7 +2196,8 @@ export class HomeChallengeComponent implements OnDestroy {
     this.editDescription = this.descriptions[index];
     this.editImage = this.challengeImages[index] || '';
     this.editSolutionPrivate = !!this.solutionPrivateFlags[index];
-    this.editCategory = this.activeCategory;
+    this.editCategory =
+      this.challengeTags[index] || this.categories[0] || '__new__';
     this.editCategoryCustom = '';
     this.showEditChallenge = true;
   }
@@ -2264,7 +2228,7 @@ export class HomeChallengeComponent implements OnDestroy {
         : this.editCategory;
 
     if (!newCat) {
-      this.toast.warning('Category required');
+      this.toast.warning('Solution tag required');
       return;
     }
 
@@ -2312,26 +2276,39 @@ export class HomeChallengeComponent implements OnDestroy {
       this.titles[this.editIndex] = title;
       this.descriptions[this.editIndex] = description;
       this.challengeImages[this.editIndex] = image || 'No image available';
+      this.challengeTags[this.editIndex] = newCat;
       this.solutionPrivateFlags[this.editIndex] = this.editSolutionPrivate;
 
-      /* if the category changed */
-      if (newCat !== this.activeCategory) {
-        // 1. remove from current view
-        this.ids.splice(this.editIndex, 1);
-        this.titles.splice(this.editIndex, 1);
-        this.descriptions.splice(this.editIndex, 1);
-        this.challengeImages.splice(this.editIndex, 1);
-        this.solutionPrivateFlags.splice(this.editIndex, 1);
-
-        // 2. add category pill if brand-new
-        if (!this.categories.includes(newCat)) {
-          this.categories.push(newCat);
-          this.categories.sort();
+      const cachedChallenges = this.challenges[this.allChallengesKey];
+      if (cachedChallenges) {
+        cachedChallenges.titles[this.editIndex] = title;
+        cachedChallenges.descriptions[this.editIndex] = description;
+        cachedChallenges.images[this.editIndex] = image || 'No image available';
+        if (cachedChallenges.tags) {
+          cachedChallenges.tags[this.editIndex] = newCat;
         }
+        if (cachedChallenges.privateFlags) {
+          cachedChallenges.privateFlags[this.editIndex] =
+            this.editSolutionPrivate;
+        }
+      }
 
-        // 3. refresh destination category & switch view
-        await this.fetchChallenges(newCat);
-        this.activeCategory = newCat;
+      const challengeCard = this.pageChallengeCards.find(
+        (card) => (card.id || card.docId) === this.editChallengeId
+      );
+      if (challengeCard) {
+        Object.assign(challengeCard, {
+          title,
+          description,
+          image,
+          category: newCat,
+          isPrivate: this.editSolutionPrivate,
+        });
+      }
+
+      if (!this.categories.includes(newCat)) {
+        this.categories.push(newCat);
+        this.categories.sort();
       }
 
       this.showEditChallenge = false;
@@ -2348,7 +2325,7 @@ export class HomeChallengeComponent implements OnDestroy {
     const typed = this.mergeCategoryCustom?.trim();
     return typed
       ? typed
-      : this.mergeCategory || this.activeCategory || 'General';
+      : this.mergeCategory || this.categories[0] || 'General';
   }
 
   private emailsFromSolutionParticipants(pList: any): string[] {
@@ -2466,18 +2443,14 @@ export class HomeChallengeComponent implements OnDestroy {
         this.categories.sort();
       }
 
-      // If we are already on this category, inject the card immediately for snappier UX
-      if (this.activeCategory === category) {
-        if (!this.ids.includes(id)) {
-          this.ids.unshift(id);
-          this.titles.unshift(title);
-          this.descriptions.unshift(description);
-          this.challengeImages.unshift(image || 'No image available');
-        }
-      } else {
-        // otherwise fetch and switch
-        await this.fetchChallenges(category);
-        this.activeCategory = category;
+      if (!this.ids.includes(id)) {
+        this.ids.unshift(id);
+        this.titles.unshift(title);
+        this.descriptions.unshift(description);
+        this.challengeImages.unshift(image || 'No image available');
+        this.challengeTags.unshift(category);
+        this.solutionPrivateFlags.unshift(!!sol.isPrivate);
+        this.solutionParticipantCounts.unshift(unionForSolution.length);
       }
 
       // reset modal

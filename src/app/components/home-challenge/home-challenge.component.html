@@ -1150,20 +1150,6 @@
             Browse, solve, and manage team challenges.
           </p>
         </div>
-        <div class="flex flex-wrap justify-center gap-3 mb-10">
-          <button
-            *ngFor="let category of categories"
-            (click)="setActiveCategory(category)"
-            class="px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200"
-            [ngClass]="{
-              'bg-teal-600 text-white shadow-md': category === activeCategory,
-              'bg-white text-slate-700 dark:bg-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700':
-                category !== activeCategory
-            }"
-          >
-            {{ category }}
-          </button>
-        </div>
         <div class="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           <div
             *ngFor="let t of titles; let i = index"
@@ -1192,7 +1178,9 @@
                 </svg>
               </button>
               <button
-                (click)="moveChallenge(ids[i], i)"
+                (click)="changeSolutionTag(ids[i], i)"
+                aria-label="Change solution tag"
+                title="Change solution tag"
                 class="p-2 rounded-full bg-yellow-500/80 text-white hover:bg-yellow-500 backdrop-blur-sm transition"
               >
                 <svg
@@ -1205,7 +1193,7 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M13 9l4 4m0 0l-4 4m4-4H3"
+                    d="M7 7h.01M3 11l8.586-8.586A2 2 0 0113 2h6a2 2 0 012 2v6a2 2 0 01-.586 1.414L11.828 20a2 2 0 01-2.828 0L3 14a2 2 0 010-3z"
                   ></path>
                 </svg>
               </button>
@@ -1239,6 +1227,7 @@
               [title]="t"
               [originalTitle]="getOriginalChallengeTitle(i)"
               [challengePageId]="challengePageId"
+              [tag]="challengeTags[i]"
               [isPrivateSolution]="solutionPrivateFlags[i]"
               [memberCountOverride]="solutionParticipantCounts[i]"
               [canManage]="isAuthorPage"
@@ -1646,23 +1635,23 @@
           />
         </div>
 
-        <!-- Category Row -->
+        <!-- Solution tag -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Category <span class="text-red-500">*</span>
+              Solution Tag <span class="text-red-500">*</span>
             </label>
             <select
               [(ngModel)]="categoryCreateChallenge"
               class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition"
             >
-              <option value="" disabled selected>Select a category</option>
+              <option value="" disabled selected>Select a tag</option>
               <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Or Create New Category
+              Or Create New Tag
             </label>
             <input
               [(ngModel)]="categoryCreateChallenge"
@@ -2503,11 +2492,11 @@
         class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
       />
 
-      <!-- Category (select OR custom) -->
+      <!-- Solution tag (select OR custom) -->
       <label
         class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
       >
-        Category
+        Solution Tag
       </label>
       <select
         [(ngModel)]="editCategory"
@@ -2519,7 +2508,7 @@
       <input
         *ngIf="editCategory === '__new__'"
         [(ngModel)]="editCategoryCustom"
-        placeholder="New category"
+        placeholder="New solution tag"
         class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
       />
 
@@ -2621,7 +2610,7 @@
       <label
         class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
       >
-        Category (optional)
+        Solution Tag (optional)
       </label>
       <div class="grid grid-cols-2 gap-2 mb-6">
         <select
