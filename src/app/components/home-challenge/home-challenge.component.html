@@ -1197,27 +1197,6 @@
                   ></path>
                 </svg>
               </button>
-              <button
-                *ngIf="isAuthorPage"
-                (click)="changeSolutionTag(ids[i], i)"
-                aria-label="Change solution tag"
-                title="Change solution tag"
-                class="rounded-full p-2 text-amber-300 transition hover:bg-white/15"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M7 7h.01M3 11l8.586-8.586A2 2 0 0113 2h6a2 2 0 012 2v6a2 2 0 01-.586 1.414L11.828 20a2 2 0 01-2.828 0L3 14a2 2 0 010-3z"
-                  ></path>
-                </svg>
-              </button>
             </div>
             <app-challenge
               class="min-h-0 flex-1"
@@ -1231,7 +1210,6 @@
               [title]="t"
               [originalTitle]="getOriginalChallengeTitle(i)"
               [challengePageId]="challengePageId"
-              [tag]="challengeTags[i]"
               [isPrivateSolution]="solutionPrivateFlags[i]"
               [memberCountOverride]="solutionParticipantCounts[i]"
               [canManage]="isAuthorPage"
@@ -1472,22 +1450,6 @@
           </button>
         </div>
 
-        <!-- Category Filter Pills -->
-        <div class="flex flex-wrap gap-2 mt-4">
-          <button
-            *ngFor="let category of existingCategories"
-            (click)="setExistingCategory(category)"
-            class="px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 ring-1"
-            [ngClass]="{
-              'bg-emerald-600 text-white shadow-md ring-emerald-600':
-                category === existingActiveCategory,
-              'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 ring-slate-200 dark:ring-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600':
-                category !== existingActiveCategory
-            }"
-          >
-            {{ category }}
-          </button>
-        </div>
       </div>
 
       <!-- Content Area -->
@@ -1551,11 +1513,6 @@
                 loading="lazy"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-              <span
-                class="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-white/95 text-slate-700 shadow-sm"
-              >
-                {{ challenge.category }}
-              </span>
             </div>
 
             <!-- Content -->
@@ -1666,33 +1623,6 @@
           />
         </div>
 
-        <!-- Solution tag -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Solution Tag <span class="text-red-500">*</span>
-            </label>
-            <select
-              [(ngModel)]="categoryCreateChallenge"
-              class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white transition"
-            >
-              <option value="" disabled selected>Select a tag</option>
-              <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Or Create New Tag
-            </label>
-            <input
-              [(ngModel)]="categoryCreateChallenge"
-              type="text"
-              placeholder="e.g., Human Rights"
-              class="block w-full px-4 py-3 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white transition"
-            />
-          </div>
-        </div>
-
         <!-- Description -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
@@ -1786,7 +1716,7 @@
           <button
             (click)="addCreateChallenge()"
             type="submit"
-            [disabled]="isLoading || !titleCreateChallenge || !descriptionCreateChallenge || !categoryCreateChallenge || !imageCreateChallenge"
+            [disabled]="isLoading || !titleCreateChallenge || !descriptionCreateChallenge || !imageCreateChallenge"
             class="px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-cyan-600 rounded-lg hover:from-teal-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <svg *ngIf="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -2523,26 +2453,6 @@
         class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
       />
 
-      <!-- Solution tag (select OR custom) -->
-      <label
-        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-      >
-        Solution Tag
-      </label>
-      <select
-        [(ngModel)]="editCategory"
-        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-      >
-        <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-        <option value="__new__">— Add new… —</option>
-      </select>
-      <input
-        *ngIf="editCategory === '__new__'"
-        [(ngModel)]="editCategoryCustom"
-        placeholder="New solution tag"
-        class="w-full mb-4 p-2 rounded border bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
-      />
-
       <!-- Description -->
       <label
         class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
@@ -2811,27 +2721,7 @@
         class="w-full mb-4 p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-slate-400"
       />
 
-      <label
-        class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-      >
-        Solution Tag (optional)
-      </label>
-      <div class="grid grid-cols-2 gap-2 mb-6">
-        <select
-          [(ngModel)]="mergeCategory"
-          class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100"
-        >
-          <option value="">— choose existing —</option>
-          <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-        </select>
-        <input
-          [(ngModel)]="mergeCategoryCustom"
-          placeholder="or type a new one…"
-          class="p-2 rounded-md border bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-sm text-gray-800 dark:text-gray-100"
-        />
-      </div>
-
-      <div class="flex justify-end gap-3">
+      <div class="mt-6 flex justify-end gap-3">
         <button
           (click)="toggle('showMergeSolution')"
           class="px-4 py-2 rounded-md bg-gray-500/80 hover:bg-gray-600 text-white text-sm"
