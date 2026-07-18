@@ -322,6 +322,80 @@ export class SolutionService {
       )
       .valueChanges();
   }
+
+  async getSolutionsForUserPicker(
+    uid = this.auth.currentUser?.uid,
+    email = this.auth.currentUser?.email
+  ): Promise<Solution[]> {
+    if (!uid || !email) return [];
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const matchesUser = (value: any): boolean => {
+      if (!value) return false;
+      if (typeof value === 'string') {
+        return value.trim().toLowerCase() === normalizedEmail || value === uid;
+      }
+      if (typeof value === 'object') {
+        const valueUid = String(
+          value.uid || value.authorAccountId || value.accountId || ''
+        );
+        const valueEmail = String(
+          value.name || value.email || value.authorEmail || ''
+        )
+          .trim()
+          .toLowerCase();
+        return valueUid === uid || valueEmail === normalizedEmail;
+      }
+      return false;
+    };
+
+    const listIncludesUser = (value: any): boolean => {
+      if (Array.isArray(value)) return value.some(matchesUser);
+      if (value && typeof value === 'object') {
+        return Object.entries(value).some(
+          ([key, entry]) => matchesUser(key) || matchesUser(entry)
+        );
+      }
+      return false;
+    };
+
+    // Older solutions use several participant shapes and may omit the
+    // solutionId field entirely. Read the documents directly so the picker
+    // can retain each Firestore document ID and evaluate every legacy shape.
+    const snapshot = await this.afs.collection<Solution>('solutions').ref.get();
+    return snapshot.docs
+      .map((document) => {
+        const solution = document.data() as Solution;
+        return {
+          ...solution,
+          solutionId: solution.solutionId || document.id,
+        };
+      })
+      .filter((solution) => {
+        const legacySolution = solution as any;
+        const ownerIds = [
+          solution.authorAccountId,
+          solution.initiatorId,
+          legacySolution.authorId,
+          legacySolution.ownerId,
+          legacySolution.userId,
+          legacySolution.createdBy,
+        ];
+        const ownerEmails = [
+          solution.authorEmail,
+          legacySolution.createdByEmail,
+          legacySolution.ownerEmail,
+        ].map((value) => String(value || '').trim().toLowerCase());
+
+        return (
+          ownerIds.includes(uid) ||
+          ownerEmails.includes(normalizedEmail) ||
+          listIncludesUser(solution.participants) ||
+          listIncludesUser(solution.participantsHolder) ||
+          listIncludesUser(solution.chosenAdmins)
+        );
+      });
+  }
   getAuthenticatedUserPendingEvaluations(email = this.auth.currentUser?.email) {
     if (!email) return of([] as Solution[]);
 

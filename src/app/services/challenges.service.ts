@@ -188,6 +188,7 @@ export class ChallengesService {
         category: challenge.category,
         image: challenge.image,
         authorId: user.uid,
+        addedByUid: user.uid,
         challengePageId: challenge.challengePageId,
       };
       return challengeRef.set(data, { merge: true });

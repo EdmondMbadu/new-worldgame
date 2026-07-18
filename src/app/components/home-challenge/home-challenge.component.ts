@@ -6,6 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
+import { Solution } from 'src/app/models/solution';
 import { ChallengeJoinRequest, ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
@@ -51,6 +52,7 @@ export class HomeChallengeComponent implements OnDestroy {
       frenchDescriptions?: string[];
       images: string[];
       tags?: string[];
+      addedByUids?: string[];
       privateFlags?: boolean[];
       participantCounts?: number[];
     };
@@ -61,6 +63,7 @@ export class HomeChallengeComponent implements OnDestroy {
   descriptions: string[] = [];
   challengeImages: string[] = [];
   challengeTags: string[] = [];
+  solutionAddedByUids: string[] = [];
   solutionPrivateFlags: boolean[] = [];
   solutionParticipantCounts: number[] = [];
   ids: string[] = [];
@@ -102,6 +105,15 @@ export class HomeChallengeComponent implements OnDestroy {
   mergeSolutionId = '';
   mergeCategory = '';
   mergeCategoryCustom = '';
+  showMySolutions = false;
+  mySolutions: Solution[] = [];
+  mySolutionSearch = '';
+  isLoadingMySolutions = false;
+  mySolutionsError = '';
+  addingSolutionId = '';
+  solutionRemovalTarget: { id: string; index: number; title: string } | null =
+    null;
+  isRemovingSolution = false;
 
   isHovering: boolean = false;
   @ViewChild('solutions') solutionsSection!: ElementRef;
@@ -305,6 +317,7 @@ export class HomeChallengeComponent implements OnDestroy {
     this.descriptions = [];
     this.challengeImages = [];
     this.challengeTags = [];
+    this.solutionAddedByUids = [];
     this.solutionPrivateFlags = [];
     this.solutionParticipantCounts = [];
     this.ids = [];
@@ -570,6 +583,7 @@ export class HomeChallengeComponent implements OnDestroy {
         frenchDescriptions: [],
         images: [],
         tags: [],
+        addedByUids: [],
         privateFlags: [],
         participantCounts: [],
       };
@@ -602,6 +616,9 @@ export class HomeChallengeComponent implements OnDestroy {
           ),
           tags: data.map((challenge) =>
             (challenge.category || '').toString().trim()
+          ),
+          addedByUids: data.map((challenge) =>
+            String(challenge.addedByUid || challenge.authorId || '')
           ),
           privateFlags: data.map((challenge) => !!challenge.isPrivate),
           participantCounts: data.map(
@@ -696,6 +713,7 @@ export class HomeChallengeComponent implements OnDestroy {
       : categoryData.descriptions;
     this.challengeImages = categoryData.images;
     this.challengeTags = categoryData.tags ?? [];
+    this.solutionAddedByUids = categoryData.addedByUids ?? [];
     this.solutionPrivateFlags = categoryData.privateFlags ?? [];
     this.solutionParticipantCounts = categoryData.participantCounts ?? [];
     this.ids = categoryData.ids!;
@@ -1135,6 +1153,7 @@ export class HomeChallengeComponent implements OnDestroy {
       | 'showEditHandouts'
       | 'showEditProgram'
       | 'showMergeSolution'
+      | 'showMySolutions'
       | 'showRemoveAdmin'
       | 'showAddAdmin'
   ) {
@@ -1955,38 +1974,80 @@ export class HomeChallengeComponent implements OnDestroy {
       console.error(`Error sending invite to ${participant}:`, error);
     }
   }
-  async deleteChallenge(challengeId: string, index: number) {
-    if (!confirm('Delete this challenge? This cannot be undone.')) {
+  canRemoveSolutionFromPage(index: number): boolean {
+    const currentUid = this.auth.currentUser?.uid || '';
+    return (
+      !!currentUid &&
+      (this.isAuthorPage || this.solutionAddedByUids[index] === currentUid)
+    );
+  }
+
+  openSolutionRemoval(index: number): void {
+    if (!this.canRemoveSolutionFromPage(index)) {
+      this.toast.error('Only the contributor or a workspace admin can remove this solution.');
       return;
     }
 
-    this.isLoading = true;
+    this.solutionRemovalTarget = {
+      id: this.ids[index],
+      index,
+      title: this.titles[index] || 'This solution',
+    };
+  }
 
+  closeSolutionRemoval(): void {
+    if (!this.isRemovingSolution) {
+      this.solutionRemovalTarget = null;
+    }
+  }
+
+  async removeSolutionFromPage(): Promise<void> {
+    const target = this.solutionRemovalTarget;
+    const currentIndex = target ? this.ids.indexOf(target.id) : -1;
+    if (
+      !target ||
+      currentIndex < 0 ||
+      !this.canRemoveSolutionFromPage(currentIndex)
+    ) {
+      return;
+    }
+
+    this.isRemovingSolution = true;
     try {
-      /* 1️⃣ delete the user-challenge document */
-      await this.afs.doc(`user-challenges/${challengeId}`).delete();
+      // Remove only the page link. The underlying solution and its team stay intact.
+      await this.afs.doc(`user-challenges/${target.id}`).delete();
 
-      /* 2️⃣ (optional) delete the linked Solution doc */
-      await this.afs
-        .doc(`solutions/${challengeId}`)
-        .delete()
-        .catch(() => {});
+      this.ids.splice(currentIndex, 1);
+      this.titles.splice(currentIndex, 1);
+      this.descriptions.splice(currentIndex, 1);
+      this.challengeImages.splice(currentIndex, 1);
+      this.challengeTags.splice(currentIndex, 1);
+      this.solutionAddedByUids.splice(currentIndex, 1);
+      this.solutionPrivateFlags.splice(currentIndex, 1);
+      this.solutionParticipantCounts.splice(currentIndex, 1);
+      this.pageChallengeCards = this.pageChallengeCards.filter(
+        (card) => (card.id || card.docId) !== target.id
+      );
 
-      /* 3️⃣ Remove from local arrays so the UI updates instantly */
-      this.ids.splice(index, 1);
-      this.titles.splice(index, 1);
-      this.descriptions.splice(index, 1);
-      this.challengeImages.splice(index, 1);
-      this.challengeTags.splice(index, 1);
-      this.solutionPrivateFlags.splice(index, 1);
-      this.solutionParticipantCounts.splice(index, 1);
+      const cachedChallenges = this.challenges[this.allChallengesKey];
+      cachedChallenges?.ids?.splice(currentIndex, 1);
+      cachedChallenges?.titles.splice(currentIndex, 1);
+      cachedChallenges?.frenchTitles?.splice(currentIndex, 1);
+      cachedChallenges?.descriptions.splice(currentIndex, 1);
+      cachedChallenges?.frenchDescriptions?.splice(currentIndex, 1);
+      cachedChallenges?.images.splice(currentIndex, 1);
+      cachedChallenges?.tags?.splice(currentIndex, 1);
+      cachedChallenges?.addedByUids?.splice(currentIndex, 1);
+      cachedChallenges?.privateFlags?.splice(currentIndex, 1);
+      cachedChallenges?.participantCounts?.splice(currentIndex, 1);
 
-      this.toast.success('Challenge deleted.');
-    } catch (err) {
-      console.error('Error deleting challenge:', err);
-      this.toast.error('Could not delete challenge—try again.');
+      this.solutionRemovalTarget = null;
+      this.toast.success('Solution removed from this challenge page.');
+    } catch (error) {
+      console.error('Unable to remove solution from challenge page:', error);
+      this.toast.error('Could not remove the solution from this page.');
     } finally {
-      this.isLoading = false;
+      this.isRemovingSolution = false;
     }
   }
   async changeSolutionTag(challengeId: string, localIndex: number) {
@@ -2344,10 +2405,76 @@ export class HomeChallengeComponent implements OnDestroy {
       : this.mergeCategory || this.categories[0] || 'General';
   }
 
-  async mergeExistingSolution() {
-    const currentUser = this.auth.currentUser;
-    if (!currentUser?.uid || !this.challengePageId) {
-      this.toast.error('Please sign in before merging a solution.');
+  get filteredMySolutions(): Solution[] {
+    const linkedIds = new Set(this.ids);
+    const search = this.mySolutionSearch.trim().toLowerCase();
+
+    return this.mySolutions.filter((solution) => {
+      const id = solution.solutionId || '';
+      if (!id || linkedIds.has(id)) {
+        return false;
+      }
+
+      if (!search) {
+        return true;
+      }
+
+      return [solution.title, solution.description]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(search));
+    });
+  }
+
+  async openMySolutions(): Promise<void> {
+    const email = this.auth.currentUser?.email;
+    if (!email) {
+      this.toast.error('Please sign in before adding a solution.');
+      return;
+    }
+
+    this.showMySolutions = true;
+    this.isLoadingMySolutions = true;
+    this.mySolutionsError = '';
+    this.mySolutionSearch = '';
+
+    try {
+      const solutions = await this.solution.getSolutionsForUserPicker(
+        this.auth.currentUser?.uid,
+        email
+      );
+      this.mySolutions = [...(solutions || [])].sort((a, b) =>
+        String(a.title || '').localeCompare(String(b.title || ''))
+      );
+    } catch (error) {
+      console.error('Unable to load user solutions:', error);
+      this.mySolutions = [];
+      this.mySolutionsError = 'Could not load your solutions. Please try again.';
+    } finally {
+      this.isLoadingMySolutions = false;
+    }
+  }
+
+  async addMySolutionToPage(solution: Solution): Promise<void> {
+    const id = String(solution.solutionId || '').trim();
+    if (!id) {
+      this.toast.error('This solution is missing its ID.');
+      return;
+    }
+
+    const added = await this.linkSolutionToChallengePage(
+      id,
+      String(solution.category || solution.solutionArea || 'General'),
+      solution
+    );
+    if (added) {
+      this.showMySolutions = false;
+      this.mySolutionSearch = '';
+    }
+  }
+
+  async addSolutionById(): Promise<void> {
+    if (!this.isAuthorPage) {
+      this.toast.error('Only workspace admins can add a solution by ID.');
       return;
     }
 
@@ -2357,28 +2484,60 @@ export class HomeChallengeComponent implements OnDestroy {
       return;
     }
 
-    this.isLoading = true;
-    try {
-      // 1) Load the solution
-      const solSnap = await this.afs.doc(`solutions/${id}`).ref.get();
-      if (!solSnap.exists) {
-        this.toast.error('No solution found with that ID.');
-        return;
-      }
-      const sol: any = solSnap.data();
+    const added = await this.linkSolutionToChallengePage(
+      id,
+      this.pickMergeCategory()
+    );
+    if (added) {
+      this.mergeSolutionId = '';
+      this.mergeCategory = '';
+      this.mergeCategoryCustom = '';
+      this.showMergeSolution = false;
+    }
+  }
 
-      // Keep the solution's existing team exactly as it is. Merging only adds
-      // a card that links the solution to this challenge page.
-      const category = this.pickMergeCategory();
+  private async linkSolutionToChallengePage(
+    id: string,
+    category: string,
+    existingSolution?: Solution
+  ): Promise<boolean> {
+    const currentUser = this.auth.currentUser;
+    if (!currentUser?.uid || !this.challengePageId) {
+      this.toast.error('Please sign in before adding a solution.');
+      return false;
+    }
+
+    if (this.ids.includes(id)) {
+      this.toast.warning('This solution is already on the challenge page.');
+      return false;
+    }
+
+    this.addingSolutionId = id;
+    try {
+      let solutionToAdd: Solution | undefined = existingSolution;
+      if (!solutionToAdd) {
+        const solSnap = await this.afs.doc<Solution>(`solutions/${id}`).ref.get();
+        if (!solSnap.exists) {
+          this.toast.error('No solution found with that ID.');
+          return false;
+        }
+        solutionToAdd = solSnap.data();
+      }
+
+      if (!solutionToAdd) {
+        this.toast.error('Could not load that solution.');
+        return false;
+      }
 
       const title = (
-        sol.title ||
-        sol.solutionTitle ||
+        solutionToAdd.title ||
+        (solutionToAdd as any).solutionTitle ||
         'Untitled Solution'
       ).toString();
-      const description = (sol.description || '').toString();
-      const image = (sol.image || '').toString();
+      const description = (solutionToAdd.description || '').toString();
+      const image = (solutionToAdd.image || '').toString();
       const titleLower = title.toLowerCase();
+      const solutionTag = category.trim() || 'General';
 
       const cardRef = this.afs.doc(`user-challenges/${id}`).ref;
       await cardRef.set(
@@ -2388,15 +2547,16 @@ export class HomeChallengeComponent implements OnDestroy {
           titleLower,
           description,
           image,
-          category,
+          category: solutionTag,
           authorId: currentUser.uid,
+          addedByUid: currentUser.uid,
           challengePageId: this.challengePageId,
         },
         { merge: true }
       );
 
-      if (!this.categories.includes(category)) {
-        this.categories.push(category);
+      if (!this.categories.includes(solutionTag)) {
+        this.categories.push(solutionTag);
         this.categories.sort();
       }
 
@@ -2405,25 +2565,22 @@ export class HomeChallengeComponent implements OnDestroy {
         this.titles.unshift(title);
         this.descriptions.unshift(description);
         this.challengeImages.unshift(image || 'No image available');
-        this.challengeTags.unshift(category);
-        this.solutionPrivateFlags.unshift(!!sol.isPrivate);
+        this.challengeTags.unshift(solutionTag);
+        this.solutionAddedByUids.unshift(currentUser.uid);
+        this.solutionPrivateFlags.unshift(!!solutionToAdd.isPrivate);
         this.solutionParticipantCounts.unshift(
-          this.countSolutionParticipants(sol.participants)
+          this.countSolutionParticipants(solutionToAdd.participants)
         );
       }
 
-      // reset modal
-      this.mergeSolutionId = '';
-      this.mergeCategory = '';
-      this.mergeCategoryCustom = '';
-      this.showMergeSolution = false;
-
-      this.toast.success('Solution merged and challenge card created.');
+      this.toast.success('Solution added to this challenge page.');
+      return true;
     } catch (err) {
-      console.error('Merge failed', err);
-      this.toast.error('Could not merge solution — check the ID and try again.');
+      console.error('Unable to add solution to challenge page:', err);
+      this.toast.error('Could not add the solution. Please try again.');
+      return false;
     } finally {
-      this.isLoading = false;
+      this.addingSolutionId = '';
     }
   }
 
