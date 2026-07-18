@@ -8,8 +8,7 @@ import { Router } from '@angular/router';
     standalone: false
 })
 export class CreateSolutionComponent {
-  initial: number = 10;
-  increment: number = 15;
+  initial: number = 12.5;
   steps: string[] = [
     'createSolution.steps.intro',
     'createSolution.steps.focusArea',
@@ -19,6 +18,16 @@ export class CreateSolutionComponent {
     'createSolution.steps.evaluators',
     'createSolution.steps.sdgs',
     'createSolution.steps.submit',
+  ];
+  stepLabelKeys: string[] = [
+    'createSolution.builder.stepLabels.start',
+    'createSolution.builder.stepLabels.focus',
+    'createSolution.builder.stepLabels.title',
+    'createSolution.builder.stepLabels.problem',
+    'createSolution.builder.stepLabels.team',
+    'createSolution.builder.stepLabels.reviewers',
+    'createSolution.builder.stepLabels.goals',
+    'createSolution.builder.stepLabels.launch',
   ];
   buttonTextKeys = new Array(this.steps.length).fill(
     'createSolution.buttons.continue'
@@ -51,6 +60,7 @@ export class CreateSolutionComponent {
     current--;
     if (current === -1) {
       this.router.navigate(['/home']);
+      return;
     }
     this.currentIndexDisplay = current;
     this.updateTimelineDisplay(current);
@@ -59,6 +69,6 @@ export class CreateSolutionComponent {
   }
 
   updateTimelineDisplay(current: number) {
-    this.initial = this.increment + this.increment * current;
+    this.initial = ((current + 1) / this.steps.length) * 100;
   }
 }

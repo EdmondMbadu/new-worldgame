@@ -636,6 +636,27 @@
     "buttons": {
       "continue": "Continuer",
       "submit": "Soumettre"
+    },
+    "builder": {
+      "eyebrow": "Créateur de solution",
+      "title": "Créer une solution",
+      "description": "Transformez un défi réel en un projet ciblé que votre équipe peut développer, évaluer et mettre en action.",
+      "progress": "Progression globale",
+      "progressNav": "Progression de la création de solution",
+      "step": "Étape",
+      "of": "sur",
+      "back": "Retour",
+      "note": "Vous pouvez revenir aux étapes précédentes avant de soumettre.",
+      "stepLabels": {
+        "start": "Commencer",
+        "focus": "Domaine d’action",
+        "title": "Titre du projet",
+        "problem": "Définir le problème",
+        "team": "Former votre équipe",
+        "reviewers": "Choisir les évaluateurs",
+        "goals": "Relier les ODD",
+        "launch": "Vérifier et lancer"
+      }
     }
   },
   "createSolutionSteps": {
@@ -651,6 +672,7 @@
       "label": "Titre de la solution"
     },
     "step3": {
+      "label": "Problème et opportunité",
       "placeholder": "Écrivez vos idées ici..."
     },
     "team": {

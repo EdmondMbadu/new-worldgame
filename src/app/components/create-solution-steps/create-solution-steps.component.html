@@ -1,127 +1,122 @@
-<div
-  class="flex justify-center gap-2.5 mx-4"
-  *ngFor="let im of imagePaths; let i = index"
->
-  <img
-    *ngIf="i == stepNumber && im !== ''"
-    class="h-60 rounded-lg mb-4"
-    [src]="im"
-    [attr.alt]="'createSolutionSteps.media.stepImageAlt' | translate"
-  />
-</div>
-<div class="flex justify-center gap-2.5 mx-4">
-  <img
-    class="h-12 rounded-full"
-    src="../../../assets/img/fuller.jpg"
-    [attr.alt]="'createSolutionSteps.media.guideAvatarAlt' | translate"
-  />
-  <div
-    class="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-e-xl rounded-es-xl dark:bg-gray-700 px-6"
-  >
-    <div class="flex items-center space-x-2 rtl:space-x-reverse">
-      <span class="text-md font-semibold text-gray-900 dark:text-white">
-        {{ 'createSolutionSteps.guideName' | translate }}
-      </span>
+<div class="solution-step">
+  <div class="step-introduction">
+    <div class="step-guidance">
+      <img
+        class="step-guide-avatar"
+        src="../../../assets/img/fuller.jpg"
+        [attr.alt]="'createSolutionSteps.media.guideAvatarAlt' | translate"
+      />
+      <div class="step-guidance__copy">
+        <span class="step-guide-name">
+          {{ 'createSolutionSteps.guideName' | translate }}
+        </span>
+        <p>{{ result }}</p>
+      </div>
     </div>
-    <p class="text-md font-normal py-2.5 text-gray-900 dark:text-white whitespace-pre-line">
-      {{ result }}
-    </p>
   </div>
-</div>
-<div *ngIf="stepNumber == 1" class="space-y-4 mt-10 mx-4">
+
+<div *ngIf="stepNumber == 1" class="step-form">
   <div class="relative z-0 w-full mb-5 group">
     <input
       [(ngModel)]="solution.newSolution.solutionArea"
-      type="email"
-      name="floating_email"
-      id="floating_email"
-      class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+      type="text"
+      name="solution_focus_area"
+      id="solution_focus_area"
+      class="step-text-input"
       placeholder=" "
       required
     />
     <label
-      for="floating_email"
-      class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+      for="solution_focus_area"
+      class="step-field-label"
       >{{ 'createSolutionSteps.step1.label' | translate }}</label
     >
   </div>
-  <div class="container flex mx-auto justify-center my-10">
+  <div class="step-actions">
     <button
+      type="button"
       *ngIf="solution.newSolution.solutionArea !== ''"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
     <button
+      type="button"
       [disabled]="true"
       *ngIf="solution.newSolution.solutionArea === ''"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
   </div>
 </div>
-<div *ngIf="stepNumber == 2" class="space-y-4 mt-10 mx-4">
+<div *ngIf="stepNumber == 2" class="step-form">
   <div class="relative z-0 w-full mb-5 group">
     <input
       [(ngModel)]="solution.newSolution.title"
-      type="email"
-      name="floating_email"
-      id="floating_email"
-      class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+      type="text"
+      name="solution_title"
+      id="solution_title"
+      class="step-text-input"
       placeholder=" "
       required
     />
     <label
-      for="floating_email"
-      class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+      for="solution_title"
+      class="step-field-label"
       >{{ 'createSolutionSteps.step2.label' | translate }}</label
     >
   </div>
-  <div class="container flex mx-auto justify-center my-10">
+  <div class="step-actions">
     <button
+      type="button"
       *ngIf="solution.newSolution.title !== ''"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
     <button
+      type="button"
       [disabled]="true"
       *ngIf="solution.newSolution.title === ''"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
   </div>
 </div>
-<div *ngIf="stepNumber == 3" class="space-y-4 mt-10 mx-4">
+<div *ngIf="stepNumber == 3" class="step-form">
   <div class="relative z-0 w-full mb-5 group">
-    <!-- <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Describe your problem focus in a few words</label> -->
+    <label for="solution_problem_description" class="step-field-label step-field-label--static">
+      {{ 'createSolutionSteps.step3.label' | translate }}
+    </label>
     <textarea
       [(ngModel)]="solution.newSolution.description"
-      id="message"
+      id="solution_problem_description"
       rows="4"
-      class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      class="step-textarea"
       [placeholder]="'createSolutionSteps.step3.placeholder' | translate"
     ></textarea>
   </div>
-  <div class="container flex mx-auto justify-center my-10">
+  <div class="step-actions">
     <button
+      type="button"
       *ngIf="solution.newSolution.description !== ''"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
     <button
+      type="button"
       [disabled]="true"
       *ngIf="solution.newSolution.description === ''"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
@@ -195,7 +190,7 @@
     </button>
   </div>
 </div> -->
-<form [formGroup]="myForm" *ngIf="stepNumber == 4" class="mt-10">
+<form [formGroup]="myForm" *ngIf="stepNumber == 4" class="step-form step-form--chips">
   <div class="relative z-0 w-full mb-5 group">
     <div class="mb-6 mt-4">
       <!-- <label for="invite" class="block mb-2 text-sm font-medium dark:text-gray-200">Team Members</label> -->
@@ -238,11 +233,12 @@
       </div>
     </div>
   </div>
-  <div class="container flex mx-auto justify-center my-10">
+  <div class="step-actions">
     <button
       *ngIf="!emails!.invalid"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+      type="button"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
@@ -250,13 +246,14 @@
       [disabled]="true"
       *ngIf="emails!.invalid"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+      type="button"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
   </div>
 </form>
-<form [formGroup]="myForm" *ngIf="stepNumber == 5" class="mt-10">
+<form [formGroup]="myForm" *ngIf="stepNumber == 5" class="step-form step-form--chips">
   <div class="relative z-0 w-full mb-5 group">
     <div class="flex flex-col">
       <div
@@ -316,11 +313,12 @@
     </div>
   </div>
 
-  <div class="container flex mx-auto justify-center my-10">
+  <div class="step-actions">
     <button
       *ngIf="!emails!.invalid"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+      type="button"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
@@ -328,7 +326,8 @@
       [disabled]="true"
       *ngIf="emails!.invalid"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+      type="button"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
@@ -337,7 +336,7 @@
 
 <section
   *ngIf="stepNumber == 6"
-  class="bg-gray-50 py-8 antialiased dark:bg-gray-800 md:py-16 px-4 mt-4"
+  class="sdg-section"
 >
   <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
     <div class="mb-4 flex items-center justify-between gap-4 md:mb-8">
@@ -349,10 +348,11 @@
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      <a
+      <button
+        type="button"
         *ngFor="let sdg of sdgs; let i = index"
         (click)="chooseSDG(i)"
-        class=" flex items-center rounded-lg border border-gray-200  px-4 py-2 hover:border-4  dark:bg-gray-800 dark:hover:bg-gray-700 {{
+        class="sdg-choice {{
           sdg.backgroundSelected
         }} "
       >
@@ -367,12 +367,12 @@
         <span class="text-sm font-medium text-gray-900 dark:text-white">{{
           sdg.fullname
         }}</span>
-      </a>
-      <div class="flex my-5">
+      </button>
+      <div class="sdg-select-all">
         <div class="flex items-center h-5">
           <input
             (change)="selectAllSdgs()"
-            id="terms"
+            id="select_all_sdgs"
             type="checkbox"
             value=""
             class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
@@ -380,41 +380,45 @@
           />
         </div>
         <label
-          for="terms"
+          for="select_all_sdgs"
           class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
           >{{ 'createSolutionSteps.sdgs.selectAll' | translate }}</label
         >
       </div>
     </div>
   </div>
-  <div class="container flex mx-auto justify-center my-10">
+  <div class="step-actions">
     <button
+      type="button"
       *ngIf="hasSelectedSDG"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
     <button
+      type="button"
       [disabled]="true"
       *ngIf="!hasSelectedSDG"
       (click)="updatePlayground(stepNumber)"
-      class="p-3 px-12 bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-white rounded-full"
+      class="step-primary-action"
     >
       {{ buttonTextKey | translate }}
     </button>
   </div>
 </section>
 
-<div class="container flex mx-auto justify-center my-10">
+<div class="step-actions step-actions--standalone">
   <button
+    type="button"
     *ngIf="stepNumber == 0 || stepNumber === 7"
     (click)="updatePlayground(stepNumber)"
-    class="p-3 px-12 text-white bg-teal-700 rounded-full hover:bg-teal-800"
+    class="step-primary-action"
   >
     {{ buttonTextKey | translate }}
   </button>
   <div id="confettiContainer"></div>
+</div>
 </div>
 
 <div

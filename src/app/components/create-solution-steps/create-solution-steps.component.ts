@@ -75,17 +75,6 @@ export class CreateSolutionStepsComponent implements OnInit {
   isHovering?: boolean;
   path: string = '';
   isLoading: boolean = false;
-  imagePaths: string[] = [
-    '../../../assets/img/nwg-start-solution.png',
-    '../../../assets/img/nwg-working-title.png',
-    '../../../assets/img/nwg-description.png',
-    '',
-    '../../../assets/img/nwg-email.png',
-    '../../../assets/img/nwg-email.png',
-    '',
-    '../../../assets/img/nwg-submit.png',
-  ];
-
   createAccountSuccess: boolean = false;
   createAccountPopUp: boolean = false;
   createAccountError: boolean = false;
@@ -235,7 +224,7 @@ export class CreateSolutionStepsComponent implements OnInit {
         this.sdgSelected[0] = -1;
       } else {
         this.sdgs[0].backgroundSelected =
-          'bg-teal-100 dark:border-gray-100 dark:border-4';
+          'bg-teal-100';
         this.sdgSelected[0] = 1;
       }
     } else {
@@ -249,7 +238,7 @@ export class CreateSolutionStepsComponent implements OnInit {
         this.sdgSelected[index] = -1;
       } else {
         this.sdgs[index].backgroundSelected =
-          'bg-teal-100 dark:border-gray-100 dark:border-4';
+          'bg-teal-100';
         this.sdgSelected[index] = 1;
       }
     }
@@ -360,7 +349,7 @@ export class CreateSolutionStepsComponent implements OnInit {
       // Select all SDGs
       for (let i = 0; i < this.sdgs.length; i++) {
         this.sdgs[i].backgroundSelected =
-          'bg-teal-100 dark:border-gray-100 dark:border-4';
+          'bg-teal-100';
         this.sdgSelected[i] = 1;
       }
     }

@@ -887,6 +887,27 @@
     "buttons": {
       "continue": "Continue",
       "submit": "Submit"
+    },
+    "builder": {
+      "eyebrow": "Solution builder",
+      "title": "Create a solution",
+      "description": "Shape a real-world challenge into a focused project your team can develop, review, and put into action.",
+      "progress": "Overall progress",
+      "progressNav": "Solution creation progress",
+      "step": "Step",
+      "of": "of",
+      "back": "Back",
+      "note": "You can return to earlier steps before submitting.",
+      "stepLabels": {
+        "start": "Get started",
+        "focus": "Focus area",
+        "title": "Project title",
+        "problem": "Define the problem",
+        "team": "Build your team",
+        "reviewers": "Choose evaluators",
+        "goals": "Connect the SDGs",
+        "launch": "Review and launch"
+      }
     }
   },
   "createSolutionSteps": {
@@ -902,6 +923,7 @@
       "label": "Solution Title"
     },
     "step3": {
+      "label": "Problem and opportunity",
       "placeholder": "Write your thoughts here..."
     },
     "team": {
