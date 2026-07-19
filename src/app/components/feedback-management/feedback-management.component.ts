@@ -2,6 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { map } from 'rxjs/operators';
+import {
+  allFeedbackPdfFilename,
+  buildFeedbackPdf,
+  feedbackPdfFilename,
+} from './feedback-pdf.util';
 
 type AskStatus = 'new' | 'read' | 'closed';
 type SortKey = 'createdAt' | 'status';
@@ -90,6 +95,8 @@ export class FeedbackManagementComponent implements OnInit {
 
   copiedEmail = new Set<string>();
   copiedAll = new Set<string>();
+  downloadingPdf = new Set<string>();
+  downloadingAllPdf = false;
   private emailTimers = new Map<string, any>();
   private allTimers = new Map<string, any>();
 
@@ -389,6 +396,48 @@ export class FeedbackManagementComponent implements OnInit {
     a.download = `nwg_feedback_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async downloadFeedbackPdf(row: Row): Promise<void> {
+    if (this.downloadingPdf.has(row.id)) return;
+    this.downloadingPdf.add(row.id);
+
+    try {
+      await this.allowLoadingStateToRender();
+      const generatedAt = new Date();
+      buildFeedbackPdf([row], {
+        generatedAt,
+        reportTitle: 'Individual Feedback Submission',
+      }).save(feedbackPdfFilename(row, generatedAt));
+    } catch (error) {
+      console.error('Failed to download feedback PDF', error);
+      alert('Could not create this feedback PDF. Please try again.');
+    } finally {
+      this.downloadingPdf.delete(row.id);
+    }
+  }
+
+  async downloadAllFeedbackPdf(): Promise<void> {
+    if (this.downloadingAllPdf || this.items.length === 0) return;
+    this.downloadingAllPdf = true;
+
+    try {
+      await this.allowLoadingStateToRender();
+      const generatedAt = new Date();
+      buildFeedbackPdf(this.items, {
+        generatedAt,
+        reportTitle: 'Complete Feedback Report',
+      }).save(allFeedbackPdfFilename(generatedAt));
+    } catch (error) {
+      console.error('Failed to download all feedback as PDF', error);
+      alert('Could not create the complete feedback PDF. Please try again.');
+    } finally {
+      this.downloadingAllPdf = false;
+    }
+  }
+
+  private allowLoadingStateToRender(): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, 0));
   }
 
   copy(text: string) {
