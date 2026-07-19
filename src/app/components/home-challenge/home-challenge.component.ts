@@ -186,6 +186,7 @@ export class HomeChallengeComponent implements OnDestroy {
   isSearchingUsers = false;
   selectedUserToAdd: { email: string; displayName: string; photoUrl?: string; uid?: string } | null = null;
   allUsers: any[] = [];  // Cached users for instant client-side filtering
+  private allUsersLoadPromise?: Promise<void>;
   showUserSuggestions = false;
   private userSearchTimeout: any;  // For debouncing server-side search
   bulkParticipantsText = '';
@@ -207,6 +208,8 @@ export class HomeChallengeComponent implements OnDestroy {
   private languageSub?: Subscription;
   private pageChallengesSub?: Subscription;
   private challengeHydrationSub?: Subscription;
+  private pageLoadToken = 0;
+  private pageChallengeSignature = '';
   private readonly allChallengesKey = '__all__';
 
   // home-challenge.component.ts
@@ -251,17 +254,17 @@ export class HomeChallengeComponent implements OnDestroy {
         this.pageReady = true;
         return;
       }
+      if (
+        this.challengePageId &&
+        idOrSlug === this.challengePage?.customUrl
+      ) {
+        return;
+      }
       window.scrollTo(0, 0);
       this.pageReady = false;
       this.loadChallengePage(idOrSlug);
     });
     
-    // Load all users on init for autocomplete (same as dashboard)
-    this.auth.getALlUsers().subscribe((users) => {
-      this.allUsers = users || [];
-      console.log(`Loaded ${this.allUsers.length} users for search`);
-    });
-
     this.challengeJoinRequestsSub = this.challenge
       .getChallengeJoinRequests()
       .subscribe({
@@ -274,6 +277,7 @@ export class HomeChallengeComponent implements OnDestroy {
       });
   }
   ngOnDestroy(): void {
+    this.pageLoadToken += 1;
     this.languageSub?.unsubscribe();
     this.participantPresenceSub?.unsubscribe();
     this.challengeJoinRequestsSub?.unsubscribe();
@@ -295,7 +299,8 @@ export class HomeChallengeComponent implements OnDestroy {
     this.logoImage = '';
     this.image = '';
   }
-  loadChallengePage(idOrSlug: string): void {
+  async loadChallengePage(idOrSlug: string): Promise<void> {
+    const loadToken = ++this.pageLoadToken;
     // Reset challenge-related data before fetching new ones
     this.resetPageState();
     this.pageChallengesSub?.unsubscribe();
@@ -309,60 +314,39 @@ export class HomeChallengeComponent implements OnDestroy {
     this.solutionPrivateFlags = [];
     this.solutionParticipantCounts = [];
     this.ids = [];
+    this.pageChallengeSignature = '';
 
-    // Known Firestore document IDs can be loaded directly. This avoids an
-    // unnecessary custom-URL query on the common /home-challenge/:id route.
-    const customUrlObservable = this.challenge.getChallengePageByCustomUrl(idOrSlug);
-    const idObservable = this.challenge.getChallengePageById(idOrSlug);
-
-    if (/^[A-Za-z0-9]{20}$/.test(idOrSlug)) {
-      idObservable.subscribe((idData: any) => {
-        if (idData) {
-          this.challengePageId = idOrSlug;
-          this.processChallengePageData(idData, false);
-          return;
-        }
-
-        // A custom URL can technically look like a generated ID, so retain a
-        // fallback for that uncommon case.
-        customUrlObservable.subscribe((customUrlData: any) => {
-          if (customUrlData) {
-            this.challengePageId = customUrlData.challengePageId || idOrSlug;
-            this.processChallengePageData(customUrlData, true);
-          } else {
-            console.error('Challenge page not found');
-            this.pageReady = true;
-          }
-        });
-      });
-      return;
-    }
-
-    // Track if we loaded by custom URL to avoid unnecessary redirects
-    let loadedByCustomUrl = false;
-
-    // Combine both observables - try custom URL first, then ID
-    customUrlObservable.subscribe((customUrlData: any) => {
-      if (customUrlData) {
-        this.challengePageId = customUrlData.challengePageId || idOrSlug;
-        loadedByCustomUrl = true;
-        this.processChallengePageData(customUrlData, loadedByCustomUrl);
-      } else {
-        // Fall back to ID lookup
-        idObservable.subscribe((idData: any) => {
-          if (idData) {
-            this.challengePageId = idOrSlug;
-            this.processChallengePageData(idData, loadedByCustomUrl);
-          } else {
-            console.error('Challenge page not found');
-            this.pageReady = true;
-          }
-        });
+    try {
+      const resolved = await this.challenge.resolveChallengePage(idOrSlug);
+      if (loadToken !== this.pageLoadToken) {
+        return;
       }
-    });
+      if (!resolved) {
+        console.error('Challenge page not found');
+        this.pageReady = true;
+        return;
+      }
+
+      this.challengePageId = resolved.id;
+      this.processChallengePageData(
+        resolved.data,
+        resolved.loadedByCustomUrl,
+        loadToken
+      );
+    } catch (error) {
+      if (loadToken !== this.pageLoadToken) {
+        return;
+      }
+      console.error('Unable to load challenge page', error);
+      this.pageReady = true;
+    }
   }
 
-  private processChallengePageData(data: any, loadedByCustomUrl: boolean = false): void {
+  private processChallengePageData(
+    data: any,
+    loadedByCustomUrl: boolean = false,
+    loadToken: number = this.pageLoadToken
+  ): void {
         this.challengePage = data;
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
@@ -435,14 +419,75 @@ export class HomeChallengeComponent implements OnDestroy {
         this.checkAccess();
         this.maybePromptJoin();
 
-        this.pageChallengesSub?.unsubscribe();
-        this.pageChallengesSub = this.challenge
-          .getUserChallengesForPage(this.challengePageId)
-          .subscribe((challenges: any[]) => {
-            const pageChallenges = challenges || [];
-            this.pageChallengeCards = pageChallenges;
-            this.fetchChallenges(pageChallenges);
-          });
+        void this.loadPageChallenges(loadToken);
+  }
+
+  private async loadPageChallenges(loadToken: number): Promise<void> {
+    this.pageChallengesSub?.unsubscribe();
+
+    try {
+      const initialChallenges = await this.challenge
+        .getUserChallengesForPageOnce(this.challengePageId);
+      if (loadToken !== this.pageLoadToken) {
+        return;
+      }
+      this.applyPageChallenges(initialChallenges);
+    } catch (error) {
+      console.error('Unable to load solution links for challenge page', error);
+    }
+
+    if (loadToken !== this.pageLoadToken) {
+      return;
+    }
+
+    this.pageChallengesSub = this.challenge
+      .getUserChallengesForPage(this.challengePageId)
+      .subscribe({
+        next: (challenges: any[]) => {
+          if (loadToken !== this.pageLoadToken) {
+            return;
+          }
+          const nextChallenges = challenges || [];
+          if (!nextChallenges.length && this.pageChallengeCards.length) {
+            void this.confirmEmptyPageChallenges(loadToken);
+            return;
+          }
+          this.applyPageChallenges(nextChallenges);
+        },
+        error: (error) => {
+          console.error('Solution link updates stopped', error);
+        },
+      });
+  }
+
+  private async confirmEmptyPageChallenges(loadToken: number): Promise<void> {
+    try {
+      const confirmedChallenges = await this.challenge
+        .getUserChallengesForPageOnce(this.challengePageId);
+      if (loadToken === this.pageLoadToken) {
+        this.applyPageChallenges(confirmedChallenges);
+      }
+    } catch (error) {
+      // Preserve the last known-good grid when an empty cached emission cannot
+      // be confirmed by Firestore.
+      console.warn('Could not confirm an empty solution list', error);
+    }
+  }
+
+  private applyPageChallenges(challenges: any[]): void {
+    const pageChallenges = challenges || [];
+    const signature = pageChallenges
+      .map((challenge) => String(challenge.id || challenge.docId || ''))
+      .filter(Boolean)
+      .sort()
+      .join('|');
+    if (signature === this.pageChallengeSignature) {
+      return;
+    }
+
+    this.pageChallengeSignature = signature;
+    this.pageChallengeCards = pageChallenges;
+    this.fetchChallenges(pageChallenges);
   }
   private checkAccess(): void {
     const email = this.normalizeEmail(this.auth.currentUser?.email || '');
@@ -927,68 +972,50 @@ export class HomeChallengeComponent implements OnDestroy {
         this.normalizeEmail(email)
       );
       const uniqueEmails = Array.from(new Set(normalizedEmails));
+      const users = await this.auth.getUsersByEmails(uniqueEmails);
+      const usersByEmail = new Map(
+        users.map((user) => [this.normalizeEmail(user.email || ''), user])
+      );
+      const currentUserEmail = this.normalizeEmail(
+        this.auth.currentUser?.email || ''
+      );
+      const currentUid =
+        this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
 
-      const results = await Promise.all(
-        uniqueEmails.map(async (email) => {
-          try {
-            const currentUserEmail = this.normalizeEmail(
-              this.auth.currentUser?.email || ''
-            );
-            const currentUid =
-              this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
-            if (email === currentUserEmail && currentUid) {
-              const currentUser = this.auth.currentUser || {};
-              const name = [currentUser.firstName, currentUser.lastName]
-                .filter(Boolean)
-                .join(' ')
-                .trim();
-              return {
-                email,
-                displayName: name || currentUser.email || email,
-                uid: currentUid,
-                photoUrl:
-                  currentUser.profilePicture?.downloadURL ||
-                  currentUser.profilePicPath ||
-                  '',
-                lastActiveAt: new Date().toISOString(),
-                isOnline: true,
-                exists: true,
-                isCurrentUser: true,
-              };
-            }
-
-            const users = await firstValueFrom(
-              this.auth.getUserFromEmail(email)
-            );
-            const user = users?.[0];
-            if (user) {
-              const name = [user.firstName, user.lastName]
-                .filter(Boolean)
-                .join(' ')
-                .trim();
-              return {
-                email,
-                displayName: name || email,
-                uid: user.uid,
-                photoUrl:
-                  user.profilePicture?.downloadURL || user.profilePicPath || '',
-                lastActiveAt: user.lastActiveAt,
-                isOnline: false,
-                exists: true,
-                isCurrentUser: user.uid === this.auth.currentUser?.uid,
-              };
-            }
-          } catch {}
-
+      const results = uniqueEmails.map((email) => {
+        const user = usersByEmail.get(email);
+        const isCurrentUser = email === currentUserEmail && !!currentUid;
+        const profileUser = isCurrentUser ? this.auth.currentUser || user : user;
+        if (profileUser || isCurrentUser) {
+          const name = [profileUser?.firstName, profileUser?.lastName]
+            .filter(Boolean)
+            .join(' ')
+            .trim();
           return {
             email,
-            displayName: email,
-            exists: false,
-            isOnline: false,
-            isCurrentUser: false,
+            displayName: name || profileUser?.email || email,
+            uid: isCurrentUser ? currentUid : profileUser?.uid,
+            photoUrl:
+              profileUser?.profilePicture?.downloadURL ||
+              profileUser?.profilePicPath ||
+              '',
+            lastActiveAt: isCurrentUser
+              ? new Date().toISOString()
+              : profileUser?.lastActiveAt,
+            isOnline: isCurrentUser,
+            exists: true,
+            isCurrentUser,
           };
-        })
-      );
+        }
+
+        return {
+          email,
+          displayName: email,
+          exists: false,
+          isOnline: false,
+          isCurrentUser: false,
+        };
+      });
 
       const profileMap = new Map(
         results.map((profile) => [profile.email, profile])
@@ -1140,8 +1167,9 @@ export class HomeChallengeComponent implements OnDestroy {
   ) {
     this[property] = !this[property];
     
-    // Reset search when opening add participant modal (users already loaded on init)
+    // Load the large user directory only when an admin opens a people picker.
     if (property === 'showAddTeamMember' && this.showAddTeamMember) {
+      void this.loadAllUsersForSearch();
       this.clearSelectedUser();
       this.clearBulkParticipants();
     }
@@ -1152,8 +1180,8 @@ export class HomeChallengeComponent implements OnDestroy {
       this.teamMemberToDelete = '';
     }
 
-    // Reset search when opening add admin modal (users already loaded on init)
     if (property === 'showAddAdmin' && this.showAddAdmin) {
+      void this.loadAllUsersForSearch();
       this.clearSelectedAdmin();
     }
 
@@ -1162,6 +1190,27 @@ export class HomeChallengeComponent implements OnDestroy {
       this.removeAdminSearchQuery = '';
       this.adminToRemove = '';
     }
+  }
+
+  private loadAllUsersForSearch(): Promise<void> {
+    if (this.allUsers.length) {
+      return Promise.resolve();
+    }
+    if (this.allUsersLoadPromise) {
+      return this.allUsersLoadPromise;
+    }
+
+    this.allUsersLoadPromise = firstValueFrom(this.auth.getALlUsers())
+      .then((users) => {
+        this.allUsers = users || [];
+      })
+      .catch((error) => {
+        console.warn('Could not preload the user search directory', error);
+      })
+      .finally(() => {
+        this.allUsersLoadPromise = undefined;
+      });
+    return this.allUsersLoadPromise;
   }
   get adminEmailsToRender(): string[] {
     const list = this.visibleAdminEmails || [];

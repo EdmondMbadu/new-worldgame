@@ -24,6 +24,12 @@ export interface FeaturedChallengeSpaceConfig {
   };
 }
 
+export interface ResolvedChallengePage {
+  id: string;
+  data: ChallengePage;
+  loadedByCustomUrl: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -123,6 +129,23 @@ export class ChallengesService {
         ref.where('challengePageId', '==', challengePageId)
       )
       .valueChanges({ idField: 'docId' } as any);
+  }
+
+  async getUserChallengesForPageOnce(challengePageId: string): Promise<any[]> {
+    if (!challengePageId) {
+      return [];
+    }
+
+    const snapshot = await this.afs
+      .collection('user-challenges', (ref) =>
+        ref.where('challengePageId', '==', challengePageId)
+      )
+      .ref.get();
+
+    return snapshot.docs.map((doc) => ({
+      ...(doc.data() as Record<string, any>),
+      docId: doc.id,
+    }));
   }
   extractCategories() {
     this.afs
@@ -409,6 +432,57 @@ export class ChallengesService {
       .pipe(
         map((pages) => (pages && pages.length > 0 ? pages[0] : null))
       );
+  }
+
+  async resolveChallengePage(
+    idOrSlug: string
+  ): Promise<ResolvedChallengePage | null> {
+    const value = String(idOrSlug || '').trim();
+    if (!value) {
+      return null;
+    }
+
+    if (/^[A-Za-z0-9]{20}$/.test(value)) {
+      const idSnapshot = await this.afs.doc<ChallengePage>(
+        `challengePages/${value}`
+      ).ref.get();
+      if (idSnapshot.exists) {
+        return {
+          id: idSnapshot.id,
+          data: idSnapshot.data() as ChallengePage,
+          loadedByCustomUrl: false,
+        };
+      }
+    }
+
+    const customUrlSnapshot = await this.afs
+      .collection<ChallengePage>('challengePages', (ref) =>
+        ref.where('customUrl', '==', value).limit(1)
+      )
+      .ref.get();
+    const customUrlDoc = customUrlSnapshot.docs[0];
+    if (customUrlDoc) {
+      return {
+        id: customUrlDoc.id,
+        data: customUrlDoc.data() as ChallengePage,
+        loadedByCustomUrl: true,
+      };
+    }
+
+    if (!/^[A-Za-z0-9]{20}$/.test(value)) {
+      const idSnapshot = await this.afs.doc<ChallengePage>(
+        `challengePages/${value}`
+      ).ref.get();
+      if (idSnapshot.exists) {
+        return {
+          id: idSnapshot.id,
+          data: idSnapshot.data() as ChallengePage,
+          loadedByCustomUrl: false,
+        };
+      }
+    }
+
+    return null;
   }
 
   async checkCustomUrlExists(customUrl: string, excludePageId?: string): Promise<boolean> {

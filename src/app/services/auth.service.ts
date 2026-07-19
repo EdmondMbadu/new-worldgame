@@ -383,6 +383,50 @@ export class AuthService {
     return this.afs.collection<User>(`users`).valueChanges();
   }
 
+  async getUsersByEmails(emails: string[]): Promise<User[]> {
+    const normalizedEmails = Array.from(
+      new Set(
+        (emails || [])
+          .map((email) => String(email || '').trim().toLowerCase())
+          .filter(Boolean)
+      )
+    );
+    if (!normalizedEmails.length) {
+      return [];
+    }
+
+    const chunks: string[][] = [];
+    for (let index = 0; index < normalizedEmails.length; index += 30) {
+      chunks.push(normalizedEmails.slice(index, index + 30));
+    }
+
+    const snapshots = await Promise.all(
+      chunks.flatMap((chunk) => [
+        this.afs
+          .collection<User>('users')
+          .ref.where('emailLower', 'in', chunk)
+          .get(),
+        this.afs
+          .collection<User>('users')
+          .ref.where('email', 'in', chunk)
+          .get(),
+      ])
+    );
+
+    const usersById = new Map<string, User>();
+    snapshots.forEach((snapshot) => {
+      snapshot.docs.forEach((doc) => {
+        const user = doc.data() as User;
+        usersById.set(doc.id, {
+          ...user,
+          uid: user.uid || doc.id,
+        });
+      });
+    });
+
+    return Array.from(usersById.values());
+  }
+
   /**
    * Search users by email prefix - scalable Firestore query
    * Uses Firestore's string ordering for efficient prefix matching
