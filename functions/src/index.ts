@@ -751,6 +751,17 @@ function buildWeeklyActivityEmailData(
   const reportingUsers = users.filter(
     (user) => !isLikelyBotForAutomation(user, statsByEmail)
   );
+  const teamMemberNameByEmail = new Map<string, string>();
+  reportingUsers.forEach((user) => {
+    const email = normalizeEmailForAutomation(user?.email);
+    if (!email) return;
+    const fullName =
+      `${String(user?.firstName || '').trim()} ${String(
+        user?.lastName || ''
+      ).trim()}`.trim() ||
+      String(user?.displayName || user?.name || '').trim();
+    teamMemberNameByEmail.set(email, fullName || email);
+  });
   const reportingUserEmailSet = new Set(
     reportingUsers
       .map((user) => normalizeEmailForAutomation(user?.email))
@@ -828,18 +839,30 @@ function buildWeeklyActivityEmailData(
       (a, b) => solutionActivityMsForAutomation(b) - solutionActivityMsForAutomation(a)
     )
     .slice(0, 12)
-    .map((solution) => ({
-      title:
-        String(solution?.title || 'Untitled').trim() || 'Untitled',
-      description: String(solution?.description || '').trim(),
-      solutionArea: String(solution?.solutionArea || '').trim(),
-      authorName:
-        String(solution?.authorName || '').trim() ||
-        normalizeEmailForAutomation(solution?.authorEmail) ||
-        'Unknown author',
-      lastActivityMs: solutionActivityMsForAutomation(solution),
-      dashboardUrl: `${APP_BASE_URL}/dashboard/${String(solution?.solutionId || '').trim()}`,
-    }));
+    .map((solution) => {
+      const teamEmails = Array.from(
+        new Set(
+          [
+            ...normalizeParticipantEmailsForAutomation(solution?.participants),
+            normalizeEmailForAutomation(solution?.authorEmail),
+            normalizeEmailForAutomation(solution?.ownerEmail),
+          ].filter(Boolean)
+        )
+      );
+
+      return {
+        title: String(solution?.title || 'Untitled').trim() || 'Untitled',
+        description: String(solution?.description || '').trim(),
+        solutionArea: String(solution?.solutionArea || '').trim(),
+        teamMembers: teamEmails.map(
+          (email) => teamMemberNameByEmail.get(email) || email
+        ),
+        lastActivityMs: solutionActivityMsForAutomation(solution),
+        dashboardUrl: `${APP_BASE_URL}/dashboard/${String(
+          solution?.solutionId || ''
+        ).trim()}`,
+      };
+    });
 
   return {
     totalUsers: reportingUsers.length,
@@ -905,7 +928,9 @@ function buildWeeklyActivityReportHtmlForAutomation(
     ? report.workedSolutions
         .map((solution) => {
           const meta = [
-            solution.authorName,
+            solution.teamMembers.length
+              ? `Team (${solution.teamMembers.length}): ${solution.teamMembers.join(', ')}`
+              : 'Team not listed',
             solution.solutionArea,
             `Last written edit ${formatDateMDYForAutomation(solution.lastActivityMs)}`,
           ]

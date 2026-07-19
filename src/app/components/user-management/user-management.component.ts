@@ -2170,25 +2170,33 @@ export class UserManagementComponent implements OnInit {
       )
       .slice(0, 12)
       .map((sol) => {
-        const authorEmail = this.normalizeEmail((sol as any).authorEmail || '');
-        const authorFromDir = this.userDirectory.get(authorEmail);
-        const authorName =
-          String((sol as any).authorName || '').trim() ||
-          authorFromDir?.name ||
-          authorEmail ||
-          'Unknown author';
-
         return {
           title: String((sol as any).title || 'Untitled').trim() || 'Untitled',
           description: String((sol as any).description || '').trim(),
           solutionArea: String((sol as any).solutionArea || '').trim(),
-          authorName,
+          teamMembers: this.solutionTeamMembersForReport(sol),
           lastActivityMs: this.solutionSubstantiveEditMs(sol),
           dashboardUrl: `https://newworld-game.org/dashboard/${
             (sol as any).solutionId || ''
           }`,
         };
       });
+  }
+
+  private solutionTeamMembersForReport(solution: Solution): string[] {
+    const emails = new Set(
+      this.normalizeParticipantEmails((solution as any).participants)
+    );
+    [
+      this.normalizeEmail((solution as any).authorEmail),
+      this.normalizeEmail((solution as any).ownerEmail),
+    ]
+      .filter(Boolean)
+      .forEach((email) => emails.add(email));
+
+    return Array.from(emails).map(
+      (email) => this.userDirectory.get(email)?.name || email
+    );
   }
 
   private buildWeeklyActivityReportHtml(): string {
@@ -2233,7 +2241,9 @@ export class UserManagementComponent implements OnInit {
       ? workedSolutions
           .map((solution) => {
             const meta = [
-              solution.authorName,
+              solution.teamMembers.length
+                ? `Team (${solution.teamMembers.length}): ${solution.teamMembers.join(', ')}`
+                : 'Team not listed',
               solution.solutionArea,
               `Last written edit ${this.formatDateMDY(solution.lastActivityMs)}`,
             ]
@@ -2675,28 +2685,27 @@ export class UserManagementComponent implements OnInit {
 
   private normalizeParticipantEmails(input: unknown): string[] {
     if (!input) return [];
+    const normalizeParticipant = (item: any): string => {
+      if (typeof item === 'string') return this.normalizeEmail(item);
+      if (item && typeof item === 'object') {
+        return this.normalizeEmail(item.email || item.name || '');
+      }
+      return '';
+    };
+
     // Array<string> or Array<{name:string}>
     if (Array.isArray(input)) {
-      return input
-        .map((item: any) => {
-          if (typeof item === 'string') return item.trim();
-          if (
-            item &&
-            typeof item === 'object' &&
-            typeof item.name === 'string'
-          ) {
-            return item.name.trim(); // in your current data, "name" holds the email
-          }
-          return '';
-        })
-        .filter(Boolean)
-        .map((e) => e.toLowerCase());
+      return Array.from(new Set(input.map(normalizeParticipant).filter(Boolean)));
     }
     // Object map { key: email }
     if (typeof input === 'object') {
-      return Object.values(input as Record<string, string>)
-        .filter(Boolean)
-        .map((e) => e.trim().toLowerCase());
+      return Array.from(
+        new Set(
+          Object.values(input as Record<string, unknown>)
+            .map(normalizeParticipant)
+            .filter(Boolean)
+        )
+      );
     }
     return [];
   }
