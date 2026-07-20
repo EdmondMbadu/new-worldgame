@@ -211,6 +211,8 @@ export class HomeChallengeComponent implements OnDestroy {
   private pageLoadToken = 0;
   private pageChallengeSignature = '';
   private readonly allChallengesKey = '__all__';
+  private readonly historyPageIdKey = 'homeChallengePageId';
+  private readonly historyPageSlugKey = 'homeChallengePageSlug';
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -262,7 +264,8 @@ export class HomeChallengeComponent implements OnDestroy {
       }
       window.scrollTo(0, 0);
       this.pageReady = false;
-      this.loadChallengePage(idOrSlug);
+      const storedPageId = this.getStoredChallengePageId(idOrSlug);
+      this.loadChallengePage(storedPageId || idOrSlug, idOrSlug);
     });
     
     this.challengeJoinRequestsSub = this.challenge
@@ -299,7 +302,10 @@ export class HomeChallengeComponent implements OnDestroy {
     this.logoImage = '';
     this.image = '';
   }
-  async loadChallengePage(idOrSlug: string): Promise<void> {
+  async loadChallengePage(
+    idOrSlug: string,
+    routeIdOrSlug: string = idOrSlug
+  ): Promise<void> {
     const loadToken = ++this.pageLoadToken;
     // Reset challenge-related data before fetching new ones
     this.resetPageState();
@@ -328,9 +334,11 @@ export class HomeChallengeComponent implements OnDestroy {
       }
 
       this.challengePageId = resolved.id;
+      const resolvedSlug = resolved.data.customUrl || '';
+      this.rememberResolvedChallengePage(resolved.id, resolvedSlug);
       this.processChallengePageData(
         resolved.data,
-        resolved.loadedByCustomUrl,
+        resolved.loadedByCustomUrl || routeIdOrSlug === resolvedSlug,
         loadToken
       );
     } catch (error) {
@@ -340,6 +348,32 @@ export class HomeChallengeComponent implements OnDestroy {
       console.error('Unable to load challenge page', error);
       this.pageReady = true;
     }
+  }
+
+  private getStoredChallengePageId(routeIdOrSlug: string): string {
+    const state = window.history.state || {};
+    const storedPageId = String(state[this.historyPageIdKey] || '');
+    const storedSlug = String(state[this.historyPageSlugKey] || '');
+
+    return storedSlug === routeIdOrSlug && /^[A-Za-z0-9]{20}$/.test(storedPageId)
+      ? storedPageId
+      : '';
+  }
+
+  private rememberResolvedChallengePage(pageId: string, slug: string): void {
+    if (!slug || this.activatedRoute.snapshot.paramMap.get('id') !== slug) {
+      return;
+    }
+
+    window.history.replaceState(
+      {
+        ...(window.history.state || {}),
+        [this.historyPageIdKey]: pageId,
+        [this.historyPageSlugKey]: slug,
+      },
+      '',
+      this.router.url
+    );
   }
 
   private processChallengePageData(
@@ -361,7 +395,11 @@ export class HomeChallengeComponent implements OnDestroy {
           // Only update if we're currently using the ID, not the custom URL
           if (currentIdOrSlug === this.challengePageId && currentIdOrSlug !== this.challengePage.customUrl) {
             this.router.navigate(['/home-challenge', this.challengePage.customUrl], {
-              replaceUrl: true
+              replaceUrl: true,
+              state: {
+                [this.historyPageIdKey]: this.challengePageId,
+                [this.historyPageSlugKey]: this.challengePage.customUrl,
+              },
             });
           }
         }

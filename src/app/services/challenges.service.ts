@@ -140,7 +140,7 @@ export class ChallengesService {
       .collection('user-challenges', (ref) =>
         ref.where('challengePageId', '==', challengePageId)
       )
-      .ref.get();
+      .ref.get({ source: 'server' });
 
     return snapshot.docs.map((doc) => ({
       ...(doc.data() as Record<string, any>),
@@ -445,7 +445,7 @@ export class ChallengesService {
     if (/^[A-Za-z0-9]{20}$/.test(value)) {
       const idSnapshot = await this.afs.doc<ChallengePage>(
         `challengePages/${value}`
-      ).ref.get();
+      ).ref.get({ source: 'server' });
       if (idSnapshot.exists) {
         return {
           id: idSnapshot.id,
@@ -459,7 +459,7 @@ export class ChallengesService {
       .collection<ChallengePage>('challengePages', (ref) =>
         ref.where('customUrl', '==', value).limit(1)
       )
-      .ref.get();
+      .ref.get({ source: 'server' });
     const customUrlDoc = customUrlSnapshot.docs[0];
     if (customUrlDoc) {
       return {
@@ -472,7 +472,7 @@ export class ChallengesService {
     if (!/^[A-Za-z0-9]{20}$/.test(value)) {
       const idSnapshot = await this.afs.doc<ChallengePage>(
         `challengePages/${value}`
-      ).ref.get();
+      ).ref.get({ source: 'server' });
       if (idSnapshot.exists) {
         return {
           id: idSnapshot.id,
