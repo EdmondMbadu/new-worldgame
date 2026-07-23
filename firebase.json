@@ -51,6 +51,22 @@
             "value": "no-cache"
           }
         ]
+      },
+      {
+        "source": "/home-challenge/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
+          }
+        ]
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/home-challenge/entp-601-2026",
+        "destination": "/home-challenge/sJBETWwiB3IZ9kDvjDCv",
+        "type": 302
       }
     ],
     "rewrites": [

@@ -9,7 +9,10 @@ import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { Solution } from 'src/app/models/solution';
 import { ChallengeJoinRequest, ChallengePage } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
-import { ChallengesService } from 'src/app/services/challenges.service';
+import {
+  ChallengesService,
+  ResolvedChallengePage,
+} from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
 import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -265,7 +268,7 @@ export class HomeChallengeComponent implements OnDestroy {
       window.scrollTo(0, 0);
       this.pageReady = false;
       const storedPageId = this.getStoredChallengePageId(idOrSlug);
-      this.loadChallengePage(storedPageId || idOrSlug, idOrSlug);
+      void this.loadChallengePage(idOrSlug, storedPageId);
     });
     
     this.challengeJoinRequestsSub = this.challenge
@@ -303,8 +306,8 @@ export class HomeChallengeComponent implements OnDestroy {
     this.image = '';
   }
   async loadChallengePage(
-    idOrSlug: string,
-    routeIdOrSlug: string = idOrSlug
+    routeIdOrSlug: string,
+    storedPageId: string = ''
   ): Promise<void> {
     const loadToken = ++this.pageLoadToken;
     // Reset challenge-related data before fetching new ones
@@ -323,7 +326,26 @@ export class HomeChallengeComponent implements OnDestroy {
     this.pageChallengeSignature = '';
 
     try {
-      const resolved = await this.challenge.resolveChallengePage(idOrSlug);
+      let resolved: ResolvedChallengePage | null = null;
+
+      if (storedPageId) {
+        const storedResolution =
+          await this.challenge.resolveChallengePage(storedPageId);
+        if (loadToken !== this.pageLoadToken) {
+          return;
+        }
+
+        // Browser history can outlive a slug edit. Never trust its document ID
+        // unless the current server record still belongs to the visible route.
+        if (this.resolvedPageMatchesRoute(storedResolution, routeIdOrSlug)) {
+          resolved = storedResolution;
+        }
+      }
+
+      if (!resolved) {
+        resolved =
+          await this.challenge.resolveChallengePage(routeIdOrSlug);
+      }
       if (loadToken !== this.pageLoadToken) {
         return;
       }
@@ -334,8 +356,12 @@ export class HomeChallengeComponent implements OnDestroy {
       }
 
       this.challengePageId = resolved.id;
-      const resolvedSlug = resolved.data.customUrl || '';
-      this.rememberResolvedChallengePage(resolved.id, resolvedSlug);
+      const resolvedSlug = String(resolved.data.customUrl || '');
+      this.rememberResolvedChallengePage(
+        resolved.id,
+        resolvedSlug,
+        routeIdOrSlug
+      );
       this.processChallengePageData(
         resolved.data,
         resolved.loadedByCustomUrl || routeIdOrSlug === resolvedSlug,
@@ -355,13 +381,32 @@ export class HomeChallengeComponent implements OnDestroy {
     const storedPageId = String(state[this.historyPageIdKey] || '');
     const storedSlug = String(state[this.historyPageSlugKey] || '');
 
-    return storedSlug === routeIdOrSlug && /^[A-Za-z0-9]{20}$/.test(storedPageId)
+    return storedSlug === routeIdOrSlug &&
+      /^[A-Za-z0-9]{20}$/.test(storedPageId)
       ? storedPageId
       : '';
   }
 
-  private rememberResolvedChallengePage(pageId: string, slug: string): void {
-    if (!slug || this.activatedRoute.snapshot.paramMap.get('id') !== slug) {
+  private resolvedPageMatchesRoute(
+    resolved: ResolvedChallengePage | null,
+    routeIdOrSlug: string
+  ): resolved is ResolvedChallengePage {
+    if (!resolved) {
+      return false;
+    }
+
+    return (
+      resolved.id === routeIdOrSlug ||
+      String(resolved.data.customUrl || '') === routeIdOrSlug
+    );
+  }
+
+  private rememberResolvedChallengePage(
+    pageId: string,
+    slug: string,
+    routeIdOrSlug: string
+  ): void {
+    if (!slug || routeIdOrSlug !== slug) {
       return;
     }
 
