@@ -120,8 +120,7 @@
     <button
       type="button"
       (click)="closeVideo()"
-      class="absolute -top-4 -right-4 p-2 bg-white rounded-full shadow
-             hover:bg-gray-200"
+      class="absolute -right-4 -top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-800 shadow-lg transition-colors hover:border-slate-300 hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300/60 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:focus-visible:ring-teal-500/40"
       aria-label="Close video"
     >
       ✕
@@ -153,18 +152,31 @@
         
         <div *ngIf="isStrategyReviewStep" class="flex flex-col items-center gap-3 mt-4 mx-auto">
             <div class="flex flex-wrap justify-center gap-3">
-                <button (click)="chooseDefaultReview()" class=" {{strategyBgColor}} relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-medium rounded-lg group hover:text-white text-gray-800 dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
-                    <span class="{{chosenColorDefault}} relative px-5 py-2.5 transition-all ease-in duration-75 rounded-md group-hover:bg-opacity-0">
-                        {{ 'playgroundSteps.strategyReview.referenceSteps' | translate }}
-                    </span>
+                <button
+                    type="button"
+                    (click)="chooseDefaultReview()"
+                    [attr.aria-pressed]="defaultReviewSelected"
+                    class="inline-flex min-h-11 min-w-48 items-center justify-center rounded-xl border-2 px-5 py-2.5 text-sm font-bold shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300/60 focus-visible:ring-offset-2 active:translate-y-px dark:focus-visible:ring-teal-500/40 dark:focus-visible:ring-offset-slate-900"
+                    [ngClass]="defaultReviewSelected
+                        ? 'border-teal-700 bg-teal-700 text-white hover:border-teal-800 hover:bg-teal-800 dark:border-teal-300 dark:bg-teal-300 dark:text-slate-950 dark:hover:border-teal-200 dark:hover:bg-teal-200'
+                        : 'border-slate-300 bg-white text-slate-800 hover:border-teal-500 hover:bg-teal-50 hover:text-teal-950 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-teal-400 dark:hover:bg-teal-950 dark:hover:text-teal-100'">
+                    {{ 'playgroundSteps.strategyReview.referenceSteps' | translate }}
                 </button>
-                <button (click)="chooseStrategyReview()" class="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm {{defaultBgColor}} font-medium rounded-lg group hover:text-white text-gray-800 dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800">
-                    <span class="{{chosenColorReview}} relative px-5 py-2.5 transition-all ease-in duration-75 rounded-md group-hover:bg-opacity-0">
-                        {{ 'playgroundSteps.strategyReview.currentDraft' | translate }}
-                    </span>
+                <button
+                    type="button"
+                    (click)="chooseStrategyReview()"
+                    [attr.aria-pressed]="strategyReviewSelected"
+                    class="inline-flex min-h-11 min-w-48 items-center justify-center rounded-xl border-2 px-5 py-2.5 text-sm font-bold shadow-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300/60 focus-visible:ring-offset-2 active:translate-y-px dark:focus-visible:ring-teal-500/40 dark:focus-visible:ring-offset-slate-900"
+                    [ngClass]="strategyReviewSelected
+                        ? 'border-teal-700 bg-teal-700 text-white hover:border-teal-800 hover:bg-teal-800 dark:border-teal-300 dark:bg-teal-300 dark:text-slate-950 dark:hover:border-teal-200 dark:hover:bg-teal-200'
+                        : 'border-slate-300 bg-white text-slate-800 hover:border-teal-500 hover:bg-teal-50 hover:text-teal-950 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-teal-400 dark:hover:bg-teal-950 dark:hover:text-teal-100'">
+                    {{ 'playgroundSteps.strategyReview.currentDraft' | translate }}
                 </button>
             </div>
-            <button type="button" (click)="openRefreshStrategyReviewModal()" class="text-sm font-semibold text-teal-700 dark:text-teal-200 border border-teal-500 rounded-full px-4 py-2 hover:bg-teal-600 hover:text-white transition">
+            <button
+                type="button"
+                (click)="openRefreshStrategyReviewModal()"
+                class="inline-flex min-h-10 items-center justify-center rounded-full border-2 border-teal-600 bg-white px-4 py-2 text-sm font-semibold text-teal-800 shadow-sm transition-colors hover:border-teal-700 hover:bg-teal-700 hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300/60 focus-visible:ring-offset-2 dark:border-teal-400 dark:bg-slate-800 dark:text-teal-200 dark:hover:border-teal-300 dark:hover:bg-teal-300 dark:hover:text-slate-950 dark:focus-visible:ring-teal-500/40 dark:focus-visible:ring-offset-slate-900">
                 {{ 'playgroundSteps.strategyReview.refreshFromSteps' | translate }}
             </button>
             <div *ngIf="showRefreshStrategyReviewModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4">
@@ -466,7 +478,7 @@
     
 
     <!-- Pop up save  -->
-    <div *ngIf="saveSuccess" id="toast-success" class="fixed inset-x-0 mx-auto top-[10rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert">
+    <div *ngIf="saveSuccess" id="toast-success" class="fixed inset-x-0 mx-auto top-[10rem] flex items-center z-40 w-full max-w-xs p-4 mb-4 text-gray-600 bg-white rounded-lg shadow dark:bg-slate-800 dark:text-slate-200" role="alert">
       <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg ">
           <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
@@ -474,7 +486,7 @@
           <span class="sr-only">Check icon</span>
       </div>
       <div class="ml-3 text-sm font-normal">Saved successfully.</div>
-      <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 "  (click)="closeSaveSuccess()" >
+      <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-500 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500"  (click)="closeSaveSuccess()" >
           <span class="sr-only">Close</span>
           <svg class="w-3 h-3"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -482,7 +494,7 @@
       </button>
   </div>
 <!-- Pop up error  -->
-  <div id="toast-danger" class=" fixed inset-x-0 mx-auto top-10 flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow " role="alert" *ngIf="saveError">
+  <div id="toast-danger" class=" fixed inset-x-0 mx-auto top-10 flex items-center w-full max-w-xs p-4 mb-4 text-gray-600 bg-white rounded-lg shadow dark:bg-slate-800 dark:text-slate-200" role="alert" *ngIf="saveError">
     <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg">
         <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
@@ -490,7 +502,7 @@
         <span class="sr-only">Error icon</span>
     </div>
     <div class="ml-3 text-sm font-normal">Error occured while saving. Try Again!</div>
-    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white"  (click)="closeSaveError()">
+    <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-500 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500"  (click)="closeSaveError()">
         <span class="sr-only" >Close</span>
         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -502,7 +514,7 @@
 <div id="popup-modal"  class=" p-4" *ngIf="submitDisplay">
   <div class="  w-full max-w-md max-h-full fixed inset-x-0 mx-auto top-[10rem] z-50 p-4 flex">
       <div class="border-gray-200 border-2 relative bg-white rounded-lg shadow dark:bg-slate-700 dark:border-gray-700">
-          <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" (click)="closeSubmission()">
+          <button type="button" class="absolute top-3 right-2.5 text-gray-500 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 dark:text-gray-300 dark:hover:bg-slate-600 dark:hover:text-white" (click)="closeSubmission()">
               <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
               </svg>
@@ -516,7 +528,7 @@
               <button  type="button" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2" (click)="accept()">
                   Yes, I'm sure
               </button>
-              <button (click)="closeSubmission()"  type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 ">No, cancel</button>
+              <button (click)="closeSubmission()"  type="button" class="text-gray-700 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-300 text-sm font-semibold px-5 py-2.5 hover:text-gray-950 focus:z-10 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-600 dark:hover:text-white dark:focus:ring-slate-500">No, cancel</button>
           </div>
       </div>
   </div>
@@ -615,9 +627,9 @@
     <!-- button for the next setup -->
     <div class="  flex flex-col mx-auto justify-center my-8 space-y-6" >
       
-       <div class="flex flex-row space-x-6">
-        <button  type="submit" class="bg-teal-600 text-white px-8 py-2 rounded-full" (click)="saveSolutionStatus()" >Save</button>
-          <button class="bg-teal-600 text-white px-8 py-2 rounded-full"  (click)="updatePlayground(stepNumber)">{{buttonText}}</button>
+       <div class="flex flex-row flex-wrap justify-center gap-4">
+        <button type="submit" class="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-teal-700 bg-teal-700 px-8 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:border-teal-800 hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300/60 focus-visible:ring-offset-2 active:translate-y-px dark:border-teal-300 dark:bg-teal-300 dark:text-slate-950 dark:hover:border-teal-200 dark:hover:bg-teal-200 dark:focus-visible:ring-teal-500/40 dark:focus-visible:ring-offset-slate-900" (click)="saveSolutionStatus()">Save</button>
+          <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-teal-700 bg-teal-700 px-8 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:border-teal-800 hover:bg-teal-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300/60 focus-visible:ring-offset-2 active:translate-y-px dark:border-teal-300 dark:bg-teal-300 dark:text-slate-950 dark:hover:border-teal-200 dark:hover:bg-teal-200 dark:focus-visible:ring-teal-500/40 dark:focus-visible:ring-offset-slate-900" (click)="updatePlayground(stepNumber)">{{buttonText}}</button>
       </div>
        
 

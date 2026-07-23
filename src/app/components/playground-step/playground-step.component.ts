@@ -44,8 +44,6 @@ export interface FeedbackRequest {
 export class PlaygroundStepComponent implements OnInit, OnDestroy {
   strategyReviewSelected: boolean = false;
   defaultReviewSelected = true;
-  chosenColorDefault = 'font-bold text-xl';
-  chosenColorReview = '';
   loader: any;
   private readonly defaultLanguage: StepSupportedLanguage = 'en';
   private readonly strategySectionTitles: Record<
@@ -129,8 +127,6 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
 
-  defaultBgColor: string = 'bg-teal-100';
-  strategyBgColor: string = 'bg-teal-100';
   showRefreshStrategyReviewModal = false;
   constructor(
     private router: Router,
@@ -306,8 +302,6 @@ complex social issues like poverty (SDG 1) and inequality (SDG
 
   chooseStrategyReview() {
     this.strategyReviewSelected = true;
-    this.chosenColorDefault = '';
-    this.chosenColorReview = 'font-bold text-xl';
     this.defaultReviewSelected = false;
     if (
       (!this.strategyReview || this.strategyReview.trim() === '') &&
@@ -315,18 +309,12 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     ) {
       this.strategyReview = this.contentsArray[0];
     }
-    this.defaultBgColor = 'bg-teal-600';
-    this.strategyBgColor = 'bg-gray-200 dark:bg-gray-600';
   }
 
   chooseDefaultReview() {
     this.defaultReviewSelected = true;
-    this.chosenColorDefault = 'font-bold text-xl';
-    this.chosenColorReview = '';
     this.strategyReviewSelected = false;
     this.staticContentArray[0] = this.contentsArray[0];
-    this.defaultBgColor = 'bg-gray-200 dark:bg-gray-600';
-    this.strategyBgColor = 'bg-teal-600';
   }
   initializeContents() {
     this.contentsArray = [];
