@@ -134,6 +134,70 @@
   outline-offset: -3px;
 }
 
+.image-icon-control {
+  position: relative;
+}
+
+.image-icon-control::before,
+.image-icon-control::after {
+  position: absolute;
+  z-index: 230;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease, transform 100ms ease;
+}
+
+.image-icon-control::before {
+  right: 0.72rem;
+  bottom: calc(100% + 0.2rem);
+  border-top: 0.3rem solid #020617;
+  border-right: 0.3rem solid transparent;
+  border-left: 0.3rem solid transparent;
+  content: "";
+  transform: translateY(0.2rem);
+}
+
+.image-icon-control::after {
+  right: 0;
+  bottom: calc(100% + 0.48rem);
+  padding: 0.42rem 0.58rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  color: white;
+  background: #020617;
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.28);
+  content: attr(data-tooltip);
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateY(0.2rem);
+}
+
+.image-icon-control--below::before {
+  top: calc(100% + 0.2rem);
+  bottom: auto;
+  border-top: 0;
+  border-right: 0.3rem solid transparent;
+  border-bottom: 0.3rem solid #020617;
+  border-left: 0.3rem solid transparent;
+  transform: translateY(-0.2rem);
+}
+
+.image-icon-control--below::after {
+  top: calc(100% + 0.48rem);
+  bottom: auto;
+  transform: translateY(-0.2rem);
+}
+
+.image-icon-control:hover::before,
+.image-icon-control:hover::after,
+.image-icon-control:focus-visible::before,
+.image-icon-control:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Smooth scrollbar styling */
 #chatbox::-webkit-scrollbar {
   width: 6px;

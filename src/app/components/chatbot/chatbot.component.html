@@ -783,7 +783,7 @@
                   <button
                     type="button"
                     class="chat-image-open"
-                    (click)="openImagePreview(resp.src!, resp.imagePrompt)"
+                    (click)="openImagePreview(resp.src!, resp.imagePrompt, $event)"
                     aria-label="Open generated image full size"
                     aria-haspopup="dialog"
                   >
@@ -815,7 +815,9 @@
                 <!-- Download button -->
                 <button
                   (click)="downloadImage(resp.src!, resp.imagePrompt)"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-teal-100 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-400 transition-all shadow-sm"
+                  class="image-icon-control inline-grid h-8 w-8 place-items-center rounded-lg bg-slate-100 text-slate-700 shadow-sm transition-all hover:bg-teal-100 hover:text-teal-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-teal-900/30 dark:hover:text-teal-400"
+                  data-tooltip="Download image"
+                  aria-label="Download image"
                 >
                   <svg
                     class="w-4 h-4"
@@ -830,7 +832,6 @@
                       d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"
                     />
                   </svg>
-                  Download Image
                 </button>
 
                 <!-- Insert to Solution button - Only show when in playground context -->
@@ -1379,7 +1380,7 @@
   role="dialog"
   aria-modal="true"
   aria-labelledby="chat-image-preview-title"
-  (click)="closeImagePreview()"
+  (click)="closeImagePreview($event)"
 >
   <section
     class="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[90rem] flex-col overflow-hidden rounded-2xl border border-white/15 bg-slate-950 text-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
@@ -1396,18 +1397,19 @@
         <button
           type="button"
           (click)="downloadImage(imagePreview.src, imagePreview.promptText)"
-          class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          class="image-icon-control image-icon-control--below grid h-10 w-10 place-items-center rounded-xl bg-white text-slate-950 transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          data-tooltip="Download image"
           aria-label="Download full-size image"
         >
           <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
           </svg>
-          <span class="hidden sm:inline">Download</span>
         </button>
         <button
           type="button"
-          (click)="closeImagePreview()"
-          class="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          (click)="closeImagePreview($event)"
+          class="image-icon-control image-icon-control--below grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          data-tooltip="Close preview"
           aria-label="Close image preview"
         >
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">

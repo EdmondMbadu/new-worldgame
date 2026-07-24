@@ -1102,15 +1102,29 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.isFullScreen = !this.isFullScreen;
   }
 
-  openImagePreview(src: string, promptText?: string): void {
+  openImagePreview(
+    src: string,
+    promptText?: string,
+    event?: MouseEvent
+  ): void {
+    event?.preventDefault();
+    event?.stopPropagation();
     if (!src) return;
 
     if (this.showIntroVideoModal) this.closeIntroVideo();
+
+    // Always remount the overlay so reopening the same image is reliable.
+    this.imagePreview = null;
+    this.cdRef.detectChanges();
     this.imagePreview = { src, promptText };
+    this.cdRef.detectChanges();
   }
 
-  closeImagePreview(): void {
+  closeImagePreview(event?: MouseEvent): void {
+    event?.preventDefault();
+    event?.stopPropagation();
     this.imagePreview = null;
+    this.cdRef.detectChanges();
   }
 
   async submitPrompt() {

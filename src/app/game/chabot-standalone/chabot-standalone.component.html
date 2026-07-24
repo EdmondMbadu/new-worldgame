@@ -330,7 +330,7 @@
               <button
                 type="button"
                 class="generated-image__preview"
-                (click)="openImagePreview(response.src!, response.imagePrompt)"
+                (click)="openImagePreview(response.src!, response.imagePrompt, $event)"
                 aria-label="Open generated image full size"
                 aria-haspopup="dialog"
               >
@@ -342,8 +342,16 @@
                   View full size
                 </span>
               </button>
-              <button type="button" class="generated-image__download" (click)="downloadImage(response.src!, response.imagePrompt)">
-                Download image
+              <button
+                type="button"
+                class="icon-button generated-image__download"
+                (click)="downloadImage(response.src!, response.imagePrompt)"
+                data-tooltip="Download image"
+                aria-label="Download image"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
               </button>
             </div>
           </article>
@@ -411,7 +419,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="standalone-image-preview-title"
-    (click)="closeImagePreview()"
+    (click)="closeImagePreview($event)"
   >
     <section (click)="$event.stopPropagation()">
       <header>
@@ -422,16 +430,22 @@
         <div class="image-lightbox__actions">
           <button
             type="button"
-            class="image-lightbox__download"
+            class="icon-button image-lightbox__download"
             (click)="downloadImage(imagePreview.src, imagePreview.promptText)"
+            data-tooltip="Download image"
             aria-label="Download full-size image"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
             </svg>
-            <span>Download</span>
           </button>
-          <button type="button" class="image-lightbox__close" (click)="closeImagePreview()" aria-label="Close image preview">
+          <button
+            type="button"
+            class="icon-button image-lightbox__close"
+            (click)="closeImagePreview($event)"
+            data-tooltip="Close preview"
+            aria-label="Close image preview"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
             </svg>
