@@ -16,6 +16,22 @@
       <div class="flex justify-end">
         <div #teamPresenceMenuRef class="team-presence-menu relative">
           <button
+            #teamPresenceDragHandleRef
+            type="button"
+            class="team-presence-drag-handle"
+            [attr.aria-label]="
+              currentLanguage === 'fr'
+                ? 'Déplacer le panneau de l’équipe. Utilisez les flèches pour le déplacer et Origine pour réinitialiser.'
+                : 'Move the team panel. Use arrow keys to move it and Home to reset.'
+            "
+            [title]="currentLanguage === 'fr' ? 'Faire glisser · Double-cliquer pour réinitialiser' : 'Drag · Double-click to reset'">
+            <span class="team-presence-drag-handle__dots" aria-hidden="true">
+              <span></span><span></span>
+              <span></span><span></span>
+              <span></span><span></span>
+            </span>
+          </button>
+          <button
             #teamPresenceTriggerRef
             type="button"
             data-testid="team-presence-trigger"

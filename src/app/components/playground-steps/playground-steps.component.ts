@@ -189,6 +189,9 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   private discussionToastTimeout?: ReturnType<typeof setTimeout>;
   private teamPresenceTriggerCleanup?: () => void;
   private teamDiscussionTriggerCleanup?: () => void;
+  private teamPresenceDragCleanup?: () => void;
+  private readonly teamPresencePositionStorageKey =
+    'playground-team-presence-position-v1';
   private latestDiscussionMessageKey = '';
   private discussionPreviewInitialized = false;
 
@@ -428,6 +431,8 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   private infographicDocSub?: Subscription;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
   @ViewChild('teamPresenceMenuRef') teamPresenceMenuRef?: ElementRef;
+  @ViewChild('teamPresenceDragHandleRef', { static: true })
+  teamPresenceDragHandleRef?: ElementRef<HTMLButtonElement>;
   @ViewChild('teamPresenceTriggerRef', { static: true })
   teamPresenceTriggerRef?: ElementRef<HTMLButtonElement>;
   @ViewChild('teamPresencePanelRef', { static: true })
@@ -586,6 +591,207 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
         'click',
         onDiscussionTriggerClick
       );
+
+    this.initializeTeamPresenceDragging();
+  }
+
+  private initializeTeamPresenceDragging(): void {
+    if (typeof window === 'undefined') return;
+
+    const menu = this.teamPresenceMenuRef?.nativeElement as HTMLElement | undefined;
+    const handle = this.teamPresenceDragHandleRef?.nativeElement;
+    const trigger = this.teamPresenceTriggerRef?.nativeElement;
+    if (!menu || !handle || !trigger) return;
+
+    let activePointerId: number | null = null;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
+    let menuStartLeft = 0;
+    let menuStartTop = 0;
+
+    const setMenuPosition = (
+      requestedLeft: number,
+      requestedTop: number,
+      persist: boolean
+    ) => {
+      // Leave enough room for the grip, which intentionally sits just outside
+      // the panel edge, so the draggable control always remains reachable.
+      const margin = 20;
+      const minimumTop = 84;
+      const menuWidth = Math.max(menu.offsetWidth, trigger.offsetWidth, 1);
+      const triggerHeight = Math.max(trigger.offsetHeight, 44);
+      const maximumLeft = Math.max(margin, window.innerWidth - menuWidth - margin);
+      const maximumTop = Math.max(
+        minimumTop,
+        window.innerHeight - triggerHeight - margin
+      );
+      const left = Math.min(Math.max(requestedLeft, margin), maximumLeft);
+      const top = Math.min(Math.max(requestedTop, minimumTop), maximumTop);
+
+      menu.classList.add('team-presence-menu--dragged');
+      menu.classList.toggle(
+        'team-presence-menu--align-left',
+        left + menuWidth / 2 < window.innerWidth / 2
+      );
+      menu.classList.toggle(
+        'team-presence-menu--open-up',
+        top + triggerHeight + 320 > window.innerHeight
+      );
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+      menu.style.right = 'auto';
+      menu.style.setProperty('--team-menu-top', `${top}px`);
+
+      if (persist) {
+        try {
+          window.localStorage.setItem(
+            this.teamPresencePositionStorageKey,
+            JSON.stringify({ left, top })
+          );
+        } catch {
+          // Position persistence is optional; dragging still works without it.
+        }
+      }
+    };
+
+    const resetMenuPosition = (clearSavedPosition: boolean) => {
+      menu.classList.remove(
+        'team-presence-menu--dragged',
+        'team-presence-menu--dragging',
+        'team-presence-menu--align-left',
+        'team-presence-menu--open-up'
+      );
+      menu.style.removeProperty('left');
+      menu.style.removeProperty('top');
+      menu.style.removeProperty('right');
+      menu.style.removeProperty('--team-menu-top');
+      if (clearSavedPosition) {
+        try {
+          window.localStorage.removeItem(this.teamPresencePositionStorageKey);
+        } catch {
+          // Ignore storage restrictions; the visual reset is already complete.
+        }
+      }
+    };
+
+    const restoreSavedPosition = () => {
+      if (window.innerWidth <= 639) {
+        resetMenuPosition(false);
+        return;
+      }
+      try {
+        const saved = JSON.parse(
+          window.localStorage.getItem(this.teamPresencePositionStorageKey) || 'null'
+        );
+        if (Number.isFinite(saved?.left) && Number.isFinite(saved?.top)) {
+          setMenuPosition(saved.left, saved.top, false);
+        }
+      } catch {
+        resetMenuPosition(true);
+      }
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!event.isPrimary || event.button !== 0 || window.innerWidth <= 639) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      const currentRect = menu.getBoundingClientRect();
+      activePointerId = event.pointerId;
+      pointerStartX = event.clientX;
+      pointerStartY = event.clientY;
+      menuStartLeft = currentRect.left;
+      menuStartTop = currentRect.top;
+      menu.classList.add('team-presence-menu--dragging');
+      handle.setPointerCapture?.(event.pointerId);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerId !== activePointerId) return;
+      event.preventDefault();
+      setMenuPosition(
+        menuStartLeft + event.clientX - pointerStartX,
+        menuStartTop + event.clientY - pointerStartY,
+        false
+      );
+    };
+
+    const finishPointerDrag = (event: PointerEvent) => {
+      if (event.pointerId !== activePointerId) return;
+      const currentRect = menu.getBoundingClientRect();
+      activePointerId = null;
+      menu.classList.remove('team-presence-menu--dragging');
+      if (handle.hasPointerCapture?.(event.pointerId)) {
+        handle.releasePointerCapture(event.pointerId);
+      }
+      setMenuPosition(currentRect.left, currentRect.top, true);
+    };
+
+    const onDoubleClick = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      resetMenuPosition(true);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      const movementKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+      if (event.key === 'Home') {
+        event.preventDefault();
+        event.stopPropagation();
+        resetMenuPosition(true);
+        return;
+      }
+      if (!movementKeys.includes(event.key) || window.innerWidth <= 639) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      const distance = event.shiftKey ? 24 : 8;
+      const currentRect = menu.getBoundingClientRect();
+      const horizontal =
+        event.key === 'ArrowLeft' ? -distance : event.key === 'ArrowRight' ? distance : 0;
+      const vertical =
+        event.key === 'ArrowUp' ? -distance : event.key === 'ArrowDown' ? distance : 0;
+      setMenuPosition(
+        currentRect.left + horizontal,
+        currentRect.top + vertical,
+        true
+      );
+    };
+
+    const onWindowResize = () => {
+      if (window.innerWidth <= 639) {
+        resetMenuPosition(false);
+        return;
+      }
+      if (menu.classList.contains('team-presence-menu--dragged')) {
+        const currentRect = menu.getBoundingClientRect();
+        setMenuPosition(currentRect.left, currentRect.top, false);
+      } else {
+        restoreSavedPosition();
+      }
+    };
+
+    this.ngZone.runOutsideAngular(() => {
+      handle.addEventListener('pointerdown', onPointerDown);
+      handle.addEventListener('pointermove', onPointerMove);
+      handle.addEventListener('pointerup', finishPointerDrag);
+      handle.addEventListener('pointercancel', finishPointerDrag);
+      handle.addEventListener('dblclick', onDoubleClick);
+      handle.addEventListener('keydown', onKeyDown);
+      window.addEventListener('resize', onWindowResize);
+      window.requestAnimationFrame(restoreSavedPosition);
+    });
+
+    this.teamPresenceDragCleanup = () => {
+      handle.removeEventListener('pointerdown', onPointerDown);
+      handle.removeEventListener('pointermove', onPointerMove);
+      handle.removeEventListener('pointerup', finishPointerDrag);
+      handle.removeEventListener('pointercancel', finishPointerDrag);
+      handle.removeEventListener('dblclick', onDoubleClick);
+      handle.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('resize', onWindowResize);
+    };
   }
 
   reportGroups: ReportGroup[] = [
@@ -3886,6 +4092,8 @@ Infographic requirements:
     this.teamPresenceTriggerCleanup = undefined;
     this.teamDiscussionTriggerCleanup?.();
     this.teamDiscussionTriggerCleanup = undefined;
+    this.teamPresenceDragCleanup?.();
+    this.teamPresenceDragCleanup = undefined;
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();
