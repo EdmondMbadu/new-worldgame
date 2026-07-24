@@ -506,6 +506,27 @@
         </ng-template>
       </aside>
       </div>
+
+      <div
+        *ngIf="typingParticipants.length"
+        class="discussion-typing-indicator"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <span class="discussion-typing-indicator__avatars" aria-hidden="true">
+          <span
+            *ngFor="let participant of typingParticipants | slice:0:3"
+            class="discussion-typing-indicator__avatar"
+          >
+            <img *ngIf="participant.avatarUrl; else typingInitial" [src]="participant.avatarUrl" alt="" />
+            <ng-template #typingInitial>{{ participant.displayName.charAt(0) }}</ng-template>
+          </span>
+        </span>
+        <span>{{ discussionTypingLabel }}</span>
+        <span class="discussion-typing-dots" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </div>
   
       <!-- Input area at the bottom -->
       <div
@@ -587,6 +608,7 @@
             #promptTextarea
             [(ngModel)]="prompt"
             (input)="onPromptInput($event)"
+            (blur)="stopDiscussionTyping()"
             (keydown.enter)="sendOnEnter($event)"
             (keydown.escape)="closeComposerPanels()"
             id="user-input"

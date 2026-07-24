@@ -24,6 +24,74 @@
   line-height: 1.55;
 }
 
+.discussion-typing-indicator {
+  display: flex;
+  min-height: 2.25rem;
+  padding: 0.4rem 1rem;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid rgb(226 232 240);
+  color: rgb(71 85 105);
+  background: rgb(248 250 252 / 0.94);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.discussion-typing-indicator__avatars {
+  display: flex;
+  padding-left: 0.25rem;
+}
+
+.discussion-typing-indicator__avatar {
+  display: grid;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-left: -0.25rem;
+  overflow: hidden;
+  place-items: center;
+  border: 2px solid white;
+  border-radius: 9999px;
+  color: white;
+  background: #0f766e;
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.discussion-typing-indicator__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discussion-typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+}
+
+.discussion-typing-dots > span {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  background: #0d9488;
+  animation: discussionTypingDot 1s ease-in-out infinite;
+}
+
+.discussion-typing-dots > span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.discussion-typing-dots > span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes discussionTypingDot {
+  0%, 60%, 100% { opacity: 0.35; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-0.12rem); }
+}
+
 .comment-author-trigger .comment-author-preview {
   opacity: 0;
   pointer-events: none;
@@ -157,6 +225,16 @@
 
 :host-context(.dark) .discussion-message:hover {
   background: rgb(15 23 42);
+}
+
+:host-context(.dark) .discussion-typing-indicator {
+  border-color: rgb(51 65 85);
+  color: rgb(203 213 225);
+  background: rgb(15 23 42 / 0.96);
+}
+
+:host-context(.dark) .discussion-typing-indicator__avatar {
+  border-color: rgb(15 23 42);
 }
 
 :host-context(.dark) .reaction-chip {

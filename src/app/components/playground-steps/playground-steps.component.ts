@@ -19,7 +19,10 @@ import {
   DiscussionMessageNotification,
   DiscussionNotificationsService,
 } from 'src/app/services/discussion-notifications.service';
-import { PresenceService } from 'src/app/services/presence.service';
+import {
+  PresenceService,
+  TypingPresence,
+} from 'src/app/services/presence.service';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
 import {
   Document,
@@ -155,6 +158,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   onlineTeamUids = new Set<string>();
   visibleTeamMembers: User[] = [];
   onlineTeamCount = 0;
+  typingTeamMembers: TypingPresence[] = [];
   latestDiscussionMessage: Comment | null = null;
   discussionUnreadNotifications: DiscussionMessageNotification[] = [];
   discussionToastMessage: Comment | null = null;
@@ -185,6 +189,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   evaluatorInviteSendingState: Record<string, boolean> = {};
   private evaluatorInviteSearchTimeout: any;
   private teamPresenceSub?: Subscription;
+  private teamTypingSub?: Subscription;
   private discussionUnreadSub?: Subscription;
   private discussionToastTimeout?: ReturnType<typeof setTimeout>;
   private teamPresenceTriggerCleanup?: () => void;
@@ -1228,6 +1233,7 @@ STYLE REQUIREMENTS:
     this.display[this.currentIndexDisplay] = true;
     this.reportInstruction = this.getSelectedReportType()?.instruction || '';
     this.watchDiscussionNotifications();
+    this.watchTeamTyping();
     
     // Subscribe to chatbot insert requests
     this.insertRequestSub = this.chatContext.insertRequest$.subscribe({
@@ -1650,6 +1656,56 @@ STYLE REQUIREMENTS:
 
   isTeamMemberOnline(user: User): boolean {
     return !!user.uid && this.onlineTeamUids.has(user.uid);
+  }
+
+  isTeamMemberTyping(user: User): boolean {
+    return (
+      !!user.uid &&
+      this.typingTeamMembers.some((typingUser) => typingUser.uid === user.uid)
+    );
+  }
+
+  get teamTypingLabel(): string {
+    if (!this.typingTeamMembers.length) return '';
+    if (this.typingTeamMembers.length === 1) {
+      const displayName = this.typingTeamMembers[0].displayName.trim();
+      const shortName = displayName.split(/\s+/)[0] || displayName;
+      return this.currentLanguage === 'fr'
+        ? `${shortName} écrit…`
+        : `${shortName} is typing…`;
+    }
+    return this.currentLanguage === 'fr'
+      ? `${this.typingTeamMembers.length} personnes écrivent…`
+      : `${this.typingTeamMembers.length} people are typing…`;
+  }
+
+  get teamTypingAriaLabel(): string {
+    const names = this.typingTeamMembers.map((member) =>
+      member.displayName.trim()
+    );
+    if (!names.length) return '';
+    if (names.length === 1) {
+      return this.currentLanguage === 'fr'
+        ? `${names[0]} écrit`
+        : `${names[0]} is typing`;
+    }
+    return this.currentLanguage === 'fr'
+      ? `${names.join(', ')} écrivent`
+      : `${names.join(', ')} are typing`;
+  }
+
+  private watchTeamTyping(): void {
+    if (!this.id) return;
+    const currentUid =
+      this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    this.teamTypingSub?.unsubscribe();
+    this.teamTypingSub = this.presence
+      .watchTypingUsers$(`solution-${this.id}`)
+      .subscribe((typingUsers) => {
+        this.typingTeamMembers = typingUsers.filter(
+          (typingUser) => typingUser.uid !== currentUid
+        );
+      });
   }
 
   getTeamMemberName(user: User): string {
@@ -4107,6 +4163,7 @@ Infographic requirements:
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     this.teamPresenceSub?.unsubscribe();
+    this.teamTypingSub?.unsubscribe();
     this.discussionUnreadSub?.unsubscribe();
     this.dismissDiscussionToast();
     // Clear chat context when leaving the playground

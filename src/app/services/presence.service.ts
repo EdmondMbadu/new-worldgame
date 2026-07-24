@@ -14,6 +14,13 @@ interface PresenceState {
   lastChanged?: number;
 }
 
+export interface TypingPresence {
+  uid: string;
+  displayName: string;
+  avatarUrl?: string;
+  updatedAt: number;
+}
+
 type DatabaseApi = typeof import('firebase/database');
 
 @Injectable({
@@ -26,6 +33,8 @@ export class PresenceService {
   private databasePromise?: Promise<ReturnType<DatabaseApi['getDatabase']>>;
   private warnedPresenceUnavailable = false;
   private readonly activeFallbackWindowMs = 10 * 60 * 1000;
+  private readonly typingFreshnessWindowMs = 6_000;
+  private readonly typingDisconnectKeys = new Set<string>();
 
   setCurrentUser(uid: string | null): void {
     if (uid === this.activeUid) return;
@@ -75,6 +84,114 @@ export class PresenceService {
     const lastActiveMs = Date.parse(lastActiveAt);
     if (!Number.isFinite(lastActiveMs)) return false;
     return Date.now() - lastActiveMs <= this.activeFallbackWindowMs;
+  }
+
+  async setTyping(
+    contextId: string,
+    uid: string,
+    displayName: string,
+    avatarUrl?: string
+  ): Promise<void> {
+    const contextKey = this.normalizeContextKey(contextId);
+    const userKey = String(uid || '').trim();
+    if (!contextKey || !userKey) return;
+
+    try {
+      const api = await this.getDatabaseApi();
+      const database = await this.getDatabase();
+      const typingRef = api.ref(database, `typing/${contextKey}/${userKey}`);
+      const disconnectKey = `${contextKey}/${userKey}`;
+
+      if (!this.typingDisconnectKeys.has(disconnectKey)) {
+        await api.onDisconnect(typingRef).remove();
+        this.typingDisconnectKeys.add(disconnectKey);
+      }
+
+      await api.set(typingRef, {
+        displayName: String(displayName || 'Team member').trim().slice(0, 80),
+        avatarUrl: String(avatarUrl || '').trim().slice(0, 500),
+        updatedAt: api.serverTimestamp(),
+      });
+    } catch (error) {
+      this.warnPresenceUnavailable(error);
+    }
+  }
+
+  async clearTyping(contextId: string, uid: string): Promise<void> {
+    const contextKey = this.normalizeContextKey(contextId);
+    const userKey = String(uid || '').trim();
+    if (!contextKey || !userKey) return;
+
+    try {
+      const api = await this.getDatabaseApi();
+      const database = await this.getDatabase();
+      await api.remove(api.ref(database, `typing/${contextKey}/${userKey}`));
+    } catch (error) {
+      this.warnPresenceUnavailable(error);
+    }
+  }
+
+  watchTypingUsers$(contextId: string): Observable<TypingPresence[]> {
+    const contextKey = this.normalizeContextKey(contextId);
+    if (!contextKey) return of([]);
+
+    return new Observable<TypingPresence[]>((subscriber) => {
+      let unsubscribe: (() => void) | undefined;
+      let cancelled = false;
+      let rawTypingState: Record<string, any> = {};
+      let lastSignature = '';
+
+      const emitFreshTypingUsers = () => {
+        const now = Date.now();
+        const users = Object.entries(rawTypingState)
+          .map(([uid, state]) => ({
+            uid,
+            displayName: String(state?.displayName || 'Team member'),
+            avatarUrl: String(state?.avatarUrl || '') || undefined,
+            updatedAt: Number(state?.updatedAt || 0),
+          }))
+          .filter(
+            (state) =>
+              state.updatedAt > 0 &&
+              now - state.updatedAt <= this.typingFreshnessWindowMs
+          )
+          .sort((a, b) => a.displayName.localeCompare(b.displayName));
+        const signature = users
+          .map((user) => `${user.uid}:${user.updatedAt}`)
+          .join('|');
+        if (signature === lastSignature) return;
+        lastSignature = signature;
+        subscriber.next(users);
+      };
+
+      const expiryTimer = window.setInterval(emitFreshTypingUsers, 1_000);
+
+      Promise.all([this.getDatabaseApi(), this.getDatabase()])
+        .then(([api, database]) => {
+          if (cancelled) return;
+          unsubscribe = api.onValue(
+            api.ref(database, `typing/${contextKey}`),
+            (snapshot) => {
+              rawTypingState =
+                (snapshot.val() as Record<string, any> | null) || {};
+              emitFreshTypingUsers();
+            },
+            (error) => subscriber.error(error)
+          );
+        })
+        .catch((error) => subscriber.error(error));
+
+      return () => {
+        cancelled = true;
+        window.clearInterval(expiryTimer);
+        unsubscribe?.();
+      };
+    }).pipe(
+      catchError((error) => {
+        this.warnPresenceUnavailable(error);
+        return of([]);
+      })
+    );
   }
 
   private watchUidOnline$(
@@ -192,6 +309,13 @@ export class PresenceService {
       if (!b.has(value)) return false;
     }
     return true;
+  }
+
+  private normalizeContextKey(value: string): string {
+    return String(value || '')
+      .trim()
+      .replace(/[.#$\/\[\]]/g, '_')
+      .slice(0, 160);
   }
 
   private warnPresenceUnavailable(error: unknown): void {

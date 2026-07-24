@@ -25,7 +25,10 @@ import {
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DiscussionNotificationsService } from 'src/app/services/discussion-notifications.service';
-import { PresenceService } from 'src/app/services/presence.service';
+import {
+  PresenceService,
+  TypingPresence,
+} from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
@@ -138,6 +141,7 @@ export class FullDiscussionComponent
   // @mention functionality
   participants: ParticipantInfo[] = [];
   onlineParticipants: ParticipantInfo[] = [];
+  typingParticipants: TypingPresence[] = [];
   showMentionDropdown = false;
   mentionSearchText = '';
   filteredParticipants: ParticipantInfo[] = [];
@@ -146,6 +150,9 @@ export class FullDiscussionComponent
 
   private hasScrolled = false;
   private participantPresenceSub?: Subscription;
+  private typingPresenceSub?: Subscription;
+  private typingStopTimeout?: ReturnType<typeof setTimeout>;
+  private lastTypingWriteAt = 0;
   private participantSourceKey = '';
   private participantPresenceUidKey = '';
   private lastReadMarkerKey = '';
@@ -180,6 +187,7 @@ export class FullDiscussionComponent
     const prefix = this.activatedRoute.snapshot.data['docPrefix'];
     // const id = this.activatedRoute.snapshot.paramMap.get('id');
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.watchDiscussionTyping();
     this.configureWorkspaceReturn(prefix);
     /* Hosted mode: we got a docPath – stream its data */
     if (prefix && this.id) {
@@ -355,6 +363,7 @@ Please choose a file under 5 MB.`);
     }
     const content = this.prompt.trim(); // may be empty
     if (!content && !this.pendingFiles.length) return; // nothing at all
+    this.stopDiscussionTyping();
     const nowIso = new Date().toISOString();
     const messageId = this.afs.createId();
     const msg: Comment = {
@@ -480,6 +489,8 @@ Please choose a file under 5 MB.`);
 
   ngOnDestroy(): void {
     this.participantPresenceSub?.unsubscribe();
+    this.typingPresenceSub?.unsubscribe();
+    this.stopDiscussionTyping();
   }
   linkify(text: string): string {
     if (!text) return '';
@@ -535,6 +546,7 @@ Please choose a file under 5 MB.`);
     const start = textarea?.selectionStart ?? this.prompt.length;
     const end = textarea?.selectionEnd ?? this.prompt.length;
     this.prompt = `${this.prompt.slice(0, start)}${emoji}${this.prompt.slice(end)}`;
+    this.registerDiscussionTypingActivity();
     this.showComposerEmojiPicker = false;
 
     setTimeout(() => {
@@ -1284,6 +1296,7 @@ Please choose a file under 5 MB.`);
 
   /** Handle input changes to detect @ mentions */
   onPromptInput(event: Event) {
+    this.registerDiscussionTypingActivity();
     const textarea = event.target as HTMLTextAreaElement;
     const cursorPos = textarea.selectionStart;
     const textBeforeCursor = this.prompt.substring(0, cursorPos);
@@ -1310,6 +1323,92 @@ Please choose a file under 5 MB.`);
     
     this.showMentionDropdown = false;
     this.mentionStartIndex = -1;
+  }
+
+  private watchDiscussionTyping(): void {
+    const contextId = this.discussionTypingContextId;
+    if (!contextId) return;
+
+    const currentUid =
+      this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    this.typingPresenceSub?.unsubscribe();
+    this.typingPresenceSub = this.presence
+      .watchTypingUsers$(contextId)
+      .subscribe((typingUsers) => {
+        this.typingParticipants = typingUsers.filter(
+          (typingUser) => typingUser.uid !== currentUid
+        );
+      });
+  }
+
+  private registerDiscussionTypingActivity(): void {
+    const contextId = this.discussionTypingContextId;
+    const uid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (!contextId || !uid) return;
+
+    if (!this.prompt.trim()) {
+      this.stopDiscussionTyping();
+      return;
+    }
+
+    const now = Date.now();
+    if (now - this.lastTypingWriteAt >= 900) {
+      this.lastTypingWriteAt = now;
+      const displayName =
+        [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
+          .filter(Boolean)
+          .join(' ')
+          .trim() ||
+        this.auth.currentUser?.email ||
+        'Team member';
+      void this.presence.setTyping(
+        contextId,
+        uid,
+        displayName,
+        this.profilePic
+      );
+    }
+
+    if (this.typingStopTimeout) {
+      clearTimeout(this.typingStopTimeout);
+    }
+    this.typingStopTimeout = setTimeout(
+      () => this.stopDiscussionTyping(),
+      2_800
+    );
+  }
+
+  stopDiscussionTyping(): void {
+    if (this.typingStopTimeout) {
+      clearTimeout(this.typingStopTimeout);
+      this.typingStopTimeout = undefined;
+    }
+    this.lastTypingWriteAt = 0;
+
+    const contextId = this.discussionTypingContextId;
+    const uid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (contextId && uid) {
+      void this.presence.clearTyping(contextId, uid);
+    }
+  }
+
+  get discussionTypingLabel(): string {
+    const names = this.typingParticipants.map((participant) =>
+      participant.displayName.trim()
+    );
+    if (!names.length) return '';
+    if (names.length === 1) {
+      return `${names[0]} is typing`;
+    }
+    if (names.length === 2) {
+      return `${names[0]} and ${names[1]} are typing`;
+    }
+    return `${names[0]} and ${names.length - 1} others are typing`;
+  }
+
+  private get discussionTypingContextId(): string {
+    const solutionId = this.currentSolution?.solutionId || this.id;
+    return solutionId ? `solution-${solutionId}` : '';
   }
 
   /** Filter participants based on search text */
@@ -1351,6 +1450,7 @@ Please choose a file under 5 MB.`);
     } else {
       this.prompt = `${beforeMention}@${participant.displayName} ${afterMention}`;
     }
+    this.registerDiscussionTypingActivity();
 
     this.showMentionDropdown = false;
     this.mentionStartIndex = -1;

@@ -42,6 +42,7 @@
               (currentLanguage === 'fr' ? 'Afficher les membres de l’équipe. ' : 'View solution team. ') +
               onlineTeamCount +
               (currentLanguage === 'fr' ? ' en ligne. ' : ' online. ') +
+              (typingTeamMembers.length ? teamTypingAriaLabel + '. ' : '') +
               (discussionUnreadCount > 0
                 ? discussionUnreadCount + (currentLanguage === 'fr' ? ' messages d’équipe non lus.' : ' unread team messages.')
                 : '')
@@ -62,14 +63,25 @@
               <span class="team-presence-trigger__title">
                 {{ currentLanguage === 'fr' ? 'Équipe' : 'Team' }}
               </span>
-              <span class="team-presence-trigger__status">
-                <span
-                  class="team-presence-trigger__status-dot"
-                  [class.team-presence-trigger__status-dot--idle]="onlineTeamCount === 0"
-                  aria-hidden="true">
-                </span>
-                {{ onlineTeamCount }}
-                {{ currentLanguage === 'fr' ? 'en ligne' : 'online' }}
+              <span
+                class="team-presence-trigger__status"
+                [class.team-presence-trigger__status--typing]="typingTeamMembers.length"
+              >
+                <ng-container *ngIf="typingTeamMembers.length; else teamOnlineStatus">
+                  <span class="team-typing-dots" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                  </span>
+                  {{ teamTypingLabel }}
+                </ng-container>
+                <ng-template #teamOnlineStatus>
+                  <span
+                    class="team-presence-trigger__status-dot"
+                    [class.team-presence-trigger__status-dot--idle]="onlineTeamCount === 0"
+                    aria-hidden="true">
+                  </span>
+                  {{ onlineTeamCount }}
+                  {{ currentLanguage === 'fr' ? 'en ligne' : 'online' }}
+                </ng-template>
               </span>
             </span>
 
@@ -167,13 +179,18 @@
                       {{ currentLanguage === 'fr' ? "Discussion d'équipe" : 'Team discussion' }}
                     </span>
                     <span class="block truncate text-[10px] font-medium text-teal-700 dark:text-teal-300">
-                      <ng-container *ngIf="latestDiscussionMessage; else emptyDiscussionSummary">
-                        {{ latestDiscussionMessage.authorName || (currentLanguage === 'fr' ? "Membre de l'équipe" : 'Team member') }}
-                        <span aria-hidden="true"> · </span>
-                        {{ getDiscussionMessageTime(latestDiscussionMessage) }}
+                      <ng-container *ngIf="typingTeamMembers.length; else latestDiscussionSummary">
+                        {{ teamTypingLabel }}
                       </ng-container>
-                      <ng-template #emptyDiscussionSummary>
-                        {{ currentLanguage === 'fr' ? 'Aucun message pour le moment' : 'No messages yet' }}
+                      <ng-template #latestDiscussionSummary>
+                        <ng-container *ngIf="latestDiscussionMessage; else emptyDiscussionSummary">
+                          {{ latestDiscussionMessage.authorName || (currentLanguage === 'fr' ? "Membre de l'équipe" : 'Team member') }}
+                          <span aria-hidden="true"> · </span>
+                          {{ getDiscussionMessageTime(latestDiscussionMessage) }}
+                        </ng-container>
+                        <ng-template #emptyDiscussionSummary>
+                          {{ currentLanguage === 'fr' ? 'Aucun message pour le moment' : 'No messages yet' }}
+                        </ng-template>
                       </ng-template>
                     </span>
                   </span>
@@ -204,6 +221,26 @@
                 [class.team-discussion-inline-preview--open]="showTeamDiscussionPreview"
                 [attr.aria-hidden]="!showTeamDiscussionPreview"
                 [attr.inert]="showTeamDiscussionPreview ? null : ''">
+                <div
+                  *ngIf="typingTeamMembers.length"
+                  class="team-discussion-typing"
+                  aria-live="polite"
+                  [attr.aria-label]="teamTypingAriaLabel"
+                >
+                  <span class="team-discussion-typing__avatars" aria-hidden="true">
+                    <span
+                      *ngFor="let typingMember of typingTeamMembers | slice:0:3"
+                      class="team-discussion-typing__avatar"
+                    >
+                      <img *ngIf="typingMember.avatarUrl; else typingMemberInitial" [src]="typingMember.avatarUrl" alt="" />
+                      <ng-template #typingMemberInitial>{{ typingMember.displayName.charAt(0) }}</ng-template>
+                    </span>
+                  </span>
+                  <span>{{ teamTypingLabel }}</span>
+                  <span class="team-typing-dots" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                  </span>
+                </div>
                 <div *ngIf="latestDiscussionMessage; else noDiscussionMessages" class="flex items-start gap-2.5">
                   <span class="grid h-8 w-8 shrink-0 place-content-center overflow-hidden rounded-full bg-slate-800 text-[10px] font-bold text-white ring-2 ring-white dark:bg-slate-700 dark:ring-slate-900">
                     <img
@@ -260,7 +297,7 @@
                 class="team-member-row"
                 [class.team-member-row--disabled]="!member.uid"
                 [routerLink]="getTeamMemberRoute(member)"
-                [attr.aria-label]="getTeamMemberName(member) + ', ' + getTeamMemberPresenceLabel(member)">
+                [attr.aria-label]="getTeamMemberName(member) + ', ' + (isTeamMemberTyping(member) ? (currentLanguage === 'fr' ? 'écrit' : 'typing') : getTeamMemberPresenceLabel(member))">
                 <span
                   class="team-avatar team-avatar--large"
                   [class.team-avatar--online]="isTeamMemberOnline(member)">
@@ -304,9 +341,18 @@
                 <span
                   class="team-member-row__presence"
                   [class.team-member-row__presence--online]="isTeamMemberOnline(member)"
+                  [class.team-member-row__presence--typing]="isTeamMemberTyping(member)"
                   [class.team-member-row__presence--invited]="!member.uid">
-                  <span class="team-member-row__presence-dot" aria-hidden="true"></span>
-                  {{ getTeamMemberPresenceLabel(member) }}
+                  <ng-container *ngIf="isTeamMemberTyping(member); else memberPresence">
+                    <span class="team-typing-dots team-typing-dots--small" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </span>
+                    {{ currentLanguage === 'fr' ? 'Écrit…' : 'Typing…' }}
+                  </ng-container>
+                  <ng-template #memberPresence>
+                    <span class="team-member-row__presence-dot" aria-hidden="true"></span>
+                    {{ getTeamMemberPresenceLabel(member) }}
+                  </ng-template>
                 </span>
               </a>
             </div>
