@@ -7,9 +7,438 @@
 } */
  .active{
   background-color: teal ;
-  scale: 1.1;
+ scale: 1.1;
 
  }
+
+/* Solution journey */
+.solution-journey__viewport {
+  overflow-x: auto;
+  padding: 0.5rem 1rem 1.25rem;
+  scroll-padding-inline: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.solution-journey__list {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.solution-journey__item {
+  display: flex;
+  align-items: center;
+  scroll-snap-align: center;
+}
+
+.solution-step-connector {
+  display: flex;
+  width: clamp(2.25rem, 5vw, 5rem);
+  flex: 0 0 auto;
+  align-items: center;
+  padding-inline: 0.3rem;
+}
+
+.solution-step-connector__line {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 0.2rem;
+  border-radius: 9999px;
+  background: #dbe3ec;
+  box-shadow: inset 0 1px 1px rgb(15 23 42 / 0.06);
+  transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.solution-step-connector__line::after {
+  position: absolute;
+  top: 50%;
+  right: -0.15rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 2px solid white;
+  border-radius: 9999px;
+  background: #cbd5e1;
+  box-shadow: 0 0 0 1px #cbd5e1;
+  content: '';
+  transform: translateY(-50%);
+}
+
+.solution-step-connector--complete .solution-step-connector__line {
+  background: linear-gradient(90deg, #0f766e, #14b8a6);
+  box-shadow: 0 0 0 1px rgb(20 184 166 / 0.08);
+}
+
+.solution-step-connector--complete .solution-step-connector__line::after {
+  background: #14b8a6;
+  box-shadow: 0 0 0 1px #14b8a6;
+}
+
+.solution-step-card {
+  display: flex;
+  width: 11rem;
+  min-height: 15rem;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid #dbe3ec;
+  border-radius: 1.15rem;
+  background: linear-gradient(180deg, #fff, #f8fafc);
+  padding: 0.72rem;
+  color: #334155;
+  text-align: center;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 8px 22px rgb(15 23 42 / 0.055);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.solution-step-card:hover {
+  border-color: #94a3b8;
+  box-shadow:
+    0 2px 4px rgb(15 23 42 / 0.05),
+    0 14px 28px rgb(15 23 42 / 0.1);
+  transform: translateY(-0.18rem);
+}
+
+.solution-step-card:focus-visible {
+  outline: 3px solid rgb(20 184 166 / 0.28);
+  outline-offset: 3px;
+  border-color: #14b8a6;
+}
+
+.solution-journey__item--current .solution-step-card {
+  border-color: #14b8a6;
+  background: linear-gradient(180deg, #f0fdfa, #fff);
+  box-shadow:
+    0 0 0 3px rgb(20 184 166 / 0.14),
+    0 16px 34px rgb(15 118 110 / 0.16);
+}
+
+.solution-journey__item--complete .solution-step-card {
+  border-color: #a7f3d0;
+}
+
+.solution-journey__item--not-started .solution-step-card {
+  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+  color: #64748b;
+}
+
+.solution-step-card__meta {
+  display: flex;
+  min-height: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.solution-step-card__number {
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.solution-step-card__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.56rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.solution-step-card__state svg {
+  width: 0.68rem;
+  height: 0.68rem;
+}
+
+.solution-step-card__state--complete {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.solution-step-card__state--current {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.solution-step-card__state--in-progress {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.solution-step-card__state--not-started {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.solution-step-card__pulse {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 9999px;
+  background: #14b8a6;
+  box-shadow: 0 0 0 0.16rem rgb(20 184 166 / 0.15);
+}
+
+.solution-step-card__visual {
+  display: grid;
+  height: 7.25rem;
+  place-items: center;
+  overflow: hidden;
+  margin-top: 0.55rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(255 255 255 / 0.95), transparent 62%),
+    #f1f5f9;
+}
+
+.solution-journey__item--current .solution-step-card__visual {
+  border-color: #99f6e4;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(255 255 255 / 0.98), transparent 62%),
+    #ccfbf1;
+}
+
+.solution-step-card__image {
+  display: block;
+  width: auto;
+  max-width: 9rem;
+  height: 6.5rem;
+  object-fit: contain;
+  transition: transform 180ms ease;
+}
+
+.solution-step-card:hover .solution-step-card__image {
+  transform: scale(1.035);
+}
+
+.solution-step-card__title {
+  display: -webkit-box;
+  min-height: 2.5rem;
+  margin-top: 0.65rem;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 780;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.solution-step-card__progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  margin-top: 0.45rem;
+}
+
+.solution-step-card__progress-track {
+  display: block;
+  width: 78%;
+  height: 0.28rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: #e2e8f0;
+}
+
+.solution-step-card__progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0f766e, #14b8a6);
+  transition: width 180ms ease;
+}
+
+.solution-step-card__progress-label {
+  color: #64748b;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.solution-step-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: auto;
+  padding-top: 0.55rem;
+  color: #0f766e;
+  font-size: 0.62rem;
+  font-weight: 750;
+}
+
+.solution-step-card__action svg {
+  width: 0.72rem;
+  height: 0.72rem;
+  transition: transform 140ms ease;
+}
+
+.solution-step-card:hover .solution-step-card__action svg {
+  transform: translateX(0.15rem);
+}
+
+.solution-journey__item--not-started .solution-step-card__action {
+  color: #64748b;
+}
+
+:host-context(.dark) .solution-journey__viewport {
+  scrollbar-color: #475569 transparent;
+}
+
+:host-context(.dark) .solution-step-connector__line {
+  background: #334155;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.2);
+}
+
+:host-context(.dark) .solution-step-connector__line::after {
+  border-color: #0f172a;
+  background: #475569;
+  box-shadow: 0 0 0 1px #475569;
+}
+
+:host-context(.dark) .solution-step-connector--complete .solution-step-connector__line {
+  background: linear-gradient(90deg, #0f766e, #2dd4bf);
+}
+
+:host-context(.dark) .solution-step-connector--complete .solution-step-connector__line::after {
+  background: #2dd4bf;
+  box-shadow: 0 0 0 1px #2dd4bf;
+}
+
+:host-context(.dark) .solution-step-card {
+  border-color: #334155;
+  background: linear-gradient(180deg, #172033, #111827);
+  color: #cbd5e1;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.22),
+    0 10px 25px rgb(0 0 0 / 0.2);
+}
+
+:host-context(.dark) .solution-step-card:hover {
+  border-color: #64748b;
+  box-shadow: 0 16px 34px rgb(0 0 0 / 0.32);
+}
+
+:host-context(.dark) .solution-journey__item--current .solution-step-card {
+  border-color: #2dd4bf;
+  background: linear-gradient(180deg, rgb(19 78 74 / 0.48), #111827 70%);
+  box-shadow:
+    0 0 0 3px rgb(45 212 191 / 0.13),
+    0 18px 38px rgb(0 0 0 / 0.34);
+}
+
+:host-context(.dark) .solution-journey__item--complete .solution-step-card {
+  border-color: rgb(16 185 129 / 0.48);
+}
+
+:host-context(.dark) .solution-journey__item--not-started .solution-step-card {
+  background: linear-gradient(180deg, #151d2c, #0f172a);
+}
+
+:host-context(.dark) .solution-step-card__number {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .solution-step-card__state--complete {
+  background: rgb(6 78 59 / 0.45);
+  color: #6ee7b7;
+}
+
+:host-context(.dark) .solution-step-card__state--current {
+  background: rgb(19 78 74 / 0.72);
+  color: #99f6e4;
+}
+
+:host-context(.dark) .solution-step-card__state--in-progress {
+  background: rgb(120 53 15 / 0.42);
+  color: #fcd34d;
+}
+
+:host-context(.dark) .solution-step-card__state--not-started {
+  background: #273449;
+  color: #94a3b8;
+}
+
+:host-context(.dark) .solution-step-card__visual {
+  border-color: #334155;
+  background:
+    radial-gradient(circle at 50% 35%, rgb(51 65 85 / 0.52), transparent 65%),
+    #1e293b;
+}
+
+:host-context(.dark) .solution-journey__item--current .solution-step-card__visual {
+  border-color: rgb(45 212 191 / 0.4);
+  background:
+    radial-gradient(circle at 50% 35%, rgb(20 184 166 / 0.2), transparent 65%),
+    #15333a;
+}
+
+:host-context(.dark) .solution-step-card__title {
+  color: #f8fafc;
+}
+
+:host-context(.dark) .solution-step-card__progress-track {
+  background: #334155;
+}
+
+:host-context(.dark) .solution-step-card__progress-label {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .solution-step-card__action {
+  color: #5eead4;
+}
+
+:host-context(.dark) .solution-journey__item--not-started .solution-step-card__action {
+  color: #94a3b8;
+}
+
+@media (max-width: 639px) {
+  .solution-journey__viewport {
+    padding-inline: 0.75rem;
+    scroll-snap-type: x proximity;
+  }
+
+  .solution-journey__list {
+    justify-content: flex-start;
+  }
+
+  .solution-step-card {
+    width: 9.75rem;
+    min-height: 14rem;
+  }
+
+  .solution-step-connector {
+    width: 1.85rem;
+    padding-inline: 0.18rem;
+  }
+
+  .solution-step-card__visual {
+    height: 6.5rem;
+  }
+
+  .solution-step-card__image {
+    max-width: 8rem;
+    height: 5.8rem;
+  }
+}
 
 /* Collaboration presence */
 .team-presence-header {
@@ -607,6 +1036,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .solution-step-card,
+  .solution-step-card__image,
+  .solution-step-card__action svg,
+  .solution-step-card__progress-fill,
+  .solution-step-connector__line,
   .team-presence-trigger,
   .team-presence-trigger__chevron,
   .team-discussion-preview__chevron,

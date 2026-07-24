@@ -119,6 +119,15 @@ interface SavedAiFeedback {
   timestamp: number;
 }
 
+type StepProgressState = 'completed' | 'in-progress' | 'not-started';
+
+interface StepProgressSummary {
+  answered: number;
+  total: number;
+  percentage: number;
+  state: StepProgressState;
+}
+
 @Component({
     selector: 'app-playground-steps',
     templateUrl: './playground-steps.component.html',
@@ -346,6 +355,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   aiFeedbackParsed: AiFeedbackDisplay = { scores: [], improvements: [] };
   currentDraftHtml = '';
   currentDraftText = '';
+  stepProgress: StepProgressSummary[] = [];
   private aiFeedbackDocSub?: Subscription;
   reportLoading = false;
   reportStatus = '';
@@ -488,6 +498,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
       // Update solution data
       this.currentSolution = data;
       this.roles = this.currentSolution.roles || {};
+      this.refreshStepProgress();
       this.updateDiscussionPreview(this.currentSolution.discussion);
       this.updateCurrentDraftText();
 
@@ -1094,6 +1105,7 @@ STYLE REQUIREMENTS:
     
     // Update the solution status locally first
     this.currentSolution.status[questionKey] = newContent;
+    this.refreshStepProgress();
     
     console.log('Saving to Firestore:', { 
       solutionId: this.currentSolution.solutionId, 
@@ -1121,6 +1133,7 @@ STYLE REQUIREMENTS:
       // Revert local change on error
       if (this.currentSolution?.status) {
         this.currentSolution.status[questionKey] = existingContent;
+        this.refreshStepProgress();
       }
       this.chatContext.notifyInsertComplete(questionKey, false);
     });
@@ -2030,6 +2043,84 @@ STYLE REQUIREMENTS:
   }
   isCurrentStep(index: number): boolean {
     return this.currentIndexDisplay === index; // Replace with your current step logic
+  }
+
+  isStepComplete(index: number): boolean {
+    return this.stepProgress[index]?.state === 'completed';
+  }
+
+  isStepInProgress(index: number): boolean {
+    return this.stepProgress[index]?.state === 'in-progress';
+  }
+
+  isStepNotStarted(index: number): boolean {
+    return !this.stepProgress[index] || this.stepProgress[index].state === 'not-started';
+  }
+
+  isStepConnectorComplete(index: number): boolean {
+    if (index <= 0) return false;
+    const previousSteps = this.stepProgress.slice(0, index);
+    return (
+      previousSteps.length === index &&
+      previousSteps.every((progress) => progress.state === 'completed')
+    );
+  }
+
+  getStepCompletionPercentage(index: number): number {
+    return this.stepProgress[index]?.percentage || 0;
+  }
+
+  getStepAnswerCount(index: number): string {
+    const progress = this.stepProgress[index];
+    if (!progress) return '0 / 0';
+    return `${progress.answered} / ${progress.total}`;
+  }
+
+  getStepDisplayTitle(step: string): string {
+    return String(step || '')
+      .replace(/^(?:Step|Étape)\s+\d+\s*:\s*/i, '')
+      .trim();
+  }
+
+  private refreshStepProgress(): void {
+    const savedStatus = this.currentSolution?.status || {};
+
+    this.stepProgress = this.questionsTitles
+      .slice(0, this.steps.length)
+      .map((questionKeys, stepIndex) => {
+        const answered = questionKeys.reduce((count, key) => {
+          const savedAnswer =
+            stepIndex === this.steps.length - 1 && key === 'S5'
+              ? this.currentSolution?.strategyReview || savedStatus[key]
+              : savedStatus[key];
+          return count + (this.hasMeaningfulStepAnswer(savedAnswer) ? 1 : 0);
+        }, 0);
+        const total = questionKeys.length;
+        const percentage = total ? Math.round((answered / total) * 100) : 0;
+        const state: StepProgressState =
+          total > 0 && answered === total
+            ? 'completed'
+            : answered > 0
+              ? 'in-progress'
+              : 'not-started';
+
+        return { answered, total, percentage, state };
+      });
+  }
+
+  private hasMeaningfulStepAnswer(value: unknown): boolean {
+    const rawValue = String(value || '');
+    if (/<(?:img|video|audio|iframe)\b/i.test(rawValue)) {
+      return true;
+    }
+
+    return rawValue
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .replace(/\u00a0/g, ' ')
+      .trim()
+      .length > 0;
   }
 
   isFinalStep(index: number): boolean {

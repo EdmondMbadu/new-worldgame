@@ -410,44 +410,104 @@
         </li>
       </ol>
     </div> -->
-    <!-- TIMELINE / STEPS HEADER (centered) -->
-<div class="mt-4 container px-32 flex flex-row mx-auto justify-center">
-  <ol class="flex items-center space-x-0">
-    <li *ngFor="let step of steps; let i = index" class="flex items-center relative">
+    <!-- Solution development journey -->
+    <nav
+      class="solution-journey mx-auto mt-5 w-full max-w-7xl"
+      [attr.aria-label]="currentLanguage === 'fr' ? 'Progression de la solution' : 'Solution development progress'">
+      <div class="solution-journey__viewport">
+        <ol class="solution-journey__list">
+          <li
+            *ngFor="let step of steps; let i = index"
+            class="solution-journey__item"
+            [class.solution-journey__item--current]="isCurrentStep(i)"
+            [class.solution-journey__item--complete]="isStepComplete(i)"
+            [class.solution-journey__item--in-progress]="isStepInProgress(i)"
+            [class.solution-journey__item--not-started]="isStepNotStarted(i)">
 
-      <!-- Line BEFORE image (touches image directly) -->
-      <div 
-        *ngIf="i !== 0"
-        class="w-6 sm:w-24 h-1 transition-all duration-300"
-        [ngClass]="isCurrentStep(i) ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-700'">
+            <span
+              *ngIf="i !== 0"
+              class="solution-step-connector"
+              [class.solution-step-connector--complete]="isStepConnectorComplete(i)"
+              aria-hidden="true">
+              <span class="solution-step-connector__line"></span>
+            </span>
+
+            <button
+              type="button"
+              class="solution-step-card"
+              (click)="goBackAndForthTimeLine(i)"
+              [attr.aria-current]="isCurrentStep(i) ? 'step' : null"
+              [attr.aria-label]="
+                (currentLanguage === 'fr' ? 'Ouvrir l’étape ' : 'Open step ') +
+                (i + 1) +
+                ': ' +
+                step
+              ">
+              <span class="solution-step-card__meta">
+                <span class="solution-step-card__number">
+                  {{ currentLanguage === 'fr' ? 'Étape' : 'Step' }} {{ i + 1 }}
+                </span>
+
+                <span *ngIf="!isCurrentStep(i) && isStepComplete(i)" class="solution-step-card__state solution-step-card__state--complete">
+                  <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M16.7 5.29a1 1 0 010 1.42l-7.25 7.25a1 1 0 01-1.42 0L3.3 9.23a1 1 0 011.42-1.42l4.02 4.03 6.54-6.55a1 1 0 011.42 0z" clip-rule="evenodd" />
+                  </svg>
+                  {{ currentLanguage === 'fr' ? 'Terminé' : 'Completed' }}
+                </span>
+                <span *ngIf="isCurrentStep(i)" class="solution-step-card__state solution-step-card__state--current">
+                  <span class="solution-step-card__pulse" aria-hidden="true"></span>
+                  {{ currentLanguage === 'fr' ? 'En cours' : 'Current' }}
+                </span>
+                <span *ngIf="!isCurrentStep(i) && isStepInProgress(i)" class="solution-step-card__state solution-step-card__state--in-progress">
+                  {{ currentLanguage === 'fr' ? 'En progression' : 'In progress' }}
+                </span>
+                <span *ngIf="!isCurrentStep(i) && isStepNotStarted(i)" class="solution-step-card__state solution-step-card__state--not-started">
+                  {{ currentLanguage === 'fr' ? 'Non commencé' : 'Not started' }}
+                </span>
+              </span>
+
+              <span class="solution-step-card__visual">
+                <img
+                  [src]="'../../../assets/img/step-' + (i + 1) + '.png'"
+                  [alt]="(currentLanguage === 'fr' ? 'Illustration de l’étape ' : 'Step illustration ') + (i + 1)"
+                  class="solution-step-card__image" />
+              </span>
+
+              <span class="solution-step-card__title">{{ getStepDisplayTitle(step) }}</span>
+              <span
+                class="solution-step-card__progress"
+                [attr.aria-label]="
+                  getStepAnswerCount(i) +
+                  (currentLanguage === 'fr' ? ' questions répondues' : ' questions answered')
+                ">
+                <span class="solution-step-card__progress-track" aria-hidden="true">
+                  <span
+                    class="solution-step-card__progress-fill"
+                    [style.width.%]="getStepCompletionPercentage(i)">
+                  </span>
+                </span>
+                <span class="solution-step-card__progress-label">
+                  {{ getStepAnswerCount(i) }}
+                  {{ currentLanguage === 'fr' ? 'répondues' : 'answered' }}
+                </span>
+              </span>
+              <span class="solution-step-card__action">
+                {{ isCurrentStep(i)
+                  ? (currentLanguage === 'fr' ? 'Vous êtes ici' : 'You are here')
+                  : isStepComplete(i)
+                    ? (currentLanguage === 'fr' ? 'Relire cette étape' : 'Review this step')
+                    : isStepInProgress(i)
+                      ? (currentLanguage === 'fr' ? 'Continuer cette étape' : 'Continue this step')
+                      : (currentLanguage === 'fr' ? 'Commencer cette étape' : 'Start this step') }}
+                <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.69l-3.72-3.72a.75.75 0 011.06-1.06l5 5a.75.75 0 010 1.06l-5 5a.75.75 0 11-1.06-1.06l3.72-3.72H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </button>
+          </li>
+        </ol>
       </div>
-
-      <!-- Step container (image + title, vertically stacked) -->
-      <div class="flex flex-col items-center text-center">
-
-        <!-- Image with red glow if current -->
-        <div 
-          (click)="goBackAndForthTimeLine(i)"
-          class="z-10 flex items-center justify-center cursor-pointer transition-all duration-300"
-          [ngClass]="isCurrentStep(i) ? 'ring-4 ring-red-500 rounded-full shadow-lg shadow-red-500/40' : ''">
-          
-          <img
-            [src]="'../../../assets/img/step-' + (i + 1) + '.png'"
-            alt="Step {{ i + 1 }} image"
-            class="w-36 h-auto" />
-        </div>
-
-        <!-- Step title -->
-        <div class="mt-2">
-          <h1 class="text-lg font-semibold text-gray-800 dark:text-white">
-           {{ step }}
-          </h1>
-  </div>
-</div>
-
-    </li>
-  </ol>
-</div>
+    </nav>
 
 
 
