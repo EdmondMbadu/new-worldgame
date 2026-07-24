@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Input, NgZone, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
 import { AuthService } from 'src/app/services/auth.service';
@@ -125,7 +125,7 @@ interface SavedAiFeedback {
     styleUrls: ['./playground-steps.component.css'],
     standalone: false
 })
-export class PlaygroundStepsComponent implements OnInit, OnDestroy {
+export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestroy {
   id: any = '';
   currentSolution: Solution = {};
   teamMembers: User[] = [];
@@ -144,6 +144,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   showTeamPresencePanel = false;
   showTeamDiscussionPreview = false;
   onlineTeamUids = new Set<string>();
+  visibleTeamMembers: User[] = [];
+  onlineTeamCount = 0;
   latestDiscussionMessage: Comment | null = null;
   discussionUnreadNotifications: DiscussionMessageNotification[] = [];
   discussionToastMessage: Comment | null = null;
@@ -176,6 +178,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   private teamPresenceSub?: Subscription;
   private discussionUnreadSub?: Subscription;
   private discussionToastTimeout?: ReturnType<typeof setTimeout>;
+  private teamPresenceTriggerCleanup?: () => void;
   private latestDiscussionMessageKey = '';
   private discussionPreviewInitialized = false;
 
@@ -414,6 +417,11 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   private infographicDocSub?: Subscription;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
   @ViewChild('teamPresenceMenuRef') teamPresenceMenuRef?: ElementRef;
+  @ViewChild('teamPresenceTriggerRef', { static: true })
+  teamPresenceTriggerRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('teamPresencePanelRef', { static: true })
+  teamPresencePanelRef?: ElementRef<HTMLElement>;
+  @ViewChild('discussionToastRef') discussionToastRef?: ElementRef<HTMLElement>;
   @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 
   @HostListener('document:click', ['$event'])
@@ -451,7 +459,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     private afs: AngularFirestore,
     private chatContext: ChatContextService,
     private presence: PresenceService,
-    private discussionNotifications: DiscussionNotificationsService
+    private discussionNotifications: DiscussionNotificationsService,
+    private ngZone: NgZone
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -510,6 +519,36 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       }
     });
     this.initializeLanguageSupport();
+  }
+
+  ngAfterViewInit(): void {
+    const trigger = this.teamPresenceTriggerRef?.nativeElement;
+    if (!trigger) return;
+
+    const onTriggerClick = (event: Event) => {
+      event.stopPropagation();
+
+      if (this.showTeamPresencePanel) {
+        // Closing can use the normal Angular path; opening is the interaction
+        // where first-use rendering latency is noticeable.
+        this.ngZone.run(() => this.toggleTeamPresencePanel(event));
+        return;
+      }
+
+      // Make the already-rendered panel visible without running change
+      // detection across this large editor. Angular will reconcile the same
+      // state on the next normal update.
+      this.showTeamPresencePanel = true;
+      this.applyTeamPresencePanelDomState(true);
+      this.dismissDiscussionToast();
+      this.discussionToastRef?.nativeElement.style.setProperty('display', 'none');
+    };
+
+    this.ngZone.runOutsideAngular(() => {
+      trigger.addEventListener('click', onTriggerClick);
+    });
+    this.teamPresenceTriggerCleanup = () =>
+      trigger.removeEventListener('click', onTriggerClick);
   }
 
   reportGroups: ReportGroup[] = [
@@ -1181,22 +1220,34 @@ STYLE REQUIREMENTS:
     this.refreshTeamPresence();
   }
 
-  get visibleTeamMembers(): User[] {
-    return [...this.teamMembers]
-      .sort((a, b) => Number(this.isTeamMemberOnline(b)) - Number(this.isTeamMemberOnline(a)))
-      .slice(0, 4);
-  }
-
-  get onlineTeamCount(): number {
-    return this.teamMembers.filter((member) => this.isTeamMemberOnline(member)).length;
-  }
-
-  toggleTeamPresencePanel(): void {
+  toggleTeamPresencePanel(event?: Event): void {
+    // Keep this interaction independent from the document-level outside-click
+    // listener so one pointer action can only toggle the panel once.
+    event?.stopPropagation();
     this.showTeamPresencePanel = !this.showTeamPresencePanel;
+    this.applyTeamPresencePanelDomState(this.showTeamPresencePanel);
     if (this.showTeamPresencePanel) {
       this.dismissDiscussionToast();
     } else {
       this.showTeamDiscussionPreview = false;
+    }
+  }
+
+  private applyTeamPresencePanelDomState(isOpen: boolean): void {
+    const trigger = this.teamPresenceTriggerRef?.nativeElement;
+    const panel = this.teamPresencePanelRef?.nativeElement;
+
+    trigger?.setAttribute('aria-expanded', String(isOpen));
+    trigger
+      ?.querySelector('.team-presence-trigger__chevron')
+      ?.classList.toggle('team-presence-trigger__chevron--open', isOpen);
+
+    panel?.classList.toggle('team-presence-panel--open', isOpen);
+    panel?.setAttribute('aria-hidden', String(!isOpen));
+    if (isOpen) {
+      panel?.removeAttribute('inert');
+    } else {
+      panel?.setAttribute('inert', '');
     }
   }
 
@@ -1407,11 +1458,23 @@ STYLE REQUIREMENTS:
 
     this.teamPresenceSub?.unsubscribe();
     this.onlineTeamUids = new Set<string>();
+    this.updateTeamPresenceSummary();
     this.teamPresenceSub = this.presence
       .watchOnlineUids$(uids, fallbackLastActiveByUid)
       .subscribe((onlineUids) => {
         this.onlineTeamUids = onlineUids;
+        this.updateTeamPresenceSummary();
       });
+  }
+
+  private updateTeamPresenceSummary(): void {
+    this.onlineTeamCount = this.teamMembers.reduce(
+      (count, member) => count + (this.isTeamMemberOnline(member) ? 1 : 0),
+      0
+    );
+    this.visibleTeamMembers = [...this.teamMembers]
+      .sort((a, b) => Number(this.isTeamMemberOnline(b)) - Number(this.isTeamMemberOnline(a)))
+      .slice(0, 4);
   }
 
   private getSolutionTeamEmails(): string[] {
@@ -3682,6 +3745,8 @@ Infographic requirements:
 
   ngOnDestroy(): void {
     this.teamRosterRequestId++;
+    this.teamPresenceTriggerCleanup?.();
+    this.teamPresenceTriggerCleanup = undefined;
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();

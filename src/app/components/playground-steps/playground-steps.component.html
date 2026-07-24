@@ -16,10 +16,10 @@
       <div class="flex justify-end">
         <div #teamPresenceMenuRef class="team-presence-menu relative">
           <button
+            #teamPresenceTriggerRef
             type="button"
             data-testid="team-presence-trigger"
             class="team-presence-trigger relative"
-            (click)="toggleTeamPresencePanel()"
             [attr.aria-expanded]="showTeamPresencePanel"
             aria-controls="team-presence-panel"
             [attr.aria-label]="
@@ -103,10 +103,13 @@
           </button>
 
           <section
-            *ngIf="showTeamPresencePanel"
+            #teamPresencePanelRef
             id="team-presence-panel"
             data-testid="team-presence-panel"
             class="team-presence-panel"
+            [class.team-presence-panel--open]="showTeamPresencePanel"
+            [attr.aria-hidden]="!showTeamPresencePanel"
+            [attr.inert]="showTeamPresencePanel ? null : ''"
             aria-label="Solution team">
             <header class="team-presence-panel__header">
               <div>
@@ -312,6 +315,7 @@
     </div>
 
     <aside
+      #discussionToastRef
       *ngIf="showDiscussionToast && discussionToastMessage"
       class="fixed right-4 top-24 z-[70] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-2xl shadow-slate-900/20 ring-1 ring-black/5 animate-fadeIn dark:border-teal-800 dark:bg-slate-900 dark:shadow-black/50"
       aria-live="polite"

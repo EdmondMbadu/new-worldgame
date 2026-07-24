@@ -230,33 +230,34 @@
   position: absolute;
   top: calc(100% + 0.65rem);
   right: 0;
-  display: flex;
+  display: block;
   max-height: calc(100vh - 9rem);
-  flex-direction: column;
   width: min(23.5rem, calc(100vw - 2rem));
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 1px solid #e2e8f0;
   border-radius: 1rem;
   background: rgb(255 255 255 / 0.985);
   color: #334155;
+  /* Keep a nearly transparent composited layer warm so the first reveal does
+     not pay the browser's paint/rasterization cost. */
+  opacity: 0.001;
+  pointer-events: none;
   box-shadow:
     0 24px 60px rgb(15 23 42 / 0.16),
     0 3px 10px rgb(15 23 42 / 0.08);
-  animation: teamPresenceIn 150ms ease-out;
+  transform: translateY(-0.25rem) scale(0.99);
   transform-origin: top right;
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  transition:
+    opacity 90ms ease-out,
+    transform 90ms ease-out;
+  will-change: opacity, transform;
 }
 
-@keyframes teamPresenceIn {
-  from {
-    opacity: 0;
-    transform: translateY(-0.35rem) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.team-presence-panel--open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
 }
 
 .team-presence-panel__header {
@@ -298,12 +299,11 @@
 }
 
 .team-presence-panel__list {
-  min-height: 0;
-  flex: 1;
-  overflow-y: auto;
+  display: block;
+  min-height: auto;
+  max-height: none;
+  overflow: visible;
   padding: 0.42rem;
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
 }
 
 .team-member-row {
