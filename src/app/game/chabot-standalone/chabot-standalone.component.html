@@ -1,139 +1,26 @@
 <div class="bucky-page" [class.dark]="isDark">
+
+  <app-navbar
+    *ngIf="signedIn"
+    [sidebarOnly]="true"
+    [sideBarBig]="generalSidebarExpanded && isWideLayout"
+    [sideBarSmall]="!generalSidebarExpanded || !isWideLayout"
+    [email]="auth.currentUser.email"
+    [firstName]="auth.currentUser.firstName"
+    [lastName]="auth.currentUser.lastName"
+    path="home"
+    current=""
+    (toggleAsideEvent)="toggleGeneralSidebar()"
+  ></app-navbar>
+
   <div
-    *ngIf="mobileAppSidebarVisible && !isWideLayout"
-    class="app-sidebar-backdrop"
-    (click)="closeMobileAppSidebar()"
-  ></div>
-
-  <aside
-    class="app-sidebar"
-    [class.is-open]="appSidebarVisible"
-    [attr.aria-hidden]="!appSidebarVisible"
-    aria-label="Global Solutions Lab navigation"
+    class="bucky-frame"
+    [class.with-general-sidebar-big]="signedIn && generalSidebarExpanded && isWideLayout"
+    [class.with-general-sidebar-small]="signedIn && (!generalSidebarExpanded || !isWideLayout)"
+    [class.without-general-sidebar]="!signedIn"
   >
-    <div class="app-sidebar__brand">
-      <a routerLink="/home" (click)="closeMobileAppSidebar()" aria-label="Global Solutions Lab home">
-        <img src="assets/img/gsl-logo.png" alt="" />
-        <span>
-          <strong>Global Solutions Lab</strong>
-          <small>Designing a world that works</small>
-        </span>
-      </a>
-      <button type="button" (click)="toggleAppSidebar()" aria-label="Hide application sidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
-        </svg>
-      </button>
-    </div>
-
-    <nav class="app-sidebar__nav" aria-label="Workspace">
-      <p>Workspace</p>
-      <a routerLink="/home" (click)="closeMobileAppSidebar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 11.2L12 4l8.5 7.2M5.5 10v9.5h5v-6h3v6h5V10" />
-        </svg>
-        <span>Home</span>
-      </a>
-      <a routerLink="/create-solution" (click)="closeMobileAppSidebar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <circle cx="12" cy="12" r="8.5" />
-          <path stroke-linecap="round" d="M12 8v8M8 12h8" />
-        </svg>
-        <span>Start a Lab</span>
-      </a>
-      <a routerLink="/problem-list-view" (click)="closeMobileAppSidebar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14M5 19h14M8 5v3l3 4-3 4v3m8-14v3l-3 4 3 4v3" />
-        </svg>
-        <span>My Workspace</span>
-      </a>
-      <a routerLink="/challenge-spaces" (click)="closeMobileAppSidebar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="4" y="4" width="16" height="16" rx="3" />
-          <path stroke-linecap="round" d="M8 9h8M8 12.5h8M8 16h5" />
-        </svg>
-        <span>Challenge Spaces</span>
-      </a>
-      <a routerLink="/operating-manual" (click)="closeMobileAppSidebar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 4.5h11.5A2.5 2.5 0 0119 7v12.5H7.5A2.5 2.5 0 015 17V4.5zM9 4.5v15" />
-        </svg>
-        <span>Operating Manual</span>
-      </a>
-
-      <ng-container *ngIf="solutionId">
-        <div class="app-sidebar__divider"></div>
-        <p>Current solution</p>
-        <div class="app-sidebar__solution">
-          <span class="app-sidebar__solution-mark">{{ solutionTitle.charAt(0) || 'S' }}</span>
-          <span><strong>{{ solutionTitle }}</strong><small>{{ contextLabel }}</small></span>
-        </div>
-        <a [routerLink]="['/dashboard', solutionId]" (click)="closeMobileAppSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="4" y="4" width="6" height="6" rx="1" />
-            <rect x="14" y="4" width="6" height="6" rx="1" />
-            <rect x="4" y="14" width="6" height="6" rx="1" />
-            <rect x="14" y="14" width="6" height="6" rx="1" />
-          </svg>
-          <span>Dashboard</span>
-        </a>
-        <a
-          [routerLink]="solutionDevelopmentPath"
-          [queryParams]="solutionDevelopmentQueryParams"
-          (click)="closeMobileAppSidebar()"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 18.5V20h1.5L17.8 7.7l-1.5-1.5L4 18.5zM14.8 7.7l1.5-1.5 1.2-1.2a1.4 1.4 0 012 2l-1.2 1.2-1.5 1.5" />
-          </svg>
-          <span>Solution development</span>
-        </a>
-        <a
-          [routerLink]="['/full-discussion', solutionId]"
-          [queryParams]="{ returnTo: solutionDevelopmentUrl }"
-          (click)="closeMobileAppSidebar()"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 17.5l-1 3 3.5-1.6A8.5 8.5 0 104 12a8.4 8.4 0 001 3.9" />
-            <path stroke-linecap="round" d="M8 12h.01M12 12h.01M16 12h.01" />
-          </svg>
-          <span>Team discussion</span>
-        </a>
-        <a class="is-active" aria-current="page">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 18l-4 2 1.4-4.2A8 8 0 114 11.5a7.9 7.9 0 001.1 4" />
-            <path stroke-linecap="round" d="M9 10.5h6M9 14h4" />
-          </svg>
-          <span>Ask Bucky</span>
-          <small>Active</small>
-        </a>
-      </ng-container>
-    </nav>
-
-    <a class="app-sidebar__profile" routerLink="/profile" (click)="closeMobileAppSidebar()">
-      <img *ngIf="profilePicturePath" [src]="profilePicturePath" alt="" />
-      <span *ngIf="!profilePicturePath" class="app-sidebar__profile-initial">{{ userInitial }}</span>
-      <span><strong>{{ userDisplayName }}</strong><small>View profile</small></span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6" />
-      </svg>
-    </a>
-  </aside>
-
-  <div class="bucky-frame">
   <header class="bucky-topbar">
     <div class="bucky-topbar__left">
-      <button
-        *ngIf="!appSidebarVisible"
-        type="button"
-        class="icon-button app-menu-button"
-        (click)="toggleAppSidebar()"
-        aria-label="Open application sidebar"
-        title="Open navigation"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
-      </button>
       <button
         *ngIf="returnTo"
         type="button"

@@ -14,3 +14,18 @@ nav{
     white-space: nowrap !important;
   }
 }
+.navbar-sidebar-only {
+  width: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.navbar-sidebar-only > :not(aside) {
+  display: none !important;
+}
+
+.navbar-sidebar-only > aside {
+  transform: translateX(0) !important;
+}

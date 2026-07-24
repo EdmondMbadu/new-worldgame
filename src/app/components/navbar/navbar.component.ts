@@ -71,6 +71,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   resourcesMenu: boolean = false;
   @Input() sideBarBig: boolean = true;
   @Input() sideBarSmall: boolean = false;
+  @Input() sidebarOnly: boolean = false;
   @Input() currentPageEvaluation: boolean = false;
   @Input() currentPageDiscover: boolean = false;
   @Input() currentPagePending: boolean = false;

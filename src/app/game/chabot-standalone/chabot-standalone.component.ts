@@ -25,8 +25,7 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
   returnTo = '';
   isWideLayout =
     typeof window === 'undefined' ? true : window.innerWidth > 880;
-  desktopAppSidebarVisible = true;
-  mobileAppSidebarVisible = false;
+  generalSidebarExpanded = true;
   private restoredHandoff: ChatPageHandoff | null = null;
 
   constructor(
@@ -164,26 +163,8 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
     super.toggleHistoryPanel();
   }
 
-  get appSidebarVisible(): boolean {
-    return this.isWideLayout
-      ? this.desktopAppSidebarVisible
-      : this.mobileAppSidebarVisible;
-  }
-
-  toggleAppSidebar(): void {
-    if (this.isWideLayout) {
-      this.desktopAppSidebarVisible = !this.desktopAppSidebarVisible;
-    } else {
-      this.mobileAppSidebarVisible = !this.mobileAppSidebarVisible;
-    }
-    this.showHistoryPanel = false;
-    this.showAiSelector = false;
-  }
-
-  closeMobileAppSidebar(): void {
-    if (!this.isWideLayout) {
-      this.mobileAppSidebarVisible = false;
-    }
+  toggleGeneralSidebar(): void {
+    this.generalSidebarExpanded = !this.generalSidebarExpanded;
   }
 
   @HostListener('window:resize')
@@ -206,12 +187,6 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
     void this.router.navigate(['/']);
   }
 
-  /* ── Placeholder letter for avatar ────────────────────────── */
-  get userInitial(): string {
-    const n = this.user?.firstName || '';
-    return n ? n[0].toUpperCase() : 'U';
-  }
-
   /* ── Dark / light toggle ──────────────────────────────────── */
   toggleTheme(): void {
     this.isDark = !this.isDark;
@@ -220,44 +195,6 @@ export class ChabotStandaloneComponent extends ChatbotComponent {
 
   get solutionTitle(): string {
     return this.playgroundContext?.solutionTitle || 'Solution workspace';
-  }
-
-  get solutionId(): string | null {
-    return (
-      this.playgroundContext?.solutionId ||
-      this.route.snapshot.queryParamMap.get('solution')
-    );
-  }
-
-  get solutionDevelopmentUrl(): string {
-    const returnUrl = this.returnTo || '';
-    if (returnUrl.startsWith('/playground-steps/')) {
-      return returnUrl;
-    }
-
-    return this.solutionId
-      ? `/playground-steps/${this.solutionId}`
-      : '/problem-list-view';
-  }
-
-  get solutionDevelopmentPath(): string {
-    return this.solutionDevelopmentUrl.split('?')[0];
-  }
-
-  get solutionDevelopmentQueryParams(): Record<string, string> {
-    try {
-      return this.router.parseUrl(this.solutionDevelopmentUrl).queryParams;
-    } catch {
-      return {};
-    }
-  }
-
-  get userDisplayName(): string {
-    const fullName = [this.user?.firstName, this.user?.lastName]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
-    return fullName || this.user?.email || 'Your profile';
   }
 
   get contextLabel(): string {
