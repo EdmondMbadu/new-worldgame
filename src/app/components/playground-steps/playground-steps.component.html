@@ -134,9 +134,9 @@
 
             <div class="mx-3 mt-3 overflow-hidden rounded-xl border border-teal-200 bg-teal-50/70 shadow-sm dark:border-teal-800/70 dark:bg-teal-950/30">
               <button
+                #teamDiscussionPreviewTriggerRef
                 type="button"
                 data-testid="team-discussion-preview"
-                (click)="toggleTeamDiscussionPreview()"
                 class="group flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition hover:bg-teal-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 dark:hover:bg-teal-900/30"
                 [attr.aria-expanded]="showTeamDiscussionPreview"
                 aria-controls="team-discussion-inline-preview">
@@ -171,7 +171,7 @@
                     {{ discussionUnreadCount }}
                   </span>
                   <svg
-                    class="h-4 w-4 text-teal-700 transition-transform dark:text-teal-300"
+                    class="team-discussion-preview__chevron h-4 w-4 text-teal-700 transition-transform dark:text-teal-300"
                     [class.rotate-180]="showTeamDiscussionPreview"
                     viewBox="0 0 20 20"
                     fill="currentColor"
@@ -182,9 +182,12 @@
               </button>
 
               <div
-                *ngIf="showTeamDiscussionPreview"
+                #teamDiscussionPreviewPanelRef
                 id="team-discussion-inline-preview"
-                class="border-t border-teal-200 bg-white/70 p-3 animate-fadeIn dark:border-teal-800/70 dark:bg-slate-900/50">
+                class="team-discussion-inline-preview border-teal-200 bg-white/70 dark:border-teal-800/70 dark:bg-slate-900/50"
+                [class.team-discussion-inline-preview--open]="showTeamDiscussionPreview"
+                [attr.aria-hidden]="!showTeamDiscussionPreview"
+                [attr.inert]="showTeamDiscussionPreview ? null : ''">
                 <div *ngIf="latestDiscussionMessage; else noDiscussionMessages" class="flex items-start gap-2.5">
                   <span class="grid h-8 w-8 shrink-0 place-content-center overflow-hidden rounded-full bg-slate-800 text-[10px] font-bold text-white ring-2 ring-white dark:bg-slate-700 dark:ring-slate-900">
                     <img

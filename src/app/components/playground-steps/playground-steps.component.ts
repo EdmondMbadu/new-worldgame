@@ -179,6 +179,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   private discussionUnreadSub?: Subscription;
   private discussionToastTimeout?: ReturnType<typeof setTimeout>;
   private teamPresenceTriggerCleanup?: () => void;
+  private teamDiscussionTriggerCleanup?: () => void;
   private latestDiscussionMessageKey = '';
   private discussionPreviewInitialized = false;
 
@@ -421,6 +422,10 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   teamPresenceTriggerRef?: ElementRef<HTMLButtonElement>;
   @ViewChild('teamPresencePanelRef', { static: true })
   teamPresencePanelRef?: ElementRef<HTMLElement>;
+  @ViewChild('teamDiscussionPreviewTriggerRef', { static: true })
+  teamDiscussionPreviewTriggerRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('teamDiscussionPreviewPanelRef', { static: true })
+  teamDiscussionPreviewPanelRef?: ElementRef<HTMLElement>;
   @ViewChild('discussionToastRef') discussionToastRef?: ElementRef<HTMLElement>;
   @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 
@@ -549,6 +554,27 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
     });
     this.teamPresenceTriggerCleanup = () =>
       trigger.removeEventListener('click', onTriggerClick);
+
+    const discussionTrigger =
+      this.teamDiscussionPreviewTriggerRef?.nativeElement;
+    if (!discussionTrigger) return;
+
+    const onDiscussionTriggerClick = (event: Event) => {
+      event.stopPropagation();
+      this.showTeamDiscussionPreview = !this.showTeamDiscussionPreview;
+      this.applyTeamDiscussionPreviewDomState(
+        this.showTeamDiscussionPreview
+      );
+    };
+
+    this.ngZone.runOutsideAngular(() => {
+      discussionTrigger.addEventListener('click', onDiscussionTriggerClick);
+    });
+    this.teamDiscussionTriggerCleanup = () =>
+      discussionTrigger.removeEventListener(
+        'click',
+        onDiscussionTriggerClick
+      );
   }
 
   reportGroups: ReportGroup[] = [
@@ -1230,6 +1256,7 @@ STYLE REQUIREMENTS:
       this.dismissDiscussionToast();
     } else {
       this.showTeamDiscussionPreview = false;
+      this.applyTeamDiscussionPreviewDomState(false);
     }
   }
 
@@ -1253,6 +1280,25 @@ STYLE REQUIREMENTS:
 
   toggleTeamDiscussionPreview(): void {
     this.showTeamDiscussionPreview = !this.showTeamDiscussionPreview;
+    this.applyTeamDiscussionPreviewDomState(this.showTeamDiscussionPreview);
+  }
+
+  private applyTeamDiscussionPreviewDomState(isOpen: boolean): void {
+    const trigger = this.teamDiscussionPreviewTriggerRef?.nativeElement;
+    const panel = this.teamDiscussionPreviewPanelRef?.nativeElement;
+
+    trigger?.setAttribute('aria-expanded', String(isOpen));
+    trigger
+      ?.querySelector('.team-discussion-preview__chevron')
+      ?.classList.toggle('rotate-180', isOpen);
+
+    panel?.classList.toggle('team-discussion-inline-preview--open', isOpen);
+    panel?.setAttribute('aria-hidden', String(!isOpen));
+    if (isOpen) {
+      panel?.removeAttribute('inert');
+    } else {
+      panel?.setAttribute('inert', '');
+    }
   }
 
   get discussionUnreadCount(): number {
@@ -3747,6 +3793,8 @@ Infographic requirements:
     this.teamRosterRequestId++;
     this.teamPresenceTriggerCleanup?.();
     this.teamPresenceTriggerCleanup = undefined;
+    this.teamDiscussionTriggerCleanup?.();
+    this.teamDiscussionTriggerCleanup = undefined;
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();

@@ -260,6 +260,31 @@
   transform: translateY(0) scale(1);
 }
 
+.team-discussion-inline-preview {
+  max-height: 0;
+  overflow: hidden;
+  border-top-width: 0;
+  padding: 0 0.75rem;
+  opacity: 0.001;
+  pointer-events: none;
+  transform: translateY(-0.15rem);
+  transition:
+    max-height 80ms ease-out,
+    padding 80ms ease-out,
+    opacity 70ms ease-out,
+    transform 70ms ease-out;
+  will-change: max-height, opacity, transform;
+}
+
+.team-discussion-inline-preview--open {
+  max-height: 20rem;
+  border-top-width: 1px;
+  padding: 0.75rem;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
 .team-presence-panel__header {
   display: flex;
   align-items: flex-start;
@@ -584,6 +609,8 @@
 @media (prefers-reduced-motion: reduce) {
   .team-presence-trigger,
   .team-presence-trigger__chevron,
+  .team-discussion-preview__chevron,
+  .team-discussion-inline-preview,
   .team-member-row,
   .team-presence-panel {
     animation: none;
