@@ -17,19 +17,28 @@
           <button
             type="button"
             data-testid="team-presence-trigger"
-            class="team-presence-trigger"
+            class="team-presence-trigger relative"
             (click)="toggleTeamPresencePanel()"
             [attr.aria-expanded]="showTeamPresencePanel"
             aria-controls="team-presence-panel"
             [attr.aria-label]="
               (currentLanguage === 'fr' ? 'Afficher les membres de l’équipe. ' : 'View solution team. ') +
               onlineTeamCount +
-              (currentLanguage === 'fr' ? ' en ligne.' : ' online.')
+              (currentLanguage === 'fr' ? ' en ligne. ' : ' online. ') +
+              (discussionUnreadCount > 0
+                ? discussionUnreadCount + (currentLanguage === 'fr' ? ' messages d’équipe non lus.' : ' unread team messages.')
+                : '')
             ">
             <span class="team-presence-trigger__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.1a7.5 7.5 0 0115 0A17.9 17.9 0 0112 21.75a17.9 17.9 0 01-7.5-1.65z" />
               </svg>
+            </span>
+            <span
+              *ngIf="discussionUnreadCount > 0"
+              class="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-extrabold leading-none text-white shadow-sm ring-2 ring-white dark:ring-slate-900"
+              [attr.aria-label]="discussionUnreadCount + ' unread team discussion messages'">
+              {{ discussionUnreadCount > 9 ? '9+' : discussionUnreadCount }}
             </span>
 
             <span class="team-presence-trigger__copy">
@@ -119,6 +128,82 @@
               </span>
             </header>
 
+            <button
+              type="button"
+              data-testid="team-discussion-preview"
+              (click)="openTeamDiscussion(latestDiscussionMessage?.messageId)"
+              class="group mx-3 mt-3 block w-auto rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-emerald-50 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-teal-800/70 dark:from-teal-950/60 dark:to-emerald-950/40 dark:hover:border-teal-700 dark:focus-visible:ring-offset-slate-900">
+              <span class="flex items-center justify-between gap-3">
+                <span class="flex min-w-0 items-center gap-2">
+                  <span class="grid h-8 w-8 shrink-0 place-content-center rounded-lg bg-teal-700 text-white shadow-sm dark:bg-teal-600">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm3.75 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM21 12c0 4.142-4.03 7.5-9 7.5a10.7 10.7 0 01-3.78-.67L3 20.25l1.49-3.48A6.84 6.84 0 013 12c0-4.142 4.03-7.5 9-7.5s9 3.358 9 7.5z" />
+                    </svg>
+                  </span>
+                  <span class="min-w-0">
+                    <span class="block text-xs font-bold text-teal-950 dark:text-teal-50">
+                      {{ currentLanguage === 'fr' ? "Discussion d'équipe" : 'Team discussion' }}
+                    </span>
+                    <span class="block text-[10px] font-medium text-teal-700 dark:text-teal-300">
+                      {{ currentLanguage === 'fr' ? 'Conversation en direct' : 'Live team conversation' }}
+                    </span>
+                  </span>
+                </span>
+                <span
+                  *ngIf="discussionUnreadCount > 0"
+                  class="inline-flex shrink-0 items-center gap-1 rounded-full bg-rose-500 px-2 py-1 text-[10px] font-extrabold text-white shadow-sm">
+                  <span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+                  {{ discussionUnreadCount }}
+                  {{ currentLanguage === 'fr' ? 'nouveau' : 'new' }}
+                </span>
+              </span>
+
+              <span *ngIf="latestDiscussionMessage; else noDiscussionMessages" class="mt-3 flex items-start gap-2.5">
+                <span class="grid h-8 w-8 shrink-0 place-content-center overflow-hidden rounded-full bg-slate-800 text-[10px] font-bold text-white ring-2 ring-white dark:bg-slate-700 dark:ring-slate-900">
+                  <img
+                    *ngIf="latestDiscussionMessage.profilePic; else discussionInitials"
+                    [src]="latestDiscussionMessage.profilePic"
+                    alt=""
+                    class="h-full w-full object-cover" />
+                  <ng-template #discussionInitials>
+                    {{ getDiscussionAuthorInitials(latestDiscussionMessage) }}
+                  </ng-template>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex items-baseline justify-between gap-2">
+                    <span class="truncate text-xs font-bold text-slate-900 dark:text-white">
+                      {{ latestDiscussionMessage.authorName || (currentLanguage === 'fr' ? "Membre de l'équipe" : 'Team member') }}
+                    </span>
+                    <span class="shrink-0 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                      {{ getDiscussionMessageTime(latestDiscussionMessage) }}
+                    </span>
+                  </span>
+                  <span class="mt-0.5 block line-clamp-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+                    {{ getDiscussionPreview(latestDiscussionMessage) }}
+                  </span>
+                </span>
+              </span>
+
+              <ng-template #noDiscussionMessages>
+                <span class="mt-3 block rounded-lg border border-dashed border-teal-200 bg-white/60 px-3 py-2 text-xs text-slate-600 dark:border-teal-800 dark:bg-slate-900/40 dark:text-slate-300">
+                  {{ getDiscussionPreview(null) }}
+                </span>
+              </ng-template>
+
+              <span class="mt-3 flex items-center justify-between border-t border-teal-200/70 pt-2.5 text-[11px] font-bold text-teal-800 dark:border-teal-800/70 dark:text-teal-200">
+                <span>{{ currentLanguage === 'fr' ? 'Ouvrir la discussion' : 'Open team discussion' }}</span>
+                <svg class="h-3.5 w-3.5 transition group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.69L10.72 5.53a.75.75 0 011.06-1.06l5 5a.75.75 0 010 1.06l-5 5a.75.75 0 11-1.06-1.06l3.72-3.72H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+                </svg>
+              </span>
+            </button>
+
+            <div class="mx-4 mt-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
+              <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+              <span>{{ currentLanguage === 'fr' ? 'Membres' : 'Members' }}</span>
+              <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
+            </div>
+
             <div *ngIf="teamMembers.length; else emptyTeam" class="team-presence-panel__list">
               <a
                 *ngFor="let member of teamMembers"
@@ -197,6 +282,61 @@
         </div>
       </div>
     </div>
+
+    <aside
+      *ngIf="showDiscussionToast && discussionToastMessage"
+      class="fixed right-4 top-24 z-[70] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-teal-200 bg-white shadow-2xl shadow-slate-900/20 ring-1 ring-black/5 animate-fadeIn dark:border-teal-800 dark:bg-slate-900 dark:shadow-black/50"
+      aria-live="polite"
+      aria-label="New team discussion message">
+      <button
+        type="button"
+        (click)="openTeamDiscussion(discussionToastMessage.messageId)"
+        class="group flex w-full items-start gap-3 p-4 pr-11 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-teal-500 dark:hover:bg-slate-800/70">
+        <span class="relative grid h-11 w-11 shrink-0 place-content-center overflow-hidden rounded-full bg-teal-700 text-xs font-bold text-white ring-2 ring-teal-100 dark:bg-teal-600 dark:ring-teal-900">
+          <img
+            *ngIf="discussionToastMessage.profilePic; else toastDiscussionInitials"
+            [src]="discussionToastMessage.profilePic"
+            alt=""
+            class="h-full w-full object-cover" />
+          <ng-template #toastDiscussionInitials>
+            {{ getDiscussionAuthorInitials(discussionToastMessage) }}
+          </ng-template>
+          <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"></span>
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="flex items-center gap-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-[0.14em] text-teal-700 dark:text-teal-300">
+              {{ currentLanguage === 'fr' ? "Nouveau message d'équipe" : 'New team message' }}
+            </span>
+            <span class="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+            <span class="text-[10px] font-medium text-slate-400">
+              {{ getDiscussionMessageTime(discussionToastMessage) }}
+            </span>
+          </span>
+          <span class="mt-1 block truncate text-sm font-bold text-slate-950 dark:text-white">
+            {{ discussionToastMessage.authorName || (currentLanguage === 'fr' ? "Membre de l'équipe" : 'Team member') }}
+          </span>
+          <span class="mt-0.5 block line-clamp-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+            {{ getDiscussionPreview(discussionToastMessage) }}
+          </span>
+          <span class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-teal-700 dark:text-teal-300">
+            {{ currentLanguage === 'fr' ? 'Voir dans la discussion' : 'View in discussion' }}
+            <svg class="h-3.5 w-3.5 transition group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.69L10.72 5.53a.75.75 0 011.06-1.06l5 5a.75.75 0 010 1.06l-5 5a.75.75 0 11-1.06-1.06l3.72-3.72H3.75A.75.75 0 013 10z" clip-rule="evenodd" />
+            </svg>
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        (click)="dismissDiscussionToast()"
+        class="absolute right-3 top-3 grid h-7 w-7 place-content-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:hover:bg-slate-800 dark:hover:text-white"
+        [attr.aria-label]="currentLanguage === 'fr' ? 'Fermer la notification' : 'Dismiss notification'">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+        </svg>
+      </button>
+    </aside>
   
     <!-- TIMELINE / STEPS HEADER (centered) -->
     <!-- <div class="mt-20 container px-32 flex flex-row mx-auto justify-center">

@@ -3,7 +3,7 @@ import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
-import { Evaluator, Roles, Solution } from 'src/app/models/solution';
+import { Comment, Evaluator, Roles, Solution } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { DataService } from 'src/app/services/data.service';
 import { User } from 'src/app/models/user';
@@ -15,6 +15,10 @@ import {
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
+import {
+  DiscussionMessageNotification,
+  DiscussionNotificationsService,
+} from 'src/app/services/discussion-notifications.service';
 import { PresenceService } from 'src/app/services/presence.service';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
 import {
@@ -139,6 +143,10 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   showPopUpEvaluators: boolean[] = [];
   showTeamPresencePanel = false;
   onlineTeamUids = new Set<string>();
+  latestDiscussionMessage: Comment | null = null;
+  discussionUnreadNotifications: DiscussionMessageNotification[] = [];
+  discussionToastMessage: Comment | null = null;
+  showDiscussionToast = false;
   showAddTeamMember: boolean = false;
   showRemoveTeamMember: boolean = false;
   hoverAddTeamMember: boolean = false;
@@ -165,6 +173,10 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   evaluatorInviteSendingState: Record<string, boolean> = {};
   private evaluatorInviteSearchTimeout: any;
   private teamPresenceSub?: Subscription;
+  private discussionUnreadSub?: Subscription;
+  private discussionToastTimeout?: ReturnType<typeof setTimeout>;
+  private latestDiscussionMessageKey = '';
+  private discussionPreviewInitialized = false;
 
   hoverChangeReadMe: boolean = false;
   updateReadMeBox: boolean = false;
@@ -435,10 +447,20 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     private languageService: LanguageService,
     private afs: AngularFirestore,
     private chatContext: ChatContextService,
-    private presence: PresenceService
+    private presence: PresenceService,
+    private discussionNotifications: DiscussionNotificationsService
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    const requestedStep = this.activatedRoute.snapshot.queryParamMap.get('step');
+    const parsedStep = requestedStep === null ? NaN : Number(requestedStep);
+    if (
+      Number.isInteger(parsedStep) &&
+      parsedStep >= 0 &&
+      parsedStep < this.steps.length
+    ) {
+      this.currentIndexDisplay = parsedStep;
+    }
     
     // Real-time subscription to solution data
     this.solutionSub = this.solution.getSolution(this.id).subscribe((data: any) => {
@@ -449,6 +471,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       // Update solution data
       this.currentSolution = data;
       this.roles = this.currentSolution.roles || {};
+      this.updateDiscussionPreview(this.currentSolution.discussion);
       this.updateCurrentDraftText();
 
       const nextTeamRosterSignature = JSON.stringify({
@@ -919,6 +942,7 @@ STYLE REQUIREMENTS:
     this.display = new Array(this.steps.length).fill(false);
     this.display[this.currentIndexDisplay] = true;
     this.reportInstruction = this.getSelectedReportType()?.instruction || '';
+    this.watchDiscussionNotifications();
     
     // Subscribe to chatbot insert requests
     this.insertRequestSub = this.chatContext.insertRequest$.subscribe({
@@ -1166,6 +1190,137 @@ STYLE REQUIREMENTS:
 
   toggleTeamPresencePanel(): void {
     this.showTeamPresencePanel = !this.showTeamPresencePanel;
+    if (this.showTeamPresencePanel) {
+      this.dismissDiscussionToast();
+    }
+  }
+
+  get discussionUnreadCount(): number {
+    return this.discussionUnreadNotifications.length;
+  }
+
+  openTeamDiscussion(messageId?: string): void {
+    this.showTeamPresencePanel = false;
+    this.dismissDiscussionToast();
+
+    const returnTo = `/playground-steps/${this.id}?step=${this.currentIndexDisplay}`;
+    this.router.navigate(['/full-discussion', this.id], {
+      queryParams: {
+        returnTo,
+        ...(messageId ? { messageId } : {}),
+      },
+    });
+  }
+
+  dismissDiscussionToast(): void {
+    this.showDiscussionToast = false;
+    if (this.discussionToastTimeout) {
+      clearTimeout(this.discussionToastTimeout);
+      this.discussionToastTimeout = undefined;
+    }
+  }
+
+  getDiscussionPreview(message: Comment | null): string {
+    if (!message) {
+      return this.currentLanguage === 'fr'
+        ? 'Lancez la conversation avec votre équipe.'
+        : 'Start the conversation with your team.';
+    }
+
+    const text = String(message.content || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (text) {
+      return text.length > 120 ? `${text.slice(0, 119)}…` : text;
+    }
+
+    const attachmentCount = message.attachments?.length || 0;
+    if (attachmentCount) {
+      return this.currentLanguage === 'fr'
+        ? `${attachmentCount} pièce${attachmentCount === 1 ? '' : 's'} jointe${attachmentCount === 1 ? '' : 's'}`
+        : `${attachmentCount} attachment${attachmentCount === 1 ? '' : 's'}`;
+    }
+
+    return this.currentLanguage === 'fr' ? 'Nouveau message' : 'New message';
+  }
+
+  getDiscussionMessageTime(message: Comment | null): string {
+    const timestamp = message?.date ? Date.parse(String(message.date)) : NaN;
+    if (!Number.isFinite(timestamp)) return '';
+
+    const elapsedMs = Math.max(0, Date.now() - timestamp);
+    const minutes = Math.floor(elapsedMs / 60_000);
+    if (minutes < 1) {
+      return this.currentLanguage === 'fr' ? "À l'instant" : 'Just now';
+    }
+    if (minutes < 60) {
+      return this.currentLanguage === 'fr'
+        ? `il y a ${minutes} min`
+        : `${minutes}m ago`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+      return this.currentLanguage === 'fr'
+        ? `il y a ${hours} h`
+        : `${hours}h ago`;
+    }
+
+    return new Date(timestamp).toLocaleDateString(
+      this.currentLanguage === 'fr' ? 'fr-FR' : 'en-US',
+      { month: 'short', day: 'numeric' }
+    );
+  }
+
+  getDiscussionAuthorInitials(message: Comment | null): string {
+    return this.getInitials(undefined, undefined, undefined, message?.authorName);
+  }
+
+  private updateDiscussionPreview(discussion: Comment[] | undefined): void {
+    const messages = Array.isArray(discussion) ? discussion : [];
+    const latest = messages.at(-1) || null;
+    const nextKey = latest?.messageId || latest?.date || '';
+    const isNewMessage =
+      this.discussionPreviewInitialized &&
+      !!nextKey &&
+      nextKey !== this.latestDiscussionMessageKey;
+
+    this.latestDiscussionMessage = latest;
+    this.latestDiscussionMessageKey = nextKey;
+
+    if (
+      isNewMessage &&
+      latest?.authorId !== this.auth.currentUser?.uid &&
+      !latest?.isLoading
+    ) {
+      this.discussionToastMessage = latest;
+      this.showDiscussionToast = true;
+      if (this.discussionToastTimeout) {
+        clearTimeout(this.discussionToastTimeout);
+      }
+      this.discussionToastTimeout = setTimeout(() => {
+        this.showDiscussionToast = false;
+        this.discussionToastTimeout = undefined;
+      }, 9000);
+    }
+
+    this.discussionPreviewInitialized = true;
+  }
+
+  private watchDiscussionNotifications(): void {
+    const uid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (!uid || !this.id) return;
+
+    const sourceDocPath = `solutions/${this.id}`;
+    this.discussionUnreadSub?.unsubscribe();
+    this.discussionUnreadSub = this.discussionNotifications
+      .watchUnread(uid)
+      .subscribe((notifications) => {
+        this.discussionUnreadNotifications = notifications.filter(
+          (notification) => notification.sourceDocPath === sourceDocPath
+        );
+      });
   }
 
   isTeamMemberOnline(user: User): boolean {
@@ -3531,6 +3686,8 @@ Infographic requirements:
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     this.teamPresenceSub?.unsubscribe();
+    this.discussionUnreadSub?.unsubscribe();
+    this.dismissDiscussionToast();
     // Clear chat context when leaving the playground
     this.chatContext.clearContext();
   }

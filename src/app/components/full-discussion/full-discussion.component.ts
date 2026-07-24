@@ -128,6 +128,7 @@ export class FullDiscussionComponent
   prompt = '';
   id: any;
   meetingUrl = ''; // <- add at class level
+  workspaceReturnUrl = '';
   // currentSolution: Solution = {};
   introMessage = `
     Welcome to the team discussion chat. You can use the following resource for more advanced prompts
@@ -179,6 +180,7 @@ export class FullDiscussionComponent
     const prefix = this.activatedRoute.snapshot.data['docPrefix'];
     // const id = this.activatedRoute.snapshot.paramMap.get('id');
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.configureWorkspaceReturn(prefix);
     /* Hosted mode: we got a docPath – stream its data */
     if (prefix && this.id) {
       // ← we are on /challenge-discussion/…
@@ -436,7 +438,10 @@ Please choose a file under 5 MB.`);
 
   // “Close” might navigate away or handle a different route
   endChat() {
-    // example: navigate away, or hide overlay, or do something else
+    if (this.workspaceReturnUrl) {
+      this.returnToWorkspace();
+      return;
+    }
 
     if (this.docPath) {
       this.router.navigate(['/home-challenge', this.id]);
@@ -445,6 +450,27 @@ Please choose a file under 5 MB.`);
     }
 
     console.log('Closed the full-screen chat');
+  }
+
+  returnToWorkspace(): void {
+    if (!this.workspaceReturnUrl) return;
+    this.router.navigateByUrl(this.workspaceReturnUrl);
+  }
+
+  private configureWorkspaceReturn(docPrefix?: string): void {
+    if (docPrefix || !this.id) {
+      this.workspaceReturnUrl = '';
+      return;
+    }
+
+    const requestedReturnUrl =
+      this.activatedRoute.snapshot.queryParamMap.get('returnTo') || '';
+    const safeWorkspaceUrl =
+      /^\/playground-steps\/[A-Za-z0-9_-]+(?:\?step=[0-4])?$/;
+
+    this.workspaceReturnUrl = safeWorkspaceUrl.test(requestedReturnUrl)
+      ? requestedReturnUrl
+      : `/playground-steps/${this.id}`;
   }
   removePreview(index: number) {
     URL.revokeObjectURL(this.previews[index].url);

@@ -30,8 +30,21 @@
       <div class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3
                   dark:border-slate-800 dark:bg-slate-900 bg-white">
         <!-- Left side: channel name -->
-        <div class="flex items-center space-x-2">
-          <span class="font-semibold text-base text-slate-900 dark:text-white">
+        <div class="flex min-w-0 items-center gap-2">
+          <button
+            *ngIf="workspaceReturnUrl"
+            type="button"
+            data-testid="back-to-workspace"
+            (click)="returnToWorkspace()"
+            class="group inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-bold text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-teal-700 dark:hover:bg-teal-950/40 dark:hover:text-teal-200"
+            aria-label="Back to solution workspace">
+            <svg class="h-4 w-4 transition group-hover:-translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.56l3.72 3.72a.75.75 0 11-1.06 1.06l-5-5a.75.75 0 010-1.06l5-5a.75.75 0 111.06 1.06L5.56 9.25h10.69A.75.75 0 0117 10z" clip-rule="evenodd" />
+            </svg>
+            <span class="hidden sm:inline">Workspace</span>
+          </button>
+          <span *ngIf="workspaceReturnUrl" class="h-6 w-px shrink-0 bg-slate-200 dark:bg-slate-700" aria-hidden="true"></span>
+          <span class="truncate font-semibold text-base text-slate-900 dark:text-white">
             #team-discussion - {{ currentSolution.title }}
           </span>
         </div>
@@ -54,6 +67,7 @@
           </a>
         </ng-template>
           <button
+            *ngIf="!workspaceReturnUrl"
             (click)="endChat()"
             class="border border-slate-300 bg-white px-4 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
           >
