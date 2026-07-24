@@ -142,6 +142,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   showPopUpContributors: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
   showTeamPresencePanel = false;
+  showTeamDiscussionPreview = false;
   onlineTeamUids = new Set<string>();
   latestDiscussionMessage: Comment | null = null;
   discussionUnreadNotifications: DiscussionMessageNotification[] = [];
@@ -428,6 +429,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       const clickedInside = this.teamPresenceMenuRef.nativeElement.contains(event.target);
       if (!clickedInside) {
         this.showTeamPresencePanel = false;
+        this.showTeamDiscussionPreview = false;
       }
     }
   }
@@ -435,6 +437,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     this.showTeamPresencePanel = false;
+    this.showTeamDiscussionPreview = false;
   }
 
   constructor(
@@ -1192,7 +1195,13 @@ STYLE REQUIREMENTS:
     this.showTeamPresencePanel = !this.showTeamPresencePanel;
     if (this.showTeamPresencePanel) {
       this.dismissDiscussionToast();
+    } else {
+      this.showTeamDiscussionPreview = false;
     }
+  }
+
+  toggleTeamDiscussionPreview(): void {
+    this.showTeamDiscussionPreview = !this.showTeamDiscussionPreview;
   }
 
   get discussionUnreadCount(): number {

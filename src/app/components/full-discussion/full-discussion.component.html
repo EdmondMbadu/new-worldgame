@@ -27,22 +27,38 @@
              mt-20 w-full max-w-5xl h-[calc(100vh-5rem)] min-h-0"
     >
       <!-- Top bar / header -->
-      <div class="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3
+      <div class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3
                   dark:border-slate-800 dark:bg-slate-900 bg-white">
         <!-- Left side: channel name -->
-        <div class="flex min-w-0 items-center gap-2">
-          <button
+        <div class="flex min-w-0 flex-1 items-center gap-2">
+          <nav
             *ngIf="workspaceReturnUrl"
-            type="button"
-            data-testid="back-to-workspace"
-            (click)="returnToWorkspace()"
-            class="group inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-bold text-slate-700 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-teal-700 dark:hover:bg-teal-950/40 dark:hover:text-teal-200"
-            aria-label="Back to solution workspace">
-            <svg class="h-4 w-4 transition group-hover:-translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.56l3.72 3.72a.75.75 0 11-1.06 1.06l-5-5a.75.75 0 010-1.06l5-5a.75.75 0 111.06 1.06L5.56 9.25h10.69A.75.75 0 0117 10z" clip-rule="evenodd" />
-            </svg>
-            <span class="hidden sm:inline">Workspace</span>
-          </button>
+            class="inline-flex shrink-0 items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 shadow-sm dark:border-slate-700 dark:bg-slate-800"
+            aria-label="Solution navigation">
+            <button
+              type="button"
+              data-testid="back-to-workspace"
+              (click)="returnToWorkspace()"
+              class="group inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-white hover:text-teal-800 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-teal-200"
+              aria-label="Open solution development">
+              <svg class="h-4 w-4 transition group-hover:-translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M17 10a.75.75 0 01-.75.75H5.56l3.72 3.72a.75.75 0 11-1.06 1.06l-5-5a.75.75 0 010-1.06l5-5a.75.75 0 111.06 1.06L5.56 9.25h10.69A.75.75 0 0117 10z" clip-rule="evenodd" />
+              </svg>
+              <span class="hidden lg:inline">Solution development</span>
+              <span class="lg:hidden">Solution</span>
+            </button>
+            <span class="h-5 w-px bg-slate-200 dark:bg-slate-600" aria-hidden="true"></span>
+            <a
+              [routerLink]="['/dashboard', id]"
+              data-testid="discussion-to-dashboard"
+              class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-white hover:text-teal-800 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-teal-200"
+              aria-label="Open solution dashboard">
+              <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M3.25 3A1.25 1.25 0 002 4.25v3.5A1.25 1.25 0 003.25 9h3.5A1.25 1.25 0 008 7.75v-3.5A1.25 1.25 0 006.75 3h-3.5zM3.25 11A1.25 1.25 0 002 12.25v3.5A1.25 1.25 0 003.25 17h3.5A1.25 1.25 0 008 15.75v-3.5A1.25 1.25 0 006.75 11h-3.5zM11.25 3A1.25 1.25 0 0010 4.25v3.5A1.25 1.25 0 0011.25 9h5.5A1.25 1.25 0 0018 7.75v-3.5A1.25 1.25 0 0016.75 3h-5.5zM11.25 11A1.25 1.25 0 0010 12.25v3.5A1.25 1.25 0 0011.25 17h5.5A1.25 1.25 0 0018 15.75v-3.5A1.25 1.25 0 0016.75 11h-5.5z" />
+              </svg>
+              <span>Dashboard</span>
+            </a>
+          </nav>
           <span *ngIf="workspaceReturnUrl" class="h-6 w-px shrink-0 bg-slate-200 dark:bg-slate-700" aria-hidden="true"></span>
           <span class="truncate font-semibold text-base text-slate-900 dark:text-white">
             #team-discussion - {{ currentSolution.title }}
@@ -50,7 +66,7 @@
         </div>
   
         <!-- Right side: actions (Join call, Close, etc.) -->
-        <div class="flex items-center space-x-2">
+        <div class="ml-auto flex items-center space-x-2">
                   <a *ngIf="meetingUrl; else defaultCall"
           [href]="meetingUrl" target="_blank" rel="noopener"
           class="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md

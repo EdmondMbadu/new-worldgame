@@ -13,12 +13,17 @@
 
 /* Collaboration presence */
 .team-presence-header {
-  position: relative;
-  z-index: 35;
+  position: fixed;
+  top: 5.25rem;
+  right: 0;
+  left: 0;
+  z-index: 55;
+  pointer-events: none;
 }
 
 .team-presence-menu {
   max-width: min(100%, 30rem);
+  pointer-events: auto;
 }
 
 .team-presence-trigger {
@@ -225,6 +230,9 @@
   position: absolute;
   top: calc(100% + 0.65rem);
   right: 0;
+  display: flex;
+  max-height: calc(100vh - 9rem);
+  flex-direction: column;
   width: min(23.5rem, calc(100vw - 2rem));
   overflow: hidden;
   border: 1px solid #e2e8f0;
@@ -290,7 +298,8 @@
 }
 
 .team-presence-panel__list {
-  max-height: min(24rem, 58vh);
+  min-height: 0;
+  flex: 1;
   overflow-y: auto;
   padding: 0.42rem;
   scrollbar-width: thin;
