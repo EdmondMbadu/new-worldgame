@@ -25,6 +25,7 @@ import {
   ChatSessionService,
   ChatSessionRecord,
 } from 'src/app/services/chat-session.service';
+import { isImageGenerationRequest } from './image-request.util';
 
 export interface Source {
   title: string;
@@ -1460,16 +1461,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
    * Detects if the prompt is requesting an image generation
    */
   private isImageRequest(prompt: string): boolean {
-    const imagePatterns = [
-      /\b(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)/i,
-      /\b(image|picture|photo|illustration|artwork|visual|graphic)\s+(of|for|showing|depicting|illustrating)/i,
-      /\bshow\s+me\s+(an?\s+)?(image|picture|visual)/i,
-      /\bvisualize\b/i,
-      /\billustrate\b/i,
-      /\bcreate\s+(a\s+)?visual/i,
-      /\b(can you|please|could you)\s+(generate|create|make|draw)\s+(an?\s+)?(image|picture)/i,
-    ];
-    return imagePatterns.some(pattern => pattern.test(prompt));
+    return isImageGenerationRequest(prompt);
   }
 
   /**

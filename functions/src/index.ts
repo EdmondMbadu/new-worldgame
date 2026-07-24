@@ -23,6 +23,10 @@ import pdfParse from 'pdf-parse';
 import * as mammoth from 'mammoth';
 import { SpeechClient, protos as speechProtos } from '@google-cloud/speech';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+import {
+  extractImageGenerationPrompt,
+  isImageGenerationRequest,
+} from './image-request';
 
 // read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
 const GEMINI_KEY = functions.config()['gemini'].key;
@@ -6658,6 +6662,12 @@ const AVATAR_CHAT_COLLECTIONS = new Set([
 
 const MARK_TWAIN_COLLECTIONS = new Set(['twain', 'mark']);
 
+const CHAT_IMAGE_MODELS = [
+  { name: 'gemini-3.1-flash-image', imageSize: '2K' },
+  { name: 'gemini-3-pro-image', imageSize: '2K' },
+  { name: 'gemini-2.5-flash-image', imageSize: '1K' },
+] as const;
+
 function getAvatarSystemInstruction(collectionId: string): string {
   if (MARK_TWAIN_COLLECTIONS.has(collectionId)) {
     return `
@@ -6806,36 +6816,14 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       }
 
       // ────────── 2. pick model ─────────────────────────────────
-      // Enhanced detection for image generation requests (English and French)
-      const imagePatterns = [
-        // English patterns
-        /\b(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)/i,
-        /\b(image|picture|photo|illustration|artwork|visual|graphic)\s+(of|for|showing|depicting|illustrating)/i,
-        /\bshow\s+me\s+(an?\s+)?(image|picture|visual)/i,
-        /\bvisualize\b/i,
-        /\billustrate\b/i,
-        /\bcreate\s+(a\s+)?visual/i,
-        /\b(can you|please|could you)\s+(generate|create|make|draw)\s+(an?\s+)?(image|picture)/i,
-        // French patterns
-        /\b(générer|créer|faire|dessiner|peindre|concevoir|produire|rendre)\s+(une\s+)?(image|photo|illustration|visuel|graphique|diagramme|infographie)/i,
-        /\b(image|photo|illustration|visuel|graphique)\s+(de|pour|montrant|dépeignant|illustrant)/i,
-        /\b(montre|montrer)\s+(moi\s+)?(une\s+)?(image|photo|visuel)/i,
-        /\bvisualiser\b/i,
-        /\billustrer\b/i,
-        /\bcréer\s+(un\s+)?visuel/i,
-        /\b(pouvez-vous|peux-tu|s'il te plaît|s'il vous plaît)\s+(générer|créer|faire|dessiner)\s+(une\s+)?(image|photo)/i,
-      ];
-      const wantsImage = imagePatterns.some((pattern) =>
-        pattern.test(userPrompt)
-      );
+      const wantsImage = isImageGenerationRequest(userPrompt);
 
-      // Use Imagen 4 for image generation and Gemini 2.5 Flash for text
       // Use gemini-2.5-flash for text-only responses with grounding
       const textModelName = 'gemini-2.5-flash';
 
       console.log('Model selection:', {
         wantsImage,
-        modelName: wantsImage ? 'imagen-4.0-generate-001' : textModelName,
+        modelName: wantsImage ? CHAT_IMAGE_MODELS[0].name : textModelName,
         promptPreview: userPrompt.slice(0, 100),
       });
 
@@ -6850,144 +6838,67 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       // For image generation, create a clean, focused prompt
       let cleanImagePrompt = userPrompt;
       if (wantsImage) {
-        // Extract the core image request from the prompt, removing conversational fluff
-        cleanImagePrompt = userPrompt
-          .replace(/^(generate|create|make|draw|paint|design|render|produce)\s+(an?\s+)?(image|picture|photo|illustration|artwork|visual|graphic|diagram|infographic)\s+(of|for|showing|depicting|illustrating)?\s*/i, '')
-          .replace(/^(générer|créer|faire|dessiner|peindre|concevoir|produire|rendre)\s+(une?\s+)?(image|photo|illustration|visuel|graphique|diagramme|infographie)\s+(de|pour|montrant|dépeignant|illustrant)?\s*/i, '')
-          .trim();
-        
-        // If the cleaned prompt is too short, use the original user request
-        if (cleanImagePrompt.length < 10) {
-          cleanImagePrompt = userPrompt;
-        }
-
-        // Add quality-enhancing suffix for image generation
-        cleanImagePrompt = `${cleanImagePrompt}. High quality, detailed, professional photograph or illustration with excellent composition and lighting.`;
+        cleanImagePrompt = extractImageGenerationPrompt(userPrompt);
       }
 
       // ────────── 3. generate ───────────────────────────────────
       let answer = '';
       let imgB64 = '';
+      let imgMimeType = 'image/png';
+      let imageModelUsed = '';
       let finalResponse: any;
 
       if (wantsImage) {
         const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
-        const qualityPrefix =
-          'You are an expert AI image generator. Create a high-quality, detailed, professional image based on the following request. Make it visually stunning, well-composed, with good lighting and artistic quality.\n\n';
+        const highQualityPrompt = [
+          cleanImagePrompt,
+          'Create one polished, high-quality image that follows the request precisely.',
+          'Honor the requested medium, subject, setting, composition, colors, mood, and any requested words.',
+          'Use strong visual hierarchy, coherent details, professional lighting, and clean edges. Do not add unrelated text, logos, or watermarks.',
+        ].join('\n\n');
 
-        // Use Imagen 4 for high-quality image generation
-        try {
-          console.log('Attempting image generation with Imagen 4');
-          console.log('Image prompt:', cleanImagePrompt.slice(0, 200));
+        console.log('Image prompt:', cleanImagePrompt.slice(0, 200));
 
-          const imageResult = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
-            prompt: cleanImagePrompt,
-            config: {
-              numberOfImages: 1,
-              aspectRatio: '16:9',
-            },
-          });
+        for (const imageModel of CHAT_IMAGE_MODELS) {
+          try {
+            console.log(`Attempting image generation with ${imageModel.name}`);
+            const interaction = await ai.interactions.create({
+              model: imageModel.name,
+              input: highQualityPrompt,
+              response_format: {
+                type: 'image',
+                aspect_ratio: '16:9',
+                image_size: imageModel.imageSize,
+                delivery: 'inline',
+              },
+            });
 
-          if (imageResult.generatedImages?.[0]?.image?.imageBytes) {
-            imgB64 = imageResult.generatedImages[0].image.imageBytes;
-            answer = "Here's the image I created for you.";
-          }
-
-          if (!imgB64) {
-            answer = "I tried to generate an image but wasn't able to. This might be due to content restrictions. Try a prompt without people or sensitive content, like 'Generate an image of a futuristic sustainable city' or 'Create an illustration of renewable energy'.";
-          }
-
-          console.log('Imagen 4 generation result:', {
-            hasImage: !!imgB64,
-            answerLength: answer.length,
-          });
-        } catch (imageError: any) {
-          console.error(
-            'Imagen 4 generation error:',
-            imageError?.message || imageError
-          );
-
-          const fallbackModels = [
-            'gemini-2.0-flash-preview-image-generation',
-            'gemini-2.0-flash-exp-image-generation',
-          ];
-
-          for (const fallbackModelName of fallbackModels) {
-            if (imgB64) {
+            if (interaction.output_image?.data) {
+              imgB64 = interaction.output_image.data;
+              imgMimeType =
+                interaction.output_image.mime_type || 'image/jpeg';
+              imageModelUsed = imageModel.name;
+              answer = "Here's the image I created for you.";
+              console.log('Chat image generated:', {
+                model: imageModelUsed,
+                mimeType: imgMimeType,
+                hasImage: true,
+              });
               break;
             }
 
-            try {
-              console.log(
-                `Falling back to ${fallbackModelName} for image generation`
-              );
-              const fallbackConfig: Record<string, unknown> = {
-                model: fallbackModelName,
-                generationConfig: {
-                  responseModalities: ['TEXT', 'IMAGE'],
-                },
-              };
-              const fallbackModel = genAI.getGenerativeModel(
-                fallbackConfig as any
-              );
-              const fallbackPrompt = qualityPrefix + cleanImagePrompt;
-
-              const result = await fallbackModel.generateContent(fallbackPrompt);
-              finalResponse = await result.response;
-              const finishReason = finalResponse?.candidates?.[0]?.finishReason;
-
-              if (finishReason === 'SAFETY') {
-                answer =
-                  "I apologize, but I couldn't generate that image due to content safety guidelines. Please try a different prompt that doesn't include people or sensitive content.";
-              } else if (finishReason === 'RECITATION') {
-                answer =
-                  "I couldn't generate that image due to content restrictions. Please try a different prompt.";
-              } else {
-                answer = '';
-                for (const part of finalResponse?.candidates?.[0]?.content?.parts ||
-                  []) {
-                  if (part.text) {
-                    answer += part.text;
-                  } else if (part.inlineData?.data) {
-                    imgB64 = part.inlineData.data;
-                  }
-                }
-              }
-
-              console.log(`${fallbackModelName} fallback result:`, {
-                hasImage: !!imgB64,
-                answerLength: answer.length,
-              });
-            } catch (fallbackError: any) {
-              console.error(
-                `${fallbackModelName} fallback error:`,
-                fallbackError?.message || fallbackError
-              );
-
-              answer = 'I encountered an issue generating that image. ';
-              if (
-                imageError?.message?.includes('SAFETY') ||
-                imageError?.message?.includes('blocked') ||
-                fallbackError?.message?.includes('SAFETY') ||
-                fallbackError?.message?.includes('blocked')
-              ) {
-                answer +=
-                  'The content may have been blocked due to safety guidelines. Try a different prompt without people or sensitive subjects.';
-              } else if (
-                imageError?.message?.includes('quota') ||
-                imageError?.message?.includes('limit') ||
-                fallbackError?.message?.includes('quota') ||
-                fallbackError?.message?.includes('limit')
-              ) {
-                answer +=
-                  'The image generation service may be temporarily unavailable. Please try again later.';
-              } else {
-                answer +=
-                  "Please try a different prompt, such as 'Generate an image of a beautiful landscape' or 'Create a picture of a sustainable city'.";
-              }
-            }
+            console.warn(`${imageModel.name} returned no inline image`);
+          } catch (imageError: any) {
+            console.warn(
+              `Chat image model ${imageModel.name} failed:`,
+              String(imageError?.message || imageError).slice(0, 240)
+            );
           }
+        }
+
+        if (!imgB64) {
+          answer =
+            "I couldn't generate that image. It may have been blocked by safety guidelines or the image service may be temporarily busy. Please adjust the request and try again.";
         }
       } else {
         const streamResult = await model.generateContentStream(history);
@@ -7156,13 +7067,19 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       let imageDocId: string | undefined;
       if (imgB64) {
         imageDocId = randomUUID();
-        const filePath = `chatbot-images/${imageDocId}.png`;
+        const imageExtension = imgMimeType.includes('jpeg')
+          ? 'jpg'
+          : imgMimeType.includes('webp')
+          ? 'webp'
+          : 'png';
+        const filePath = `chatbot-images/${imageDocId}.${imageExtension}`;
         const downloadToken = randomUUID();
         await bucket.file(filePath).save(Buffer.from(imgB64, 'base64'), {
           metadata: {
-            contentType: 'image/png',
+            contentType: imgMimeType,
             metadata: {
               createdAt: new Date().toISOString(),
+              imageModel: imageModelUsed,
               firebaseStorageDownloadTokens: downloadToken,
             },
           },
@@ -7182,6 +7099,8 @@ const processChatPrompt = async (snap: any): Promise<void> => {
             url: imageUrl,
             storagePath: filePath,
             prompt: userPrompt.slice(0, 500),
+            model: imageModelUsed || null,
+            mimeType: imgMimeType,
             userId: uid || null,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             discussionDocId: snap.id,
