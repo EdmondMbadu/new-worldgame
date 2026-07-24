@@ -15,6 +15,7 @@ import {
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
+import { PresenceService } from 'src/app/services/presence.service';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
 import {
   Document,
@@ -136,6 +137,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   showFacilitator: boolean = false;
   showPopUpContributors: boolean[] = [];
   showPopUpEvaluators: boolean[] = [];
+  showTeamPresencePanel = false;
+  onlineTeamUids = new Set<string>();
   showAddTeamMember: boolean = false;
   showRemoveTeamMember: boolean = false;
   hoverAddTeamMember: boolean = false;
@@ -161,6 +164,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   }> = [];
   evaluatorInviteSendingState: Record<string, boolean> = {};
   private evaluatorInviteSearchTimeout: any;
+  private teamPresenceSub?: Subscription;
 
   hoverChangeReadMe: boolean = false;
   updateReadMeBox: boolean = false;
@@ -315,6 +319,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   private langSub?: Subscription;
   private insertRequestSub?: Subscription;
   private solutionSub?: Subscription;
+  private teamRosterSignature = '';
+  private teamRosterRequestId = 0;
   aiFeedbackLoading = false;
   aiFeedbackStatus = '';
   aiFeedbackError = '';
@@ -394,6 +400,7 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
   downloadingInfographic = false;
   private infographicDocSub?: Subscription;
   @ViewChild('aiEvaluatorDropdownRef') aiEvaluatorDropdownRef?: ElementRef;
+  @ViewChild('teamPresenceMenuRef') teamPresenceMenuRef?: ElementRef;
   @ViewChildren(PlaygroundStepComponent) playgroundStepComponents!: QueryList<PlaygroundStepComponent>;
 
   @HostListener('document:click', ['$event'])
@@ -404,6 +411,18 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
         this.showAiEvaluatorDropdown = false;
       }
     }
+
+    if (this.showTeamPresencePanel && this.teamPresenceMenuRef) {
+      const clickedInside = this.teamPresenceMenuRef.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.showTeamPresencePanel = false;
+      }
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.showTeamPresencePanel = false;
   }
 
   constructor(
@@ -415,7 +434,8 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
     private fns: AngularFireFunctions,
     private languageService: LanguageService,
     private afs: AngularFirestore,
-    private chatContext: ChatContextService
+    private chatContext: ChatContextService,
+    private presence: PresenceService
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -428,14 +448,23 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
       
       // Update solution data
       this.currentSolution = data;
+      this.roles = this.currentSolution.roles || {};
       this.updateCurrentDraftText();
+
+      const nextTeamRosterSignature = JSON.stringify({
+        emails: this.getSolutionTeamEmails().sort(),
+        roles: this.roles,
+      });
+      const teamRosterChanged =
+        nextTeamRosterSignature !== this.teamRosterSignature;
+      this.teamRosterSignature = nextTeamRosterSignature;
+
+      if (teamRosterChanged) {
+        void this.getMembers();
+      }
       
       if (isFirstLoad) {
         // First load - initialize everything
-        this.roles =
-          this.currentSolution.roles !== undefined
-            ? this.currentSolution.roles
-            : {};
         this.currentSolution.evaluators?.forEach((ev: any) => {
           this.evaluators.push(ev);
         });
@@ -445,7 +474,6 @@ export class PlaygroundStepsComponent implements OnInit, OnDestroy {
             : '';
         this.newReadMe = this.currentSolution.description!;
 
-        this.getMembers();
         this.getEvaluators();
         this.loadSavedFeedback();
         // Set up chat context after solution loads
@@ -1073,40 +1101,179 @@ STYLE REQUIREMENTS:
   toggleHover(event: boolean) {
     this.isHovering = event;
   }
-  getMembers() {
-    this.teamMembers = [];
-    console.log('all participants', this.currentSolution.participants);
-    for (const key in this.currentSolution.participants) {
-      let participant = this.currentSolution.participants[key];
-      let email = Object.values(participant)[0];
-      this.auth.getUserFromEmail(email).subscribe((data) => {
-        // Check if the email of the incoming data is already in the teamMembers
-        if (
-          data &&
-          data[0] &&
-          !this.teamMembers.some((member) => member.email === data[0].email)
-        ) {
-          this.teamMembers.push(data[0]);
-        }
+  async getMembers() {
+    const requestId = ++this.teamRosterRequestId;
+    const emails = this.getSolutionTeamEmails();
 
-        if (this.roles.facilitator === email) {
-          this.facilitator = data[0];
-          if (this.currentUser.email === email)
-            this.currentUserIsFacilitator = true;
+    const members = await Promise.all(
+      emails.map(async (email): Promise<User> => {
+        try {
+          const users = await firstValueFrom(this.auth.getUserFromEmail(email));
+          return users?.[0] || { email };
+        } catch {
+          // Keep invited participants visible even if a profile cannot be loaded.
+          return { email };
         }
-        if (this.roles.teamLeader === email) {
-          this.teamLeader = data[0];
-          if (this.currentUser.email === email)
-            this.currentUserIsTeamleader = true;
-        }
-        if (this.roles.factChecker === email) {
-          this.factChecker = data[0];
-          if (this.currentUser.email === email)
-            this.currentUserIsFactChecker = true;
-        }
-      });
-      this.popupStyles = this.teamMembers.map(() => ({}));
+      })
+    );
+
+    if (requestId !== this.teamRosterRequestId) return;
+
+    this.teamMembers = members
+      .filter(
+        (member, index, all) =>
+          !!member.email &&
+          all.findIndex(
+            (candidate) =>
+              this.normalizeTeamEmail(candidate.email) ===
+              this.normalizeTeamEmail(member.email)
+          ) === index
+      )
+      .sort((a, b) => this.getTeamMemberName(a).localeCompare(this.getTeamMemberName(b)));
+
+    this.teamMembers.forEach((member) => {
+      const email = this.normalizeTeamEmail(member.email);
+      if (this.normalizeTeamEmail(this.roles.facilitator) === email) {
+        this.facilitator = member;
+        this.currentUserIsFacilitator =
+          this.normalizeTeamEmail(this.currentUser.email) === email;
+      }
+      if (this.normalizeTeamEmail(this.roles.teamLeader) === email) {
+        this.teamLeader = member;
+        this.currentUserIsTeamleader =
+          this.normalizeTeamEmail(this.currentUser.email) === email;
+      }
+      if (this.normalizeTeamEmail(this.roles.factChecker) === email) {
+        this.factChecker = member;
+        this.currentUserIsFactChecker =
+          this.normalizeTeamEmail(this.currentUser.email) === email;
+      }
+    });
+
+    this.popupStyles = this.teamMembers.map(() => ({}));
+    this.refreshTeamPresence();
+  }
+
+  get visibleTeamMembers(): User[] {
+    return [...this.teamMembers]
+      .sort((a, b) => Number(this.isTeamMemberOnline(b)) - Number(this.isTeamMemberOnline(a)))
+      .slice(0, 4);
+  }
+
+  get onlineTeamCount(): number {
+    return this.teamMembers.filter((member) => this.isTeamMemberOnline(member)).length;
+  }
+
+  toggleTeamPresencePanel(): void {
+    this.showTeamPresencePanel = !this.showTeamPresencePanel;
+  }
+
+  isTeamMemberOnline(user: User): boolean {
+    return !!user.uid && this.onlineTeamUids.has(user.uid);
+  }
+
+  getTeamMemberName(user: User): string {
+    return (
+      `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+      user.email ||
+      (this.currentLanguage === 'fr' ? "Membre de l'équipe" : 'Team member')
+    );
+  }
+
+  getTeamMemberRoute(user: User): string[] | null {
+    if (!user.uid) return null;
+    return user.uid === this.auth.currentUser?.uid
+      ? ['/profile']
+      : ['/user-profile', user.uid];
+  }
+
+  getTeamMemberRole(user: User): string {
+    const email = this.normalizeTeamEmail(user.email);
+    const roles: string[] = [];
+
+    if (email && email === this.normalizeTeamEmail(this.roles.teamLeader)) {
+      roles.push(this.currentLanguage === 'fr' ? "Chef d'équipe" : 'Team lead');
     }
+    if (email && email === this.normalizeTeamEmail(this.roles.facilitator)) {
+      roles.push(this.currentLanguage === 'fr' ? 'Facilitateur' : 'Facilitator');
+    }
+    if (email && email === this.normalizeTeamEmail(this.roles.factChecker)) {
+      roles.push(
+        this.currentLanguage === 'fr' ? 'Vérificateur des faits' : 'Fact-checker'
+      );
+    }
+
+    return (
+      roles.join(' · ') ||
+      (this.currentLanguage === 'fr' ? "Membre de l'équipe" : 'Team member')
+    );
+  }
+
+  getTeamMemberPresenceLabel(user: User): string {
+    if (this.isTeamMemberOnline(user)) {
+      return this.currentLanguage === 'fr' ? 'En ligne' : 'Online';
+    }
+    if (!user.uid) {
+      return this.currentLanguage === 'fr' ? 'Invité' : 'Invited';
+    }
+    return this.currentLanguage === 'fr' ? 'Hors ligne' : 'Offline';
+  }
+
+  getTeamAvatarColor(user: User): string {
+    const palette = ['#0f766e', '#2563eb', '#7c3aed', '#c2410c', '#be185d', '#0369a1'];
+    const source = user.uid || user.email || this.getTeamMemberName(user);
+    let hash = 0;
+    for (let i = 0; i < source.length; i++) {
+      hash = (hash * 31 + source.charCodeAt(i)) >>> 0;
+    }
+    return palette[hash % palette.length];
+  }
+
+  private refreshTeamPresence(): void {
+    const uids = this.teamMembers
+      .map((member) => member.uid)
+      .filter((uid): uid is string => !!uid);
+    const fallbackLastActiveByUid = new Map<string, string | undefined>();
+
+    this.teamMembers.forEach((member) => {
+      if (member.uid) {
+        fallbackLastActiveByUid.set(member.uid, member.lastActiveAt);
+      }
+    });
+
+    this.teamPresenceSub?.unsubscribe();
+    this.onlineTeamUids = new Set<string>();
+    this.teamPresenceSub = this.presence
+      .watchOnlineUids$(uids, fallbackLastActiveByUid)
+      .subscribe((onlineUids) => {
+        this.onlineTeamUids = onlineUids;
+      });
+  }
+
+  private getSolutionTeamEmails(): string[] {
+    const emails = new Set<string>();
+    const addEmail = (value: any) => {
+      const candidate =
+        value?.name ||
+        value?.email ||
+        (value && typeof value === 'object' ? Object.values(value)[0] : value);
+      const email = this.normalizeTeamEmail(candidate);
+      if (email) emails.add(email);
+    };
+    const participants = this.currentSolution.participants;
+
+    if (Array.isArray(participants)) {
+      participants.forEach(addEmail);
+    } else if (participants && typeof participants === 'object') {
+      Object.values(participants).forEach(addEmail);
+    }
+    addEmail(this.currentSolution.authorEmail);
+
+    return Array.from(emails);
+  }
+
+  private normalizeTeamEmail(value: any): string {
+    return String(value || '').trim().toLowerCase();
   }
 
   adjustPopupPosition(event: MouseEvent, index: number) {
@@ -3350,6 +3517,7 @@ Infographic requirements:
   }
 
   ngOnDestroy(): void {
+    this.teamRosterRequestId++;
     this.langSub?.unsubscribe();
     this.aiFeedbackDocSub?.unsubscribe();
     this.reportDocSub?.unsubscribe();
@@ -3362,6 +3530,7 @@ Infographic requirements:
     this.presentationRequestSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
+    this.teamPresenceSub?.unsubscribe();
     // Clear chat context when leaving the playground
     this.chatContext.clearContext();
   }
