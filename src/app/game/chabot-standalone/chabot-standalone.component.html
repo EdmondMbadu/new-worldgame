@@ -1,216 +1,504 @@
-<!-- Root wrapper -->
-<div [class.dark]="isDark"
-     class="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+<div class="bucky-page" [class.dark]="isDark">
+  <div
+    *ngIf="mobileAppSidebarVisible && !isWideLayout"
+    class="app-sidebar-backdrop"
+    (click)="closeMobileAppSidebar()"
+  ></div>
 
-  <!-- ── NAVBAR (unchanged) ─────────────────────────────────── -->
-  <app-navbar
-    *ngIf="signedIn; else guestBar"
-    [email]="auth.currentUser.email"
-    [firstName]="auth.currentUser.firstName"
-    [lastName]="auth.currentUser.lastName"
-    [path]="'home'">
-  </app-navbar>
-
-  <ng-template #guestBar>
-    <app-navbar></app-navbar>
-    <div class="h-16"></div>
-  </ng-template>
-
-  <!-- ── Compact header : theme switch only ─────────────────── -->
-  <header class="flex items-center justify-end px-6 py-4">
-    <button (click)="toggleTheme()"
-            class="p-2 rounded-full bg-gray-200 dark:bg-slate-700 hover:opacity-80 transition">
-      <!-- sun -->
-      <ng-container *ngIf="!isDark; else moon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m8.66-11.66-.71.71M4.05 19.95l-.71-.71M21 12h1M2 12H1m16.95 4.95-.71-.71M4.05 4.05l-.71.71M12 7a5 5 0 100 10 5 5 0 000-10z" />
-        </svg>
-      </ng-container>
-      <!-- moon -->
-      <ng-template #moon>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-        </svg>
-      </ng-template>
-    </button>
-  </header>
-
-  <!-- ── Greeting (Gemini‑style) ─────────────────────────────── -->
-<!-- ── Greeting (Gemini-style) with tagline ────────────────── -->
-<section *ngIf="!responses.length"
-         class="flex-1 flex flex-col items-center justify-center text-center px-4">
-
-  <!-- Group keeps everything centered -->
-  <div class="flex flex-col items-center gap-4">
-
-    <!-- Main greeting on one line -->
-    <div class="flex items-baseline gap-2">
-      <h1 class="text-4xl md:text-6xl font-extrabold
-                 bg-gradient-to-r from-teal-500 via-indigo-500 to-pink-500
-                 bg-clip-text text-transparent">
-        Hello,
-      </h1>
-      <h2 class="text-3xl md:text-5xl font-extrabold
-                 text-slate-800 dark:text-slate-200">
-        Ask&nbsp;Bucky
-      </h2>
-    </div>
-
-    <!-- Tagline beneath, centered and restrained width -->
-    <p class="max-w-xl text-sm md:text-lg font-medium
-              text-slate-600 dark:text-slate-400">
-      The world’s first and most powerful AI dedicated to making the world
-      work for&nbsp;100&nbsp;% of humanity in the shortest possible time.
-    </p>
-  </div>
-</section>
-
-
-<!-- ╭── Starter box ───────────────────────────────────────────╮ -->
-<div *ngIf="starterPrompts.length"
-     class="w-full max-w-3xl mx-auto mt-6 p-6 bg-white/70 dark:bg-slate-800/60
-            border border-gray-200 dark:border-slate-600 rounded-2xl
-            shadow-md backdrop-blur">
-
-  <!-- Hint line -->
-  <p class="mb-4 text-center text-sm md:text-base text-gray-500 dark:text-slate-400">
-    These are just examples—feel free to ask anything you want!
-  </p>
-
-  <!-- Switch to grid: 2 columns on sm and above -->
-  <div class="grid gap-4 sm:grid-cols-2">
-  
-    <button *ngFor="let p of starterPrompts"
-            (click)="selectStarter(p)"
-            class="flex flex-col px-6 py-4 text-left border border-gray-300
-                   dark:border-slate-500 rounded-3xl bg-white/80 dark:bg-slate-700/60
-                   hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm transition">
-
-      <span class="font-semibold text-slate-900 dark:text-slate-100">
-        {{ p.title }}
-      </span>
-      <span class="text-gray-600 dark:text-slate-400">
-        {{ p.subtitle }}
-      </span>
-    </button>
-  </div>
-</div>
-<!-- ╰───────────────────────────────────────────────────────────╯ -->
-
-  <!-- ╭── Scrollable conversation ──────────────────────────────╮ -->
-  <main *ngIf="responses.length" id="chatbox" class="flex-1 w-full max-w-3xl mx-auto px-4 py-6 overflow-y-auto">
-
-    <!-- Conversation loop (avatars removed) -->
-    <ng-container *ngFor="let resp of responses; let i = index">
-
-      <!-- ▸ PROMPT ------------------------------------------------- -->
-      <div *ngIf="resp.type === 'PROMPT'" class="flex justify-end mb-4">
-        <div class="max-w-[100%]">
-        <!-- ▸ PROMPT (user) ------------------------------------------------ -->
-        <p class="bg-gray-100 dark:bg-slate-800 text-gray-900 dark:text-slate-100
-                  py-2 px-4 rounded-lg shadow-sm">
-          {{ resp.text }}
-        </p>
-          <button class="mt-1 p-1 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300 dark:hover:bg-slate-500 transition"
-                  (click)="copySingleMessage(resp.text!, i)"
-                  [title]="singleCopyStates[i] === 'Copied!' ? 'Copied!' : 'Copy'">
-            <ng-container *ngIf="singleCopyStates[i] !== 'Copied!'; else copied">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-700 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V6a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H10a2 2 0 01-2-2v-1" />
-                <rect width="9" height="13" x="5" y="7" rx="1" />
-              </svg>
-            </ng-container>
-            <ng-template #copied>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-teal-700 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </ng-template>
-          </button>
-        </div>
-      </div>
-
-      <!-- ▸ RESPONSE ---------------------------------------------- -->
-      <div *ngIf="resp.type === 'RESPONSE'" class="flex mb-4">
-        <div class="max-w-[100%]">
-        <!-- ▸ RESPONSE (AI) ----------------------------------------------- -->
-        <p class="bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-slate-200
-                  py-2 px-4 rounded-lg shadow-sm" [innerHTML]="formatText(resp.text!)">
-        </p>
-            <button class="mt-1 p-1 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300 dark:hover:bg-slate-500 transition"
-                  (click)="copySingleMessage(resp.text!, i)"
-                  [title]="singleCopyStates[i] === 'Copied!' ? 'Copied!' : 'Copy'">
-            <ng-container *ngIf="singleCopyStates[i] !== 'Copied!'; else copiedResp">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-700 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V6a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H10a2 2 0 01-2-2v-1" />
-                <rect width="9" height="13" x="5" y="7" rx="1" />
-              </svg>
-            </ng-container>
-            <ng-template #copiedResp>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-teal-700 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </ng-template>
-          </button>
-        </div>
-      </div>
-
-      <!-- ▸ ATTACHMENT & IMAGE (same layout without avatar) -->
-      <div *ngIf="resp.type === 'ATTACHMENT'" class="flex justify-end mb-4">
-        <a [href]="resp.src" download target="_blank" class="bg-slate-200 dark:bg-slate-500 px-4 py-2 rounded-lg shadow-sm text-gray-800 dark:text-slate-100 whitespace-nowrap">
-          {{ resp.text }}
-        </a>
-      </div>
-
-      <div *ngIf="resp.type === 'IMAGE'" class="flex mb-4">
-        <div class="flex flex-col items-center">
-          <img [src]="resp.src" class="max-w-[250px] md:max-w-sm rounded-lg shadow-sm" alt="AI generated image">
-          <button (click)="downloadImage(resp.src!)" class="mt-1 text-xs px-2 py-1 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300 dark:hover:bg-slate-500">Download</button>
-        </div>
-      </div>
-
-    </ng-container>
-
-    <!-- Typing indicator -->
-    <div *ngIf="status"
-        class="flex items-center gap-3 text-gray-500 dark:text-slate-400">
-
-      <!-- Spinning ring -->
-      <span class="h-6 w-6 rounded-full border-4 border-teal-500/30
-                  border-t-teal-500 animate-spin"></span>
-
-      <!-- Pulsing dots -->
-      <div class="flex gap-1">
-        <span class="block w-2 h-2 bg-teal-500 rounded-full animate-bounce"></span>
-        <span class="block w-2 h-2 bg-teal-500 rounded-full animate-bounce [animation-delay:.15s]"></span>
-        <span class="block w-2 h-2 bg-teal-500 rounded-full animate-bounce [animation-delay:.3s]"></span>
-      </div>
-
-      <!-- Status text -->
-      <span class="italic">{{ status }}</span>
-    </div>
-
-  </main>
-
-  <!-- ╭── Composer (Gemini‑style pill) ─────────────────────────╮ -->
-  <footer class="w-full max-w-3xl mx-auto px-4 pb-8">
-    <div class="relative flex items-end gap-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full shadow-lg focus-within:ring-2 focus-within:ring-teal-400">
-      <!-- Attach -->
-      <label class="cursor-pointer p-4 flex items-center">
-        <svg class="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 13.5L9 21a4.5 4.5 0 01-6.364-6.364l10.607-10.607a3 3 0 014.243 4.243L8.83 16.8" />
-        </svg>
-        <input type="file" hidden (change)="handleFile($event)" accept=".pdf,.doc,.docx,.txt">
-      </label>
-
-      <!-- Textarea -->
-      <textarea [(ngModel)]="prompt" (keydown.enter)="submitPrompt(); $event.preventDefault()" rows="1" placeholder="Ask&nbsp;Bucky…" class="flex-1 resize-none bg-transparent py-4 pr-2 text-sm focus:outline-none dark:text-white"></textarea>
-
-      <!-- Send -->
-      <button (click)="submitPrompt()" [disabled]="uploading" class="p-3 mr-3 rounded-full bg-teal-700 text-white hover:bg-teal-800 transition disabled:opacity-50">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8l16-4-4 16-5-5L4 8z" />
+  <aside
+    class="app-sidebar"
+    [class.is-open]="appSidebarVisible"
+    [attr.aria-hidden]="!appSidebarVisible"
+    aria-label="Global Solutions Lab navigation"
+  >
+    <div class="app-sidebar__brand">
+      <a routerLink="/home" (click)="closeMobileAppSidebar()" aria-label="Global Solutions Lab home">
+        <img src="assets/img/gsl-logo.png" alt="" />
+        <span>
+          <strong>Global Solutions Lab</strong>
+          <small>Designing a world that works</small>
+        </span>
+      </a>
+      <button type="button" (click)="toggleAppSidebar()" aria-label="Hide application sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
         </svg>
       </button>
     </div>
-  </footer>
+
+    <nav class="app-sidebar__nav" aria-label="Workspace">
+      <p>Workspace</p>
+      <a routerLink="/home" (click)="closeMobileAppSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 11.2L12 4l8.5 7.2M5.5 10v9.5h5v-6h3v6h5V10" />
+        </svg>
+        <span>Home</span>
+      </a>
+      <a routerLink="/create-solution" (click)="closeMobileAppSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="8.5" />
+          <path stroke-linecap="round" d="M12 8v8M8 12h8" />
+        </svg>
+        <span>Start a Lab</span>
+      </a>
+      <a routerLink="/problem-list-view" (click)="closeMobileAppSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14M5 19h14M8 5v3l3 4-3 4v3m8-14v3l-3 4 3 4v3" />
+        </svg>
+        <span>My Workspace</span>
+      </a>
+      <a routerLink="/challenge-spaces" (click)="closeMobileAppSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="4" y="4" width="16" height="16" rx="3" />
+          <path stroke-linecap="round" d="M8 9h8M8 12.5h8M8 16h5" />
+        </svg>
+        <span>Challenge Spaces</span>
+      </a>
+      <a routerLink="/operating-manual" (click)="closeMobileAppSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 4.5h11.5A2.5 2.5 0 0119 7v12.5H7.5A2.5 2.5 0 015 17V4.5zM9 4.5v15" />
+        </svg>
+        <span>Operating Manual</span>
+      </a>
+
+      <ng-container *ngIf="solutionId">
+        <div class="app-sidebar__divider"></div>
+        <p>Current solution</p>
+        <div class="app-sidebar__solution">
+          <span class="app-sidebar__solution-mark">{{ solutionTitle.charAt(0) || 'S' }}</span>
+          <span><strong>{{ solutionTitle }}</strong><small>{{ contextLabel }}</small></span>
+        </div>
+        <a [routerLink]="['/dashboard', solutionId]" (click)="closeMobileAppSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="4" y="4" width="6" height="6" rx="1" />
+            <rect x="14" y="4" width="6" height="6" rx="1" />
+            <rect x="4" y="14" width="6" height="6" rx="1" />
+            <rect x="14" y="14" width="6" height="6" rx="1" />
+          </svg>
+          <span>Dashboard</span>
+        </a>
+        <a
+          [routerLink]="solutionDevelopmentPath"
+          [queryParams]="solutionDevelopmentQueryParams"
+          (click)="closeMobileAppSidebar()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 18.5V20h1.5L17.8 7.7l-1.5-1.5L4 18.5zM14.8 7.7l1.5-1.5 1.2-1.2a1.4 1.4 0 012 2l-1.2 1.2-1.5 1.5" />
+          </svg>
+          <span>Solution development</span>
+        </a>
+        <a
+          [routerLink]="['/full-discussion', solutionId]"
+          [queryParams]="{ returnTo: solutionDevelopmentUrl }"
+          (click)="closeMobileAppSidebar()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 17.5l-1 3 3.5-1.6A8.5 8.5 0 104 12a8.4 8.4 0 001 3.9" />
+            <path stroke-linecap="round" d="M8 12h.01M12 12h.01M16 12h.01" />
+          </svg>
+          <span>Team discussion</span>
+        </a>
+        <a class="is-active" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 18l-4 2 1.4-4.2A8 8 0 114 11.5a7.9 7.9 0 001.1 4" />
+            <path stroke-linecap="round" d="M9 10.5h6M9 14h4" />
+          </svg>
+          <span>Ask Bucky</span>
+          <small>Active</small>
+        </a>
+      </ng-container>
+    </nav>
+
+    <a class="app-sidebar__profile" routerLink="/profile" (click)="closeMobileAppSidebar()">
+      <img *ngIf="profilePicturePath" [src]="profilePicturePath" alt="" />
+      <span *ngIf="!profilePicturePath" class="app-sidebar__profile-initial">{{ userInitial }}</span>
+      <span><strong>{{ userDisplayName }}</strong><small>View profile</small></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 18l6-6-6-6" />
+      </svg>
+    </a>
+  </aside>
+
+  <div class="bucky-frame">
+  <header class="bucky-topbar">
+    <div class="bucky-topbar__left">
+      <button
+        *ngIf="!appSidebarVisible"
+        type="button"
+        class="icon-button app-menu-button"
+        (click)="toggleAppSidebar()"
+        aria-label="Open application sidebar"
+        title="Open navigation"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+      <button
+        *ngIf="returnTo"
+        type="button"
+        class="icon-button icon-button--back"
+        (click)="goBack()"
+        aria-label="Return to solution development"
+        title="Return to solution development"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        class="bucky-identity"
+        (click)="toggleAiSelector()"
+        [attr.aria-expanded]="showAiSelector"
+        aria-haspopup="dialog"
+      >
+        <span class="bucky-identity__avatar">
+          <img [src]="selectedAi.avatarPath" [alt]="selectedAi.name" />
+          <span aria-hidden="true"></span>
+        </span>
+        <span class="bucky-identity__copy">
+          <strong>{{ getDisplayName(selectedAi) }}</strong>
+          <small>{{ selectedAi.name }}</small>
+        </span>
+        <svg class="bucky-identity__chevron" [class.is-open]="showAiSelector" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="bucky-topbar__context">
+      <span class="context-eyebrow">Working with context</span>
+      <strong>{{ solutionTitle }}</strong>
+      <span class="context-divider" aria-hidden="true"></span>
+      <span>{{ contextLabel }}</span>
+    </div>
+
+    <div class="bucky-topbar__actions">
+      <button
+        type="button"
+        class="icon-button"
+        (click)="startNewConversation()"
+        aria-label="Start a new conversation"
+        title="New conversation"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="icon-button"
+        [class.is-active]="historySidebarVisible"
+        (click)="toggleHistoryPanel()"
+        [attr.aria-label]="historySidebarVisible ? 'Hide conversation history' : 'Open conversation history'"
+        [attr.aria-expanded]="historySidebarVisible"
+        [title]="historySidebarVisible ? 'Hide conversation history' : 'Conversation history'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v5h5M12 7v5l3 2" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="icon-button"
+        (click)="toggleTheme()"
+        [attr.aria-label]="isDark ? 'Use light mode' : 'Use dark mode'"
+        [title]="isDark ? 'Light mode' : 'Dark mode'"
+      >
+        <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.64 5.64l1.06 1.06M17.3 17.3l1.06 1.06M18.36 5.64L17.3 6.7M6.7 17.3l-1.06 1.06" />
+          <circle cx="12" cy="12" r="4" />
+        </svg>
+        <svg *ngIf="isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.4 15.2A8.5 8.5 0 118.8 3.6a7 7 0 0011.6 11.6z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="showAiSelector" class="ai-picker-backdrop" (click)="toggleAiSelector()"></div>
+  <section *ngIf="showAiSelector" class="ai-picker" aria-label="Choose an AI guide">
+    <div class="ai-picker__heading">
+      <div>
+        <span>Your AI team</span>
+        <strong>Choose a guide</strong>
+      </div>
+      <button type="button" class="icon-button" (click)="toggleAiSelector()" aria-label="Close AI guide picker">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </div>
+
+    <p class="ai-picker__label">Visionary guides</p>
+    <div class="ai-picker__grid">
+      <button
+        *ngFor="let ai of elderAvatars"
+        type="button"
+        class="ai-option"
+        [class.is-selected]="selectedAi.id === ai.id"
+        (click)="selectAi(ai)"
+      >
+        <img [src]="ai.avatarPath" [alt]="ai.name" />
+        <span><strong>{{ ai.name }}</strong><small>{{ ai.intro }}</small></span>
+        <svg *ngIf="selectedAi.id === ai.id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4 10-10" />
+        </svg>
+      </button>
+    </div>
+
+    <p class="ai-picker__label">SDG specialists</p>
+    <div class="ai-picker__grid">
+      <button
+        *ngFor="let ai of colleagueAvatars"
+        type="button"
+        class="ai-option"
+        [class.is-selected]="selectedAi.id === ai.id"
+        (click)="selectAi(ai)"
+      >
+        <img [src]="ai.avatarPath" [alt]="ai.name" />
+        <span><strong>{{ ai.name }}</strong><small>{{ ai.intro }}</small></span>
+        <svg *ngIf="selectedAi.id === ai.id" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l4 4 10-10" />
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <div class="bucky-workspace">
+    <div
+      *ngIf="showHistoryPanel"
+      class="history-backdrop"
+      (click)="toggleHistoryPanel()"
+    ></div>
+    <aside
+      class="history-panel"
+      [class.is-open]="historySidebarVisible"
+      [attr.aria-hidden]="!historySidebarVisible"
+      aria-label="Conversation history"
+    >
+      <div class="history-panel__header">
+        <div>
+          <span>Conversation history</span>
+          <small>{{ historyScopeLabel }}</small>
+        </div>
+        <button type="button" class="icon-button history-close" (click)="toggleHistoryPanel()" aria-label="Close history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+
+      <button type="button" class="new-chat-button" (click)="startNewConversation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" d="M12 5v14M5 12h14" />
+        </svg>
+        New conversation
+      </button>
+
+      <div *ngIf="isLoadingHistory" class="history-state">
+        <span class="loading-ring"></span>
+        Loading conversations…
+      </div>
+
+      <div *ngIf="!isLoadingHistory && !sessions.length" class="history-state history-state--empty">
+        <span>✦</span>
+        <strong>No conversations yet</strong>
+        <small>Your solution conversations will appear here.</small>
+      </div>
+
+      <div *ngIf="!isLoadingHistory && sessions.length" class="history-list">
+        <button
+          *ngFor="let session of sessions"
+          type="button"
+          class="history-item"
+          [class.is-active]="currentSessionId === session.id"
+          (click)="loadSession(session.id)"
+        >
+          <span class="history-item__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h6m-8 7l1.2-3.1A8 8 0 114 12a7.9 7.9 0 001.9 5.2L5 19z" />
+            </svg>
+          </span>
+          <span class="history-item__copy">
+            <strong>{{ session.title }}</strong>
+            <small>{{ session.latestPreview }}</small>
+            <time>{{ formatSessionDate(session.updatedAtMs) }}</time>
+          </span>
+          <span
+            role="button"
+            tabindex="0"
+            class="history-item__delete"
+            (click)="deleteSessionFromHistory(session.id, $event)"
+            (keydown.enter)="deleteSessionFromHistory(session.id, $event)"
+            aria-label="Delete conversation"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4h6v3m3 0l-1 13H7L6 7m4 4v5m4-5v5" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="conversation-shell">
+      <div class="conversation-title" *ngIf="responses.length">
+        <span>{{ currentSessionTitle }}</span>
+        <small>
+          <span class="live-dot"></span>
+          Context stays connected to {{ solutionTitle }}
+        </small>
+      </div>
+
+      <section *ngIf="!responses.length && !isLoadingSession" class="welcome-state">
+        <div class="welcome-orbit" aria-hidden="true">
+          <div class="welcome-avatar">
+            <img [src]="selectedAi.avatarPath" [alt]="selectedAi.name" />
+          </div>
+        </div>
+        <span class="welcome-eyebrow">Your systems-thinking partner</span>
+        <h1>What should we work through?</h1>
+        <p>
+          I’m {{ getDisplayName(selectedAi) }}. I can use your current solution and
+          step as context while we research, reason, and improve the work together.
+        </p>
+
+        <div class="starter-grid">
+          <button *ngFor="let starter of starterPrompts" type="button" (click)="selectStarter(starter)">
+            <span>{{ starter.title }}</span>
+            <small>{{ starter.subtitle }}</small>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-5-5l5 5-5 5" />
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <div *ngIf="isLoadingSession" class="conversation-loading">
+        <span class="loading-ring"></span>
+        Restoring your conversation…
+      </div>
+
+      <section *ngIf="responses.length" id="chatbox" class="message-stream" aria-live="polite">
+        <ng-container *ngFor="let response of responses; let i = index">
+          <article *ngIf="response.type === 'PROMPT'" class="message-row message-row--user">
+            <div class="message-content">
+              <div class="message-bubble message-bubble--user">{{ response.text }}</div>
+              <button
+                type="button"
+                class="message-action"
+                (click)="copySingleMessage(response.text!, i)"
+                [attr.aria-label]="singleCopyStates[i] === 'Copied!' ? 'Copied' : 'Copy message'"
+              >
+                {{ singleCopyStates[i] === 'Copied!' ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
+          </article>
+
+          <article *ngIf="response.type === 'RESPONSE'" class="message-row message-row--assistant">
+            <img class="message-avatar" [src]="selectedAi.avatarPath" [alt]="selectedAi.name" />
+            <div class="message-content">
+              <div class="message-author">{{ getDisplayName(selectedAi) }}</div>
+              <div class="message-bubble message-bubble--assistant" [innerHTML]="formatText(response.text || '')"></div>
+              <div *ngIf="response.sources?.length" class="message-sources">
+                <span>Sources</span>
+                <a
+                  *ngFor="let source of response.sources"
+                  [href]="source.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ source.title }}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5M10 14L19 5M19 14v5H5V5h5" />
+                  </svg>
+                </a>
+              </div>
+              <button
+                type="button"
+                class="message-action"
+                (click)="copySingleMessage(response.text!, i)"
+                [attr.aria-label]="singleCopyStates[i] === 'Copied!' ? 'Copied' : 'Copy response'"
+              >
+                {{ singleCopyStates[i] === 'Copied!' ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
+          </article>
+
+          <article *ngIf="response.type === 'ATTACHMENT'" class="message-row message-row--user">
+            <a class="attachment-card" [href]="response.src" download target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12.5l6.4-6.4a3 3 0 114.2 4.2l-8.1 8.1a5 5 0 11-7.1-7.1L12 2.7" />
+              </svg>
+              {{ response.text }}
+            </a>
+          </article>
+
+          <article *ngIf="response.type === 'IMAGE'" class="message-row message-row--assistant">
+            <img class="message-avatar" [src]="selectedAi.avatarPath" [alt]="selectedAi.name" />
+            <div class="generated-image">
+              <img [src]="response.src" alt="AI-generated visual" />
+              <button type="button" (click)="downloadImage(response.src!)">Download image</button>
+            </div>
+          </article>
+        </ng-container>
+
+        <article *ngIf="uiPhase === 'thinking' || status" class="message-row message-row--assistant thinking-row">
+          <img class="message-avatar" [src]="selectedAi.avatarPath" [alt]="selectedAi.name" />
+          <div>
+            <span></span><span></span><span></span>
+            <small>{{ thinkingLabel || status }}</small>
+          </div>
+        </article>
+      </section>
+
+      <footer class="composer-area">
+        <div *ngIf="previews.length" class="preview-list">
+          <div *ngFor="let preview of previews; let i = index" class="preview-chip">
+            <span class="loading-ring" *ngIf="preview.uploading"></span>
+            <svg *ngIf="!preview.uploading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l4 4v14H7zM14 3v5h5" />
+            </svg>
+            <span>{{ preview.file.name }}</span>
+            <button type="button" (click)="removePreview(i)" aria-label="Remove attachment">×</button>
+          </div>
+        </div>
+
+        <div class="composer">
+          <label class="composer__attach" title="Attach a document">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 12.5l6.4-6.4a3 3 0 114.2 4.2l-8.1 8.1a5 5 0 11-7.1-7.1L12 2.7" />
+            </svg>
+            <input type="file" hidden (change)="handleFile($event)" accept=".pdf,.doc,.docx,.txt" />
+          </label>
+          <textarea
+            [(ngModel)]="prompt"
+            (keydown)="handleComposerKeydown($event)"
+            rows="1"
+            [placeholder]="'Message ' + getDisplayName(selectedAi) + '…'"
+            aria-label="Chat message"
+          ></textarea>
+          <button
+            type="button"
+            class="composer__send"
+            (click)="submitPrompt()"
+            [disabled]="uploading || (!prompt.trim() && !previews.length)"
+            aria-label="Send message"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m-6 6l6-6 6 6" />
+            </svg>
+          </button>
+        </div>
+        <div class="composer-meta">
+          <span>Enter to send · Shift + Enter for a new line</span>
+          <button *ngIf="returnTo" type="button" (click)="goBack()">Return to solution development</button>
+        </div>
+      </footer>
+    </main>
+  </div>
+  </div>
 </div>

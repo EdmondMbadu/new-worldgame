@@ -24,10 +24,34 @@ export interface InsertRequest {
   mode: 'replace' | 'append';
 }
 
+export interface ChatHandoffMessage {
+  text?: string;
+  src?: string;
+  type: 'PROMPT' | 'RESPONSE' | 'IMAGE' | 'ATTACHMENT';
+  sources?: Array<{ title: string; url: string }>;
+  imageDocId?: string;
+  imagePrompt?: string;
+}
+
+export interface ChatPageHandoff {
+  context: PlaygroundContext | null;
+  sessionId: string | null;
+  avatarId: string;
+  returnTo: string;
+  draft: string;
+  messages: ChatHandoffMessage[];
+  isThinking: boolean;
+  thinkingLabel: string;
+  createdAt: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ChatContextService {
+  private readonly fullPageHandoffStorageKey = 'nwg_chat_full_page_handoff_v1';
+  private readonly fullPageHandoffMaxAgeMs = 6 * 60 * 60 * 1000;
+
   // Current playground context (null when not on playground page)
   private contextSubject = new BehaviorSubject<PlaygroundContext | null>(null);
   context$ = this.contextSubject.asObservable();
@@ -118,6 +142,50 @@ export class ChatContextService {
    */
   clearContext(): void {
     this.contextSubject.next(null);
+  }
+
+  /**
+   * Preserve the in-widget state while Angular replaces the solution page with
+   * the dedicated chat route. sessionStorage keeps this private to the tab and
+   * avoids placing solution answers or conversation text in the URL.
+   */
+  saveFullPageHandoff(
+    handoff: Omit<ChatPageHandoff, 'createdAt'>
+  ): void {
+    try {
+      sessionStorage.setItem(
+        this.fullPageHandoffStorageKey,
+        JSON.stringify({ ...handoff, createdAt: Date.now() })
+      );
+    } catch {
+      // Firestore session restoration and URL parameters remain as fallbacks.
+    }
+  }
+
+  getFullPageHandoff(
+    expectedSolutionId?: string | null
+  ): ChatPageHandoff | null {
+    try {
+      const raw = sessionStorage.getItem(this.fullPageHandoffStorageKey);
+      if (!raw) return null;
+
+      const handoff = JSON.parse(raw) as ChatPageHandoff;
+      const isExpired =
+        !handoff?.createdAt ||
+        Date.now() - handoff.createdAt > this.fullPageHandoffMaxAgeMs;
+      const solutionMismatch =
+        !!expectedSolutionId &&
+        handoff.context?.solutionId !== expectedSolutionId;
+
+      if (isExpired || solutionMismatch) {
+        sessionStorage.removeItem(this.fullPageHandoffStorageKey);
+        return null;
+      }
+
+      return handoff;
+    } catch {
+      return null;
+    }
   }
 
   /**

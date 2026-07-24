@@ -387,7 +387,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   get historyScopeLabel(): string {
-    if (this.hasContext) {
+    if (this.activeScope.scopeType === 'SOLUTION') {
       return 'Showing conversations for this solution';
     }
 
@@ -525,7 +525,10 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   /**
    * Load a specific session's messages
    */
-  loadSession(sessionId: string): void {
+  loadSession(
+    sessionId: string,
+    optimisticMessages: DisplayMessage[] = []
+  ): void {
     this.messagesSub?.unsubscribe();
     
     const uid = this.auth.currentUser?.uid;
@@ -540,7 +543,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (messages) => {
           // Convert ChatMessageRecord to DisplayMessage (including sources and images)
-          this.responses = messages.map(msg => {
+          const restoredMessages = messages.map(msg => {
             if (msg.type === 'IMAGE') {
               // Restore image message
               return {
@@ -558,6 +561,39 @@ export class ChatbotComponent implements OnInit, OnDestroy {
               insertable: this.hasContext && msg.type === 'RESPONSE',
             };
           });
+          const transientAttachments = optimisticMessages.filter(
+            (message) => message.type === 'ATTACHMENT'
+          );
+          const optimisticPersistedMessages = optimisticMessages.filter(
+            (message) => message.type !== 'ATTACHMENT'
+          );
+          const serverHasCaughtUp =
+            restoredMessages.length >= optimisticPersistedMessages.length;
+          const optimisticAnswerCount = optimisticPersistedMessages.filter(
+            (message) =>
+              message.type === 'RESPONSE' || message.type === 'IMAGE'
+          ).length;
+          const restoredAnswerCount = restoredMessages.filter(
+            (message) =>
+              message.type === 'RESPONSE' || message.type === 'IMAGE'
+          ).length;
+          const pendingAnswerHasArrived =
+            this.uiPhase !== 'thinking' ||
+            restoredAnswerCount > optimisticAnswerCount;
+
+          this.responses =
+            optimisticMessages.length > 0 && !serverHasCaughtUp
+              ? optimisticMessages
+              : [...restoredMessages, ...transientAttachments];
+
+          if (
+            serverHasCaughtUp &&
+            pendingAnswerHasArrived &&
+            this.uiPhase === 'thinking'
+          ) {
+            this.stopThinking();
+            this.status = '';
+          }
           this.isLoadingSession = false;
           this.cdRef.detectChanges();
           setTimeout(() => this.scrollToBottom('auto'), 0);
@@ -701,8 +737,38 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   openFullPage(): void {
     this.closeIntroVideo();
+    const context = this.playgroundContext || this.chatContext.getContext();
+    const solutionId = context?.solutionId || this.getSolutionIdFromRoute();
+    const returnTo = this.router.url;
+
+    this.chatContext.saveFullPageHandoff({
+      context,
+      sessionId: this.currentSessionId,
+      avatarId: this.selectedAi.id,
+      returnTo,
+      draft: this.prompt,
+      messages: this.responses.map((message) => ({
+        text: message.text,
+        src: message.src,
+        type: message.type,
+        sources: message.sources,
+        imageDocId: message.imageDocId,
+        imagePrompt: message.imagePrompt,
+      })),
+      isThinking: this.uiPhase === 'thinking' || !!this.status,
+      thinkingLabel: this.thinkingLabel || this.status || 'Thinking',
+    });
+
     this.showBot = false;
-    this.router.navigate(['/ask-bucky'], { queryParams: { from: 'widget' } });
+    this.router.navigate(['/ask-bucky'], {
+      queryParams: {
+        from: 'widget',
+        solution: solutionId || undefined,
+        session: this.currentSessionId || undefined,
+        avatar: this.selectedAi.id,
+        returnTo,
+      },
+    });
   }
 
   toggleBot() {
@@ -1258,9 +1324,21 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   private getSolutionIdFromRoute(): string | null {
-    const path = (this.router.url || '').split('?')[0];
+    const currentUrl = this.router.url || '';
+    const path = currentUrl.split('?')[0];
     const match = path.match(/\/playground-steps\/([^/?#]+)/);
-    return match?.[1] || null;
+    if (match?.[1]) return match[1];
+
+    try {
+      const querySolutionId = this.router.parseUrl(currentUrl).queryParams[
+        'solution'
+      ];
+      return typeof querySolutionId === 'string' && querySolutionId
+        ? querySolutionId
+        : null;
+    } catch {
+      return null;
+    }
   }
 
   private handleScopeChange(): void {
