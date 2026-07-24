@@ -89,6 +89,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   showBot = false;
   isEnlarged = false;
   isFullScreen = false;
+  imagePreview: { src: string; promptText?: string } | null = null;
   copyButtonText = 'Copy';
   private attachment: { url: string; mime: string } | null = null;
   MAX_SIZE = 10 * 1024 * 1024;
@@ -446,7 +447,12 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('document:keydown.escape')
-  closeIntroVideoOnEscape(): void {
+  closeOverlayOnEscape(): void {
+    if (this.imagePreview) {
+      this.closeImagePreview();
+      return;
+    }
+
     if (this.showIntroVideoModal) this.closeIntroVideo();
   }
 
@@ -1094,6 +1100,17 @@ export class ChatbotComponent implements OnInit, OnDestroy {
 
   toggleFullScreen() {
     this.isFullScreen = !this.isFullScreen;
+  }
+
+  openImagePreview(src: string, promptText?: string): void {
+    if (!src) return;
+
+    if (this.showIntroVideoModal) this.closeIntroVideo();
+    this.imagePreview = { src, promptText };
+  }
+
+  closeImagePreview(): void {
+    this.imagePreview = null;
   }
 
   async submitPrompt() {

@@ -27,7 +27,7 @@
         class="icon-button icon-button--back"
         (click)="goBack()"
         aria-label="Return to solution development"
-        title="Return to solution development"
+        data-tooltip="Return to solution development"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
@@ -68,7 +68,7 @@
         class="icon-button"
         (click)="startNewConversation()"
         aria-label="Start a new conversation"
-        title="New conversation"
+        data-tooltip="New conversation"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
@@ -81,7 +81,7 @@
         (click)="toggleHistoryPanel()"
         [attr.aria-label]="historySidebarVisible ? 'Hide conversation history' : 'Open conversation history'"
         [attr.aria-expanded]="historySidebarVisible"
-        [title]="historySidebarVisible ? 'Hide conversation history' : 'Conversation history'"
+        [attr.data-tooltip]="historySidebarVisible ? 'Hide conversation history' : 'Conversation history'"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
@@ -93,7 +93,7 @@
         class="icon-button"
         (click)="toggleTheme()"
         [attr.aria-label]="isDark ? 'Use light mode' : 'Use dark mode'"
-        [title]="isDark ? 'Light mode' : 'Dark mode'"
+        [attr.data-tooltip]="isDark ? 'Light mode' : 'Dark mode'"
       >
         <svg *ngIf="!isDark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.64 5.64l1.06 1.06M17.3 17.3l1.06 1.06M18.36 5.64L17.3 6.7M6.7 17.3l-1.06 1.06" />
@@ -327,8 +327,24 @@
           <article *ngIf="response.type === 'IMAGE'" class="message-row message-row--assistant">
             <img class="message-avatar" [src]="selectedAi.avatarPath" [alt]="selectedAi.name" />
             <div class="generated-image">
-              <img [src]="response.src" alt="AI-generated visual" />
-              <button type="button" (click)="downloadImage(response.src!)">Download image</button>
+              <button
+                type="button"
+                class="generated-image__preview"
+                (click)="openImagePreview(response.src!, response.imagePrompt)"
+                aria-label="Open generated image full size"
+                aria-haspopup="dialog"
+              >
+                <img [src]="response.src" alt="AI-generated visual" />
+                <span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 3H3v5M16 3h5v5M8 21H3v-5m13 5h5v-5" />
+                  </svg>
+                  View full size
+                </span>
+              </button>
+              <button type="button" class="generated-image__download" (click)="downloadImage(response.src!, response.imagePrompt)">
+                Download image
+              </button>
             </div>
           </article>
         </ng-container>
@@ -387,5 +403,48 @@
       </footer>
     </main>
   </div>
+  </div>
+
+  <div
+    *ngIf="imagePreview"
+    class="image-lightbox"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="standalone-image-preview-title"
+    (click)="closeImagePreview()"
+  >
+    <section (click)="$event.stopPropagation()">
+      <header>
+        <div>
+          <span>Image preview</span>
+          <h2 id="standalone-image-preview-title">Generated with {{ getDisplayName(selectedAi) }}</h2>
+        </div>
+        <div class="image-lightbox__actions">
+          <button
+            type="button"
+            class="image-lightbox__download"
+            (click)="downloadImage(imagePreview.src, imagePreview.promptText)"
+            aria-label="Download full-size image"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            </svg>
+            <span>Download</span>
+          </button>
+          <button type="button" class="image-lightbox__close" (click)="closeImagePreview()" aria-label="Close image preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="image-lightbox__canvas">
+        <img
+          [src]="imagePreview.src"
+          [alt]="imagePreview.promptText ? 'Generated image: ' + imagePreview.promptText : 'Generated image preview'"
+        />
+      </div>
+      <p *ngIf="imagePreview.promptText">{{ imagePreview.promptText }}</p>
+    </section>
   </div>
 </div>

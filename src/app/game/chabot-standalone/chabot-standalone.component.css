@@ -135,6 +135,64 @@ button {
   height: 1.2rem;
 }
 
+.icon-button[data-tooltip] {
+  position: relative;
+}
+
+.icon-button[data-tooltip]::before,
+.icon-button[data-tooltip]::after {
+  position: absolute;
+  z-index: 130;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease, transform 100ms ease;
+}
+
+.icon-button[data-tooltip]::before {
+  top: calc(100% + 0.2rem);
+  right: 0.8rem;
+  border-right: 0.3rem solid transparent;
+  border-bottom: 0.3rem solid #020617;
+  border-left: 0.3rem solid transparent;
+  content: "";
+  transform: translateY(-0.2rem);
+}
+
+.icon-button[data-tooltip]::after {
+  top: calc(100% + 0.48rem);
+  right: 0;
+  padding: 0.42rem 0.58rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  color: white;
+  background: #020617;
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.28);
+  content: attr(data-tooltip);
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateY(-0.2rem);
+}
+
+.icon-button--back[data-tooltip]::before {
+  right: auto;
+  left: 0.8rem;
+}
+
+.icon-button--back[data-tooltip]::after {
+  right: auto;
+  left: 0;
+}
+
+.icon-button[data-tooltip]:hover::before,
+.icon-button[data-tooltip]:hover::after,
+.icon-button[data-tooltip]:focus-visible::before,
+.icon-button[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .icon-button:hover,
 .icon-button:focus-visible,
 .icon-button.is-active {
@@ -577,21 +635,232 @@ button {
   width: 1rem;
 }
 
-.generated-image img {
+.generated-image__preview {
+  position: relative;
   display: block;
   max-width: min(100%, 34rem);
-  border: 1px solid var(--border);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
   border-radius: 1rem;
+  background: transparent;
   box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
+  cursor: zoom-in;
 }
 
-.generated-image button {
+.generated-image__preview > img {
+  display: block;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+.generated-image__preview::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top, rgba(2, 6, 23, 0.5), transparent 48%);
+  content: "";
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.generated-image__preview > span {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 1;
+  display: inline-flex;
+  padding: 0.48rem 0.65rem;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 0.65rem;
+  color: white;
+  background: rgba(2, 6, 23, 0.86);
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.24);
+  font-size: 0.7rem;
+  font-weight: 750;
+  opacity: 0;
+  transform: translateY(0.35rem);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.generated-image__preview > span svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.generated-image__preview:hover::after,
+.generated-image__preview:focus-visible::after,
+.generated-image__preview:hover > span,
+.generated-image__preview:focus-visible > span {
+  opacity: 1;
+}
+
+.generated-image__preview:hover > span,
+.generated-image__preview:focus-visible > span {
+  transform: translateY(0);
+}
+
+.generated-image__preview:focus-visible {
+  outline: 3px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
+.generated-image__download {
   margin-top: 0.5rem;
   border: 0;
   color: var(--accent);
   background: transparent;
   font-size: 0.72rem;
   font-weight: 750;
+}
+
+.generated-image__download:hover,
+.generated-image__download:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+  outline: none;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: flex;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.image-lightbox > section {
+  display: flex;
+  width: min(100%, 90rem);
+  max-height: calc(100dvh - clamp(1.5rem, 4vw, 3rem));
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.1rem;
+  color: white;
+  background: #020617;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.5);
+}
+
+.image-lightbox header {
+  display: flex;
+  min-height: 4.25rem;
+  padding: 0.75rem 1rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.image-lightbox header > div:first-child {
+  display: grid;
+  min-width: 0;
+}
+
+.image-lightbox header span:first-child {
+  color: #5eead4;
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.image-lightbox h2 {
+  overflow: hidden;
+  margin: 0.2rem 0 0;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-lightbox__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.image-lightbox__actions button {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 0.75rem;
+}
+
+.image-lightbox__download {
+  display: inline-flex;
+  padding: 0.55rem 0.8rem;
+  align-items: center;
+  gap: 0.45rem;
+  color: #020617;
+  background: white;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.image-lightbox__download:hover {
+  background: #ccfbf1;
+}
+
+.image-lightbox__download svg,
+.image-lightbox__close svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.image-lightbox__close {
+  display: grid;
+  width: 2.5rem;
+  place-items: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.image-lightbox__close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.image-lightbox__actions button:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+}
+
+.image-lightbox__canvas {
+  display: flex;
+  min-height: 0;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.image-lightbox__canvas img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-lightbox > section > p {
+  overflow: hidden;
+  margin: 0;
+  padding: 0.65rem 1rem;
+  flex: 0 0 auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .thinking-row > div {

@@ -97,8 +97,9 @@
           <!-- New conversation button -->
           <button
             (click)="startNewConversation()"
-            class="p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            title="New conversation"
+            class="chat-window-control p-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+            data-tooltip="New conversation"
+            aria-label="New conversation"
           >
             <svg
               class="w-5 h-5"
@@ -118,11 +119,12 @@
           <!-- History button -->
           <button
             (click)="toggleHistoryPanel()"
-            class="p-2 rounded-lg transition-colors"
+            class="chat-window-control p-2 rounded-lg transition-colors"
             [ngClass]="showHistoryPanel 
               ? 'bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400' 
               : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
-            title="Chat history"
+            data-tooltip="Chat history"
+            aria-label="Chat history"
           >
             <svg
               class="w-5 h-5"
@@ -142,8 +144,9 @@
           <!-- Full screen toggle button -->
           <button
             (click)="toggleFullScreen()"
-            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-            [title]="isFullScreen ? 'Exit full screen' : 'Full screen'"
+            class="chat-window-control p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            [attr.data-tooltip]="isFullScreen ? 'Exit full screen' : 'Full screen'"
+            [attr.aria-label]="isFullScreen ? 'Exit full screen' : 'Full screen'"
           >
             <svg
               *ngIf="!isFullScreen"
@@ -178,8 +181,9 @@
           <!-- Open in new page button -->
           <button
             (click)="openFullPage()"
-            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-            title="Open in new page"
+            class="chat-window-control p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+            data-tooltip="Open full page"
+            aria-label="Open full page"
           >
             <svg
               class="w-5 h-5"
@@ -199,8 +203,9 @@
           <!-- Close button -->
           <button
             (click)="toggleBot()"
-            class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-            title="Close"
+            class="chat-window-control p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+            data-tooltip="Close chat"
+            aria-label="Close chat"
           >
             <svg
               class="w-5 h-5"
@@ -775,11 +780,25 @@
               <div class="relative group">
                 <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-2xl opacity-75 group-hover:opacity-100 blur transition duration-300"></div>
                 <div class="relative rounded-2xl rounded-tl-md overflow-hidden bg-white dark:bg-slate-900">
-                  <img
-                    [src]="resp.src"
-                    class="w-full max-w-[480px] md:max-w-[560px] lg:max-w-[640px] block"
-                    alt="Generated image"
-                  />
+                  <button
+                    type="button"
+                    class="chat-image-open"
+                    (click)="openImagePreview(resp.src!, resp.imagePrompt)"
+                    aria-label="Open generated image full size"
+                    aria-haspopup="dialog"
+                  >
+                    <img
+                      [src]="resp.src"
+                      class="w-full max-w-[480px] md:max-w-[560px] lg:max-w-[640px] block"
+                      alt="Generated image"
+                    />
+                    <span class="chat-image-open__label">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 3H3v5M16 3h5v5M8 21H3v-5m13 5h5v-5" />
+                      </svg>
+                      View full size
+                    </span>
+                  </button>
                 </div>
               </div>
               
@@ -1351,6 +1370,63 @@
       </p>
     </div>
   </footer>
+</div>
+
+<!-- Full-size generated image preview -->
+<div
+  *ngIf="imagePreview"
+  class="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/90 p-3 backdrop-blur-md sm:p-6"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="chat-image-preview-title"
+  (click)="closeImagePreview()"
+>
+  <section
+    class="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[90rem] flex-col overflow-hidden rounded-2xl border border-white/15 bg-slate-950 text-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="flex flex-shrink-0 items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
+      <div class="min-w-0">
+        <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-teal-300">Image preview</p>
+        <h2 id="chat-image-preview-title" class="mt-0.5 truncate text-sm font-semibold text-white sm:text-base">
+          Generated with {{ getDisplayName(selectedAi) }}
+        </h2>
+      </div>
+      <div class="flex flex-shrink-0 items-center gap-2">
+        <button
+          type="button"
+          (click)="downloadImage(imagePreview.src, imagePreview.promptText)"
+          class="inline-flex min-h-10 items-center gap-2 rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-slate-950 transition hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          aria-label="Download full-size image"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+          </svg>
+          <span class="hidden sm:inline">Download</span>
+        </button>
+        <button
+          type="button"
+          (click)="closeImagePreview()"
+          class="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-300"
+          aria-label="Close image preview"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+    </header>
+    <div class="flex min-h-0 flex-1 items-center justify-center overflow-auto p-2 sm:p-4">
+      <img
+        [src]="imagePreview.src"
+        class="max-h-full max-w-full object-contain"
+        [alt]="imagePreview.promptText ? 'Generated image: ' + imagePreview.promptText : 'Generated image preview'"
+      />
+    </div>
+    <p *ngIf="imagePreview.promptText" class="flex-shrink-0 truncate border-t border-white/10 px-4 py-2.5 text-xs text-slate-400 sm:px-5">
+      {{ imagePreview.promptText }}
+    </p>
+  </section>
 </div>
 
 <!-- Large, focused character introduction modal -->
