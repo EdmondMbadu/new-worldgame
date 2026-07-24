@@ -6869,7 +6869,6 @@ const processChatPrompt = async (snap: any): Promise<void> => {
                 type: 'image',
                 aspect_ratio: '16:9',
                 image_size: imageModel.imageSize,
-                delivery: 'inline',
               },
             });
 
@@ -7148,11 +7147,13 @@ const processChatPrompt = async (snap: any): Promise<void> => {
 
 export const onChatPrompt = functions
   .region('us-central1')
+  .runWith({ memory: '1GB', timeoutSeconds: 180 })
   .firestore.document('users/{uid}/discussions/{docId}')
   .onCreate(processChatPrompt);
 
 export const onAvatarChatPrompt = functions
   .region('us-central1')
+  .runWith({ memory: '1GB', timeoutSeconds: 180 })
   .firestore.document('users/{uid}/{collectionId}/{docId}')
   .onCreate(async (snap, context) => {
     const collectionId = String(context.params.collectionId || '')
