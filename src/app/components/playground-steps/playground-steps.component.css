@@ -460,7 +460,7 @@
   height: 1.35rem;
 }
 
-.dark .team-presence-trigger {
+:host-context(.dark) .team-presence-trigger {
   border-color: rgb(51 65 85 / 0.9);
   background: rgb(15 23 42 / 0.92);
   color: #cbd5e1;
@@ -469,86 +469,88 @@
     0 8px 24px rgb(0 0 0 / 0.18);
 }
 
-.dark .team-presence-trigger:hover {
+:host-context(.dark) .team-presence-trigger:hover {
   border-color: #64748b;
 }
 
-.dark .team-presence-trigger__title,
-.dark .team-presence-panel__title,
-.dark .team-member-row__name {
+:host-context(.dark) .team-presence-trigger__title,
+:host-context(.dark) .team-presence-panel__title,
+:host-context(.dark) .team-member-row__name {
   color: #f8fafc;
 }
 
-.dark .team-presence-trigger__status,
-.dark .team-presence-trigger__empty,
-.dark .team-presence-panel__summary,
-.dark .team-member-row__detail,
-.dark .team-presence-panel__footer {
+:host-context(.dark) .team-presence-trigger__status,
+:host-context(.dark) .team-presence-trigger__empty,
+:host-context(.dark) .team-presence-panel__summary,
+:host-context(.dark) .team-member-row__detail,
+:host-context(.dark) .team-presence-panel__footer {
   color: #94a3b8;
 }
 
-.dark .team-avatar--small,
-.dark .team-avatar--more,
-.dark .team-avatar__presence {
+:host-context(.dark) .team-avatar--small,
+:host-context(.dark) .team-avatar--more,
+:host-context(.dark) .team-avatar__presence {
   border-color: #0f172a;
 }
 
-.dark .team-avatar--more {
+:host-context(.dark) .team-avatar--more {
   background: #334155;
   color: #e2e8f0;
 }
 
-.dark .team-presence-panel {
+:host-context(.dark) .team-presence-panel {
   border-color: #334155;
-  background: rgb(15 23 42 / 0.975);
+  background: rgb(15 23 42 / 0.99);
   color: #cbd5e1;
   box-shadow:
-    0 26px 70px rgb(0 0 0 / 0.42),
-    0 3px 10px rgb(0 0 0 / 0.2);
+    0 26px 70px rgb(0 0 0 / 0.52),
+    0 3px 10px rgb(0 0 0 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.035);
+  scrollbar-color: #475569 transparent;
 }
 
-.dark .team-presence-panel__header,
-.dark .team-presence-panel__footer {
+:host-context(.dark) .team-presence-panel__header,
+:host-context(.dark) .team-presence-panel__footer {
   border-color: #1e293b;
 }
 
-.dark .team-presence-panel__live {
+:host-context(.dark) .team-presence-panel__live {
   background: rgb(6 78 59 / 0.42);
   color: #6ee7b7;
 }
 
-.dark .team-member-row:hover,
-.dark .team-member-row:focus-visible {
+:host-context(.dark) .team-member-row:hover,
+:host-context(.dark) .team-member-row:focus-visible {
   background: #1e293b;
   box-shadow: inset 0 0 0 1px #334155;
 }
 
-.dark .team-member-row__role {
+:host-context(.dark) .team-member-row__role {
   color: #cbd5e1;
 }
 
-.dark .team-member-row__you {
+:host-context(.dark) .team-member-row__you {
   background: rgb(19 78 74 / 0.72);
   color: #99f6e4;
 }
 
-.dark .team-member-row__presence {
+:host-context(.dark) .team-member-row__presence {
   background: #1e293b;
   color: #94a3b8;
 }
 
-.dark .team-member-row__presence--online {
+:host-context(.dark) .team-member-row__presence--online {
   background: rgb(6 78 59 / 0.42);
   color: #6ee7b7;
 }
 
-.dark .team-member-row__presence--invited {
+:host-context(.dark) .team-member-row__presence--invited {
   background: rgb(120 53 15 / 0.36);
   color: #fcd34d;
 }
 
-.dark .team-presence-panel__footer,
-.dark .team-presence-panel__empty-icon {
+:host-context(.dark) .team-presence-panel__footer,
+:host-context(.dark) .team-presence-panel__empty-icon {
   background: #111827;
 }
 
