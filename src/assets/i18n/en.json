@@ -704,10 +704,10 @@
     },
     "testimonials": {
       "title": "What People Are Saying",
-      "subtitle": "Real feedback from educators, students, and collaborators of the Global Solutions Lab.",
+      "subtitle": "Reflections from people turning ambitious ideas into real-world solutions with Global Solutions Lab.",
       "cta": "Watch video testimonials",
       "featured": {
-        "badge": "Featured participant reflection",
+        "badge": "Participant reflection",
         "quote": "Participating in the 10-day Global Solutions Lab was nothing short of mind-blowing.",
         "summary": "After joining the Building Community in a Changing Environment team, Cynthia created a renewable-energy comic, an Indigenous-seed preservation story, and a World House Game prototype that connects climate action with play.",
         "initials": "CN",
@@ -715,37 +715,12 @@
         "role": "Global Solutions Lab 2026 participant",
         "cta": "Read Cynthia’s full reflection"
       },
-      "cards": {
-        "one": {
-          "quote": "It’s amazing what you’ve put together in this simulation — the innovation, inclusiveness, and diversity of the AI avatars are truly inspiring.",
-          "initials": "MB",
-          "name": "M.B.",
-          "role": "Drexel University"
-        },
-        "two": {
-          "quote": "Your tools and collaborative mindset are a perfect fit for what we’re learning. It's great to see someone so deeply connected to Global Solutions Lab and eager to support others.",
-          "initials": "CB",
-          "name": "C.B.",
-          "role": "Participant"
-        },
-        "three": {
-          "quote": "What a fantastic tool. It's incredibly personable. Have you considered expanding it beyond social and sustainability?",
-          "initials": "AR",
-          "name": "A.R.",
-          "role": "Educator"
-        },
-        "four": {
-          "quote": "Thanks so much for the help and insight you're bringing. Looking forward to learning more about Global Solutions Lab this quarter.",
-          "initials": "BS",
-          "name": "B.S.",
-          "role": "Student"
-        },
-        "five": {
-          "quote": "I’m excited to dive deeper into this program. I can already tell this tool has great potential — just need a little guidance to unlock more.",
-          "initials": "SH",
-          "name": "S.H.",
-          "role": "Participant"
-        }
+      "sue": {
+        "badge": "Participant reflection",
+        "quote": "The Global Solutions Lab has given me the confidence to think as big as I always have. Up until now, I didn't have anyone who understood what I was trying to say! Thank you for this magnificent program and the possibilities it opens up.",
+        "initials": "SB",
+        "name": "Sue Blythe",
+        "role": "Global Solutions Lab participant"
       }
     },
     "design": {

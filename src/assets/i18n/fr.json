@@ -453,10 +453,10 @@
     },
     "testimonials": {
       "title": "Ce que l'on en dit",
-      "subtitle": "Des retours authentiques d'enseignants, d'étudiants et de partenaires de Global Solutions Lab.",
+      "subtitle": "Les témoignages de personnes qui transforment des idées ambitieuses en solutions concrètes avec Global Solutions Lab.",
       "cta": "Voir les témoignages vidéo",
       "featured": {
-        "badge": "Témoignage de participante à la une",
+        "badge": "Témoignage de participante",
         "quote": "Participer aux dix jours du Global Solutions Lab a été tout simplement époustouflant.",
         "summary": "Après avoir rejoint l’équipe Building Community in a Changing Environment, Cynthia a créé une bande dessinée sur les énergies renouvelables, un récit sur la préservation des semences autochtones et un prototype du World House Game qui associe l’action climatique au jeu.",
         "initials": "CN",
@@ -464,37 +464,12 @@
         "role": "Participante au Global Solutions Lab 2026",
         "cta": "Lire le témoignage complet de Cynthia"
       },
-      "cards": {
-        "one": {
-          "quote": "Ce que vous avez construit dans cette simulation est incroyable — l'innovation, l'inclusion et la diversité des avatars IA sont vraiment inspirantes.",
-          "initials": "MB",
-          "name": "M.B.",
-          "role": "Université Drexel"
-        },
-        "two": {
-          "quote": "Vos outils et votre esprit collaboratif correspondent parfaitement à ce que nous apprenons. C'est formidable de voir quelqu'un d'aussi connecté à Global Solutions Lab et prêt à aider les autres.",
-          "initials": "CB",
-          "name": "C.B.",
-          "role": "Participant"
-        },
-        "three": {
-          "quote": "Quel outil fantastique. Il est incroyablement accessible. Avez-vous envisagé de l'étendre au-delà du social et du développement durable ?",
-          "initials": "AR",
-          "name": "A.R.",
-          "role": "Enseignante"
-        },
-        "four": {
-          "quote": "Merci pour l'aide et les idées que vous apportez. Hâte d'en savoir plus sur Global Solutions Lab ce trimestre.",
-          "initials": "BS",
-          "name": "B.S.",
-          "role": "Étudiante"
-        },
-        "five": {
-          "quote": "J'ai hâte d'aller plus loin dans ce programme. Je vois déjà le potentiel de cet outil — il me faut juste un peu d'accompagnement pour en tirer encore plus.",
-          "initials": "SH",
-          "name": "S.H.",
-          "role": "Participant"
-        }
+      "sue": {
+        "badge": "Témoignage de participante",
+        "quote": "Le Global Solutions Lab m’a donné la confiance nécessaire pour voir aussi grand que je l’ai toujours fait. Jusqu’à présent, je n’avais personne qui comprenait ce que j’essayais d’exprimer ! Merci pour ce programme magnifique et les possibilités qu’il ouvre.",
+        "initials": "SB",
+        "name": "Sue Blythe",
+        "role": "Participante au Global Solutions Lab"
       }
     },
     "design": {
