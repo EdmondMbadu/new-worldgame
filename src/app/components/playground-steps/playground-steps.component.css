@@ -451,7 +451,8 @@
 }
 
 .team-presence-menu {
-  max-width: min(100%, 30rem);
+  width: min(23.5rem, calc(100vw - 2.5rem));
+  max-width: 100%;
   pointer-events: auto;
 }
 
@@ -564,6 +565,7 @@
 
 .team-presence-trigger {
   display: flex;
+  width: 100%;
   min-height: 2.75rem;
   max-width: 100%;
   align-items: center;
@@ -618,9 +620,11 @@
 
 .team-presence-trigger__copy {
   display: flex;
-  min-width: 4.2rem;
+  min-width: 0;
+  flex: 1 1 auto;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   line-height: 1.1;
 }
 
@@ -632,7 +636,9 @@
 
 .team-presence-trigger__status {
   display: inline-flex;
+  width: 100%;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
   margin-top: 0.18rem;
   font-size: 0.65rem;
@@ -641,7 +647,7 @@
 }
 
 .team-presence-trigger__status--typing {
-  max-width: 9.5rem;
+  max-width: 100%;
   overflow: hidden;
   color: #0f766e;
   text-overflow: ellipsis;
